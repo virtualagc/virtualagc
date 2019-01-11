@@ -1,1279 +1,964 @@
-<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.3.14">
-  <meta http-equiv="Content-Type" content=
-  "text/html; charset=utf-8">
-  <meta name="GENERATOR" content=
-  "Mozilla/4.7 [en] (X11; I; Linux 2.4.16 ppc) [Netscape]">
-  <meta name="Author" content="Ronald Burkey">
-  <title>Virtual AGC Home Page</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="author" content="Ronald S. Burkey">
-  <script type="text/javascript" src="Header.js">
-  </script>
-</head>
-<body style="background-image: url(gray3.jpg);">
-  <script type="text/javascript">
-  document.write(headerTemplate.replace("@TITLE@","The Apollo Guidance Computer").replace("@SUBTITLE@","A Kinder, Gentler Introduction"))
-  </script>
-  <h2>Ron's Introduction to the AGC<br></h2>The Apollo spacecraft
-  used for <a href=
-  "http://en.wikipedia.org/wiki/Apollo_program">lunar missions in
-  the late 1960's and early 1970's</a> was really two different
-  spacecraft, the <a href=
-  "http://en.wikipedia.org/wiki/Command_Module">Command Module
-  (CM)</a> and the <a href=
-  "http://en.wikipedia.org/wiki/Lunar_Module">Lunar Module
-  (LM)</a>.&nbsp; The CM was used to get the three astronauts to
-  the moon, and back again.&nbsp; The LM was used to land two of
-  the astronauts on the moon while the third astronaut remained in
-  the CM, in orbit around the moon.<br>
-  <br>
-  <table summary="" style="text-align: left; width: 100%;" border=
-  "1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="vertical-align: top; text-align: center;">
-        <img style="width: 305px; height: 242px;" alt="" src=
-        "Apollo15CSM.jpg" height="242" width="305"><br>
-        <small><span style="font-style: italic;">Apollo 15 CSM
-        (Command and Service Modules)</span></small><br></td>
-        <td style="vertical-align: top; text-align: center;">
-        <img style="width: 268px; height: 242px;" alt="" src=
-        "Apollo16LM.jpg" height="242" width="268"><br>
-        <small style="font-style: italic;">Apollo 16
-        LM</small><br></td>
-      </tr>
-    </tbody>
-  </table><br>
-  Each of the spacecraft needed to be able to navigate through
-  space, with or without the assistance of the astronauts, and
-  therefore needed to have a "guidance system".&nbsp; The guidance
-  system was developed by MIT's Instrumentation Lab, now an
-  independent company known as the <a href=
-  "http://www.draper.com/">Charles Stark Draper Laboratory</a>.<br>
-  <br>
-  An important part of the guidance system was the Apollo Guidance
-  Computer—or just "AGC" for short.&nbsp; On any given Apollo
-  mission, there were two AGCs, one for the Command Module, and one
-  for the Lunar Module.&nbsp; The two AGCs were identical and
-  interchangeable, but they ran different software because the
-  tasks the spacecraft had to perform were different.&nbsp;
-  Moreover, the software run by the AGC evolved over time, so that
-  the AGC software used in later missions like Apollo 17 differed
-  somewhat from that of earlier missions like Apollo 8.<br>
-  <br>
-  Considered just as a computer, the AGC was severely under-powered
-  by any more-modern standards.&nbsp; The basic characteristics of
-  the AGC were:<br>
-  <ul>
-    <li>2048 words of RAM.&nbsp; A "word" was 15 bits of
-    data—therefore just under 2 bytes (16 bits) of data—and so the
-    total RAM was just 3840 bytes.<br></li>
-    <li>36,864 words of read-only memory, equivalent to 69,120
-    bytes.</li>
-    <li>Maximum of about 85,000 CPU instructions executed per
-    second.</li>
-    <li>Dimensions: 24"×12.5"×6".</li>
-    <li>Weight:&nbsp; 70.1 pounds.</li>
-    <li>Power supply:&nbsp; 2.5A of current at 28V DC</li>
-  </ul>
-  <div style="text-align: center;"><img src="RealDSKY-thumb.jpg"
-  title=
-  "Photograph of DSK used in F-8 fly-by-wire project. The indicator lights are indicative of a CM DSKY. Click to enlarge."
-  alt="Real DSKY." style=
-  "border: 2px solid ; width: 288px; height: 240px;" align="right"
-  height="240" hspace="5" vspace="5" width="288"></div>It is
-  occasionally quipped—with perhaps greater wit than insight—that
-  the AGC was more like a calculator than a computer.&nbsp; But to
-  say this is to grossly underestimate the AGC's sophistication.
-  For example, the AGC was <a href=
-  "http://en.wikipedia.org/wiki/Real-time_operating_system">multi-tasking</a>,
-  so that it could seemingly run multiple programs
-  simultaneously.<br>
-  <br>
-  Another important part of the guidance system was the
-  Display/Keyboard unit—or just "DSKY" for short.&nbsp; The AGC by
-  itself was simply a box with electrical connections, without any
-  built-in way for the astronaut to access it.&nbsp; The DSKY
-  provided the astronaut with an interface by which to access the
-  AGC.<br>
-  <br>
-  The Lunar Module had a single DSKY, positioned between the two
-  astronauts where it could be operated by either of them.&nbsp;
-  The Command Module actually had two DSKYs.&nbsp; One of the CM's
-  DSKYs was only the main control panel, while the other was
-  positioned near the optical equipment used to mark the positions
-  of stars or other landmarks.<br>
-  <br>
-  The DSKY as a substantial piece of equipment in its own
-  right:<br>
-  <ul>
-    <li>Dimensions:&nbsp; 8"×8"×7"</li>
-    <li>Weight:&nbsp; 17.5 pounds.</li>
-  </ul>Perhaps the most important part of the guidance system was
-  the Inertial Measurement Unit—or just "IMU" for short.&nbsp; The
-  IMU continuously kept track of the acceleration and rotation of
-  the spacecraft, and reported this information back to the
-  AGC.&nbsp; By mathematically processing this data, the AGC could
-  know on a moment-by-moment basis the orientation and position of
-  the spacecraft.<br>
-  <h2><a name="Fabrizio"></a>Fabrizio's Alternate Introduction to
-  the AGC</h2><span style="font-style: italic;"><a href=
-  "AGC_Poster_3%20copia.pdf"><img alt=
-  "Fabrizio's poster, in Italian" title=
-  "Click to get the full PDF file" src=
-  "small-AGC_Poster_3%20copia.pdf-pages.jpg" style=
-  "border: 2px solid ; width: 192px; height: 347px;" align="right"
-  height="347" border="0" width="192"></a>(Fabrizio Bernardini has
-  contributed this alternate introduction to the AGC, from a poster
-  presentation he made, and then was kind enough to give use both
-  the poster, in Italian, and an English translation.&nbsp; The
-  words and photos are his, and I'll simply present them
-  as-is.&nbsp; Don't be surprised if there's some duplication of
-  material.&nbsp; Thanks, Fabrizio!)</span><br>
-  <br>
-  <style type="text/css">
-  p { margin-bottom: 0.08in; }
-  </style><font size="4"><b>Introduction</b></font>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>The first contract
-  assigned within the scope of the Apollo program, a little after
-  the decision by president Kennedy to reach the Moon before the
-  decade was out, has been that for the computerized guidance and
-  navigation system. Requirements for the system were clear and
-  simple, but apparently unreachable at the time: build a small
-  autonomous system, able to steer a crew from the Earth to the
-  Moon and bring it back safely to the
-  Earth.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><font size="4"><b>A giant leap for
-  technology</b></font></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>When in 1962 MIT's
-  Instrumentation Laboratory began, under the direction of the
-  legendary Dr. Charles Stark Draper (a pioneer of inertial
-  navigation systems), the development of a computer to bring
-  people from the Earth to the Moon, computers where in their
-  childhood. They were giant electronic-tubes devices, big as rooms
-  or even building floors, controlled by means of of perforated
-  tapes or cards, with insignificant memory capacity compared to
-  the personal computers that would be born at the end of the
-  1970's.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>With an engineering
-  courage that has few precedents, designers (historical characters
-  like Hal Laning Jr, Eldon Hall, Ramon Alonso, Albert Hopkins and
-  many others) elected to use for the first time in history a newly
-  born electronic component: the integrated circuit. Still far away
-  from the microprocessor or microcontrollers of the 1980's, the
-  only functions available were simple logic ones. Using thousands
-  of these logic gates, it was possible to implement what would be
-  called today the central processing unit of the computer and all
-  support circuitry. For memory, since it was still impractical to
-  build it with integrated circuits, the ferrite core technology
-  (where small rings were used to store single bits) was adopted.
-  being reasonable easy to miniaturize. Using the same technology,
-  the program memory was made of tens of thousands of ferrite
-  cores, hand woven with thin copper wire to represent the 1's and
-  0's of the computer software. These wire were to be woven by
-  specialized workers at least one month before the launch of a
-  mission.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>These critical
-  decisions, taken in the era of the "dinosaur computers", were
-  found to be winners in the following years, just seven, that saw
-  men land on the Moon. The onboard computer developed for the
-  Apollo program (and installed into both the Command Module and
-  the Lunar Module, but with different software for each vehicle)
-  was an outstanding technological success and established rules
-  for the development of future computers both for aerospace and
-  other applications. It also opened the way to new applications of
-  integrated circuits (it has been the first big user on an
-  industrial scale) and being at the time the smallest computer in
-  the world, helped push computers into other sectors of
-  technology.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><font size="4"><b>AGC, CMC,
-  LGC?</b></font></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small><a href=
-  "P6210643_AGC.png"><img alt="Internal modules of AGC" title=
-  "Click to enlarge" src="small-P6210643_AGC.png" style=
-  "border: 2px solid ; width: 437px; height: 160px;" align="right"
-  height="160" border="0" width="437"></a>The computer and the
-  navigation system developed for the Apollo program were used both
-  on board the Command (and Servce) Module, or CSM, and on board
-  the Lunar Module, or LM. To distinguish them, the one in the
-  Command Module was said CMC (Command Module Computer), that in
-  the Lunar Module was said LGC (Lunar-module Guidance
-  Computer).</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>The software was
-  different for the two computers, and each "edition" had an
-  independent development path, with shared components. It was in
-  common the management of the various programs, as well as the
-  management of the inertial platform and that of the interface
-  toward the crew (called DSKY, for Display and
-  Keyboard).</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><a href=
-  "P6220763_IC.png"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small><img alt=
-  "Some integrated circuits used in the AGC" title=
-  "Click to enlarge" src="small-P6220763_IC.png" style=
-  "border: 2px solid ; width: 211px; height: 160px;" align="left"
-  height="160" border="0" width=
-  "211"></small></font></font></small></a><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>The CMC software
-  was different for the presence of the Saturn V rocket monitoring
-  and control program (never used in its controlling functions as
-  the Saturn computer always performed flawlessly). It also
-  contained functions to steer during the trans-lunar trajectory
-  maneuver, during orbital flight and of course for the re-entry
-  into the Earth's atmosphere.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>The LGC software
-  was different for the descent and landing programs, and for the
-  ascent program and the subsequent lunar orbit
-  insertion.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>Another part in
-  common was devoted to the rendezvous maneuvers, as both vehicles
-  could perform as the active part in the complex process of
-  rejoining each other in orbit.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>Obviously, the
-  software of both vehicles was different in the management of
-  propulsion devices, and the navigation sensor which, while in the
-  CSM were a sextant and a telescope, in the LM they were a single
-  optical device with a special behavior (due to the reduced size
-  of the LM and the need to keep weight within precise
-  limits).</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><font size="4"><b>Display and
-  keyboard</b></font></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small><a href=
-  "P6220704_DSKY.png"><img alt="DSKY" title="Click to enlarge" src=
-  "small-P6220704_DSKY.png" style=
-  "border: 2px solid ; width: 153px; height: 160px;" align="right"
-  height="160" border="0" width="153"></a>The most visible
-  component of the whole AGC was the panel used by the crew to
-  interact with the computer. In an era in which "speak" to a
-  computer using a video terminal was still a futuristic
-  advancement, the unit called Display and Keyboard, or DSKY,
-  represented a drastic achievement in the relationship between man
-  and machine. For the first time the famous seven-digits numerical
-  displays were introduced and for the first time it was possible
-  to tell the computer, while it was working, what to do, being
-  also possible to interact with it to change parameters, or to
-  monitor numerical values of different kind (which by itself was a
-  real novelty in an aerospace world still dominated by
-  gauges).</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>System limitations
-  imposed, of course, a number of restrictions and ingenuous
-  solutions even if using the language developed for the purpose of
-  user interaction with the computer required patience and training
-  to ensure efficiency and
-  confidence.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small><a href=
-  "SCAN_HOF_014.jpg"><img alt="DSKY in CM control panel" title=
-  "Click to enlarge" src="small-SCAN_HOF_014.jpg" style=
-  "border: 2px solid ; width: 182px; height: 160px;" align="left"
-  height="160" border="0" width="182"></a>The DSKY's language was
-  based in two-digits numeric codes, used to represent Verbs (that
-  is actions) and Nouns (that is the object of an action). In the
-  figure it is shown part of a checklist (from the Apollo A17
-  Flight Crew G&amp;N Dictionary) that summarized all the Verb/Noun
-  codes for the Lunar Module computer. Verb and Noun values had a
-  prominent display on the DSKY as well as the active program (or
-  major mode, related usually to a flight phase), which was also
-  assigned a two-digits numerical value and displayed on the top
-  right corner of the unit.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><a href=
-  "A17_VN_Checklist.png"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small><img alt=
-  "Apollo 17 verb/noun list" title="Click to enlarge" src=
-  "small-A17_VN_Checklist.png" style=
-  "border: 2px solid ; width: 223px; height: 360px;" align="right"
-  height="360" border="0" width=
-  "223"></small></font></font></small></a><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>The Verb and Noun
-  keys were used to set the Verb/Noun combination of interest, and
-  telling the computer to accept it by pressing the Enter key
-  (e.g,, a typical sequence could have been: Verb 16 Noun 65
-  Enter). The Clear key was used to correct user typing errors,
-  while the Reset key was used to cancel error warnings from the
-  computer. The Pro key (where Pro stands for Proceed) was sued to
-  confirm critical operations (like the execution of a maneuver or
-  the starting and stopping of the computer). The Key Release key
-  was used to release the control of the DSKY to other routines
-  that required its use, that is when the corresponding indicator
-  light was flashing to grab the attention of the operator. The
-  latter behavior was another novelty as many programs could run
-  inside the AGC at the same
-  time.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><font size="4"><b>Why
-  "guidance"?</b></font></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>The real task
-  assigned to MIT's Instrumentation Laboratory (now Draper
-  Laboratories) was the design and implementation of a guidance
-  system for Apollo, that is a system able to keep a notion of the
-  state of the vehicle in every instant and provide guidance
-  directions for the execution of specific flight phases (for
-  instance, landing on the Moon). The whole AGC is therefore a
-  wider system, not limited only to the computer, that provided
-  sensors, actuators, interfaces for the crew and the
-  communications system (to exchange data with the control
-  center).</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small><a href=
-  "GNC_NavBase.pdf"><img alt=
-  "Guidance, Navigation, and Control system." title=
-  "Click to get a large PDF of this diagram" src=
-  "small-GNC_NavBase.pdf-pages.jpg" style=
-  "border: 2px solid ; width: 208px; height: 159px;" align="left"
-  height="159" border="0" width="208"></a>For the navigation
-  sensors, designers chose an inertial navigation system based on a
-  "three-axis inertial platform" able to maintain an given
-  orientation (used as reference) independently by the motions of
-  the vehicle. On the "platform", three accelerometers were mounted
-  to measure accelerations and thus update the vehicle state during
-  propulsive phases. In the free-fall phases, when the vehicle
-  moved along orbits dictated by Earth/Moon gravities, the state
-  was updated mathematically by applying Newton's and Kepler's
-  equation. Verification of the state, to correct it in case of
-  possible deviations from the intended path, were done by means of
-  a sextant mounted with the "platform". By observing stars and the
-  angle between stars and the horizon (or a landmark) crew were
-  able to navigate in the Earth/Moon system like sailors did for
-  centuries before the advent of of modern radio navigation
-  systems. The mathematics behind the whole guidance and navigation
-  system was worked out by prof. Richard Battin, at the time one of
-  the most prominent experts in the sector, who also went to
-  initially lead the software development task for
-  AGC.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>In the course of
-  the project, the AGC was added other main functions, like that to
-  act as go-between for the manual control of the vehicle. By all
-  means that was the first "fly-by-wire" guidance system in
-  history, and the first "digital autopilot". This and other
-  additional utilities for secondary tasks demonstrated the
-  versatility of computerized system with respect to more classical
-  approaches.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><font size="4"><b>AGC
-  Software</b></font></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>As in all
-  computerized systems, the physical part of the computer
-  (circuits, logic gates and memory) is useless without a program
-  to manage its operation. Software became soon one of the
-  principal aspects of each Apollo mission and hundreds of
-  programmers (at a time when the word "software" was still unknown
-  but to a few insiders) worked to produce programs of very high
-  quality, and with lots of ingenuity, having to overcome not only
-  the intricacies of the space guidance and navigation equations,
-  but also the limitations imposed by the inflexible hardware
-  architecture. Even in this case, methods and technologies were
-  developed for this specific purposes to soon become part of the
-  required knowledge in the aerospace
-  world.<br></small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>Software
-  development was not even worthy a mention in the original
-  contract, as it was considered expected, at the time (but often
-  it is still the same today), that programming the computer was a
-  side task in the whole project. In truth, at the peak of the
-  Apollo program, in 1969, software workers were approximately as
-  much as the hardware workers. But being the "software culture"
-  not widely diffused, everybody looked with suspicion at this
-  intangible but fundamental,
-  "thing".</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>Two were the
-  programming languages available: one was the proper central
-  processing unit language, or assembly language, and the other was
-  a higher-level language, that was to be interpreted at execution
-  time within the computer by a program called, exactly,
-  Interpreter. This second language enabled to save memory speeding
-  up the programming of complex mathematical operations, at the
-  expense of a slower execution
-  speed.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>During the course
-  of software development, in addition to performance limitations,
-  programmers had to fight against memory limitations. Uncountable
-  tricks were used by programmers to save memory words, often to
-  the detriment of code readability. In addition, to worsen the
-  situation, it was required to adopt particular techniques to
-  protect critical functions from a sudden computer restart. By
-  keeping tab on the state of programs under execution it was
-  possible to ensure that in case of serious problems, the computer
-  were able to restart and resume programs from the place they were
-  at the moment of the trouble, without causing issued with
-  critical functions, like the propulsive
-  phases.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica, sans-serif"><font size="4"><small>The experience
-  acquired with the Apollo program, that continued after the lunar
-  missions with the Skylab flights and the Apollo-Soyuz mission,
-  was not lost. The performance of the software and the reliability
-  of the hardware made the AGC the logical choice for the first
-  computer controlled flight, or "fly-by-wire", of an airplane (a
-  modified F-8 fighter). The experience of programmers was
-  subsequently transferred to the Space Shuttle program, where an
-  evolution of the AGC software, and the methods used to implement
-  it, contributed to the making of a space vehicle entirely
-  controlled by the on-board
-  computer.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><font size="4"><b>Myths and
-  legends</b></font></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica-Oblique, sans-serif"><font size="4"><small><i>Is it
-  true that the Apollo computer had less power than a digital
-  pocket calculator?</i></small></font></font> <font face=
-  "Helvetica, sans-serif"><font size="4"><small>No it is not true.
-  The performances of the Apollo Guidance Computer were comparable
-  to that of the central processing unit of computers like the
-  Apple II, the Commodore 64 and the ZX Spectrum, the personal
-  computer that opened the way for the digital revolution at the
-  end ot the 1970's. The big difference was that the AGC was highly
-  reliable and had many more input/output ports to be able to
-  control, and receive data from, sensors and devices within the
-  Command Module and the Lunar Module. In addition, it was able to
-  execute programs in real-time, that is which operated
-  continuously performing more tasks at the same time and
-  guaranteeing that high priority tasks were performed first when
-  required. Its architecture is not much different from that of
-  modern microcontrollers used today for the most disparate tasks,
-  with the difference that the latter are at least 10 to 20 times
-  faster than the AGC and enormously smallest (being integrated in
-  a single chip). For this reason programming and using the AGC is
-  not very far from the world in which control systems and embedded
-  systems designers and hobbyists work
-  today.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica-Oblique, sans-serif"><font size="4"><small><i>Is it
-  true that during the landing of Apollo 11, Neil Armstrong had to
-  take control from the computer because of the alarms it
-  generated?</i></small></font></font> <font face=
-  "Helvetica, sans-serif"><font size="4"><small>Stupid media
-  remarks often cite "software errors" that generated alarms during
-  Apollo 11 descent to the Moon (the most critical phase of the
-  mission). In truth, the robustness of AGC software, in terms of
-  good design and reliability, saved the mission when other issues,
-  external to the computer, were causing an overload in it its
-  operation (and was thus correctly alerting the crew of the
-  condition). The LGC kept working correctly, but toward the end of
-  the descent, Armstrong took manual control (as everybody else who
-  followed him on this task) because the landing point targeted by
-  the computer was too dangerous for a safe
-  landing.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica-Oblique, sans-serif"><font size="4"><small><i>Was AGC
-  the first space computer?</i></small></font></font> <font face=
-  "Helvetica, sans-serif"><font size="4"><small>No, AGC wasn't the
-  first space computer or the first computer who flew on a crewed
-  vehicle. Gemini spacecrafts had also an onboard computer, made
-  with transistors, and able to assist the crew (but not totally
-  control the vehicle) in the propulsive phases, during
-  'rendezvous' and during re-entry. But that computer was not an
-  essential part of the mission, while AGC was born to provide
-  assistance in completing the mission without ground support.In
-  addition to that, other digital computers were developed for the
-  Titan rockets, and of course for the Saturn, but they were
-  limited to a single task and were much bulkier and heavier. The
-  Lunar Module also had a second onboard computer, the AGC, Abort
-  Guidance System, much simpler and able to ensure the climb back
-  to orbit and a rendezvous with the CSM in case of troubles with
-  the primary guidance and navigation
-  system.</small></font></font></small></p>
-  <p style="margin-bottom: 0in;"><small><font face=
-  "Helvetica-Oblique, sans-serif"><font size="4"><small><i>Did the
-  AGC have an operating system?</i></small></font></font>
-  <font face="Helvetica, sans-serif"><font size="4"><small>In a
-  certain sense it had, in the sense today commonly considered for
-  computers for control applications. The AGC operating system was
-  made of an executive and a manager of queue for waiting programs.
-  The executive provided, in turn and basing on priority, a chance
-  to each program to execute its own instructions and also managed
-  possible interruptions generated by random external events. This
-  way more than a single program could be active at the same time,
-  even if the allocation of "machine time" was not based by a rigid
-  scheduling (preferred technique at the time). but was was
-  asynchronous and linked to the correct design of each function.
-  Also, it was available a separate process to verify the
-  well-being of the computer, one for the management of the DSKY
-  and one for managing external devices. And another part of this
-  "operating" was devoted to the higher level language used for
-  mathematical operations that did not require a real-time
-  response.</small></font></font></small></p>
-  <h2>Introduction to Virtual AGC</h2>The Virtual AGC project
-  provides a <a href=
-  "http://en.wikipedia.org/wiki/Virtual_computer">virtual
-  machine</a> which simulates the AGC, the DSKY, and some other
-  portions of the guidance system.&nbsp; In other words, if the
-  virtual machine—which we call <span style=
-  "font-weight: bold;">yaAGC</span>—is given the same software
-  which was originally run by the real AGCs, and is fed the same
-  input signals encountered by the real AGCs during Apollo
-  missions, then it will responds in the same way as the real AGCs
-  did.&nbsp; The Virtual AGC software is free of charge, <a href=
-  "download.html">can be obtained for Windows, Mac OS X, Linux, or
-  as open source software source code</a> so that it can be studied
-  or modified.<br>
-  <p style="margin-bottom: 0in;" align="center"><iframe src=
-  "https://www.youtube.com/embed/hyhI85Rd1kI" allowfullscreen
-  frameborder="0" height="480" width="854"></iframe></p><br>
-  The video clip above (courtesy of Dean Koska and YouTube)
-  illustrates Virtual AGC running on a Palm Centro—which isn't
-  supported directly from our <a href="download.html">download
-  page</a>.&nbsp; But it's one of the great advantages of <a href=
-  "http://en.wikipedia.org/wiki/Open_source_software">open-source
-  software</a> that you can take it an adapt it to your wishes
-  without being at the mercy of the creators of the software.<br>
-  <br>
-  After you install the Virtual AGC software you can run the
-  simulation by clicking its desktop icon <img style=
-  "width: 32px; height: 32px;" alt="" src="ApolloPatch3.png" align=
-  "middle" height="40" width="40">:<br>
-  <br>
-  <div style="text-align: center;">
-    <img style="border: 2px solid ; width: 713px; height: 460px;"
-    alt="" src="Screenshot-VirtualAGC-SuperSimple.jpg" height="460"
-    width="713"><br>
-  </div><br>
-  While there are all manner of runtime options you can select in
-  this screen, such as which Apollo mission you which to fly, it's
-  simplest as a newcomer to just click the Novice button and then
-  to click Run.&nbsp; In the screenshot below, the DSKY is
-  displaying the time since startup (00000 hours, 00003 minutes,
-  00270 hundreds of a second), though that's not something it will
-  do automatically when you start it up.<br>
-  <br>
-  <div style="text-align: center;">
-    <img style="width: 711px; height: 480px;" alt="" src=
-    "Screenshot-novice.jpg" height="480" width="711"><br>
-    <div style="text-align: left;">
-      <br>
-      In this simplest of configurations, you are simulating the
-      AGC of the Lunar Module of Apollo 13, and you are provided
-      with a simulated AGC and simulated DSKY.&nbsp; You can enter
-      commands at the DSKY keypad, and the AGC will report the
-      results of its actions on the DSKY's display.<br>
-    </div>
-  </div>
-  <h2>How to Operate the AGC from the DSKY<br></h2>The first thing
-  you need to know when operating the AGC is that it contains a
-  collection of programs, each identified by a two-digit
-  number.&nbsp; The most-basic program is program 00, usually known
-  as "pooh" (as in "Winnie the Pooh") or P00.&nbsp; In fact, in the
-  screenshot above, the AGC is running P00, as you can see by
-  looking at the "PROG" area in the upper right-hand corner of the
-  DSKY.&nbsp; The available programs differ somewhat from mission
-  to mission, and the picture below (taken from reference cards
-  supplied to the astronauts) is a sampling of some of the programs
-  available for the Apollo 15 Command Module.<br>
-  <br>
-  <div style="text-align: center;">
-    <img style="border: 2px solid ; width: 612px; height: 720px;"
-    alt="" src="SamplePrograms.jpg" height="720" width="612"><br>
-  </div><br>
-  From the astronaut's perspective, all operations of the computer
-  are controlled by a quirky system of "verbs" and "nouns".&nbsp;
-  <span style="font-style: italic;">Verbs</span> and <span style=
-  "font-style: italic;">nouns</span> aren't words, as you might
-  suppose, but are instead two-digit numbers.&nbsp; What makes them
-  "verbs" and "nouns" is that they are somewhat analogous to verbs
-  and nouns in natural languages like English, in which the verb
-  describes the action to be taken and the noun describes the data
-  to which the action is applied.&nbsp; So most commands are
-  applied by hitting a key sequence like the following on the
-  DSKY:<br>
-  <br>
-  <div style="text-align: center;">
-    VERB <span style="font-style: italic;">digit</span>
-    <span style="font-style: italic;">digit</span> NOUN
-    <span style="font-style: italic;">digit</span> <span style=
-    "font-style: italic;">digit</span> ENTR<br>
-    <small style="font-style: italic;">or sometimes</small><br>
-    VERB <span style="font-style: italic;">digit</span>
-    <span style="font-style: italic;">digit</span> ENTR<br>
-  </div><br>
-  For example, a command like V06N36E (VERB 0 6 NOUN 3 6 ENTR)
-  would mean to perform action 06 on data 36.&nbsp; The exact
-  meanings of the verbs-numbers and noun-numbers differ from
-  mission to mission—i.e., from AGC software version to
-  version.&nbsp; The pictures below show a sampling of the
-  available verbs and nouns from the astronaut's reference cards
-  for the Apollo 15 Command Module, from which you can see that
-  verb 06 means to perform a decimal display and noun 36 means
-  "time of AGC clock", so V06N36E should display the current time
-  from the AGC's clock, if that happens to be a legal action for
-  the current program.<br>
-  <br>
-  <table summary="" style=
-  "text-align: left; margin-left: auto; margin-right: auto;"
-  border="0" cellpadding="2" cellspacing="50">
-    <tbody>
-      <tr>
-        <td style="text-align: center;"><img style=
-        "width: 537px; height: 720px;" alt="" src="SampleVerbs.jpg"
-        height="720" width="537"><br></td>
-        <td style="text-align: center;"><img style=
-        "width: 414px; height: 720px;" alt="" src="SampleNouns.jpg"
-        height="720" width="414"><br></td>
-      </tr>
-    </tbody>
-  </table>There are also some exceptions, such as getting the AGC
-  to run the P00 program.&nbsp; You do that with a key sequence
-  like V37E00E, in which NOUN is replaced by ENTR for some
-  reason.<br>
-  <br>
-  How did this strange verb/noun system get put into place?&nbsp;
-  One of the original AGC developers, Ram\F3n Alonso, provides an
-  explanation.&nbsp; Apparently, nobody had yet arrived at any kind
-  of software requirements for the AGC's user interface when the
-  desire arose within the Instrumentation Laboratory to set up a
-  demo guidance-computer unit with which to impress visitors to the
-  lab.&nbsp; Of course, this demo would have to <span style=
-  "font-style: italic;">do</span> something, if it was going to be
-  at all impressive, and to do something it would need some
-  software. In short order, some of the coders threw together a
-  demo program, inventing and using the verb/noun user-interface
-  concept, but without any idea that the verb/noun concept would
-  somehow survive into the flight software.&nbsp; As time passed,
-  and more and more people became familiar with the demo, nobody
-  got around to inventing an improvement for the user interface, so
-  the coders simply built it into the flight software without any
-  specific requirements to do so.&nbsp; Many objections to the
-  verb/noun system were received by the developers, such as "it's
-  not scientific", "it's not dignified", or even "astronauts won't
-  understand it".&nbsp; Even though the coders of the demo hadn't
-  seriously intended the verb/noun interface to be used in any
-  permanent way, it became a kind of devilish game to counter these
-  objections with arguments as to why the interface was really a
-  good one.&nbsp; In the end, the coders won and the verbs and
-  nouns stayed.&nbsp; Nevertheless, the following Shakespearean
-  quote (from <span style="font-style: italic;">Henry IV</span>) is
-  embedded within the AGC source code:&nbsp; "It will be proved to
-  thy face that thou hast men about thee that usually talk of a
-  noun and a verb, and such abominable words as no Christian ear
-  can endure to hear."<br>
-  <br>
-  <a href="index.html#Quick_Start">The main Virtual AGC web-page
-  gives you various step-by-step procedures</a> you can perform to
-  see the DSKY actually do something.<br>
-  <br>
-  <h2><a name="StupidSoftware"></a>It's the Software,
-  Stupid!<br></h2>You may notice that on the Virtual AGC main
-  display screen there are a number of different Apollo missions
-  listed, but that not all of them are selectable.&nbsp; That's
-  because Virtual AGC strictly simulates the original AGC computer
-  hardware, and that requires having the original software that ran
-  on the AGC.&nbsp; But we don't have copies of all of the
-  different software versions used for the different
-  missions!&nbsp; Collecting this software is one of the principal
-  goals of the Virtual AGC project, so if you happen to know a
-  collector, a museum, or any of the original AGC developers who
-  have printouts of AGC software, <a href=
-  "mailto:info@sandroid.org">let us know</a>!&nbsp; (We don't want
-  the printouts themselves, just copies of the information in them,
-  and we're willing to travel there to do the copying work
-  ourselves.)<br>
-  <br>
-  Here's a brief rundown on the known AGC software:<br>
-  <br>
-  <table summary="" style="text-align: left; width: 100%;" border=
-  "0" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="text-align: center; vertical-align: middle;">
-          <table summary="" style=
-          "text-align: left; margin-left: auto; margin-right: auto;"
-          border="1" cellpadding="2" cellspacing="2">
-            <tbody>
-              <tr>
-                <th colspan="1" rowspan="2" style=
-                "vertical-align: bottom; text-align: center;">
-                Mission<br></th>
-                <th colspan="2" rowspan="1" style=
-                "vertical-align: top; text-align: center;">AGC
-                Software by&nbsp; Name and Version<br></th>
-              </tr>
-              <tr>
-                <th style=
-                "vertical-align: top; text-align: center;">Command
-                Module<br></th>
-                <th style=
-                "vertical-align: top; text-align: center;">Lunar
-                Module<br></th>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_1">Apollo
-                1</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Sunspot
-                build TBD<br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">
-                -<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_4">Apollo
-                4</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Solarium
-                build 54</td>
-                <td style=
-                "vertical-align: top; text-align: center;">
-                -<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_5">Apollo
-                5</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">
-                -<br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Sunburst
-                build TBD<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_6">Apollo
-                6</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Solarium055/MAIN.agc.html">Solarium build
-                55</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">
-                -<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_7">Apollo
-                7</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Sundisk
-                build TBD<br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">
-                -<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_8">Apollo
-                8</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Colossus237/MAIN.agc.html">Colossus build
-                237</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">
-                -<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_9">Apollo
-                9</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Colossus249/MAIN.agc.html">Colossus build
-                249</a></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Sundance
-                build 306<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_10">Apollo
-                10</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Comanche
-                build 45?<br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Luminary
-                build 69<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_11">Apollo
-                11</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Comanche055/MAIN.agc.html">Comanche build
-                55</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Luminary099/MAIN.agc.html">Luminary build
-                99</a><br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_12">Apollo
-                12</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Comanche
-                build TBD<br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Luminary
-                build 116<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_13">Apollo
-                13</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Comanche
-                build 67<br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Luminary131/MAIN.agc.html">Luminary build
-                131</a><br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_14">Apollo
-                14</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Comanche
-                build 72<br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Luminary
-                build 178<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_15">Apollo
-                15</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Artemis072/MAIN.agc.html">Artemis build
-                72</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Luminary
-                build 210<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_16">Apollo
-                16</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Artemis072/MAIN.agc.html">Artemis build
-                72</a></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Luminary
-                build 210</td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_17">Apollo
-                17</a><br></td>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "listings/Artemis072/MAIN.agc.html">Artemis build
-                72</a></td>
-                <td style=
-                "vertical-align: top; text-align: center;">Luminary
-                build 210</td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Skylab_2">Skylab
-                2</a><br>
-                <a href=
-                "http://en.wikipedia.org/wiki/Skylab_3">Skylab
-                3</a><br>
-                <a href=
-                "http://en.wikipedia.org/wiki/Skylab_4">Skylab
-                4</a><br></td>
-                <td style="text-align: center;">Skylark build
-                48?<br></td>
-                <td style="text-align: center;">-<br></td>
-              </tr>
-              <tr>
-                <td style=
-                "vertical-align: top; text-align: center;"><a href=
-                "http://en.wikipedia.org/wiki/Apollo_soyuz">Apollo-Soyuz</a><br>
-                </td>
-                <td style=
-                "vertical-align: top; text-align: center;">Skylark
-                build TBD<br></td>
-                <td style=
-                "vertical-align: top; text-align: center;">
-                -<br></td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-        <td style="text-align: center; vertical-align: middle;"
-        width="33%"><img style="width: 445px; height: 540px;" alt=
-        "" src="AgcFamilyTree-small.jpg" height="540" width=
-        "445"><br></td>
-        <td valign="middle" width="33%">
-          <blockquote>
-            <small>"What would you call a collection of programs,
-            routines, subroutines, procedures, major modes, jobs
-            and tasks, that all have to exert the utmost courtesy
-            in sharing the resources of a single spacecraft
-            computer? The physical form of fixed memory gave us our
-            answer: a rope. With no tapes, disks, or any form of
-            backing store, every scrap of coded logic had to be
-            built into one rope memory, 24K words in a Block I AGC,
-            for each Apollo mission. Ropes had names of up to 8
-            characters, and early ones were named in honor of
-            Apollo\92s role in ancient mythology, as driver of the
-            phaeton carrying the Sun across the sky: ECLIPSE (begun
-            on the day of a solar eclipse that occurred 6 years to
-            the day before the first Moon landing), SUNRISE,
-            CORONA, SOLARIUM, and SUNSPOT. In Block II development,
-            there was a maverick called RETREAD, then AURORA,
-            SUNDIAL, SUNDISK, SUNBURST, and SUNDANCE.&nbsp;
-            Finally, Fred Martin, our transplanted New Yorker who
-            steadfastly refused to pledge allegiance to the Red
-            Sox, persuaded us that it was more important to give
-            them names that linked them to their vehicles: COLOSSUS
-            for the Command Module; LUMINARY for the
-            LM."<br></small>
-            <div align="right">
-              <small><i>&nbsp;— Hugh Blair-Smith</i></small><br>
-            </div>
-          </blockquote>
-          <div align="right">
-            <div align="left">
-              (A description of the software-naming convention that
-              didn't quite make it into the final version of AGC
-              developer Hugh Blair-Smith's book, <i>Left Brains for
-              the Right Stuff</i>.)<br>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  These programs, though having different names, are not really
-  independent programs.&nbsp; There is a complex family heritage,
-  and a lot of overlap between them.&nbsp; So if you understand one
-  of the programs, you will understand 99% of what's in any of the
-  others.<br>
-  <br>
-  The AGC software is mostly written in <a href=
-  "http://en.wikipedia.org/wiki/Assembly_language">assembly
-  language</a>.&nbsp; "Assembly language" is a very simple language
-  in which each instruction—usually, each line of software source
-  code—represents a single primitive CPU operation.&nbsp; Since
-  each type of CPU provides different primitive operations, the
-  assembly language for each type of CPU differs from that of every
-  other type of CPU.&nbsp; The AGC assembly language, being based
-  on the custom AGC CPU, thus differs in detail from every other
-  type of assembly language but shares certain customary
-  elements.&nbsp; The specific assembly language of the AGC was
-  referred to as "basic"—<span style=
-  "font-style: italic;">not</span> to be confused with the famous
-  later computer language BASIC which is many people's first
-  introduction to simple computer programming.&nbsp; Here's a short
-  excerpt from the Apollo 11 Lunar Module software to give the
-  flavor of it:<br>
-  <br>
-  <table summary="" style=
-  "text-align: left; font-family: Courier New,Courier,monospace; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style=
-        "vertical-align: top; background-color: rgb(204, 204, 204);">
-          <pre><span class=
-          "sm">TWIDDLE </span>          <span class=
-          "op">INHINT  </span>                                       <br>                  <span class="op">TS      </span> L        <span class="co">#  SAVE DELAY TIME IN L</span><br>                  <span class="op">CA      </span> POSMAX                                <br>                  <span class="op">ADS     </span> Q        <span class="co">#  CREATING OVERFLOW AND Q-1 IN Q</span><br>                  <span class="op">CA      </span> BBANK                                 <br>                  <span class="op">EXTEND  </span>                                       <br>                  <span class="op">ROR     </span> SUPERBNK                              <br>                  <span class="op">XCH     </span> L                                     <br><br><span class="sm">WAITLIST</span>          <span class="op">INHINT  </span>                                       <br>                  <span class="op">XCH     </span> Q        # SAVE DELTA           <br>                  <span class="op">TS      </span> WAITEXIT # WAITEXIT.                  <br>                  <span class="op">EXTEND  </span>                                       <br>                  <span class="op">INDEX   </span> WAITEXIT <span class="co">#  IF TWIDDLING, THE TS SKIPS TO HERE</span><br>                  <span class="op">DCA     </span> 0        <span class="co">#  PICK UP 2CADR OF TASK.</span><br>         -1       <span class="op">TS      </span> WAITADR  <span class="co">#  BBCON WILL REMAIN IN L</span><br><span class="sm">DLY2    </span>          <span class="op">CAF     </span> WAITBB   <span class="co">#  ENTRY FROM FIXDELAY AND VARDELAY.</span><br>                  <span class="op">XCH     </span> BBANK                                 <br>                  <span class="op">TCF     </span> WAIT2               <br></pre>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  The things at the left-hand side (<span style=
-  "font-family: monospace;">TWIDDLE</span>, <span style=
-  "font-family: monospace;">WAITLIST</span>, <span style=
-  "font-family: monospace;">DLY2</span>) are "program labels", and
-  are used to provide names for different blocks of source
-  code.&nbsp; The next column to the right contains the actual CPU
-  instructions (<span style=
-  "font-family: monospace;">INHINT</span>, <span style=
-  "font-family: monospace;">TS</span>, <span style=
-  "font-family: monospace;">CA</span>, <span style=
-  "font-family: monospace;">ADS</span>, etc.) while the column to
-  the right of that (<span style=
-  "font-family: monospace;">L</span>, <span style=
-  "font-family: monospace;">POSMAX</span>, <span style=
-  "font-family: monospace;">Q</span>, etc.) specifies the data on
-  which the CPU instructions are supposed to operate.&nbsp; For
-  example, at the very bottom you'll find "<span style=
-  "font-family: monospace;">TCF WAIT2</span>"; when the program
-  reaches that point, the instruction <span style=
-  "font-family: monospace;">TCF</span> causes it to jump to program
-  label <span style="font-family: monospace;">WAIT2</span>.&nbsp;
-  Finally, anything preceded by the '#' symbol is just a comment
-  added for explanatory purposes by the programmer, but not
-  affecting program execution in any way.<br>
-  <br>
-  You can learn all about AGC basic assembly language, if you so
-  desire, in the <a href="assembly_language_manual.html">Virtual
-  AGC assembly-language manual</a>.&nbsp; The Virtual AGC software
-  provides an assembler, which is a program that converts
-  assembly-language source code to executable code which can
-  actually be run on the AGC CPU.&nbsp; So with Virtual AGC, you
-  can actually create and run your own AGC programs.<br>
-  <br>
-  As it happens, the functionality which the AGC needed to provide
-  was so complex that it wouldn't have fit within the amount of
-  physical memory provided by the AGC if it were written entirely
-  in basic assembly language.&nbsp; One thing that was done to get
-  around this was to provide also a higher-level computer language
-  referred to as "interpretive", in which each interpretive
-  instruction represents a large number of basic assembly-language
-  instructions.&nbsp; Interpretive thus has the advantage of
-  cutting down on memory usage, but typically has the disadvantage
-  of running much more slowly, and therefore had to be used with
-  care.&nbsp; Within any given AGC program like Luminary, basic and
-  interpretive code is intermixed.<br>
-  <br>
-  Here's a sample of interpretive code:<br>
-  <br>
-  <table summary="" style=
-  "text-align: left; font-family: Courier New,Courier,monospace; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style=
-        "vertical-align: top; background-color: rgb(204, 204, 204);">
-          <pre><span style="font-family: monospace;"><span class=
-          "sm">STATINT1</span>          <span class=
-          "op">TC      </span> INTPRET                               <br>        <span class="in">          BON     </span> RTB                                   <br>                           QUITFLAG          <span class="co">#  KILL INTEGRATION UNTIL NEXT P00.</span><br>                           NOINT                                 <br>                           LOADTIME                              <br>                  <span class="in">STORE   </span> TDEC1                                 <br>                  <span class="in">CALL    </span>                                       <br>                           INTSTALL                              <br>                  <span class="in">SET     </span> CALL                                  <br>                           NODOFLAG                              <br>                           SETIFLGS                              <br>                  <span class="in">GOTO    </span>                                       <br>                           STATEUP                               <br><span class="sm">600SECS </span>          <span class="ps">2DEC    </span> 60000      B-28                       <br><span class="sm">ENDINT  </span>          <span class="in">CLEAR   </span> EXIT                                  <br>                           STATEFLG        <br>                  TC       PHASCHNG                   </span></pre>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  Some of the things here are the same as in the basic assembly
-  language, such as the program labels and the program
-  comments.&nbsp; As with basic assembly language, the next column
-  to the right of the program labels (<span style=
-  "font-family: monospace;">BON,</span> <span style=
-  "font-family: monospace;">STORE</span>, <span style=
-  "font-family: monospace;">CALL</span>, etc.) contains
-  instructions—though mostly interpretive instructions rather than
-  basic instructions.<br>
-  <br>
-  In this sample, "<span style="font-family: monospace;">TC
-  INTPRET</span>" and "<span style="font-family: monospace;">TC
-  PHASCHNG</span>" are basic assembly-language code.&nbsp; In fact,
-  "<span style="font-family: monospace;">TC INTPRET</span>"
-  actually means to begin interpreting the lines that follow as
-  interpretive code, and every block of intepretive code must
-  somehow be preceded by a basic instruction like that.&nbsp; Near
-  the end, you see the interpretive instruction <span style=
-  "font-family: monospace;">EXIT,</span> and this means to stop
-  working with interpretive code and to resume working with basic
-  assembly language.<br>
-  <br>
-  In other respects, though, interpretive is very weird in
-  comparison to basic assembly language.&nbsp; For example, the
-  column to the right of the instruction column contains mostly
-  names of variables operated on by the instructions ... but can
-  also contain more instructions, because intepretive instructions
-  can be packed two to a word of memory.&nbsp; Also, many variables
-  don't seem to be preceded by instructions, because a single
-  interpretive instruction may operate on the lines below it as
-  well as on the column to the right of it.&nbsp; For example, in
-  the two lines of code "<span style=
-  "font-family: monospace;">CLEAR EXIT</span> / <span style=
-  "font-family: monospace;">STATEFLG</span>" near the end of the
-  sample, the <span style="font-family: monospace;">CLEAR</span>
-  and <span style="font-family: monospace;">EXIT</span>
-  instructions are grouped together because they are packed into a
-  single word of memory, but the <span style=
-  "font-family: monospace;">CLEAR</span> instruction actually
-  operates on the variable <span style=
-  "font-family: monospace;">STATEFLG</span>.&nbsp; Oh, those wacky
-  AGC developers!&nbsp; How they must have chuckled when they
-  dreamed up that scheme.<br>
-  <br>
-  You can learn all about AGC interpretive language, if you so
-  desire, in the <a href="assembly_language_manual.html">Virtual
-  AGC assembly-language manual</a>.<br>
-  <br>
-  <h2>The Abort Guidance System (AGS)</h2>The AGC was not the only
-  computer in the Lunar Module.&nbsp; As a backup to the main
-  guidance system, there was a completely separate guidance system
-  called the Abort Guidance System (AGS) developed by <span style=
-  "font-family: sans-serif; font-style: italic;">TRW</span>
-  Aerospace, now a division of Northrop Grumman.&nbsp; As the name
-  implies, the AGS was intended to be used only in the case of an
-  aborted landing, and its basic function was simply to get the LM
-  into an orbit from which it would be possible for the CM to
-  rendezvous.&nbsp; Fortunately, this functionality never had to be
-  used in a real mission, but that does not alter the significance
-  of the system.<br>
-  <br>
-  Naturally, an important part of the AGS was a computer, and this
-  computer was called the Abort Electronics Assembly—or just "AEA"
-  for short.&nbsp; Since the AGC and AEA were developed
-  independently by unrelated groups, there is no commonality
-  between them in terms either of hardware or of software.&nbsp;
-  There was essentially no interaction between the AGC and AEA,
-  except that the spacecraft's "state vector"—its current position,
-  velocity, and orientation—could be transferred.<br>
-  <br>
-  Here are the basic characteristics of the AEA:<br>
-  <ul>
-    <li>2048 words of RAM.&nbsp; A "word" was 18 bits of
-    data—therefore just over 2 bytes (16 bits) of data—and so the
-    total RAM was just 4608 bytes.<br></li>
-    <li>2048 words of read-only memory, so equivalent to 4608
-    bytes.&nbsp; It should be noted that the "RAM" retained its
-    contents when power was removed, so that the full 4096 words
-    (9216 bytes) of memory were available for program
-    storage.<br></li>
-    <li><img alt="" src="DEDADrawingSmall-transparent.png" style=
-    "width: 503px; height: 290px;" align="right" height="290"
-    width="438">Maximum of about 100,000 CPU instructions executed
-    per second.</li>
-    <li>Dimensions: 23.75"×8"×5".</li>
-    <li>Weight:&nbsp; 32.7 pounds.</li>
-    <li>Power supply:&nbsp; 90 Watts.<br></li>
-  </ul>Just as the AGC had its DSKY for interfacing to the
-  astronaut, the AEA had its own Data Entry and Display Assembly—or
-  "DEDA" for short.<br>
-  <br>
-  The astronaut interface was very simple.&nbsp; You could do one
-  of two things:<br>
-  <ul>
-    <li>Change the value stored in a memory location; or</li>
-    <li>Cause the value of a memory location to be displayed (and
-    to update twice per second).</li>
-  </ul>In other words, to usefully interact with the AEA, you had
-  to know the numerical values of the memory addresses that had any
-  significant purposes.&nbsp; But don't be fooled by the simplicity
-  of the interface into believing that the AEA was a mere
-  calculator.&nbsp; Though its functionality was much less than
-  that of the AGC, it still had to perform very significant
-  guidance functions on demand, and to have very sophisticated
-  software.<br>
-  <br>
-  Virtual AGC provides the ability to simulate the AEA and DEDA,
-  and you can activate this ability by selecting the "LM Abort
-  Computer (AEA)" option in the Virtual AGC main window.&nbsp; In
-  the screenshot below, the DEDA is displaying the contents of
-  location 377, which is the number of interations of the units
-  self-test which have been executed (and passed).<br>
-  <br>
-  <div style="text-align: center;">
-    <img style="width: 718px; height: 520px;" alt="" src=
-    "Screenshot-novice-aea.jpg" height="520" width="718"><br>
-  </div><br>
-  As with the AGC software, the AEA software evolved over time and
-  we have only a subset of the software versions known to have been
-  created, so <a href="mailto:info@sandroid.org">if you know of the
-  existence of others please let us know</a>!&nbsp; We <span style=
-  "font-style: italic;">do</span> have the versions for <a href=
-  "listings/FP6/FP6.aea.html">Apollo 11 ("Flight Program 6")</a>
-  and probably for <a href="listings/FP8/FP8.aea.html">Apollo 15-17
-  ("Flight Program 8")</a>.<br>
-  <br>
-  The AEA was programmed in its own assembly language, which was
-  completely different from that of the AGC.&nbsp; The Virtual AGC
-  software includes an AEA assembler, so you can create and run
-  your own AEA software, if you'd like to do so.<br>
-  <span style="font-weight: bold;"><br></span>You can learn more
-  about the AEA, including the definition of its assembly language,
-  at the <a href="yaAGS.html">main Virtual AGC web-page for
-  it</a>.<br>
-  <h2><img alt="" src="Saturn1B-transparent.png" style=
-  "width: 290px; height: 500px;" align="right" height="500" width=
-  "290"></h2>
-  <h2>Guiding the Mighty Saturn Rocket</h2>It's natural to think
-  that the AGC might have steered and otherwise controlled the
-  Saturn V rocket that hurled the Command Module and Lunar Module
-  onto its moon-bound trajectory, or the Saturn IB rocket that was
-  used for Earth-orbital missions like Apollo 7, but in fact it
-  isn't true.&nbsp; The AGC was able to provide limited
-  guidance-system backup for some of the Saturn burns, but the main
-  responsibility for guiding the Saturn rested with yet another
-  onboard computer, the Launch Vehicle Digital Computer (or LVDC
-  for short).&nbsp; The astronauts were able to monitor various
-  sensor readings from the Saturn's guidance system on their
-  displays, but neither they nor the AGC normally had any control
-  over the rocket.<br>
-  <br>
-  Unlike the AGC and AGS, the LVDC was not installed in the Command
-  Module or Lunar Module, but was instead installed in the Saturn
-  itself, in a non-propulsive stage called the IU (Instrumentation
-  Unit).&nbsp; The IU perched above the final propulsive stage, the
-  S-IVB, and therefore was the last part of the Saturn to be
-  discarded by the Command Module.&nbsp; The picture at right
-  illustrates this for a Saturn IB rocket, but the Saturn V is very
-  similar ... only much bigger!<br>
-  <br>
-  There's a lot more information about the LVDC on the <a href=
-  "LVDC.html">main Virtual AGC web-page for it</a>, but there's no
-  denying that at present we know far less about the LVDC than
-  about any of the other Apollo flight computers.<br>
-  <h2>To Learn More ...</h2>This web page has provided a brief
-  introduction to the AGC &amp; friends, and to Virtual AGC, but if
-  you'd like to learn more about the AGC without taking the trouble
-  to become a full expert on it, you might want to read the AGC's
-  <a href=
-  "http://en.wikipedia.org/wiki/Apollo_Guidance_Computer">Wikipedia
-  article</a>.&nbsp;<br>
-  <br>
-  If that's not enough for you, you can learn a <span style=
-  "font-style: italic;">lot</span> more by looking at the <a href=
-  "index.html">main Virtual AGC web pages</a>, and of course that's
-  what we think you <span style="font-style: italic;">should</span>
-  do!&nbsp; In fact, the main Virtual AGC website contains every
-  AGC-related scrap of data, documentation, and software we've been
-  able to find, so it can be somewhat intimidating.&nbsp; We're
-  sorry about that, but training for an Apollo moon landing isn't
-  easy!<br>
-  <br>
-  <br>
-  <hr style="width: 100%; height: 2px;">
-  <center>
-    <br>
-    <span style=
-    "color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
-    This page is available under the <a href=
-    "https://creativecommons.org/publicdomain/zero/1.0/">Creative
-    Commons No Rights Reserved License</a></span><br>
-    <i><font size="-1">Last modified by <a href=
-    "mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br>
-    <br>
-    <a href="http://www.ibiblio.org"><img style=
-    "border: 0px solid ; width: 300px; height: 100px;" alt=
-    "Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
-    "100" width="300"></a><br></font></i>
-  </center><br>
-</body>
-</html>
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><title>Virtual AGC Home Page</title><meta http-equiv="Content-Type" content=
+"text/html; charset=utf-8"><meta name=Author content="Ronald Burkey"><link rel=icon type="image/png" href="favicon.png"><meta name=author content="Ronald S. Burkey"><script type="text/javascript" src="Header.js"></script></head><body style="background-image: url(gray3.jpg);"><script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","The Apollo Guidance Computer").replace("@SUBTITLE@","A Kinder, Gentler Introduction"))
+</script><h2>Ron's Introduction to the AGC<br></h2>The Apollo spacecraft
+used for <a href=
+"http://en.wikipedia.org/wiki/Apollo_program">lunar missions in
+the late 1960's and early 1970's</a> was really two different
+spacecraft, the <a href=
+"http://en.wikipedia.org/wiki/Command_Module">Command Module
+(CM)</a> and the <a href=
+"http://en.wikipedia.org/wiki/Lunar_Module">Lunar Module
+(LM)</a>.&nbsp; The CM was used to get the three astronauts to
+the moon, and back again.&nbsp; The LM was used to land two of
+the astronauts on the moon while the third astronaut remained in
+the CM, in orbit around the moon.<br><br><table summary="" style="text-align: left; width: 100%;" border=
+"1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top; text-align: center;"><img style="width: 305px; height: 242px;" alt="" src=
+"Apollo15CSM.jpg" height="242" width="305"><br><small><span style="font-style: italic;">Apollo 15 CSM
+(Command and Service Modules)</span></small><br></td><td style="vertical-align: top; text-align: center;"><img style="width: 268px; height: 242px;" alt="" src=
+"Apollo16LM.jpg" height="242" width="268"><br><small style="font-style: italic;">Apollo 16
+LM</small><br></td></tr></tbody></table><br>
+Each of the spacecraft needed to be able to navigate through
+space, with or without the assistance of the astronauts, and
+therefore needed to have a "guidance system".&nbsp; The guidance
+system was developed by MIT's Instrumentation Lab, now an
+independent company known as the <a href=
+"http://www.draper.com/">Charles Stark Draper Laboratory</a>.<br><br>
+An important part of the guidance system was the Apollo Guidance
+Computer—or just "AGC" for short.&nbsp; On any given Apollo
+mission, there were two AGCs, one for the Command Module, and one
+for the Lunar Module.&nbsp; The two AGCs were identical and
+interchangeable, but they ran different software because the
+tasks the spacecraft had to perform were different.&nbsp;
+Moreover, the software run by the AGC evolved over time, so that
+the AGC software used in later missions like Apollo 17 differed
+somewhat from that of earlier missions like Apollo 8.<br><br>
+Considered just as a computer, the AGC was severely under-powered
+by any more-modern standards.&nbsp; The basic characteristics of
+the AGC were:<br><ul><li>2048 words of RAM.&nbsp; A "word" was 15 bits of
+data—therefore just under 2 bytes (16 bits) of data—and so the
+total RAM was just 3840 bytes.<br></li><li>36,864 words of read-only memory, equivalent to 69,120
+bytes.</li><li>Maximum of about 85,000 CPU instructions executed per
+second.</li><li>Dimensions: 24"×12.5"×6".</li><li>Weight:&nbsp; 70.1 pounds.</li><li>Power supply:&nbsp; 2.5A of current at 28V DC</li></ul><div style="text-align: center;"><img src="RealDSKY-thumb.jpg"
+title=
+"Photograph of DSK used in F-8 fly-by-wire project. The indicator lights are indicative of a CM DSKY. Click to enlarge."
+alt="Real DSKY." style=
+"border: 2px solid ; width: 288px; height: 240px;" align="right"
+height="240" hspace="5" vspace="5" width="288"></div>It is
+occasionally quipped—with perhaps greater wit than insight—that
+the AGC was more like a calculator than a computer.&nbsp; But to
+say this is to grossly underestimate the AGC's sophistication.
+For example, the AGC was <a href=
+"http://en.wikipedia.org/wiki/Real-time_operating_system">multi-tasking</a>,
+so that it could seemingly run multiple programs
+simultaneously.<br><br>
+Another important part of the guidance system was the
+Display/Keyboard unit—or just "DSKY" for short.&nbsp; The AGC by
+itself was simply a box with electrical connections, without any
+built-in way for the astronaut to access it.&nbsp; The DSKY
+provided the astronaut with an interface by which to access the
+AGC.<br><br>
+The Lunar Module had a single DSKY, positioned between the two
+astronauts where it could be operated by either of them.&nbsp;
+The Command Module actually had two DSKYs.&nbsp; One of the CM's
+DSKYs was only the main control panel, while the other was
+positioned near the optical equipment used to mark the positions
+of stars or other landmarks.<br><br>
+The DSKY as a substantial piece of equipment in its own
+right:<br><ul><li>Dimensions:&nbsp; 8"×8"×7"</li><li>Weight:&nbsp; 17.5 pounds.</li></ul>Perhaps the most important part of the guidance system was
+the Inertial Measurement Unit—or just "IMU" for short.&nbsp; The
+IMU continuously kept track of the acceleration and rotation of
+the spacecraft, and reported this information back to the
+AGC.&nbsp; By mathematically processing this data, the AGC could
+know on a moment-by-moment basis the orientation and position of
+the spacecraft.<br><h2><a name=Fabrizio></a>Fabrizio's Alternate Introduction to
+the AGC</h2><span style="font-style: italic;"><a href=
+"AGC_Poster_3%20copia.pdf"><img alt=
+"Fabrizio's poster, in Italian" title=
+"Click to get the full PDF file" src=
+"small-AGC_Poster_3%20copia.pdf-pages.jpg" style=
+"border: 2px solid ; width: 192px; height: 347px;" align="right"
+height="347" border="0" width="192"></a>(Fabrizio Bernardini has
+contributed this alternate introduction to the AGC, from a poster
+presentation he made, and then was kind enough to give use both
+the poster, in Italian, and an English translation.&nbsp; The
+words and photos are his, and I'll simply present them
+as-is.&nbsp; Don't be surprised if there's some duplication of
+material.&nbsp; Thanks, Fabrizio!)</span><br><br><style type="text/css">
+p { margin-bottom: 0.08in; }
+</style><font size=4><b>Introduction</b></font><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>The first contract
+assigned within the scope of the Apollo program, a little after
+the decision by president Kennedy to reach the Moon before the
+decade was out, has been that for the computerized guidance and
+navigation system. Requirements for the system were clear and
+simple, but apparently unreachable at the time: build a small
+autonomous system, able to steer a crew from the Earth to the
+Moon and bring it back safely to the
+Earth.</small></font></font></small></p><p style="margin-bottom: 0in;"><font size=4><b>A giant leap for
+technology</b></font></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>When in 1962 MIT's
+Instrumentation Laboratory began, under the direction of the
+legendary Dr. Charles Stark Draper (a pioneer of inertial
+navigation systems), the development of a computer to bring
+people from the Earth to the Moon, computers where in their
+childhood. They were giant electronic-tubes devices, big as rooms
+or even building floors, controlled by means of of perforated
+tapes or cards, with insignificant memory capacity compared to
+the personal computers that would be born at the end of the
+1970's.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>With an engineering
+courage that has few precedents, designers (historical characters
+like Hal Laning Jr, Eldon Hall, Ramon Alonso, Albert Hopkins and
+many others) elected to use for the first time in history a newly
+born electronic component: the integrated circuit. Still far away
+from the microprocessor or microcontrollers of the 1980's, the
+only functions available were simple logic ones. Using thousands
+of these logic gates, it was possible to implement what would be
+called today the central processing unit of the computer and all
+support circuitry. For memory, since it was still impractical to
+build it with integrated circuits, the ferrite core technology
+(where small rings were used to store single bits) was adopted.
+being reasonable easy to miniaturize. Using the same technology,
+the program memory was made of tens of thousands of ferrite
+cores, hand woven with thin copper wire to represent the 1's and
+0's of the computer software. These wire were to be woven by
+specialized workers at least one month before the launch of a
+mission.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>These critical
+decisions, taken in the era of the "dinosaur computers", were
+found to be winners in the following years, just seven, that saw
+men land on the Moon. The onboard computer developed for the
+Apollo program (and installed into both the Command Module and
+the Lunar Module, but with different software for each vehicle)
+was an outstanding technological success and established rules
+for the development of future computers both for aerospace and
+other applications. It also opened the way to new applications of
+integrated circuits (it has been the first big user on an
+industrial scale) and being at the time the smallest computer in
+the world, helped push computers into other sectors of
+technology.</small></font></font></small></p><p style="margin-bottom: 0in;"><font size=4><b>AGC, CMC,
+LGC?</b></font></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small><a href=
+"P6210643_AGC.png"><img alt="Internal modules of AGC" title=
+"Click to enlarge" src="small-P6210643_AGC.png" style=
+"border: 2px solid ; width: 437px; height: 160px;" align="right"
+height="160" border="0" width="437"></a>The computer and the
+navigation system developed for the Apollo program were used both
+on board the Command (and Servce) Module, or CSM, and on board
+the Lunar Module, or LM. To distinguish them, the one in the
+Command Module was said CMC (Command Module Computer), that in
+the Lunar Module was said LGC (Lunar-module Guidance
+Computer).</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>The software was
+different for the two computers, and each "edition" had an
+independent development path, with shared components. It was in
+common the management of the various programs, as well as the
+management of the inertial platform and that of the interface
+toward the crew (called DSKY, for Display and
+Keyboard).</small></font></font></small></p><p style="margin-bottom: 0in;"><a href=
+"P6220763_IC.png"><small><font face=
+"Helvetica, sans-serif"><font size=4><small><img alt=
+"Some integrated circuits used in the AGC" title=
+"Click to enlarge" src="small-P6220763_IC.png" style=
+"border: 2px solid ; width: 211px; height: 160px;" align="left"
+height="160" border="0" width=
+"211"></small></font></font></small></a><small><font face=
+"Helvetica, sans-serif"><font size=4><small>The CMC software
+was different for the presence of the Saturn V rocket monitoring
+and control program (never used in its controlling functions as
+the Saturn computer always performed flawlessly). It also
+contained functions to steer during the trans-lunar trajectory
+maneuver, during orbital flight and of course for the re-entry
+into the Earth's atmosphere.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>The LGC software
+was different for the descent and landing programs, and for the
+ascent program and the subsequent lunar orbit
+insertion.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>Another part in
+common was devoted to the rendezvous maneuvers, as both vehicles
+could perform as the active part in the complex process of
+rejoining each other in orbit.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>Obviously, the
+software of both vehicles was different in the management of
+propulsion devices, and the navigation sensor which, while in the
+CSM were a sextant and a telescope, in the LM they were a single
+optical device with a special behavior (due to the reduced size
+of the LM and the need to keep weight within precise
+limits).</small></font></font></small></p><p style="margin-bottom: 0in;"><font size=4><b>Display and
+keyboard</b></font></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small><a href=
+"P6220704_DSKY.png"><img alt=DSKY title="Click to enlarge" src=
+"small-P6220704_DSKY.png" style=
+"border: 2px solid ; width: 153px; height: 160px;" align="right"
+height="160" border="0" width="153"></a>The most visible
+component of the whole AGC was the panel used by the crew to
+interact with the computer. In an era in which "speak" to a
+computer using a video terminal was still a futuristic
+advancement, the unit called Display and Keyboard, or DSKY,
+represented a drastic achievement in the relationship between man
+and machine. For the first time the famous seven-digits numerical
+displays were introduced and for the first time it was possible
+to tell the computer, while it was working, what to do, being
+also possible to interact with it to change parameters, or to
+monitor numerical values of different kind (which by itself was a
+real novelty in an aerospace world still dominated by
+gauges).</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>System limitations
+imposed, of course, a number of restrictions and ingenuous
+solutions even if using the language developed for the purpose of
+user interaction with the computer required patience and training
+to ensure efficiency and
+confidence.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small><a href=
+"SCAN_HOF_014.jpg"><img alt="DSKY in CM control panel" title=
+"Click to enlarge" src="small-SCAN_HOF_014.jpg" style=
+"border: 2px solid ; width: 182px; height: 160px;" align="left"
+height="160" border="0" width="182"></a>The DSKY's language was
+based in two-digits numeric codes, used to represent Verbs (that
+is actions) and Nouns (that is the object of an action). In the
+figure it is shown part of a checklist (from the Apollo A17
+Flight Crew G&amp;N Dictionary) that summarized all the Verb/Noun
+codes for the Lunar Module computer. Verb and Noun values had a
+prominent display on the DSKY as well as the active program (or
+major mode, related usually to a flight phase), which was also
+assigned a two-digits numerical value and displayed on the top
+right corner of the unit.</small></font></font></small></p><p style="margin-bottom: 0in;"><a href=
+"A17_VN_Checklist.png"><small><font face=
+"Helvetica, sans-serif"><font size=4><small><img alt=
+"Apollo 17 verb/noun list" title="Click to enlarge" src=
+"small-A17_VN_Checklist.png" style=
+"border: 2px solid ; width: 223px; height: 360px;" align="right"
+height="360" border="0" width=
+"223"></small></font></font></small></a><small><font face=
+"Helvetica, sans-serif"><font size=4><small>The Verb and Noun
+keys were used to set the Verb/Noun combination of interest, and
+telling the computer to accept it by pressing the Enter key
+(e.g,, a typical sequence could have been: Verb 16 Noun 65
+Enter). The Clear key was used to correct user typing errors,
+while the Reset key was used to cancel error warnings from the
+computer. The Pro key (where Pro stands for Proceed) was sued to
+confirm critical operations (like the execution of a maneuver or
+the starting and stopping of the computer). The Key Release key
+was used to release the control of the DSKY to other routines
+that required its use, that is when the corresponding indicator
+light was flashing to grab the attention of the operator. The
+latter behavior was another novelty as many programs could run
+inside the AGC at the same
+time.</small></font></font></small></p><p style="margin-bottom: 0in;"><font size=4><b>Why
+"guidance"?</b></font></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>The real task
+assigned to MIT's Instrumentation Laboratory (now Draper
+Laboratories) was the design and implementation of a guidance
+system for Apollo, that is a system able to keep a notion of the
+state of the vehicle in every instant and provide guidance
+directions for the execution of specific flight phases (for
+instance, landing on the Moon). The whole AGC is therefore a
+wider system, not limited only to the computer, that provided
+sensors, actuators, interfaces for the crew and the
+communications system (to exchange data with the control
+center).</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small><a href=
+"GNC_NavBase.pdf"><img alt=
+"Guidance, Navigation, and Control system." title=
+"Click to get a large PDF of this diagram" src=
+"small-GNC_NavBase.pdf-pages.jpg" style=
+"border: 2px solid ; width: 208px; height: 159px;" align="left"
+height="159" border="0" width="208"></a>For the navigation
+sensors, designers chose an inertial navigation system based on a
+"three-axis inertial platform" able to maintain an given
+orientation (used as reference) independently by the motions of
+the vehicle. On the "platform", three accelerometers were mounted
+to measure accelerations and thus update the vehicle state during
+propulsive phases. In the free-fall phases, when the vehicle
+moved along orbits dictated by Earth/Moon gravities, the state
+was updated mathematically by applying Newton's and Kepler's
+equation. Verification of the state, to correct it in case of
+possible deviations from the intended path, were done by means of
+a sextant mounted with the "platform". By observing stars and the
+angle between stars and the horizon (or a landmark) crew were
+able to navigate in the Earth/Moon system like sailors did for
+centuries before the advent of of modern radio navigation
+systems. The mathematics behind the whole guidance and navigation
+system was worked out by prof. Richard Battin, at the time one of
+the most prominent experts in the sector, who also went to
+initially lead the software development task for
+AGC.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>In the course of
+the project, the AGC was added other main functions, like that to
+act as go-between for the manual control of the vehicle. By all
+means that was the first "fly-by-wire" guidance system in
+history, and the first "digital autopilot". This and other
+additional utilities for secondary tasks demonstrated the
+versatility of computerized system with respect to more classical
+approaches.</small></font></font></small></p><p style="margin-bottom: 0in;"><font size=4><b>AGC
+Software</b></font></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>As in all
+computerized systems, the physical part of the computer
+(circuits, logic gates and memory) is useless without a program
+to manage its operation. Software became soon one of the
+principal aspects of each Apollo mission and hundreds of
+programmers (at a time when the word "software" was still unknown
+but to a few insiders) worked to produce programs of very high
+quality, and with lots of ingenuity, having to overcome not only
+the intricacies of the space guidance and navigation equations,
+but also the limitations imposed by the inflexible hardware
+architecture. Even in this case, methods and technologies were
+developed for this specific purposes to soon become part of the
+required knowledge in the aerospace
+world.<br></small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>Software
+development was not even worthy a mention in the original
+contract, as it was considered expected, at the time (but often
+it is still the same today), that programming the computer was a
+side task in the whole project. In truth, at the peak of the
+Apollo program, in 1969, software workers were approximately as
+much as the hardware workers. But being the "software culture"
+not widely diffused, everybody looked with suspicion at this
+intangible but fundamental,
+"thing".</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>Two were the
+programming languages available: one was the proper central
+processing unit language, or assembly language, and the other was
+a higher-level language, that was to be interpreted at execution
+time within the computer by a program called, exactly,
+Interpreter. This second language enabled to save memory speeding
+up the programming of complex mathematical operations, at the
+expense of a slower execution
+speed.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>During the course
+of software development, in addition to performance limitations,
+programmers had to fight against memory limitations. Uncountable
+tricks were used by programmers to save memory words, often to
+the detriment of code readability. In addition, to worsen the
+situation, it was required to adopt particular techniques to
+protect critical functions from a sudden computer restart. By
+keeping tab on the state of programs under execution it was
+possible to ensure that in case of serious problems, the computer
+were able to restart and resume programs from the place they were
+at the moment of the trouble, without causing issued with
+critical functions, like the propulsive
+phases.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica, sans-serif"><font size=4><small>The experience
+acquired with the Apollo program, that continued after the lunar
+missions with the Skylab flights and the Apollo-Soyuz mission,
+was not lost. The performance of the software and the reliability
+of the hardware made the AGC the logical choice for the first
+computer controlled flight, or "fly-by-wire", of an airplane (a
+modified F-8 fighter). The experience of programmers was
+subsequently transferred to the Space Shuttle program, where an
+evolution of the AGC software, and the methods used to implement
+it, contributed to the making of a space vehicle entirely
+controlled by the on-board
+computer.</small></font></font></small></p><p style="margin-bottom: 0in;"><font size=4><b>Myths and
+legends</b></font></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica-Oblique, sans-serif"><font size=4><small><i>Is it
+true that the Apollo computer had less power than a digital
+pocket calculator?</i></small></font></font> <font face=
+"Helvetica, sans-serif"><font size=4><small>No it is not true.
+The performances of the Apollo Guidance Computer were comparable
+to that of the central processing unit of computers like the
+Apple II, the Commodore 64 and the ZX Spectrum, the personal
+computer that opened the way for the digital revolution at the
+end ot the 1970's. The big difference was that the AGC was highly
+reliable and had many more input/output ports to be able to
+control, and receive data from, sensors and devices within the
+Command Module and the Lunar Module. In addition, it was able to
+execute programs in real-time, that is which operated
+continuously performing more tasks at the same time and
+guaranteeing that high priority tasks were performed first when
+required. Its architecture is not much different from that of
+modern microcontrollers used today for the most disparate tasks,
+with the difference that the latter are at least 10 to 20 times
+faster than the AGC and enormously smallest (being integrated in
+a single chip). For this reason programming and using the AGC is
+not very far from the world in which control systems and embedded
+systems designers and hobbyists work
+today.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica-Oblique, sans-serif"><font size=4><small><i>Is it
+true that during the landing of Apollo 11, Neil Armstrong had to
+take control from the computer because of the alarms it
+generated?</i></small></font></font> <font face=
+"Helvetica, sans-serif"><font size=4><small>Stupid media
+remarks often cite "software errors" that generated alarms during
+Apollo 11 descent to the Moon (the most critical phase of the
+mission). In truth, the robustness of AGC software, in terms of
+good design and reliability, saved the mission when other issues,
+external to the computer, were causing an overload in it its
+operation (and was thus correctly alerting the crew of the
+condition). The LGC kept working correctly, but toward the end of
+the descent, Armstrong took manual control (as everybody else who
+followed him on this task) because the landing point targeted by
+the computer was too dangerous for a safe
+landing.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica-Oblique, sans-serif"><font size=4><small><i>Was AGC
+the first space computer?</i></small></font></font> <font face=
+"Helvetica, sans-serif"><font size=4><small>No, AGC wasn't the
+first space computer or the first computer who flew on a crewed
+vehicle. Gemini spacecrafts had also an onboard computer, made
+with transistors, and able to assist the crew (but not totally
+control the vehicle) in the propulsive phases, during
+'rendezvous' and during re-entry. But that computer was not an
+essential part of the mission, while AGC was born to provide
+assistance in completing the mission without ground support.In
+addition to that, other digital computers were developed for the
+Titan rockets, and of course for the Saturn, but they were
+limited to a single task and were much bulkier and heavier. The
+Lunar Module also had a second onboard computer, the AGC, Abort
+Guidance System, much simpler and able to ensure the climb back
+to orbit and a rendezvous with the CSM in case of troubles with
+the primary guidance and navigation
+system.</small></font></font></small></p><p style="margin-bottom: 0in;"><small><font face=
+"Helvetica-Oblique, sans-serif"><font size=4><small><i>Did the
+AGC have an operating system?</i></small></font></font><font face="Helvetica, sans-serif"><font size=4><small>In a
+certain sense it had, in the sense today commonly considered for
+computers for control applications. The AGC operating system was
+made of an executive and a manager of queue for waiting programs.
+The executive provided, in turn and basing on priority, a chance
+to each program to execute its own instructions and also managed
+possible interruptions generated by random external events. This
+way more than a single program could be active at the same time,
+even if the allocation of "machine time" was not based by a rigid
+scheduling (preferred technique at the time). but was was
+asynchronous and linked to the correct design of each function.
+Also, it was available a separate process to verify the
+well-being of the computer, one for the management of the DSKY
+and one for managing external devices. And another part of this
+"operating" was devoted to the higher level language used for
+mathematical operations that did not require a real-time
+response.</small></font></font></small></p><h2>Introduction to Virtual AGC</h2>The Virtual AGC project
+provides a <a href=
+"http://en.wikipedia.org/wiki/Virtual_computer">virtual
+machine</a> which simulates the AGC, the DSKY, and some other
+portions of the guidance system.&nbsp; In other words, if the
+virtual machine—which we call <span style=
+"font-weight: bold;">yaAGC</span>—is given the same software
+which was originally run by the real AGCs, and is fed the same
+input signals encountered by the real AGCs during Apollo
+missions, then it will responds in the same way as the real AGCs
+did.&nbsp; The Virtual AGC software is free of charge, <a href=
+"download.html">can be obtained for Windows, Mac OS X, Linux, or
+as open source software source code</a> so that it can be studied
+or modified.<br><p style="margin-bottom: 0in;" align="center"><iframe src=
+"https://www.youtube.com/embed/hyhI85Rd1kI" allowfullscreen
+frameborder="0" height="480" width="854"></iframe></p><br>
+The video clip above (courtesy of Dean Koska and YouTube)
+illustrates Virtual AGC running on a Palm Centro—which isn't
+supported directly from our <a href="download.html">download
+page</a>.&nbsp; But it's one of the great advantages of <a href=
+"http://en.wikipedia.org/wiki/Open_source_software">open-source
+software</a> that you can take it an adapt it to your wishes
+without being at the mercy of the creators of the software.<br><br>
+After you install the Virtual AGC software you can run the
+simulation by clicking its desktop icon <img style=
+"width: 32px; height: 32px;" alt="" src="ApolloPatch3.png" align=
+"middle" height="40" width="40">:<br><br><div style="text-align: center;"><img style="border: 2px solid ; width: 713px; height: 460px;"
+alt="" src="Screenshot-VirtualAGC-SuperSimple.jpg" height="460"
+width="713"><br></div><br>
+While there are all manner of runtime options you can select in
+this screen, such as which Apollo mission you which to fly, it's
+simplest as a newcomer to just click the Novice button and then
+to click Run.&nbsp; In the screenshot below, the DSKY is
+displaying the time since startup (00000 hours, 00003 minutes,
+00270 hundreds of a second), though that's not something it will
+do automatically when you start it up.<br><br><div style="text-align: center;"><img style="width: 711px; height: 480px;" alt="" src=
+"Screenshot-novice.jpg" height="480" width="711"><br><div style="text-align: left;"><br>
+In this simplest of configurations, you are simulating the
+AGC of the Lunar Module of Apollo 13, and you are provided
+with a simulated AGC and simulated DSKY.&nbsp; You can enter
+commands at the DSKY keypad, and the AGC will report the
+results of its actions on the DSKY's display.<br></div></div><h2>How to Operate the AGC from the DSKY<br></h2>The first thing
+you need to know when operating the AGC is that it contains a
+collection of programs, each identified by a two-digit
+number.&nbsp; The most-basic program is program 00, usually known
+as "pooh" (as in "Winnie the Pooh") or P00.&nbsp; In fact, in the
+screenshot above, the AGC is running P00, as you can see by
+looking at the "PROG" area in the upper right-hand corner of the
+DSKY.&nbsp; The available programs differ somewhat from mission
+to mission, and the picture below (taken from reference cards
+supplied to the astronauts) is a sampling of some of the programs
+available for the Apollo 15 Command Module.<br><br><div style="text-align: center;"><img style="border: 2px solid ; width: 612px; height: 720px;"
+alt="" src="SamplePrograms.jpg" height="720" width="612"><br></div><br>
+From the astronaut's perspective, all operations of the computer
+are controlled by a quirky system of "verbs" and "nouns".&nbsp;
+<span style="font-style: italic;">Verbs</span> and <span style=
+"font-style: italic;">nouns</span> aren't words, as you might
+suppose, but are instead two-digit numbers.&nbsp; What makes them
+"verbs" and "nouns" is that they are somewhat analogous to verbs
+and nouns in natural languages like English, in which the verb
+describes the action to be taken and the noun describes the data
+to which the action is applied.&nbsp; So most commands are
+applied by hitting a key sequence like the following on the
+DSKY:<br><br><div style="text-align: center;">
+VERB <span style="font-style: italic;">digit</span><span style="font-style: italic;">digit</span> NOUN
+<span style="font-style: italic;">digit</span> <span style=
+"font-style: italic;">digit</span> ENTR<br><small style="font-style: italic;">or sometimes</small><br>
+VERB <span style="font-style: italic;">digit</span><span style="font-style: italic;">digit</span> ENTR<br></div><br>
+For example, a command like V06N36E (VERB 0 6 NOUN 3 6 ENTR)
+would mean to perform action 06 on data 36.&nbsp; The exact
+meanings of the verbs-numbers and noun-numbers differ from
+mission to mission—i.e., from AGC software version to
+version.&nbsp; The pictures below show a sampling of the
+available verbs and nouns from the astronaut's reference cards
+for the Apollo 15 Command Module, from which you can see that
+verb 06 means to perform a decimal display and noun 36 means
+"time of AGC clock", so V06N36E should display the current time
+from the AGC's clock, if that happens to be a legal action for
+the current program.<br><br><table summary="" style=
+"text-align: left; margin-left: auto; margin-right: auto;"
+border="0" cellpadding="2" cellspacing="50"><tbody><tr><td style="text-align: center;"><img style=
+"width: 537px; height: 720px;" alt="" src="SampleVerbs.jpg"
+height="720" width="537"><br></td><td style="text-align: center;"><img style=
+"width: 414px; height: 720px;" alt="" src="SampleNouns.jpg"
+height="720" width="414"><br></td></tr></tbody></table>There are also some exceptions, such as getting the AGC
+to run the P00 program.&nbsp; You do that with a key sequence
+like V37E00E, in which NOUN is replaced by ENTR for some
+reason.<br><br>
+How did this strange verb/noun system get put into place?&nbsp;
+One of the original AGC developers, Ram\F3n Alonso, provides an
+explanation.&nbsp; Apparently, nobody had yet arrived at any kind
+of software requirements for the AGC's user interface when the
+desire arose within the Instrumentation Laboratory to set up a
+demo guidance-computer unit with which to impress visitors to the
+lab.&nbsp; Of course, this demo would have to <span style=
+"font-style: italic;">do</span> something, if it was going to be
+at all impressive, and to do something it would need some
+software. In short order, some of the coders threw together a
+demo program, inventing and using the verb/noun user-interface
+concept, but without any idea that the verb/noun concept would
+somehow survive into the flight software.&nbsp; As time passed,
+and more and more people became familiar with the demo, nobody
+got around to inventing an improvement for the user interface, so
+the coders simply built it into the flight software without any
+specific requirements to do so.&nbsp; Many objections to the
+verb/noun system were received by the developers, such as "it's
+not scientific", "it's not dignified", or even "astronauts won't
+understand it".&nbsp; Even though the coders of the demo hadn't
+seriously intended the verb/noun interface to be used in any
+permanent way, it became a kind of devilish game to counter these
+objections with arguments as to why the interface was really a
+good one.&nbsp; In the end, the coders won and the verbs and
+nouns stayed.&nbsp; Nevertheless, the following Shakespearean
+quote (from <span style="font-style: italic;">Henry IV</span>) is
+embedded within the AGC source code:&nbsp; "It will be proved to
+thy face that thou hast men about thee that usually talk of a
+noun and a verb, and such abominable words as no Christian ear
+can endure to hear."<br><br><a href="index.html#Quick_Start">The main Virtual AGC web-page
+gives you various step-by-step procedures</a> you can perform to
+see the DSKY actually do something.<br><br><h2><a name=StupidSoftware></a>It's the Software,
+Stupid!<br></h2>You may notice that on the Virtual AGC main
+display screen there are a number of different Apollo missions
+listed, but that not all of them are selectable.&nbsp; That's
+because Virtual AGC strictly simulates the original AGC computer
+hardware, and that requires having the original software that ran
+on the AGC.&nbsp; But we don't have copies of all of the
+different software versions used for the different
+missions!&nbsp; Collecting this software is one of the principal
+goals of the Virtual AGC project, so if you happen to know a
+collector, a museum, or any of the original AGC developers who
+have printouts of AGC software, <a href=
+"mailto:info@sandroid.org">let us know</a>!&nbsp; (We don't want
+the printouts themselves, just copies of the information in them,
+and we're willing to travel there to do the copying work
+ourselves.)<br><br>
+Here's a brief rundown on the known AGC software:<br><br><table summary="" style="text-align: left; width: 100%;" border=
+"0" cellpadding="2" cellspacing="2"><tbody><tr><td style="text-align: center; vertical-align: middle;"><table summary="" style=
+"text-align: left; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><th colspan=1 rowspan="2" style=
+"vertical-align: bottom; text-align: center;">
+Mission<br></th><th colspan=2 rowspan="1" style=
+"vertical-align: top; text-align: center;">AGC
+Software by&nbsp; Name and Version<br></th></tr><tr><th style=
+"vertical-align: top; text-align: center;">Command
+Module<br></th><th style=
+"vertical-align: top; text-align: center;">Lunar
+Module<br></th></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_1">Apollo
+1</a><br></td><td style=
+"vertical-align: top; text-align: center;">Sunspot
+build TBD<br></td><td style=
+"vertical-align: top; text-align: center;">
+-<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_4">Apollo
+4</a><br></td><td style=
+"vertical-align: top; text-align: center;">Solarium
+build 54</td><td style=
+"vertical-align: top; text-align: center;">
+-<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_5">Apollo
+5</a><br></td><td style=
+"vertical-align: top; text-align: center;">
+-<br></td><td style=
+"vertical-align: top; text-align: center;">Sunburst
+build TBD<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_6">Apollo
+6</a><br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Solarium055/MAIN.agc.html">Solarium build
+55</a><br></td><td style=
+"vertical-align: top; text-align: center;">
+-<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_7">Apollo
+7</a><br></td><td style=
+"vertical-align: top; text-align: center;">Sundisk
+build TBD<br></td><td style=
+"vertical-align: top; text-align: center;">
+-<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_8">Apollo
+8</a><br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Colossus237/MAIN.agc.html">Colossus build
+237</a><br></td><td style=
+"vertical-align: top; text-align: center;">
+-<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_9">Apollo
+9</a><br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Colossus249/MAIN.agc.html">Colossus build
+249</a></td><td style=
+"vertical-align: top; text-align: center;">Sundance
+build 306<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_10">Apollo
+10</a><br></td><td style=
+"vertical-align: top; text-align: center;">Comanche
+build 45?<br></td><td style=
+"vertical-align: top; text-align: center;">Luminary
+build 69<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_11">Apollo
+11</a><br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Comanche055/MAIN.agc.html">Comanche build
+55</a><br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Luminary099/MAIN.agc.html">Luminary build
+99</a><br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_12">Apollo
+12</a><br></td><td style=
+"vertical-align: top; text-align: center;">Comanche
+build TBD<br></td><td style=
+"vertical-align: top; text-align: center;">Luminary
+build 116<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_13">Apollo
+13</a><br></td><td style=
+"vertical-align: top; text-align: center;">Comanche
+build 67<br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Luminary131/MAIN.agc.html">Luminary build
+131</a><br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_14">Apollo
+14</a><br></td><td style=
+"vertical-align: top; text-align: center;">Comanche
+build 72<br></td><td style=
+"vertical-align: top; text-align: center;">Luminary
+build 178<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_15">Apollo
+15</a><br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Artemis072/MAIN.agc.html">Artemis build
+72</a><br></td><td style=
+"vertical-align: top; text-align: center;">Luminary
+build 210<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_16">Apollo
+16</a><br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Artemis072/MAIN.agc.html">Artemis build
+72</a></td><td style=
+"vertical-align: top; text-align: center;">Luminary
+build 210</td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_17">Apollo
+17</a><br></td><td style=
+"vertical-align: top; text-align: center;"><a href=
+"listings/Artemis072/MAIN.agc.html">Artemis build
+72</a></td><td style=
+"vertical-align: top; text-align: center;">Luminary
+build 210</td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Skylab_2">Skylab
+2</a><br><a href=
+"http://en.wikipedia.org/wiki/Skylab_3">Skylab
+3</a><br><a href=
+"http://en.wikipedia.org/wiki/Skylab_4">Skylab
+4</a><br></td><td style="text-align: center;">Skylark build
+48?<br></td><td style="text-align: center;">-<br></td></tr><tr><td style=
+"vertical-align: top; text-align: center;"><a href=
+"http://en.wikipedia.org/wiki/Apollo_soyuz">Apollo-Soyuz</a><br></td><td style=
+"vertical-align: top; text-align: center;">Skylark
+build TBD<br></td><td style=
+"vertical-align: top; text-align: center;">
+-<br></td></tr></tbody></table></td><td style="text-align: center; vertical-align: middle;"
+width="33%"><img style="width: 445px; height: 540px;" alt=
+"" src="AgcFamilyTree-small.jpg" height="540" width=
+"445"><br></td><td valign=middle width="33%"><blockquote><small>"What would you call a collection of programs,
+routines, subroutines, procedures, major modes, jobs
+and tasks, that all have to exert the utmost courtesy
+in sharing the resources of a single spacecraft
+computer? The physical form of fixed memory gave us our
+answer: a rope. With no tapes, disks, or any form of
+backing store, every scrap of coded logic had to be
+built into one rope memory, 24K words in a Block I AGC,
+for each Apollo mission. Ropes had names of up to 8
+characters, and early ones were named in honor of
+Apollo\92s role in ancient mythology, as driver of the
+phaeton carrying the Sun across the sky: ECLIPSE (begun
+on the day of a solar eclipse that occurred 6 years to
+the day before the first Moon landing), SUNRISE,
+CORONA, SOLARIUM, and SUNSPOT. In Block II development,
+there was a maverick called RETREAD, then AURORA,
+SUNDIAL, SUNDISK, SUNBURST, and SUNDANCE.&nbsp;
+Finally, Fred Martin, our transplanted New Yorker who
+steadfastly refused to pledge allegiance to the Red
+Sox, persuaded us that it was more important to give
+them names that linked them to their vehicles: COLOSSUS
+for the Command Module; LUMINARY for the
+LM."<br></small><div align=right><small><i>&nbsp;— Hugh Blair-Smith</i></small><br></div></blockquote><div align=right><div align=left>
+(A description of the software-naming convention that
+didn't quite make it into the final version of AGC
+developer Hugh Blair-Smith's book, <i>Left Brains for
+the Right Stuff</i>.)<br></div></div></td></tr></tbody></table><br>
+These programs, though having different names, are not really
+independent programs.&nbsp; There is a complex family heritage,
+and a lot of overlap between them.&nbsp; So if you understand one
+of the programs, you will understand 99% of what's in any of the
+others.<br><br>
+The AGC software is mostly written in <a href=
+"http://en.wikipedia.org/wiki/Assembly_language">assembly
+language</a>.&nbsp; "Assembly language" is a very simple language
+in which each instruction—usually, each line of software source
+code—represents a single primitive CPU operation.&nbsp; Since
+each type of CPU provides different primitive operations, the
+assembly language for each type of CPU differs from that of every
+other type of CPU.&nbsp; The AGC assembly language, being based
+on the custom AGC CPU, thus differs in detail from every other
+type of assembly language but shares certain customary
+elements.&nbsp; The specific assembly language of the AGC was
+referred to as "basic"—<span style=
+"font-style: italic;">not</span> to be confused with the famous
+later computer language BASIC which is many people's first
+introduction to simple computer programming.&nbsp; Here's a short
+excerpt from the Apollo 11 Lunar Module software to give the
+flavor of it:<br><br><table summary="" style=
+"text-align: left; font-family: Courier New,Courier,monospace; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style=
+"vertical-align: top; background-color: rgb(204, 204, 204);"><pre><span class=
+"sm">TWIDDLE </span>          <span class=
+"op">INHINT  </span>                                       <br>                  <span class=op>TS      </span> L        <span class=co>#  SAVE DELAY TIME IN L</span><br>                  <span class=op>CA      </span> POSMAX                                <br>                  <span class=op>ADS     </span> Q        <span class=co>#  CREATING OVERFLOW AND Q-1 IN Q</span><br>                  <span class=op>CA      </span> BBANK                                 <br>                  <span class=op>EXTEND  </span>                                       <br>                  <span class=op>ROR     </span> SUPERBNK                              <br>                  <span class=op>XCH     </span> L                                     <br><br><span class=sm>WAITLIST</span>          <span class=op>INHINT  </span>                                       <br>                  <span class=op>XCH     </span> Q        # SAVE DELTA           <br>                  <span class=op>TS      </span> WAITEXIT # WAITEXIT.                  <br>                  <span class=op>EXTEND  </span>                                       <br>                  <span class=op>INDEX   </span> WAITEXIT <span class=co>#  IF TWIDDLING, THE TS SKIPS TO HERE</span><br>                  <span class=op>DCA     </span> 0        <span class=co>#  PICK UP 2CADR OF TASK.</span><br>         -1       <span class=op>TS      </span> WAITADR  <span class=co>#  BBCON WILL REMAIN IN L</span><br><span class=sm>DLY2    </span>          <span class=op>CAF     </span> WAITBB   <span class=co>#  ENTRY FROM FIXDELAY AND VARDELAY.</span><br>                  <span class=op>XCH     </span> BBANK                                 <br>                  <span class=op>TCF     </span> WAIT2               <br></pre></td></tr></tbody></table><br>
+The things at the left-hand side (<span style=
+"font-family: monospace;">TWIDDLE</span>, <span style=
+"font-family: monospace;">WAITLIST</span>, <span style=
+"font-family: monospace;">DLY2</span>) are "program labels", and
+are used to provide names for different blocks of source
+code.&nbsp; The next column to the right contains the actual CPU
+instructions (<span style=
+"font-family: monospace;">INHINT</span>, <span style=
+"font-family: monospace;">TS</span>, <span style=
+"font-family: monospace;">CA</span>, <span style=
+"font-family: monospace;">ADS</span>, etc.) while the column to
+the right of that (<span style=
+"font-family: monospace;">L</span>, <span style=
+"font-family: monospace;">POSMAX</span>, <span style=
+"font-family: monospace;">Q</span>, etc.) specifies the data on
+which the CPU instructions are supposed to operate.&nbsp; For
+example, at the very bottom you'll find "<span style=
+"font-family: monospace;">TCF WAIT2</span>"; when the program
+reaches that point, the instruction <span style=
+"font-family: monospace;">TCF</span> causes it to jump to program
+label <span style="font-family: monospace;">WAIT2</span>.&nbsp;
+Finally, anything preceded by the '#' symbol is just a comment
+added for explanatory purposes by the programmer, but not
+affecting program execution in any way.<br><br>
+You can learn all about AGC basic assembly language, if you so
+desire, in the <a href="assembly_language_manual.html">Virtual
+AGC assembly-language manual</a>.&nbsp; The Virtual AGC software
+provides an assembler, which is a program that converts
+assembly-language source code to executable code which can
+actually be run on the AGC CPU.&nbsp; So with Virtual AGC, you
+can actually create and run your own AGC programs.<br><br>
+As it happens, the functionality which the AGC needed to provide
+was so complex that it wouldn't have fit within the amount of
+physical memory provided by the AGC if it were written entirely
+in basic assembly language.&nbsp; One thing that was done to get
+around this was to provide also a higher-level computer language
+referred to as "interpretive", in which each interpretive
+instruction represents a large number of basic assembly-language
+instructions.&nbsp; Interpretive thus has the advantage of
+cutting down on memory usage, but typically has the disadvantage
+of running much more slowly, and therefore had to be used with
+care.&nbsp; Within any given AGC program like Luminary, basic and
+interpretive code is intermixed.<br><br>
+Here's a sample of interpretive code:<br><br><table summary="" style=
+"text-align: left; font-family: Courier New,Courier,monospace; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style=
+"vertical-align: top; background-color: rgb(204, 204, 204);"><pre><span style="font-family: monospace;"><span class=
+"sm">STATINT1</span>          <span class=
+"op">TC      </span> INTPRET                               <br>        <span class=in>          BON     </span> RTB                                   <br>                           QUITFLAG          <span class=co>#  KILL INTEGRATION UNTIL NEXT P00.</span><br>                           NOINT                                 <br>                           LOADTIME                              <br>                  <span class=in>STORE   </span> TDEC1                                 <br>                  <span class=in>CALL    </span>                                       <br>                           INTSTALL                              <br>                  <span class=in>SET     </span> CALL                                  <br>                           NODOFLAG                              <br>                           SETIFLGS                              <br>                  <span class=in>GOTO    </span>                                       <br>                           STATEUP                               <br><span class=sm>600SECS </span>          <span class=ps>2DEC    </span> 60000      B-28                       <br><span class=sm>ENDINT  </span>          <span class=in>CLEAR   </span> EXIT                                  <br>                           STATEFLG        <br>                  TC       PHASCHNG                   </span></pre></td></tr></tbody></table><br>
+Some of the things here are the same as in the basic assembly
+language, such as the program labels and the program
+comments.&nbsp; As with basic assembly language, the next column
+to the right of the program labels (<span style=
+"font-family: monospace;">BON,</span> <span style=
+"font-family: monospace;">STORE</span>, <span style=
+"font-family: monospace;">CALL</span>, etc.) contains
+instructions—though mostly interpretive instructions rather than
+basic instructions.<br><br>
+In this sample, "<span style="font-family: monospace;">TC
+INTPRET</span>" and "<span style="font-family: monospace;">TC
+PHASCHNG</span>" are basic assembly-language code.&nbsp; In fact,
+"<span style="font-family: monospace;">TC INTPRET</span>"
+actually means to begin interpreting the lines that follow as
+interpretive code, and every block of intepretive code must
+somehow be preceded by a basic instruction like that.&nbsp; Near
+the end, you see the interpretive instruction <span style=
+"font-family: monospace;">EXIT,</span> and this means to stop
+working with interpretive code and to resume working with basic
+assembly language.<br><br>
+In other respects, though, interpretive is very weird in
+comparison to basic assembly language.&nbsp; For example, the
+column to the right of the instruction column contains mostly
+names of variables operated on by the instructions ... but can
+also contain more instructions, because intepretive instructions
+can be packed two to a word of memory.&nbsp; Also, many variables
+don't seem to be preceded by instructions, because a single
+interpretive instruction may operate on the lines below it as
+well as on the column to the right of it.&nbsp; For example, in
+the two lines of code "<span style=
+"font-family: monospace;">CLEAR EXIT</span> / <span style=
+"font-family: monospace;">STATEFLG</span>" near the end of the
+sample, the <span style="font-family: monospace;">CLEAR</span>
+and <span style="font-family: monospace;">EXIT</span>
+instructions are grouped together because they are packed into a
+single word of memory, but the <span style=
+"font-family: monospace;">CLEAR</span> instruction actually
+operates on the variable <span style=
+"font-family: monospace;">STATEFLG</span>.&nbsp; Oh, those wacky
+AGC developers!&nbsp; How they must have chuckled when they
+dreamed up that scheme.<br><br>
+You can learn all about AGC interpretive language, if you so
+desire, in the <a href="assembly_language_manual.html">Virtual
+AGC assembly-language manual</a>.<br><br><h2>The Abort Guidance System (AGS)</h2>The AGC was not the only
+computer in the Lunar Module.&nbsp; As a backup to the main
+guidance system, there was a completely separate guidance system
+called the Abort Guidance System (AGS) developed by <span style=
+"font-family: sans-serif; font-style: italic;">TRW</span>
+Aerospace, now a division of Northrop Grumman.&nbsp; As the name
+implies, the AGS was intended to be used only in the case of an
+aborted landing, and its basic function was simply to get the LM
+into an orbit from which it would be possible for the CM to
+rendezvous.&nbsp; Fortunately, this functionality never had to be
+used in a real mission, but that does not alter the significance
+of the system.<br><br>
+Naturally, an important part of the AGS was a computer, and this
+computer was called the Abort Electronics Assembly—or just "AEA"
+for short.&nbsp; Since the AGC and AEA were developed
+independently by unrelated groups, there is no commonality
+between them in terms either of hardware or of software.&nbsp;
+There was essentially no interaction between the AGC and AEA,
+except that the spacecraft's "state vector"—its current position,
+velocity, and orientation—could be transferred.<br><br>
+Here are the basic characteristics of the AEA:<br><ul><li>2048 words of RAM.&nbsp; A "word" was 18 bits of
+data—therefore just over 2 bytes (16 bits) of data—and so the
+total RAM was just 4608 bytes.<br></li><li>2048 words of read-only memory, so equivalent to 4608
+bytes.&nbsp; It should be noted that the "RAM" retained its
+contents when power was removed, so that the full 4096 words
+(9216 bytes) of memory were available for program
+storage.<br></li><li><img alt="" src="DEDADrawingSmall-transparent.png" style=
+"width: 503px; height: 290px;" align="right" height="290"
+width="438">Maximum of about 100,000 CPU instructions executed
+per second.</li><li>Dimensions: 23.75"×8"×5".</li><li>Weight:&nbsp; 32.7 pounds.</li><li>Power supply:&nbsp; 90 Watts.<br></li></ul>Just as the AGC had its DSKY for interfacing to the
+astronaut, the AEA had its own Data Entry and Display Assembly—or
+"DEDA" for short.<br><br>
+The astronaut interface was very simple.&nbsp; You could do one
+of two things:<br><ul><li>Change the value stored in a memory location; or</li><li>Cause the value of a memory location to be displayed (and
+to update twice per second).</li></ul>In other words, to usefully interact with the AEA, you had
+to know the numerical values of the memory addresses that had any
+significant purposes.&nbsp; But don't be fooled by the simplicity
+of the interface into believing that the AEA was a mere
+calculator.&nbsp; Though its functionality was much less than
+that of the AGC, it still had to perform very significant
+guidance functions on demand, and to have very sophisticated
+software.<br><br>
+Virtual AGC provides the ability to simulate the AEA and DEDA,
+and you can activate this ability by selecting the "LM Abort
+Computer (AEA)" option in the Virtual AGC main window.&nbsp; In
+the screenshot below, the DEDA is displaying the contents of
+location 377, which is the number of interations of the units
+self-test which have been executed (and passed).<br><br><div style="text-align: center;"><img style="width: 718px; height: 520px;" alt="" src=
+"Screenshot-novice-aea.jpg" height="520" width="718"><br></div><br>
+As with the AGC software, the AEA software evolved over time and
+we have only a subset of the software versions known to have been
+created, so <a href="mailto:info@sandroid.org">if you know of the
+existence of others please let us know</a>!&nbsp; We <span style=
+"font-style: italic;">do</span> have the versions for <a href=
+"listings/FP6/FP6.aea.html">Apollo 11 ("Flight Program 6")</a>
+and probably for <a href="listings/FP8/FP8.aea.html">Apollo 15-17
+("Flight Program 8")</a>.<br><br>
+The AEA was programmed in its own assembly language, which was
+completely different from that of the AGC.&nbsp; The Virtual AGC
+software includes an AEA assembler, so you can create and run
+your own AEA software, if you'd like to do so.<br><span style="font-weight: bold;"><br></span>You can learn more
+about the AEA, including the definition of its assembly language,
+at the <a href="yaAGS.html">main Virtual AGC web-page for
+it</a>.<br><h2><img alt="" src="Saturn1B-transparent.png" style=
+"width: 290px; height: 500px;" align="right" height="500" width=
+"290"></h2><h2>Guiding the Mighty Saturn Rocket</h2>It's natural to think
+that the AGC might have steered and otherwise controlled the
+Saturn V rocket that hurled the Command Module and Lunar Module
+onto its moon-bound trajectory, or the Saturn IB rocket that was
+used for Earth-orbital missions like Apollo 7, but in fact it
+isn't true.&nbsp; The AGC was able to provide limited
+guidance-system backup for some of the Saturn burns, but the main
+responsibility for guiding the Saturn rested with yet another
+onboard computer, the Launch Vehicle Digital Computer (or LVDC
+for short).&nbsp; The astronauts were able to monitor various
+sensor readings from the Saturn's guidance system on their
+displays, but neither they nor the AGC normally had any control
+over the rocket.<br><br>
+Unlike the AGC and AGS, the LVDC was not installed in the Command
+Module or Lunar Module, but was instead installed in the Saturn
+itself, in a non-propulsive stage called the IU (Instrumentation
+Unit).&nbsp; The IU perched above the final propulsive stage, the
+S-IVB, and therefore was the last part of the Saturn to be
+discarded by the Command Module.&nbsp; The picture at right
+illustrates this for a Saturn IB rocket, but the Saturn V is very
+similar ... only much bigger!<br><br>
+There's a lot more information about the LVDC on the <a href=
+"LVDC.html">main Virtual AGC web-page for it</a>, but there's no
+denying that at present we know far less about the LVDC than
+about any of the other Apollo flight computers.<br><h2>To Learn More ...</h2>This web page has provided a brief
+introduction to the AGC &amp; friends, and to Virtual AGC, but if
+you'd like to learn more about the AGC without taking the trouble
+to become a full expert on it, you might want to read the AGC's
+<a href=
+"http://en.wikipedia.org/wiki/Apollo_Guidance_Computer">Wikipedia
+article</a>.&nbsp;<br><br>
+If that's not enough for you, you can learn a <span style=
+"font-style: italic;">lot</span> more by looking at the <a href=
+"index.html">main Virtual AGC web pages</a>, and of course that's
+what we think you <span style="font-style: italic;">should</span>
+do!&nbsp; In fact, the main Virtual AGC website contains every
+AGC-related scrap of data, documentation, and software we've been
+able to find, so it can be somewhat intimidating.&nbsp; We're
+sorry about that, but training for an Apollo moon landing isn't
+easy!<br><br><br><hr style="width: 100%; height: 2px;"><center><br><span style=
+"color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
+This page is available under the <a href=
+"https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons No Rights Reserved License</a></span><br><i><font size="-1">Last modified by <a href=
+"mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br><br><a href="http://www.ibiblio.org"><img style=
+"border: 0px solid ; width: 300px; height: 100px;" alt=
+"Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
+"100" width="300"></a><br></font></i></center><br></body></html>

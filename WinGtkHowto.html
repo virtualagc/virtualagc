@@ -1,444 +1,320 @@
-<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.3.14">
-  <meta http-equiv="Content-Type" content=
-  "text/html; charset=utf-8">
-  <meta name="GENERATOR" content=
-  "Mozilla/4.7 [en] (X11; I; Linux 2.4.16 ppc) [Netscape]">
-  <meta name="Author" content="Ronald Burkey">
-  <title>Win32 gtk+ Howto</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="author" content="Ronald S. Burkey">
-  <script type="text/javascript" src="Header.js">
-  </script>
-</head>
-<body style="background-image: url(gray3.jpg);">
-  <script type="text/javascript">
-  document.write(headerTemplate.replace("@TITLE@","How to Develop Win32 Software").replace("@SUBTITLE@","with gtk+ 2, glade, and MinGW"))
-  </script>
-  <h2><span style="font-weight: bold;">What are "gtk+", "glade",
-  and "MinGW"?</span></h2><a href="http://www.gtk.org">Gtk+</a> is
-  a free cross-platform graphical toolkit.&nbsp; When you develop
-  software using <span style="font-weight: bold;">gtk+</span>, it
-  is possible to write a single program which works almost without
-  change on various computer platforms like Linux, Mac OS X, and
-  Windows.&nbsp; In order to compile a program that depends on
-  <span style="font-weight: bold;">gtk+</span>, you therefore have
-  to have the necessary <span style=
-  "font-weight: bold;">gtk+</span> development environment
-  installed on your computer.<br>
-  <br>
-  With that said, though, one must deal with the fact that the
-  <span style="font-weight: bold;">gtk+</span> developers provide
-  little advice as to <span style="font-style: italic;">how</span>
-  to use <span style="font-weight: bold;">gtk+</span> on
-  Windows.&nbsp; It turns out not to be difficult, but it helps to
-  have it explained.&nbsp;&nbsp; I assume in advance that you
-  already have some experience at compiling C-language programs; if
-  you don't, you probably are going to need to acquire some (or to
-  bring in a friend with some experience), before using any of the
-  stuff I'm going to say.<br>
-  <br>
-  <span style="font-weight: bold;">Glade</span> is free software
-  that helps you rapidly create a <span style=
-  "font-weight: bold;">gtk+</span> program, and to easily design a
-  user interface.&nbsp; While there are other ways to create
-  <span style="font-weight: bold;">gtk+</span> applications, using
-  <span style="font-weight: bold;">glade</span> is a very common
-  method for doing so.&nbsp; You can find out more about
-  <span style="font-weight: bold;">glade</span> at <a href=
-  "http://glade.gnome.org">glade.gnome.org</a>.<br>
-  <br>
-  <span style="font-weight: bold;">MinGW</span> is a free Win32
-  port of the GNU <span style="font-weight: bold;">gcc</span> C/C++
-  compiler.<br>
-  <br>
-  P.S.:&nbsp; After figuring out most of the stuff in this howto
-  (and writing it), I discovered a site devoted to Win32 ports of
-  <span style="font-weight: bold;">gtk+</span> and <span style=
-  "font-weight: bold;">glade</span>:&nbsp; <a href=
-  "http://wingtk.sourceforge.net/">wingtk.sourceforge.net</a>.&nbsp;
-  You may want to check it out if my remarks below don't meet your
-  needs.<br>
-  <h2>Gtk+ 1 or gtk+ 2?</h2>I will discuss only the newer
-  <span style="font-weight: bold;">gtk+</span> 2, rather than the
-  older <span style="font-weight: bold;">gtk+</span> 1.&nbsp; The
-  newer version has more features and results in software that's
-  simply visually more attractive.&nbsp; However, using version 2
-  does limit you in some ways:&nbsp; For example, at present
-  (10/25/03) the Mac OS X port is version 1 only.&nbsp; I assume
-  that most of what I say below can be adapted easily to
-  <span style="font-weight: bold;">gtk+</span> 1, but I don't care
-  to explore the possibilties myself.<br>
-  <h2><a name="BigBox" id="BigBox"></a>How To Install gtk+ 2 for
-  Developing in Windows</h2>
-  <table summary="" style=
-  "width: 95%; text-align: left; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="vertical-align: top;">
-          <ol>
-            <li>Download a <span style=
-            "font-style: italic;">bunch</span> of stuff.&nbsp;
-            You're going to need both <span style=
-            "font-weight: bold;">gtk+</span> itself, as ported to
-            Win32, and a suitable C-language compiler.&nbsp; In
-            parentheses I show the specific software versions I
-            have used, but presumably later versions will work just
-            as well.&nbsp; (In fact, since the time this section
-            was written, I <span style=
-            "font-style: italic;">have</span> used later versions
-            of most of these libraries.&nbsp; Forgive me for not
-            providing exact links, but as you can imagine, these
-            are likely to change so often that I would have a tough
-            time keeping them up to date.)<br></li>
-          </ol>
-          <ul>
-            <ul>
-              <li>From <a href=
-              "http://www.mingw.org">www.mingw.org</a>, download
-              the MSYS (1.0.9) and MinGW (3.1.0-1) exe files.</li>
-            </ul>
-            <ul>
-              <li>From <a href=
-              "http://www.gimp.org/%7Etml/gimp/win32/">www.gimp.org</a>,
-              download all of the following zipfiles:&nbsp; atk
-              (1.2.4), atk-dev (1.2.4), gettext-runtime (0.12.1),
-              gettext-tools (0.12.1), glib (2.2.3), glib-dev
-              (2.2.3), gtk+ (2.2.4), gtk+-dev (2.2.4), jpeg lib
-              (6b-1), jpeg bin (6b-1), libiconv lib (1.9.1), libpng
-              lib (1.2.5), libpng bin (1.2.5) pango (1.2.5),
-              pango-dev (1.2.5), pkgconfig (0.15), tiff lib
-              (3.5.7), tiff bin (3.5.7), zlib lib (1.1.4-1), zlib
-              bin (1.1.4-1).</li>
-            </ul>
-          </ul>
-          <ol>
-            <li>Install <span style=
-            "font-weight: bold;">MinGW</span>.&nbsp; This is simply
-            a matter of running the exe file you downloaded above,
-            and answering the prompts.&nbsp; For the sake of
-            argument, I'm going to assume that you have used the
-            installation directory c:\mingw.</li>
-            <li>Install all of the zipfiles you downloaded
-            above.&nbsp; Unzip them under c:\mingw.&nbsp; After
-            doing so, you should see directories such as
-            c:\mingw\bin, c:\mingw\usr, c:\mingw\etc, and so
-            on.</li>
-            <li>Move the file(s) libatk*.dll from c:\mingw\lib to
-            c:\mingw\bin.</li>
-            <li>Install <span style=
-            "font-weight: bold;">Msys</span>.&nbsp; Again, this is
-            just running the exe file and following the
-            prompts.&nbsp; It doesn't really matter what
-            install-directory you use, but at the end you will be
-            prompted to tell which directory <span style=
-            "font-weight: bold;">MinGW</span> was installed
-            under.&nbsp; (The answer will be c:/mingw.)</li>
-            <li>If you're reading this HOWTO because you just want
-            to compile Virtual AGC programs, then you can return to
-            the <a href="download.html#WinTarball">Virtual AGC
-            download page</a> now.&nbsp; <a href=
-            "download.html"></a></li>
-          </ol>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h2>"Command Line" Compilation of gtk+ Programs in Windows</h2>
-  <h3>The Msys Development Environment<br></h3>Let's suppose you
-  have a <span style="font-weight: bold;">gtk+</span> application
-  you want to compile for Windows.&nbsp;<br>
-  <br>
-  The trick to compiling such programs is to use <span style=
-  "font-weight: bold;">Msys</span>.&nbsp; After installing
-  <span style="font-weight: bold;">Msys</span>, you should have
-  noticed the creation of an <span style=
-  "font-weight: bold;">Msys</span> icon on your desktop.&nbsp;
-  Clicking on the <span style="font-weight: bold;">Msys</span> icon
-  opens up a window with a command-line environment inside
-  it.&nbsp; However, this command-line environment is not the "DOS
-  Prompt" normally available under Windows; rather, it is a
-  Linux-style command-line environment using what is known as the
-  <span style="font-weight: bold;">sh</span> shell.&nbsp;<br>
-  <br>
-  The point of working with <span style=
-  "font-weight: bold;">Msys</span> is that it helps you to
-  <span style="font-style: italic;">build</span> the executable
-  Win32 programs.&nbsp; However, <span style=
-  "font-weight: bold;">Msys</span> is not itself needed for
-  <span style="font-style: italic;">running</span> these programs
-  after they're built.&nbsp; In particular, you can deploy or
-  distribute the executables to computers which don't themselves
-  have <span style="font-weight: bold;">Msys</span> installed on
-  them.<br>
-  <br>
-  When working with <span style="font-weight: bold;">Msys</span>,
-  you will be doing all of your work within your "home"
-  directory.&nbsp; The home directory is a Linux concept that
-  doesn't actually exist in Windows, and I'm not sure exactly how
-  <span style="font-weight: bold;">Msys</span> chooses which
-  particular directory it uses.&nbsp; (In other words, it will be
-  different on your computer than on my computer.)&nbsp;<br>
-  <h3>Getting Source Code<br></h3>By some means you have go put the
-  source-code you need into the <span style=
-  "font-weight: bold;">Msys</span> home directory.&nbsp; Perhaps
-  you've developed it directly using a Win32 port of <span style=
-  "font-weight: bold;">glade</span>; perhaps you've developed in
-  Linux and have copied the source code; perhaps you've downloaded
-  it from the web.&nbsp; It doesn't really matter, as long as it
-  ends up in the home directory.&nbsp;<br>
-  <br>
-  The easiest way to get files into or out of your <span style=
-  "font-weight: bold;">Msys</span> home directory is to use the
-  "cp" command from within the <span style=
-  "font-weight: bold;">Msys</span> environment.&nbsp; For example,
-  here are two sample commands, one of which copies the directory
-  c:\DirA into the home directory, and one of which copies the DirB
-  subdirectory to the root directory of the c: drive.<br>
-  <br>
-  <div style="margin-left: 40px; font-family: monospace;">
-    cp -a c:/DirA .<br>
-    cp -a DirB c:/<br>
-  </div><br>
-  (Use the command "cp --help" to get more info on how to use the
-  "cp" command.)<br>
-  <br>
-  For simplicity, I'll assume below that the code was developed
-  using <span style="font-weight: bold;">glade</span>, and resides
-  in a sub-directory of the home directory named according to the
-  way the project was named when it was created in <span style=
-  "font-weight: bold;">glade</span>.&nbsp; On the other hand, if
-  the source code is in the form of a "tarball", all of the
-  standard tarball-unpacking utilities like <span style=
-  "font-weight: bold;">tar</span>, <span style=
-  "font-weight: bold;">gzip</span>, and <span style=
-  "font-weight: bold;">bzip2</span> are available within the
-  <span style="font-weight: bold;">Msys</span> working
-  environment.<br>
-  <h3>Adapting Linux Source Code to Win32<br></h3>There is, of
-  course, no guarantee that a <span style=
-  "font-weight: bold;">gtk+</span> application developed on Linux
-  will actually compile and work properly in Win32, even if you
-  follow my instructions exactly.&nbsp;&nbsp; There's also no way
-  in the world I can possibly cover all of the things you might
-  have to adapt in your Linux source code to be compatible with
-  Win32 (or vice-versa).<br>
-  <br>
-  If only generic C-library functions and <span style=
-  "font-weight: bold;">gtk+</span> functions have been used,
-  there's a good chance that the program will work without much
-  difficulty.&nbsp; However, if Linux-specific functions that don't
-  work (or work differently) in Windows are used, then the program
-  probably won't compile or won't work well.&nbsp; For example,
-  accessing the RS-232 ("com ports") has a completely different API
-  in Linux and Windows, and can only be adapted with a lot of
-  effort.&nbsp;&nbsp; On the other hand, using sockets <span style=
-  "font-style: italic;">looks</span> very similar in Linux and
-  Windows, but differs in certain details.&nbsp;<br>
-  <br>
-  At the very least, you'll probably find that you have to make at
-  least a few source-code changes like the following:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">#ifdef
-    WIN32</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">#include
-    &lt;windows.h&gt;</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">#endif</span><br>
-  </div>
-  <h3>Compiling the Source Code</h3><span style=
-  "font-weight: bold;">Glade</span> enforces a build process
-  similar to that of many other Linux programs, in which one first
-  runs a script called "configure" (which creates a Makefile), then
-  runs "make", and then runs "make install".&nbsp; Unfortunately,
-  "configure" scripts generally depend upon programs called
-  <span style="font-weight: bold;">autoconf</span> and <span style=
-  "font-weight: bold;">automake</span>, which are theoretically
-  available in Windows, but which I've never gotten to work
-  properly in <span style="font-weight: bold;">Msys</span>.&nbsp;
-  Fortunately, it's reasonably easy to work out the necessary
-  compiler command-line switches, and therefore to do without the
-  configure-script.&nbsp;<br>
-  <br>
-  In general, to build a <span style=
-  "font-weight: bold;">gtk+</span>/<span style=
-  "font-weight: bold;">glade</span> application in Win32, one would
-  run the C compiler from the <span style=
-  "font-weight: bold;">Msys</span> command prompt as follows:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">cd <span style=
-    "font-style: italic;">GladeProjectName</span>/src<br>
-    gcc \</span><br style="font-family: monospace;">
-    <div style="margin-left: 40px;">
-      <span style="font-family: monospace;">-o</span> <span style=
-      "font-style: italic; font-family: monospace;">NameOfExecutable</span>
-      <span style="font-family: monospace;">\</span><br style=
-      "font-family: monospace;">
-      <span style="font-family: monospace;">`pkg-config --cflags
-      gtk+-win32-2.0` \</span><br style="font-family: monospace;">
-      <span style="font-family: monospace;">-mno-cygwin
-      -mms-bitfields \</span><br style="font-family: monospace;">
-      <span style=
-      "font-family: monospace;">-DPACKAGE_DATA_DIR="\"/mingw/share\""
-      \</span><br style="font-family: monospace;">
-      <span style=
-      "font-family: monospace;">-DPACKAGE="\"</span><span style=
-      "font-style: italic; font-family: monospace;">GladeProjectName</span><span style="font-family: monospace;">\""
-      \</span><br style="font-family: monospace;">
-      <span style="font-family: monospace;">*.c \</span><br style=
-      "font-family: monospace;">
-      <span style="font-family: monospace;">`pkg-config --libs
-      gtk+-win32-2.0`</span><br>
-    </div>
-  </div><br>
-  Note the use of backward-quotes rather than apostrophes
-  above.&nbsp; In other words, make sure to use `pkg-config` rather
-  than 'pkg-config'.&nbsp;&nbsp; The <span style=
-  "font-style: italic;">NameOfExecutable</span> is, of course, the
-  name you want to assign to the exe-file which is going to be
-  produced.&nbsp; The <span style=
-  "font-style: italic;">GladeProjectName</span> is the name
-  assigned when the original <span style=
-  "font-weight: bold;">glade</span> project was created.&nbsp; For
-  example, these might be "MyProgram.exe" and "MyProgram",
-  respectively.<br>
-  <br>
-  I'm not entirely sure, but I believe the same approach would work
-  for compiling non-<span style="font-weight: bold;">glade</span>
-  <span style="font-weight: bold;">gtk+</span> apps as well.&nbsp;
-  Some adjustment of directory names would undoubtedly be
-  needed.<br>
-  <h3>Installing/Deploying the Executable<br></h3>What is needed to
-  install the executable program on another computer after it has
-  been built?&nbsp; My suggestions are:<br>
-  <ul>
-    <li>On the target computer, create the directories c:\mingw,
-    c:\mingw\bin, and c:\mingw\share, and add c:\mingw\bin to the
-    PATH.<br></li>
-    <li>The executable itself, following the instructions above,
-    has been created in <span style=
-    "font-style: italic;">GladeProjectName</span>/src on the
-    development computer.&nbsp; I'd suggest placing it in
-    c:\mingw\bin on the target computer.<br></li>
-    <li>The MinGW/gtk+ DLLs are found in c:\mingw\bin on the
-    development computer.&nbsp; I'd suggest placing them in the
-    same directory on the target computer.<br></li>
-    <li>The pixmaps (the graphics used by the executable program)
-    are found in <span style=
-    "font-style: italic;">GladeProjectName</span>/pixmaps on the
-    development computer.&nbsp; I'd suggest placing them in
-    c:\mingw\share\<span style=
-    "font-style: italic;">GladeProjectName</span>\pixmaps on the
-    target computer.<br></li>
-  </ul>
-  <h2>Some Other Tools That May Help You<br></h2>
-  <h3>Glade</h3>As I mentioned above, the most convenient (free)
-  way I've found to develop <span style=
-  "font-weight: bold;">gtk+</span> applications is to use the
-  <span style="font-weight: bold;">glade</span> rapid-application
-  development software.&nbsp; <span style=
-  "font-weight: bold;">Glade</span> is available both for Linux and
-  for Win32, and the project data is interchangeable among the
-  Linux and Win32 versions.&nbsp; You can download the Win32 port
-  at <a href=
-  "http://wingtk.sourceforge.net/">wingtk.sourceforge.net</a>.&nbsp;
-  At this writing (10/25/03), three separate versions of
-  <span style="font-weight: bold;">glade</span> are available at
-  that site.&nbsp; I'd suggest using the one labeled "Glade for
-  GTK+2".<br>
-  <h3>RedHat Source Navigator<br></h3>Personally, I find that there
-  are many advantages to editing my source-code trees within an
-  integrated development environment (IDE) like RedHat's free
-  <a href="http://sources.redhat.com">Source Navigator</a>
-  program.&nbsp; <span style="font-weight: bold;">Source
-  Navigator</span> has the helpful feature that it's available both
-  for Linux and for Windows, and hence I can use the same working
-  environment when I'm debugging the Win32 port as I do when I'm
-  writing the code in Linux.&nbsp; The main advantage of the IDE,
-  though, is that when you build the code from within the IDE and
-  encounter compiler errors, you can click on the error listing and
-  jump right to the place in the source code where the error
-  occurs.&nbsp; This is a bit of a trick when you are compiling
-  from the <span style="font-weight: bold;">Msys</span>
-  environment, but I can tell you how to do it.&nbsp; (I assume the
-  same approach will work with IDEs other than <span style=
-  "font-weight: bold;">Source Navigator</span>, but I don't really
-  have any specific information about it.)<br>
-  <br>
-  Basically, when you tell <span style="font-weight: bold;">Source
-  Navigator</span> to build your code, it opens up a window in
-  which (by default) the command "make" is executed.&nbsp; You need
-  to replace the "make" command with a command that instead takes
-  the use of the <span style="font-weight: bold;">Msys</span>
-  environment into account:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style=
-    "font-style: italic; font-family: monospace;">MsysInstallDirectory</span><span style="font-family: monospace;">\bin\sh
-    --login -c "cd</span> <span style=
-    "font-style: italic; font-family: monospace;">SourceDirectory</span>
-    <span style="font-family: monospace;">;</span> <span style=
-    "font-style: italic; font-family: monospace;">MakeCommand</span><span style="font-family: monospace;">"</span><br>
-  </div><br>
-  Your source code would typically be in some subdirectory of your
-  <span style="font-weight: bold;">Msys</span> home directory, such
-  as /home/rburkey/TestProject/src.&nbsp; The command you&nbsp; use
-  in the <span style="font-weight: bold;">Msys</span> environment
-  to build the executable might be the complicated <span style=
-  "font-weight: bold;">gcc</span> command described above; or
-  perhaps you have wrapped the <span style=
-  "font-weight: bold;">gcc</span> command in a makefile --- called,
-  say, Makefile.Win32.&nbsp; So the command used by <span style=
-  "font-weight: bold;">Source Navigator</span> to build the
-  executable could be<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">c:\msys\1.0\bin\sh
-    --login -c "cd /home/rburkey/TestProject/src ; make -f
-    Makefile.Win32"<br></span>
-  </div><br>
-  <span style="font-weight: bold;">Source Navigator</span> expects
-  the utility <span style="font-weight: bold;">cat</span> to be
-  present for this to work.&nbsp; Fortunately, <span style=
-  "font-weight: bold;">cat</span> is installed automatically when
-  <span style="font-weight: bold;">Msys</span> is installed.&nbsp;
-  Just make sure that c:\msys\1.0\bin is in your PATH (or else copy
-  cat.exe and msys-1.0.dll to someplace which is already in your
-  PATH).<br>
-  <br>
-  This approach seems to work quite well, although it does have the
-  annoying characteristic of opening and closing a new window (with
-  nothing in it) every time it invokes the compiler.<br>
-  <br>
-  By the way, note the directions of the slashes in the command
-  above.&nbsp; The command "sh" is executed in the normal Win32
-  command shell, and therefore has backslashes as directory-name
-  delimiters.&nbsp; The stuff within the double-quotes, on the
-  other hand, is executed within the <span style=
-  "font-weight: bold;">sh</span> command shell, and therefore
-  expects to find forward-slashes as directory-name delimiters.<br>
-  <br>
-  <hr style="width: 100%; height: 2px;">
-  <center>
-    <br>
-    <span style=
-    "color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
-    This page is available under the <a href=
-    "https://creativecommons.org/publicdomain/zero/1.0/">Creative
-    Commons No Rights Reserved License</a></span><br>
-    <i><font size="-1">Last modified by <a href=
-    "mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br>
-    <br>
-    <a href="http://www.ibiblio.org"><img style=
-    "border: 0px solid ; width: 300px; height: 100px;" alt=
-    "Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
-    "100" width="300"></a><br></font></i>
-  </center><br>
-  <br>
-</body>
-</html>
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><title>Win32 gtk+ Howto</title><meta http-equiv="Content-Type" content=
+"text/html; charset=utf-8"><meta name=Author content="Ronald Burkey"><link rel=icon type="image/png" href="favicon.png"><meta name=author content="Ronald S. Burkey"><script type="text/javascript" src="Header.js"></script></head><body style="background-image: url(gray3.jpg);"><script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","How to Develop Win32 Software").replace("@SUBTITLE@","with gtk+ 2, glade, and MinGW"))
+</script><h2><span style="font-weight: bold;">What are "gtk+", "glade",
+and "MinGW"?</span></h2><a href="http://www.gtk.org">Gtk+</a> is
+a free cross-platform graphical toolkit.&nbsp; When you develop
+software using <span style="font-weight: bold;">gtk+</span>, it
+is possible to write a single program which works almost without
+change on various computer platforms like Linux, Mac OS X, and
+Windows.&nbsp; In order to compile a program that depends on
+<span style="font-weight: bold;">gtk+</span>, you therefore have
+to have the necessary <span style=
+"font-weight: bold;">gtk+</span> development environment
+installed on your computer.<br><br>
+With that said, though, one must deal with the fact that the
+<span style="font-weight: bold;">gtk+</span> developers provide
+little advice as to <span style="font-style: italic;">how</span>
+to use <span style="font-weight: bold;">gtk+</span> on
+Windows.&nbsp; It turns out not to be difficult, but it helps to
+have it explained.&nbsp;&nbsp; I assume in advance that you
+already have some experience at compiling C-language programs; if
+you don't, you probably are going to need to acquire some (or to
+bring in a friend with some experience), before using any of the
+stuff I'm going to say.<br><br><span style="font-weight: bold;">Glade</span> is free software
+that helps you rapidly create a <span style=
+"font-weight: bold;">gtk+</span> program, and to easily design a
+user interface.&nbsp; While there are other ways to create
+<span style="font-weight: bold;">gtk+</span> applications, using
+<span style="font-weight: bold;">glade</span> is a very common
+method for doing so.&nbsp; You can find out more about
+<span style="font-weight: bold;">glade</span> at <a href=
+"http://glade.gnome.org">glade.gnome.org</a>.<br><br><span style="font-weight: bold;">MinGW</span> is a free Win32
+port of the GNU <span style="font-weight: bold;">gcc</span> C/C++
+compiler.<br><br>
+P.S.:&nbsp; After figuring out most of the stuff in this howto
+(and writing it), I discovered a site devoted to Win32 ports of
+<span style="font-weight: bold;">gtk+</span> and <span style=
+"font-weight: bold;">glade</span>:&nbsp; <a href=
+"http://wingtk.sourceforge.net/">wingtk.sourceforge.net</a>.&nbsp;
+You may want to check it out if my remarks below don't meet your
+needs.<br><h2>Gtk+ 1 or gtk+ 2?</h2>I will discuss only the newer
+<span style="font-weight: bold;">gtk+</span> 2, rather than the
+older <span style="font-weight: bold;">gtk+</span> 1.&nbsp; The
+newer version has more features and results in software that's
+simply visually more attractive.&nbsp; However, using version 2
+does limit you in some ways:&nbsp; For example, at present
+(10/25/03) the Mac OS X port is version 1 only.&nbsp; I assume
+that most of what I say below can be adapted easily to
+<span style="font-weight: bold;">gtk+</span> 1, but I don't care
+to explore the possibilties myself.<br><h2><a name=BigBox id="BigBox"></a>How To Install gtk+ 2 for
+Developing in Windows</h2><table summary="" style=
+"width: 95%; text-align: left; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top;"><ol><li>Download a <span style=
+"font-style: italic;">bunch</span> of stuff.&nbsp;
+You're going to need both <span style=
+"font-weight: bold;">gtk+</span> itself, as ported to
+Win32, and a suitable C-language compiler.&nbsp; In
+parentheses I show the specific software versions I
+have used, but presumably later versions will work just
+as well.&nbsp; (In fact, since the time this section
+was written, I <span style=
+"font-style: italic;">have</span> used later versions
+of most of these libraries.&nbsp; Forgive me for not
+providing exact links, but as you can imagine, these
+are likely to change so often that I would have a tough
+time keeping them up to date.)<br></li></ol><ul><ul><li>From <a href=
+"http://www.mingw.org">www.mingw.org</a>, download
+the MSYS (1.0.9) and MinGW (3.1.0-1) exe files.</li></ul><ul><li>From <a href=
+"http://www.gimp.org/%7Etml/gimp/win32/">www.gimp.org</a>,
+download all of the following zipfiles:&nbsp; atk
+(1.2.4), atk-dev (1.2.4), gettext-runtime (0.12.1),
+gettext-tools (0.12.1), glib (2.2.3), glib-dev
+(2.2.3), gtk+ (2.2.4), gtk+-dev (2.2.4), jpeg lib
+(6b-1), jpeg bin (6b-1), libiconv lib (1.9.1), libpng
+lib (1.2.5), libpng bin (1.2.5) pango (1.2.5),
+pango-dev (1.2.5), pkgconfig (0.15), tiff lib
+(3.5.7), tiff bin (3.5.7), zlib lib (1.1.4-1), zlib
+bin (1.1.4-1).</li></ul></ul><ol><li>Install <span style=
+"font-weight: bold;">MinGW</span>.&nbsp; This is simply
+a matter of running the exe file you downloaded above,
+and answering the prompts.&nbsp; For the sake of
+argument, I'm going to assume that you have used the
+installation directory c:\mingw.</li><li>Install all of the zipfiles you downloaded
+above.&nbsp; Unzip them under c:\mingw.&nbsp; After
+doing so, you should see directories such as
+c:\mingw\bin, c:\mingw\usr, c:\mingw\etc, and so
+on.</li><li>Move the file(s) libatk*.dll from c:\mingw\lib to
+c:\mingw\bin.</li><li>Install <span style=
+"font-weight: bold;">Msys</span>.&nbsp; Again, this is
+just running the exe file and following the
+prompts.&nbsp; It doesn't really matter what
+install-directory you use, but at the end you will be
+prompted to tell which directory <span style=
+"font-weight: bold;">MinGW</span> was installed
+under.&nbsp; (The answer will be c:/mingw.)</li><li>If you're reading this HOWTO because you just want
+to compile Virtual AGC programs, then you can return to
+the <a href="download.html#WinTarball">Virtual AGC
+download page</a> now.&nbsp; <a href=
+"download.html"></a></li></ol></td></tr></tbody></table><h2>"Command Line" Compilation of gtk+ Programs in Windows</h2><h3>The Msys Development Environment<br></h3>Let's suppose you
+have a <span style="font-weight: bold;">gtk+</span> application
+you want to compile for Windows.&nbsp;<br><br>
+The trick to compiling such programs is to use <span style=
+"font-weight: bold;">Msys</span>.&nbsp; After installing
+<span style="font-weight: bold;">Msys</span>, you should have
+noticed the creation of an <span style=
+"font-weight: bold;">Msys</span> icon on your desktop.&nbsp;
+Clicking on the <span style="font-weight: bold;">Msys</span> icon
+opens up a window with a command-line environment inside
+it.&nbsp; However, this command-line environment is not the "DOS
+Prompt" normally available under Windows; rather, it is a
+Linux-style command-line environment using what is known as the
+<span style="font-weight: bold;">sh</span> shell.&nbsp;<br><br>
+The point of working with <span style=
+"font-weight: bold;">Msys</span> is that it helps you to
+<span style="font-style: italic;">build</span> the executable
+Win32 programs.&nbsp; However, <span style=
+"font-weight: bold;">Msys</span> is not itself needed for
+<span style="font-style: italic;">running</span> these programs
+after they're built.&nbsp; In particular, you can deploy or
+distribute the executables to computers which don't themselves
+have <span style="font-weight: bold;">Msys</span> installed on
+them.<br><br>
+When working with <span style="font-weight: bold;">Msys</span>,
+you will be doing all of your work within your "home"
+directory.&nbsp; The home directory is a Linux concept that
+doesn't actually exist in Windows, and I'm not sure exactly how
+<span style="font-weight: bold;">Msys</span> chooses which
+particular directory it uses.&nbsp; (In other words, it will be
+different on your computer than on my computer.)&nbsp;<br><h3>Getting Source Code<br></h3>By some means you have go put the
+source-code you need into the <span style=
+"font-weight: bold;">Msys</span> home directory.&nbsp; Perhaps
+you've developed it directly using a Win32 port of <span style=
+"font-weight: bold;">glade</span>; perhaps you've developed in
+Linux and have copied the source code; perhaps you've downloaded
+it from the web.&nbsp; It doesn't really matter, as long as it
+ends up in the home directory.&nbsp;<br><br>
+The easiest way to get files into or out of your <span style=
+"font-weight: bold;">Msys</span> home directory is to use the
+"cp" command from within the <span style=
+"font-weight: bold;">Msys</span> environment.&nbsp; For example,
+here are two sample commands, one of which copies the directory
+c:\DirA into the home directory, and one of which copies the DirB
+subdirectory to the root directory of the c: drive.<br><br><div style="margin-left: 40px; font-family: monospace;">
+cp -a c:/DirA .<br>
+cp -a DirB c:/<br></div><br>
+(Use the command "cp --help" to get more info on how to use the
+"cp" command.)<br><br>
+For simplicity, I'll assume below that the code was developed
+using <span style="font-weight: bold;">glade</span>, and resides
+in a sub-directory of the home directory named according to the
+way the project was named when it was created in <span style=
+"font-weight: bold;">glade</span>.&nbsp; On the other hand, if
+the source code is in the form of a "tarball", all of the
+standard tarball-unpacking utilities like <span style=
+"font-weight: bold;">tar</span>, <span style=
+"font-weight: bold;">gzip</span>, and <span style=
+"font-weight: bold;">bzip2</span> are available within the
+<span style="font-weight: bold;">Msys</span> working
+environment.<br><h3>Adapting Linux Source Code to Win32<br></h3>There is, of
+course, no guarantee that a <span style=
+"font-weight: bold;">gtk+</span> application developed on Linux
+will actually compile and work properly in Win32, even if you
+follow my instructions exactly.&nbsp;&nbsp; There's also no way
+in the world I can possibly cover all of the things you might
+have to adapt in your Linux source code to be compatible with
+Win32 (or vice-versa).<br><br>
+If only generic C-library functions and <span style=
+"font-weight: bold;">gtk+</span> functions have been used,
+there's a good chance that the program will work without much
+difficulty.&nbsp; However, if Linux-specific functions that don't
+work (or work differently) in Windows are used, then the program
+probably won't compile or won't work well.&nbsp; For example,
+accessing the RS-232 ("com ports") has a completely different API
+in Linux and Windows, and can only be adapted with a lot of
+effort.&nbsp;&nbsp; On the other hand, using sockets <span style=
+"font-style: italic;">looks</span> very similar in Linux and
+Windows, but differs in certain details.&nbsp;<br><br>
+At the very least, you'll probably find that you have to make at
+least a few source-code changes like the following:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">#ifdef
+WIN32</span><br style="font-family: monospace;"><span style="font-family: monospace;">#include
+&lt;windows.h&gt;</span><br style="font-family: monospace;"><span style="font-family: monospace;">#endif</span><br></div><h3>Compiling the Source Code</h3><span style=
+"font-weight: bold;">Glade</span> enforces a build process
+similar to that of many other Linux programs, in which one first
+runs a script called "configure" (which creates a Makefile), then
+runs "make", and then runs "make install".&nbsp; Unfortunately,
+"configure" scripts generally depend upon programs called
+<span style="font-weight: bold;">autoconf</span> and <span style=
+"font-weight: bold;">automake</span>, which are theoretically
+available in Windows, but which I've never gotten to work
+properly in <span style="font-weight: bold;">Msys</span>.&nbsp;
+Fortunately, it's reasonably easy to work out the necessary
+compiler command-line switches, and therefore to do without the
+configure-script.&nbsp;<br><br>
+In general, to build a <span style=
+"font-weight: bold;">gtk+</span>/<span style=
+"font-weight: bold;">glade</span> application in Win32, one would
+run the C compiler from the <span style=
+"font-weight: bold;">Msys</span> command prompt as follows:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">cd <span style=
+"font-style: italic;">GladeProjectName</span>/src<br>
+gcc \</span><br style="font-family: monospace;"><div style="margin-left: 40px;"><span style="font-family: monospace;">-o</span> <span style=
+"font-style: italic; font-family: monospace;">NameOfExecutable</span><span style="font-family: monospace;">\</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">`pkg-config --cflags
+gtk+-win32-2.0` \</span><br style="font-family: monospace;"><span style="font-family: monospace;">-mno-cygwin
+-mms-bitfields \</span><br style="font-family: monospace;"><span style=
+"font-family: monospace;">-DPACKAGE_DATA_DIR="\"/mingw/share\""
+\</span><br style="font-family: monospace;"><span style=
+"font-family: monospace;">-DPACKAGE="\"</span><span style=
+"font-style: italic; font-family: monospace;">GladeProjectName</span><span style="font-family: monospace;">\""
+\</span><br style="font-family: monospace;"><span style="font-family: monospace;">*.c \</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">`pkg-config --libs
+gtk+-win32-2.0`</span><br></div></div><br>
+Note the use of backward-quotes rather than apostrophes
+above.&nbsp; In other words, make sure to use `pkg-config` rather
+than 'pkg-config'.&nbsp;&nbsp; The <span style=
+"font-style: italic;">NameOfExecutable</span> is, of course, the
+name you want to assign to the exe-file which is going to be
+produced.&nbsp; The <span style=
+"font-style: italic;">GladeProjectName</span> is the name
+assigned when the original <span style=
+"font-weight: bold;">glade</span> project was created.&nbsp; For
+example, these might be "MyProgram.exe" and "MyProgram",
+respectively.<br><br>
+I'm not entirely sure, but I believe the same approach would work
+for compiling non-<span style="font-weight: bold;">glade</span><span style="font-weight: bold;">gtk+</span> apps as well.&nbsp;
+Some adjustment of directory names would undoubtedly be
+needed.<br><h3>Installing/Deploying the Executable<br></h3>What is needed to
+install the executable program on another computer after it has
+been built?&nbsp; My suggestions are:<br><ul><li>On the target computer, create the directories c:\mingw,
+c:\mingw\bin, and c:\mingw\share, and add c:\mingw\bin to the
+PATH.<br></li><li>The executable itself, following the instructions above,
+has been created in <span style=
+"font-style: italic;">GladeProjectName</span>/src on the
+development computer.&nbsp; I'd suggest placing it in
+c:\mingw\bin on the target computer.<br></li><li>The MinGW/gtk+ DLLs are found in c:\mingw\bin on the
+development computer.&nbsp; I'd suggest placing them in the
+same directory on the target computer.<br></li><li>The pixmaps (the graphics used by the executable program)
+are found in <span style=
+"font-style: italic;">GladeProjectName</span>/pixmaps on the
+development computer.&nbsp; I'd suggest placing them in
+c:\mingw\share\<span style=
+"font-style: italic;">GladeProjectName</span>\pixmaps on the
+target computer.<br></li></ul><h2>Some Other Tools That May Help You<br></h2><h3>Glade</h3>As I mentioned above, the most convenient (free)
+way I've found to develop <span style=
+"font-weight: bold;">gtk+</span> applications is to use the
+<span style="font-weight: bold;">glade</span> rapid-application
+development software.&nbsp; <span style=
+"font-weight: bold;">Glade</span> is available both for Linux and
+for Win32, and the project data is interchangeable among the
+Linux and Win32 versions.&nbsp; You can download the Win32 port
+at <a href=
+"http://wingtk.sourceforge.net/">wingtk.sourceforge.net</a>.&nbsp;
+At this writing (10/25/03), three separate versions of
+<span style="font-weight: bold;">glade</span> are available at
+that site.&nbsp; I'd suggest using the one labeled "Glade for
+GTK+2".<br><h3>RedHat Source Navigator<br></h3>Personally, I find that there
+are many advantages to editing my source-code trees within an
+integrated development environment (IDE) like RedHat's free
+<a href="http://sources.redhat.com">Source Navigator</a>
+program.&nbsp; <span style="font-weight: bold;">Source
+Navigator</span> has the helpful feature that it's available both
+for Linux and for Windows, and hence I can use the same working
+environment when I'm debugging the Win32 port as I do when I'm
+writing the code in Linux.&nbsp; The main advantage of the IDE,
+though, is that when you build the code from within the IDE and
+encounter compiler errors, you can click on the error listing and
+jump right to the place in the source code where the error
+occurs.&nbsp; This is a bit of a trick when you are compiling
+from the <span style="font-weight: bold;">Msys</span>
+environment, but I can tell you how to do it.&nbsp; (I assume the
+same approach will work with IDEs other than <span style=
+"font-weight: bold;">Source Navigator</span>, but I don't really
+have any specific information about it.)<br><br>
+Basically, when you tell <span style="font-weight: bold;">Source
+Navigator</span> to build your code, it opens up a window in
+which (by default) the command "make" is executed.&nbsp; You need
+to replace the "make" command with a command that instead takes
+the use of the <span style="font-weight: bold;">Msys</span>
+environment into account:<br><br><div style="margin-left: 40px;"><span style=
+"font-style: italic; font-family: monospace;">MsysInstallDirectory</span><span style="font-family: monospace;">\bin\sh
+--login -c "cd</span> <span style=
+"font-style: italic; font-family: monospace;">SourceDirectory</span><span style="font-family: monospace;">;</span> <span style=
+"font-style: italic; font-family: monospace;">MakeCommand</span><span style="font-family: monospace;">"</span><br></div><br>
+Your source code would typically be in some subdirectory of your
+<span style="font-weight: bold;">Msys</span> home directory, such
+as /home/rburkey/TestProject/src.&nbsp; The command you&nbsp; use
+in the <span style="font-weight: bold;">Msys</span> environment
+to build the executable might be the complicated <span style=
+"font-weight: bold;">gcc</span> command described above; or
+perhaps you have wrapped the <span style=
+"font-weight: bold;">gcc</span> command in a makefile --- called,
+say, Makefile.Win32.&nbsp; So the command used by <span style=
+"font-weight: bold;">Source Navigator</span> to build the
+executable could be<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">c:\msys\1.0\bin\sh
+--login -c "cd /home/rburkey/TestProject/src ; make -f
+Makefile.Win32"<br></span></div><br><span style="font-weight: bold;">Source Navigator</span> expects
+the utility <span style="font-weight: bold;">cat</span> to be
+present for this to work.&nbsp; Fortunately, <span style=
+"font-weight: bold;">cat</span> is installed automatically when
+<span style="font-weight: bold;">Msys</span> is installed.&nbsp;
+Just make sure that c:\msys\1.0\bin is in your PATH (or else copy
+cat.exe and msys-1.0.dll to someplace which is already in your
+PATH).<br><br>
+This approach seems to work quite well, although it does have the
+annoying characteristic of opening and closing a new window (with
+nothing in it) every time it invokes the compiler.<br><br>
+By the way, note the directions of the slashes in the command
+above.&nbsp; The command "sh" is executed in the normal Win32
+command shell, and therefore has backslashes as directory-name
+delimiters.&nbsp; The stuff within the double-quotes, on the
+other hand, is executed within the <span style=
+"font-weight: bold;">sh</span> command shell, and therefore
+expects to find forward-slashes as directory-name delimiters.<br><br><hr style="width: 100%; height: 2px;"><center><br><span style=
+"color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
+This page is available under the <a href=
+"https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons No Rights Reserved License</a></span><br><i><font size="-1">Last modified by <a href=
+"mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br><br><a href="http://www.ibiblio.org"><img style=
+"border: 0px solid ; width: 300px; height: 100px;" alt=
+"Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
+"100" width="300"></a><br></font></i></center><br><br></body></html>

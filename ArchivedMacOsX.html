@@ -1,391 +1,257 @@
-<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.3.14">
-  <meta http-equiv="Content-Type" content=
-  "text/html; charset=utf-8">
-  <meta name="GENERATOR" content=
-  "Mozilla/4.7 [en] (X11; I; Linux 2.4.16 ppc) [Netscape]">
-  <meta name="Author" content="Ronald Burkey">
-  <title>Obsolete Mac instructions from Virtual AGC Download
-  Page</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="author" content="Ronald S. Burkey">
-  <script type="text/javascript" src="Header.js">
-  </script>
-</head>
-<body style="background-image: url(gray3.jpg);">
-  <script type="text/javascript">
-  document.write(headerTemplate.replace("@TITLE@","Building Virtual AGC on Mac OS X").replace("@SUBTITLE@","(This page is now obsolete)"))
-  </script><br>
-  <table summary="" style=
-  "width: 60%; text-align: left; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="vertical-align: top;"><big><span style=
-        "color: rgb(255, 0, 0);">This page contains some
-        instructions for installing and/or building Virtual AGC on
-        Mac OS X.&nbsp; I no longer recommend using these
-        instructions, but they work reasonably well ... up to a
-        certain point.&nbsp; I am archiving them here just in case
-        somebody who built Virtual AGC using them wants to refer to
-        them.</span></big><br></td>
-      </tr>
-    </tbody>
-  </table><br>
-  <h2><a name="Installing_the_Mac_OS_X_Binaries" id=
-  "Installing_the_Mac_OS_X_Binaries"></a>Installing the Mac OS X
-  Binaries</h2><span style=
-  "font-weight: bold;">Disclaimer:</span>&nbsp; I really
-  <span style="font-style: italic;">really</span> don't know how to
-  package programs for installation on Mac OS X.&nbsp; The binaries
-  may not work on your system.&nbsp; The installation procedures
-  may not work on your system, and are complex compared to what
-  you're used to (but easier than building from source).&nbsp; I
-  know that it worked on the 10.2 machine I used to build it, and I
-  have feedback (from Fabrizio Bernardini) that the binary package
-  works fine on 10.3.&nbsp; On the other hand, I personally tried
-  to install it on a friend's 10.3 machine, and the installation
-  failed at step #3, so I never got to find out if the Virtual AGC
-  program ran or not.&nbsp; Hopefully it'll work for you; if not,
-  you may still need to end up building Virtual AGC yourself, as
-  described <a href=
-  "#Building_Virtual_AGC_in_Mac_OS_X">below</a>.&nbsp; If the
-  binary installation works for you, or if you understand how to
-  improve the process, let me know.&nbsp; (Hint:&nbsp; giving me a
-  link to a 10-page howto is <span style=
-  "font-style: italic;">not</span> the level of help I'm looking
-  for.)&nbsp; I apologize for the complexity relative to what
-  you're used to, but at my level of Mac OS (non-)skill you're
-  lucky to get anything at all.&nbsp; :-)<br>
-  <br>
-  <span style="font-weight: bold;">Another disclaimer:</span>&nbsp;
-  I should warn you, I suppose, that it takes <span style=
-  "font-style: italic;">so long</span> to install the prerequisites
-  you need to run Virtual AGC, that you get very little advantage
-  from installing the Virtual AGC binary package rather than simply
-  building Virtual AGC from source.&nbsp; But enough
-  negativity!&nbsp; Let's get installing!<br>
-  <br>
-  <span style="font-weight: bold;">Installation:</span><br>
-  <ol>
-    <li>Install the X-window system (<span style=
-    "font-weight: bold;">XFree86</span>).&nbsp; For Panther, this
-    is apparently an optional install from your Apple-supplied Mac
-    OS X CDs.&nbsp; For Jaguar, you can download from the <a href=
-    "http://sourceforge.net/projects/xonx/">XonX
-    project</a>.<br></li>
-    <li>Install <a href="http://fink.sourceforge.net"><span style=
-    "font-weight: bold;">fink</span></a>, which is a program that
-    is used to install other programs.&nbsp; Make sure that you
-    choose the version of <span style=
-    "font-weight: bold;">fink</span> that works with your version
-    of Mac OS X, and follow the instructions on the <span style=
-    "font-weight: bold;">fink</span> webpage.&nbsp;<br></li>
-    <li>Use <span style="font-weight: bold;">fink</span> to install
-    <span style="font-weight: bold;">gtk+</span> version 2.&nbsp;
-    This is done from the command-line with "<span style=
-    "font-family: monospace;">sudo fink install gtk+2</span>".</li>
-    <li>Now download the current Mac OS X binary package of Virtual
-    AGC (yaAGC-macosx-<span style=
-    "font-style: italic;">RevisionCode</span>.tar.bz2).&nbsp; On my
-    computer, <span style="font-weight: bold;">stuffit</span>
-    automatically unpacked this when I downloaded it.&nbsp; If not,
-    you'll have to manually unpack it from the command line, as
-    follows:</li>
-  </ol>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">cd Desktop</span><br>
-    <span style="font-family: monospace;">bunzip2
-    yaAGC-macosx</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span>
-  </div>
-  <ol start="5">
-    <li>Install, with this command:</li>
-  </ol>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">sudo tar --directory=/
-    -xf yaAGC-macosx</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar</span>
-  </div>
-  <ol start="6">
-    <li>You'll probably still want the source-code tarball, since
-    it contains a lot of stuff (like source code for the Luminary
-    and Colossus programs) that aren't in the binary tarball.&nbsp;
-    So download yaAGC-dev-<span style=
-    "font-style: italic;">RevisionCode</span>.tar.bz2 and unpack
-    it, thus creating a directory called "yaAGC" containing the
-    stuff listed at the top of the page:</li>
-  </ol>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">tar --bzip2 -xf
-    yaAGC-dev</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span>
-  </div>
-  <ol start="7">
-    <li>If you want to run Stephan Hotto's <a href=
-    "yaTelemetry.html"><span style=
-    "font-weight: bold;">LM_Simulator</span></a> program (and I bet
-    you do!), you'll need to install <a href=
-    "http://www.tcl.tk/"><span style=
-    "font-weight: bold;">Tcl/Tk</span></a>.&nbsp;&nbsp; Do this
-    either by following the instructions at the <span style=
-    "font-weight: bold;">Tcl/Tk</span> website, or else use
-    "<span style="font-family: monospace;">sudo fink install
-    tcltk</span>".&nbsp; (I did the latter, myself, so I can't
-    really vouch for the former.)<br></li>
-    <li>Running the program is a little more complex than you're
-    used to:</li>
-  </ol>
-  <ul>
-    <ul>
-      <li>Run the X-window system.&nbsp; This will (as a side
-      effect) probably cause several command-line windows to open
-      up.</li>
-      <li>In one of the command-line windows that opened up, type
-      the following:</li>
-    </ul>
-  </ul>
-  <div style="margin-left: 120px;">
-    <span style="font-family: monospace;">set path = ($path
-    /usr/local/yaAGC/bin)</span><br style=
-    "font-family: monospace;">
-    <span style="font-family: monospace;">SimLuminary131<br></span>
-  </div>
-  <div style="margin-left: 40px;">
-    <ul>
-      <li>In some cases, the simulated DSKY won't immediately
-      display on the screen.&nbsp; Instead, the cursor will simply
-      change shape, indicating that it wants you to position the
-      DSKY on the screen.&nbsp; Click on the screen, and the
-      simulated DSKY will appear where you click.<br></li>
-    </ul>
-  </div>
-  <ol start="9">
-    <li>You can stop the program simply by stopping the X-window
-    system.&nbsp; If you don't want to do that (say, because you
-    have other X programs running also), then stopping the program
-    is also a little complex:</li>
-  </ol>
-  <ul>
-    <ul>
-      <li>Use the mouse to focus the command-line window you used
-      to start the program.</li>
-      <li>Hit ctrl-C on the keyboard to stop the CPU
-      emulation.</li>
-      <li>Type the command "<span style=
-      "font-family: monospace;">killall yaDSKY</span>" to stop the
-      DSKY emulation.<br></li>
-    </ul>
-  </ul>
-  <ol start="10">
-    <li>Enjoy, if you're still capable of it after all
-    that!<br></li>
-  </ol><span style=
-  "font-weight: bold;">Uninstallation:</span>&nbsp; Just remove the
-  /usr/local/yaAGC directory containing the binaries, and the
-  Desktop/yaAGC directory containing the sources.<br>
-  <h2><a name="Building_Virtual_AGC_in_Mac_OS_X" id=
-  "Building_Virtual_AGC_in_Mac_OS_X"></a>Building Virtual AGC in
-  Mac OS X</h2>I had significant help in getting Virtual AGC
-  working on Mac OS X.&nbsp; Matteo Giani was the first to get
-  Virtual AGC working, on Mac OS X Panther (10.3); in Virtual AGC
-  version 20040828 and later I've incorporated the changes he
-  needed to make to get it to work.&nbsp; <a href=
-  "MacOSscreenshot.pdf">Here's a screenshot</a> Matteo has given
-  me.&nbsp; After some additional advice from <a href=
-  "GregDunnPanther.txt">Greg Dunn</a>, and the appearance of a
-  document from Apple called "<a href=
-  "http://developer.apple.com/darwin/runningx11.html">Configuring
-  and Running X11 Applications on Mac OS X</a>", I've managed to
-  get Virtual AGC working in Mac OS X Jaguar (10.2) as well.&nbsp;
-  Presumably it will work in all other versions of Mac OS X, but I
-  can hardly guarantee it.&nbsp; In fact, I have had reports that
-  it failed to build even on some 10.3 machines, so apparently it's
-  not entirely consistent.<br>
-  <br>
-  While none of the steps below is difficult, building the software
-  nevertheless requires a lot more command-line work than the
-  typical Mac OS X user finds congenial.&nbsp; A binary installer
-  would be <span style="font-style: italic;">much</span> better for
-  the typical user.&nbsp; Sadly, I don't know how to package the
-  executables to allow them to be installed directly on a Mac
-  without all of this nonsense, because I'm not a Mac software
-  developer at heart and haven't the energy to learn.&nbsp;
-  Step-by-step instructions for creating an installer (perhaps in
-  the form of mods to the makefiles) from anybody who <span style=
-  "font-style: italic;">does</span> know would be very welcome.<br>
-  <br>
-  The following instructions have been tested on a pristine
-  installation of Jaguar (10.2.8).&nbsp; (In other words, I
-  completely wiped my Mac and reinstalled Mac OS X, just to make
-  sure these instructions would work.)&nbsp; To begin with, you'll
-  need to install a substantial amount of stuff on your Mac.&nbsp;
-  It will use up a lot of disk space and take a long time to do
-  so.<br>
-  <ol>
-    <li>Install Apple's "developer tools", either from the CD that
-    Apple supplies with the Mac OS X installation CDs, or as a
-    download from Apple.</li>
-    <li>Install the X-window system (<span style=
-    "font-weight: bold;">XFree86</span>).&nbsp; For Panther, this
-    is apparently an optional install from your Apple-supplied Mac
-    OS X CDs.&nbsp; For Jaguar, you can download from the <a href=
-    "http://sourceforge.net/projects/xonx/">XonX
-    project</a>.<br></li>
-    <li>(Optional.)&nbsp; Install the <a href=
-    "http://alleg.sourceforge.net/">Allegro</a> cross-platform GUI
-    kit.&nbsp; This is only needed to build <span style=
-    "font-weight: bold;">yaACA</span>, which is presently only in
-    the early development stage.&nbsp; If you skip this step, the
-    build-process (below) will display warnings and fail to build
-    <span style="font-weight: bold;">yaACA</span>, but will work
-    normally otherwise.&nbsp; However, <span style=
-    "font-weight: bold;">yaACA</span> gives you the ability to use
-    the rotational hand controller (RHC) in the LM, and that
-    substantially adds to the fun-factor of using the
-    simulation.&nbsp; (Sadly, when <span style=
-    "font-style: italic;">I</span> try installing <span style=
-    "font-weight: bold;">Allegro</span> on my iMac, it fails to do
-    so, so I really don't have the option.)<br></li>
-    <li>Install <a href="http://fink.sourceforge.net"><span style=
-    "font-weight: bold;">fink</span></a>, which is a program that
-    is used to install other programs.&nbsp; Make sure that you
-    choose the version of <span style=
-    "font-weight: bold;">fink</span> that works with your version
-    of Mac OS X, and follow the instructions on the <span style=
-    "font-weight: bold;">fink</span> webpage.&nbsp;<br></li>
-    <li>Use <span style="font-weight: bold;">fink</span> to install
-    <span style="font-weight: bold;">gtk+</span> version 2.&nbsp;
-    This is done from the command-line with "<span style=
-    "font-family: monospace;">sudo fink install gtk+2</span>".</li>
-    <li>Use <span style="font-weight: bold;">fink</span> to install
-    <span style="font-weight: bold;">automake</span> ("sudo fink
-    install automake").&nbsp; These are already present on your
-    computer, but the Apple-supplied version didn't work for
-    me.&nbsp; Fortunately, this new version won't conflict with
-    your Apple-supplied ones, which will remain on your
-    computer.</li>
-    <li>If you want to run Stephan Hotto's <a href=
-    "yaTelemetry.html"><span style=
-    "font-weight: bold;">LM_Simulator</span></a> program (and I bet
-    you do!), you'll need to install <a href=
-    "http://www.tcl.tk/"><span style=
-    "font-weight: bold;">Tcl/Tk</span></a>.&nbsp;&nbsp; Do this
-    either by following the instructions at the <span style=
-    "font-weight: bold;">Tcl/Tk</span> website, or else use
-    "<span style="font-family: monospace;">sudo fink install
-    tcltk</span>".&nbsp; (I've done only the latter, so I don't
-    know how well the former works.)</li>
-    <li>Now download the current development snapshot of Virtual
-    AGC (yaAGC-dev-<span style=
-    "font-style: italic;">XXXXXXXX</span>.tar.bz2).&nbsp; On my
-    computer, <span style="font-weight: bold;">stuffit</span>
-    automatically unpacked this when I downloaded it.&nbsp; If not,
-    you'll have to manually unpack it from the command line, as
-    follows:</li>
-  </ol>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">cd Desktop<br>
-    bunzip2 yaAGC-dev</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span><span style="font-family: monospace;"><br>
-
-    tar -xf yaAGC-dev</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar<br>
-
-    <br></span>
-  </div>Now that all of the tools you need are installed, you build
-  Virtual AGC basically by just following the same (command-line)
-  instructions as do the Linux folk:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">cd Desktop<br>
-    cd yaAGC</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">./configure
-    --prefix=/sw</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">make<br>
-    sudo make install<br></span>
-  </div><br>
-  Having built and installed Virtual AGC, you run it like this:<br>
-  <ul>
-    <li>The installation of the X-window system will have provided
-    some way to start the X-window system.&nbsp; (On Jaguar, there
-    is an <span style="font-weight: bold;">XDarwin</span> icon on
-    the desktop.)&nbsp; Go ahead and start X-windows.</li>
-    <li>Starting X-windows will (hopefully) will call up one or
-    more 'xterm' command-line windows.&nbsp; Within one of these
-    windows, simply use the <span style=
-    "font-weight: bold;">SimColossus249</span> or <span style=
-    "font-weight: bold;">SimLuminary131</span> command,
-    <span style="font-style: italic;">et voila</span>!</li>
-    <li>Proceed over to <a href="index.html#Quick_Start">quick
-    start</a> on the home page to see some things you can do with
-    it.</li>
-  </ul>(<span style="font-weight: bold;">Note</span>:&nbsp; The
-  following advice presently doesn't work very well, and is present
-  for future purposes.)&nbsp; <span style=
-  "color: rgb(153, 153, 153);">It may be that you just can't build
-  the software, no matter how hard you try.&nbsp; In almost all
-  cases, the reason for this will be a problem in installation or
-  configuration of</span> <span style=
-  "font-weight: bold; color: rgb(153, 153, 153);">gtk+</span>
-  <span style="color: rgb(153, 153, 153);">(with which I'll
-  probably be unable to help), and that all of the programs will
-  build fine except for</span> <span style=
-  "font-weight: bold; color: rgb(153, 153, 153);">yaDSKY</span>
-  <span style="color: rgb(153, 153, 153);">and</span> <span style=
-  "font-weight: bold; color: rgb(153, 153, 153);">yaDEDA</span><span style="color: rgb(153, 153, 153);">.&nbsp;
-  In this case, as a last resort, you can do the
-  following:</span><br style="color: rgb(153, 153, 153);">
-  <ol style="color: rgb(153, 153, 153);">
-    <li>Instead of "./configure --prefix=/sw", do "make NOGUI=yes
-    PREFIX=/sw autogen".</li>
-    <li>Instead of "make", do "make NOGUI=yes".<br></li>
-    <li>Instead of "sudo make install", do "sudo make NOGUI=yes
-    install".</li>
-    <li>Instead of running "SimLuminary131" or "SimColossus249",
-    run "SimLuminary131_lite" or "SimColossus249_lite".</li>
-  </ol><span style="color: rgb(153, 153, 153);">What these steps
-  will do for you is to bypass the problematic steps such as
-  building</span> <span style=
-  "font-weight: bold; color: rgb(153, 153, 153);">yaDSKY</span>
-  <span style="color: rgb(153, 153, 153);">and</span> <span style=
-  "font-weight: bold; color: rgb(153, 153, 153);">yaDEDA</span><span style="color: rgb(153, 153, 153);">,
-  and to use instead the "DSKY Lite" module of the</span>
-  <span style=
-  "font-weight: bold; color: rgb(153, 153, 153);">LM_Simulator</span>
-  <span style="color: rgb(153, 153, 153);">program (which doesn't
-  need to be compiled, and so doesn't normally cause you a problem
-  ... or at least, causes</span> <span style=
-  "font-style: italic; color: rgb(153, 153, 153);">different</span>
-  <span style="color: rgb(153, 153, 153);">problems).</span><br>
-  <hr style="width: 100%; height: 2px;">
-  <center>
-    <br>
-    <span style=
-    "color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
-    This page is available under the <a href=
-    "https://creativecommons.org/publicdomain/zero/1.0/">Creative
-    Commons No Rights Reserved License</a></span><br>
-    <i><font size="-1">Last modified by <a href=
-    "mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br>
-    <br>
-    <a href="http://www.ibiblio.org"><img style=
-    "border: 0px solid ; width: 300px; height: 100px;" alt=
-    "Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
-    "100" width="300"></a><br></font></i>
-  </center><br>
-</body>
-</html>
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><title>Obsolete Mac instructions from Virtual AGC Download
+Page</title><meta http-equiv="Content-Type" content=
+"text/html; charset=utf-8"><meta name=Author content="Ronald Burkey"><link rel=icon type="image/png" href="favicon.png"><meta name=author content="Ronald S. Burkey"><script type="text/javascript" src="Header.js"></script></head><body style="background-image: url(gray3.jpg);"><script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Building Virtual AGC on Mac OS X").replace("@SUBTITLE@","(This page is now obsolete)"))
+</script><br><table summary="" style=
+"width: 60%; text-align: left; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top;"><big><span style=
+"color: rgb(255, 0, 0);">This page contains some
+instructions for installing and/or building Virtual AGC on
+Mac OS X.&nbsp; I no longer recommend using these
+instructions, but they work reasonably well ... up to a
+certain point.&nbsp; I am archiving them here just in case
+somebody who built Virtual AGC using them wants to refer to
+them.</span></big><br></td></tr></tbody></table><br><h2><a name=Installing_the_Mac_OS_X_Binaries id=
+"Installing_the_Mac_OS_X_Binaries"></a>Installing the Mac OS X
+Binaries</h2><span style=
+"font-weight: bold;">Disclaimer:</span>&nbsp; I really
+<span style="font-style: italic;">really</span> don't know how to
+package programs for installation on Mac OS X.&nbsp; The binaries
+may not work on your system.&nbsp; The installation procedures
+may not work on your system, and are complex compared to what
+you're used to (but easier than building from source).&nbsp; I
+know that it worked on the 10.2 machine I used to build it, and I
+have feedback (from Fabrizio Bernardini) that the binary package
+works fine on 10.3.&nbsp; On the other hand, I personally tried
+to install it on a friend's 10.3 machine, and the installation
+failed at step #3, so I never got to find out if the Virtual AGC
+program ran or not.&nbsp; Hopefully it'll work for you; if not,
+you may still need to end up building Virtual AGC yourself, as
+described <a href=
+"#Building_Virtual_AGC_in_Mac_OS_X">below</a>.&nbsp; If the
+binary installation works for you, or if you understand how to
+improve the process, let me know.&nbsp; (Hint:&nbsp; giving me a
+link to a 10-page howto is <span style=
+"font-style: italic;">not</span> the level of help I'm looking
+for.)&nbsp; I apologize for the complexity relative to what
+you're used to, but at my level of Mac OS (non-)skill you're
+lucky to get anything at all.&nbsp; :-)<br><br><span style="font-weight: bold;">Another disclaimer:</span>&nbsp;
+I should warn you, I suppose, that it takes <span style=
+"font-style: italic;">so long</span> to install the prerequisites
+you need to run Virtual AGC, that you get very little advantage
+from installing the Virtual AGC binary package rather than simply
+building Virtual AGC from source.&nbsp; But enough
+negativity!&nbsp; Let's get installing!<br><br><span style="font-weight: bold;">Installation:</span><br><ol><li>Install the X-window system (<span style=
+"font-weight: bold;">XFree86</span>).&nbsp; For Panther, this
+is apparently an optional install from your Apple-supplied Mac
+OS X CDs.&nbsp; For Jaguar, you can download from the <a href=
+"http://sourceforge.net/projects/xonx/">XonX
+project</a>.<br></li><li>Install <a href="http://fink.sourceforge.net"><span style=
+"font-weight: bold;">fink</span></a>, which is a program that
+is used to install other programs.&nbsp; Make sure that you
+choose the version of <span style=
+"font-weight: bold;">fink</span> that works with your version
+of Mac OS X, and follow the instructions on the <span style=
+"font-weight: bold;">fink</span> webpage.&nbsp;<br></li><li>Use <span style="font-weight: bold;">fink</span> to install
+<span style="font-weight: bold;">gtk+</span> version 2.&nbsp;
+This is done from the command-line with "<span style=
+"font-family: monospace;">sudo fink install gtk+2</span>".</li><li>Now download the current Mac OS X binary package of Virtual
+AGC (yaAGC-macosx-<span style=
+"font-style: italic;">RevisionCode</span>.tar.bz2).&nbsp; On my
+computer, <span style="font-weight: bold;">stuffit</span>
+automatically unpacked this when I downloaded it.&nbsp; If not,
+you'll have to manually unpack it from the command line, as
+follows:</li></ol><div style="margin-left: 80px;"><span style="font-family: monospace;">cd Desktop</span><br><span style="font-family: monospace;">bunzip2
+yaAGC-macosx</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span></div><ol start=5><li>Install, with this command:</li></ol><div style="margin-left: 80px;"><span style="font-family: monospace;">sudo tar --directory=/
+-xf yaAGC-macosx</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar</span></div><ol start=6><li>You'll probably still want the source-code tarball, since
+it contains a lot of stuff (like source code for the Luminary
+and Colossus programs) that aren't in the binary tarball.&nbsp;
+So download yaAGC-dev-<span style=
+"font-style: italic;">RevisionCode</span>.tar.bz2 and unpack
+it, thus creating a directory called "yaAGC" containing the
+stuff listed at the top of the page:</li></ol><div style="margin-left: 80px;"><span style="font-family: monospace;">tar --bzip2 -xf
+yaAGC-dev</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span></div><ol start=7><li>If you want to run Stephan Hotto's <a href=
+"yaTelemetry.html"><span style=
+"font-weight: bold;">LM_Simulator</span></a> program (and I bet
+you do!), you'll need to install <a href=
+"http://www.tcl.tk/"><span style=
+"font-weight: bold;">Tcl/Tk</span></a>.&nbsp;&nbsp; Do this
+either by following the instructions at the <span style=
+"font-weight: bold;">Tcl/Tk</span> website, or else use
+"<span style="font-family: monospace;">sudo fink install
+tcltk</span>".&nbsp; (I did the latter, myself, so I can't
+really vouch for the former.)<br></li><li>Running the program is a little more complex than you're
+used to:</li></ol><ul><ul><li>Run the X-window system.&nbsp; This will (as a side
+effect) probably cause several command-line windows to open
+up.</li><li>In one of the command-line windows that opened up, type
+the following:</li></ul></ul><div style="margin-left: 120px;"><span style="font-family: monospace;">set path = ($path
+/usr/local/yaAGC/bin)</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">SimLuminary131<br></span></div><div style="margin-left: 40px;"><ul><li>In some cases, the simulated DSKY won't immediately
+display on the screen.&nbsp; Instead, the cursor will simply
+change shape, indicating that it wants you to position the
+DSKY on the screen.&nbsp; Click on the screen, and the
+simulated DSKY will appear where you click.<br></li></ul></div><ol start=9><li>You can stop the program simply by stopping the X-window
+system.&nbsp; If you don't want to do that (say, because you
+have other X programs running also), then stopping the program
+is also a little complex:</li></ol><ul><ul><li>Use the mouse to focus the command-line window you used
+to start the program.</li><li>Hit ctrl-C on the keyboard to stop the CPU
+emulation.</li><li>Type the command "<span style=
+"font-family: monospace;">killall yaDSKY</span>" to stop the
+DSKY emulation.<br></li></ul></ul><ol 0><li>Enjoy, if you're still capable of it after all
+that!<br></li></ol><span style=
+"font-weight: bold;">Uninstallation:</span>&nbsp; Just remove the
+/usr/local/yaAGC directory containing the binaries, and the
+Desktop/yaAGC directory containing the sources.<br><h2><a name=Building_Virtual_AGC_in_Mac_OS_X id=
+"Building_Virtual_AGC_in_Mac_OS_X"></a>Building Virtual AGC in
+Mac OS X</h2>I had significant help in getting Virtual AGC
+working on Mac OS X.&nbsp; Matteo Giani was the first to get
+Virtual AGC working, on Mac OS X Panther (10.3); in Virtual AGC
+version 20040828 and later I've incorporated the changes he
+needed to make to get it to work.&nbsp; <a href=
+"MacOSscreenshot.pdf">Here's a screenshot</a> Matteo has given
+me.&nbsp; After some additional advice from <a href=
+"GregDunnPanther.txt">Greg Dunn</a>, and the appearance of a
+document from Apple called "<a href=
+"http://developer.apple.com/darwin/runningx11.html">Configuring
+and Running X11 Applications on Mac OS X</a>", I've managed to
+get Virtual AGC working in Mac OS X Jaguar (10.2) as well.&nbsp;
+Presumably it will work in all other versions of Mac OS X, but I
+can hardly guarantee it.&nbsp; In fact, I have had reports that
+it failed to build even on some 10.3 machines, so apparently it's
+not entirely consistent.<br><br>
+While none of the steps below is difficult, building the software
+nevertheless requires a lot more command-line work than the
+typical Mac OS X user finds congenial.&nbsp; A binary installer
+would be <span style="font-style: italic;">much</span> better for
+the typical user.&nbsp; Sadly, I don't know how to package the
+executables to allow them to be installed directly on a Mac
+without all of this nonsense, because I'm not a Mac software
+developer at heart and haven't the energy to learn.&nbsp;
+Step-by-step instructions for creating an installer (perhaps in
+the form of mods to the makefiles) from anybody who <span style=
+"font-style: italic;">does</span> know would be very welcome.<br><br>
+The following instructions have been tested on a pristine
+installation of Jaguar (10.2.8).&nbsp; (In other words, I
+completely wiped my Mac and reinstalled Mac OS X, just to make
+sure these instructions would work.)&nbsp; To begin with, you'll
+need to install a substantial amount of stuff on your Mac.&nbsp;
+It will use up a lot of disk space and take a long time to do
+so.<br><ol><li>Install Apple's "developer tools", either from the CD that
+Apple supplies with the Mac OS X installation CDs, or as a
+download from Apple.</li><li>Install the X-window system (<span style=
+"font-weight: bold;">XFree86</span>).&nbsp; For Panther, this
+is apparently an optional install from your Apple-supplied Mac
+OS X CDs.&nbsp; For Jaguar, you can download from the <a href=
+"http://sourceforge.net/projects/xonx/">XonX
+project</a>.<br></li><li>(Optional.)&nbsp; Install the <a href=
+"http://alleg.sourceforge.net/">Allegro</a> cross-platform GUI
+kit.&nbsp; This is only needed to build <span style=
+"font-weight: bold;">yaACA</span>, which is presently only in
+the early development stage.&nbsp; If you skip this step, the
+build-process (below) will display warnings and fail to build
+<span style="font-weight: bold;">yaACA</span>, but will work
+normally otherwise.&nbsp; However, <span style=
+"font-weight: bold;">yaACA</span> gives you the ability to use
+the rotational hand controller (RHC) in the LM, and that
+substantially adds to the fun-factor of using the
+simulation.&nbsp; (Sadly, when <span style=
+"font-style: italic;">I</span> try installing <span style=
+"font-weight: bold;">Allegro</span> on my iMac, it fails to do
+so, so I really don't have the option.)<br></li><li>Install <a href="http://fink.sourceforge.net"><span style=
+"font-weight: bold;">fink</span></a>, which is a program that
+is used to install other programs.&nbsp; Make sure that you
+choose the version of <span style=
+"font-weight: bold;">fink</span> that works with your version
+of Mac OS X, and follow the instructions on the <span style=
+"font-weight: bold;">fink</span> webpage.&nbsp;<br></li><li>Use <span style="font-weight: bold;">fink</span> to install
+<span style="font-weight: bold;">gtk+</span> version 2.&nbsp;
+This is done from the command-line with "<span style=
+"font-family: monospace;">sudo fink install gtk+2</span>".</li><li>Use <span style="font-weight: bold;">fink</span> to install
+<span style="font-weight: bold;">automake</span> ("sudo fink
+install automake").&nbsp; These are already present on your
+computer, but the Apple-supplied version didn't work for
+me.&nbsp; Fortunately, this new version won't conflict with
+your Apple-supplied ones, which will remain on your
+computer.</li><li>If you want to run Stephan Hotto's <a href=
+"yaTelemetry.html"><span style=
+"font-weight: bold;">LM_Simulator</span></a> program (and I bet
+you do!), you'll need to install <a href=
+"http://www.tcl.tk/"><span style=
+"font-weight: bold;">Tcl/Tk</span></a>.&nbsp;&nbsp; Do this
+either by following the instructions at the <span style=
+"font-weight: bold;">Tcl/Tk</span> website, or else use
+"<span style="font-family: monospace;">sudo fink install
+tcltk</span>".&nbsp; (I've done only the latter, so I don't
+know how well the former works.)</li><li>Now download the current development snapshot of Virtual
+AGC (yaAGC-dev-<span style=
+"font-style: italic;">XXXXXXXX</span>.tar.bz2).&nbsp; On my
+computer, <span style="font-weight: bold;">stuffit</span>
+automatically unpacked this when I downloaded it.&nbsp; If not,
+you'll have to manually unpack it from the command line, as
+follows:</li></ol><div style="margin-left: 40px;"><span style="font-family: monospace;">cd Desktop<br>
+bunzip2 yaAGC-dev</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span><span style="font-family: monospace;"><br>
+tar -xf yaAGC-dev</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar<br><br></span></div>Now that all of the tools you need are installed, you build
+Virtual AGC basically by just following the same (command-line)
+instructions as do the Linux folk:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">cd Desktop<br>
+cd yaAGC</span><br style="font-family: monospace;"><span style="font-family: monospace;">./configure
+--prefix=/sw</span><br style="font-family: monospace;"><span style="font-family: monospace;">make<br>
+sudo make install<br></span></div><br>
+Having built and installed Virtual AGC, you run it like this:<br><ul><li>The installation of the X-window system will have provided
+some way to start the X-window system.&nbsp; (On Jaguar, there
+is an <span style="font-weight: bold;">XDarwin</span> icon on
+the desktop.)&nbsp; Go ahead and start X-windows.</li><li>Starting X-windows will (hopefully) will call up one or
+more 'xterm' command-line windows.&nbsp; Within one of these
+windows, simply use the <span style=
+"font-weight: bold;">SimColossus249</span> or <span style=
+"font-weight: bold;">SimLuminary131</span> command,
+<span style="font-style: italic;">et voila</span>!</li><li>Proceed over to <a href="index.html#Quick_Start">quick
+start</a> on the home page to see some things you can do with
+it.</li></ul>(<span style="font-weight: bold;">Note</span>:&nbsp; The
+following advice presently doesn't work very well, and is present
+for future purposes.)&nbsp; <span style=
+"color: rgb(153, 153, 153);">It may be that you just can't build
+the software, no matter how hard you try.&nbsp; In almost all
+cases, the reason for this will be a problem in installation or
+configuration of</span> <span style=
+"font-weight: bold; color: rgb(153, 153, 153);">gtk+</span><span style="color: rgb(153, 153, 153);">(with which I'll
+probably be unable to help), and that all of the programs will
+build fine except for</span> <span style=
+"font-weight: bold; color: rgb(153, 153, 153);">yaDSKY</span><span style="color: rgb(153, 153, 153);">and</span> <span style=
+"font-weight: bold; color: rgb(153, 153, 153);">yaDEDA</span><span style="color: rgb(153, 153, 153);">.&nbsp;
+In this case, as a last resort, you can do the
+following:</span><br style="color: rgb(153, 153, 153);"><ol style="color: rgb(153, 153, 153);"><li>Instead of "./configure --prefix=/sw", do "make NOGUI=yes
+PREFIX=/sw autogen".</li><li>Instead of "make", do "make NOGUI=yes".<br></li><li>Instead of "sudo make install", do "sudo make NOGUI=yes
+install".</li><li>Instead of running "SimLuminary131" or "SimColossus249",
+run "SimLuminary131_lite" or "SimColossus249_lite".</li></ol><span style="color: rgb(153, 153, 153);">What these steps
+will do for you is to bypass the problematic steps such as
+building</span> <span style=
+"font-weight: bold; color: rgb(153, 153, 153);">yaDSKY</span><span style="color: rgb(153, 153, 153);">and</span> <span style=
+"font-weight: bold; color: rgb(153, 153, 153);">yaDEDA</span><span style="color: rgb(153, 153, 153);">,
+and to use instead the "DSKY Lite" module of the</span><span style=
+"font-weight: bold; color: rgb(153, 153, 153);">LM_Simulator</span><span style="color: rgb(153, 153, 153);">program (which doesn't
+need to be compiled, and so doesn't normally cause you a problem
+... or at least, causes</span> <span style=
+"font-style: italic; color: rgb(153, 153, 153);">different</span><span style="color: rgb(153, 153, 153);">problems).</span><br><hr style="width: 100%; height: 2px;"><center><br><span style=
+"color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
+This page is available under the <a href=
+"https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons No Rights Reserved License</a></span><br><i><font size="-1">Last modified by <a href=
+"mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br><br><a href="http://www.ibiblio.org"><img style=
+"border: 0px solid ; width: 300px; height: 100px;" alt=
+"Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
+"100" width="300"></a><br></font></i></center><br></body></html>

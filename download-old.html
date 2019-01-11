@@ -1,1456 +1,892 @@
-<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.3.14">
-  <meta http-equiv="Content-Type" content=
-  "text/html; charset=utf-8">
-  <meta name="GENERATOR" content=
-  "Mozilla/4.7 [en] (X11; I; Linux 2.4.16 ppc) [Netscape]">
-  <meta name="Author" content="Ronald Burkey">
-  <title>Virtual AGC Download Page</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="author" content="Ronald S. Burkey">
-  <script type="text/javascript" src="Header.js">
-  </script>
-</head>
-<body style="background-image: url(gray3.jpg);">
-  <script type="text/javascript">
-  document.write(headerTemplate.replace("@TITLE@","Downloading").replace("@SUBTITLE@","and building the software<br>(This page is now obsolete)"))
-  </script><br>
-  <table summary="" style=
-  "text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="vertical-align: top;"><span style=
-        "color: rgb(204, 0, 0);"><span style=
-        "font-weight: bold;">This is an unmaintained, obsoleted
-        page, archived for legacy purposes only to provide
-        information on some older Virtual AGC releases.&nbsp; For
-        information pertinent to current releases, please look on
-        the <a href="download.html">current download
-        page</a>.</span></span><br></td>
-      </tr>
-    </tbody>
-  </table><br>
-  <h2>Contents</h2>
-  <ul>
-    <li><a href="download.html#Whats_In_a_Full_Download">What's in
-    a full download?</a></li>
-    <li><a href="#Downloads">Downloads</a> (source code package;
-    Linux, Windows, and Mac OS X binary packages)</li>
-    <li><a href="#Extras">Extras!</a> (extra stuff not included in
-    the "full" download)<br></li>
-    <li><a href="#Installing_in_Windows">Installing the Windows
-    binaries</a><br></li>
-    <li><a href="#Installing_the_Linux_Binaries_">Installing the
-    Linux binaries</a></li>
-    <li><a href="#Building_the_Virtual_AGC_software_in_">Building
-    the Virtual AGC software, in Linux</a></li>
-    <li><a href="#Running_the_Validation_Suite">Running the
-    validation suite</a></li>
-    <li><a href="#Building_the_Virtual_AGC_software_in">Building
-    the Virtual AGC software, in Windows</a></li>
-    <li><a href="#What_about_building_Virtual_AGC_in">What about
-    building Virtual AGC in FreeBSD, NetBSD, or OpenBSD?</a></li>
-    <li><a href="#Installing_the_Mac_OS_X_Binaries">Installing
-    and/or building Virtual AGC in Mac OS X (10.2)</a></li>
-    <li><a href="#Ten_4_3">Installing Virtual AGC Binaries in Mac
-    OS X (10.4)</a></li>
-  </ul><br>
-  <h2><a name="Whats_In_a_Full_Download" id=
-  "Whats_In_a_Full_Download"></a>What's In a Full Download?</h2>
-  <table summary="" style=
-  "width: 100%; text-align: left; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <th style="vertical-align: top;">Directory<br></th>
-        <th style="vertical-align: middle;">Contents<br></th>
-        <td style="vertical-align: middle;"><span style=
-        "font-weight: bold;">Status</span><br></td>
-      </tr>
-      <tr>
-        <td colspan="1" rowspan="2" style=
-        "vertical-align: middle;">yaAGC/Colossus249/<br></td>
-        <td style="vertical-align: middle;">Source code (*.s) for
-        Build 249 of the <span style=
-        "font-weight: bold;">Colossus</span> (AGC Command Module)
-        program.<br></td>
-        <td style="vertical-align: middle;">100% complete, and
-        debugged.&nbsp; (The comments in the source-code still need
-        proofing, but the program assembles correctly with the
-        <span style="font-weight: bold;">yaYUL</span>
-        assembler.)</td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">Binary (*.bin and
-        *.binsource) image of the core-rope for Build 249 of
-        <span style="font-weight: bold;">Colossus</span>.</td>
-        <td style="vertical-align: middle;">100% complete, proofed,
-        and known to be <a href=
-        "Colossus.html#Validity">valid</a>.</td>
-      </tr>
-      <tr>
-        <td colspan="1" rowspan="3" style=
-        "vertical-align: middle;">yaAGC/Luminary131/<br></td>
-        <td style="vertical-align: middle;">Source code (*.s) for
-        Build 131 of the <span style=
-        "font-weight: bold;">Luminary</span> (AGC Lunar Module)
-        program.<br></td>
-        <td style="vertical-align: middle;">100% complete, and
-        debugged.&nbsp; (The comments in the source-code still need
-        proofing, but the program assembles correctly with the
-        <span style="font-weight: bold;">yaYUL</span>
-        assembler.)</td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">Binary (*.bin and
-        *.binsource) image of the core-rope for Build 131 of
-        <span style="font-weight: bold;">Luminary</span>.</td>
-        <td style="vertical-align: middle;">100% complete, proofed,
-        and known to be <a href=
-        "Luminary.html#Validity">valid</a>.&nbsp;</td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">Some utilities.</td>
-        <td style="vertical-align: middle;">
-          <ul>
-            <li><span style="font-weight: bold;">Oct2Bin</span> ---
-            converts a set of <span style=
-            "font-weight: bold;">Luminary</span>/<span style=
-            "font-weight: bold;">Colossus</span> binaries given in
-            the form of an ASCII file to a core-rope binary.&nbsp;
-            This is 100% working.&nbsp; Needed only for validating
-            data entry for programs like <span style=
-            "font-weight: bold;">Luminary</span> or <span style=
-            "font-weight: bold;">Colossus</span>.<br></li>
-            <li><span style="font-weight: bold;">CheckDec</span>
-            --- allows interactive entry of decimal numbers
-            (suitable for <span style=
-            "font-family: monospace;">DEC</span>/<span style=
-            "font-family: monospace;">2DEC</span> pseudo-ops), and
-            immediate viewing of their binary forms.&nbsp; This is
-            100% working.&nbsp; Needed only for experimenting with
-            the binary formats the AGC uses for storing
-            numbers.<br></li>
-            <li><span style=
-            "font-weight: bold;">webb2burkey-rope</span> ---
-            converts the core-rope files used in Virtual AGC to the
-            format used by Julian Webb's AGC simulator, and
-            vice-versa.&nbsp; This is 100% working, but since few
-            of you have Webb's simulator, the point is moot.</li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="1" rowspan="2" style=
-        "vertical-align: middle;">yaAGC/Artemis072/<br></td>
-        <td style="vertical-align: middle;">Source code (*.s) for
-        Build 072 of the <span style=
-        "font-weight: bold;">Artemis</span> or <span style=
-        "font-weight: bold;">Colossus 3</span> (AGC Command Module)
-        program.</td>
-        <td style="vertical-align: middle;">About 6 pages (out of
-        &gt;1500) available.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">Binary (*.bin and
-        *.binsource) image&nbsp; for Build 072 of&nbsp;
-        <span style="font-weight: bold;">Artemis</span> or
-        <span style="font-weight: bold;">Colossus 3</span>.</td>
-        <td style="vertical-align: middle;">100% complete and
-        proofed.&nbsp; I <span style=
-        "font-style: italic;">assume</span> it's correct, but we
-        won't really know until there's source code to cross-check
-        it against.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/yaAGC/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaAGC</span> (AGC
-        emulator) program.<br></td>
-        <td style="vertical-align: middle;">99% complete.&nbsp; At
-        present, you can expect to see do the stuff described in
-        the <a href="index.html#Quick_Start">Quick Start
-        section</a> of my home page.&nbsp; Both the LM and CM sims
-        should work quite well.</td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">
-        yaAGC/ControlPulseSim<br></td>
-        <td style="vertical-align: middle;">An emulator for the AGC
-        at the "control-pulse" (microcode) level rather than the
-        instruction level.<br></td>
-        <td style="vertical-align: middle;"><span style=
-        "font-weight: bold;">A</span>llows interactive simulation
-        of some (but not all) control-pulse sequences (microcode)
-        for the AGC.&nbsp; This program is only for the very brave,
-        and very little of it works.&nbsp; I'll probably never
-        complete much more of it.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/yaDSKY/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaDSKY</span> (DSKY
-        emulator) program.<br></td>
-        <td style="vertical-align: middle;">99% complete (both
-        Linux and Win32).&nbsp; (The STBY and RESTART indicator
-        lamps are inoperable.)&nbsp; In addition to being a DSKY
-        simulation, this program can print out downlinked telemetry
-        data.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">
-        yaAGC/yaUniverse/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaUniverse</span>
-        (spacecraft motion emulator) program.<br></td>
-        <td style="vertical-align: middle;">Is now capable of
-        modeling the motion of heavenly bodies and spacecraft under
-        gravitational influences.&nbsp; This, perhaps, 25% of
-        what's required in the full program.</td>
-      </tr>
-      <tr>
-        <td style=
-        "vertical-align: middle; text-decoration: line-through;">
-        yaAGC/yaIMU/<br></td>
-        <td style=
-        "vertical-align: middle; text-decoration: line-through;">
-        Source code for the <span style=
-        "font-weight: bold;">yaIMU</span> (inertial measurement
-        unit emulator) program.</td>
-        <td style="vertical-align: middle;"><span style=
-        "text-decoration: line-through;">This program has not yet
-        been started.</span>&nbsp; <small>(Because of Stephan
-        Hotto's contributed <a href="yaTelemetry.html"><span style=
-        "font-weight: bold;">LM_Simulator</span></a> program, the
-        <span style="font-weight: bold;">yaIMU</span> program is no
-        longer needed, and therefore is no longer being
-        planned.)</small><br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/yaAOT/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaAOT</span> (alignment
-        optical telescope emulator) program.</td>
-        <td style="vertical-align: middle;">This program has not
-        yet been started.</td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/yaACA/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaACA</span> (attitude
-        controller assembly emulator) program.</td>
-        <td style="vertical-align: middle;">This program is 100%
-        complete and seems fine on a standalone basis, but the
-        complete system environment for it has not yet been
-        demonstrated to work.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">
-        yaAGC/yaTelemetry/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaTelemetry</span>
-        (telemetry-downlink console) program.<br></td>
-        <td style="vertical-align: middle;">This program has not
-        yet been started.&nbsp; (In its absence, <span style=
-        "font-weight: bold;">yaDSKY</span> is capable of printing
-        out digital-downlink data, though not in a particularly
-        attractive manner, with the "--test-downlink" command-line
-        switch.)<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/yaYUL/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaYUL</span> (AGC
-        cross-assembler) program.<br></td>
-        <td style="vertical-align: middle;">100% complete, and
-        capable of assembling <span style=
-        "font-weight: bold;">Luminary131</span>, <span style=
-        "font-weight: bold;">Colossus249</span>, or <span style=
-        "font-weight: bold;">Validation</span> source code without
-        error.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">
-        yaAGC/Validation/<br></td>
-        <td style="vertical-align: middle;">Source code for a
-        (newly-written) program in AGC assembly-langauge that is
-        used to test the emulator's instruction set.<br></td>
-        <td style="vertical-align: middle;">About as complete as
-        it's going to get!</td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/yaAGS/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaAGS</span> (Abort
-        Guidance System emulator) program.<br></td>
-        <td style="vertical-align: middle;">Now working.&nbsp;
-        Probably there are a number of bugs and unimplemented
-        features, but at least it can pass the built-in self-test,
-        and can perform the few operations I personally know how to
-        activate.&nbsp; :-)<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/yaDEDA/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaDEDA</span> (emulator
-        for the Data Entry and Display&nbsp; Assembly -- i.e., the
-        AGS user interface) program<br></td>
-        <td style="vertical-align: middle;">I think this program is
-        100% working, though I've only tested it with <span style=
-        "font-weight: bold;">yaAGC</span> (since <span style=
-        "font-weight: bold;">yaAGS</span> isn't available yet), so
-        I can't be perfectly sure.<br></td>
-      </tr>
-      <tr>
-        <td colspan="1" rowspan="3" style=
-        "vertical-align: middle;">yaAGC/yaLEMAP/<br></td>
-        <td style="vertical-align: middle;">Source code for the
-        <span style="font-weight: bold;">yaLEMAP</span> (AGS
-        cross-assembler) program.<br></td>
-        <td style="vertical-align: middle;">I think this program is
-        100% working, though there could be bugs I'm not aware
-        of.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">Sample AGS source
-        code.<br></td>
-        <td style="vertical-align: middle;">100% complete and
-        correct.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">Utilities<br></td>
-        <td style="vertical-align: middle;"><span style=
-        "font-weight: bold;">binLEMAP</span> --- like <span style=
-        "font-weight: bold;">Oct2Bin</span>, but for the AGS
-        instead of the AGC.&nbsp; 100% working.&nbsp; Needed only
-        for validating source-code data entry for programs like AGS
-        <span style="font-weight: bold;">FP6</span> or <span style=
-        "font-weight: bold;">FP8</span>.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/FP6/<br></td>
-        <td style="vertical-align: middle;">Source code (*.s) and
-        binary (*.bin and *.binsource) for AGS <span style=
-        "font-weight: bold;">FP6</span> (Flight Program 6)<br></td>
-        <td style="vertical-align: middle;">It is believed that the
-        source code is 100% complete and correct, and that the
-        binary produced by assembling the source with <span style=
-        "font-weight: bold;">yaLEMAP</span> is 100% complete and
-        correct.</td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">yaAGC/FP8/<br></td>
-        <td style="vertical-align: middle;">Source code (*.s) and
-        binary for AGS <span style="font-weight: bold;">FP8</span>
-        (Flight Program 8)<br></td>
-        <td style="vertical-align: middle;">It is believed that the
-        source code is 100% complete and correct, and that the
-        binary produced by assembling the source with <span style=
-        "font-weight: bold;">yaLEMAP</span> is 100% complete and
-        correct.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle; text-align: left;">
-        yaAGC/Contributed/LM_Simulator<br></td>
-        <td style="vertical-align: middle; text-align: left;">
-        <span style="font-weight: bold;">Tcl/Tk</span> source code,
-        contributed by Stephan Hotto.<br></td>
-        <td style="vertical-align: middle; text-align: left;">
-          Continually evolving in its conception, and I'm not the
-          author, so I can't give a percentage of completion.&nbsp;
-          <span style="font-style: italic;">At present</span>, the
-          program has the following features:<br>
-          <ul>
-            <li>An operational IMU.<br></li>
-            <li>An operational FDA ball.<br></li>
-            <li>An operational "DSKY Lite" (an alternate DSKY
-            simulation), for use on target computer platforms where
-            <span style="font-weight: bold;">yaDSKY</span> cannot
-            be built.<br></li>
-            <li>An operational i/o-channel monitor</li>
-          </ul>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  <h2><a name="Downloads" id="Downloads"></a>Downloads</h2>
-  <table summary="" style="text-align: left; width: 100%;" border=
-  "1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="font-weight: bold; vertical-align: middle;">
-        Download file<br></td>
-        <td style="font-weight: bold; vertical-align: middle;">What
-        is it?<br></td>
-        <td style="font-weight: bold; vertical-align: middle;">Who
-        needs it?<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;">
-          <a href=
-          "Downloads/yaAGC-dev-20090301.tar.bz2">
-          yaAGC-dev-20090301.tar.bz2</a><br>
-          <br>
-          <table summary="" style="text-align: left; width: 100%;"
-          border="1" cellpadding="2" cellspacing="2">
-            <tbody>
-              <tr>
-                <td style="vertical-align: top;"><span style=
-                "font-weight: bold;">Note:</span>&nbsp; To take
-                full advantage of pad loads provided by
-                <span style="font-weight: bold;">LM_Simulator</span>,
-                I'd suggest copying the file yaAGC / Contributed /
-                LM_Simulator / LM.core to the directory from which
-                you invoke the simulator.<br></td>
-              </tr>
-            </tbody>
-          </table><br>
-        </td>
-        <td style="vertical-align: middle;">
-          Full development snapshot, containing all of the stuff
-          mentioned above, to the extent described above.&nbsp;
-          Refer also to the <a href="changes.html">change
-          log</a>.<br>
-          <br>
-          <table summary="" style=
-          "width: 60%; text-align: left; margin-left: auto; margin-right: auto;"
-          border="1" cellpadding="2" cellspacing="2">
-            <tbody>
-              <tr>
-                <td style="vertical-align: top;"><span style=
-                "font-weight: bold;">Note:</span>&nbsp; If you
-                already have Virtual AGC working on your computer
-                and simply wish to install the Artemis 072
-                (Colossus 3) program, expand the tarball and copy
-                the SimArtemis* and Artemis072/Artemis072.bin files
-                to your installation directory.&nbsp; (You might
-                also need to change the file attributes of
-                SimArtemis072 and SimArtemis072_lite to make them
-                executable.)<br></td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-        <td style="vertical-align: middle;">
-          <ul>
-            <li>Everybody who wants the Virtual AGC source code,
-            AGC <span style="font-weight: bold;">Colossus</span>
-            source code, AGC <span style=
-            "font-weight: bold;">Luminary</span> source code, or
-            AGS flight-program source code not included in the
-            Linux, Windows, and Mac OS X binary packages.</li>
-            <li>Everybody who needs to build Virtual AGC from
-            source because binary packages for them aren't provided
-            here, such as <a href=
-            "#What_about_building_Virtual_AGC_in">*BSD users</a>,
-            <a href="#Building_the_Virtual_AGC_software_in_">PPC
-            Linux users</a>, Solaris users, ....</li>
-            <li>Linux users who need to <a href=
-            "#Building_the_Virtual_AGC_software_in_">build from
-            source</a> because the binary package doesn't work for
-            them.</li>
-            <li>Windows users who need to <a href=
-            "#Building_the_Virtual_AGC_software_in">build from
-            source</a> because the binary package doesn't work for
-            them.</li>
-            <li>Mac OS X users who need to <a href=
-            "#Installing_the_Mac_OS_X_Binaries">build from
-            source</a> because the binary package doesn't work for
-            them.<br></li>
-            <li>... Oh, heck!&nbsp; Just everybody!<br></li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td style="vertical-align: top;"><a href=
-        "Downloads/yaAGC-linux-20050720.tar.bz2">
-        yaAGC-linux-20050720.tar.bz2</a></td>
-        <td style="vertical-align: top;">Pre-built Virtual AGC
-        executables for x86 Linux.</td>
-        <td style="vertical-align: top;">
-          <ul>
-            <li>x86 Linux users who don't want to build Virtual AGC
-            from source, and thus want to just <a href=
-            "#InstallStandAlone">install the binaries</a>.</li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="1" rowspan="1" style=
-        "vertical-align: middle;"><a href=
-        "Downloads/LM_StandAlone_210407a.zip">
-        LM_StandAlone_210407a.zip</a><br></td>
-        <td colspan="1" rowspan="1" style=
-        "vertical-align: middle;">Pre-built Virtual AGC executables
-        for MS Windows, packaged by Stephan Hotto.<br></td>
-        <td colspan="1" rowspan="1" style=
-        "vertical-align: middle;">
-          <ul>
-            <li>Windows users who don't want to build Virtual AGC
-            from source, and thus want to just <a href=
-            "download.html#Installing_in_Windows">install the
-            binaries</a>.&nbsp; (But see the next item.)<br></li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;"><a href=
-        "Downloads/yaAGC-Win32-20050720.zip">
-        yaAGC-Win32-20050720.zip</a></td>
-        <td style="vertical-align: middle;">Pre-built Virtual AGC
-        executables for MS Windows, packaged by Ron
-        Burkey.<br></td>
-        <td colspan="1" rowspan="2" style=
-        "vertical-align: middle;">
-          <ul>
-            <li>Windows users who don't want to build Virtual AGC
-            from source, and thus want to just <a href=
-            "#Installing_in_Windows">install the
-            binaries</a>.&nbsp; <span style=
-            "font-weight: bold; color: rgb(255, 0, 0);">Hey!&nbsp;
-            Isn't this just like the line above?!!!</span>&nbsp;
-            Sort of ....&nbsp; There are two different packagings
-            of the Windows binaries.&nbsp; My packaging (this
-            line!) gives you everything and may run a little more
-            efficiently, but may be a little harder to install;
-            it's targeted at enthusiasts.&nbsp; Stephan's (the line
-            above) is more selective about what it provides, and
-            may be a little easier to install; it's probably the
-            better choice if you just want to quickly try out the
-            simulation without getting too involved in it.&nbsp;
-            Also, you may want to see which one is more
-            current.<br></li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;"><a href=
-        "Downloads/MinGW-runtime-install.zip">
-        runtime-package zipfile</a></td>
-        <td style="vertical-align: middle;">Runtime package needed
-        for running the Ron's pre-built Windows executables.&nbsp;
-        Not needed for Stephan's executables.<br></td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;"><a href=
-        "Downloads/yaAGC-macosx-20050720.tar.bz2">
-        yaAGC-macosx-20050720.tar.bz2</a><br></td>
-        <td style="vertical-align: middle;">Pre-built Virtual AGC
-        executables for Mac OS X.<br></td>
-        <td style="vertical-align: middle;">
-          <ul>
-            <li>Mac OS X users who don't want to build Virtual AGC
-            from source.&nbsp; <span style=
-            "font-style: italic;">Note that this will be nothing
-            like any Mac OS X package you've ever seen, so you will
-            have to</span> <a style="font-style: italic;" href=
-            "#Installing_the_Mac_OS_X_Binaries">follow the
-            instructions</a><span style=
-            "font-style: italic;">.</span><br></li>
-          </ul>
-        </td>
-      </tr>
-      <tr>
-        <td style="vertical-align: middle;"><a href=
-        "Downloads/">Archive</a></td>
-        <td style="vertical-align: middle;">Earlier versions of the
-        downloadable files.<br></td>
-        <td style="vertical-align: middle;">
-          <ul>
-            <li>... Probably nobody.<br></li>
-          </ul>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  <h2><a name="Extras" id="Extras"></a>Extras!</h2>Onno Hommes has
-  sent us some configuration files for adding AGC-specific
-  syntax-highlighting for the following source-code editors:&nbsp;
-  <span style="font-weight: bold;">Kate</span>, <span style=
-  "font-weight: bold;">KWrite</span>, <span style=
-  "font-weight: bold;">Kdevelop</span>, <span style=
-  "font-weight: bold;">Eclipse</span>, <span style=
-  "font-weight: bold;">vim</span>, <span style=
-  "font-weight: bold;">TextPad</span>, and (maybe) <span style=
-  "font-weight: bold;">emacs</span>.&nbsp; <a href=
-  "OnnoHommes/SyntaxAGC-20071231.zip">
-  Onno's zipfile</a> contains all of the configuration files, along
-  with instructions (in PDF form) for using them.<br>
-  <br>
-  Here's a nice screenshot (click to enlarge) of what source
-  highlighting looks like in <span style=
-  "font-weight: bold;">Kdevelop</span>.&nbsp; As you can see, it's
-  a lot more pleasant to read the AGC source code with the
-  highlighting than without it.<br>
-  <div style="text-align: center;">
-    <a href=
-    "OnnoHommes/SyntaxAGC-Kdevelop.jpg">
-    <img style="border: 2px solid ; width: 300px; height: 240px;"
-    alt="Screenshot of source highlighting in KDevelop" title=
-    "Click to enlarge" src=
-    "OnnoHommes/SyntaxAGC-Kdevelop-thumb.jpg" height="240" width=
-    "300"></a>
-  </div>
-  <h2><a name="InstallStandAlone" id=
-  "InstallStandAlone"></a>Installing the Windows Binaries, the
-  Stephan Way</h2>(This is the installation procedure for
-  LM_StandAlone_<span style=
-  "font-style: italic;">version</span>.zip.)<br>
-  <br>
-  Choose some folder on your Windows computer, and unzip
-  LM_StandAlone_<span style=
-  "font-style: italic;">version</span>.zip into it.&nbsp; Now
-  you're finished with the installation!<br>
-  <br>
-  Inside the installtion directory, you'll find a program called
-  "lm_simulator.exe".&nbsp;&nbsp; (You might want to create an icon
-  on your desktop for it.)&nbsp; Run and enjoy!<br>
-  <h2><a name="Installing_in_Windows" id=
-  "Installing_in_Windows"></a>Installing the Windows Binaries, the
-  Ron Way<br></h2>(This is the installation procedure for
-  yaAGC-Win32-<span style="font-style: italic;">date</span>.zip and
-  the runtime-package zipfile.)<br>
-  <br>
-  For Win32 users, it's much more work to get your computer set up
-  to build Virtual AGC than it is in Linux, and the steps needed
-  will be less familiar.&nbsp; Therefore, most of you will feel
-  inclined to simply install the Virtual AGC programs rather than
-  compiling them from scratch.&nbsp; On the other hand, if you are
-  already a software developer using MinGW, you will probably want
-  to build the software rather than installing the binaries, to
-  avoid gumming up your \mingw directory.<br>
-  <br>
-  <span style="font-weight: bold;">Note:</span>&nbsp; Since it's
-  inconvenient for me to build the Win32 packages, they may not be
-  as current as the development snapshot.<br>
-  <ol>
-    <li>Download the runtime package (see above).&nbsp; Extract its
-    contents into your c:\ directory.&nbsp; You only need to
-    download and install this <span style=
-    "font-style: italic;">once.</span><br></li>
-    <li>Download the&nbsp; latest zipfile of Virtual AGC Win32
-    executables.&nbsp; Extract its contents into your c:\
-    directory.<br></li>
-    <li>Add the directory c:\mingw\bin (created by steps 1 &amp; 2
-    above) to your PATH.&nbsp; Note that <span style=
-    "font-weight: bold;">yaDSKY</span> <span style=
-    "font-style: italic;">will not work</span> if you copy the
-    files to a directory other than c:\mingw\bin.</li>
-    <li><span style="font-weight: bold;">Optional:</span>&nbsp; The
-    steps above give you <span style=
-    "font-weight: bold;">Luminary</span> and <span style=
-    "font-weight: bold;">Colossus</span> core-rope images, needed
-    to run the simulation, but <span style="font-style: italic;">do
-    not</span> include source code for <span style=
-    "font-weight: bold;">Luminary</span> or <span style=
-    "font-weight: bold;">Colossus</span>, nor source code for
-    <span style="font-weight: bold;">yaAGC</span>, <span style=
-    "font-weight: bold;">yaDSKY</span>, or <span style=
-    "font-weight: bold;">yaYUL</span>.&nbsp; If you want those
-    things, you'll have to download the full development snapshot
-    also.&nbsp; (To extract the contents of the downloaded archive,
-    you'll need the programs <span style=
-    "font-weight: bold;">tar</span> and <span style=
-    "font-weight: bold;">bzip2</span>, which most Win32 users will
-    not have pre-installed. &nbsp; You can download versions of
-    these programs for Win32 from the following links:&nbsp;
-    <a href="http://www.bzip.org/downloads.html">bzip2</a> or
-    <a href=
-    "http://gnuwin32.sourceforge.net/packages/tar.htm">tar</a>.)&nbsp;
-    The contents of the archive can then be extracted by the
-    command-line steps, which will create a directory called
-    yaAGC.<br></li>
-  </ol>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">bunzip2
-    yaAGC-dev-<span style=
-    "font-style: italic;">RevisionDate</span>.tar.bz2</span><br style="font-family: monospace;">
-
-    <span style="font-family: monospace;">tar -xf
-    yaAGC-dev-<span style=
-    "font-style: italic;">RevisionDate</span>.tar<br></span>
-  </div>
-  <ol start="5">
-    <li><span style="font-weight: bold;">Optional:</span>&nbsp; If
-    you want to run Stephan Hotto's contributed <a href=
-    "developer.html"><span style=
-    "font-weight: bold;">LM_Simulator</span></a> software (and you
-    probably do!), you'll have to install <a href=
-    "http://www.tcl.tk/"><span style=
-    "font-weight: bold;">Tcl/Tk</span></a> for it to work.</li>
-  </ol>
-  <h2><a name="Installing_the_Linux_Binaries_" id=
-  "Installing_the_Linux_Binaries_"></a>Installing the Linux
-  Binaries<br></h2><span style=
-  "font-weight: bold;">Disclaimer:</span>&nbsp; I don't really know
-  how to package programs for installation on Linux, so these
-  binaries may not work on your system.&nbsp; (I think they work on
-  SuSE 9.0 &amp; 9.1, Ubuntu 5.04, RedHat 7.3, and Fedora Core
-  1.)&nbsp; Hopefully they will work for you; if not, you may still
-  need to end up building Virtual AGC yourself, as described
-  <a href="#Building_the_Virtual_AGC_software_in_">below</a>.<br>
-  <br>
-  <span style="font-weight: bold;">Prerequisites:</span>&nbsp;
-  libgtk 2.0 or higher; also, <span style=
-  "font-weight: bold;">Tcl/Tk</span> if you want to run the
-  <a href="yaTelemetry.html"><span style=
-  "font-weight: bold;">LM_Simulator</span></a> program.&nbsp; I am
-  not sure what version of <span style=
-  "font-weight: bold;">Tcl/Tk</span> is needed, but I've noticed
-  that v8.4.4 works fine, whereas v8.3.3 (RedHat 7.3) aborts on
-  trying to open the FDAI ball window.<br>
-  <br>
-  <span style="font-weight: bold;">Installation:</span><br>
-  <ul>
-    <li>Download (see above) the Virtual AGC binary tarball,
-    yaAGC-linux-<span style=
-    "font-style: italic;">RevisionCode</span>.tar.bz2.<br></li>
-    <li>From a command line, as <span style=
-    "font-style: italic;">root</span>, unpack the tarball with the
-    following command:</li>
-  </ul>
-  <div style="margin-left: 80px;">
-    &nbsp; <span style="font-family: monospace;">tar --directory=/
-    --bzip2 -xf yaAGC-linux-</span><span style=
-    "font-style: italic; font-family: monospace;"><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;"><span style=
-    "font-style: italic;">RevisionCode</span></span></span></span><span style="font-family: monospace;">.tar.bz2</span>
-  </div>
-  <ul>
-    <li>Put the directory /usr/local/yaAGC/bin into your PATH.</li>
-    <li>You'll probably still want the source-code tarball, since
-    it contains a lot of stuff (like source code for the Luminary
-    and Colossus programs) that aren't in the binary tarball.&nbsp;
-    So download yaAGC-dev-<span style=
-    "font-style: italic;">RevisionCode</span>.tar.bz2 and unpack
-    it, thus creating a directory called "yaAGC" containing the
-    stuff listed at the top of the page:</li>
-  </ul>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">tar --bzip2 -xf
-    yaAGC-dev</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span>
-  </div>
-  <ul>
-    <li>Enjoy!</li>
-  </ul><span style=
-  "font-weight: bold;">Uninstallation:</span>&nbsp; Just remove the
-  /usr/local/yaAGC directory containing the binaries, and the yaAGC
-  directory containing the sources.<br>
-  <br>
-  <h2><a name="Building_the_Virtual_AGC_software_in_" id=
-  "Building_the_Virtual_AGC_software_in_"></a>Building the Virtual
-  AGC software, in Linux<br></h2><span style=
-  "font-weight: bold;">Disclaimer:</span>&nbsp; On a number of
-  Linux platforms, I've had no problem at all building the Virtual
-  AGC suite.&nbsp; (These include SuSE 9.0-10.0, RedHat 7.3, and
-  Ubuntu 5.04.)&nbsp; But on some, it's much trickier.&nbsp; In
-  cases like that, I'd suggest trying to install the binaries (see
-  above) rather than building from source.<br>
-  <span style="font-weight: bold;"><br>
-  Prerequisites:</span>&nbsp; gcc, pkg-config, autoconf, automake,
-  glib-dev, libgtk, libgtk-dev 2.0 or higher, readline-devel,
-  either curses or ncurses, and the <a href=
-  "http://alleg.sourceforge.net/">Allegro</a> cross-platform GUI
-  kit.<br>
-  <br>
-  To unpack the tarball, you work from a command-line prompt.&nbsp;
-  The development-snapshot tarball, for example, is unpacked as
-  follows:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">tar --bzip2 -xf
-    yaAGC-dev</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span><br>
-  </div><br>
-  After unpacking there will be a new directory called "yaAGC",
-  with the contents listed in the preceding section.&nbsp;&nbsp; To
-  build the programs,<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">cd yaAGC</span><br style=
-    "font-family: monospace;">
-    <span style=
-    "font-family: monospace;">./configure</span><br style=
-    "font-family: monospace;">
-    <span style="font-family: monospace;">make
-    clean</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">make</span><br style=
-    "font-family: monospace;">
-    <span style="font-family: monospace;">sudo make
-    install</span><br>
-    <br>
-  </div>As shown above, installation will be made to the /usr/local
-  directory, and the executables will go into /usr/local/bin.&nbsp;
-  If you would prefer to&nbsp; do an installation to some other
-  directory, perhaps to avoid needing root access, then&nbsp;
-  instead of using the command "./configure", use the command
-  "./configure --prefix=<span style=
-  "font-style: italic;">InstallDirectory</span>".&nbsp; (This
-  option is present only in software versions 05/14/04 and
-  later.)&nbsp; If you use this option, you will also want to add
-  the directory <span style=
-  "font-style: italic;">InstallDirectory</span>/bin to your PATH
-  environment variable.<br>
-  <br>
-  <div style="text-align: center;">
-    <table summary="" style=
-    "text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
-    border="1" cellpadding="2" cellspacing="2">
-      <tbody>
-        <tr>
-          <td style="vertical-align: top;">
-            <div style=
-            "text-align: center; color: rgb(204, 0, 0);">
-              <big><span style=
-              "font-weight: bold; text-decoration: underline;">Important
-              Note</span><br></big>
-            </div><big><span style="color: rgb(204, 0, 0);">Do not
-            run the uninstallation script mentioned in the
-            struck-out section following this note, since if you
-            have installed into /usr/local (or worse, /usr) it will
-            delete /usr/local/bin (or /usr/bin)! Thanks to Onno
-            Hommes for catching this error.</span></big><br>
-          </td>
-        </tr>
-      </tbody>
-    </table><br>
-  </div><br>
-  <span style="text-decoration: line-through;">For versions
-  2006-02-26 and later, 'make install' builds a script
-  called</span> <span style=
-  "font-weight: bold; text-decoration: line-through;">VirtualAgcUninstall</span><span style="text-decoration: line-through;">,
-  which you can use to uninstall Virtual AGC later, if you so
-  choose:</span><br style="text-decoration: line-through;">
-  <br style=
-  "font-family: monospace; text-decoration: line-through;">
-  <div style="margin-left: 40px; text-decoration: line-through;">
-    <span style="font-family: monospace;">sudo
-    VirtualAgcUninstall</span><br>
-    <br>
-  </div><span style="text-decoration: line-through;">This is
-  principally useful, I expect, if you decide to change the
-  installation directory after already having installed the
-  program.&nbsp; I guess I should point out that</span>
-  <span style="font-weight: bold; text-decoration: line-through;">VirtualAgcUninstall</span>
-  <span style="text-decoration: line-through;">is slightly
-  dangerous on a true multi-user system, because it will uninstall
-  not only Virtual AGC, but also any other programs that happened
-  to be placed in the installation directory at the exact moment
-  'make install' occurred.&nbsp; But if your system is a true
-  multi-user system, I expect you'd not want to install Virtual AGC
-  into /usr/local anyway.</span><br>
-  <div style="margin-left: 40px;">
-    <br>
-  </div>
-  <table summary="" style="text-align: left; width: 100%;" border=
-  "1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="vertical-align: top;">
-          <div style="text-align: center;">
-            <span style="font-weight: bold;">Some trouble-shooting
-            notes ...<br>
-            <br></span>
-          </div>
-          <ul>
-            <li>If you get a message to the effect libcurses.a is
-            not found, it points to a naming discrepancy between
-            the curses library (which is what we'd like to have
-            installed) and the ncurses library (which is probably
-            what is actually installed).&nbsp; In that case, locate
-            the file libncurses.a (usually, in /usr/lib) and do
-            this before running <span style=
-            "font-family: monospace;">make</span> again:</li>
-          </ul>
-          <div style="text-align: left; margin-left: 80px;">
-            <span style="font-family: monospace;">sudo ln
-            --symbolic /usr/lib/libncurses.a
-            /usr/lib/libcurses.a</span><br>
-          </div>
-          <ul>
-            <li>As mentioned above, you will need to have <a href=
-            "http://www.gtk.org">gtk+</a> (<span style=
-            "font-style: italic;">plus</span> the gtk+ development
-            package) installed on your computer for this to
-            work.&nbsp; (Presently, I'm using <span style=
-            "font-weight: bold;">gtk+</span> version 2.2.x.)&nbsp;
-            Unfortunately, the names of the packages you need to
-            install will differ by Linux distribution, unless you
-            choose to install gtk+ from source (in which case no
-            separate "dev" package is needed).&nbsp; They may be
-            something like "gtk2" and "gtk2-dev", or "gtk+2" and
-            "gtk+2-dev", or even (I'm told) something as obscure as
-            "libgtk+2.0_0-devel".&nbsp; For some reason, on my
-            computer, the environment variable PKG_CONFIG_PATH
-            needed for the "configure" step is not set properly by
-            the&nbsp; installation of gtk+.&nbsp; If you encounter
-            this problem, the "configure" step will display
-            instructions as to how it may be easily fixed.&nbsp; If
-            you don't get a message, you probably don't need to
-            worry about it.&nbsp;<br></li>
-          </ul>
-          <ul>
-            <li>It may be that you just can't build the software,
-            no matter how hard you try.&nbsp; In almost all cases,
-            the reason for this will be a problem in configuration
-            of <span style="font-weight: bold;">gtk+</span>, and
-            that all of the programs will build fine except for
-            <span style="font-weight: bold;">yaDSKY</span> and
-            <span style="font-weight: bold;">yaDEDA</span>.&nbsp;
-            In this case, as a last resort, you can use the
-            following alternate build instructions:</li>
-          </ul>
-          <div style="margin-left: 40px;">
-            <span style="font-family: monospace;">cd yaAGC<br>
-            make NOGUI=yes autogen<br></span> [<span style=
-            "font-style: italic;">or</span>&nbsp; <span style=
-            "font-family: monospace;">make NOGUI=yes
-            PREFIX=<span style=
-            "font-style: italic;">InstallDirectory</span>
-            autogen</span>]<span style=
-            "font-family: monospace;"><br style=
-            "font-family: monospace;"></span> <span style=
-            "font-family: monospace;">make NOGUI=yes
-            clean<br style="font-family: monospace;"></span>
-            <span style="font-family: monospace;">make
-            NOGUI=yes<br>
-            sudo make NUGUI=yes install<br></span>
-          </div><br>
-          <div style="margin-left: 40px;">
-            Instead of running "SimLuminary131", "SimColossus249",
-            or "SimArtemis072", run "SimLuminary131_lite",
-            "SimColossus249_lite", or "SimArtemis072_lite".&nbsp;
-            What these steps will do for you is to bypass building
-            <span style="font-weight: bold;">yaDSKY</span> and
-            <span style="font-weight: bold;">yaDEDA</span>, and to
-            use instead the "DSKY Lite" module of the <span style=
-            "font-weight: bold;">LM_Simulator</span> program (which
-            doesn't need to be compiled).<br>
-          </div>
-          <ul>
-            <li>Other trouble-shooting info may be found in the
-            <a href="faq.html">FAQ</a>.<br></li>
-          </ul>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  <h2><a name="Running_the_Validation_Suite" id=
-  "Running_the_Validation_Suite"></a>Running the Validation
-  Suite</h2>Having built the software as above, you can test the
-  emulated CPU using the "validation suite":<br>
-  <ol>
-    <li>Run <span style=
-    "font-weight: bold;">SimValidation</span>.<br></li>
-    <li>A code of "00" will appear in the MODE area of the DSKY,
-    and the OPR ERR lamp will light.&nbsp; This means that the
-    validation program is ready to start.<br></li>
-    <li>Press the PRO key on the DSKY.&nbsp; The OPR ERR light will
-    go off and the validation program will begin.<br></li>
-    <li>If all tests are passed, then the MODE area on the DSKY
-    will show the code "77", and the OPR ERR lamp will light.&nbsp;
-    This will take about 50 seconds.<br></li>
-    <li>If some tests fail, an error code other than "00" or "77"
-    will be displayed in the MODE area on the DSKY, and the OPR ERR
-    lamp will light.</li>
-    <li>In the latter case, you can proceed from one test to the
-    next by pressing the PRO key.&nbsp; The meanings of the error
-    codes are determined by reading the file
-    Validation/Validation.s.</li>
-  </ol>If this doesn't work for some reason, refer to the
-  trouble-shooting info in the <a href="faq.html">FAQ</a>.<br>
-  <h2><a name="Building_the_Virtual_AGC_software_in" id=
-  "Building_the_Virtual_AGC_software_in"></a>Building the Virtual
-  AGC software, in Windows</h2><span style=
-  "font-weight: bold;">Note:</span>&nbsp; I don't use Windows
-  myself, if I can help it, and so will have no great enthusiasm
-  for helping you if you have trouble with the Windows version of
-  the simulation.&nbsp; With that said, I am at this instant
-  (07/17/04, 09:43 am.) watching four separate LM simulations,
-  including a Win32 DSKY attached to a Win32 AGC, a Win32 DSKY
-  attached to a Linux AGC, a Linux DSKY attached to a Win32 AGC,
-  and a Linux DSKY attached to a Linux AGC.&nbsp; They all seem to
-  be working properly.<br>
-  <br>
-  Before doing anything else, <a href=
-  "WinGtkHowto.html#BigBox">install the MinGW C-language compiler
-  and the gtk+ toolkit</a><a name="WinTarball" id="WinTarball"></a>
-  on your computer.&nbsp; The makefiles provided in the tarball
-  assume that you have done this in exactly the way I prescribe,
-  though possibly with different versions of some software
-  packages, and may not work if <span style=
-  "font-weight: bold;">MinGW</span> and/or <span style=
-  "font-weight: bold;">gtk+</span> have been installed slightly
-  differently.&nbsp; Those of you who know about such things may
-  wonder if it wouldn't be easier to build Virtual AGC using
-  <a href="http://sources.redhat.com/cygwin/">Cygwin</a>.&nbsp; The
-  answer is that I think it would be preferable, but I haven't been
-  able to get it to work.&nbsp; (Anybody who figures it out should
-  let me know how you did it.)<br>
-  <br>
-  If you want to build <span style=
-  "font-weight: bold;">yaACA</span>, you'll need the <a href=
-  "http://alleg.sourceforge.net/">Allegro</a> cross-platform GUI
-  kit.&nbsp; If you don't want to bother with <span style=
-  "font-weight: bold;">yaACA</span>, you don't have to.&nbsp; The
-  build-process (below) will display warnings, but won't
-  abort.&nbsp; However, <span style=
-  "font-weight: bold;">yaACA</span> gives you the ability to use
-  the rotational hand controller (RHC) in the LM, and that
-  substantially adds to the fun-factor of using the simulation.<br>
-  <br>
-  One result of following the installation instructions is that an
-  icon for <span style="font-weight: bold;">Msys</span> should now
-  appear on your desktop.&nbsp; <span style=
-  "font-weight: bold;">Msys</span> is a command-line environment
-  which is similar to the command-line environment found in
-  Linux.&nbsp; It is not needed for <span style=
-  "font-style: italic;">running</span> any of the Virtual AGC
-  programs you'll be creating, but you will work within the
-  <span style="font-weight: bold;">Msys</span> enviroment when
-  <span style="font-style: italic;">building</span> the
-  programs.&nbsp; Therefore, the first step is to click the
-  <span style="font-weight: bold;">Msys</span> icon and enter the
-  <span style="font-weight: bold;">Msys</span> command-line
-  environment.<br>
-  <br>
-  For versions 20040810 or later, you will also need to install
-  <a href="http://sources.redhat.com/pthreads-win32/">POSIX Threads
-  for Win32</a>.&nbsp; While I can't guarantee that the folks who
-  develop that software won't change their installation procedure,
-  as of 20040814 this is what worked for me:<br>
-  <ul>
-    <li>Download the self-extracting file and extract the software
-    into your <span style="font-weight: bold;">Msys</span> home
-    directory.&nbsp; (For me, that's "c:\msys\1.0\home\Ronald
-    Burkey".&nbsp; For you, it will naturally different.)</li>
-    <li>From the <span style="font-weight: bold;">Msys</span>
-    command line, do this:</li>
-  </ul>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">cd
-    pthreads</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">make</span><br style=
-    "font-family: monospace;">
-    <span style="font-family: monospace;">cp -a pthreadGC*.dll
-    c:/mingw/bin</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">cp -a *.h
-    c:/mingw/include</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">cp -a *.a
-    c:/mingw/lib</span><br>
-  </div>Next, you need a way of getting the source-code tarball
-  into the <span style="font-weight: bold;">Msys</span>
-  environment.&nbsp; The <span style=
-  "font-weight: bold;">MinGW</span>/<span style=
-  "font-weight: bold;">gtk+</span> installation instructions give
-  some hints as to how to do that.&nbsp; Once you've done that,
-  perform the following steps:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">tar --bzip2 -xf
-    yaAGC-dev-<span style=
-    "font-style: italic;">RevisionCode</span>.tar.bz2</span><br>
-  </div>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">cd yaAGC</span><br style=
-    "font-family: monospace;">
-  </div>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">make install</span><br>
-  </div><br>
-  (If you are using Virtual AGC versions prior to 20040810, you'll
-  need "make -f Makefile.Win32 clean install" instead.)&nbsp;
-  Assuming the steps above were successful, you are now done with
-  the <span style="font-weight: bold;">Msys</span> environment, and
-  may exit it simply by using the command "exit".<br>
-  <br>
-  The net result of this is that the Virtual AGC executable
-  programs will now appear in the c:\mingw\bin directory, which you
-  should add to your PATH.<br>
-  <br>
-  Finally, if you want to run Stephan Hotto's contributed <a href=
-  "developer.html"><span style=
-  "font-weight: bold;">LM_Simulator</span></a> software (and you
-  probably do!), you'll have to install <a href=
-  "http://www.tcl.tk/"><span style=
-  "font-weight: bold;">Tcl/Tk</span></a> for it to work.&nbsp; I'd
-  strongly suggest doing this.<br>
-  <br>
-  It may be that you just can't build the software, no matter how
-  hard you try.&nbsp; In almost all cases, the reason for this will
-  be a problem in configuration of <span style=
-  "font-weight: bold;">gtk+</span> (with which I'll probably be
-  unable to help), and that all of the programs will build fine
-  except for <span style="font-weight: bold;">yaDSKY</span> and
-  <span style="font-weight: bold;">yaDEDA</span>.&nbsp; In this
-  case, as a last resort, you can do the following:<br>
-  <ol>
-    <li>Instead of "make install", do "make NOGUI=yes
-    install".</li>
-    <li>Instead of running "SimLuminary131", "SimColossus249", or
-    "SimArtemis072", run "SimLuminary131_lite",
-    "SimColossus249_lite", or "SimArtemis072_lite".</li>
-  </ol>What these steps will do for you is to bypass building
-  <span style="font-weight: bold;">yaDSKY</span> and <span style=
-  "font-weight: bold;">yaDEDA</span>, and to use instead the "DSKY
-  Lite" module of the <span style=
-  "font-weight: bold;">LM_Simulator</span> program (which doesn't
-  need to be compiled).<br>
-  <h2><a name="What_about_building_Virtual_AGC_in" id=
-  "What_about_building_Virtual_AGC_in"></a>What about building
-  Virtual AGC in FreeBSD, NetBSD, or OpenBSD?</h2>In FreeBSD,
-  NetBSD, or OpenBSD, I expect compilation to be pretty much as in
-  Linux, but perhaps with various cleanups.&nbsp; For example, I
-  expect that the makefiles will have to be modified to use
-  <span style="font-weight: bold;">gmake</span> rather than
-  <span style="font-weight: bold;">make</span>.&nbsp; I have not
-  tried it, however, and if anyone wants to send me info on doing
-  it, I'd be happy to make any required changes or to post the
-  results on this page.<br>
-  <h2><a name="Installing_the_Mac_OS_X_Binaries" id=
-  "Installing_the_Mac_OS_X_Binaries"></a>Installing and/or building
-  Virtual AGC in Mac OS X (10.2)<br></h2><span style=
-  "font-weight: bold;">Disclaimer:</span>&nbsp; Mac OS X is not my
-  bag.&nbsp; If this works, you'll be lucky.&nbsp; (But it does
-  work for me.)&nbsp; My system is an iMac with Mac OS X
-  10.2.8.&nbsp; The instructions below are relatively new; if you
-  want to see the old instructions, <a href=
-  "ArchivedMacOsX.html">look here</a>.<br>
-  <br>
-  <span style="font-weight: bold;">Prerequisites:</span><br>
-  <ol>
-    <li>Please install Apple's "developer tools", from the CD that
-    came with MacOS X.&nbsp; If your version of the <span style=
-    "font-weight: bold;">gcc</span> program is 3.1 or prior, there
-    is an upgrade to <span style="font-weight: bold;">gcc</span>
-    3.3 which you'll want to download from Apple and install.&nbsp;
-    (You can tell by running the command "gcc -v" from the command
-    line interface to view the version number.)&nbsp;
-    Unfortunately, you'll have to sign up as an <a href=
-    "http://connect.apple.com">Apple developer</a> (which is free)
-    in order to download it.&nbsp; What you're looking for is a
-    "gcc updater", of which there are several (depending on your
-    version of MacOS X), so I can't really advise you as to which
-    of them needs to be downloaded.<br></li>
-    <li>Please install <a href=
-    "http://fink.sourceforge.net"><span style=
-    "font-weight: bold;">fink</span></a>, which is a program that
-    is used to install other programs.&nbsp; Make sure that you
-    choose the version of <span style=
-    "font-weight: bold;">fink</span> that works with your version
-    of Mac OS X, and follow the instructions on the <span style=
-    "font-weight: bold;">fink</span> webpage.&nbsp; There is a
-    graphical front end for <span style=
-    "font-weight: bold;">fink</span> called <span style=
-    "font-weight: bold;">Fink Commander</span>, which you'll have
-    to <span style="font-style: italic;">manually drag onto your
-    desktop</span>, as it is not automatically installed by the
-    installer program.&nbsp;<br></li>
-    <li>Run <span style="font-weight: bold;">Fink
-    Commander</span>.&nbsp; From the main menu, do
-    FinkCommander/Preferences, and click the tab that says
-    Fink.&nbsp; Activate "Use unstable packages".<br></li>
-    <li>Running Virtual AGC will require the X-window system (also
-    known as "xdarwin", "xfree86", "xorg", or "X11").&nbsp; If you
-    already have this installed and are satisfied with it, you
-    probably should ignore this step.&nbsp; However, what I did to
-    install the X-window system is this:&nbsp; with <span style=
-    "font-weight: bold;">Fink Commander</span>, install the
-    <span style="font-style: italic;">binary packages</span>
-    (rather than the source packages) for "xfree86" and
-    "icewm-basic".&nbsp; After Fink Commander finishes its
-    business, create a text file called ".xinitrc" in your home
-    directory which contains a single line reading "exec
-    /sw/bin/icewm".<br></li>
-    <li>With <span style="font-weight: bold;">Fink
-    Commander</span>, install the <span style=
-    "font-style: italic;">binary packages</span> (rather than the
-    source packages) for the following programs:&nbsp; "automake",
-    "tcltk", "cvs", "readline", and "readline-shlibs".</li>
-    <li>With <span style="font-weight: bold;">Fink
-    Commander</span>, install the <span style=
-    "font-style: italic;">source package</span> "gtk+2-dev".&nbsp;
-    This will probably take quite a long time, but (as of this
-    writing) the much-quicker-installing binary package for
-    gtk+2-dev provided by <span style=
-    "font-weight: bold;">fink</span> is not up-to-date enough to
-    build Virtual AGC. &nbsp; You may be presented with the choice
-    between "pango1-xft1" and "pango1-xft2"; choose
-    "pango1-xft2".<br></li>
-    <li>Install the <a href=
-    "http://alleg.sourceforge.net/">Allegro</a> cross-platform GUI
-    kit.&nbsp; This can't be done at present from <span style=
-    "font-weight: bold;">fink</span>.&nbsp; If you're only going to
-    try installing the Virtual AGC binary package, you might try
-    simply downloading the <span style=
-    "font-weight: bold;">Allegro</span> runtime library dmg file
-    and installing it.&nbsp; (But I should tell you I haven't tried
-    it, and have no way at present to try it.&nbsp; Let me know if
-    it works for you.)&nbsp; What I do instead is build
-    <span style="font-weight: bold;">Allegro</span> from source.
-    &nbsp; Building <span style="font-weight: bold;">Allegro</span>
-    is a tricky proposition, since the current version (as of 4.2.0
-    beta, when I'm writing this) does not seem to work correctly on
-    Mac OS X ... or at least not on <span style=
-    "font-style: italic;">my</span> version of Mac OS X.&nbsp; So
-    here's what <span style="font-style: italic;">I</span> did, and
-    hopefully it will work for you.&nbsp; From a command line, use
-    the following commands (just hitting ENTER when prompted for a
-    password):<br></li>
-  </ol>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">cvs
-    -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/alleg
-    login</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">cvs -z3
-    -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/alleg co -r
-    v4-1-18 allegro</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">cd
-    allegro</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">mkdir
-    obj/macosx/alleg/macosx</span><br style=
-    "font-family: monospace;">
-    <span style="font-family: monospace;">sh fix.sh
-    macosx</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">make</span><br style=
-    "font-family: monospace;">
-    <span style="font-family: monospace;">sudo make
-    install</span><br>
-  </div><br>
-  <div style="margin-left: 40px;">
-    For me, 'make' ends up with what appears to be an error message
-    "no macro name given in #define directive", but '<span style=
-    "font-family: monospace;">sudo make install</span>' is still
-    able to install it, and it seems to work well enough for my
-    purposes.<br>
-  </div><br>
-  <span style="font-weight: bold;">Try to install the Virtual AGC
-  binary package:</span><br>
-  <div style="margin-left: 40px;">
-    <br>
-    (Note that I personally have no way to test this, but I've had
-    some reports that it works.)<br>
-    <br>
-    From a command-line, do the following, assuming that you've
-    downloaded both the Virtual AGC binary package
-    (yaAGC-macosx-<span style=
-    "font-style: italic;">RevisionCode</span>.tar.bz2) and
-    developer snapshot.<br>
-    <br>
-  </div>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">cd Desktop</span><br>
-    <span style="font-family: monospace;">sudo tar --directory=/
-    --bzip2 -xf yaAGC-macosx</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span>
-  </div>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">tar --bzip2 -xf
-    yaAGC-dev</span><span style=
-    "font-family: monospace;"><span style=
-    "font-family: monospace;">-<span style=
-    "font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span>
-  </div>
-  <div style="margin-left: 40px;">
-    <br>
-    Running the program is a little more complex than you're used
-    to:
-  </div>
-  <ul>
-    <ul>
-      <li>Run the X-window system.&nbsp; If you followed my
-      instructions for installing the X-window system, there will
-      be a toolbar at the bottom of the screen, and you can click
-      the little CRT button on it to open up an "xterm"
-      command-line interface.&nbsp; (If you didn't follow my
-      instructions, you'll have to figure out for yourself how to
-      run <span style="font-weight: bold;">xterm</span>.)<br></li>
-      <li>In the <span style="font-weight: bold;">xterm</span>
-      window, type the following:</li>
-    </ul>
-  </ul>
-  <div style="margin-left: 120px;">
-    <span style="font-family: monospace;">set path = ($path
-    /usr/local/yaAGC/bin)</span><br style=
-    "font-family: monospace;">
-    <span style="font-family: monospace;">SimLuminary131
-    --half-size<br></span>
-  </div>
-  <ul>
-    <ul>
-      <li>If you installed the X-window system differently than I
-      suggested, the simulated DSKY may not immediately display on
-      the screen.&nbsp; Instead, the cursor may simply change
-      shape, indicating that it wants you to position the DSKY on
-      the screen.&nbsp; Click on the screen, and the simulated DSKY
-      will appear where you click.&nbsp; You'll may similarly have
-      to position the DEDA, and so on.<br></li>
-    </ul>
-  </ul>
-  <div style="margin-left: 40px;">
-    If this didn't work properly, you may need to build Virtual AGC
-    from source.<br>
-  </div>
-  <div style="margin-left: 40px;">
-    <br style="font-weight: bold;">
-  </div><span style="font-weight: bold;">Trying to build Virtual
-  AGC from source:</span><br>
-  <br>
-  <div style="margin-left: 40px;">
-    If you are unable to get the binary package to work, but have
-    followed the steps above, you can try to build Virtual AGC from
-    source.&nbsp; Just do this from a command-line:<br>
-    <br>
-    <div style="margin-left: 40px;">
-      <span style="font-family: monospace;">cd
-      yaAGC</span><br style="font-family: monospace;">
-      <span style="font-family: monospace;">./configure
-      --prefix=/sw</span><br style="font-family: monospace;">
-      <span style="font-family: monospace;">make<br>
-      sudo make install</span><br>
-    </div>
-  </div><br>
-  <div style="margin-left: 40px;">
-    When you try to run the simulation, you do the same thing as
-    instructed above (for the binary installation), but you don't
-    need the "<span style="font-family: monospace;">set path
-    ...</span>" command.<br>
-  </div><br>
-  <span style="font-weight: bold;">Bypassing compilation of
-  yaDSKY:</span><br>
-  <br>
-  <div style="margin-left: 40px;">
-    One of the main difficulties that people seem to have in
-    building Virtual AGC is the <span style=
-    "font-weight: bold;">yaDSKY</span> and <span style=
-    "font-weight: bold;">yaDEDA</span> applications.&nbsp; It's
-    possible to do without <span style=
-    "font-weight: bold;">yaDSKY</span> by using the "DSKY Lite"
-    built into the <span style=
-    "font-weight: bold;">LM_Simulator</span> program.&nbsp; (Sadly,
-    there's no substitute at present for <span style=
-    "font-weight: bold;">yaDEDA</span>, but <span style=
-    "font-weight: bold;">yaDEDA</span> isn't as important to most
-    people as <span style=
-    "font-weight: bold;">yaDSKY</span>.)&nbsp; So modify the steps
-    listed above as follows:<br>
-    <ol style="color: rgb(0, 0, 0);">
-      <li>Instead of "<span style=
-      "font-family: monospace;">./configure --prefix=/sw</span>",
-      do "<span style="font-family: monospace;">make NOGUI=yes
-      PREFIX=/sw</span> <span style=
-      "font-family: monospace;">autogen</span>".</li>
-      <li>Instead of "<span style=
-      "font-family: monospace;">make</span>", do "<span style=
-      "font-family: monospace;">make NOGUI=yes</span>".<br></li>
-      <li>Instead of "<span style="font-family: monospace;">sudo
-      make install</span>", do "<span style=
-      "font-family: monospace;">sudo make NOGUI=yes
-      install</span>".</li>
-      <li>Instead of running <span style=
-      "font-weight: bold;">SimLuminary131</span>, <span style=
-      "font-weight: bold;">SimColossus249</span>, or <span style=
-      "font-weight: bold;">SimArtemis072</span>, run <span style=
-      "font-weight: bold;">SimLuminary131_lite</span>, <span style=
-      "font-weight: bold;">SimColossus249_lite</span>, or
-      <span style=
-      "font-weight: bold;">SimArtemis072_lite</span>.<br></li>
-    </ol>
-  </div><span style="font-weight: bold;">If all else
-  fails:</span><br>
-  <br>
-  <div style="margin-left: 40px;">
-    <a href="ArchivedMacOsX.html">Look here</a> for the way I
-    <span style="font-style: italic;">used to</span> advise doing
-    all this.<br>
-  </div><span style="font-weight: bold;"><br>
-  Uninstalling:</span><br>
-  <br>
-  <div style="margin-left: 40px;">
-    If you installed the binary package, you can uninstall just
-    removing the directories that were created:<br>
-    <br>
-  </div>
-  <div style="margin-left: 80px;">
-    <span style="font-family: monospace;">sudo rm -rf
-    /usr/local/yaAGC</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">rm -rf yaAGC<br></span>
-    Use <span style="font-weight: bold;">Fink Commander</span> to
-    uninstall the prerequisites I asked you to install.<br>
-  </div><br>
-  <div style="margin-left: 40px;">
-    If you built from source, there's no good way to uninstall,
-    aside from just figuring out all the files that were created,
-    and deleting them.&nbsp; I don't have a comprehensive list of
-    files in Virtual AGC at the moment.&nbsp; However, you're only
-    talking a few megabytes, so it usually won't be a problem just
-    to let the files alone.<br>
-  </div>
-  <h2><a name="Ten_4_3" id="Ten_4_3"></a>Installing Virtual AGC
-  Binaries in Mac OS X (10.4)<br></h2><span style=
-  "font-weight: bold;">Disclaimer:</span>&nbsp;&nbsp; <a href=
-  "ArchivedMacOsX.html">I used to explain</a> how to install
-  Virtual AGC binaries in Mac OS X, as well as how to build from
-  source (see above).&nbsp; However, it was almost as hard as
-  building from source, so I eventually removed the
-  instructions.&nbsp; I'm told that it has become relatively easy
-  in Mac OS X 10.4, so we have some new instructions thanks to
-  Fabrizio Bernardini.&nbsp; I haven't any way to try them myself,
-  but Fabrizio knows what he's doing.&nbsp; I've cut-and-pasted
-  directly from his email.<br>
-  <br>
-  <table summary="" style=
-  "width: 75%; text-align: left; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="vertical-align: top;">
-          <pre style=
-          "white-space:pre-wrap; -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">
-
-
-
-
-
-
-
-
-          Thanks to the availability of a brand new PowerBook I had to reload yaAGC and its stuff once more.<br><br>And thanks to the outstanding quality of the overall system provided by Apple (sorry for the ad, but it changes your life) installing the binaries is now simpler than currently cited in the download page.<br><br>Here are the steps I performed:<br><br>Initial conditions: MacOS Tiger 10.4.3 installed and configured as it is out of the box.<br><br>1. Run the Dev Tools installer situated in /Applications/Installers (if you are reading these you probably already performed that).<br><br>2. Install X11 from the Options package available in the MacOS Tiger Installation Disc. When you double-click the installer a selection window will open: everything should already been installed but X11, check it and go ahead.<br><br>3. Check that X11 works by double-clicking on the X11 icon now available in /Applications/Utilities.<br><br>4. Download from //fink.sourceforge.net/ the lates stable relase of fink. I got version 0.8.0 released on 09 June 2005.<br><br>5. Install fink double-clicking its installer package from the disk image (.dmg) file downlaoded. Let it create the /sw directory. Installing FinkCommander is an option, not required if you need fink for yaAGC only, or install it later.<br><br>6. Open a terminal shell and run the following fink request:<br><br>  $ fink install gtk+2<br><br>Running this command requires the computer to be connected to the Internet. Let it run and say Yes to requests.<br><br>7. Install yaAGC binaries in /usr/local<br><br>8. Upon successful completion of the above steps, starts X11 and:<br><br>     a. Open a term shell<br>        b. $ cd /usr/local/yaAGC/bin<br>        c. $ ./yaAGC --core=Luminary131.bin --port=19797 --cfg=LM.ini<br>       d. Open another term shell<br>  e. $ cd /usr/local/yaAGC/bin<br>        f. $ ./yadsky --half-size --cfg=LM.ini --port=19797<br><br>   and everything runs !<br><br>9. Bonus step: now the TCL/TK toolkit is included in the developer tools so it is already installed and if you wish you can open another term shell and run also LM_Simulator with no troubles !<br><br>Conclusions: MacOS is demonstrating itself as one of the best developing platforms ever conceived out of a box. Please note that only the gtk libraries where required in addition to the dev tools add ons.<br><br>I will perform the same procedures also on a iMac and will report the results soon.<br><br>Now is anybody so lucky to be able to try the same on an Intel iMac with Tiger 10.4.4 ?</pre>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <div style="margin-left: 40px;"></div><br>
-  <hr style="width: 100%; height: 2px;">
-  <center>
-    <br>
-    <span style=
-    "color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
-    This page is available under the <a href=
-    "https://creativecommons.org/publicdomain/zero/1.0/">Creative
-    Commons No Rights Reserved License</a></span><br>
-    <i><font size="-1">Last modified by <a href=
-    "mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br>
-    <br>
-    <a href="http://www.ibiblio.org"><img style=
-    "border: 0px solid ; width: 300px; height: 100px;" alt=
-    "Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
-    "100" width="300"></a><br></font></i>
-  </center><br>
-</body>
-</html>
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><title>Virtual AGC Download Page</title><meta http-equiv="Content-Type" content=
+"text/html; charset=utf-8"><meta name=Author content="Ronald Burkey"><link rel=icon type="image/png" href="favicon.png"><meta name=author content="Ronald S. Burkey"><script type="text/javascript" src="Header.js"></script></head><body style="background-image: url(gray3.jpg);"><script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Downloading").replace("@SUBTITLE@","and building the software<br>(This page is now obsolete)"))
+</script><br><table summary="" style=
+"text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top;"><span style=
+"color: rgb(204, 0, 0);"><span style=
+"font-weight: bold;">This is an unmaintained, obsoleted
+page, archived for legacy purposes only to provide
+information on some older Virtual AGC releases.&nbsp; For
+information pertinent to current releases, please look on
+the <a href="download.html">current download
+page</a>.</span></span><br></td></tr></tbody></table><br><h2>Contents</h2><ul><li><a href="download.html#Whats_In_a_Full_Download">What's in
+a full download?</a></li><li><a href="#Downloads">Downloads</a> (source code package;
+Linux, Windows, and Mac OS X binary packages)</li><li><a href="#Extras">Extras!</a> (extra stuff not included in
+the "full" download)<br></li><li><a href="#Installing_in_Windows">Installing the Windows
+binaries</a><br></li><li><a href="#Installing_the_Linux_Binaries_">Installing the
+Linux binaries</a></li><li><a href="#Building_the_Virtual_AGC_software_in_">Building
+the Virtual AGC software, in Linux</a></li><li><a href="#Running_the_Validation_Suite">Running the
+validation suite</a></li><li><a href="#Building_the_Virtual_AGC_software_in">Building
+the Virtual AGC software, in Windows</a></li><li><a href="#What_about_building_Virtual_AGC_in">What about
+building Virtual AGC in FreeBSD, NetBSD, or OpenBSD?</a></li><li><a href="#Installing_the_Mac_OS_X_Binaries">Installing
+and/or building Virtual AGC in Mac OS X (10.2)</a></li><li><a href="#Ten_4_3">Installing Virtual AGC Binaries in Mac
+OS X (10.4)</a></li></ul><br><h2><a name=Whats_In_a_Full_Download id=
+"Whats_In_a_Full_Download"></a>What's In a Full Download?</h2><table summary="" style=
+"width: 100%; text-align: left; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><th style="vertical-align: top;">Directory<br></th><th style="vertical-align: middle;">Contents<br></th><td style="vertical-align: middle;"><span style=
+"font-weight: bold;">Status</span><br></td></tr><tr><td rowspan="2" style=
+"vertical-align: middle;">yaAGC/Colossus249/<br></td><td style="vertical-align: middle;">Source code (*.s) for
+Build 249 of the <span style=
+"font-weight: bold;">Colossus</span> (AGC Command Module)
+program.<br></td><td style="vertical-align: middle;">100% complete, and
+debugged.&nbsp; (The comments in the source-code still need
+proofing, but the program assembles correctly with the
+<span style="font-weight: bold;">yaYUL</span>
+assembler.)</td></tr><tr><td style="vertical-align: middle;">Binary (*.bin and
+*.binsource) image of the core-rope for Build 249 of
+<span style="font-weight: bold;">Colossus</span>.</td><td style="vertical-align: middle;">100% complete, proofed,
+and known to be <a href=
+"Colossus.html#Validity">valid</a>.</td></tr><tr><td rowspan="3" style=
+"vertical-align: middle;">yaAGC/Luminary131/<br></td><td style="vertical-align: middle;">Source code (*.s) for
+Build 131 of the <span style=
+"font-weight: bold;">Luminary</span> (AGC Lunar Module)
+program.<br></td><td style="vertical-align: middle;">100% complete, and
+debugged.&nbsp; (The comments in the source-code still need
+proofing, but the program assembles correctly with the
+<span style="font-weight: bold;">yaYUL</span>
+assembler.)</td></tr><tr><td style="vertical-align: middle;">Binary (*.bin and
+*.binsource) image of the core-rope for Build 131 of
+<span style="font-weight: bold;">Luminary</span>.</td><td style="vertical-align: middle;">100% complete, proofed,
+and known to be <a href=
+"Luminary.html#Validity">valid</a>.&nbsp;</td></tr><tr><td style="vertical-align: middle;">Some utilities.</td><td style="vertical-align: middle;"><ul><li><span style="font-weight: bold;">Oct2Bin</span> ---
+converts a set of <span style=
+"font-weight: bold;">Luminary</span>/<span style=
+"font-weight: bold;">Colossus</span> binaries given in
+the form of an ASCII file to a core-rope binary.&nbsp;
+This is 100% working.&nbsp; Needed only for validating
+data entry for programs like <span style=
+"font-weight: bold;">Luminary</span> or <span style=
+"font-weight: bold;">Colossus</span>.<br></li><li><span style="font-weight: bold;">CheckDec</span>
+--- allows interactive entry of decimal numbers
+(suitable for <span style=
+"font-family: monospace;">DEC</span>/<span style=
+"font-family: monospace;">2DEC</span> pseudo-ops), and
+immediate viewing of their binary forms.&nbsp; This is
+100% working.&nbsp; Needed only for experimenting with
+the binary formats the AGC uses for storing
+numbers.<br></li><li><span style=
+"font-weight: bold;">webb2burkey-rope</span> ---
+converts the core-rope files used in Virtual AGC to the
+format used by Julian Webb's AGC simulator, and
+vice-versa.&nbsp; This is 100% working, but since few
+of you have Webb's simulator, the point is moot.</li></ul></td></tr><tr><td rowspan="2" style=
+"vertical-align: middle;">yaAGC/Artemis072/<br></td><td style="vertical-align: middle;">Source code (*.s) for
+Build 072 of the <span style=
+"font-weight: bold;">Artemis</span> or <span style=
+"font-weight: bold;">Colossus 3</span> (AGC Command Module)
+program.</td><td style="vertical-align: middle;">About 6 pages (out of
+&gt;1500) available.<br></td></tr><tr><td style="vertical-align: middle;">Binary (*.bin and
+*.binsource) image&nbsp; for Build 072 of&nbsp;
+<span style="font-weight: bold;">Artemis</span> or
+<span style="font-weight: bold;">Colossus 3</span>.</td><td style="vertical-align: middle;">100% complete and
+proofed.&nbsp; I <span style=
+"font-style: italic;">assume</span> it's correct, but we
+won't really know until there's source code to cross-check
+it against.<br></td></tr><tr><td style="vertical-align: middle;">yaAGC/yaAGC/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaAGC</span> (AGC
+emulator) program.<br></td><td style="vertical-align: middle;">99% complete.&nbsp; At
+present, you can expect to see do the stuff described in
+the <a href="index.html#Quick_Start">Quick Start
+section</a> of my home page.&nbsp; Both the LM and CM sims
+should work quite well.</td></tr><tr><td style="vertical-align: middle;">
+yaAGC/ControlPulseSim<br></td><td style="vertical-align: middle;">An emulator for the AGC
+at the "control-pulse" (microcode) level rather than the
+instruction level.<br></td><td style="vertical-align: middle;"><span style=
+"font-weight: bold;">A</span>llows interactive simulation
+of some (but not all) control-pulse sequences (microcode)
+for the AGC.&nbsp; This program is only for the very brave,
+and very little of it works.&nbsp; I'll probably never
+complete much more of it.<br></td></tr><tr><td style="vertical-align: middle;">yaAGC/yaDSKY/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaDSKY</span> (DSKY
+emulator) program.<br></td><td style="vertical-align: middle;">99% complete (both
+Linux and Win32).&nbsp; (The STBY and RESTART indicator
+lamps are inoperable.)&nbsp; In addition to being a DSKY
+simulation, this program can print out downlinked telemetry
+data.<br></td></tr><tr><td style="vertical-align: middle;">
+yaAGC/yaUniverse/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaUniverse</span>
+(spacecraft motion emulator) program.<br></td><td style="vertical-align: middle;">Is now capable of
+modeling the motion of heavenly bodies and spacecraft under
+gravitational influences.&nbsp; This, perhaps, 25% of
+what's required in the full program.</td></tr><tr><td style=
+"vertical-align: middle; text-decoration: line-through;">
+yaAGC/yaIMU/<br></td><td style=
+"vertical-align: middle; text-decoration: line-through;">
+Source code for the <span style=
+"font-weight: bold;">yaIMU</span> (inertial measurement
+unit emulator) program.</td><td style="vertical-align: middle;"><span style=
+"text-decoration: line-through;">This program has not yet
+been started.</span>&nbsp; <small>(Because of Stephan
+Hotto's contributed <a href="yaTelemetry.html"><span style=
+"font-weight: bold;">LM_Simulator</span></a> program, the
+<span style="font-weight: bold;">yaIMU</span> program is no
+longer needed, and therefore is no longer being
+planned.)</small><br></td></tr><tr><td style="vertical-align: middle;">yaAGC/yaAOT/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaAOT</span> (alignment
+optical telescope emulator) program.</td><td style="vertical-align: middle;">This program has not
+yet been started.</td></tr><tr><td style="vertical-align: middle;">yaAGC/yaACA/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaACA</span> (attitude
+controller assembly emulator) program.</td><td style="vertical-align: middle;">This program is 100%
+complete and seems fine on a standalone basis, but the
+complete system environment for it has not yet been
+demonstrated to work.<br></td></tr><tr><td style="vertical-align: middle;">
+yaAGC/yaTelemetry/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaTelemetry</span>
+(telemetry-downlink console) program.<br></td><td style="vertical-align: middle;">This program has not
+yet been started.&nbsp; (In its absence, <span style=
+"font-weight: bold;">yaDSKY</span> is capable of printing
+out digital-downlink data, though not in a particularly
+attractive manner, with the "--test-downlink" command-line
+switch.)<br></td></tr><tr><td style="vertical-align: middle;">yaAGC/yaYUL/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaYUL</span> (AGC
+cross-assembler) program.<br></td><td style="vertical-align: middle;">100% complete, and
+capable of assembling <span style=
+"font-weight: bold;">Luminary131</span>, <span style=
+"font-weight: bold;">Colossus249</span>, or <span style=
+"font-weight: bold;">Validation</span> source code without
+error.<br></td></tr><tr><td style="vertical-align: middle;">
+yaAGC/Validation/<br></td><td style="vertical-align: middle;">Source code for a
+(newly-written) program in AGC assembly-langauge that is
+used to test the emulator's instruction set.<br></td><td style="vertical-align: middle;">About as complete as
+it's going to get!</td></tr><tr><td style="vertical-align: middle;">yaAGC/yaAGS/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaAGS</span> (Abort
+Guidance System emulator) program.<br></td><td style="vertical-align: middle;">Now working.&nbsp;
+Probably there are a number of bugs and unimplemented
+features, but at least it can pass the built-in self-test,
+and can perform the few operations I personally know how to
+activate.&nbsp; :-)<br></td></tr><tr><td style="vertical-align: middle;">yaAGC/yaDEDA/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaDEDA</span> (emulator
+for the Data Entry and Display&nbsp; Assembly -- i.e., the
+AGS user interface) program<br></td><td style="vertical-align: middle;">I think this program is
+100% working, though I've only tested it with <span style=
+"font-weight: bold;">yaAGC</span> (since <span style=
+"font-weight: bold;">yaAGS</span> isn't available yet), so
+I can't be perfectly sure.<br></td></tr><tr><td rowspan="3" style=
+"vertical-align: middle;">yaAGC/yaLEMAP/<br></td><td style="vertical-align: middle;">Source code for the
+<span style="font-weight: bold;">yaLEMAP</span> (AGS
+cross-assembler) program.<br></td><td style="vertical-align: middle;">I think this program is
+100% working, though there could be bugs I'm not aware
+of.<br></td></tr><tr><td style="vertical-align: middle;">Sample AGS source
+code.<br></td><td style="vertical-align: middle;">100% complete and
+correct.<br></td></tr><tr><td style="vertical-align: middle;">Utilities<br></td><td style="vertical-align: middle;"><span style=
+"font-weight: bold;">binLEMAP</span> --- like <span style=
+"font-weight: bold;">Oct2Bin</span>, but for the AGS
+instead of the AGC.&nbsp; 100% working.&nbsp; Needed only
+for validating source-code data entry for programs like AGS
+<span style="font-weight: bold;">FP6</span> or <span style=
+"font-weight: bold;">FP8</span>.<br></td></tr><tr><td style="vertical-align: middle;">yaAGC/FP6/<br></td><td style="vertical-align: middle;">Source code (*.s) and
+binary (*.bin and *.binsource) for AGS <span style=
+"font-weight: bold;">FP6</span> (Flight Program 6)<br></td><td style="vertical-align: middle;">It is believed that the
+source code is 100% complete and correct, and that the
+binary produced by assembling the source with <span style=
+"font-weight: bold;">yaLEMAP</span> is 100% complete and
+correct.</td></tr><tr><td style="vertical-align: middle;">yaAGC/FP8/<br></td><td style="vertical-align: middle;">Source code (*.s) and
+binary for AGS <span style="font-weight: bold;">FP8</span>
+(Flight Program 8)<br></td><td style="vertical-align: middle;">It is believed that the
+source code is 100% complete and correct, and that the
+binary produced by assembling the source with <span style=
+"font-weight: bold;">yaLEMAP</span> is 100% complete and
+correct.<br></td></tr><tr><td style="vertical-align: middle; text-align: left;">
+yaAGC/Contributed/LM_Simulator<br></td><td style="vertical-align: middle; text-align: left;"><span style="font-weight: bold;">Tcl/Tk</span> source code,
+contributed by Stephan Hotto.<br></td><td style="vertical-align: middle; text-align: left;">
+Continually evolving in its conception, and I'm not the
+author, so I can't give a percentage of completion.&nbsp;
+<span style="font-style: italic;">At present</span>, the
+program has the following features:<br><ul><li>An operational IMU.<br></li><li>An operational FDA ball.<br></li><li>An operational "DSKY Lite" (an alternate DSKY
+simulation), for use on target computer platforms where
+<span style="font-weight: bold;">yaDSKY</span> cannot
+be built.<br></li><li>An operational i/o-channel monitor</li></ul></td></tr></tbody></table><br><h2><a name=Downloads id="Downloads"></a>Downloads</h2><table summary="" style="text-align: left; width: 100%;" border=
+"1" cellpadding="2" cellspacing="2"><tbody><tr><td style="font-weight: bold; vertical-align: middle;">
+Download file<br></td><td style="font-weight: bold; vertical-align: middle;">What
+is it?<br></td><td style="font-weight: bold; vertical-align: middle;">Who
+needs it?<br></td></tr><tr><td style="vertical-align: middle;"><a href=
+"Downloads/yaAGC-dev-20090301.tar.bz2">
+yaAGC-dev-20090301.tar.bz2</a><br><br><table summary="" style="text-align: left; width: 100%;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top;"><span style=
+"font-weight: bold;">Note:</span>&nbsp; To take
+full advantage of pad loads provided by
+<span style="font-weight: bold;">LM_Simulator</span>,
+I'd suggest copying the file yaAGC / Contributed /
+LM_Simulator / LM.core to the directory from which
+you invoke the simulator.<br></td></tr></tbody></table><br></td><td style="vertical-align: middle;">
+Full development snapshot, containing all of the stuff
+mentioned above, to the extent described above.&nbsp;
+Refer also to the <a href="changes.html">change
+log</a>.<br><br><table summary="" style=
+"width: 60%; text-align: left; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top;"><span style=
+"font-weight: bold;">Note:</span>&nbsp; If you
+already have Virtual AGC working on your computer
+and simply wish to install the Artemis 072
+(Colossus 3) program, expand the tarball and copy
+the SimArtemis* and Artemis072/Artemis072.bin files
+to your installation directory.&nbsp; (You might
+also need to change the file attributes of
+SimArtemis072 and SimArtemis072_lite to make them
+executable.)<br></td></tr></tbody></table></td><td style="vertical-align: middle;"><ul><li>Everybody who wants the Virtual AGC source code,
+AGC <span style="font-weight: bold;">Colossus</span>
+source code, AGC <span style=
+"font-weight: bold;">Luminary</span> source code, or
+AGS flight-program source code not included in the
+Linux, Windows, and Mac OS X binary packages.</li><li>Everybody who needs to build Virtual AGC from
+source because binary packages for them aren't provided
+here, such as <a href=
+"#What_about_building_Virtual_AGC_in">*BSD users</a>,
+<a href="#Building_the_Virtual_AGC_software_in_">PPC
+Linux users</a>, Solaris users, ....</li><li>Linux users who need to <a href=
+"#Building_the_Virtual_AGC_software_in_">build from
+source</a> because the binary package doesn't work for
+them.</li><li>Windows users who need to <a href=
+"#Building_the_Virtual_AGC_software_in">build from
+source</a> because the binary package doesn't work for
+them.</li><li>Mac OS X users who need to <a href=
+"#Installing_the_Mac_OS_X_Binaries">build from
+source</a> because the binary package doesn't work for
+them.<br></li><li>... Oh, heck!&nbsp; Just everybody!<br></li></ul></td></tr><tr><td style="vertical-align: top;"><a href=
+"Downloads/yaAGC-linux-20050720.tar.bz2">
+yaAGC-linux-20050720.tar.bz2</a></td><td style="vertical-align: top;">Pre-built Virtual AGC
+executables for x86 Linux.</td><td style="vertical-align: top;"><ul><li>x86 Linux users who don't want to build Virtual AGC
+from source, and thus want to just <a href=
+"#InstallStandAlone">install the binaries</a>.</li></ul></td></tr><tr><td rowspan="1" style=
+"vertical-align: middle;"><a href=
+"Downloads/LM_StandAlone_210407a.zip">
+LM_StandAlone_210407a.zip</a><br></td><td rowspan="1" style=
+"vertical-align: middle;">Pre-built Virtual AGC executables
+for MS Windows, packaged by Stephan Hotto.<br></td><td rowspan="1" style=
+"vertical-align: middle;"><ul><li>Windows users who don't want to build Virtual AGC
+from source, and thus want to just <a href=
+"download.html#Installing_in_Windows">install the
+binaries</a>.&nbsp; (But see the next item.)<br></li></ul></td></tr><tr><td></td></tr><tr><td style="vertical-align: middle;"><a href=
+"Downloads/yaAGC-Win32-20050720.zip">
+yaAGC-Win32-20050720.zip</a></td><td style="vertical-align: middle;">Pre-built Virtual AGC
+executables for MS Windows, packaged by Ron
+Burkey.<br></td><td rowspan="2" style=
+"vertical-align: middle;"><ul><li>Windows users who don't want to build Virtual AGC
+from source, and thus want to just <a href=
+"#Installing_in_Windows">install the
+binaries</a>.&nbsp; <span style=
+"font-weight: bold; color: rgb(255, 0, 0);">Hey!&nbsp;
+Isn't this just like the line above?!!!</span>&nbsp;
+Sort of ....&nbsp; There are two different packagings
+of the Windows binaries.&nbsp; My packaging (this
+line!) gives you everything and may run a little more
+efficiently, but may be a little harder to install;
+it's targeted at enthusiasts.&nbsp; Stephan's (the line
+above) is more selective about what it provides, and
+may be a little easier to install; it's probably the
+better choice if you just want to quickly try out the
+simulation without getting too involved in it.&nbsp;
+Also, you may want to see which one is more
+current.<br></li></ul></td></tr><tr><td style="vertical-align: middle;"><a href=
+"Downloads/MinGW-runtime-install.zip">
+runtime-package zipfile</a></td><td style="vertical-align: middle;">Runtime package needed
+for running the Ron's pre-built Windows executables.&nbsp;
+Not needed for Stephan's executables.<br></td></tr><tr><td style="vertical-align: middle;"><a href=
+"Downloads/yaAGC-macosx-20050720.tar.bz2">
+yaAGC-macosx-20050720.tar.bz2</a><br></td><td style="vertical-align: middle;">Pre-built Virtual AGC
+executables for Mac OS X.<br></td><td style="vertical-align: middle;"><ul><li>Mac OS X users who don't want to build Virtual AGC
+from source.&nbsp; <span style=
+"font-style: italic;">Note that this will be nothing
+like any Mac OS X package you've ever seen, so you will
+have to</span> <a style="font-style: italic;" href=
+"#Installing_the_Mac_OS_X_Binaries">follow the
+instructions</a><span style=
+"font-style: italic;">.</span><br></li></ul></td></tr><tr><td style="vertical-align: middle;"><a href=
+"Downloads/">Archive</a></td><td style="vertical-align: middle;">Earlier versions of the
+downloadable files.<br></td><td style="vertical-align: middle;"><ul><li>... Probably nobody.<br></li></ul></td></tr></tbody></table><br><h2><a name=Extras id="Extras"></a>Extras!</h2>Onno Hommes has
+sent us some configuration files for adding AGC-specific
+syntax-highlighting for the following source-code editors:&nbsp;
+<span style="font-weight: bold;">Kate</span>, <span style=
+"font-weight: bold;">KWrite</span>, <span style=
+"font-weight: bold;">Kdevelop</span>, <span style=
+"font-weight: bold;">Eclipse</span>, <span style=
+"font-weight: bold;">vim</span>, <span style=
+"font-weight: bold;">TextPad</span>, and (maybe) <span style=
+"font-weight: bold;">emacs</span>.&nbsp; <a href=
+"OnnoHommes/SyntaxAGC-20071231.zip">
+Onno's zipfile</a> contains all of the configuration files, along
+with instructions (in PDF form) for using them.<br><br>
+Here's a nice screenshot (click to enlarge) of what source
+highlighting looks like in <span style=
+"font-weight: bold;">Kdevelop</span>.&nbsp; As you can see, it's
+a lot more pleasant to read the AGC source code with the
+highlighting than without it.<br><div style="text-align: center;"><a href=
+"OnnoHommes/SyntaxAGC-Kdevelop.jpg"><img style="border: 2px solid ; width: 300px; height: 240px;"
+alt="Screenshot of source highlighting in KDevelop" title=
+"Click to enlarge" src=
+"OnnoHommes/SyntaxAGC-Kdevelop-thumb.jpg" height="240" width=
+"300"></a></div><h2><a name=InstallStandAlone id=
+"InstallStandAlone"></a>Installing the Windows Binaries, the
+Stephan Way</h2>(This is the installation procedure for
+LM_StandAlone_<span style=
+"font-style: italic;">version</span>.zip.)<br><br>
+Choose some folder on your Windows computer, and unzip
+LM_StandAlone_<span style=
+"font-style: italic;">version</span>.zip into it.&nbsp; Now
+you're finished with the installation!<br><br>
+Inside the installtion directory, you'll find a program called
+"lm_simulator.exe".&nbsp;&nbsp; (You might want to create an icon
+on your desktop for it.)&nbsp; Run and enjoy!<br><h2><a name=Installing_in_Windows id=
+"Installing_in_Windows"></a>Installing the Windows Binaries, the
+Ron Way<br></h2>(This is the installation procedure for
+yaAGC-Win32-<span style="font-style: italic;">date</span>.zip and
+the runtime-package zipfile.)<br><br>
+For Win32 users, it's much more work to get your computer set up
+to build Virtual AGC than it is in Linux, and the steps needed
+will be less familiar.&nbsp; Therefore, most of you will feel
+inclined to simply install the Virtual AGC programs rather than
+compiling them from scratch.&nbsp; On the other hand, if you are
+already a software developer using MinGW, you will probably want
+to build the software rather than installing the binaries, to
+avoid gumming up your \mingw directory.<br><br><span style="font-weight: bold;">Note:</span>&nbsp; Since it's
+inconvenient for me to build the Win32 packages, they may not be
+as current as the development snapshot.<br><ol><li>Download the runtime package (see above).&nbsp; Extract its
+contents into your c:\ directory.&nbsp; You only need to
+download and install this <span style=
+"font-style: italic;">once.</span><br></li><li>Download the&nbsp; latest zipfile of Virtual AGC Win32
+executables.&nbsp; Extract its contents into your c:\
+directory.<br></li><li>Add the directory c:\mingw\bin (created by steps 1 &amp; 2
+above) to your PATH.&nbsp; Note that <span style=
+"font-weight: bold;">yaDSKY</span> <span style=
+"font-style: italic;">will not work</span> if you copy the
+files to a directory other than c:\mingw\bin.</li><li><span style="font-weight: bold;">Optional:</span>&nbsp; The
+steps above give you <span style=
+"font-weight: bold;">Luminary</span> and <span style=
+"font-weight: bold;">Colossus</span> core-rope images, needed
+to run the simulation, but <span style="font-style: italic;">do
+not</span> include source code for <span style=
+"font-weight: bold;">Luminary</span> or <span style=
+"font-weight: bold;">Colossus</span>, nor source code for
+<span style="font-weight: bold;">yaAGC</span>, <span style=
+"font-weight: bold;">yaDSKY</span>, or <span style=
+"font-weight: bold;">yaYUL</span>.&nbsp; If you want those
+things, you'll have to download the full development snapshot
+also.&nbsp; (To extract the contents of the downloaded archive,
+you'll need the programs <span style=
+"font-weight: bold;">tar</span> and <span style=
+"font-weight: bold;">bzip2</span>, which most Win32 users will
+not have pre-installed. &nbsp; You can download versions of
+these programs for Win32 from the following links:&nbsp;
+<a href="http://www.bzip.org/downloads.html">bzip2</a> or
+<a href=
+"http://gnuwin32.sourceforge.net/packages/tar.htm">tar</a>.)&nbsp;
+The contents of the archive can then be extracted by the
+command-line steps, which will create a directory called
+yaAGC.<br></li></ol><div style="margin-left: 80px;"><span style="font-family: monospace;">bunzip2
+yaAGC-dev-<span style=
+"font-style: italic;">RevisionDate</span>.tar.bz2</span><br style="font-family: monospace;"><span style="font-family: monospace;">tar -xf
+yaAGC-dev-<span style=
+"font-style: italic;">RevisionDate</span>.tar<br></span></div><ol start=5><li><span style="font-weight: bold;">Optional:</span>&nbsp; If
+you want to run Stephan Hotto's contributed <a href=
+"developer.html"><span style=
+"font-weight: bold;">LM_Simulator</span></a> software (and you
+probably do!), you'll have to install <a href=
+"http://www.tcl.tk/"><span style=
+"font-weight: bold;">Tcl/Tk</span></a> for it to work.</li></ol><h2><a name=Installing_the_Linux_Binaries_ id=
+"Installing_the_Linux_Binaries_"></a>Installing the Linux
+Binaries<br></h2><span style=
+"font-weight: bold;">Disclaimer:</span>&nbsp; I don't really know
+how to package programs for installation on Linux, so these
+binaries may not work on your system.&nbsp; (I think they work on
+SuSE 9.0 &amp; 9.1, Ubuntu 5.04, RedHat 7.3, and Fedora Core
+1.)&nbsp; Hopefully they will work for you; if not, you may still
+need to end up building Virtual AGC yourself, as described
+<a href="#Building_the_Virtual_AGC_software_in_">below</a>.<br><br><span style="font-weight: bold;">Prerequisites:</span>&nbsp;
+libgtk 2.0 or higher; also, <span style=
+"font-weight: bold;">Tcl/Tk</span> if you want to run the
+<a href="yaTelemetry.html"><span style=
+"font-weight: bold;">LM_Simulator</span></a> program.&nbsp; I am
+not sure what version of <span style=
+"font-weight: bold;">Tcl/Tk</span> is needed, but I've noticed
+that v8.4.4 works fine, whereas v8.3.3 (RedHat 7.3) aborts on
+trying to open the FDAI ball window.<br><br><span style="font-weight: bold;">Installation:</span><br><ul><li>Download (see above) the Virtual AGC binary tarball,
+yaAGC-linux-<span style=
+"font-style: italic;">RevisionCode</span>.tar.bz2.<br></li><li>From a command line, as <span style=
+"font-style: italic;">root</span>, unpack the tarball with the
+following command:</li></ul><div style="margin-left: 80px;">
+&nbsp; <span style="font-family: monospace;">tar --directory=/
+--bzip2 -xf yaAGC-linux-</span><span style=
+"font-style: italic; font-family: monospace;"><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;"><span style=
+"font-style: italic;">RevisionCode</span></span></span></span><span style="font-family: monospace;">.tar.bz2</span></div><ul><li>Put the directory /usr/local/yaAGC/bin into your PATH.</li><li>You'll probably still want the source-code tarball, since
+it contains a lot of stuff (like source code for the Luminary
+and Colossus programs) that aren't in the binary tarball.&nbsp;
+So download yaAGC-dev-<span style=
+"font-style: italic;">RevisionCode</span>.tar.bz2 and unpack
+it, thus creating a directory called "yaAGC" containing the
+stuff listed at the top of the page:</li></ul><div style="margin-left: 80px;"><span style="font-family: monospace;">tar --bzip2 -xf
+yaAGC-dev</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span></div><ul><li>Enjoy!</li></ul><span style=
+"font-weight: bold;">Uninstallation:</span>&nbsp; Just remove the
+/usr/local/yaAGC directory containing the binaries, and the yaAGC
+directory containing the sources.<br><br><h2><a name=Building_the_Virtual_AGC_software_in_ id=
+"Building_the_Virtual_AGC_software_in_"></a>Building the Virtual
+AGC software, in Linux<br></h2><span style=
+"font-weight: bold;">Disclaimer:</span>&nbsp; On a number of
+Linux platforms, I've had no problem at all building the Virtual
+AGC suite.&nbsp; (These include SuSE 9.0-10.0, RedHat 7.3, and
+Ubuntu 5.04.)&nbsp; But on some, it's much trickier.&nbsp; In
+cases like that, I'd suggest trying to install the binaries (see
+above) rather than building from source.<br><span style="font-weight: bold;"><br>
+Prerequisites:</span>&nbsp; gcc, pkg-config, autoconf, automake,
+glib-dev, libgtk, libgtk-dev 2.0 or higher, readline-devel,
+either curses or ncurses, and the <a href=
+"http://alleg.sourceforge.net/">Allegro</a> cross-platform GUI
+kit.<br><br>
+To unpack the tarball, you work from a command-line prompt.&nbsp;
+The development-snapshot tarball, for example, is unpacked as
+follows:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">tar --bzip2 -xf
+yaAGC-dev</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span><br></div><br>
+After unpacking there will be a new directory called "yaAGC",
+with the contents listed in the preceding section.&nbsp;&nbsp; To
+build the programs,<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">cd yaAGC</span><br style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">./configure</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">make
+clean</span><br style="font-family: monospace;"><span style="font-family: monospace;">make</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">sudo make
+install</span><br><br></div>As shown above, installation will be made to the /usr/local
+directory, and the executables will go into /usr/local/bin.&nbsp;
+If you would prefer to&nbsp; do an installation to some other
+directory, perhaps to avoid needing root access, then&nbsp;
+instead of using the command "./configure", use the command
+"./configure --prefix=<span style=
+"font-style: italic;">InstallDirectory</span>".&nbsp; (This
+option is present only in software versions 05/14/04 and
+later.)&nbsp; If you use this option, you will also want to add
+the directory <span style=
+"font-style: italic;">InstallDirectory</span>/bin to your PATH
+environment variable.<br><br><div style="text-align: center;"><table summary="" style=
+"text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top;"><div style=
+"text-align: center; color: rgb(204, 0, 0);"><big><span style=
+"font-weight: bold; text-decoration: underline;">Important
+Note</span><br></big></div><big><span style="color: rgb(204, 0, 0);">Do not
+run the uninstallation script mentioned in the
+struck-out section following this note, since if you
+have installed into /usr/local (or worse, /usr) it will
+delete /usr/local/bin (or /usr/bin)! Thanks to Onno
+Hommes for catching this error.</span></big><br></td></tr></tbody></table><br></div><br><span style="text-decoration: line-through;">For versions
+2006-02-26 and later, 'make install' builds a script
+called</span> <span style=
+"font-weight: bold; text-decoration: line-through;">VirtualAgcUninstall</span><span style="text-decoration: line-through;">,
+which you can use to uninstall Virtual AGC later, if you so
+choose:</span><br style="text-decoration: line-through;"><br style=
+"font-family: monospace; text-decoration: line-through;"><div style="margin-left: 40px; text-decoration: line-through;"><span style="font-family: monospace;">sudo
+VirtualAgcUninstall</span><br><br></div><span style="text-decoration: line-through;">This is
+principally useful, I expect, if you decide to change the
+installation directory after already having installed the
+program.&nbsp; I guess I should point out that</span><span style="font-weight: bold; text-decoration: line-through;">VirtualAgcUninstall</span><span style="text-decoration: line-through;">is slightly
+dangerous on a true multi-user system, because it will uninstall
+not only Virtual AGC, but also any other programs that happened
+to be placed in the installation directory at the exact moment
+'make install' occurred.&nbsp; But if your system is a true
+multi-user system, I expect you'd not want to install Virtual AGC
+into /usr/local anyway.</span><br><div style="margin-left: 40px;"><br></div><table summary="" style="text-align: left; width: 100%;" border=
+"1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top;"><div style="text-align: center;"><span style="font-weight: bold;">Some trouble-shooting
+notes ...<br><br></span></div><ul><li>If you get a message to the effect libcurses.a is
+not found, it points to a naming discrepancy between
+the curses library (which is what we'd like to have
+installed) and the ncurses library (which is probably
+what is actually installed).&nbsp; In that case, locate
+the file libncurses.a (usually, in /usr/lib) and do
+this before running <span style=
+"font-family: monospace;">make</span> again:</li></ul><div style="text-align: left; margin-left: 80px;"><span style="font-family: monospace;">sudo ln
+--symbolic /usr/lib/libncurses.a
+/usr/lib/libcurses.a</span><br></div><ul><li>As mentioned above, you will need to have <a href=
+"http://www.gtk.org">gtk+</a> (<span style=
+"font-style: italic;">plus</span> the gtk+ development
+package) installed on your computer for this to
+work.&nbsp; (Presently, I'm using <span style=
+"font-weight: bold;">gtk+</span> version 2.2.x.)&nbsp;
+Unfortunately, the names of the packages you need to
+install will differ by Linux distribution, unless you
+choose to install gtk+ from source (in which case no
+separate "dev" package is needed).&nbsp; They may be
+something like "gtk2" and "gtk2-dev", or "gtk+2" and
+"gtk+2-dev", or even (I'm told) something as obscure as
+"libgtk+2.0_0-devel".&nbsp; For some reason, on my
+computer, the environment variable PKG_CONFIG_PATH
+needed for the "configure" step is not set properly by
+the&nbsp; installation of gtk+.&nbsp; If you encounter
+this problem, the "configure" step will display
+instructions as to how it may be easily fixed.&nbsp; If
+you don't get a message, you probably don't need to
+worry about it.&nbsp;<br></li></ul><ul><li>It may be that you just can't build the software,
+no matter how hard you try.&nbsp; In almost all cases,
+the reason for this will be a problem in configuration
+of <span style="font-weight: bold;">gtk+</span>, and
+that all of the programs will build fine except for
+<span style="font-weight: bold;">yaDSKY</span> and
+<span style="font-weight: bold;">yaDEDA</span>.&nbsp;
+In this case, as a last resort, you can use the
+following alternate build instructions:</li></ul><div style="margin-left: 40px;"><span style="font-family: monospace;">cd yaAGC<br>
+make NOGUI=yes autogen<br></span> [<span style=
+"font-style: italic;">or</span>&nbsp; <span style=
+"font-family: monospace;">make NOGUI=yes
+PREFIX=<span style=
+"font-style: italic;">InstallDirectory</span>
+autogen</span>]<span style=
+"font-family: monospace;"><br style=
+"font-family: monospace;"></span> <span style=
+"font-family: monospace;">make NOGUI=yes
+clean<br style="font-family: monospace;"></span><span style="font-family: monospace;">make
+NOGUI=yes<br>
+sudo make NUGUI=yes install<br></span></div><br><div style="margin-left: 40px;">
+Instead of running "SimLuminary131", "SimColossus249",
+or "SimArtemis072", run "SimLuminary131_lite",
+"SimColossus249_lite", or "SimArtemis072_lite".&nbsp;
+What these steps will do for you is to bypass building
+<span style="font-weight: bold;">yaDSKY</span> and
+<span style="font-weight: bold;">yaDEDA</span>, and to
+use instead the "DSKY Lite" module of the <span style=
+"font-weight: bold;">LM_Simulator</span> program (which
+doesn't need to be compiled).<br></div><ul><li>Other trouble-shooting info may be found in the
+<a href="faq.html">FAQ</a>.<br></li></ul></td></tr></tbody></table><br><h2><a name=Running_the_Validation_Suite id=
+"Running_the_Validation_Suite"></a>Running the Validation
+Suite</h2>Having built the software as above, you can test the
+emulated CPU using the "validation suite":<br><ol><li>Run <span style=
+"font-weight: bold;">SimValidation</span>.<br></li><li>A code of "00" will appear in the MODE area of the DSKY,
+and the OPR ERR lamp will light.&nbsp; This means that the
+validation program is ready to start.<br></li><li>Press the PRO key on the DSKY.&nbsp; The OPR ERR light will
+go off and the validation program will begin.<br></li><li>If all tests are passed, then the MODE area on the DSKY
+will show the code "77", and the OPR ERR lamp will light.&nbsp;
+This will take about 50 seconds.<br></li><li>If some tests fail, an error code other than "00" or "77"
+will be displayed in the MODE area on the DSKY, and the OPR ERR
+lamp will light.</li><li>In the latter case, you can proceed from one test to the
+next by pressing the PRO key.&nbsp; The meanings of the error
+codes are determined by reading the file
+Validation/Validation.s.</li></ol>If this doesn't work for some reason, refer to the
+trouble-shooting info in the <a href="faq.html">FAQ</a>.<br><h2><a name=Building_the_Virtual_AGC_software_in id=
+"Building_the_Virtual_AGC_software_in"></a>Building the Virtual
+AGC software, in Windows</h2><span style=
+"font-weight: bold;">Note:</span>&nbsp; I don't use Windows
+myself, if I can help it, and so will have no great enthusiasm
+for helping you if you have trouble with the Windows version of
+the simulation.&nbsp; With that said, I am at this instant
+(07/17/04, 09:43 am.) watching four separate LM simulations,
+including a Win32 DSKY attached to a Win32 AGC, a Win32 DSKY
+attached to a Linux AGC, a Linux DSKY attached to a Win32 AGC,
+and a Linux DSKY attached to a Linux AGC.&nbsp; They all seem to
+be working properly.<br><br>
+Before doing anything else, <a href=
+"WinGtkHowto.html#BigBox">install the MinGW C-language compiler
+and the gtk+ toolkit</a><a name=WinTarball id="WinTarball"></a>
+on your computer.&nbsp; The makefiles provided in the tarball
+assume that you have done this in exactly the way I prescribe,
+though possibly with different versions of some software
+packages, and may not work if <span style=
+"font-weight: bold;">MinGW</span> and/or <span style=
+"font-weight: bold;">gtk+</span> have been installed slightly
+differently.&nbsp; Those of you who know about such things may
+wonder if it wouldn't be easier to build Virtual AGC using
+<a href="http://sources.redhat.com/cygwin/">Cygwin</a>.&nbsp; The
+answer is that I think it would be preferable, but I haven't been
+able to get it to work.&nbsp; (Anybody who figures it out should
+let me know how you did it.)<br><br>
+If you want to build <span style=
+"font-weight: bold;">yaACA</span>, you'll need the <a href=
+"http://alleg.sourceforge.net/">Allegro</a> cross-platform GUI
+kit.&nbsp; If you don't want to bother with <span style=
+"font-weight: bold;">yaACA</span>, you don't have to.&nbsp; The
+build-process (below) will display warnings, but won't
+abort.&nbsp; However, <span style=
+"font-weight: bold;">yaACA</span> gives you the ability to use
+the rotational hand controller (RHC) in the LM, and that
+substantially adds to the fun-factor of using the simulation.<br><br>
+One result of following the installation instructions is that an
+icon for <span style="font-weight: bold;">Msys</span> should now
+appear on your desktop.&nbsp; <span style=
+"font-weight: bold;">Msys</span> is a command-line environment
+which is similar to the command-line environment found in
+Linux.&nbsp; It is not needed for <span style=
+"font-style: italic;">running</span> any of the Virtual AGC
+programs you'll be creating, but you will work within the
+<span style="font-weight: bold;">Msys</span> enviroment when
+<span style="font-style: italic;">building</span> the
+programs.&nbsp; Therefore, the first step is to click the
+<span style="font-weight: bold;">Msys</span> icon and enter the
+<span style="font-weight: bold;">Msys</span> command-line
+environment.<br><br>
+For versions 20040810 or later, you will also need to install
+<a href="http://sources.redhat.com/pthreads-win32/">POSIX Threads
+for Win32</a>.&nbsp; While I can't guarantee that the folks who
+develop that software won't change their installation procedure,
+as of 20040814 this is what worked for me:<br><ul><li>Download the self-extracting file and extract the software
+into your <span style="font-weight: bold;">Msys</span> home
+directory.&nbsp; (For me, that's "c:\msys\1.0\home\Ronald
+Burkey".&nbsp; For you, it will naturally different.)</li><li>From the <span style="font-weight: bold;">Msys</span>
+command line, do this:</li></ul><div style="margin-left: 80px;"><span style="font-family: monospace;">cd
+pthreads</span><br style="font-family: monospace;"><span style="font-family: monospace;">make</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">cp -a pthreadGC*.dll
+c:/mingw/bin</span><br style="font-family: monospace;"><span style="font-family: monospace;">cp -a *.h
+c:/mingw/include</span><br style="font-family: monospace;"><span style="font-family: monospace;">cp -a *.a
+c:/mingw/lib</span><br></div>Next, you need a way of getting the source-code tarball
+into the <span style="font-weight: bold;">Msys</span>
+environment.&nbsp; The <span style=
+"font-weight: bold;">MinGW</span>/<span style=
+"font-weight: bold;">gtk+</span> installation instructions give
+some hints as to how to do that.&nbsp; Once you've done that,
+perform the following steps:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">tar --bzip2 -xf
+yaAGC-dev-<span style=
+"font-style: italic;">RevisionCode</span>.tar.bz2</span><br></div><div style="margin-left: 40px;"><span style="font-family: monospace;">cd yaAGC</span><br style=
+"font-family: monospace;"></div><div style="margin-left: 40px;"><span style="font-family: monospace;">make install</span><br></div><br>
+(If you are using Virtual AGC versions prior to 20040810, you'll
+need "make -f Makefile.Win32 clean install" instead.)&nbsp;
+Assuming the steps above were successful, you are now done with
+the <span style="font-weight: bold;">Msys</span> environment, and
+may exit it simply by using the command "exit".<br><br>
+The net result of this is that the Virtual AGC executable
+programs will now appear in the c:\mingw\bin directory, which you
+should add to your PATH.<br><br>
+Finally, if you want to run Stephan Hotto's contributed <a href=
+"developer.html"><span style=
+"font-weight: bold;">LM_Simulator</span></a> software (and you
+probably do!), you'll have to install <a href=
+"http://www.tcl.tk/"><span style=
+"font-weight: bold;">Tcl/Tk</span></a> for it to work.&nbsp; I'd
+strongly suggest doing this.<br><br>
+It may be that you just can't build the software, no matter how
+hard you try.&nbsp; In almost all cases, the reason for this will
+be a problem in configuration of <span style=
+"font-weight: bold;">gtk+</span> (with which I'll probably be
+unable to help), and that all of the programs will build fine
+except for <span style="font-weight: bold;">yaDSKY</span> and
+<span style="font-weight: bold;">yaDEDA</span>.&nbsp; In this
+case, as a last resort, you can do the following:<br><ol><li>Instead of "make install", do "make NOGUI=yes
+install".</li><li>Instead of running "SimLuminary131", "SimColossus249", or
+"SimArtemis072", run "SimLuminary131_lite",
+"SimColossus249_lite", or "SimArtemis072_lite".</li></ol>What these steps will do for you is to bypass building
+<span style="font-weight: bold;">yaDSKY</span> and <span style=
+"font-weight: bold;">yaDEDA</span>, and to use instead the "DSKY
+Lite" module of the <span style=
+"font-weight: bold;">LM_Simulator</span> program (which doesn't
+need to be compiled).<br><h2><a name=What_about_building_Virtual_AGC_in id=
+"What_about_building_Virtual_AGC_in"></a>What about building
+Virtual AGC in FreeBSD, NetBSD, or OpenBSD?</h2>In FreeBSD,
+NetBSD, or OpenBSD, I expect compilation to be pretty much as in
+Linux, but perhaps with various cleanups.&nbsp; For example, I
+expect that the makefiles will have to be modified to use
+<span style="font-weight: bold;">gmake</span> rather than
+<span style="font-weight: bold;">make</span>.&nbsp; I have not
+tried it, however, and if anyone wants to send me info on doing
+it, I'd be happy to make any required changes or to post the
+results on this page.<br><h2><a name=Installing_the_Mac_OS_X_Binaries id=
+"Installing_the_Mac_OS_X_Binaries"></a>Installing and/or building
+Virtual AGC in Mac OS X (10.2)<br></h2><span style=
+"font-weight: bold;">Disclaimer:</span>&nbsp; Mac OS X is not my
+bag.&nbsp; If this works, you'll be lucky.&nbsp; (But it does
+work for me.)&nbsp; My system is an iMac with Mac OS X
+10.2.8.&nbsp; The instructions below are relatively new; if you
+want to see the old instructions, <a href=
+"ArchivedMacOsX.html">look here</a>.<br><br><span style="font-weight: bold;">Prerequisites:</span><br><ol><li>Please install Apple's "developer tools", from the CD that
+came with MacOS X.&nbsp; If your version of the <span style=
+"font-weight: bold;">gcc</span> program is 3.1 or prior, there
+is an upgrade to <span style="font-weight: bold;">gcc</span>
+3.3 which you'll want to download from Apple and install.&nbsp;
+(You can tell by running the command "gcc -v" from the command
+line interface to view the version number.)&nbsp;
+Unfortunately, you'll have to sign up as an <a href=
+"http://connect.apple.com">Apple developer</a> (which is free)
+in order to download it.&nbsp; What you're looking for is a
+"gcc updater", of which there are several (depending on your
+version of MacOS X), so I can't really advise you as to which
+of them needs to be downloaded.<br></li><li>Please install <a href=
+"http://fink.sourceforge.net"><span style=
+"font-weight: bold;">fink</span></a>, which is a program that
+is used to install other programs.&nbsp; Make sure that you
+choose the version of <span style=
+"font-weight: bold;">fink</span> that works with your version
+of Mac OS X, and follow the instructions on the <span style=
+"font-weight: bold;">fink</span> webpage.&nbsp; There is a
+graphical front end for <span style=
+"font-weight: bold;">fink</span> called <span style=
+"font-weight: bold;">Fink Commander</span>, which you'll have
+to <span style="font-style: italic;">manually drag onto your
+desktop</span>, as it is not automatically installed by the
+installer program.&nbsp;<br></li><li>Run <span style="font-weight: bold;">Fink
+Commander</span>.&nbsp; From the main menu, do
+FinkCommander/Preferences, and click the tab that says
+Fink.&nbsp; Activate "Use unstable packages".<br></li><li>Running Virtual AGC will require the X-window system (also
+known as "xdarwin", "xfree86", "xorg", or "X11").&nbsp; If you
+already have this installed and are satisfied with it, you
+probably should ignore this step.&nbsp; However, what I did to
+install the X-window system is this:&nbsp; with <span style=
+"font-weight: bold;">Fink Commander</span>, install the
+<span style="font-style: italic;">binary packages</span>
+(rather than the source packages) for "xfree86" and
+"icewm-basic".&nbsp; After Fink Commander finishes its
+business, create a text file called ".xinitrc" in your home
+directory which contains a single line reading "exec
+/sw/bin/icewm".<br></li><li>With <span style="font-weight: bold;">Fink
+Commander</span>, install the <span style=
+"font-style: italic;">binary packages</span> (rather than the
+source packages) for the following programs:&nbsp; "automake",
+"tcltk", "cvs", "readline", and "readline-shlibs".</li><li>With <span style="font-weight: bold;">Fink
+Commander</span>, install the <span style=
+"font-style: italic;">source package</span> "gtk+2-dev".&nbsp;
+This will probably take quite a long time, but (as of this
+writing) the much-quicker-installing binary package for
+gtk+2-dev provided by <span style=
+"font-weight: bold;">fink</span> is not up-to-date enough to
+build Virtual AGC. &nbsp; You may be presented with the choice
+between "pango1-xft1" and "pango1-xft2"; choose
+"pango1-xft2".<br></li><li>Install the <a href=
+"http://alleg.sourceforge.net/">Allegro</a> cross-platform GUI
+kit.&nbsp; This can't be done at present from <span style=
+"font-weight: bold;">fink</span>.&nbsp; If you're only going to
+try installing the Virtual AGC binary package, you might try
+simply downloading the <span style=
+"font-weight: bold;">Allegro</span> runtime library dmg file
+and installing it.&nbsp; (But I should tell you I haven't tried
+it, and have no way at present to try it.&nbsp; Let me know if
+it works for you.)&nbsp; What I do instead is build
+<span style="font-weight: bold;">Allegro</span> from source.
+&nbsp; Building <span style="font-weight: bold;">Allegro</span>
+is a tricky proposition, since the current version (as of 4.2.0
+beta, when I'm writing this) does not seem to work correctly on
+Mac OS X ... or at least not on <span style=
+"font-style: italic;">my</span> version of Mac OS X.&nbsp; So
+here's what <span style="font-style: italic;">I</span> did, and
+hopefully it will work for you.&nbsp; From a command line, use
+the following commands (just hitting ENTER when prompted for a
+password):<br></li></ol><div style="margin-left: 80px;"><span style="font-family: monospace;">cvs
+-d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/alleg
+login</span><br style="font-family: monospace;"><span style="font-family: monospace;">cvs -z3
+-d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/alleg co -r
+v4-1-18 allegro</span><br style="font-family: monospace;"><span style="font-family: monospace;">cd
+allegro</span><br style="font-family: monospace;"><span style="font-family: monospace;">mkdir
+obj/macosx/alleg/macosx</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">sh fix.sh
+macosx</span><br style="font-family: monospace;"><span style="font-family: monospace;">make</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">sudo make
+install</span><br></div><br><div style="margin-left: 40px;">
+For me, 'make' ends up with what appears to be an error message
+"no macro name given in #define directive", but '<span style=
+"font-family: monospace;">sudo make install</span>' is still
+able to install it, and it seems to work well enough for my
+purposes.<br></div><br><span style="font-weight: bold;">Try to install the Virtual AGC
+binary package:</span><br><div style="margin-left: 40px;"><br>
+(Note that I personally have no way to test this, but I've had
+some reports that it works.)<br><br>
+From a command-line, do the following, assuming that you've
+downloaded both the Virtual AGC binary package
+(yaAGC-macosx-<span style=
+"font-style: italic;">RevisionCode</span>.tar.bz2) and
+developer snapshot.<br><br></div><div style="margin-left: 80px;"><span style="font-family: monospace;">cd Desktop</span><br><span style="font-family: monospace;">sudo tar --directory=/
+--bzip2 -xf yaAGC-macosx</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span></div><div style="margin-left: 80px;"><span style="font-family: monospace;">tar --bzip2 -xf
+yaAGC-dev</span><span style=
+"font-family: monospace;"><span style=
+"font-family: monospace;">-<span style=
+"font-style: italic;">RevisionCode</span></span></span><span style="font-family: monospace;">.tar.bz2</span></div><div style="margin-left: 40px;"><br>
+Running the program is a little more complex than you're used
+to:
+</div><ul><ul><li>Run the X-window system.&nbsp; If you followed my
+instructions for installing the X-window system, there will
+be a toolbar at the bottom of the screen, and you can click
+the little CRT button on it to open up an "xterm"
+command-line interface.&nbsp; (If you didn't follow my
+instructions, you'll have to figure out for yourself how to
+run <span style="font-weight: bold;">xterm</span>.)<br></li><li>In the <span style="font-weight: bold;">xterm</span>
+window, type the following:</li></ul></ul><div style="margin-left: 120px;"><span style="font-family: monospace;">set path = ($path
+/usr/local/yaAGC/bin)</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">SimLuminary131
+--half-size<br></span></div><ul><ul><li>If you installed the X-window system differently than I
+suggested, the simulated DSKY may not immediately display on
+the screen.&nbsp; Instead, the cursor may simply change
+shape, indicating that it wants you to position the DSKY on
+the screen.&nbsp; Click on the screen, and the simulated DSKY
+will appear where you click.&nbsp; You'll may similarly have
+to position the DEDA, and so on.<br></li></ul></ul><div style="margin-left: 40px;">
+If this didn't work properly, you may need to build Virtual AGC
+from source.<br></div><div style="margin-left: 40px;"><br style="font-weight: bold;"></div><span style="font-weight: bold;">Trying to build Virtual
+AGC from source:</span><br><br><div style="margin-left: 40px;">
+If you are unable to get the binary package to work, but have
+followed the steps above, you can try to build Virtual AGC from
+source.&nbsp; Just do this from a command-line:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">cd
+yaAGC</span><br style="font-family: monospace;"><span style="font-family: monospace;">./configure
+--prefix=/sw</span><br style="font-family: monospace;"><span style="font-family: monospace;">make<br>
+sudo make install</span><br></div></div><br><div style="margin-left: 40px;">
+When you try to run the simulation, you do the same thing as
+instructed above (for the binary installation), but you don't
+need the "<span style="font-family: monospace;">set path
+...</span>" command.<br></div><br><span style="font-weight: bold;">Bypassing compilation of
+yaDSKY:</span><br><br><div style="margin-left: 40px;">
+One of the main difficulties that people seem to have in
+building Virtual AGC is the <span style=
+"font-weight: bold;">yaDSKY</span> and <span style=
+"font-weight: bold;">yaDEDA</span> applications.&nbsp; It's
+possible to do without <span style=
+"font-weight: bold;">yaDSKY</span> by using the "DSKY Lite"
+built into the <span style=
+"font-weight: bold;">LM_Simulator</span> program.&nbsp; (Sadly,
+there's no substitute at present for <span style=
+"font-weight: bold;">yaDEDA</span>, but <span style=
+"font-weight: bold;">yaDEDA</span> isn't as important to most
+people as <span style=
+"font-weight: bold;">yaDSKY</span>.)&nbsp; So modify the steps
+listed above as follows:<br><ol style="color: rgb(0, 0, 0);"><li>Instead of "<span style=
+"font-family: monospace;">./configure --prefix=/sw</span>",
+do "<span style="font-family: monospace;">make NOGUI=yes
+PREFIX=/sw</span> <span style=
+"font-family: monospace;">autogen</span>".</li><li>Instead of "<span style=
+"font-family: monospace;">make</span>", do "<span style=
+"font-family: monospace;">make NOGUI=yes</span>".<br></li><li>Instead of "<span style="font-family: monospace;">sudo
+make install</span>", do "<span style=
+"font-family: monospace;">sudo make NOGUI=yes
+install</span>".</li><li>Instead of running <span style=
+"font-weight: bold;">SimLuminary131</span>, <span style=
+"font-weight: bold;">SimColossus249</span>, or <span style=
+"font-weight: bold;">SimArtemis072</span>, run <span style=
+"font-weight: bold;">SimLuminary131_lite</span>, <span style=
+"font-weight: bold;">SimColossus249_lite</span>, or
+<span style=
+"font-weight: bold;">SimArtemis072_lite</span>.<br></li></ol></div><span style="font-weight: bold;">If all else
+fails:</span><br><br><div style="margin-left: 40px;"><a href="ArchivedMacOsX.html">Look here</a> for the way I
+<span style="font-style: italic;">used to</span> advise doing
+all this.<br></div><span style="font-weight: bold;"><br>
+Uninstalling:</span><br><br><div style="margin-left: 40px;">
+If you installed the binary package, you can uninstall just
+removing the directories that were created:<br><br></div><div style="margin-left: 80px;"><span style="font-family: monospace;">sudo rm -rf
+/usr/local/yaAGC</span><br style="font-family: monospace;"><span style="font-family: monospace;">rm -rf yaAGC<br></span>
+Use <span style="font-weight: bold;">Fink Commander</span> to
+uninstall the prerequisites I asked you to install.<br></div><br><div style="margin-left: 40px;">
+If you built from source, there's no good way to uninstall,
+aside from just figuring out all the files that were created,
+and deleting them.&nbsp; I don't have a comprehensive list of
+files in Virtual AGC at the moment.&nbsp; However, you're only
+talking a few megabytes, so it usually won't be a problem just
+to let the files alone.<br></div><h2><a name=Ten_4_3 id="Ten_4_3"></a>Installing Virtual AGC
+Binaries in Mac OS X (10.4)<br></h2><span style=
+"font-weight: bold;">Disclaimer:</span>&nbsp;&nbsp; <a href=
+"ArchivedMacOsX.html">I used to explain</a> how to install
+Virtual AGC binaries in Mac OS X, as well as how to build from
+source (see above).&nbsp; However, it was almost as hard as
+building from source, so I eventually removed the
+instructions.&nbsp; I'm told that it has become relatively easy
+in Mac OS X 10.4, so we have some new instructions thanks to
+Fabrizio Bernardini.&nbsp; I haven't any way to try them myself,
+but Fabrizio knows what he's doing.&nbsp; I've cut-and-pasted
+directly from his email.<br><br><table summary="" style=
+"width: 75%; text-align: left; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style="vertical-align: top;"><pre style=
+"white-space:pre-wrap; -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">
+Thanks to the availability of a brand new PowerBook I had to reload yaAGC and its stuff once more.<br><br>And thanks to the outstanding quality of the overall system provided by Apple (sorry for the ad, but it changes your life) installing the binaries is now simpler than currently cited in the download page.<br><br>Here are the steps I performed:<br><br>Initial conditions: MacOS Tiger 10.4.3 installed and configured as it is out of the box.<br><br>1. Run the Dev Tools installer situated in /Applications/Installers (if you are reading these you probably already performed that).<br><br>2. Install X11 from the Options package available in the MacOS Tiger Installation Disc. When you double-click the installer a selection window will open: everything should already been installed but X11, check it and go ahead.<br><br>3. Check that X11 works by double-clicking on the X11 icon now available in /Applications/Utilities.<br><br>4. Download from //fink.sourceforge.net/ the lates stable relase of fink. I got version 0.8.0 released on 09 June 2005.<br><br>5. Install fink double-clicking its installer package from the disk image (.dmg) file downlaoded. Let it create the /sw directory. Installing FinkCommander is an option, not required if you need fink for yaAGC only, or install it later.<br><br>6. Open a terminal shell and run the following fink request:<br><br>  $ fink install gtk+2<br><br>Running this command requires the computer to be connected to the Internet. Let it run and say Yes to requests.<br><br>7. Install yaAGC binaries in /usr/local<br><br>8. Upon successful completion of the above steps, starts X11 and:<br><br>     a. Open a term shell<br>        b. $ cd /usr/local/yaAGC/bin<br>        c. $ ./yaAGC --core=Luminary131.bin --port=19797 --cfg=LM.ini<br>       d. Open another term shell<br>  e. $ cd /usr/local/yaAGC/bin<br>        f. $ ./yadsky --half-size --cfg=LM.ini --port=19797<br><br>   and everything runs !<br><br>9. Bonus step: now the TCL/TK toolkit is included in the developer tools so it is already installed and if you wish you can open another term shell and run also LM_Simulator with no troubles !<br><br>Conclusions: MacOS is demonstrating itself as one of the best developing platforms ever conceived out of a box. Please note that only the gtk libraries where required in addition to the dev tools add ons.<br><br>I will perform the same procedures also on a iMac and will report the results soon.<br><br>Now is anybody so lucky to be able to try the same on an Intel iMac with Tiger 10.4.4 ?</pre></td></tr></tbody></table><div style="margin-left: 40px;"></div><br><hr style="width: 100%; height: 2px;"><center><br><span style=
+"color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
+This page is available under the <a href=
+"https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons No Rights Reserved License</a></span><br><i><font size="-1">Last modified by <a href=
+"mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br><br><a href="http://www.ibiblio.org"><img style=
+"border: 0px solid ; width: 300px; height: 100px;" alt=
+"Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
+"100" width="300"></a><br></font></i></center><br></body></html>

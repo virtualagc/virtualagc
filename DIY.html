@@ -1,1153 +1,765 @@
-<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-  <head>
-    <meta name="generator" content="HTML Tidy for HTML5 for Linux
-      version 5.3.14">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="Bluefish 2.2.4">
-    <meta name="author" content="Ron Burkey">
-    <title>Virtual AGC Developer-Info Page</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <meta name="author" content="Ron Burkey">
-    <script type="text/javascript" src="Header.js">
-  </script>
-  </head>
-  <body style="background-image: url(gray3.jpg);">
-    <script type="text/javascript">
-  document.write(headerTemplate.replace("@TITLE@","Do It Yourself").replace("@SUBTITLE@","Writing AGC Software For Fun and Profit"))
-  </script> <br>
-    <div align="center">
-      <table cellspacing="2" cellpadding="2" border="2">
-        <tbody>
-          <tr>
-            <td valign="top"><big><b><i>This page is new and is under
-                    development so don't expect much yet.</i></b></big></td>
-          </tr>
-        </tbody>
-      </table>
-      <div align="left">
-        <h2>Contents</h2>
-      </div>
-    </div>
-    <ul>
-      <li><a href="#Introduction">Introduction</a></li>
-      <li><a href="#Basic_Facts">Basic Facts</a></li>
-      <li><a href="#Your_Own_Peripheral_Devices">Your Own Peripheral
-          Devices</a><br>
-      </li>
-      <li><a href="#Bare-Metal_Programming">Bare-Metal Programming</a></li>
-      <li><a href="#Programming_for_the_AGC_Operating">Programming for
-          the AGC "Operating System"</a></li>
-    </ul>
-    <ul>
-    </ul>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Introduction"></a>Introduction</h2>
-    The home page of this website semi-jokingly suggests you might want
-    to use our AGC+DSKY simulation software to create a <a
-      href="index.html#..._Or_for_the_silly_mood_">clock app</a> for
-    your computer or perhaps write <a
-      href="index.html#..._Or_for_the_even_sillier_mood_">a calculator
-      program or tic-tac-toe game</a> using it ... all without giving
-    you any clues as to how to go about doing such a thing.&nbsp; <br>
-    <br>
-    It's true that we do have a <a href="developer.html">developer page</a>,
-    which goes into seemingly-endless though still-incomplete detail
-    about AGC software from a developer's point of view, but the
-    developer page is really focused on software developers who might
-    want to create simulations for Apollo peripherals devices such as
-    the Alignment Optical Telescope (AOT) or the Inertial Measurement
-    Unit (IMU) that aren't otherwise provided by our Virtual AGC
-    Project.&nbsp; In other words, the developer page (and most of the
-    remainder of this website) caters to people who are interested in
-    simulating the historical Apollo missions or flying hypothetical
-    Apollo missions as accurately as possible, and who want to enrich
-    that experience by creating ever-more-faithful bits and pieces of
-    the simulation.<br>
-    <br>
-    But what if you simply want to do something fun, but different, with
-    the AGC+DSKY, perhaps outside the context of simulation within a
-    spacecraft environment?&nbsp; For example, to display the current
-    temperature, or GPS data, or as I already said, to make a calculator
-    program?<br>
-    <br>
-    Well, there's a variety of ways to go about doing such stuff.&nbsp;
-    For example, maybe you just want to display this stuff on the DSKY
-    directly, and not even bother with the AGC at all.&nbsp; If so, I
-    wish you luck, but am not sympathetic to your plight.&nbsp; The <i>correct</i>
-    way to go about it, in my oh-so-not-humble opinion, is to write
-    actual AGC software that does whatever you need done, and let the
-    simulated AGC display whatever you need on the DSKY.&nbsp; :-)&nbsp;
-    That way, you not only end up with a clock or a calculator or a game
-    or whatever, but you've also learned something about what it was
-    like as an AGC programmer from the Apollo era, <i>and</i> have
-    developed some AGC-programmer street-creds (as if there were such a
-    thing).&nbsp; Now, <i>that's</i> a hobbyist project!<br>
-    <br>
-    This is a particularly apropos topic for anybody who has purchased a
-    functional AGC+DSKY replica, such as <a
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><title>Virtual AGC Developer-Info Page</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name=author content="Ron Burkey"><link rel=icon type="image/png" href="favicon.png"><meta name=author content="Ron Burkey"><script type="text/javascript" src="Header.js"></script></head><body style="background-image: url(gray3.jpg);"><script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Do It Yourself").replace("@SUBTITLE@","Writing AGC Software For Fun and Profit"))
+</script> <br><div align=center><table cellspacing=2 cellpadding="2" border="2"><tbody><tr><td valign=top><big><b><i>This page is new and is under
+development so don't expect much yet.</i></b></big></td></tr></tbody></table><div align=left><h2>Contents</h2></div></div><ul><li><a href="#Introduction">Introduction</a></li><li><a href="#Basic_Facts">Basic Facts</a></li><li><a href="#Your_Own_Peripheral_Devices">Your Own Peripheral
+Devices</a><br></li><li><a href="#Bare-Metal_Programming">Bare-Metal Programming</a></li><li><a href="#Programming_for_the_AGC_Operating">Programming for
+the AGC "Operating System"</a></li></ul><ul></ul><hr style="width: 100%; height: 2px;"><h2><a name=Introduction></a>Introduction</h2>
+The home page of this website semi-jokingly suggests you might want
+to use our AGC+DSKY simulation software to create a <a
+href="index.html#..._Or_for_the_silly_mood_">clock app</a> for
+your computer or perhaps write <a
+href="index.html#..._Or_for_the_even_sillier_mood_">a calculator
+program or tic-tac-toe game</a> using it ... all without giving
+you any clues as to how to go about doing such a thing.&nbsp; <br><br>
+It's true that we do have a <a href="developer.html">developer page</a>,
+which goes into seemingly-endless though still-incomplete detail
+about AGC software from a developer's point of view, but the
+developer page is really focused on software developers who might
+want to create simulations for Apollo peripherals devices such as
+the Alignment Optical Telescope (AOT) or the Inertial Measurement
+Unit (IMU) that aren't otherwise provided by our Virtual AGC
+Project.&nbsp; In other words, the developer page (and most of the
+remainder of this website) caters to people who are interested in
+simulating the historical Apollo missions or flying hypothetical
+Apollo missions as accurately as possible, and who want to enrich
+that experience by creating ever-more-faithful bits and pieces of
+the simulation.<br><br>
+But what if you simply want to do something fun, but different, with
+the AGC+DSKY, perhaps outside the context of simulation within a
+spacecraft environment?&nbsp; For example, to display the current
+temperature, or GPS data, or as I already said, to make a calculator
+program?<br><br>
+Well, there's a variety of ways to go about doing such stuff.&nbsp;
+For example, maybe you just want to display this stuff on the DSKY
+directly, and not even bother with the AGC at all.&nbsp; If so, I
+wish you luck, but am not sympathetic to your plight.&nbsp; The <i>correct</i>
+way to go about it, in my oh-so-not-humble opinion, is to write
+actual AGC software that does whatever you need done, and let the
+simulated AGC display whatever you need on the DSKY.&nbsp; :-)&nbsp;
+That way, you not only end up with a clock or a calculator or a game
+or whatever, but you've also learned something about what it was
+like as an AGC programmer from the Apollo era, <i>and</i> have
+developed some AGC-programmer street-creds (as if there were such a
+thing).&nbsp; Now, <i>that's</i> a hobbyist project!<br><br>
+This is a particularly apropos topic for anybody who has purchased a
+functional AGC+DSKY replica, such as <a
 href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/263190750503?hash=item3d47642527:g:IwoAAOSw35lZePeX">one
-
-
-
-      of those sold on eBay</a> by Sam Ammons.&nbsp; It's all very well
-    that you now have a working AGC plus DSKY-lookalike that can run
-    (say) the Apollo 11 LM AGC software, but you don't have a LM flying
-    in space, do you?&nbsp; So what good does it do you (other than
-    being immensely cool)?&nbsp; Naturally, you want to justify your
-    purchase by making it do something <i>else</i> too, and to amaze
-    your geekish friends!&nbsp; Well, making your own custom AGC
-    software is a way to do that.&nbsp;&nbsp; Since the particular
-    3D-printed DSKY mentioned happens to contain a Raspberry Pi running
-    our very-own Virtual AGC software, we're actually in a good position
-    to understand how to adapt custom AGC software to it, though you
-    don't need that specific gadget to take advantage of the info
-    provided on this page.&nbsp;&nbsp;&nbsp; (Disclaimer:&nbsp; I did
-    lend my sage advice and some software to the manufacturer of that
-    device, which is why I know about it, but I derive no financial
-    benefit from it.) <br>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Basic_Facts"></a>Basic Facts</h2>
-    At its heart, the AGC is simply a computer, like any other:&nbsp; It
-    has memory which it can read to or write from for storing variables,
-    it has memory that it can read from but not write to for storing its
-    program, and it can execute simple instructions one after the other
-    at a fixed "clock" rate.&nbsp; It has much less memory and a much
-    slower clock speed and the instructions are different in detail from
-    our modern-day computers, but the concept is the same.<br>
-    <br>
-    Of course, just being able to execute instructions is of very little
-    value unless you can receive some kind of input from the outside
-    world and can provide some kind of output to the outside
-    world.&nbsp; Otherwise, what's the point?&nbsp; In the AGC, all of
-    this connection to the outside world is provided by "i/o channels",
-    which are memory-like locations into which the CPU can write data
-    ("output channels") or from which it can read data ("input
-    channels").&nbsp; The AGC i/o-channel address space allows for up to
-    128 distinct i/o channels, the majority of which were not used for
-    anything in the AGC hardware, and are assigned no specific purpose
-    by the yaAGC simulation software ... thus, in writing your own AGC
-    software, you can assign these unused i/o channels whatever function
-    you like, as long as you have some way to feed data into the input
-    channels and use the data placed in the output channels.<br>
-    <br>
-    So the basic steps to writing your own AGC software as follows:<br>
-    <ol>
-      <li>Decide what special purpose i/o you need to have, other than
-        those for the DSKY (which will be handled by the existing DSKY
-        software, of course), and assign channel-numbers to them in the
-        unused region of the i/o-channel address space.</li>
-      <li>Write a program which can feed this special purpose data into
-        yaAGC (the AGC simulator) or read the special-purpose data from
-        yaAGC.&nbsp; This is your own special-purpose AGC peripheral
-        device.<br>
-      </li>
-      <li>Write AGC software that provides whatever functionality you
-        want it to have, using data on these new, special-purpose i/o
-        channels you've defined, and/or on pre-existing channels like
-        those for the DSKY.</li>
-      <li>Assemble your new AGC software using the yaYUL assembler.</li>
-      <li>Simultaneously run yaAGC plus a DSKY-simulation program plus
-        your new special-purpose peripheral device.</li>
-      <li>...</li>
-      <li>Profit!<br>
-      </li>
-    </ol>
-    <p>Actually, I lied in the title of this page and in item #7 of the
-      list above.&nbsp; There's no profit, unless your own personal
-      enjoyment and sense of accomplishment counts as profit.&nbsp;
-      (Prove me wrong!)&nbsp; But the other topics, #1-5, are discussed
-      further throughout the remainder of this page.</p>
-    <p>An important thing to know about "embedded programming", of which
-      AGC software is an example, is that there are two basic varieties
-      of embedded programming and embedded programmers:<br>
-    </p>
-    <ul>
-      <li>"Bare-metal" programming — This is where you start from
-        scratch, often writing the entire program yourself.&nbsp; In
-        other words, you have a computer with a completely empty memory,
-        with no program at all, and you write your own!&nbsp; This has
-        the advantage of being simpler, since you don't have to take all
-        the time to learn about how to work with all of the quirks in
-        somebody else's software, and can confine yourself to worrying
-        about the quirks of the hardware, which are usually
-        simpler.&nbsp; This is often the approach taken in systems
-        having extremely limited memory resources or speed, since such
-        systems often don't have the resources to run software anybody
-        else wrote anyway.&nbsp; For example, I imagine that most
-        programming for <a href="https://www.arduino.cc/">Arduino
-          devices</a> is of this kind.<br>
-      </li>
-      <li>Programming with an "operating system" — This is where the
-        system is already running software that provides a lot of useful
-        services (such a time-keeping functions, file-systems,
-        networking, and so on), and you are merely providing one small
-        piece of the system's existing software puzzle and relying on
-        the operating system for a lot of stuff that would otherwise be
-        troublesome.&nbsp; This has the advantage, of course, that you
-        don't have to figure out for yourself how to do some of these
-        very hard things.&nbsp; This is generally the approach taken in
-        a system like a <a href="https://www.raspberrypi.org/">Raspberry
-          Pi</a>, which is very fast and has lots of memory and
-        peripheral devices.&nbsp; In fact, programming for these devices
-        is hardly "embedded" programming at all, since it's really just
-        like programming a desktop computer that has been put into a
-        very small, cheap box.</li>
-    </ul>
-    <p>The AGC is an odd case, because while it has very, very small
-      resources (tiny memory, terribly slow), it nevertheless has a
-      pretty capable operating system written but a bunch of smart
-      people.&nbsp; We will therefore cover both bare-metal programming
-      and operating-system-based programming.&nbsp; My advice would be
-      to start with the former until you're familiar with what you're
-      doing, and then graduate to the latter if it turns out you need to
-      do so.<br>
-    </p>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Your_Own_Peripheral_Devices"></a>Your Own Peripheral
-      Devices</h2>
-    The stock version of the AGC simulator program, yaAGC, interacts
-    with its peripheral devices through what I like to refer to as
-    "virtual wires".&nbsp; (Some customized versions of yaGC, such as
-    the one used in NASSP don't use this method, so what I have to say
-    here won't fully apply to them.)&nbsp; These virtual wires are a
-    networking socket interface, in which yaAGC acts something like a
-    network "server", and peripheral devices connect via a networking
-    socket as "clients".&nbsp; The server (yaAGC) and the peripherals
-    (such as the DSKY or your own custom peripheral device) exchange
-    network packets whenever the values of the AGC's i/o channels
-    change.<br>
-    <br>
-    Okay, that was a mouthful, and sounds very complex ... but isn't
-    really, because you don't really need to know about it if you use
-    the handy-dandy template for creating AGC peripheral devices we
-    provide.&nbsp; But it was useful background information if you're
-    too stinkin' proud to use our template, so we had to tell you all
-    about it anyway.&nbsp; You can find more information about it on our
-    <a href="developer.html#sendrecv_Protocol">developer page</a> if you
-    need to!&nbsp; <br>
-    <br>
-    As for the peripheral template program, though, it is called
-    piPeripheral.py and <a
+of those sold on eBay</a> by Sam Ammons.&nbsp; It's all very well
+that you now have a working AGC plus DSKY-lookalike that can run
+(say) the Apollo 11 LM AGC software, but you don't have a LM flying
+in space, do you?&nbsp; So what good does it do you (other than
+being immensely cool)?&nbsp; Naturally, you want to justify your
+purchase by making it do something <i>else</i> too, and to amaze
+your geekish friends!&nbsp; Well, making your own custom AGC
+software is a way to do that.&nbsp;&nbsp; Since the particular
+3D-printed DSKY mentioned happens to contain a Raspberry Pi running
+our very-own Virtual AGC software, we're actually in a good position
+to understand how to adapt custom AGC software to it, though you
+don't need that specific gadget to take advantage of the info
+provided on this page.&nbsp;&nbsp;&nbsp; (Disclaimer:&nbsp; I did
+lend my sage advice and some software to the manufacturer of that
+device, which is why I know about it, but I derive no financial
+benefit from it.) <br><br><hr style="width: 100%; height: 2px;"><h2><a name=Basic_Facts></a>Basic Facts</h2>
+At its heart, the AGC is simply a computer, like any other:&nbsp; It
+has memory which it can read to or write from for storing variables,
+it has memory that it can read from but not write to for storing its
+program, and it can execute simple instructions one after the other
+at a fixed "clock" rate.&nbsp; It has much less memory and a much
+slower clock speed and the instructions are different in detail from
+our modern-day computers, but the concept is the same.<br><br>
+Of course, just being able to execute instructions is of very little
+value unless you can receive some kind of input from the outside
+world and can provide some kind of output to the outside
+world.&nbsp; Otherwise, what's the point?&nbsp; In the AGC, all of
+this connection to the outside world is provided by "i/o channels",
+which are memory-like locations into which the CPU can write data
+("output channels") or from which it can read data ("input
+channels").&nbsp; The AGC i/o-channel address space allows for up to
+128 distinct i/o channels, the majority of which were not used for
+anything in the AGC hardware, and are assigned no specific purpose
+by the yaAGC simulation software ... thus, in writing your own AGC
+software, you can assign these unused i/o channels whatever function
+you like, as long as you have some way to feed data into the input
+channels and use the data placed in the output channels.<br><br>
+So the basic steps to writing your own AGC software as follows:<br><ol><li>Decide what special purpose i/o you need to have, other than
+those for the DSKY (which will be handled by the existing DSKY
+software, of course), and assign channel-numbers to them in the
+unused region of the i/o-channel address space.</li><li>Write a program which can feed this special purpose data into
+yaAGC (the AGC simulator) or read the special-purpose data from
+yaAGC.&nbsp; This is your own special-purpose AGC peripheral
+device.<br></li><li>Write AGC software that provides whatever functionality you
+want it to have, using data on these new, special-purpose i/o
+channels you've defined, and/or on pre-existing channels like
+those for the DSKY.</li><li>Assemble your new AGC software using the yaYUL assembler.</li><li>Simultaneously run yaAGC plus a DSKY-simulation program plus
+your new special-purpose peripheral device.</li><li>...</li><li>Profit!<br></li></ol><p>Actually, I lied in the title of this page and in item #7 of the
+list above.&nbsp; There's no profit, unless your own personal
+enjoyment and sense of accomplishment counts as profit.&nbsp;
+(Prove me wrong!)&nbsp; But the other topics, #1-5, are discussed
+further throughout the remainder of this page.</p><p>An important thing to know about "embedded programming", of which
+AGC software is an example, is that there are two basic varieties
+of embedded programming and embedded programmers:<br></p><ul><li>"Bare-metal" programming — This is where you start from
+scratch, often writing the entire program yourself.&nbsp; In
+other words, you have a computer with a completely empty memory,
+with no program at all, and you write your own!&nbsp; This has
+the advantage of being simpler, since you don't have to take all
+the time to learn about how to work with all of the quirks in
+somebody else's software, and can confine yourself to worrying
+about the quirks of the hardware, which are usually
+simpler.&nbsp; This is often the approach taken in systems
+having extremely limited memory resources or speed, since such
+systems often don't have the resources to run software anybody
+else wrote anyway.&nbsp; For example, I imagine that most
+programming for <a href="https://www.arduino.cc/">Arduino
+devices</a> is of this kind.<br></li><li>Programming with an "operating system" — This is where the
+system is already running software that provides a lot of useful
+services (such a time-keeping functions, file-systems,
+networking, and so on), and you are merely providing one small
+piece of the system's existing software puzzle and relying on
+the operating system for a lot of stuff that would otherwise be
+troublesome.&nbsp; This has the advantage, of course, that you
+don't have to figure out for yourself how to do some of these
+very hard things.&nbsp; This is generally the approach taken in
+a system like a <a href="https://www.raspberrypi.org/">Raspberry
+Pi</a>, which is very fast and has lots of memory and
+peripheral devices.&nbsp; In fact, programming for these devices
+is hardly "embedded" programming at all, since it's really just
+like programming a desktop computer that has been put into a
+very small, cheap box.</li></ul><p>The AGC is an odd case, because while it has very, very small
+resources (tiny memory, terribly slow), it nevertheless has a
+pretty capable operating system written but a bunch of smart
+people.&nbsp; We will therefore cover both bare-metal programming
+and operating-system-based programming.&nbsp; My advice would be
+to start with the former until you're familiar with what you're
+doing, and then graduate to the latter if it turns out you need to
+do so.<br></p><hr style="width: 100%; height: 2px;"><h2><a name=Your_Own_Peripheral_Devices></a>Your Own Peripheral
+Devices</h2>
+The stock version of the AGC simulator program, yaAGC, interacts
+with its peripheral devices through what I like to refer to as
+"virtual wires".&nbsp; (Some customized versions of yaGC, such as
+the one used in NASSP don't use this method, so what I have to say
+here won't fully apply to them.)&nbsp; These virtual wires are a
+networking socket interface, in which yaAGC acts something like a
+network "server", and peripheral devices connect via a networking
+socket as "clients".&nbsp; The server (yaAGC) and the peripherals
+(such as the DSKY or your own custom peripheral device) exchange
+network packets whenever the values of the AGC's i/o channels
+change.<br><br>
+Okay, that was a mouthful, and sounds very complex ... but isn't
+really, because you don't really need to know about it if you use
+the handy-dandy template for creating AGC peripheral devices we
+provide.&nbsp; But it was useful background information if you're
+too stinkin' proud to use our template, so we had to tell you all
+about it anyway.&nbsp; You can find more information about it on our
+<a href="developer.html#sendrecv_Protocol">developer page</a> if you
+need to!&nbsp; <br><br>
+As for the peripheral template program, though, it is called
+piPeripheral.py and <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeripheral.py">you
-
-
-
-      can find it in our GitHub repository</a>.&nbsp; As the name
-    implies, piPeripheral.py is written in <a
-      href="https://www.python.org/">the Python 3 language</a>.&nbsp;
-    Python is a kind of scripting language which does not need to be
-    compiled, and hence you can change the program and see the effects
-    immediately.&nbsp; It's available, or already automatically
-    installed, on Windows, Mac OS X, Linux, and so on.<br>
-    <br>
-    The piPeripheral.py program is a couple of hundred lines long, and
-    undoubtedly looks a bit complex if you don't know what you're
-    looking at.&nbsp; Again, that complexity is an illusion, and there
-    are only a couple of things you need to know to immediately begin
-    working with it, if you're lucky enough to already be familiar with
-    Python.&nbsp; In fact, you only need to look at or modify two of the
-    program's functions, <tt>inputsForAGx</tt> and <tt>outputFromAGx</tt>:<br>
-    <ul>
-      <li><tt>outputFromAGx(channel,value)</tt> — This is a function
-        which is called automatically whenever an output channel in the
-        AGC has changed.&nbsp; The <tt>channel</tt> parameter is the
-        address of the output channel, in the range 0-127 (0-0177
-        octal), while <tt>value</tt> is the new value of that channel,
-        in the range 0-32767 (0-077777 octal).&nbsp; Your software can
-        do anything you like with this data.&nbsp; Most channels you
-        will likely ignore.&nbsp; For example, there's little need to do
-        anything with data in DSKY channels like 010 (octal), 011, or
-        013, since the DSKY peripheral will handle those.</li>
-      <li><tt>inputsForAGx()</tt> — This is a function which is
-        automatically called periodically (nominally every 50 ms), which
-        allows you to specify zero or more AGC input channels and values
-        that are supposed to be written into those channels.&nbsp; How
-        this decision is made or where the data comes from originally is
-        entirely up to you.&nbsp; By default, the function simply
-        returns an empty list (in Python notation <tt>[]</tt>), and so
-        none of the AGC's input channels are affected.&nbsp; But if the
-        returned list contains one or more items, then the corresponding
-        input channels will be changed.</li>
-    </ul>
-    <p>Actually, the values in the list of input channels returned by <tt>inputsForAGx()</tt>
-      are something the Python language calls "tuples" or specifically,
-      3-tuples.&nbsp; Each 3-tuple has, as you may imagine, 3 parts:<br>
-    </p>
-    <blockquote>
-      <p><tt>( channel, value, mask )</tt><br>
-      </p>
-    </blockquote>
-    The interpretations of the <tt>channel</tt> and <tt>value</tt>
-    parts are probably obvious.&nbsp; The <tt>mask</tt> part indicates
-    which <i>bit positions</i> of the <tt>value</tt> are valid.&nbsp;
-    Only the bit positions of <tt>value</tt> for which the <tt>mask</tt>
-    is 1 end up affecting the AGC's input channel, and the bit positions
-    in the input channel corresponding to 0 in in the <tt>mask</tt>
-    remain unchanged.&nbsp; This feature is needed in general because
-    some input channels have bit-fields controlled by one peripheral
-    device and other bit-fields controlled by other peripheral devices,
-    and you don't want a peripheral device to change the wrong
-    bits.&nbsp; For i/o channels you've defined yourself, of course,
-    that probably isn't an issue, and the <tt>mask</tt> could always be
-    32677 (077777 octal).<br>
-    <br>
-    For example, in a given periodic call to <tt>inputsForAGx()</tt>,
-    you might decide that the lower 3 bits of your custom input channel
-    045 (octal) need to be changed to 05 (octal), and perhaps that the
-    entire value of your custom channel 046 needs to be changed to
-    012345.&nbsp; The list returned by <tt>inputsForAGx()</tt> would
-    then be<br>
-    <blockquote><tt>[ ( 0o45, 0o5, 0o00007), (0o46, 0o12345, 0o77777) ]</tt><br>
-    </blockquote>
-    Note that in Python 3, octal constants are prefixed by "0o".<br>
-    <br>
-    As for how to choose good addresses for your own custom i/o
-    channels, it's probably best to avoid i/o channels already
-    preassigned by the true AGC hardware and existing AGC mission
-    software.&nbsp; While I'm not aware of any comprehensive list,
-    addresses 0o0-0035 and 0o76-0o77 should be regarded as already
-    allocated by the AGC hardware.&nbsp; In addition to those, the <i>simulated</i>
-    AGC hardware, yaAGC, has defined various "fictitious i/o ports",
-    working downward from address 0o177, for its own purposes.&nbsp; So
-    to summarize all of that, my advice would be to confine any custom
-    i/o channels you want to assign to the following ranges:<br>
-    <ul>
-      <li>0o40 - 0o67</li>
-      <li>0o100-0o147</li>
-    </ul>
-    <p>As it happens, the sample peripheral program piPeripheral.py in
-      our GitHub repository has been pepped up slightly from just a bare
-      template.&nbsp; Additionally, it defines and processes several new
-      i/o channels just to give examples of how to do so.&nbsp; This
-      extra stuff is active only when the command-line switch <tt>--time=1</tt>
-      (or actually, <tt>--time=<i>anything</i></tt>) is used, so you
-      can easily eliminate it if you choose to build your own peripheral
-      device starting from piPeripheral.py.&nbsp; Here's a list of these
-      newly-assigned channels:</p>
-    <ul>
-      <li>AGC input channel 0o40 — Packed minutes and seconds of the
-        current time, with seconds in the least-significant 6 bits and
-        minutes in the next higher 6 bits.</li>
-      <li>AGC input channel 0o41 — Packed month, day, and hours of the
-        current date and time, with hours being the least-significant 5
-        bits, day the next higher 5 bits, and month the next higher 4
-        bits.</li>
-      <li>AGC input channel 0o42 — The current year.</li>
-      <li>AGC output channel 0o43 — The current year.</li>
-      <li>AGC output channel 0o44 — The current month.</li>
-      <li>AGC output channel 0o44 — The current day</li>
-      <li>AGC output channel 0o44 — The current hour</li>
-      <li>AGC output channel 0o44 — The current minute</li>
-      <li>AGC output channel 0o44 — The current second</li>
-    </ul>
-    <p>The input channels are actively generated by piPeripheral.py,
-      while the output channels merely have their contents printed
-      out.&nbsp; The AGC program processing the input channels (in which
-      the date and time is packed in a non-human-friendly way) <i>might</i>
-      use the output channels for reporting human-friendly unpacked date
-      &amp; time data.&nbsp; Of course, the AGC program might choose to
-      do something else altogether or even nothing at all with these
-      extra channels.<br>
-    </p>
-    <p>And of course, the main idea behind providing the current time
-      and date in this way in the first place, is that it might serve as
-      the basis for using the AGC+DSKY as a clock widget on a computer
-      desktop.&nbsp; That's because we really <i>mean</i> the current
-      time, and we don't mean something like "time since powerup", which
-      is otherwise all that the AGC knows about on its own.&nbsp; This
-      idea of a clock app is continued in the next section.<br>
-    </p>
-    <ul>
-    </ul>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Bare-Metal_Programming"></a>Bare-Metal Programming</h2>
-    Alas! there's nothing akin to a higher-level language such a C or
-    Python for the AGC.&nbsp; Thus, programming the AGC is ultimately an
-    exercise in <i>assembly-language</i> programming, and specifically
-    in the assembly language that's unique to the "Block 2" AGC.&nbsp;
-    This is covered in more detail than many mortals would like on our <a
-      href="assembly_language_manual.html">Block 2 AGC Language page</a>,
-    so to start out, you'll either want to look that over, or at least
-    to look over the concise "<a
-      href="http://www.ibiblio.org/apollo/hrst/archive/1689.pdf">AGC4
-      Memo #9</a>" from which a lot of the information on that page
-    comes.&nbsp; If you're not already somewhat-familiar with
-    assembly-language programming in general, I won't pretend this will
-    be easy for you.&nbsp; On the other hand, if you <i>do</i> have any
-    previous familiarity with assembly language, all you'll really need
-    to worry about is internalizing the AGC's unique non-contiguous
-    memory map and register set, and getting an overview of the
-    instruction set. <br>
-    <br>
-    Other than what I mentioned just now, the first important thing to
-    know is that your AGC program will begin executing at address 04000
-    (octal), which could look like this in assembly language:<br>
-    <blockquote><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        &nbsp;&nbsp;&nbsp; SETLOC&nbsp;&nbsp;&nbsp; 4000<br>
-        STARTUP &nbsp;&nbsp;&nbsp; # Do your own stuff from here on<br>
-      </tt></blockquote>
-    But that's a bit of an over-simplification.&nbsp; The actual
-    significance of address 04000 is that it's the start of an <a
-      href="https://en.wikipedia.org/wiki/Interrupt_vector_table">interrupt-vector
-
-
-
-      table</a> — i.e., of code which is instantly automatically
-    executed whenever certain exceptional conditions occurs.&nbsp; For
-    example, if the DSKY sends the AGC a keystroke, it instantly
-    "vectors" to the code that's associated with that condition, and
-    it's not something that your AGC program necessarily has to
-    explicitly check for.<br>
-    <br>
-    There are actually 11 different interrupt sources in the AGC,
-    including power-up, and each of those interrupt-sources has 4 words
-    allocated for it in the interrupt-vector table at address 04000, and
-    <a href="assembly_language_manual.html#Interrupt_Processing">you can
-      read about them here</a>.&nbsp; You can't just ignore them, even
-    if you think you don't need them for anything, because you still
-    have to worry about what happens if one of those interrupts occurs:
-    you can't have the code just suddenly vector off into the middle of
-    nowhere!&nbsp; So a minimal version of the code above that accounts
-    for the full interrupt table might look like so:<br>
-    <blockquote><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        &nbsp;&nbsp;&nbsp; SETLOC&nbsp;&nbsp;&nbsp; 4000<br>
-        <br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        TCF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; STARTUP</tt><tt></tt><tt><br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOOP<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOOP<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOOP<br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # T6RUPT</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # T5RUPT</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME &nbsp;&nbsp; # T3RUPT</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # T4RUPT</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # KEYRUPT1</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # KEYRUPT2</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # UPRUPT</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # DOWNRUPT</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # RADAR RUPT</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; NOOP</tt><tt><br>
-      </tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        RESUME&nbsp;&nbsp;&nbsp; # RUPT10</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        NOOP</tt><tt><br>
-      </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt><tt><br>
-      </tt><tt>STARTUP&nbsp;&nbsp;&nbsp;&nbsp; # Do your own stuff from
-        here on!</tt><br>
-    </blockquote>
-    Even here, we're still simplifying a bit, since what you'd find if
-    you started filling in code after the label <tt>STARTUP</tt> is
-    that your code might execute for a while and then just reset and
-    start again at address 04000!&nbsp; What's up with that?&nbsp; Well,
-    behind the scenes, the AGC hardware checks performs various checks
-    to determine if the computer has somehow frozen up, and of course,
-    yaAGC tries to perform whichever of those checks are appropriate as
-    well.&nbsp; If it detects any of these conditions, it performs a
-    jump to address 04000, just as if a power-up had occurred.&nbsp;
-    That's one of the features that lends reliability to the
-    device.&nbsp; This restart is known as a GOJAM.&nbsp; I'm not
-    totally sure what all of the conditions that could trigger a GOJAM
-    are, but <a
-      href="https://www.ibiblio.org/apollo/Documents/LUM225-PV_text.pdf">LUMINARY
-
-
-
-      Memo #225</a> contains a handy list of 8 of them.&nbsp; The ones
-    that are relevant to software that you yourself write are these:<br>
-    <ul>
-      <li>Night Watchman — this expects a specific memory location
-        (address 067 octal, usually labeled as <tt>NEWJOB</tt>) to be
-        tested every so often.&nbsp; If <tt>NEWJOB</tt> isn't tested at
-        reasonable intervals, then a GOJAM occurs.&nbsp; (In normal
-        mission software, <tt>NEWJOB</tt> is a variable that relates to
-        loading jobs into the "executive", and thus it's reasonable to
-        expect it not to be ignored by the software.)&nbsp; Thus, you
-        need to have some code that periodically reads this location,
-        such as a <tt>CS NEWJOB</tt> instruction.</li>
-      <li>RUPTLOCK — this check guards against interrupts being disabled
-        for too long a period of time, or else for an interrupt service
-        routine taking too long before executing its <tt>RESUME</tt>
-        instruction to return to the main code.&nbsp; Thus, you must
-        make sure that interrupts are usually enabled (and don't occur
-        too often or take too long when they do).</li>
-      <li>TC TRAP — this check guards against infinite loops of the form
-        <tt>TC SELF</tt>.&nbsp; So if your AGC program actually has an
-        end point after which it has finished up all of its work, it
-        best to end it up with something more complex than an
-        instruction to just keep looping at the same address.</li>
-    </ul>
-    <p>Taking all of that into consideration, here's a minimal framework
-      you might use to start building your bare-metal AGC program:<br>
-    </p>
-    <blockquote>
-      <p><tt># Definitions of various registers.<br>
-          ARUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          EQUALS&nbsp;&nbsp;&nbsp; 10<br>
-          QRUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          EQUALS&nbsp;&nbsp;&nbsp; 12<br>
-          TIME3&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; EQUALS&nbsp;&nbsp;&nbsp;
-          26<br>
-          NEWJOB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EQUALS&nbsp;&nbsp;&nbsp;
-          67 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; # Location
-          checked by the Night Watchman.<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          SETLOC&nbsp;&nbsp;&nbsp; 4000&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; # The interrupt-vector table.<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          Come here at power-up or GOJAM<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          INHINT&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; # Disable interrupts for a moment.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Set
-          up the TIME3 interrupt, T3RUPT.&nbsp; TIME3 is a 15-bit<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          register at address 026, which automatically increments every<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # 10
-          ms, and a T3RUPT interrupt occurs when the timer<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          overflows.&nbsp; Thus if it is initially loaded with 037774,<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # and
-          overflows when it hits 040000, then it will <br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          interrupt after 40 ms.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          CA&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; O37774<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; TIME3<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          TCF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; STARTUP&nbsp;&nbsp;&nbsp; #
-          Go to your "real" code.<br>
-        </tt></p>
-      <p><tt> </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # T6RUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # T5RUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; DXCH&nbsp;&nbsp; &nbsp;&nbsp; ARUPT
-          &nbsp;&nbsp; &nbsp;&nbsp; # T3RUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; EXTEND&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Back up A, L, and Q</tt><tt>
-          registers<br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; QXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QRUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; TCF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          T3RUPT</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # T4RUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
-          NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # KEYRUPT1</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # KEYRUPT2</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # UPRUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # DOWNRUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # RADAR RUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
-          NOOP</tt><tt><br>
-        </tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # RUPT10</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; NOOP</tt><tt><br>
-        </tt><tt><br>
-          # The interrupt-service routine for the TIME3 interrupt every
-          40 ms.&nbsp; <br>
-          T3RUPT&nbsp;&nbsp; &nbsp;&nbsp; CAF&nbsp;&nbsp;&nbsp;&nbsp;
-          O37774&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Schedule another TIME3
-          interrupt in 40 ms.<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-          TS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TIME3<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          Tickle NEWJOB to keep Night Watchman GOJAMs from happening.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # You
-          normally would NOT do this kind of thing in an
-          interrupt-service<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          routine, because it would actually prevent you from detecting
-          <br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          true misbehavior in the main program.&nbsp; If you're
-          concerned about<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          that, just comment out the next instruction and instead
-          sprinkle<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          your main code with "CS NEWJOB" instructions at strategic
-          points.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          CS&nbsp;&nbsp;&nbsp; &nbsp; NEWJOB<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          If you want to build in your own behavior, do it right here!</tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          And resume the main program<br>
-          &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-          DXCH&nbsp;&nbsp;&nbsp;
-          ARUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Restore A, L, and
-          Q, and exit the interrupt<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-          EXTEND<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-          QXCH&nbsp;&nbsp;&nbsp; QRUPT<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-          RESUME&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt><br>
-      </p>
-      <p><tt><br>
-        </tt><tt>STARTUP&nbsp;&nbsp;&nbsp;&nbsp;
-          RELINT&nbsp;&nbsp;&nbsp; # Reenable interrupts.</tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          Do your own stuff here!<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          If you're all done, a nice but complex infinite loop that<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          won't trigger a TC TRAP GOJAM.<br>
-          ALLDONE&nbsp;&nbsp;&nbsp;&nbsp;
-          CS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEWJOB&nbsp;&nbsp;&nbsp;
-          &nbsp; # Tickle the Night Watchman<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          TCF&nbsp;&nbsp;&nbsp;&nbsp; ALLDONE<br>
-        </tt></p>
-      <p><tt># Define any constants that are needed.<br>
-          O37774&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          OCT&nbsp;&nbsp;&nbsp;&nbsp; 37774<br>
-          <br>
-        </tt></p>
-    </blockquote>
-    <p>So here you have simple framework with a few empty places in
-      which to insert your own code.&nbsp; Not to mention a few
-      interrupt vectors (such as the DSKY keypad interrupts, KEYRUPT1
-      and KEYRUPT2) that right now do nothing, but which you could
-      imagine might be very helpful.<br>
-    </p>
-    <p>What might the functionality for reading DSKY keystrokes look
-      like?&nbsp; Note that <a
-        href="developer.html#Table_of_IO_Channels">info about the i/o
-        channels pertaining to the DSKY are on the developer page</a>.&nbsp;
-      Perhaps you'd use the KEYRUPT1 interrupt-service routine to read
-      the input channel containing the DSKY keycode, and then store that
-      keycode in a variable.&nbsp; Your main program loop might
-      periodically check that variable to see it it contains anything,
-      and then might output something to the DSKY so you'd know it had
-      been detected.&nbsp; For example, it might toggle the DSKY's COMP
-      ACTY lamp every time there was a new keycode detected.<br>
-    </p>
-    <blockquote>
-      <p><tt># Here's what the allocation of the variable to hold the
-          keycode might look like.<br>
-          # Plus, a variable that tells if COMP ACTY is currently on or
-          off.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
-          SETLOC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68<br>
-          KEYBUF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ERASE&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # 040
-          when empty, 0-037 when holding a code<br>
-          CASTATUS&nbsp;&nbsp;&nbsp; ERASE&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # 0
-          if COMP ACTY off, 2 if on.<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-        </tt></p>
-      <p><tt># Here's what the KEYRUPT1 interrupt-vector table entry
-          might look like.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          DXCH&nbsp;&nbsp; &nbsp;&nbsp; ARUPT &nbsp;&nbsp; &nbsp;&nbsp;
-          # KEYRUPT1</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; EXTEND&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Back up A, L, and Q</tt><tt>
-          registers<br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; QXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QRUPT</tt><tt><br>
-        </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; TCF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          KEYRUPT1</tt></p>
-      <p><tt> </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-        </tt></p>
-      <p><tt># Here's what the actual interrupt-service code might look
-          like.<br>
-          KEYRUPT1&nbsp;&nbsp;&nbsp; EXTEND<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          READ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; # Read the DSKY keycode input
-          channel<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          MASK&nbsp;&nbsp; &nbsp;&nbsp; O37&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Get rid of all but lowest 5
-          bits.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          KEYBUF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; # save the keycode for
-          later.</tt><tt><br>
-          &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
-          DXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          ARUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Restore A,
-          L, and Q, and exit the interrupt<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-          EXTEND<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-          QXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QRUPT<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
-
-          RESUME&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-        </tt></p>
-      <p><tt># Here's what it might look like in the main code.<br>
-          STARTUP&nbsp;&nbsp;&nbsp;&nbsp; RELINT<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          Initialization<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          CA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          NOKEY&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; # Clear the
-          keypad buffer variable<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          KEYBUF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # to initially
-          hold an illegal keycode.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          CA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ZERO<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; CASTATUS<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          Occasionally check if there's a keycode ready, and toggle <br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          DSKY COMP ACTY if there is.&nbsp; Presumably this is inside of
-          a <br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
-          loop.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          CA&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOKEY<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          EXTEND<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          SU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          KEYBUF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Acc will now be
-          zero if no key, non-zero otherwise<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          EXTEND<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          BZF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EMPTY<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          CA&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOKEY<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          KEYBUF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Mark keycode
-          buffer as empty.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          CA&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          CASTATUS&nbsp;&nbsp;&nbsp; &nbsp; # Toggle COMP ACTY.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          EXTEND<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          BZF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CAOFF<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          CA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ZERO<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          TCF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CATOGGLE<br>
-          CAOFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CA&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; TWO<br>
-          CATOGGLE&nbsp;&nbsp;&nbsp;
-          TS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CASTATUS<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          EXTEND<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          WRITE&nbsp;&nbsp;&nbsp;&nbsp; 11&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Write to the DSKY
-          lamps<br>
-          EMPTY&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; NOOP<br>
-        </tt></p>
-      <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
-        </tt></p>
-      <p><tt># Constants<br>
-          ZERO&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          OCT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br>
-          TWO&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-          OCT&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; 2<br>
-          O37&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-          OCT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 37&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Mask with lowest 5
-          bits set.<br>
-          NOKEY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          OCT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 40<br>
-        </tt></p>
-    </blockquote>
-    <p><img src="piPeripheral.jpg" alt="" width="290" height="336"
-        align="right">With this, you actually have an AGC program that
-      does something, and does it both visibly and testably ... if not
-      very excitingly.<br>
-    </p>
-    <p>A slightly sleeker form of this code, called <a
+can find it in our GitHub repository</a>.&nbsp; As the name
+implies, piPeripheral.py is written in <a
+href="https://www.python.org/">the Python 3 language</a>.&nbsp;
+Python is a kind of scripting language which does not need to be
+compiled, and hence you can change the program and see the effects
+immediately.&nbsp; It's available, or already automatically
+installed, on Windows, Mac OS X, Linux, and so on.<br><br>
+The piPeripheral.py program is a couple of hundred lines long, and
+undoubtedly looks a bit complex if you don't know what you're
+looking at.&nbsp; Again, that complexity is an illusion, and there
+are only a couple of things you need to know to immediately begin
+working with it, if you're lucky enough to already be familiar with
+Python.&nbsp; In fact, you only need to look at or modify two of the
+program's functions, <tt>inputsForAGx</tt> and <tt>outputFromAGx</tt>:<br><ul><li><tt>outputFromAGx(channel,value)</tt> — This is a function
+which is called automatically whenever an output channel in the
+AGC has changed.&nbsp; The <tt>channel</tt> parameter is the
+address of the output channel, in the range 0-127 (0-0177
+octal), while <tt>value</tt> is the new value of that channel,
+in the range 0-32767 (0-077777 octal).&nbsp; Your software can
+do anything you like with this data.&nbsp; Most channels you
+will likely ignore.&nbsp; For example, there's little need to do
+anything with data in DSKY channels like 010 (octal), 011, or
+013, since the DSKY peripheral will handle those.</li><li><tt>inputsForAGx()</tt> — This is a function which is
+automatically called periodically (nominally every 50 ms), which
+allows you to specify zero or more AGC input channels and values
+that are supposed to be written into those channels.&nbsp; How
+this decision is made or where the data comes from originally is
+entirely up to you.&nbsp; By default, the function simply
+returns an empty list (in Python notation <tt>[]</tt>), and so
+none of the AGC's input channels are affected.&nbsp; But if the
+returned list contains one or more items, then the corresponding
+input channels will be changed.</li></ul><p>Actually, the values in the list of input channels returned by <tt>inputsForAGx()</tt>
+are something the Python language calls "tuples" or specifically,
+3-tuples.&nbsp; Each 3-tuple has, as you may imagine, 3 parts:<br></p><blockquote><p><tt>( channel, value, mask )</tt><br></p></blockquote>
+The interpretations of the <tt>channel</tt> and <tt>value</tt>
+parts are probably obvious.&nbsp; The <tt>mask</tt> part indicates
+which <i>bit positions</i> of the <tt>value</tt> are valid.&nbsp;
+Only the bit positions of <tt>value</tt> for which the <tt>mask</tt>
+is 1 end up affecting the AGC's input channel, and the bit positions
+in the input channel corresponding to 0 in in the <tt>mask</tt>
+remain unchanged.&nbsp; This feature is needed in general because
+some input channels have bit-fields controlled by one peripheral
+device and other bit-fields controlled by other peripheral devices,
+and you don't want a peripheral device to change the wrong
+bits.&nbsp; For i/o channels you've defined yourself, of course,
+that probably isn't an issue, and the <tt>mask</tt> could always be
+32677 (077777 octal).<br><br>
+For example, in a given periodic call to <tt>inputsForAGx()</tt>,
+you might decide that the lower 3 bits of your custom input channel
+045 (octal) need to be changed to 05 (octal), and perhaps that the
+entire value of your custom channel 046 needs to be changed to
+012345.&nbsp; The list returned by <tt>inputsForAGx()</tt> would
+then be<br><blockquote><tt>[ ( 0o45, 0o5, 0o00007), (0o46, 0o12345, 0o77777) ]</tt><br></blockquote>
+Note that in Python 3, octal constants are prefixed by "0o".<br><br>
+As for how to choose good addresses for your own custom i/o
+channels, it's probably best to avoid i/o channels already
+preassigned by the true AGC hardware and existing AGC mission
+software.&nbsp; While I'm not aware of any comprehensive list,
+addresses 0o0-0035 and 0o76-0o77 should be regarded as already
+allocated by the AGC hardware.&nbsp; In addition to those, the <i>simulated</i>
+AGC hardware, yaAGC, has defined various "fictitious i/o ports",
+working downward from address 0o177, for its own purposes.&nbsp; So
+to summarize all of that, my advice would be to confine any custom
+i/o channels you want to assign to the following ranges:<br><ul><li>0o40 - 0o67</li><li>0o100-0o147</li></ul><p>As it happens, the sample peripheral program piPeripheral.py in
+our GitHub repository has been pepped up slightly from just a bare
+template.&nbsp; Additionally, it defines and processes several new
+i/o channels just to give examples of how to do so.&nbsp; This
+extra stuff is active only when the command-line switch <tt>--time=1</tt>
+(or actually, <tt>--time=<i>anything</i></tt>) is used, so you
+can easily eliminate it if you choose to build your own peripheral
+device starting from piPeripheral.py.&nbsp; Here's a list of these
+newly-assigned channels:</p><ul><li>AGC input channel 0o40 — Packed minutes and seconds of the
+current time, with seconds in the least-significant 6 bits and
+minutes in the next higher 6 bits.</li><li>AGC input channel 0o41 — Packed month, day, and hours of the
+current date and time, with hours being the least-significant 5
+bits, day the next higher 5 bits, and month the next higher 4
+bits.</li><li>AGC input channel 0o42 — The current year.</li><li>AGC output channel 0o43 — The current year.</li><li>AGC output channel 0o44 — The current month.</li><li>AGC output channel 0o44 — The current day</li><li>AGC output channel 0o44 — The current hour</li><li>AGC output channel 0o44 — The current minute</li><li>AGC output channel 0o44 — The current second</li></ul><p>The input channels are actively generated by piPeripheral.py,
+while the output channels merely have their contents printed
+out.&nbsp; The AGC program processing the input channels (in which
+the date and time is packed in a non-human-friendly way) <i>might</i>
+use the output channels for reporting human-friendly unpacked date
+&amp; time data.&nbsp; Of course, the AGC program might choose to
+do something else altogether or even nothing at all with these
+extra channels.<br></p><p>And of course, the main idea behind providing the current time
+and date in this way in the first place, is that it might serve as
+the basis for using the AGC+DSKY as a clock widget on a computer
+desktop.&nbsp; That's because we really <i>mean</i> the current
+time, and we don't mean something like "time since powerup", which
+is otherwise all that the AGC knows about on its own.&nbsp; This
+idea of a clock app is continued in the next section.<br></p><ul></ul><hr style="width: 100%; height: 2px;"><h2><a name="Bare-Metal_Programming"></a>Bare-Metal Programming</h2>
+Alas! there's nothing akin to a higher-level language such a C or
+Python for the AGC.&nbsp; Thus, programming the AGC is ultimately an
+exercise in <i>assembly-language</i> programming, and specifically
+in the assembly language that's unique to the "Block 2" AGC.&nbsp;
+This is covered in more detail than many mortals would like on our <a
+href="assembly_language_manual.html">Block 2 AGC Language page</a>,
+so to start out, you'll either want to look that over, or at least
+to look over the concise "<a
+href="http://www.ibiblio.org/apollo/hrst/archive/1689.pdf">AGC4
+Memo #9</a>" from which a lot of the information on that page
+comes.&nbsp; If you're not already somewhat-familiar with
+assembly-language programming in general, I won't pretend this will
+be easy for you.&nbsp; On the other hand, if you <i>do</i> have any
+previous familiarity with assembly language, all you'll really need
+to worry about is internalizing the AGC's unique non-contiguous
+memory map and register set, and getting an overview of the
+instruction set. <br><br>
+Other than what I mentioned just now, the first important thing to
+know is that your AGC program will begin executing at address 04000
+(octal), which could look like this in assembly language:<br><blockquote><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; SETLOC&nbsp;&nbsp;&nbsp; 4000<br>
+STARTUP &nbsp;&nbsp;&nbsp; # Do your own stuff from here on<br></tt></blockquote>
+But that's a bit of an over-simplification.&nbsp; The actual
+significance of address 04000 is that it's the start of an <a
+href="https://en.wikipedia.org/wiki/Interrupt_vector_table">interrupt-vector
+table</a> — i.e., of code which is instantly automatically
+executed whenever certain exceptional conditions occurs.&nbsp; For
+example, if the DSKY sends the AGC a keystroke, it instantly
+"vectors" to the code that's associated with that condition, and
+it's not something that your AGC program necessarily has to
+explicitly check for.<br><br>
+There are actually 11 different interrupt sources in the AGC,
+including power-up, and each of those interrupt-sources has 4 words
+allocated for it in the interrupt-vector table at address 04000, and
+<a href="assembly_language_manual.html#Interrupt_Processing">you can
+read about them here</a>.&nbsp; You can't just ignore them, even
+if you think you don't need them for anything, because you still
+have to worry about what happens if one of those interrupts occurs:
+you can't have the code just suddenly vector off into the middle of
+nowhere!&nbsp; So a minimal version of the code above that accounts
+for the full interrupt table might look like so:<br><blockquote><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; SETLOC&nbsp;&nbsp;&nbsp; 4000<br><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+TCF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; STARTUP</tt><tt></tt><tt><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOOP<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOOP<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOOP<br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # T6RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # T5RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME &nbsp;&nbsp; # T3RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # T4RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # KEYRUPT1</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # KEYRUPT2</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # UPRUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # DOWNRUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # RADAR RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; # RUPT10</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt><tt><br></tt><tt>STARTUP&nbsp;&nbsp;&nbsp;&nbsp; # Do your own stuff from
+here on!</tt><br></blockquote>
+Even here, we're still simplifying a bit, since what you'd find if
+you started filling in code after the label <tt>STARTUP</tt> is
+that your code might execute for a while and then just reset and
+start again at address 04000!&nbsp; What's up with that?&nbsp; Well,
+behind the scenes, the AGC hardware checks performs various checks
+to determine if the computer has somehow frozen up, and of course,
+yaAGC tries to perform whichever of those checks are appropriate as
+well.&nbsp; If it detects any of these conditions, it performs a
+jump to address 04000, just as if a power-up had occurred.&nbsp;
+That's one of the features that lends reliability to the
+device.&nbsp; This restart is known as a GOJAM.&nbsp; I'm not
+totally sure what all of the conditions that could trigger a GOJAM
+are, but <a
+href="https://www.ibiblio.org/apollo/Documents/LUM225-PV_text.pdf">LUMINARY
+Memo #225</a> contains a handy list of 8 of them.&nbsp; The ones
+that are relevant to software that you yourself write are these:<br><ul><li>Night Watchman — this expects a specific memory location
+(address 067 octal, usually labeled as <tt>NEWJOB</tt>) to be
+tested every so often.&nbsp; If <tt>NEWJOB</tt> isn't tested at
+reasonable intervals, then a GOJAM occurs.&nbsp; (In normal
+mission software, <tt>NEWJOB</tt> is a variable that relates to
+loading jobs into the "executive", and thus it's reasonable to
+expect it not to be ignored by the software.)&nbsp; Thus, you
+need to have some code that periodically reads this location,
+such as a <tt>CS NEWJOB</tt> instruction.</li><li>RUPTLOCK — this check guards against interrupts being disabled
+for too long a period of time, or else for an interrupt service
+routine taking too long before executing its <tt>RESUME</tt>
+instruction to return to the main code.&nbsp; Thus, you must
+make sure that interrupts are usually enabled (and don't occur
+too often or take too long when they do).</li><li>TC TRAP — this check guards against infinite loops of the form
+<tt>TC SELF</tt>.&nbsp; So if your AGC program actually has an
+end point after which it has finished up all of its work, it
+best to end it up with something more complex than an
+instruction to just keep looping at the same address.</li></ul><p>Taking all of that into consideration, here's a minimal framework
+you might use to start building your bare-metal AGC program:<br></p><blockquote><p><tt># Definitions of various registers.<br>
+ARUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+EQUALS&nbsp;&nbsp;&nbsp; 10<br>
+QRUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+EQUALS&nbsp;&nbsp;&nbsp; 12<br>
+TIME3&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; EQUALS&nbsp;&nbsp;&nbsp;
+26<br>
+NEWJOB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EQUALS&nbsp;&nbsp;&nbsp;
+67 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; # Location
+checked by the Night Watchman.<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+SETLOC&nbsp;&nbsp;&nbsp; 4000&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; # The interrupt-vector table.<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+Come here at power-up or GOJAM<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+INHINT&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; # Disable interrupts for a moment.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Set
+up the TIME3 interrupt, T3RUPT.&nbsp; TIME3 is a 15-bit<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+register at address 026, which automatically increments every<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # 10
+ms, and a T3RUPT interrupt occurs when the timer<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+overflows.&nbsp; Thus if it is initially loaded with 037774,<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # and
+overflows when it hits 040000, then it will <br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+interrupt after 40 ms.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+CA&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; O37774<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; TIME3<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+TCF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; STARTUP&nbsp;&nbsp;&nbsp; #
+Go to your "real" code.<br></tt></p><p><tt> </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # T6RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # T5RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; DXCH&nbsp;&nbsp; &nbsp;&nbsp; ARUPT
+&nbsp;&nbsp; &nbsp;&nbsp; # T3RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; EXTEND&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Back up A, L, and Q</tt><tt>
+registers<br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; QXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QRUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; TCF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3RUPT</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # T4RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
+NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # KEYRUPT1</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # KEYRUPT2</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # UPRUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # DOWNRUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # RADAR RUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
+NOOP</tt><tt><br></tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; RESUME&nbsp;&nbsp;&nbsp; # RUPT10</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; NOOP</tt><tt><br></tt><tt><br>
+# The interrupt-service routine for the TIME3 interrupt every
+40 ms.&nbsp; <br>
+T3RUPT&nbsp;&nbsp; &nbsp;&nbsp; CAF&nbsp;&nbsp;&nbsp;&nbsp;
+O37774&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Schedule another TIME3
+interrupt in 40 ms.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+TS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TIME3<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+Tickle NEWJOB to keep Night Watchman GOJAMs from happening.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # You
+normally would NOT do this kind of thing in an
+interrupt-service<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+routine, because it would actually prevent you from detecting
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+true misbehavior in the main program.&nbsp; If you're
+concerned about<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+that, just comment out the next instruction and instead
+sprinkle<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+your main code with "CS NEWJOB" instructions at strategic
+points.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+CS&nbsp;&nbsp;&nbsp; &nbsp; NEWJOB<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+If you want to build in your own behavior, do it right here!</tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+And resume the main program<br>
+&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
+DXCH&nbsp;&nbsp;&nbsp;
+ARUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Restore A, L, and
+Q, and exit the interrupt<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+EXTEND<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+QXCH&nbsp;&nbsp;&nbsp; QRUPT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt><br></p><p><tt><br></tt><tt>STARTUP&nbsp;&nbsp;&nbsp;&nbsp;
+RELINT&nbsp;&nbsp;&nbsp; # Reenable interrupts.</tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+Do your own stuff here!<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+If you're all done, a nice but complex infinite loop that<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+won't trigger a TC TRAP GOJAM.<br>
+ALLDONE&nbsp;&nbsp;&nbsp;&nbsp;
+CS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEWJOB&nbsp;&nbsp;&nbsp;
+&nbsp; # Tickle the Night Watchman<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+TCF&nbsp;&nbsp;&nbsp;&nbsp; ALLDONE<br></tt></p><p><tt># Define any constants that are needed.<br>
+O37774&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+OCT&nbsp;&nbsp;&nbsp;&nbsp; 37774<br><br></tt></p></blockquote><p>So here you have simple framework with a few empty places in
+which to insert your own code.&nbsp; Not to mention a few
+interrupt vectors (such as the DSKY keypad interrupts, KEYRUPT1
+and KEYRUPT2) that right now do nothing, but which you could
+imagine might be very helpful.<br></p><p>What might the functionality for reading DSKY keystrokes look
+like?&nbsp; Note that <a
+href="developer.html#Table_of_IO_Channels">info about the i/o
+channels pertaining to the DSKY are on the developer page</a>.&nbsp;
+Perhaps you'd use the KEYRUPT1 interrupt-service routine to read
+the input channel containing the DSKY keycode, and then store that
+keycode in a variable.&nbsp; Your main program loop might
+periodically check that variable to see it it contains anything,
+and then might output something to the DSKY so you'd know it had
+been detected.&nbsp; For example, it might toggle the DSKY's COMP
+ACTY lamp every time there was a new keycode detected.<br></p><blockquote><p><tt># Here's what the allocation of the variable to hold the
+keycode might look like.<br>
+# Plus, a variable that tells if COMP ACTY is currently on or
+off.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+SETLOC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68<br>
+KEYBUF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ERASE&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # 040
+when empty, 0-037 when holding a code<br>
+CASTATUS&nbsp;&nbsp;&nbsp; ERASE&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # 0
+if COMP ACTY off, 2 if on.<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br></tt></p><p><tt># Here's what the KEYRUPT1 interrupt-vector table entry
+might look like.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+DXCH&nbsp;&nbsp; &nbsp;&nbsp; ARUPT &nbsp;&nbsp; &nbsp;&nbsp;
+# KEYRUPT1</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; EXTEND&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Back up A, L, and Q</tt><tt>
+registers<br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; QXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QRUPT</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; TCF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+KEYRUPT1</tt></p><p><tt> </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br></tt></p><p><tt># Here's what the actual interrupt-service code might look
+like.<br>
+KEYRUPT1&nbsp;&nbsp;&nbsp; EXTEND<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+READ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; # Read the DSKY keycode input
+channel<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+MASK&nbsp;&nbsp; &nbsp;&nbsp; O37&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Get rid of all but lowest 5
+bits.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+KEYBUF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; # save the keycode for
+later.</tt><tt><br>
+&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
+DXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ARUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Restore A,
+L, and Q, and exit the interrupt<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+EXTEND<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+QXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QRUPT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+RESUME&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br></tt></p><p><tt># Here's what it might look like in the main code.<br>
+STARTUP&nbsp;&nbsp;&nbsp;&nbsp; RELINT<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+Initialization<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NOKEY&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; # Clear the
+keypad buffer variable<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+KEYBUF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # to initially
+hold an illegal keycode.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+CA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ZERO<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; CASTATUS<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+Occasionally check if there's a keycode ready, and toggle <br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+DSKY COMP ACTY if there is.&nbsp; Presumably this is inside of
+a <br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
+loop.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+CA&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOKEY<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+EXTEND<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+SU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+KEYBUF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Acc will now be
+zero if no key, non-zero otherwise<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+EXTEND<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+BZF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EMPTY<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+CA&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; NOKEY<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+TS&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+KEYBUF&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Mark keycode
+buffer as empty.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+CA&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+CASTATUS&nbsp;&nbsp;&nbsp; &nbsp; # Toggle COMP ACTY.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+EXTEND<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+BZF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CAOFF<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+CA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ZERO<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+TCF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CATOGGLE<br>
+CAOFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CA&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; TWO<br>
+CATOGGLE&nbsp;&nbsp;&nbsp;
+TS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CASTATUS<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+EXTEND<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+WRITE&nbsp;&nbsp;&nbsp;&nbsp; 11&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Write to the DSKY
+lamps<br>
+EMPTY&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; NOOP<br></tt></p><p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br></tt></p><p><tt># Constants<br>
+ZERO&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+OCT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br>
+TWO&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+OCT&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; 2<br>
+O37&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+OCT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 37&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; # Mask with lowest 5
+bits set.<br>
+NOKEY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+OCT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 40<br></tt></p></blockquote><p><img src="piPeripheral.jpg" alt="" width="290" height="336"
+align="right">With this, you actually have an AGC program that
+does something, and does it both visibly and testably ... if not
+very excitingly.<br></p><p>A slightly sleeker form of this code, called <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeripheral.agc">piPeripheral.agc,
-
-
-
-        which can be assembled with yaYUL and actually works if it is
-        run in the AGC simulator, can be found in our GitHub repository</a>.&nbsp;
-      Actually, the code in GitHub is not <i>merely</i> a cleaned-up
-      form of the code above, but in fact implements processing of the
-      current-timestamp information the sample peripheral program
-      piPeripheral.py provides in the newly-minted AGC input channels
-      040-042.&nbsp; (See the end of the preceding section.)&nbsp; What
-      piPeripheral.agc does with that information (which is a packed
-      form of the date and time) is to:<br>
-    </p>
-    <ul>
-      <li>Unpack the data into separate year, month, day, hour, minute,
-        and second fields.</li>
-      <li> Output the unpacked data fields in the newly-allocated AGC
-        output channels 043-050.</li>
-      <li>Display the data on the DSKY.</li>
-    </ul>
-    <p>You can actually see what this looks like on a simulated DSKY in
-      the picture to right.&nbsp; What you see there is:<br>
-    </p>
-    <ul>
-      <li>The year (2017) in DSKY register R3 (the bottom 5-digit area).</li>
-      <li>The month (12) and the day (09) in DSKY register R2.</li>
-      <li>The hour (06) and minute (19) in DSKY register R1.</li>
-      <li>The seconds (10) in the NOUN area.</li>
-    </ul>
-    <p>The piPeripheral.py program will have generated this data
-      according to the preference settings on the compuer on which
-      you're running it, which in my case is the U.S. CST time-zone ...
-      so yes, I was doing this at around 6 in the morning, local time,
-      on a Saturday.&nbsp; Yawn!&nbsp; I should be paid more (than the
-      $0 I currently get) for doing this lousy job.&nbsp; :-)<br>
-    </p>
-    <p>At any rate, assuming one has written such a custom AGC program,
-      a necessary step before being able to run it in the AGC simulator
-      is to assemble it with the yaYUL assembler.&nbsp; Exactly how to
-      find the assembler depends on the particular setup being used, but
-      assuming you can find it (or better yet, have it in the "PATH"),
-      assembly is a snap.&nbsp; But suppose, for example, that you
-      simply want to assemble piPeripheral.agc; assuming you've retained
-      the same directory setup as in GitHub, and have built the normal
-      Virtual AGC software too, you could do something like the
-      following without having to worry about path settings:<br>
-    </p>
-    <blockquote>
-      <p><tt>cd virtualagc/piPeripheral</tt><tt><br>
-        </tt><tt>../yaYUL/yaYUL piPeripheral.agc</tt><br>
-      </p>
-    </blockquote>
-    The result (if there were no errors, and hopefully there wouldn't be
-    for an unmodified piPeripheral.agc) would be the executable file
-    piPeripheral.agc.bin.&nbsp; If there were assembly errors such as
-    syntax problems or unallocated variables, of course, then you have
-    to fix them ... a topic on which it's difficult to offer any general
-    advice other than to start with a small program that assembles
-    perfectly and slowly work towards having a larger program.&nbsp; <br>
-    <p>Once the program is assembled, it can be run in the AGC
-      simulator.&nbsp; This is again a tricky topic, since there are a
-      variety of ways in which it can be done, and a variety of possible
-      system configurations.&nbsp; What you would do on a desktop PC is
-      undoubtedly not the same thing you'd do on the 3D-printed DSKY
-      mentioned earlier.&nbsp; However, to just do it from a command
-      line within our software tree as downloaded from GitHub and
-      successfully built from source, in Linux you could do the
-      following.<br>
-    </p>
-    <blockquote>
-      <p><tt># Start up the AGC simulator with the custom AGC program,
-          in the background, and discard all messages from it.<br>
-          cd virtualagc/yaAGC</tt><tt><br>
-        </tt><tt>./yaAGC --core="../piPeripheral/piPeripheral.agc.bin"
-          --port=19697 --cfg="../yaDSKY/src/LM.ini" &amp;&gt;/dev/null
-          &amp;<br>
-          # Start up the DSKY simulator in the background and discard
-          all messages from it.<br>
-          cd ../yaDSKY2</tt><tt><br>
-        </tt><tt>./yaDSKY2 --cfg="../yaDSKY/src/LM.ini" --port=19698
-          &amp;&gt;/dev/null &amp;<br>
-          # Start up the custom peripheral device, in the foreground,
-          and don't discard its messages.&nbsp; You might need<br>
-          # to install some extra Python modules, such as "sudo pip3
-          install argparse", if this fails. <br>
-          cd ../piPeripheral</tt><tt><br>
-        </tt><tt>./piPeripheral.py --port=19699 --time=1<br>
-          # Now that the custom peripheral has been terminated, clean up
-          the other programs we've started.<br>
-          killall yaAGC yaDSKY2<br>
-        </tt></p>
-    </blockquote>
-    <p>On Mac OS, I think it would be a bit trickier than what I'm
-      written, since I don't think that yaDSKY2 as started this way
-      would actually accept any keypress events; I'm not sure quite how
-      to do it properly, though.&nbsp; On Windows, you would have to use
-      backslashes ('\') in places of the forward slashes if used here
-      ('/'); also, I don't know that using '&amp;' to put the programs
-      into the background would work, or that "killall" would be
-      available for killing those programs afterward, so you might want
-      to run the various programs all in the foreground, in separate
-      command-line consoles.&nbsp; But obviously, there's a way to do
-      it, even if I'm too personally lazy to figure it out just
-      yet.&nbsp; If anyone just wants to inform me of the correct
-      detailed way of doing things on Mac OS X or Windows, I'd be happy
-      to include that info here.<br>
-    </p>
-    <blockquote>
-      <p><tt> </tt></p>
-    </blockquote>
-    <hr style="width: 100%; height: 2px;">
-    <h2><a name="Programming_for_the_AGC_Operating"></a>Programming for
-      the AGC "Operating System"</h2>
-    After one is comfortable with writing simple, bare-metal AGC
-    applications as described in the preceding section, presumably one
-    might want to graduate to producing more-complex AGC
-    applications.&nbsp; For example, the bare-metal example doesn't
-    allow you to use multi-tasking, nor to use the PROG/VERB/NOUN
-    user-interface style, nor to use the various types of monitoring
-    associated with the VERB/NOUN system, and so on.&nbsp; Admittedly,
-    if you were sufficiently enthusiastic you might write all of the
-    code to do that, though it might take quite a bit of effort and
-    time.<br>
-    <br>
-    Alternatively, you could just use those features as-is, since they
-    already exist within the existing AGC mission code.<br>
-    <br>
-    Unfortunately, as far as I know, nobody has taken the effort to
-    extract just the "operating system" content of the AGC mission code,
-    as devoid from the various "programs" that run under that operating
-    system.&nbsp; Actually, to be fair, it has been done, but only with
-    Block 1 AGC code using an incompatible assembler, so it's not
-    immediately useful.&nbsp; But with Block 2 code, no.&nbsp; It would
-    be cool, but I'm too lazy to do it.&nbsp; (Anyone who wants to do it
-    and send me a set of files that actually assembles and runs without
-    error, please do so!)<br>
-    <br>
-    Lacking that, one could simply clone the code for an existing
-    mission and try to adapt that.&nbsp; Unfortunately, perhaps, the
-    existing mission code tends to be big and to fill most of available
-    memory, making it difficult to fit in any new code.&nbsp; The trick
-    to getting around that is to recognize a) that the mission code grew
-    over time and that b) the "operating system" portions of the
-    software were relatively stable pretty early.&nbsp; Thus if we
-    choose a very early version of the Apollo-era AGC code to work from,
-    we should have a fairly stable operating system with lots of free
-    memory.&nbsp; And, of course, it would presumably be easier to strip
-    unwanted programs out of an early (relatively feature-lacking)
-    version of the code than out of a later one.<br>
-    <br>
-    The existing AGC code which seems to fit the bill is <a
-      href="https://github.com/virtualagc/virtualagc/tree/master/Retread44">RETREAD
-
-
-
-      44</a>, which does not even use a third of the fixed program
-    memory.<br>
-    <br>
-    As for how to write your program in such a way as to take advantage
-    of the operating system ... TBD<br>
-    <br>
-    Assembling and running the code is the same as the steps provided at
-    the end of the preceding section on bare-metal programming, though
-    obviously the name and storage location of the AGC code changes.<br>
-    <br>
-    <hr style="width: 100%; height: 2px;">
-    <center> <br>
-      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
-        font-size: 11.05px; font-style: normal; font-variant: normal;
-        font-weight: normal; letter-spacing: normal; line-height:
-        16.575px; orphans: auto; text-align: center; text-indent: 0px;
-        text-transform: none; white-space: normal; widows: 1;
-        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
-        inline !important; float: none; background-color: rgb(255, 255,
-        255);"> This page is available under the <a
-          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
-
-
-
-
-
-
-
-
-
-          Commons No Rights Reserved License</a></span><br>
-      <i><font size="-1">Last modified by <a
-            href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-12-09.<br>
-          <br>
-          <a href="http://www.ibiblio.org"><img style="border: 0px solid
-              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
-        </font></i> </center>
-    <br>
-    <br>
-  </body>
-</html>
+which can be assembled with yaYUL and actually works if it is
+run in the AGC simulator, can be found in our GitHub repository</a>.&nbsp;
+Actually, the code in GitHub is not <i>merely</i> a cleaned-up
+form of the code above, but in fact implements processing of the
+current-timestamp information the sample peripheral program
+piPeripheral.py provides in the newly-minted AGC input channels
+040-042.&nbsp; (See the end of the preceding section.)&nbsp; What
+piPeripheral.agc does with that information (which is a packed
+form of the date and time) is to:<br></p><ul><li>Unpack the data into separate year, month, day, hour, minute,
+and second fields.</li><li> Output the unpacked data fields in the newly-allocated AGC
+output channels 043-050.</li><li>Display the data on the DSKY.</li></ul><p>You can actually see what this looks like on a simulated DSKY in
+the picture to right.&nbsp; What you see there is:<br></p><ul><li>The year (2017) in DSKY register R3 (the bottom 5-digit area).</li><li>The month (12) and the day (09) in DSKY register R2.</li><li>The hour (06) and minute (19) in DSKY register R1.</li><li>The seconds (10) in the NOUN area.</li></ul><p>The piPeripheral.py program will have generated this data
+according to the preference settings on the compuer on which
+you're running it, which in my case is the U.S. CST time-zone ...
+so yes, I was doing this at around 6 in the morning, local time,
+on a Saturday.&nbsp; Yawn!&nbsp; I should be paid more (than the
+$0 I currently get) for doing this lousy job.&nbsp; :-)<br></p><p>At any rate, assuming one has written such a custom AGC program,
+a necessary step before being able to run it in the AGC simulator
+is to assemble it with the yaYUL assembler.&nbsp; Exactly how to
+find the assembler depends on the particular setup being used, but
+assuming you can find it (or better yet, have it in the "PATH"),
+assembly is a snap.&nbsp; But suppose, for example, that you
+simply want to assemble piPeripheral.agc; assuming you've retained
+the same directory setup as in GitHub, and have built the normal
+Virtual AGC software too, you could do something like the
+following without having to worry about path settings:<br></p><blockquote><p><tt>cd virtualagc/piPeripheral</tt><tt><br></tt><tt>../yaYUL/yaYUL piPeripheral.agc</tt><br></p></blockquote>
+The result (if there were no errors, and hopefully there wouldn't be
+for an unmodified piPeripheral.agc) would be the executable file
+piPeripheral.agc.bin.&nbsp; If there were assembly errors such as
+syntax problems or unallocated variables, of course, then you have
+to fix them ... a topic on which it's difficult to offer any general
+advice other than to start with a small program that assembles
+perfectly and slowly work towards having a larger program.&nbsp; <br><p>Once the program is assembled, it can be run in the AGC
+simulator.&nbsp; This is again a tricky topic, since there are a
+variety of ways in which it can be done, and a variety of possible
+system configurations.&nbsp; What you would do on a desktop PC is
+undoubtedly not the same thing you'd do on the 3D-printed DSKY
+mentioned earlier.&nbsp; However, to just do it from a command
+line within our software tree as downloaded from GitHub and
+successfully built from source, in Linux you could do the
+following.<br></p><blockquote><p><tt># Start up the AGC simulator with the custom AGC program,
+in the background, and discard all messages from it.<br>
+cd virtualagc/yaAGC</tt><tt><br></tt><tt>./yaAGC --core="../piPeripheral/piPeripheral.agc.bin"
+--port=19697 --cfg="../yaDSKY/src/LM.ini" &amp;&gt;/dev/null
+&amp;<br>
+# Start up the DSKY simulator in the background and discard
+all messages from it.<br>
+cd ../yaDSKY2</tt><tt><br></tt><tt>./yaDSKY2 --cfg="../yaDSKY/src/LM.ini" --port=19698
+&amp;&gt;/dev/null &amp;<br>
+# Start up the custom peripheral device, in the foreground,
+and don't discard its messages.&nbsp; You might need<br>
+# to install some extra Python modules, such as "sudo pip3
+install argparse", if this fails. <br>
+cd ../piPeripheral</tt><tt><br></tt><tt>./piPeripheral.py --port=19699 --time=1<br>
+# Now that the custom peripheral has been terminated, clean up
+the other programs we've started.<br>
+killall yaAGC yaDSKY2<br></tt></p></blockquote><p>On Mac OS, I think it would be a bit trickier than what I'm
+written, since I don't think that yaDSKY2 as started this way
+would actually accept any keypress events; I'm not sure quite how
+to do it properly, though.&nbsp; On Windows, you would have to use
+backslashes ('\') in places of the forward slashes if used here
+('/'); also, I don't know that using '&amp;' to put the programs
+into the background would work, or that "killall" would be
+available for killing those programs afterward, so you might want
+to run the various programs all in the foreground, in separate
+command-line consoles.&nbsp; But obviously, there's a way to do
+it, even if I'm too personally lazy to figure it out just
+yet.&nbsp; If anyone just wants to inform me of the correct
+detailed way of doing things on Mac OS X or Windows, I'd be happy
+to include that info here.<br></p><blockquote><p><tt> </tt></p></blockquote><hr style="width: 100%; height: 2px;"><h2><a name=Programming_for_the_AGC_Operating></a>Programming for
+the AGC "Operating System"</h2>
+After one is comfortable with writing simple, bare-metal AGC
+applications as described in the preceding section, presumably one
+might want to graduate to producing more-complex AGC
+applications.&nbsp; For example, the bare-metal example doesn't
+allow you to use multi-tasking, nor to use the PROG/VERB/NOUN
+user-interface style, nor to use the various types of monitoring
+associated with the VERB/NOUN system, and so on.&nbsp; Admittedly,
+if you were sufficiently enthusiastic you might write all of the
+code to do that, though it might take quite a bit of effort and
+time.<br><br>
+Alternatively, you could just use those features as-is, since they
+already exist within the existing AGC mission code.<br><br>
+Unfortunately, as far as I know, nobody has taken the effort to
+extract just the "operating system" content of the AGC mission code,
+as devoid from the various "programs" that run under that operating
+system.&nbsp; Actually, to be fair, it has been done, but only with
+Block 1 AGC code using an incompatible assembler, so it's not
+immediately useful.&nbsp; But with Block 2 code, no.&nbsp; It would
+be cool, but I'm too lazy to do it.&nbsp; (Anyone who wants to do it
+and send me a set of files that actually assembles and runs without
+error, please do so!)<br><br>
+Lacking that, one could simply clone the code for an existing
+mission and try to adapt that.&nbsp; Unfortunately, perhaps, the
+existing mission code tends to be big and to fill most of available
+memory, making it difficult to fit in any new code.&nbsp; The trick
+to getting around that is to recognize a) that the mission code grew
+over time and that b) the "operating system" portions of the
+software were relatively stable pretty early.&nbsp; Thus if we
+choose a very early version of the Apollo-era AGC code to work from,
+we should have a fairly stable operating system with lots of free
+memory.&nbsp; And, of course, it would presumably be easier to strip
+unwanted programs out of an early (relatively feature-lacking)
+version of the code than out of a later one.<br><br>
+The existing AGC code which seems to fit the bill is <a
+href="https://github.com/virtualagc/virtualagc/tree/master/Retread44">RETREAD
+44</a>, which does not even use a third of the fixed program
+memory.<br><br>
+As for how to write your program in such a way as to take advantage
+of the operating system ... TBD<br><br>
+Assembling and running the code is the same as the steps provided at
+the end of the preceding section on bare-metal programming, though
+obviously the name and storage location of the AGC code changes.<br><br><hr style="width: 100%; height: 2px;"><center> <br><span style="color: rgb(84, 89, 93); font-family: sans-serif;
+font-size: 11.05px; font-style: normal; font-variant: normal;
+font-weight: normal; letter-spacing: normal; line-height:
+16.575px; orphans: auto; text-align: center; text-indent: 0px;
+text-transform: none; white-space: normal; widows: 1;
+word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+inline !important; float: none; background-color: rgb(255, 255,
+255);"> This page is available under the <a
+href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons No Rights Reserved License</a></span><br><i><font size="-1">Last modified by <a
+href="mailto:info@sandroid.org">Ronald Burkey</a> on
+2017-12-09.<br><br><a href="http://www.ibiblio.org"><img style="border: 0px solid
+; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+by ibiblio.org" src="hosted.png" width="300" height="100"></a><br></font></i> </center><br><br></body></html>

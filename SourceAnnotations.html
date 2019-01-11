@@ -1,452 +1,308 @@
-<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.3.14">
-  <meta http-equiv="Content-Type" content=
-  "text/html; charset=utf-8">
-  <meta name="GENERATOR" content=
-  "Mozilla/4.7 [en] (X11; I; Linux 2.4.16 ppc) [Netscape]">
-  <meta name="Author" content="Ronald Burkey">
-  <title>Virtual AGC yaYUL Page</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="author" content="Ronald S. Burkey">
-  <script type="text/javascript" src="Header.js">
-  </script>
-</head>
-<body style="background-image: url(gray3.jpg);">
-  <script type="text/javascript">
-  document.write(headerTemplate.replace("@TITLE@","Source-Code Annotations").replace("@SUBTITLE@","for yaYUL and yaLEMAP"))
-  </script>
-  <h1><small>Source-Code Presentation Formatting</small></h1>The
-  principal <span style="font-style: italic;">raison d'etre</span>
-  for AGC/AGS assembly-language source code as provided by the
-  Virtual AGC project is to be able to assemble the source using
-  the <a style="font-weight: bold;" href=
-  "yaYUL.html">yaYUL</a>/<a style="font-weight: bold;" href=
-  "yaAGS.html#yaLEMAP_the_AGS_Cross-Assembler">yaLEMAP</a> programs
-  to obtain binary executable programs which can be run on the
-  <a href="yaAGC.html">yaAGC/</a><a href=
-  "yaAGS.html#yaAGS_the_AGS_CPU_Emulation">yaAGS</a> CPU
-  simulators.&nbsp; However, there is a secondary purpose, and that
-  is to be able to compile the source code into a nice presentation
-  format that is both attractive and which can aid students of this
-  software in understanding how it operates.&nbsp; For this reason,
-  the <span style="font-weight: bold;">yaYUL</span>/<span style=
-  "font-weight: bold;">yaLEMAP</span> assembler software has the
-  capability of creating an HTML form of assembly listings which
-  can be viewed in a browser.<br>
-  <br>
-  The HTML form of the assembly listings has various useful
-  properties lacked by the raw source code, including the
-  following:<br>
-  <ul>
-    <li>It has syntax highlighting, so that different types of
-    language elements (basic instructions, interpretive
-    instructions, pseudo-ops, variables, etc.) have different
-    colorization and therefore can be more-readily distinguished
-    from each other.</li>
-    <li>Usages of program-defined symbols (line labels, variables,
-    constants) are hyperlinked to the points where the symbols are
-    actually defined, thus making it easier to trace program
-    flow.</li>
-    <li>Modern annotations can be added to the software, to
-    supplement the program comments of the original
-    developers.&nbsp; These modern annotations are presented in a
-    different visual style from the source code, and so it is clear
-    that they are supplemental rather than original.</li>
-  </ul>
-  <h1><small><small>The Strategy of Modern
-  Annotations<br></small></small></h1>Addition of modern
-  annotations to the source-code is an on-going process that will
-  likely take many years (or decades) to complete, and at this
-  writing (20090703) is only in its infancy.&nbsp; If you would
-  like to assist in this task, please look at the <a href=
-  "volunteer.html">volunteer page</a>.&nbsp; But note that helpful,
-  insightful annotations can only be the product of expert
-  knowledge of the affected source-code modules, so expect to work
-  hard to produce them.&nbsp;&nbsp; My general strategy for
-  providing these annotations is:<br>
-  <ul>
-    <li>To fully annotate the Apollo 11 source code—AGC Luminary
-    099, AGC Comanche 055, AGS Flight Program 6—to the extent
-    possible.</li>
-    <li>To fully annotate changes in software from mission to
-    mission.&nbsp; For example, the Apollo 12 software (if it was
-    available) would be annotated to explain how it differs from
-    Apollo 11 software.</li>
-  </ul>
-  <h1><small><small><big>Annotation
-  Language</big></small></small></h1>Annotations are added directly
-  to AGC/AGS source-code files, where they are transparently
-  discarded during normal assembly, but are used in creating HTML
-  forms of the assembly listing.&nbsp; To create the HTML output,
-  <span style="font-weight: bold;">yaYUL</span> and <span style=
-  "font-weight: bold;">yaLEMAP</span> require the "--html"
-  command-line switch.&nbsp; Annotations are pure HTML, but can
-  have styling applied to them to provide a distinctive appearance
-  generally with few or no actual HTML tags needed.&nbsp; There are
-  two forms of syntax which may be used, and they may be
-  intermixed, but we highly recommend using only the form we call
-  "##" annotations, and avoid the form we call "&lt;HTML&gt;"
-  annotations.&nbsp; The latter is described only for
-  completeness.<br>
-  <h2><small>Recommended "##" Annotations</small></h2>In this form
-  of annotation, which is highly recommended, all embedded HTML
-  takes the form of normal program comments, except that the
-  comments begin with "##" instead of just "#".&nbsp; Only "##"
-  comments beginning at the start of a line participate in becoming
-  embedded HTML.&nbsp; In other words, there can be no leading text
-  or spaces preceding the "##" on a line.&nbsp; This form is
-  recommended because in most cases it naturally appears to be a
-  program comment, and so is relatively comfortable and
-  non-intrusive for someone reading the source files
-  themselves.&nbsp; This idea is based on the style of annotations
-  used by the <a style="font-weight: bold;" href=
-  "http://www.doxygen.org">doxygen</a> system, though pure HTML is
-  used in place of <span style=
-  "font-weight: bold;">doxygen</span>'s custom markup language.<br>
-  <br>
-  The basic markup looks like this:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">...<br>
-    ... AGC or AGS source code ...<br>
-    ...<br>
-    ## HTML statements<br>
-    ## ,,,<br>
-    ...<br>
-    ... AGC or AGS source code ...<br>
-    ...<br></span>
-  </div><br>
-  What happens is that any set of consecutive "##" lines has the
-  "##" stripped from the beginnings, and the remainders are
-  inserted directly into the output HTML.&nbsp; At any given time
-  there is a default styling in effect (more on this below).&nbsp;
-  Prior to outputting the embedded HTML, the styling that was being
-  used for source code is cancelled and the default styling for
-  embedded HTML is initiated.&nbsp; Similarly, at the end of the
-  embedded HTML block, the default HTML styling is terminated and
-  the styling used for source code is started again.&nbsp;
-  Therefore, the "##" statements containing the embedded HTML are
-  usually very simple and often consist entirely of text without
-  any HTML tags at all.&nbsp; For example, with the default styling
-  presently being supplied, here's a side-by-side comparison of the
-  source code to HTML annotation:<br>
-  <br>
-  <table summary="" style=
-  "text-align: left; margin-left: auto; margin-right: auto;"
-  border="0" cellpadding="2" cellspacing="20">
-    <tbody>
-      <tr>
-        <td style="vertical-align: top; white-space: nowrap;">
-        <span style="font-family: monospace;">## This is a
-        &lt;i&gt;sample&lt;/i&gt;<br>
-        ## annotation.<br></span></td>
-        <td style="vertical-align: top;">
-          <table summary="" style="text-align: left;" border="1"
-          cellpadding="2" cellspacing="2">
-            <tbody>
-              <tr>
-                <td style=
-                "white-space: nowrap; vertical-align: middle;">
-                <img alt="" src="listings/Luminary099/Apollo32.png"
-                style="width: 32px; height: 32px;" align="left"
-                height="32" width="32"></td>
-                <td style="vertical-align: middle;"><span style=
-                "font-family: monospace;">This is a <span style=
-                "font-style: italic;">sample</span>
-                annotation.</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  It is important to note that the <span style=
-  "font-family: monospace;">&lt;br&gt;</span> tag must be used for
-  paragraph breaks (if any), since otherwise all of the text will
-  be reflowed into one large paragraph as in the example above.<br>
-  <h2><small>Important Exceptions to ## Processing</small></h2>
-  <p>In AGC source code, there are remarks present in the original
-  source code, provided contemporaneously by the original AGC
-  developers, and of necessity there are also comments added by
-  "modern" annotators of the code, and it is essential to
-  distinguish between those somehow.&nbsp; No such method of
-  distinguishing between these two types of comments has been
-  formalized in any technical sense, but there are approaches which
-  have been used.<br></p>
-  <p>One technique is the one described in the preceding section,
-  which is simply to use '#' to precede all of the original
-  comments, and '##' to precede all later comments.&nbsp; This idea
-  has great merit, but would result in a very poor presentation in
-  HTML if <i>all</i> ## comments were always processed precisely as
-  described in the preceding section.&nbsp; The specific culprits
-  would be the headers (consisting of a large number of comments
-  describing the origin of the data, how it was edited, and so on)
-  that we always add to the top of each AGC source-code file, as
-  well as the page numbers we embed in the source-code files making
-  it easy to relate the source-code to the original scans of the
-  AGC programs or the hardcopies of the programs.<br></p>
-  <p>Consequently, there are two exceptions to the processing of ##
-  comments:<br></p>
-  <ul>
-    <li>Any comment of the form "## Page ..." is simply treated as
-    a regular comment, and printed with two ## rather than one #,
-    but not subject to any special highlighting as described in the
-    preceding section; and</li>
-    <li>File headers — defined as any sequence of lines beginning
-    with ## in column 1 or lines that have nothing but blanks in
-    them — are also treated as normal comments without any special
-    highlighting.</li>
-  </ul>
-  <p>These two exceptions should, in most cases, make it feasible
-  to mark all "modern" comments with ##, while still taking
-  advantage of the special highlighting that ## provides in the
-  HTML-formatted output.<br></p>
-  <h2><small>### Annotations</small><br></h2>Styles are defined
-  with statements like "<span style="font-family: monospace;">###
-  STYLE=<span style="font-style: italic;">something</span></span>"
-  (note the use of "###" rather than "##") and remain in effect
-  until canceled or changed.&nbsp; In theory, styles can be changed
-  on-the-fly, but there is presently (20090703) a bug which causes
-  assembly to break if you do that, so it's best at present to
-  stick with a single style.&nbsp; The types of style statement are
-  as follows:<br>
-  <br>
-  <table summary="" style=
-  "text-align: left; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="font-family: monospace;">### STYLE=NONE<br></td>
-        <td style="vertical-align: top;">This means that no special
-        styling will be used.<br></td>
-      </tr>
-      <tr>
-        <td style="font-family: monospace;">### STYLE=BOX
-        <span style="font-style: italic;">nn</span>%<br></td>
-        <td style="vertical-align: top;">This means that the
-        embedded HTML will be placed in a centered box <span style=
-        "font-style: italic; font-family: monospace;">nn</span>%
-        the width of the display.<br></td>
-      </tr>
-      <tr>
-        <td style="font-family: monospace; white-space: nowrap;">
-        ### STYLE=START <span style=
-        "font-style: italic;">html</span><br></td>
-        <td colspan="1" rowspan="3" style="vertical-align: top;">
-        These three types of statements work together to create a
-        user-defined style.&nbsp; The <span style=
-        "font-family: monospace;">START</span> command is used to
-        define whatever HTML is needed to initiate the style.&nbsp;
-        For example, it might set a font face and a text
-        color.&nbsp; However, for complex styles, the startup HTML
-        may be very long and may not conveniently fit on a single
-        line.&nbsp; (It is best to keep the line lengths similar to
-        those of the assembly-language itself.)&nbsp; In that case,
-        the <span style="font-family: monospace;">START+</span>
-        command can be used to supply as many continuation lines of
-        HTML as may be necessary.&nbsp; Finally, the <span style=
-        "font-family: monospace;">END</span> command is used to
-        supply the HTML needed to discontinue the style at the end
-        of the annotation.<br></td>
-      </tr>
-      <tr>
-        <td style="font-family: monospace; white-space: nowrap;">
-        ### STYLE=START+ <span style=
-        "font-style: italic;">html</span></td>
-      </tr>
-      <tr>
-        <td style="font-family: monospace;">### STYLE=END
-        <span style="font-style: italic;">html</span></td>
-      </tr>
-      <tr>
-        <td style="font-family: monospace;">### STYLE=USER</td>
-        <td style="vertical-align: top;">This is used to resume a
-        previous user-defined style which has temporarily been
-        discontinued by <span style=
-        "font-family: monospace;">STYLE=NONE</span> or <span style=
-        "font-family: monospace;">STYLE=BOX</span>.<br></td>
-      </tr>
-    </tbody>
-  </table><br>
-  In some cases, it may be useful to take user-defined styles or
-  boilerplate annotations from a separate file, so that they can
-  easily be included in all source files without having to
-  duplicate the same material over and over.&nbsp; This is done
-  with the statement<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">### FILE="<span style=
-    "font-style: italic;">filename</span>"</span><br>
-  </div><br>
-  More-generally, This command can be used to inject any amount of
-  arbitrary HTML at any point in the HTML versions of the program
-  listings, in a specific source-code file, and isn't limited to
-  boilerplate that is duplicated in multiple files.&nbsp; Thus it
-  can be used to create annotations of any desired
-  complexity.&nbsp; However, it should be noted that while such
-  annotations are great for the HTML versions of the program
-  listings, they don't appear at all in the normal (non-HTML)
-  listings output by yaYUL, nor in the source code itself, as
-  anything other than a filename.&nbsp; So its utility is limited
-  to things that you <i>only</i> want to show up in the HTML
-  versions of the program listings.&nbsp; Note only that but the
-  ### annotations are not automatically formatted for you in any
-  way, in contrast to the ## annotations which are automatically
-  formatted as shown earlier, and thus are somewhat harder to
-  manage stylistically.&nbsp; Most source-code sets do have a
-  Main.annotations file which can be used as a template for
-  producing ###-annotation formatting similar to the ##
-  annotations.&nbsp; Nevertheless, in these respects, the ##
-  annotations, while more-limited in flexibility, are superior for
-  routine program annotations.<br>
-  <br>
-  If a file called "Default.style" exists, it will automatically be
-  included at the start of every source file.&nbsp; The
-  Default.style supplied by Virtual AGC produces the sample
-  annotations style shown earlier.&nbsp; It creates a table with
-  one row and two columns, with the left-hand cell containing a
-  graphic and the right-hand cell containing the embedded
-  HTML.&nbsp; The file itself looks like this:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">### STYLE=START &lt;table
-    style="text-align: left;" border="1" cellpadding="2"
-    cellspacing="2"&gt;</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">### STYLE=START+
-    &lt;tbody&gt;</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">### STYLE=START+
-    &lt;tr&gt;</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">### STYLE=START+ &lt;td
-    style="white-space: nowrap; vertical-align:
-    middle;"&gt;</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">### STYLE=START+ &lt;img
-    alt="" src="Apollo32.png" style="width: 32px; height: 32px;"
-    align="left"&gt;</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">### STYLE=START+
-    &lt;/td&gt;</span><br style="font-family: monospace;">
-    <span style="font-family: monospace;">### STYLE=START+ &lt;td
-    style="vertical-align: middle;"&gt;</span><br style=
-    "font-family: monospace;">
-    <span style="font-family: monospace;">### STYLE=END
-    &lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</span><br>
-    <br>
-  </div>Finally, a statement like<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">### ANCHOR=<span style=
-    "font-style: italic;">name</span></span><br>
-  </div><br>
-  provides a destination for hyperlinks like "#<span style=
-  "font-style: italic;">name</span>".&nbsp; This is exactly
-  equivalent to<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">### &lt;a
-    name="<span style=
-    "font-style: italic;">name</span>"&gt;</span><br>
-  </div><br>
-  but is provided separately in order to be less intrusive when
-  reading the source files.<br>
-  <h2><small>Deprecated "&lt;HTML&gt;" Annotations</small></h2>This
-  type of annotation, which (I repeat) I strongly advise against,
-  takes three possible forms, of which the prototypical form
-  is:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">...<br>
-    ... AGC or AGS source code ...<br>
-    ...<br>
-    &lt;HTML&gt;<br>
-    &nbsp; ... HTML statements ...<br>
-    &lt;/HTML&gt;<br>
-    ...<br>
-    ... AGC or AGS source code ...<br>
-    ...<br></span>
-  </div><br>
-  Note that the indentation between the <span style=
-  "font-family: monospace;">&lt;HTML&gt;</span> and <span style=
-  "font-family: monospace;">&lt;/HTML&gt;</span> tags is not really
-  needed, but is just there to make the construct less
-  unattractive.&nbsp; However, the tags themselves are supposed to
-  appear by themselves, with nothing else on the line with them,
-  and no leading spaces.&nbsp; Using this form, any HTML whatsoever
-  can be embedded, and no styling is applied to it.&nbsp; However,
-  any styling being applied to the source code that precedes it is
-  cancelled, and the source code styling is then resumed after the
-  embedded HTML, so even if the embedded HTML is just simple text,
-  it will still have a different appearance in terms of font, size,
-  and color than the surrounding source code.<br>
-  <br>
-  It is important to note that the <span style=
-  "font-family: monospace;">&lt;br&gt;</span> tag must be used for
-  paragraph breaks (if any), since otherwise all of the text will
-  be reflowed into one large paragraph.<br>
-  <br>
-  There is nothing really wrong with this style of annotation,
-  except that it simply does not look like AGC assembly language,
-  and is therefore jarring when encountered in an assembly-language
-  source file, and that's why I advise against using it.<br>
-  <br>
-  Similar to this is the form:<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">...<br>
-    ... AGC or AGS source code ...<br>
-    ...<br>
-    &lt;HTML<span style="font-style: italic;">nn</span>&gt;<br>
-    &nbsp; ... HTML statements ...<br>
-    &lt;/HTML&gt;<br>
-    ...<br>
-    ... AGC or AGS source code ...<br>
-    ...<br></span>
-  </div><br>
-  where <span style=
-  "font-style: italic; font-family: monospace;">nn</span> is
-  supposed to be any decimal number from 1 to 99.&nbsp; This form
-  works exactly the same way as the "<span style=
-  "font-family: monospace;">&lt;HTML&gt;</span>" form, except that
-  the embedded HTML has a box drawn around it which is <span style=
-  "font-style: italic; font-family: monospace;">nn</span>% as wide
-  as the display, thus calling even greater attention to the
-  annotation.&nbsp; The box is horizontally centered on the screen,
-  but the aligment within the box can be anything you like.<br>
-  <br>
-  Finally, we have the form<br>
-  <br>
-  <div style="margin-left: 40px;">
-    <span style="font-family: monospace;">...<br>
-    ... AGC or AGS source code ...<br>
-    ...<br>
-    &lt;HTML <span style=
-    "font-style: italic;">"filename"</span>&gt;<br>
-    ...<br>
-    ... AGC or AGS source code ...<br>
-    ...<br></span>
-  </div><br>
-  In this form, <span style=
-  "font-family: monospace; font-style: italic;">filename</span> is
-  the name of a file containing HTML, but it will not generally be
-  a legal HTML file itself, since it will lack the necessary
-  headings and tags that a complete HTML file will have.<br>
-  <hr style="width: 100%; height: 2px;">
-  <center>
-    <br>
-    <span style=
-    "color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
-    This page is available under the <a href=
-    "https://creativecommons.org/publicdomain/zero/1.0/">Creative
-    Commons No Rights Reserved License</a></span><br>
-    <i><font size="-1">Last modified by <a href=
-    "mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br>
-    <br>
-    <a href="http://www.ibiblio.org"><img style=
-    "border: 0px solid ; width: 300px; height: 100px;" alt=
-    "Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
-    "100" width="300"></a><br></font></i>
-  </center><br>
-</body>
-</html>
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><title>Virtual AGC yaYUL Page</title><meta http-equiv="Content-Type" content=
+"text/html; charset=utf-8"><meta name=Author content="Ronald Burkey"><link rel=icon type="image/png" href="favicon.png"><meta name=author content="Ronald S. Burkey"><script type="text/javascript" src="Header.js"></script></head><body style="background-image: url(gray3.jpg);"><script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Source-Code Annotations").replace("@SUBTITLE@","for yaYUL and yaLEMAP"))
+</script><h1><small>Source-Code Presentation Formatting</small></h1>The
+principal <span style="font-style: italic;">raison d'etre</span>
+for AGC/AGS assembly-language source code as provided by the
+Virtual AGC project is to be able to assemble the source using
+the <a style="font-weight: bold;" href=
+"yaYUL.html">yaYUL</a>/<a style="font-weight: bold;" href=
+"yaAGS.html#yaLEMAP_the_AGS_Cross-Assembler">yaLEMAP</a> programs
+to obtain binary executable programs which can be run on the
+<a href="yaAGC.html">yaAGC/</a><a href=
+"yaAGS.html#yaAGS_the_AGS_CPU_Emulation">yaAGS</a> CPU
+simulators.&nbsp; However, there is a secondary purpose, and that
+is to be able to compile the source code into a nice presentation
+format that is both attractive and which can aid students of this
+software in understanding how it operates.&nbsp; For this reason,
+the <span style="font-weight: bold;">yaYUL</span>/<span style=
+"font-weight: bold;">yaLEMAP</span> assembler software has the
+capability of creating an HTML form of assembly listings which
+can be viewed in a browser.<br><br>
+The HTML form of the assembly listings has various useful
+properties lacked by the raw source code, including the
+following:<br><ul><li>It has syntax highlighting, so that different types of
+language elements (basic instructions, interpretive
+instructions, pseudo-ops, variables, etc.) have different
+colorization and therefore can be more-readily distinguished
+from each other.</li><li>Usages of program-defined symbols (line labels, variables,
+constants) are hyperlinked to the points where the symbols are
+actually defined, thus making it easier to trace program
+flow.</li><li>Modern annotations can be added to the software, to
+supplement the program comments of the original
+developers.&nbsp; These modern annotations are presented in a
+different visual style from the source code, and so it is clear
+that they are supplemental rather than original.</li></ul><h1><small><small>The Strategy of Modern
+Annotations<br></small></small></h1>Addition of modern
+annotations to the source-code is an on-going process that will
+likely take many years (or decades) to complete, and at this
+writing (20090703) is only in its infancy.&nbsp; If you would
+like to assist in this task, please look at the <a href=
+"volunteer.html">volunteer page</a>.&nbsp; But note that helpful,
+insightful annotations can only be the product of expert
+knowledge of the affected source-code modules, so expect to work
+hard to produce them.&nbsp;&nbsp; My general strategy for
+providing these annotations is:<br><ul><li>To fully annotate the Apollo 11 source code—AGC Luminary
+099, AGC Comanche 055, AGS Flight Program 6—to the extent
+possible.</li><li>To fully annotate changes in software from mission to
+mission.&nbsp; For example, the Apollo 12 software (if it was
+available) would be annotated to explain how it differs from
+Apollo 11 software.</li></ul><h1><small><small><big>Annotation
+Language</big></small></small></h1>Annotations are added directly
+to AGC/AGS source-code files, where they are transparently
+discarded during normal assembly, but are used in creating HTML
+forms of the assembly listing.&nbsp; To create the HTML output,
+<span style="font-weight: bold;">yaYUL</span> and <span style=
+"font-weight: bold;">yaLEMAP</span> require the "--html"
+command-line switch.&nbsp; Annotations are pure HTML, but can
+have styling applied to them to provide a distinctive appearance
+generally with few or no actual HTML tags needed.&nbsp; There are
+two forms of syntax which may be used, and they may be
+intermixed, but we highly recommend using only the form we call
+"##" annotations, and avoid the form we call "&lt;HTML&gt;"
+annotations.&nbsp; The latter is described only for
+completeness.<br><h2><small>Recommended "##" Annotations</small></h2>In this form
+of annotation, which is highly recommended, all embedded HTML
+takes the form of normal program comments, except that the
+comments begin with "##" instead of just "#".&nbsp; Only "##"
+comments beginning at the start of a line participate in becoming
+embedded HTML.&nbsp; In other words, there can be no leading text
+or spaces preceding the "##" on a line.&nbsp; This form is
+recommended because in most cases it naturally appears to be a
+program comment, and so is relatively comfortable and
+non-intrusive for someone reading the source files
+themselves.&nbsp; This idea is based on the style of annotations
+used by the <a style="font-weight: bold;" href=
+"http://www.doxygen.org">doxygen</a> system, though pure HTML is
+used in place of <span style=
+"font-weight: bold;">doxygen</span>'s custom markup language.<br><br>
+The basic markup looks like this:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">...<br>
+... AGC or AGS source code ...<br>
+...<br>
+## HTML statements<br>
+## ,,,<br>
+...<br>
+... AGC or AGS source code ...<br>
+...<br></span></div><br>
+What happens is that any set of consecutive "##" lines has the
+"##" stripped from the beginnings, and the remainders are
+inserted directly into the output HTML.&nbsp; At any given time
+there is a default styling in effect (more on this below).&nbsp;
+Prior to outputting the embedded HTML, the styling that was being
+used for source code is cancelled and the default styling for
+embedded HTML is initiated.&nbsp; Similarly, at the end of the
+embedded HTML block, the default HTML styling is terminated and
+the styling used for source code is started again.&nbsp;
+Therefore, the "##" statements containing the embedded HTML are
+usually very simple and often consist entirely of text without
+any HTML tags at all.&nbsp; For example, with the default styling
+presently being supplied, here's a side-by-side comparison of the
+source code to HTML annotation:<br><br><table summary="" style=
+"text-align: left; margin-left: auto; margin-right: auto;"
+border="0" cellpadding="2" cellspacing="20"><tbody><tr><td style="vertical-align: top; white-space: nowrap;"><span style="font-family: monospace;">## This is a
+&lt;i&gt;sample&lt;/i&gt;<br>
+## annotation.<br></span></td><td style="vertical-align: top;"><table summary="" style="text-align: left;" border="1"
+cellpadding="2" cellspacing="2"><tbody><tr><td style=
+"white-space: nowrap; vertical-align: middle;"><img alt="" src="listings/Luminary099/Apollo32.png"
+style="width: 32px; height: 32px;" align="left"
+height="32" width="32"></td><td style="vertical-align: middle;"><span style=
+"font-family: monospace;">This is a <span style=
+"font-style: italic;">sample</span>
+annotation.</span></td></tr></tbody></table></td></tr></tbody></table><br>
+It is important to note that the <span style=
+"font-family: monospace;">&lt;br&gt;</span> tag must be used for
+paragraph breaks (if any), since otherwise all of the text will
+be reflowed into one large paragraph as in the example above.<br><h2><small>Important Exceptions to ## Processing</small></h2><p>In AGC source code, there are remarks present in the original
+source code, provided contemporaneously by the original AGC
+developers, and of necessity there are also comments added by
+"modern" annotators of the code, and it is essential to
+distinguish between those somehow.&nbsp; No such method of
+distinguishing between these two types of comments has been
+formalized in any technical sense, but there are approaches which
+have been used.<br></p><p>One technique is the one described in the preceding section,
+which is simply to use '#' to precede all of the original
+comments, and '##' to precede all later comments.&nbsp; This idea
+has great merit, but would result in a very poor presentation in
+HTML if <i>all</i> ## comments were always processed precisely as
+described in the preceding section.&nbsp; The specific culprits
+would be the headers (consisting of a large number of comments
+describing the origin of the data, how it was edited, and so on)
+that we always add to the top of each AGC source-code file, as
+well as the page numbers we embed in the source-code files making
+it easy to relate the source-code to the original scans of the
+AGC programs or the hardcopies of the programs.<br></p><p>Consequently, there are two exceptions to the processing of ##
+comments:<br></p><ul><li>Any comment of the form "## Page ..." is simply treated as
+a regular comment, and printed with two ## rather than one #,
+but not subject to any special highlighting as described in the
+preceding section; and</li><li>File headers — defined as any sequence of lines beginning
+with ## in column 1 or lines that have nothing but blanks in
+them — are also treated as normal comments without any special
+highlighting.</li></ul><p>These two exceptions should, in most cases, make it feasible
+to mark all "modern" comments with ##, while still taking
+advantage of the special highlighting that ## provides in the
+HTML-formatted output.<br></p><h2><small>### Annotations</small><br></h2>Styles are defined
+with statements like "<span style="font-family: monospace;">###
+STYLE=<span style="font-style: italic;">something</span></span>"
+(note the use of "###" rather than "##") and remain in effect
+until canceled or changed.&nbsp; In theory, styles can be changed
+on-the-fly, but there is presently (20090703) a bug which causes
+assembly to break if you do that, so it's best at present to
+stick with a single style.&nbsp; The types of style statement are
+as follows:<br><br><table summary="" style=
+"text-align: left; margin-left: auto; margin-right: auto;"
+border="1" cellpadding="2" cellspacing="2"><tbody><tr><td style="font-family: monospace;">### STYLE=NONE<br></td><td style="vertical-align: top;">This means that no special
+styling will be used.<br></td></tr><tr><td style="font-family: monospace;">### STYLE=BOX
+<span style="font-style: italic;">nn</span>%<br></td><td style="vertical-align: top;">This means that the
+embedded HTML will be placed in a centered box <span style=
+"font-style: italic; font-family: monospace;">nn</span>%
+the width of the display.<br></td></tr><tr><td style="font-family: monospace; white-space: nowrap;">
+### STYLE=START <span style=
+"font-style: italic;">html</span><br></td><td rowspan="3" style="vertical-align: top;">
+These three types of statements work together to create a
+user-defined style.&nbsp; The <span style=
+"font-family: monospace;">START</span> command is used to
+define whatever HTML is needed to initiate the style.&nbsp;
+For example, it might set a font face and a text
+color.&nbsp; However, for complex styles, the startup HTML
+may be very long and may not conveniently fit on a single
+line.&nbsp; (It is best to keep the line lengths similar to
+those of the assembly-language itself.)&nbsp; In that case,
+the <span style="font-family: monospace;">START+</span>
+command can be used to supply as many continuation lines of
+HTML as may be necessary.&nbsp; Finally, the <span style=
+"font-family: monospace;">END</span> command is used to
+supply the HTML needed to discontinue the style at the end
+of the annotation.<br></td></tr><tr><td style="font-family: monospace; white-space: nowrap;">
+### STYLE=START+ <span style=
+"font-style: italic;">html</span></td></tr><tr><td style="font-family: monospace;">### STYLE=END
+<span style="font-style: italic;">html</span></td></tr><tr><td style="font-family: monospace;">### STYLE=USER</td><td style="vertical-align: top;">This is used to resume a
+previous user-defined style which has temporarily been
+discontinued by <span style=
+"font-family: monospace;">STYLE=NONE</span> or <span style=
+"font-family: monospace;">STYLE=BOX</span>.<br></td></tr></tbody></table><br>
+In some cases, it may be useful to take user-defined styles or
+boilerplate annotations from a separate file, so that they can
+easily be included in all source files without having to
+duplicate the same material over and over.&nbsp; This is done
+with the statement<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">### FILE="<span style=
+"font-style: italic;">filename</span>"</span><br></div><br>
+More-generally, This command can be used to inject any amount of
+arbitrary HTML at any point in the HTML versions of the program
+listings, in a specific source-code file, and isn't limited to
+boilerplate that is duplicated in multiple files.&nbsp; Thus it
+can be used to create annotations of any desired
+complexity.&nbsp; However, it should be noted that while such
+annotations are great for the HTML versions of the program
+listings, they don't appear at all in the normal (non-HTML)
+listings output by yaYUL, nor in the source code itself, as
+anything other than a filename.&nbsp; So its utility is limited
+to things that you <i>only</i> want to show up in the HTML
+versions of the program listings.&nbsp; Note only that but the
+### annotations are not automatically formatted for you in any
+way, in contrast to the ## annotations which are automatically
+formatted as shown earlier, and thus are somewhat harder to
+manage stylistically.&nbsp; Most source-code sets do have a
+Main.annotations file which can be used as a template for
+producing ###-annotation formatting similar to the ##
+annotations.&nbsp; Nevertheless, in these respects, the ##
+annotations, while more-limited in flexibility, are superior for
+routine program annotations.<br><br>
+If a file called "Default.style" exists, it will automatically be
+included at the start of every source file.&nbsp; The
+Default.style supplied by Virtual AGC produces the sample
+annotations style shown earlier.&nbsp; It creates a table with
+one row and two columns, with the left-hand cell containing a
+graphic and the right-hand cell containing the embedded
+HTML.&nbsp; The file itself looks like this:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">### STYLE=START &lt;table
+style="text-align: left;" border="1" cellpadding="2"
+cellspacing="2"&gt;</span><br style="font-family: monospace;"><span style="font-family: monospace;">### STYLE=START+
+&lt;tbody&gt;</span><br style="font-family: monospace;"><span style="font-family: monospace;">### STYLE=START+
+&lt;tr&gt;</span><br style="font-family: monospace;"><span style="font-family: monospace;">### STYLE=START+ &lt;td
+style="white-space: nowrap; vertical-align:
+middle;"&gt;</span><br style="font-family: monospace;"><span style="font-family: monospace;">### STYLE=START+ &lt;img
+alt="" src="Apollo32.png" style="width: 32px; height: 32px;"
+align="left"&gt;</span><br style="font-family: monospace;"><span style="font-family: monospace;">### STYLE=START+
+&lt;/td&gt;</span><br style="font-family: monospace;"><span style="font-family: monospace;">### STYLE=START+ &lt;td
+style="vertical-align: middle;"&gt;</span><br style=
+"font-family: monospace;"><span style="font-family: monospace;">### STYLE=END
+&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</span><br><br></div>Finally, a statement like<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">### ANCHOR=<span style=
+"font-style: italic;">name</span></span><br></div><br>
+provides a destination for hyperlinks like "#<span style=
+"font-style: italic;">name</span>".&nbsp; This is exactly
+equivalent to<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">### &lt;a
+name="<span style=
+"font-style: italic;">name</span>"&gt;</span><br></div><br>
+but is provided separately in order to be less intrusive when
+reading the source files.<br><h2><small>Deprecated "&lt;HTML&gt;" Annotations</small></h2>This
+type of annotation, which (I repeat) I strongly advise against,
+takes three possible forms, of which the prototypical form
+is:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">...<br>
+... AGC or AGS source code ...<br>
+...<br>
+&lt;HTML&gt;<br>
+&nbsp; ... HTML statements ...<br>
+&lt;/HTML&gt;<br>
+...<br>
+... AGC or AGS source code ...<br>
+...<br></span></div><br>
+Note that the indentation between the <span style=
+"font-family: monospace;">&lt;HTML&gt;</span> and <span style=
+"font-family: monospace;">&lt;/HTML&gt;</span> tags is not really
+needed, but is just there to make the construct less
+unattractive.&nbsp; However, the tags themselves are supposed to
+appear by themselves, with nothing else on the line with them,
+and no leading spaces.&nbsp; Using this form, any HTML whatsoever
+can be embedded, and no styling is applied to it.&nbsp; However,
+any styling being applied to the source code that precedes it is
+cancelled, and the source code styling is then resumed after the
+embedded HTML, so even if the embedded HTML is just simple text,
+it will still have a different appearance in terms of font, size,
+and color than the surrounding source code.<br><br>
+It is important to note that the <span style=
+"font-family: monospace;">&lt;br&gt;</span> tag must be used for
+paragraph breaks (if any), since otherwise all of the text will
+be reflowed into one large paragraph.<br><br>
+There is nothing really wrong with this style of annotation,
+except that it simply does not look like AGC assembly language,
+and is therefore jarring when encountered in an assembly-language
+source file, and that's why I advise against using it.<br><br>
+Similar to this is the form:<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">...<br>
+... AGC or AGS source code ...<br>
+...<br>
+&lt;HTML<span style="font-style: italic;">nn</span>&gt;<br>
+&nbsp; ... HTML statements ...<br>
+&lt;/HTML&gt;<br>
+...<br>
+... AGC or AGS source code ...<br>
+...<br></span></div><br>
+where <span style=
+"font-style: italic; font-family: monospace;">nn</span> is
+supposed to be any decimal number from 1 to 99.&nbsp; This form
+works exactly the same way as the "<span style=
+"font-family: monospace;">&lt;HTML&gt;</span>" form, except that
+the embedded HTML has a box drawn around it which is <span style=
+"font-style: italic; font-family: monospace;">nn</span>% as wide
+as the display, thus calling even greater attention to the
+annotation.&nbsp; The box is horizontally centered on the screen,
+but the aligment within the box can be anything you like.<br><br>
+Finally, we have the form<br><br><div style="margin-left: 40px;"><span style="font-family: monospace;">...<br>
+... AGC or AGS source code ...<br>
+...<br>
+&lt;HTML <span style=
+"font-style: italic;">"filename"</span>&gt;<br>
+...<br>
+... AGC or AGS source code ...<br>
+...<br></span></div><br>
+In this form, <span style=
+"font-family: monospace; font-style: italic;">filename</span> is
+the name of a file containing HTML, but it will not generally be
+a legal HTML file itself, since it will lack the necessary
+headings and tags that a complete HTML file will have.<br><hr style="width: 100%; height: 2px;"><center><br><span style=
+"color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
+This page is available under the <a href=
+"https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons No Rights Reserved License</a></span><br><i><font size="-1">Last modified by <a href=
+"mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br><br><a href="http://www.ibiblio.org"><img style=
+"border: 0px solid ; width: 300px; height: 100px;" alt=
+"Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
+"100" width="300"></a><br></font></i></center><br></body></html>
