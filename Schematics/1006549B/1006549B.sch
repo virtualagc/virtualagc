@@ -3306,7 +3306,7 @@ F 5 "AB1" H 13000 12950 140 0000 C CNB "Caption"
 	1    12450 12925
 	1    0    0    -1  
 $EndComp
-Wire Notes Line width 30
+Wire Notes Line
 	11825 12925 12125 12925
 $Comp
 L AGC_DSKY:OvalBodyAGC4 X15
@@ -3321,7 +3321,7 @@ F 5 "AB1" H 12450 14250 140 0000 C CNB "Caption"
 	1    11900 14100
 	1    0    0    -1  
 $EndComp
-Wire Notes Line width 30
+Wire Notes Line
 	12200 14100 12700 14100
 $Comp
 L AGC_DSKY:OvalBodyAGC4 X18
@@ -3336,7 +3336,7 @@ F 5 "AB2" H 13000 15450 140 0000 C CNB "Caption"
 	1    12450 15425
 	1    0    0    -1  
 $EndComp
-Wire Notes Line width 30
+Wire Notes Line
 	12150 15425 11800 15425
 $Comp
 L AGC_DSKY:OvalBodyAGC4 X16
@@ -3351,7 +3351,7 @@ F 5 "AB2" H 12450 16650 140 0000 C CNB "Caption"
 	1    11900 16500
 	1    0    0    -1  
 $EndComp
-Wire Notes Line width 30
+Wire Notes Line
 	12175 16500 12725 16500
 $Comp
 L AGC_DSKY:OvalBodyAGC4 X11
@@ -3379,11 +3379,11 @@ F 5 "AB3" H 12425 18075 140 0000 C CNB "Caption"
 	1    11875 17925
 	1    0    0    -1  
 $EndComp
-Wire Notes Line width 30
+Wire Notes Line
 	11650 17050 11800 17050
-Wire Notes Line width 30
+Wire Notes Line
 	11800 17050 11800 17475
-Wire Notes Line width 30
+Wire Notes Line
 	12175 17925 12750 17925
 $Comp
 L AGC_DSKY:OvalBodyAGC4 X12
@@ -3398,10 +3398,10 @@ F 5 "AB4" H 11375 18675 140 0000 C CNB "Caption"
 	1    11375 18375
 	1    0    0    -1  
 $EndComp
-Wire Notes Line width 30
+Wire Notes Line
 	11650 18375 11800 18375
-Wire Notes Line width 30
-	11800 18375 11800 18800
+Wire Notes Line
+	11800 18450 11800 18825
 $Comp
 L AGC_DSKY:OvalBodyAGC4 X13
 U 1 1 5C45115F
@@ -3415,7 +3415,7 @@ F 5 "AB4" H 12400 19400 140 0000 C CNB "Caption"
 	1    11850 19250
 	1    0    0    -1  
 $EndComp
-Wire Notes Line width 30
+Wire Notes Line
 	12125 19250 12750 19250
 $Comp
 L AGC_DSKY:ConnectorBlockI J1
@@ -3440,7 +3440,7 @@ F 1 "D3NOR-+3VDC-0VDC-block1-153-___" H 22175 14750 140 0001 C CNN
 F 2 "" H 22175 14800 140 0001 C CNN
 F 3 "" H 22175 14800 140 0001 C CNN
 F 4 "2G1" H 22175 14425 140 0000 C CNB "agc4"
-F 5 "64202" H 22175 14225 140 0000 C CNB "agc5"
+F 5 "62402" H 22175 14225 140 0000 C CNB "agc5"
 	1    22175 14325
 	1    0    0    -1  
 $EndComp

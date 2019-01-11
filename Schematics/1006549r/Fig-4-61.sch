@@ -4021,7 +4021,7 @@ AB1
 Wire Wire Line
 	29875 19400 30550 19400
 Text GLabel 29850 23400 0    140  Input ~ 28
-AB1
+AB2
 Wire Wire Line
 	29850 23400 30025 23400
 Wire Wire Line
@@ -4263,7 +4263,7 @@ AB2
 Wire Wire Line
 	55175 18525 55600 18525
 Text GLabel 55150 23575 0    140  Input ~ 28
-AB2
+AB1
 Wire Wire Line
 	55150 23575 55625 23575
 Wire Wire Line
