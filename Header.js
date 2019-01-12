@@ -160,7 +160,7 @@ headerTemplate = '<table summary="" nosave="" width="100%" border="1" cellpaddin
  * On that "staging" version of the website, there are no directories like 
  * Documents, Downloads, hrst, klabs, etc., and so references to them need to be
  * redirected to http://www.ibiblio.org/apollo + whatever.  We simply
- * loop through all of the links in the page, and if any of them are to one fo the
+ * loop through all of the links in the page, and if any of them are to one of the
  * affected subdirectories, we prefix the href properly.
  */
 var retargetedFolders = [ "/OnnoHommes/",
@@ -182,7 +182,8 @@ var retargetedFolders = [ "/OnnoHommes/",
                           "/doc/",
                           "/klabs/",
                           "/AGCHandbook/",
-                          "/KiCad/"
+                          "/KiCad/",
+                          "/NARA-aperture-cards/"
 ]
 var numRetargets = retargetedFolders.length
 window.onload = function() {
