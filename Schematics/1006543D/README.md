@@ -42,7 +42,7 @@ My personal suspicion is that the correct explanation is #1.
 
 # Different Wiring of Input Signals to Gates 33101 and 33102
 
-In Figure 4-100, ND-1021041 uses signal YT0/ (connector pin 25) as input to gate 33101, whereas 1006543 (all available revisions) uses it as input to gate 33102.  Because the outputs of gates 33101 and 33102 are ganged, the two gates logical form a single 5-input NOR gate, so moving this signal from one of the two gates to the other produces an identical electrical output, even with respect to propagation delay.
+In Figure 4-100, ND-1021041 uses signal YT0/ (connector pin 25) as input to gate 33101, whereas 1006543 (all available revisions) uses it as input to gate 33102.  Because the outputs of gates 33101 and 33102 are ganged, the two gates logically form a single 5-input NOR gate, so moving this signal from one of the two gates to the other produces an identical electrical output, even with respect to propagation delay.
 
 I would characterize this as a simple mistake in ND-1021041, which fortunately produces an electrically-correct result.
 
