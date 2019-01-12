@@ -189,15 +189,28 @@ var numRetargets = retargetedFolders.length
 window.onload = function() {
 	if (window.location.hostname != "virtualagc.github.io") 
 		return
+	var i, j
 	var links = document.links
 	var numLinks = links.length
-	var i, j
 	for (i = 0; i < numLinks; i++) {
 		if ("href" in links[i]) {
 			for (j = 0; j < numRetargets; j++) {
 				var index = links[i].href.indexOf(retargetedFolders[j])
 				if (index >= 0) {
 					links[i].href = "http://www.ibiblio.org/apollo" + links[i].href.substring(index)
+					break
+				}
+			}
+		}
+	}
+	var images = document.images
+	var numImages = images.length
+	for (i = 0; i < numImages; i++) {
+		if ("src" in images[i]) {
+			for (j = 0; j < numRetargets; j++) {
+				var index = images[i].src.indexOf(retargetedFolders[j])
+				if (index >= 0) {
+					images[i].src = "http://www.ibiblio.org/apollo" + images[i].src.substring(index)
 					break
 				}
 			}
