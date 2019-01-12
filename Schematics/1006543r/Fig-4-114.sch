@@ -377,7 +377,7 @@ PIN91
 Wire Wire Line
 	5750 5450 6250 5450
 Text Notes 4300 5550 0    140  ~ 28
-(I2/)
+(12/)
 Wire Wire Line
 	7775 5100 8975 5100
 Wire Wire Line
@@ -449,7 +449,7 @@ PIN91
 Wire Wire Line
 	5825 14525 6200 14525
 Text Notes 4400 14625 0    140  ~ 28
-(I2/)
+(12/)
 Wire Wire Line
 	3625 7625 3375 7625
 Text HLabel 3375 7625 0    140  Input ~ 28

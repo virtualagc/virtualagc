@@ -495,7 +495,7 @@ PIN91
 Wire Wire Line
 	11675 13050 12225 13050
 Text Notes 10775 13150 2    140  ~ 28
-(I2/)
+(12/)
 Wire Wire Line
 	13700 8000 14300 8000
 Wire Wire Line

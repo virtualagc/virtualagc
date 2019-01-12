@@ -284,14 +284,14 @@ F 4 "33028" H 17550 18775 140 0000 C CNB "Location"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 8 1 5BF89766
+U 30 1 5BF89766
 P 5250 8300
 F 0 "J1" H 5250 8625 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5250 8725 140 0001 C CNN
 F 2 "" H 5250 8775 140 0001 C CNN
 F 3 "" H 5250 8775 140 0001 C CNN
 F 4 "WL04" H 4650 8225 140 0000 C BNB "Caption"
-	8    5250 8300
+	30   5250 8300
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -368,14 +368,14 @@ F 4 "WL06/" H 4700 18300 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 110 1 5BF8976D
+U 130 1 5BF8976D
 P 5300 13575
 F 0 "J1" H 5300 13900 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5300 14000 140 0001 C CNN
 F 2 "" H 5300 14050 140 0001 C CNN
 F 3 "" H 5300 14050 140 0001 C CNN
 F 4 "WL14" H 4700 13500 140 0000 C BNB "Caption"
-	110  5300 13575
+	130  5300 13575
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -560,26 +560,26 @@ F 4 "WL09" H 4700 10850 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 36 1 5BF8977D
+U 46 1 5BF8977D
 P 5275 9875
 F 0 "J1" H 5275 10200 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5275 10300 140 0001 C CNN
 F 2 "" H 5275 10350 140 0001 C CNN
 F 3 "" H 5275 10350 140 0001 C CNN
 F 4 "WL07" H 4675 9800 140 0000 C BNB "Caption"
-	36   5275 9875
+	46   5275 9875
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 30 1 5BF8977E
+U 16 1 5BF8977E
 P 5325 17250
 F 0 "J1" H 5325 17575 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5325 17675 140 0001 C CNN
 F 2 "" H 5325 17725 140 0001 C CNN
 F 3 "" H 5325 17725 140 0001 C CNN
 F 4 "WL04/" H 4675 17200 140 0000 C BNB "Caption"
-	30   5325 17250
+	16   5325 17250
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -824,14 +824,14 @@ F 4 "WL13/" H 4700 21950 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 130 1 5BF89793
+U 126 1 5BF89793
 P 5350 22525
 F 0 "J1" H 5350 22850 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5350 22950 140 0001 C CNN
 F 2 "" H 5350 23000 140 0001 C CNN
 F 3 "" H 5350 23000 140 0001 C CNN
 F 4 "WL14/" H 4675 22450 140 0000 C BNB "Caption"
-	130  5350 22525
+	126  5350 22525
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1076,38 +1076,38 @@ F 4 "33060" H 46850 12775 140 0000 C CNB "Location"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 28 1 5BF897A8
+U 44 1 5BF897A8
 P 5325 19375
 F 0 "J1" H 5325 19700 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5325 19800 140 0001 C CNN
 F 2 "" H 5325 19850 140 0001 C CNN
 F 3 "" H 5325 19850 140 0001 C CNN
 F 4 "WL08/" H 4675 19300 140 0000 C BNB "Caption"
-	28   5325 19375
+	44   5325 19375
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 44 1 5BF897A9
+U 50 1 5BF897A9
 P 5325 19925
 F 0 "J1" H 5325 20250 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5325 20350 140 0001 C CNN
 F 2 "" H 5325 20400 140 0001 C CNN
 F 3 "" H 5325 20400 140 0001 C CNN
 F 4 "WL09/" H 4675 19850 140 0000 C BNB "Caption"
-	44   5325 19925
+	50   5325 19925
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 46 1 5BF897AA
+U 36 1 5BF897AA
 P 5325 18850
 F 0 "J1" H 5325 19175 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5325 19275 140 0001 C CNN
 F 2 "" H 5325 19325 140 0001 C CNN
 F 3 "" H 5325 19325 140 0001 C CNN
 F 4 "WL07/" H 4675 18775 140 0000 C BNB "Caption"
-	46   5325 18850
+	36   5325 18850
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -2380,7 +2380,7 @@ F_
 Wire Wire Line
 	39650 16375 40225 16375
 Text Notes 47825 23675 0    140  ~ 28
-Notes from the Virtual AGC Project:\n4. ND-1021041 Figure 4-114 is internally inconsistent with respect to the backplane\n   connector pins used for the WLxx and WLxx/ signals.  Specifically, it lists the same pin\n   for WL04 as for WL04/, and similarly for WL07, WL08, WL09, and WL14.  In this drawing,\n   arbitrary reassignments have been made for some of these signals to otherwise unused\n   pins.  Namely, WL04 has been reassigned to pin 8, WL07 to pin 36, WL08/ to pin 28,\n   WL09/ to pin 44, and WL14 to pin 110. — RSB 2018
+Notes from the Virtual AGC Project:\n4. ND-1021041 Figure 4-114 is internally inconsistent with respect to the backplane\n   connector pins used for the WLxx and WLxx/ signals.  Specifically, it lists the same pin\n   for WL04 as for WL04/, and similarly for WL07, WL08, WL09, and WL14.  Since the \n   official drawing for this schematic (1006543), the signals have been renumbered to\n   correspond to the schematic. — RSB 2019
 $Bitmap
 Pos 47500 22225
 Scale 1.000000
