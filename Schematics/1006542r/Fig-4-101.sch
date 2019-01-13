@@ -415,11 +415,11 @@ Text Notes 3850 6175 0    140  ~ 28
 Text HLabel 5925 5600 0    140  Input ~ 28
 PIN57
 Text Notes 4525 5700 0    140  ~ 28
-(I2/)
+(12/)
 Text HLabel 5950 7975 0    140  Input ~ 28
 PIN57
 Text Notes 5250 8300 0    140  ~ 28
-(I2/)
+(12/)
 Wire Wire Line
 	5950 5600 5925 5600
 $EndSCHEMATC

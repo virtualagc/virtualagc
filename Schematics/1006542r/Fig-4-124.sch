@@ -452,7 +452,7 @@ Text Notes 5300 11200 0    140  ~ 28
 Text HLabel 11950 9850 0    140  Input ~ 28
 PIN57
 Text Notes 11275 9700 0    140  ~ 28
-(I2/)
+(12/)
 Text HLabel 8625 7300 0    140  Input ~ 28
 PIN63
 Text Notes 7875 7175 0    140  ~ 28

@@ -100,5 +100,5 @@ Wire Wire Line
 Text HLabel 3850 4650 0    140  Input ~ 28
 PIN57
 Text Notes 3150 4500 0    140  ~ 28
-(I2/)
+(12/)
 $EndSCHEMATC
