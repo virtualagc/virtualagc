@@ -14,8 +14,8 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text Notes 68425 12875 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. None of the official Block I AGC electrical-schematic drawings were available at\n   the time this CAD drawing was made.  Rather, it is a transcription of the schematic\n   drawings in the figures of AC Electronics document ND-1021041, which are also\n   believed to comprise a complete but unofficial set of schematics. — RSB 2018\n2. The figures in ND-1021041 do not indicate reference designators for components.\n   In this drawing, the numbered oval pads comprise connector J1.  All other \n   electrical components presently have reference designators assigned by the\n   KiCad CAD software. — RSB 2018\n3. This physical drawing has 16 separate physical instances (modules A1 through\n   A16) in the Block I AGC, each with different associated backplane signals.  Each oval\n   connector pad is associated with 16 backplane signal names.  In CAD, they can be\n   viewed or edited as the connector-pads' fields "Caption", "Caption2", "Caption3", ...,\n   "Caption16". As visual notations on the drawing, a notation like NAMExx means that\n   the signal name is NAME01 for module A1, NAME02 for module A2, and so on. \n   If a single notation is shown for an oval pad, it means that the same signal is applied\n   on that pin for all modules.  Signal names that cannot be concisely described are \n   listed instead in the table on the second sheet of this drawing.  — RSB 2018\n4. Each NOR gate is associated with 16 different 5-digit gate numbers, one for each of\n   the modules A1-A16.  These 5-digit numbers are of the form NNNxx, where xx\n   is the module number and NNN represents a unique location within the drawing.\n   For example, the NOR gate shown as 226xx represents gate 22601 in module A1,\n   gate 22602 in module A2, and so on. — RSB 2018\n5. Backplane signals which ND-1021041 does not supply a name for have been given \n   unique names constructed from module and pad numbers in this drawing.  For example,\n   signal name "A15_105_A16_105_106" refers to the net connecting module A15 pad 105\n   with module A16 pads 105 and 106. — RSB 2018\n6. Resolution of backplane-signal inconsistencies in ND-1021041.  Pad which have been\n   renumbered to avoid inconsistencies show their original pad number paranthetically\n   in this drawing.\n   a) Figure 4-108, drawing and table differ in output of gate 283xx; the former indicates\n      it feeds pad 66, the latter indicates pad 68.  The table is in error, since Figure 4-105\n      shows pad 68 as carrying different backplane signals. — RSB 2018\n   b) Figure 4-60 and 4-117 both use pad 55, but in conflicting ways. There is not enough\n      information to resolve this discrepancy.  Figure 4-60 has been arbitrarily selected\n      as being correct.  Pad 55 in Figure 4-117 has been arbitrarily replaced by the\n      otherwise-unused pad 51. — RSB 2018\n   c) Figures 4-65 and 4-122 conflict in the output of gate 182xx.  The former\n      indicates that it feeds pad 74, while the latter indicates it feeds pin 140.  However, pin\n      74 is used elsewhere (Figure 4-121), so the usage of 4-122 is accepted.  — RSB 2018\n   d) Every pad used in Figure  4-110 (pads 31-38) conflicts with usage in some other\n      figure.  Consequently, all of the pads in Figure 4-110 have been arbitrarily replaced\n      by otherwise-unused pads:  specifically, 31→101, 32→103, 33→104, 34→108,\n      35→109, 36→113, 37→116, and 38→117. — RSB 2018\n   e) Superficially, module A38 appears to use its connector pad 14 for 3 mutually\n      inconsistent nets in Figures 4-119, 4-120, and 4-121.  It is possible that this usage is\n      correct.  However, provisionally, in this drawing, module A38's pad 14 has been \n      replaced by the otherwise-unused pad 13 in Figure 4-120, and by pad 16 in \n      Figure 4-121. — RSB 2018
+Text Notes 68475 8825 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. None of the official Block I AGC electrical-schematic drawings were available at\n   the time this CAD drawing was made.  Rather, it is a transcription of the schematic\n   drawings in the figures of AC Electronics document ND-1021041, which are also\n   believed to comprise a complete but unofficial set of schematics. — RSB 2018\n2. The figures in ND-1021041 do not indicate reference designators for components.\n   In this drawing, the numbered oval pads comprise connector J1.  All other \n   electrical components presently have reference designators assigned by the\n   KiCad CAD software. — RSB 2018\n3. This physical drawing has 16 separate physical instances (modules A1 through\n   A16) in the Block I AGC, each with different associated backplane signals.  Each oval\n   connector pad is associated with 16 backplane signal names.  In CAD, they can be\n   viewed or edited as the connector-pads' fields "Caption", "Caption2", "Caption3", ...,\n   "Caption16". As visual notations on the drawing, a notation like NAMExx means that\n   the signal name is NAME01 for module A1, NAME02 for module A2, and so on. \n   If a single notation is shown for an oval pad, it means that the same signal is applied\n   on that pin for all modules.  Signal names that cannot be concisely described are \n   listed instead in the table on the second sheet of this drawing.  — RSB 2018\n4. Each NOR gate is associated with 16 different 5-digit gate numbers, one for each of\n   the modules A1-A16.  These 5-digit numbers are of the form NNNxx, where xx\n   is the module number and NNN represents a unique location within the drawing.\n   For example, the NOR gate shown as 226xx represents gate 22601 in module A1,\n   gate 22602 in module A2, and so on. — RSB 2018\n5. Backplane signals which ND-1021041 does not supply a name for have been given \n   unique names constructed from module and pad numbers in this drawing.  For example,\n   signal name "A15_105_A16_105_106" refers to the net connecting module A15 pad 105\n   with module A16 pads 105 and 106. — RSB 2018\n6. ND-1021041 has some internal inconsistencies in connector-pad numbering.  In \n   some cases it seems to have mistakenly used "AGC4" connector-pin numbers.  Here, \n   these mismatches are replaced by the "AGC5" pin numbers from drawing 1006540A.\n   Where that is not possible. arbitrary renumbering has been done.  The original pin \n   numbers given by ND-1021041 are still shown, parentesized.  — RSB 2019\n
 $Bitmap
 Pos 68075 1475
 Scale 1.000000
@@ -1178,10 +1178,10 @@ F 19 "0VDC" H 74675 29550 140 0001 C BNB "Caption16"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor C103
+L AGC_DSKY:Capacitor C1
 U 1 1 5C0FAB6B
 P 75875 24225
-F 0 "C103" H 76050 24425 130 0001 C CNN
+F 0 "C1" H 76050 24425 130 0001 C CNN
 F 1 "6.8UF" H 76200 24025 130 0000 C CNN
 F 2 "" H 75875 24625 130 0001 C CNN
 F 3 "" H 75875 24625 130 0001 C CNN
@@ -1189,10 +1189,10 @@ F 3 "" H 75875 24625 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor C101
+L AGC_DSKY:Capacitor C2
 U 1 1 5C0FB1FF
 P 75850 25800
-F 0 "C101" H 76025 26000 130 0001 C CNN
+F 0 "C2" H 76025 26000 130 0001 C CNN
 F 1 "6.8UF" H 76175 25600 130 0000 C CNN
 F 2 "" H 75850 26200 130 0001 C CNN
 F 3 "" H 75850 26200 130 0001 C CNN
@@ -1200,10 +1200,10 @@ F 3 "" H 75850 26200 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor C102
+L AGC_DSKY:Capacitor C3
 U 1 1 5C0FB6FE
 P 75850 28450
-F 0 "C102" H 76025 28650 130 0001 C CNN
+F 0 "C3" H 76025 28650 130 0001 C CNN
 F 1 "Capacitor" H 76400 28250 130 0001 C CNN
 F 2 "" H 75850 28850 130 0001 C CNN
 F 3 "" H 75850 28850 130 0001 C CNN
@@ -1211,10 +1211,10 @@ F 3 "" H 75850 28850 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor C104
+L AGC_DSKY:Capacitor C4
 U 1 1 5C0FBCC5
 P 77400 28450
-F 0 "C104" H 77575 28650 130 0001 C CNN
+F 0 "C4" H 77575 28650 130 0001 C CNN
 F 1 "Capacitor" H 77950 28250 130 0001 C CNN
 F 2 "" H 77400 28850 130 0001 C CNN
 F 3 "" H 77400 28850 130 0001 C CNN
@@ -1524,7 +1524,7 @@ F 4 "131xx" H 36250 9775 140 0000 C CNB "Location"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 55 1 5BF2E48A
+U 103 1 5BF2E48A
 P 34900 9425
 F 0 "J1" H 34900 9750 140 0001 C CNN
 F 1 "ConnectorGeneric" H 34900 9850 140 0001 C CNN
@@ -1546,7 +1546,7 @@ F 16 "RV1G/" H 34900 9425 140 0001 C BNB "Caption13"
 F 17 "RV1G/" H 34900 9425 140 0001 C BNB "Caption14"
 F 18 "RV1G/" H 34900 9425 140 0001 C BNB "Caption15"
 F 19 "RV1G/" H 34900 9425 140 0001 C BNB "Caption16"
-	55   34900 9425
+	103  34900 9425
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1861,7 +1861,7 @@ F 14 "RGG/" H 33100 5900 140 0001 C BNB "Caption11"
 F 15 "CQG" H 33100 5900 140 0001 C BNB "Caption12"
 F 16 "CLPG" H 33100 5900 140 0001 C BNB "Caption13"
 F 17 "CZG" H 33100 5900 140 0001 C BNB "Caption14"
-F 18 "CVOG" H 33100 5900 140 0001 C BNB "Caption15"
+F 18 "CV0G" H 33100 5900 140 0001 C BNB "Caption15"
 F 19 "CW3G" H 33100 5900 140 0001 C BNB "Caption16"
 	14   33100 5900
 	-1   0    0    1   
@@ -1888,7 +1888,7 @@ F 14 "RGG/" H 33075 3775 140 0001 C BNB "Caption11"
 F 15 "CQG" H 33075 3775 140 0001 C BNB "Caption12"
 F 16 "CLPG" H 33075 3775 140 0001 C BNB "Caption13"
 F 17 "CZG" H 33075 3775 140 0001 C BNB "Caption14"
-F 18 "CVOG" H 33075 3775 140 0001 C BNB "Caption15"
+F 18 "CV0G" H 33075 3775 140 0001 C BNB "Caption15"
 F 19 "CW3G" H 33075 3775 140 0001 C BNB "Caption16"
 	12   33075 3775
 	-1   0    0    1   
@@ -4043,7 +4043,7 @@ F 19 "WYG/" H 42750 7425 140 0001 C BNB "Caption16"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 109 1 5BF4135B
+U 104 1 5BF4135B
 P 51150 3325
 F 0 "J1" H 51150 3650 140 0001 C CNN
 F 1 "ConnectorGeneric" H 51150 3750 140 0001 C CNN
@@ -4065,12 +4065,12 @@ F 16 "CRY12/" H 51150 3325 140 0001 C BNB "Caption13"
 F 17 "CRY13/" H 51150 3325 140 0001 C BNB "Caption14"
 F 18 "CRY14/" H 51150 3325 140 0001 C BNB "Caption15"
 F 19 "CRY15/" H 51150 3325 140 0001 C BNB "Caption16"
-	109  51150 3325
+	104  51150 3325
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 113 1 5BF4135C
+U 94 1 5BF4135C
 P 62250 4700
 F 0 "J1" H 62250 5025 140 0001 C CNN
 F 1 "ConnectorGeneric" H 62250 5125 140 0001 C CNN
@@ -4092,12 +4092,12 @@ F 16 "CRY13/" H 62250 4700 140 0001 C BNB "Caption13"
 F 17 "CRY14/" H 62250 4700 140 0001 C BNB "Caption14"
 F 18 "CRY15/" H 62250 4700 140 0001 C BNB "Caption15"
 F 19 "CRY16/" H 62250 4700 140 0001 C BNB "Caption16"
-	113  62250 4700
+	94   62250 4700
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 116 1 5BF4135D
+U 88 1 5BF4135D
 P 58475 7425
 F 0 "J1" H 58475 7750 140 0001 C CNN
 F 1 "ConnectorGeneric" H 58475 7850 140 0001 C CNN
@@ -4119,12 +4119,12 @@ F 16 "RUG/" H 58475 7425 140 0001 C BNB "Caption13"
 F 17 "RUG/" H 58475 7425 140 0001 C BNB "Caption14"
 F 18 "RUG/" H 58475 7425 140 0001 C BNB "Caption15"
 F 19 "RUAC/" H 58475 7425 140 0001 C BNB "Caption16"
-	116  58475 7425
+	88   58475 7425
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 101 1 5BF4135E
+U 116 1 5BF4135E
 P 42300 3350
 F 0 "J1" H 42300 3675 140 0001 C CNN
 F 1 "ConnectorGeneric" H 42300 3775 140 0001 C CNN
@@ -4146,12 +4146,12 @@ F 16 "WL13/" H 42300 3350 140 0001 C BNB "Caption13"
 F 17 "WL14/" H 42300 3350 140 0001 C BNB "Caption14"
 F 18 "WL15/" H 42300 3350 140 0001 C BNB "Caption15"
 F 19 "WL16/" H 42300 3350 140 0001 C BNB "Caption16"
-	101  42300 3350
+	116  42300 3350
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 103 1 5BF4135F
+U 118 1 5BF4135F
 P 42325 2650
 F 0 "J1" H 42325 2975 140 0001 C CNN
 F 1 "ConnectorGeneric" H 42325 3075 140 0001 C CNN
@@ -4173,12 +4173,12 @@ F 16 "WXG/" H 42325 2650 140 0001 C BNB "Caption13"
 F 17 "WXG/" H 42325 2650 140 0001 C BNB "Caption14"
 F 18 "WXG/" H 42325 2650 140 0001 C BNB "Caption15"
 F 19 "WXG/" H 42325 2650 140 0001 C BNB "Caption16"
-	103  42325 2650
+	118  42325 2650
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 104 1 5BF41360
+U 122 1 5BF41360
 P 44725 5050
 F 0 "J1" H 44725 5375 140 0001 C CNN
 F 1 "ConnectorGeneric" H 44725 5475 140 0001 C CNN
@@ -4200,12 +4200,12 @@ F 16 "CUG" H 44725 5050 140 0001 C BNB "Caption13"
 F 17 "CUG" H 44725 5050 140 0001 C BNB "Caption14"
 F 18 "CUG" H 44725 5050 140 0001 C BNB "Caption15"
 F 19 "CUG" H 44725 5050 140 0001 C BNB "Caption16"
-	104  44725 5050
+	122  44725 5050
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 117 1 5BF41361
+U 90 1 5BF41361
 P 62200 7075
 F 0 "J1" H 62200 7400 140 0001 C CNN
 F 1 "ConnectorGeneric" H 62200 7500 140 0001 C CNN
@@ -4227,7 +4227,7 @@ F 16 "URL13" H 62200 7075 140 0001 C BNB "Caption13"
 F 17 "URL14" H 62200 7075 140 0001 C BNB "Caption14"
 F 18 "URL15" H 62200 7075 140 0001 C BNB "Caption15"
 F 19 "URL16" H 62200 7075 140 0001 C BNB "Caption16"
-	117  62200 7075
+	90   62200 7075
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -5532,7 +5532,7 @@ F 19 "RV0G/" H 61225 14375 140 0001 C BNB "Caption16"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 51 1 5BF43BE1
+U 55 1 5BF43BE1
 P 57075 14375
 F 0 "J1" H 57075 14700 140 0001 C CNN
 F 1 "ConnectorGeneric" H 57075 14800 140 0001 C CNN
@@ -5554,7 +5554,7 @@ F 16 "G_N_ENTRY_MODE" H 57075 14375 140 0001 C BNB "Caption13"
 F 17 "0VDC" H 57075 14375 140 0001 C BNB "Caption14"
 F 18 "MARK" H 57075 14375 140 0001 C BNB "Caption15"
 F 19 "MARK" H 57075 14375 140 0001 C BNB "Caption16"
-	51   57075 14375
+	55   57075 14375
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -5565,22 +5565,22 @@ F 0 "J1" H 57125 17150 140 0001 C CNN
 F 1 "ConnectorGeneric" H 57125 17250 140 0001 C CNN
 F 2 "" H 57125 17300 140 0001 C CNN
 F 3 "" H 57125 17300 140 0001 C CNN
-F 4 "CVOG" H 57125 16825 140 0001 C BNB "Caption"
-F 5 "CVOG" H 57125 16825 140 0001 C BNB "Caption2"
-F 6 "CVOG" H 57125 16825 140 0001 C BNB "Caption3"
-F 7 "CVOG" H 57125 16825 140 0001 C BNB "Caption4"
-F 8 "CVOG" H 57125 16825 140 0001 C BNB "Caption5"
-F 9 "CVOG" H 57125 16825 140 0001 C BNB "Caption6"
-F 10 "CVOG" H 57125 16825 140 0001 C BNB "Caption7"
-F 11 "CVOG" H 57125 16825 140 0001 C BNB "Caption8"
-F 12 "CVOG" H 57125 16825 140 0001 C BNB "Caption9"
-F 13 "CVOG" H 57125 16825 140 0001 C BNB "Caption10"
-F 14 "CVOG" H 57125 16825 140 0001 C BNB "Caption11"
-F 15 "CVOG" H 57125 16825 140 0001 C BNB "Caption12"
-F 16 "CVOG" H 57125 16825 140 0001 C BNB "Caption13"
-F 17 "CVOG" H 57125 16825 140 0001 C BNB "Caption14"
-F 18 "CVOG" H 57125 16825 140 0001 C BNB "Caption15"
-F 19 "CVOG" H 57125 16825 140 0001 C BNB "Caption16"
+F 4 "CV0G" H 57125 16825 140 0001 C BNB "Caption"
+F 5 "CV0G" H 57125 16825 140 0001 C BNB "Caption2"
+F 6 "CV0G" H 57125 16825 140 0001 C BNB "Caption3"
+F 7 "CV0G" H 57125 16825 140 0001 C BNB "Caption4"
+F 8 "CV0G" H 57125 16825 140 0001 C BNB "Caption5"
+F 9 "CV0G" H 57125 16825 140 0001 C BNB "Caption6"
+F 10 "CV0G" H 57125 16825 140 0001 C BNB "Caption7"
+F 11 "CV0G" H 57125 16825 140 0001 C BNB "Caption8"
+F 12 "CV0G" H 57125 16825 140 0001 C BNB "Caption9"
+F 13 "CV0G" H 57125 16825 140 0001 C BNB "Caption10"
+F 14 "CV0G" H 57125 16825 140 0001 C BNB "Caption11"
+F 15 "CV0G" H 57125 16825 140 0001 C BNB "Caption12"
+F 16 "CV0G" H 57125 16825 140 0001 C BNB "Caption13"
+F 17 "CV0G" H 57125 16825 140 0001 C BNB "Caption14"
+F 18 "CV0G" H 57125 16825 140 0001 C BNB "Caption15"
+F 19 "CV0G" H 57125 16825 140 0001 C BNB "Caption16"
 	57   57125 16825
 	1    0    0    -1  
 $EndComp
@@ -7181,7 +7181,7 @@ F 0 "U166" H 35625 32225 140 0001 C CNB
 F 1 "D3NOR-+3VDC-0VDC-nd1021041-1_5-___" H 35625 32325 140 0001 C CNN
 F 2 "" H 35625 32375 140 0001 C CNN
 F 3 "" H 35625 32375 140 0001 C CNN
-F 4 "181xx" H 35625 31900 140 0000 C CNB "Location"
+F 4 "180xx" H 35625 31900 140 0000 C CNB "Location"
 	1    35625 31900
 	1    0    0    -1  
 $EndComp
@@ -7397,8 +7397,6 @@ Text Notes 57700 7525 0    140  ~ 28
 (37)
 Text Notes 61950 7500 0    140  ~ 28
 (38)
-Text Notes 56825 14800 0    140  ~ 28
-(55)
 Text Notes 49950 29325 0    140  ~ 28
 (74)
 Connection ~ 34175 22850
@@ -7720,4 +7718,6 @@ Wire Notes Line
 	39100 7200 18725 7200
 Text Notes 36125 15150 0    140  ~ 28
 (Gates powered from +3A)
+Text Notes 34650 9875 0    140  ~ 28
+(55)
 $EndSCHEMATC

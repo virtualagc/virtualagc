@@ -10,9 +10,21 @@
 # "recovered" schematics I've already created.
 
 # Usage:
-#	netlistCompare.py TRUEDRAWING.net RECOVEREDDRAWING.net TRUESCHEMATIC.sch RECOVEREDSCHEMATIC.sch
+#	netlistCompare.py TRUEDRAWING.net RECOVEREDDRAWING.net TRUESCHEMATIC.sch RECOVEREDSCHEMATIC.sch [bit]
 # Both netlists are in Orcad2 format.  The .sch files are really all of the 
-# schematic files in the project folder, concatenated.
+# schematic files in the project folder, concatenated.  If the fifth argument
+# is present and is literally "bit", then signal names on the connector
+# are cross-checked only in the following restricted way:
+#	1. Only the first signal for any connector pin is checked.
+#	   (I.e., "Caption" and not "Caption2", "Caption3", etc.
+#	2. If the signal on the true schematic is "" or "-", or if
+#	   it ends in "--" or "--/", then it's not checked at all.
+# I believe the "bit" feature will only be used for 1006540 (modules A1-A16), and is present 
+# because the schematic drawing mostly doesn't list the signal names, so I haven't put 
+# them in the CAD file for the schematic drawing.  Whereas ND-1021041 has extensive
+# (but not 100% complete) tables of them, so I've added them in the ND-1021041 CAD
+# file.  Also, many of them differ for each of the 16 modules, which complicates 
+# the comparison.
 
 import sys
 
@@ -65,7 +77,10 @@ def readSchematic(filename):
 							refd += chr(65 + low)
 					schematic[refd] = { "symbol": symbol }
 				elif len(fields) == 11 and fields[0] == "F" and fields[10] in ['"Location"','"agc5"']:
-					schematic[refd]["gate"] = fields[2].strip('"')
+					gate = fields[2].strip('"')
+					if gate[-2:] == "--":
+						gate = gate[:-2] + "xx"
+					schematic[refd]["gate"] = gate
 				elif len(fields) == 11 and fields[0] == "F" and fields[10][:8] == '"Caption' and fields[2] != '""':
 					schematic[refd][fields[10]] = fields[2].strip('"')
 			else:
@@ -74,6 +89,14 @@ def readSchematic(filename):
 		else:
 			fp.close()
 			return schematic
+
+try:
+	if sys.argv[5] == "bit":
+		bit = True
+	else:
+		bit = False
+except:
+	bit = False
 
 # Read all of the input files.
 trueDrawingNet = readNetlist(sys.argv[1])
@@ -93,7 +116,7 @@ for refd in recoveredSchematic:
 		print "Connector " + refd + " in recovered schematic is missing from the true schematic."
 		continue
 	for key in recoveredSchematic[refd]:
-		if key[:8] == '"Caption' and key not in trueSchematic[refd]:
+		if key[:8] == '"Caption' and key not in trueSchematic[refd] and (key[8:] == "" or not bit):
 			print "Key " + key + " is missing from true schematic " + refd
 for refd in trueSchematic:
 	if refd[:1] != "J":
@@ -102,7 +125,7 @@ for refd in trueSchematic:
 		print "Connector " + refd + " in true schematic is missing from the recovered schematic."
 		continue
 	for key in trueSchematic[refd]:
-		if key[:8] == '"Caption' and key not in recoveredSchematic[refd]:
+		if key[:8] == '"Caption' and key not in recoveredSchematic[refd] and (key[8:] == "" or not bit):
 			print "Key " + key + " is missing from recovered schematic " + refd
 NC = ["(NC)", "N.C.", "0VDC"]
 V3 = ["+3VDC", "+3A", "+3B"]
@@ -114,6 +137,8 @@ for refd in trueSchematic:
 			continue
 		try:
 			trueValue = trueSchematic[refd][key]
+			if bit and (trueValue in ["", "-"] or trueValue[-2:] == "--" or trueValue[-3:] == "--/"):
+				continue
 			recoveredValue = recoveredSchematic[refd][key]
 			if trueValue in NC and recoveredValue in NC:
 				continue

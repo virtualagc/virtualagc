@@ -249,7 +249,7 @@ CLPG
 Text Notes 8095 18925 0    130  ~ 26
 CZG
 Text Notes 8095 19175 0    130  ~ 26
-CVOG
+CV0G
 Text Notes 8095 19425 0    130  ~ 26
 CW3G
 Text Notes 8935 15325 0    130  ~ 26
@@ -317,7 +317,7 @@ CLPG
 Text Notes 9775 18925 0    130  ~ 26
 CZG
 Text Notes 9775 19175 0    130  ~ 26
-CVOG
+CV0G
 Text Notes 9775 19425 0    130  ~ 26
 CW3G
 Text Notes 10615 15325 0    130  ~ 26
