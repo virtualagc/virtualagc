@@ -240,7 +240,7 @@ for line in sys.stdin:
 			print >>sys.stderr, "Duplicate pins: " + line
 			wereErrors = True
 			continue
-		if len(gate) != 3 or not gate.isdigit() or len(agc5) not in [3, 5] or not agc5.isdigit():
+		if len(gate) != 3 or not gate.isdigit() or len(agc5) not in [3, 5] or not (agc5.isdigit() or (agc5[:3].isdigit() and agc5[-2:] == "--")):
 			print >>sys.stderr, "Incorrectly numbered gate: " + line
 			wereErrors = True
 			continue
