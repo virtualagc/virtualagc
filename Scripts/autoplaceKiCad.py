@@ -46,6 +46,8 @@
 #				doubt there will be any more recovered 
 #				ND-1021041 drawings in the future, but I'll 
 #				keep nd1021041 around for that, just in case.
+#		2019-01-12	Added "bit".
+#		2019-01-16	Added "dupej".
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -117,6 +119,7 @@ moduleA52 = False
 nd1021041 = False
 block1 = False
 bit = False
+dupej = False
 norLength = 5
 norSuffix = ""
 
@@ -142,6 +145,9 @@ for line in sys.stdin:
 		bit = True
 		norLength = 3
 		norSuffix = "xx"
+		continue
+	if type == "dupej":
+		dupej = True
 		continue
 	if type == "module=" and numFields == 2:
 		module = fields[1]
@@ -221,6 +227,11 @@ for line in sys.stdin:
 		
 	if block1 and type in nors and numFields == 7:
 		gate = fields[1]
+		if gate == ".":
+			gate = str(gateNumber)
+			while len(gate) < 3:
+				gate = '0' + gate
+			gateNumber += 1
 		agc4 = fields[2]
 		agc5 = fields[3]
 		top = fields[4]
@@ -537,9 +548,23 @@ for line in sys.stdin:
 			wereErrors = True
 			continue
 		if id in objects:
-			print >>sys.stderr, "Part duplicated: " + line
-			print >>sys.stderr, objects[id]
-			wereErrors = True
+			if dupej:
+				id = "O" + str(index)
+				index += 1
+				if len(texts) > 0:
+					text = texts[0]
+				else:
+					text = ""
+				text2 = "(" + upperPinName + "/" + pinName + ")"
+				objects[id] = { "type": "O", "text": text, "text2": text2, "x": posX, "y": posY }
+				nextXY()
+				print >>sys.stderr, "Converting duplicated part to node: " + line
+				print >>sys.stderr, objects[id]
+				continue
+			else:
+				print >>sys.stderr, "Part duplicated: " + line
+				print >>sys.stderr, objects[id]
+				wereErrors = True
 			continue
 		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "texts": texts, "x": posX, "y": posY, "rotated": rotated, "down": down, "up": up, "upperPinName":upperPinName }
 		nextXY()
