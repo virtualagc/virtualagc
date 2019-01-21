@@ -1,795 +1,1254 @@
-<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><title>Virtual AGC Home Page</title><meta http-equiv="content-type" content="text/html; charset=UTF-8"><link rel=icon type="image/png" href="favicon.png"><meta name=author content="Ron Burkey"><script type="text/javascript" src="Header.js"></script></head><body style="background-image: url(gray3.jpg);"><script type="text/javascript">
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>Virtual AGC Home Page</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ron Burkey">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","Physical Implementations").replace("@SUBTITLE@","John Pultorak's Famous Block I AGC ... and more!"))
-</script><h1>Contents</h1>
-This page is devoted to <span style="font-style: italic;
-font-weight: bold;">physical</span> implementations of the Block I
-and Block II AGCs, and their peripherals such as DSKYs.&nbsp; In
-other words, to physical devices that you could build and keep in
-your living room to impress friends and neighbors.&nbsp; Be the
-first on your block to have one!<br><ul><li><a href="#John_Pultoraks_Block_I_AGC">John Pultorak's Block I
-AGC Project</a></li><li><a href="#Mike_Stewarts_Block_II_AGC_Project">Mike Stewart's
-Block II AGC Project</a></li><li><a href="#Steven_Hauers_Implementation">Steven Hauer's
-Implementation</a><br></li><li><a href="#Dario_Kublers_Apollo_16_AGCDSKY">Dario Kubler's
-Apollo 16 AGC/DSKY Simulation Project</a></li><li><a href="#Dimitris_Vitoriss_Block_I_and_Block_II">Dimitris
-Vitoris's Block I and Block II AGC Project</a></li><li><a href="#Philip_Schmidts_Block_I_AGC">Philip Schmidt's Block
-I AGC Projects</a></li><li><a href="#JuanJose">Juan Jose's Block I AGC Project, Running
-SOLARIUM</a></li><li><a href="#DaveRoberts">Dave Roberts's Block II AGC Project</a><br></li><li><a href="#Whos_Building_Them">Who's Building Them?</a></li><ul><li><a href="#Alessandro_Cinquemani">Alessandro Cinquemani</a></li><li><a href="#Bruno_Muller">Bruno Muller</a><br></li></ul><li><a href="#Other_">Other?</a><br></li></ul><hr style="width: 100%; height: 2px;"><h1><a name=John_Pultoraks_Block_I_AGC></a>John Pultorak's Block I
-AGC Project<br></h1><h2>The Pultorak PDFs<br></h2><a href="AGCandJohn.jpg"><img style="border: 2px solid ; width:
-192px; height: 144px;" alt="John Pultorak and his AGC"
-title="Click to enlarge" src="ThmAGCandJohn.jpg" width="192"
-height="144" border="0" align="right"></a>John Pultorak has
-constructed a physical (not virtual), working model of a Block I AGC
-out of 74LS-series low-power Schottky TTL devices.&nbsp; The model
-works, and runs software which John has adapted from Colossus 249
-software.&nbsp; John's unit even has the same general appearance as
-the original Block I AGC prototype!&nbsp; Of course, Colossus 249
-software is targeted for the Block II AGC rather than the Block I
-AGC, but John did not then know of any existing Block I source code,
-and indeed, even the Colossus 249 software listing he had at the
-time was only a partial one rather than a complete program.<br>
-&nbsp;<br>
-I think I've harped on this point endlessly in the past, but at the
-risk of beating a dead horse, please don't expect John's schematics
-to be the <i>actual</i> Block I AGC schematics.&nbsp; Those simply
-weren't publicly available when John did his work.&nbsp; John's
-work, rather, is a fantastic creation of a workalike, based on his
-reading of available documentation.&nbsp; The Block I AGC and DSKY
-schematics have since become available, though, and if you want
-those the place to look is on <a href="ElectroMechanical.html">our
-electro-mechanical page</a> rather than here.&nbsp; Okay, you've
-been warned now, whether you wanted a warning about it or not, so
-feel free to continue reading about John's accomplishment!<br><br>
-No manned mission ever flew with a Block I AGC.&nbsp; It was
-originally intended that Apollo 1 and Apollo 2 would be Block I
-missions; but I'm sure you know what happened to Apollo 1, and
-Apollo 2 never took place.&nbsp; The unmanned missions AS-202
-(sometimes referred to as Apollo 3, though it took place before
-Apollo 1 would have), Apollo 4, and Apollo 6 did use Block I AGCs.<br><br>
-John has thoughtfully provided us at Virtual AGC with his schematic
-diagrams, with adapted Block II software, and with his
-cross-assembler, all of which are a bit tricky otherwise to get in
-machine-readable form.&nbsp; He has also documented his project in
-what I'll refer to as the <span style="font-style: italic;
-font-weight: bold;">Pultorak PDFs</span>, which you may find a lot
-of other places on the web, but which I provide here as well, since
-why not?&nbsp; The following block quote is simply a duplicate of
-what was on the sort-of-but-not-quite-discontinued <a
-href="http://klabs.org/history/build_agc/">klabs website</a>:<br><blockquote style="border-color:black!important; border:1px solid"><h1 align="center"><small><font size=5><small>Block I Apollo
-Guidance Computer (AGC):<br>
-How to build one in your basement</small></font></small></h1><p><small>Material developed and provided by <a
-href="mailto:jvpultorak@msn.com" style="text-decoration:
-none">John Pultorak</a>, who is kind enough to put these
-files into the public domain with no restrictions on their
-use.</small></p><p><small><i><b>Abstract</b></i></small></p><blockquote><p><small>This report describes my successful project to build a
-working reproduction of the 1964 prototype for the Block I
-Apollo Guidance Computer. The AGC is the flight computer for
-the Apollo moon landings, with one unit in the command
-module and one in the LEM.</small></p></blockquote><p><small>I built it in my basement. It took me 4 years.</small></p><p><small>If you like, you can build one too. It will take you
-less time, and yours will be better than mine.</small></p><p><small>I documented my project in 9 separate files:</small></p><blockquote><p><small><a href="Pultorak_files/build_agc_1.pdf"
-style="text-decoration: none">Part 1</a> - Overview [8.1
-MB]: Introduces the project.<br><a href="Pultorak_files/build_agc_2.pdf"
-style="text-decoration: none">Part 2</a> - CTL Module [9.9
-MB]: Design and construction of the control module.<br><a href="Pultorak_files/build_agc_3.pdf"
-style="text-decoration: none">Part 3</a> - PROC Module
-[6.7 MB]: Design and construction of the processing (CPU)
-module.<br><a href="Pultorak_files/build_agc_4.pdf"
-style="text-decoration: none">Part 4</a> - MEM Module [6.8
-MB]: Design and construction of the memory module.<br><a href="Pultorak_files/build_agc_5.pdf"
-style="text-decoration: none">Part 5</a> - IO Module [7.0
-MB]: Design and construction of the diskplay/keyboard (DSKY)
-module.<br><a href="Pultorak_files/build_agc_6.pdf"
-style="text-decoration: none">Part 6</a> - Assembler [0.5
-MB]: A cross-assembler for AGC software development.<br><a href="Pultorak_files/build_agc_7.pdf"
-style="text-decoration: none">Part 7</a> - C++ Simulator
-[5.2 MB]: A low-level simulator that runs assembled AGC
-code.<br><a href="Pultorak_files/build_agc_8.pdf"
-style="text-decoration: none">Part 8</a> - Flight Software
-[2.8 MB]: My translation of portions of the COLOSSUS 249
-flight software.<br><a href="Pultorak_files/build_agc_9.pdf"
-style="text-decoration: none">Part 9</a> - Test &amp;
-Checkout [0.9 MB]: A suite of test programs in AGC assembly
-language.</small></p></blockquote><p><small><b>Why build an AGC?</b></small></p><blockquote><p><small>Early computers are interesting. Because they're
-simple, you can (if you like) actually understand the entire
-computer, from hardware to software.</small></p><p><small>The AGC is the most interesting early computer
-because: it flew the first men to the moon and has
-interesting architectural features.</small></p></blockquote></blockquote><h2>How is this Related to Virtual AGC?<br></h2>
-It's not.&nbsp; John's project is not an offshoot of the Virtual AGC
-project, or vice-versa, and neither project uses materials created
-by the other.&nbsp; But John's project is at an end, and he doesn't
-want the hassle of maintaining a web presence for it, whereas
-Virtual AGC is an ongoing project.&nbsp; (But <a
-href="../../../../media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo/Block1.html">
-see our Block 1 page</a>.)&nbsp; So as a courtesy, the Virtual AGC
-website is going to host supplemental materials for the Pultorak
-project that haven't worked their way into the other websites
-mentioned above.<br><br>
-I should mention, though, that it was John who acquired for us all
-of the documentation and source code that we presently have for <a
-href="yaAGS.html">the LM's abort computer</a>.&nbsp; (Of course, I
-had to write the assembler and simulator myself, so he didn't do <i>everything</i>
-for us!)&nbsp; And, the existence of his <i>software</i> Block I
-simulation (see below), which he wrote in preparation for his
-hardware simulation, has been extremely helpful in the creation of
-our own Block I simulator.&nbsp; So it would be hard to overestimate
-the value John has had for us a Virtual AGC.&nbsp; Thanks, John!<br><h2>The Supplemental Materials</h2><h3>Copyright and Licensing</h3>
-The Pultorak PDFs do not address the question of copyright for the
-software or schematics, nor the conditions under which they may be
-used by others, though the webpages themselves are copyrighted by
-John.&nbsp; Obviously, the quote from klabs.or earlier claims that
-John has put them into the public domain. John has told me that he
-wants everyone to be able to use the software and hardware
-freely.&nbsp; <a href="Pultorak_files/PdReply.html">Click here to
-see an email in which he explains this</a>.&nbsp; (And just in
-case you wonder about the context, <a
-href="Pultorak_files/PdQuestion.html">click here to see email
-containing my copyright/licensing questions</a> to which he is
-replying.)<br><h3>AGC Source Code</h3>
-AGC source code (flight software adapted for Block I and for John's
-cross-assembler, test &amp; checkout software, and so forth) is
-provided in the Pultorak PDFs, but you have to have some means of
-extracting them to use them for anything.&nbsp; Moreover, the PDFs
-often provide assembly listings—i.e., reports generated by the
-assembler—rather than pure source code.&nbsp; An assembly listing
-isn't a legal assembly-language source-code file, so you can't
-conveniently change and reassemble it.&nbsp; You can get a zipfile
-containing the source code and some supplemental files (such as hex
-files) by <a href="Pultorak_files/PultorakAgcSoftware.zip">
-clicking here</a> (1 MB).&nbsp;<br><br>
-Unfortunately, the format accepted by John's cross-assembler isn't
-compatible with <span style="font-weight: bold;">yaYUL</span> (or
-vice-versa), so these source files cannot be assembled by <span
-style="font-weight: bold;">yaYUL</span>.&nbsp; They must be
-assembled using John's cross-assembler.<br><h3><a name=AssemblerSimulatorSourceCode></a>Assembler and
-Simulator Source Code</h3>
-The Visual C++ source code for John's PC-based cross-assembler and
-simulator do appear in the Pultorak PDFs, but rather than
-cutting-and-pasting you may find it more convenient to download a
-zipfile by <a
-href="Pultorak_files/PultorakAssemblerAndSimulator.zip"> clicking
-here</a> (3.7 MB).&nbsp; In addition to John's original code,
-there is work in progress on <a
-href="Block1.html#John_Pultoraks_Assembler_and_Simulator">a
-corrected, cross-platform version of that code for gcc</a>, and on
-<a href="Block1.html#Virtual_AGCs_CPU_Simulator_yaAGCb1">an
-alternative cross-platform simulator with an unrelated source-code
-base</a>.<br><h3>Circuit Design<br></h3>
-The Pultorak PDFs do provide schematic diagrams, but some readers
-have commented that it is difficult to make out some of the details
-in them.&nbsp; You can download a zipfile containing the complete
-CAD files for the design by <a
-href="Pultorak_files/PultorakFinalLogicDesign.zip"> clicking here</a>
-(1.7 MB).&nbsp; The CAD files are in <span style="font-weight:
-bold;">Circuitmaker</span> format (*.ckt), but even if you don't
-have a copy of <span style="font-weight: bold;">Circuitmaker,</span>
-the zipfile may be worth downloading because it also contains:<br><ul><li>WMF (Windows Metafile) versions of the schematics that are
-more legible than those in the Pultorak PDFs; and</li><li>An Excel spreadsheet with a partlist for the design.</li></ul>
-At the time John created these materials and first sent them to me,
-<span style="font-weight: bold;">Circuitmaker</span> was available
-commercially, and if you couldn't afford the full version of the
-program you could either have downloaded the free but limited
-"student" version of the software, or else you could download a full
-but time-limited demo version of the program.&nbsp; Since that time,
-however, the company which was selling <span style="font-weight:
-bold;">Circuitmaker</span> has apparently been acquired by Altium,
-and <span style="color: rgb(204, 0, 0);">the</span> <span
-style="font-weight: bold; color: rgb(204, 0, 0);">Circuitmaker</span><span style="color: rgb(204, 0, 0);">program has been</span> <span
-style="font-style: italic;"><span style="color: rgb(204, 0, 0);">discontinued</span>.&nbsp;</span>
-According to <a href="http://www.circuitmaker.com">Altium's website</a>,
-the substantially more expensive <span style="font-weight: bold;">Altium
-Designer</span> product is supposed to be able to import existing
-<span style="font-weight: bold;">Circuitmaker</span>
-schematics.&nbsp; I have no idea whether this is true or not, though
-my past experiences in such situations leads me to be suspicious
-about it.&nbsp; If anybody else has tried it (and cares to convert
-John's schematics for me), please let me know.<br><br>
-In order to run <span style="font-weight: bold;">Circuitmaker</span>,
-you have to use Options/LibraryLocation (full or demo version) or
-File/Preferences/DirectoriesAndFiles (student version) on the menu
-to set the location of the "user library" (USER.LIB) that comes in
-our zipfile.&nbsp; (After doing so, you will probably also have to
-exit from <span style="font-weight: bold;">Circuitmaker</span> and
-then re-run it, because <span style="font-weight: bold;">Circuitmaker</span>
-will already have loaded the default USER.LIB into its internal
-cache, and it won't reload it until being restarted.)&nbsp;&nbsp;
-Otherwise, when you load the schematics they will have wires but no
-electrical components on them.&nbsp; Incidentally, although <span
-style="font-weight: bold;">Circuitmaker2000</span> is a Windows
-program, both the student and demo versions run just fine under
-Linux with <a href="http://www.codeweavers.com/">CrossOver Office</a>.&nbsp;
-They may run fine too under normal <a href="http://www.winehq.com">Wine</a>,
-but I haven't tried it.<br><br>
-One thing you will likely want to do with <span style="font-weight:
-bold;">Circuitmaker</span> is to create a netlist.&nbsp; Neither
-the student nor demo versions of <span style="font-weight: bold;">Circuitmaker</span>
-seem to want to admit the notion that a single IC can contain
-multiple gates, and will therefore likely display an error prompt
-asking if you want to "correct" this condition.&nbsp; If you say
-"yes", <span style="font-weight: bold;">Circuitmaker</span> will
-arbitrarily relabel the components within the schematic, so that
-only one gate appears in each package.&nbsp; My advice would be to
-say "no" (not to correct), as the only negative side-effect of doing
-so appears to be that the netlist file will have duplicate entries
-for the packages with multiple gates, but the wire-list will be
-correct.<br><h3><a name=Polehn></a>Integrated Development Environment (IDE)</h3><div> Donna Polehn has created an GUI IDE (I think, Windows only)
-based on the Pultorak Simulator and assembler, which you can find
-at <a title="https://github.com/donnaware/AGC"
-href="https://github.com/donnaware/AGC">https://github.com/donnaware/AGC</a>.&nbsp;
-In order to build it, you need C++Builder 6.&nbsp; I've not tried
-it, since I don't personally have C++Builder 6 and don't normally
-run Windows, but I expect it's interesting.<br><br>
-Donna tells us also that she has made a functional Block I using
-the Terasic DE0 FPGA development board, as well as a custom FPGA
-board.&nbsp; Those are available at the link listed above.<br><br><hr  size="2"><h1><a name=Mike_Stewarts_Block_II_AGC_Project></a>Mike
-Stewart's Block II AGC Project<br></h1>
-You can find all the data on Mike's project at these two GitHub
-sites:<br><ul><li><a href="https://github.com/thewonderidiot/agc_hardware">https://github.com/thewonderidiot/agc_hardware</a></li><li><a href="https://github.com/thewonderidiot/agc_simulation">https://github.com/thewonderidiot/agc_simulation</a><br></li></ul>
-You have to take what I say about Mike's project with a bit of a
-grain of salt, because Mike has used his Block II simulator as a
-weapon for justice, rather than treating it as a work of art, and
-so I have to give him very high marks just on that basis
-alone.&nbsp;<br><br>
-No, wait, is that what I wanted to say?<br><br>
-I jest, of course, but it may not be so far off.&nbsp; What Mike
-has done, in his quest to perfect his simulation, has been
-unique.&nbsp; He has used his hardware simulator to do detailed
-comparisons against our own software AGC simulator, <b>yaAGC</b>,
-and to <i>repair</i> yaAGC when he has found it to be broken in
-some way, along the way becoming a top contributor to the Virtual
-AGC project.&nbsp; The problems he has found have certainly been
-subtle, but real.&nbsp; One benefit to Virtual AGC is that bugs
-preventing yaAGC's use for landing the NASSP/Orbiter LM on the
-Moon have been fixed, and I got a nice note a few weeks ago (say,
-in late August of 2016) saying that they had finally landed on the
-Moon with any program alarms or other problems!&nbsp; But there
-has apparently been some help flowing in the opposite direction as
-well, since Mike tells me that Jim Lawton's AGC wire-lister from <a
+</script>
+    <h1>Contents</h1>
+    This page is devoted to <span style="font-style: italic;
+      font-weight: bold;">physical</span> implementations of the Block I
+    and Block II AGCs, and their peripherals such as DSKYs.&nbsp; In
+    other words, to physical devices that you could build and keep in
+    your living room to impress friends and neighbors.&nbsp; Be the
+    first on your block to have one!<br>
+    <ul>
+      <li><a href="#John_Pultoraks_Block_I_AGC">John Pultorak's Block I
+          AGC Project</a></li>
+      <li><a href="#Mike_Stewarts_Block_II_AGC_Project">Mike Stewart's
+          Block II AGC Project</a></li>
+      <li><a href="#Steven_Hauers_Implementation">Steven Hauer's
+          Implementation</a><br>
+      </li>
+      <li><a href="#Dario_Kublers_Apollo_16_AGCDSKY">Dario Kubler's
+          Apollo 16 AGC/DSKY Simulation Project</a></li>
+      <li><a href="#Dimitris_Vitoriss_Block_I_and_Block_II">Dimitris
+          Vitoris's Block I and Block II AGC Project</a></li>
+      <li><a href="#Philip_Schmidts_Block_I_AGC">Philip Schmidt's Block
+          I AGC Projects</a></li>
+      <li><a href="#JuanJose">Juan Jose's Block I AGC Project, Running
+          SOLARIUM</a></li>
+      <li><a href="#DaveRoberts">Dave Roberts's Block II AGC Project</a><br>
+      </li>
+      <li><a href="#Whos_Building_Them">Who's Building Them?</a></li>
+      <ul>
+        <li><a href="#Alessandro_Cinquemani">Alessandro Cinquemani</a></li>
+        <li><a href="#Bruno_Muller">Bruno Muller</a><br>
+        </li>
+      </ul>
+      <li><a href="#Other_">Other?</a><br>
+      </li>
+    </ul>
+    <hr style="width: 100%; height: 2px;">
+    <h1><a name="John_Pultoraks_Block_I_AGC"></a>John Pultorak's Block I
+      AGC Project<br>
+    </h1>
+    <h2>The Pultorak PDFs<br>
+    </h2>
+    <a href="AGCandJohn.jpg"><img style="border: 2px solid ; width:
+        192px; height: 144px;" alt="John Pultorak and his AGC"
+        title="Click to enlarge" src="ThmAGCandJohn.jpg" align="right"
+        border="0" height="144" width="192"></a>John Pultorak has
+    constructed a physical (not virtual), working model of a Block I AGC
+    out of 74LS-series low-power Schottky TTL devices.&nbsp; The model
+    works, and runs software which John has adapted from Colossus 249
+    software.&nbsp; John's unit even has the same general appearance as
+    the original Block I AGC prototype!&nbsp; Of course, Colossus 249
+    software is targeted for the Block II AGC rather than the Block I
+    AGC, but John did not then know of any existing Block I source code,
+    and indeed, even the Colossus 249 software listing he had at the
+    time was only a partial one rather than a complete program.<br>
+    &nbsp;<br>
+    I think I've harped on this point endlessly in the past, but at the
+    risk of beating a dead horse, please don't expect John's schematics
+    to be the <i>actual</i> Block I AGC schematics.&nbsp; Those simply
+    weren't publicly available when John did his work.&nbsp; John's
+    work, rather, is a fantastic creation of a workalike, based on his
+    reading of available documentation.&nbsp; The Block I AGC and DSKY
+    schematics have since become available, though, and if you want
+    those the place to look is on <a href="ElectroMechanical.html">our
+      electro-mechanical page</a> rather than here.&nbsp; Okay, you've
+    been warned now, whether you wanted a warning about it or not, so
+    feel free to continue reading about John's accomplishment!<br>
+    <br>
+    No manned mission ever flew with a Block I AGC.&nbsp; It was
+    originally intended that Apollo 1 and Apollo 2 would be Block I
+    missions; but I'm sure you know what happened to Apollo 1, and
+    Apollo 2 never took place.&nbsp; The unmanned missions AS-202
+    (sometimes referred to as Apollo 3, though it took place before
+    Apollo 1 would have), Apollo 4, and Apollo 6 did use Block I AGCs.<br>
+    <br>
+    John has thoughtfully provided us at Virtual AGC with his schematic
+    diagrams, with adapted Block II software, and with his
+    cross-assembler, all of which are a bit tricky otherwise to get in
+    machine-readable form.&nbsp; He has also documented his project in
+    what I'll refer to as the <span style="font-style: italic;
+      font-weight: bold;">Pultorak PDFs</span>, which you may find a lot
+    of other places on the web, but which I provide here as well, since
+    why not?&nbsp; The following block quote is simply a duplicate of
+    what was on the sort-of-but-not-quite-discontinued <a
+      href="http://klabs.org/history/build_agc/">klabs website</a>:<br>
+    <blockquote style="border-color:black!important; border:1px solid">
+      <h1 align="center"><small><font size="5"><small>Block I Apollo
+              Guidance Computer (AGC):<br>
+              How to build one in your basement</small></font></small></h1>
+      <p><small>Material developed and provided by <a
+            href="mailto:jvpultorak@msn.com" style="text-decoration:
+            none">John Pultorak</a>, who is kind enough to put these
+          files into the public domain with no restrictions on their
+          use.</small></p>
+      <p><small><i><b>Abstract</b></i></small></p>
+      <blockquote>
+        <p><small>This report describes my successful project to build a
+            working reproduction of the 1964 prototype for the Block I
+            Apollo Guidance Computer. The AGC is the flight computer for
+            the Apollo moon landings, with one unit in the command
+            module and one in the LEM.</small></p>
+      </blockquote>
+      <p><small>I built it in my basement. It took me 4 years.</small></p>
+      <p><small>If you like, you can build one too. It will take you
+          less time, and yours will be better than mine.</small></p>
+      <p><small>I documented my project in 9 separate files:</small></p>
+      <blockquote>
+        <p><small><a href="Pultorak_files/build_agc_1.pdf"
+              style="text-decoration: none">Part 1</a> - Overview [8.1
+            MB]: Introduces the project.<br>
+            <a href="Pultorak_files/build_agc_2.pdf"
+              style="text-decoration: none">Part 2</a> - CTL Module [9.9
+            MB]: Design and construction of the control module.<br>
+            <a href="Pultorak_files/build_agc_3.pdf"
+              style="text-decoration: none">Part 3</a> - PROC Module
+            [6.7 MB]: Design and construction of the processing (CPU)
+            module.<br>
+            <a href="Pultorak_files/build_agc_4.pdf"
+              style="text-decoration: none">Part 4</a> - MEM Module [6.8
+            MB]: Design and construction of the memory module.<br>
+            <a href="Pultorak_files/build_agc_5.pdf"
+              style="text-decoration: none">Part 5</a> - IO Module [7.0
+            MB]: Design and construction of the diskplay/keyboard (DSKY)
+            module.<br>
+            <a href="Pultorak_files/build_agc_6.pdf"
+              style="text-decoration: none">Part 6</a> - Assembler [0.5
+            MB]: A cross-assembler for AGC software development.<br>
+            <a href="Pultorak_files/build_agc_7.pdf"
+              style="text-decoration: none">Part 7</a> - C++ Simulator
+            [5.2 MB]: A low-level simulator that runs assembled AGC
+            code.<br>
+            <a href="Pultorak_files/build_agc_8.pdf"
+              style="text-decoration: none">Part 8</a> - Flight Software
+            [2.8 MB]: My translation of portions of the COLOSSUS 249
+            flight software.<br>
+            <a href="Pultorak_files/build_agc_9.pdf"
+              style="text-decoration: none">Part 9</a> - Test &amp;
+            Checkout [0.9 MB]: A suite of test programs in AGC assembly
+            language.</small></p>
+      </blockquote>
+      <p><small><b>Why build an AGC?</b></small></p>
+      <blockquote>
+        <p><small>Early computers are interesting. Because they're
+            simple, you can (if you like) actually understand the entire
+            computer, from hardware to software.</small></p>
+        <p><small>The AGC is the most interesting early computer
+            because: it flew the first men to the moon and has
+            interesting architectural features.</small></p>
+      </blockquote>
+    </blockquote>
+    <h2>How is this Related to Virtual AGC?<br>
+    </h2>
+    It's not.&nbsp; John's project is not an offshoot of the Virtual AGC
+    project, or vice-versa, and neither project uses materials created
+    by the other.&nbsp; But John's project is at an end, and he doesn't
+    want the hassle of maintaining a web presence for it, whereas
+    Virtual AGC is an ongoing project.&nbsp; (But <a
+href="../../../../media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/apollo/Block1.html">see
+      our Block 1 page</a>.)&nbsp; So as a courtesy, the Virtual AGC
+    website is going to host supplemental materials for the Pultorak
+    project that haven't worked their way into the other websites
+    mentioned above.<br>
+    <br>
+    I should mention, though, that it was John who acquired for us all
+    of the documentation and source code that we presently have for <a
+      href="yaAGS.html">the LM's abort computer</a>.&nbsp; (Of course, I
+    had to write the assembler and simulator myself, so he didn't do <i>everything</i>
+    for us!)&nbsp; And, the existence of his <i>software</i> Block I
+    simulation (see below), which he wrote in preparation for his
+    hardware simulation, has been extremely helpful in the creation of
+    our own Block I simulator.&nbsp; So it would be hard to overestimate
+    the value John has had for us a Virtual AGC.&nbsp; Thanks, John!<br>
+    <h2>The Supplemental Materials</h2>
+    <h3>Copyright and Licensing</h3>
+    The Pultorak PDFs do not address the question of copyright for the
+    software or schematics, nor the conditions under which they may be
+    used by others, though the webpages themselves are copyrighted by
+    John.&nbsp; Obviously, the quote from klabs.or earlier claims that
+    John has put them into the public domain. John has told me that he
+    wants everyone to be able to use the software and hardware
+    freely.&nbsp; <a href="Pultorak_files/PdReply.html">Click here to
+      see an email in which he explains this</a>.&nbsp; (And just in
+    case you wonder about the context, <a
+      href="Pultorak_files/PdQuestion.html">click here to see email
+      containing my copyright/licensing questions</a> to which he is
+    replying.)<br>
+    <h3>AGC Source Code</h3>
+    AGC source code (flight software adapted for Block I and for John's
+    cross-assembler, test &amp; checkout software, and so forth) is
+    provided in the Pultorak PDFs, but you have to have some means of
+    extracting them to use them for anything.&nbsp; Moreover, the PDFs
+    often provide assembly listings—i.e., reports generated by the
+    assembler—rather than pure source code.&nbsp; An assembly listing
+    isn't a legal assembly-language source-code file, so you can't
+    conveniently change and reassemble it.&nbsp; You can get a zipfile
+    containing the source code and some supplemental files (such as hex
+    files) by <a href="Pultorak_files/PultorakAgcSoftware.zip">
+      clicking here</a> (1 MB).&nbsp;<br>
+    <br>
+    Unfortunately, the format accepted by John's cross-assembler isn't
+    compatible with <span style="font-weight: bold;">yaYUL</span> (or
+    vice-versa), so these source files cannot be assembled by <span
+      style="font-weight: bold;">yaYUL</span>.&nbsp; They must be
+    assembled using John's cross-assembler.<br>
+    <h3><a name="AssemblerSimulatorSourceCode"></a>Assembler and
+      Simulator Source Code</h3>
+    The Visual C++ source code for John's PC-based cross-assembler and
+    simulator do appear in the Pultorak PDFs, but rather than
+    cutting-and-pasting you may find it more convenient to download a
+    zipfile by <a
+      href="Pultorak_files/PultorakAssemblerAndSimulator.zip"> clicking
+      here</a> (3.7 MB).&nbsp; In addition to John's original code,
+    there is work in progress on <a
+      href="Block1.html#John_Pultoraks_Assembler_and_Simulator">a
+      corrected, cross-platform version of that code for gcc</a>, and on
+    <a href="Block1.html#Virtual_AGCs_CPU_Simulator_yaAGCb1">an
+      alternative cross-platform simulator with an unrelated source-code
+      base</a>.<br>
+    <h3>Circuit Design<br>
+    </h3>
+    The Pultorak PDFs do provide schematic diagrams, but some readers
+    have commented that it is difficult to make out some of the details
+    in them.&nbsp; You can download a zipfile containing the complete
+    CAD files for the design by <a
+      href="Pultorak_files/PultorakFinalLogicDesign.zip"> clicking here</a>
+    (1.7 MB).&nbsp; The CAD files are in <span style="font-weight:
+      bold;">Circuitmaker</span> format (*.ckt), but even if you don't
+    have a copy of <span style="font-weight: bold;">Circuitmaker,</span>
+    the zipfile may be worth downloading because it also contains:<br>
+    <ul>
+      <li>WMF (Windows Metafile) versions of the schematics that are
+        more legible than those in the Pultorak PDFs; and</li>
+      <li>An Excel spreadsheet with a partlist for the design.</li>
+    </ul>
+    At the time John created these materials and first sent them to me,
+    <span style="font-weight: bold;">Circuitmaker</span> was available
+    commercially, and if you couldn't afford the full version of the
+    program you could either have downloaded the free but limited
+    "student" version of the software, or else you could download a full
+    but time-limited demo version of the program.&nbsp; Since that time,
+    however, the company which was selling <span style="font-weight:
+      bold;">Circuitmaker</span> has apparently been acquired by Altium,
+    and <span style="color: rgb(204, 0, 0);">the</span> <span
+      style="font-weight: bold; color: rgb(204, 0, 0);">Circuitmaker</span><span
+      style="color: rgb(204, 0, 0);">program has been</span> <span
+      style="font-style: italic;"><span style="color: rgb(204, 0, 0);">discontinued</span>.&nbsp;</span>
+    According to <a href="http://www.circuitmaker.com">Altium's website</a>,
+    the substantially more expensive <span style="font-weight: bold;">Altium
+      Designer</span> product is supposed to be able to import existing
+    <span style="font-weight: bold;">Circuitmaker</span>
+    schematics.&nbsp; I have no idea whether this is true or not, though
+    my past experiences in such situations leads me to be suspicious
+    about it.&nbsp; If anybody else has tried it (and cares to convert
+    John's schematics for me), please let me know.<br>
+    <br>
+    In order to run <span style="font-weight: bold;">Circuitmaker</span>,
+    you have to use Options/LibraryLocation (full or demo version) or
+    File/Preferences/DirectoriesAndFiles (student version) on the menu
+    to set the location of the "user library" (USER.LIB) that comes in
+    our zipfile.&nbsp; (After doing so, you will probably also have to
+    exit from <span style="font-weight: bold;">Circuitmaker</span> and
+    then re-run it, because <span style="font-weight: bold;">Circuitmaker</span>
+    will already have loaded the default USER.LIB into its internal
+    cache, and it won't reload it until being restarted.)&nbsp;&nbsp;
+    Otherwise, when you load the schematics they will have wires but no
+    electrical components on them.&nbsp; Incidentally, although <span
+      style="font-weight: bold;">Circuitmaker2000</span> is a Windows
+    program, both the student and demo versions run just fine under
+    Linux with <a href="http://www.codeweavers.com/">CrossOver Office</a>.&nbsp;
+They
+    may run fine too under normal <a href="http://www.winehq.com">Wine</a>,
+    but I haven't tried it.<br>
+    <br>
+    One thing you will likely want to do with <span style="font-weight:
+      bold;">Circuitmaker</span> is to create a netlist.&nbsp; Neither
+    the student nor demo versions of <span style="font-weight: bold;">Circuitmaker</span>
+    seem to want to admit the notion that a single IC can contain
+    multiple gates, and will therefore likely display an error prompt
+    asking if you want to "correct" this condition.&nbsp; If you say
+    "yes", <span style="font-weight: bold;">Circuitmaker</span> will
+    arbitrarily relabel the components within the schematic, so that
+    only one gate appears in each package.&nbsp; My advice would be to
+    say "no" (not to correct), as the only negative side-effect of doing
+    so appears to be that the netlist file will have duplicate entries
+    for the packages with multiple gates, but the wire-list will be
+    correct.<br>
+    <h3><a name="Polehn"></a>Integrated Development Environment (IDE)</h3>
+    <div> Donna Polehn has created an GUI IDE (I think, Windows only)
+      based on the Pultorak Simulator and assembler, which you can find
+      at <a title="https://github.com/donnaware/AGC"
+        href="https://github.com/donnaware/AGC">https://github.com/donnaware/AGC</a>.&nbsp;
+In
+      order to build it, you need C++Builder 6.&nbsp; I've not tried
+      it, since I don't personally have C++Builder 6 and don't normally
+      run Windows, but I expect it's interesting.<br>
+      <br>
+      Donna tells us also that she has made a functional Block I using
+      the Terasic DE0 FPGA development board, as well as a custom FPGA
+      board.&nbsp; Those are available at the link listed above.<br>
+      <br>
+      <hr size="2">
+      <h1><a name="Mike_Stewarts_Block_II_AGC_Project"></a>Mike
+        Stewart's Block II AGC Project<br>
+      </h1>
+      You can find all the data on Mike's project at these two GitHub
+      sites:<br>
+      <ul>
+        <li><a href="https://github.com/thewonderidiot/agc_hardware">https://github.com/thewonderidiot/agc_hardware</a></li>
+        <li><a href="https://github.com/thewonderidiot/agc_simulation">https://github.com/thewonderidiot/agc_simulation</a><br>
+        </li>
+      </ul>
+      You have to take what I say about Mike's project with a bit of a
+      grain of salt, because Mike has used his Block II simulator as a
+      weapon for justice, rather than treating it as a work of art, and
+      so I have to give him very high marks just on that basis
+      alone.&nbsp;<br>
+      <br>
+      No, wait, is that what I wanted to say?<br>
+      <br>
+      I jest, of course, but it may not be so far off.&nbsp; What Mike
+      has done, in his quest to perfect his simulation, has been
+      unique.&nbsp; He has used his hardware simulator to do detailed
+      comparisons against our own software AGC simulator, <b>yaAGC</b>,
+      and to <i>repair</i> yaAGC when he has found it to be broken in
+      some way, along the way becoming a top contributor to the Virtual
+      AGC project.&nbsp; The problems he has found have certainly been
+      subtle, but real.&nbsp; One benefit to Virtual AGC is that bugs
+      preventing yaAGC's use for landing the NASSP/Orbiter LM on the
+      Moon have been fixed, and I got a nice note a few weeks ago (say,
+      in late August of 2016) saying that they had finally landed on the
+      Moon with any program alarms or other problems!&nbsp; But there
+      has apparently been some help flowing in the opposite direction as
+      well, since Mike tells me that Jim Lawton's AGC wire-lister from <a
 href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireLister">
-our own GitHub repository</a> was essential to his work.&nbsp;
-Go figure!&nbsp; I didn't even know it was there.&nbsp; Good job,
-Jim!<br><br>
-As part of this, Mike has also been instrumental in acquiring
-AURORA, a very early AGC LM program, because it was the <i>last</i>
-AGC program to contain a full suite of test-suite software, which
-should help him (and us!) to locate yet other subtle bugs in the
-simulations, if bugs there be.<br><br>
-Mike's project also stands out because he has used open-source
-tools, so if you have the time, the expertise, and the will, you
-can reuse the material from his project without having to acquire
-proprietary tools to do so.<br><br>
-So while I haven't any fancy exclusive-to-VirtualAGC graphics of
-Mike's work to present to you here, I can't help but recommend it
-highly to you!<br><br><hr  size="2"><h1><a name=Steven_Hauers_Implementation></a>Steven Hauer's
-Implementation</h1>
-Although (see preceding section) I don't have fancy graphics from
-Mike Stewart's project to show you, Steven Hauer has been busy
-working on implementing Mike's work, and has sent graphics
-galore.&nbsp; Because I am lazy, I'll let Steven describe it for
-you himself without any of my normal, pesky reinterpretations or
-editing.<br><blockquote><h3><font size="-1">OVERVIEW</font></h3><font size="-1">Here is a physical implementation currently in
-progress of Mike Stewart's Block II AGC design.&nbsp; I
-started the process of creating this AGC about 20 months ago
-by researching available AGC design information and
-implementation examples.&nbsp; I wanted to create a Block II
-version of the AGC capable of running the full software.&nbsp;
-The idea of creating an AGC that mimics the original Block II
-circuits also appealed to me greatly, so Mike's design based
-exclusively on NOR gates, inverters, and open collector
-drivers was exactly what I was looking for.<br><br>
-I have implemented Mike's design of A01 - A24 plus his version
-of the fixed/erasable memory board B01 exactly as defined in
-his KiCad schematics available online.&nbsp; The only
-exception is a change in memory devices used on B01 to options
-available for 5V logic and through-hole design.&nbsp; <br><br>
-I intend this AGC to demonstrate full functionality so I have
-brought out the full set of I/O signals and the monitor
-connector signals.&nbsp; I use the monitor connector signals
-for basic integration testing via a monitor breakout board of
-my own design that also provides interfaces to a logic
-analyzer.<br><br>
-Instead of the transformer coupled I/O of the original AGC, I
-applied open collector digital drivers for all outputs added
-directly to the I/O boards.&nbsp; For the inputs I used a
-simple emitter follower for the high speed inputs and the
-original 'D' circuits for handling the switch inputs.&nbsp;
-The simplification of the signal conditioning allowed me to
-use only 2 interface circuit boards.<br><br>
-My intention is to eventually create a full complement of
-hardware based simulations of all peripheral devices,
-uplink/downlink, and a working hardware implementation of the
-monitor console (also called the core rope simulator) to
-demonstrate historically accurate monitor functionality.<br></font><h3><font size="-1">DSKY</font></h3><font size="-1">The DSKY design is my own.&nbsp; Instead of
-multiplexing the display drivers like in John Pultorak's DSKY,
-I have decided to drive the led segments primarily from open
-collector driver ICs and each 7-segment display will have its
-own latching BCD decoder/driver instead of latching
-relays.&nbsp; The translation of the AGC digit values to BCD
-will be accomplished with some old 32x8 bit fused link bipolar
-PROMS.&nbsp; Decoding of the AGC OUT1 channel (channel 10 oct)
-will use a combination of a 4 to 16 decoder and a series of
-nor-gate based flip flops and gating logic similar to the AGC
-implementation.<br><br>
-The DSKY push buttons are as close to the orginals as I could
-find comercially available.&nbsp; They will be wired identical
-to the original DSKY and make use of the same diode array for
-encoding.<br><br>
-There will be 4 PCBs in the DSKY:<br>
-- Display board<br>
-- Display driver board<br>
-- Decode and latch board<br>
-- I/O board with signal conditioning and the push button diode
-array<br><br>
-I currently have the first two boards completed.<br></font><h3><font size="-1">AGC CONSTRUCTION</font></h3><font size="-1">Each AGC module is fabricated on a 4 layer PCB
-using 14-pin DIP packages.&nbsp; I initially thought I would
-wire-wrap each module but after completing A01 and A02 I
-quickly determined that wire-wrapping the modules was not a
-viable option so I went with PCBs.&nbsp; I used KiCad for all
-PCB layout to ensure they matched Mike's schematics.<br><br>
-The chassis is made of aluminum plate and angle stock.&nbsp;
-The plates for the module connectors and the card guides were
-ordered online and laser cut.<br><br>
-The backplane is wire-wrapped by hand.&nbsp; I generated a
-backplane netlist within KiCad and printed out a hard
-copy.&nbsp; Careful use of highlighter markers and triple
-counting each pin has so far yielded an error free
-backplane.&nbsp; The backplane took about 10 months of part
-time effort (several hundred hours) to complete and I ended up
-using about 2200 feet of wire.<br></font><h3><font size="-1">CURRENT FUNCTIONALITY</font></h3><font size="-1">Pictures show completed AGC with modules A01 -
-A24 plus two input conditioning boards.&nbsp; I've included
-some logic analyzer screen shots showing the first time I got
-GOJAM working and also a couple screen shots showing the 4
-instructions of the startup entry vector executing from the
-validate code.&nbsp; The screen shots showing instruction
-names are driven from signals via the monitor connector
-breakout board.<br><br>
-Current computer runs validation program successfully through
-to completion.&nbsp; I don't have a DSKY yet so I confirmed
-successful completion by watching '77' be written to CH10
-(oct) for the DSKY signaling the sucessful completion of the
-program.<br><br>
-I have also loaded Luminary 210 and the program runs without
-any alarms other than 'NO ATT' which makes sense since there
-is no IMU (yet).&nbsp; I can watch PINBALL (the DSKY control
-routine) clear the DSKY via my logic analyzer and observe some
-of the interrupt driven idle behavior of Luminary at this
-point.<br></font><h3><font size="-1">FUTURE PLANS</font></h3><font size="-1">After the DSKY is complete, I plan on creating
-an interface to allow my physical AGC / DSKY to connect to the
-Orbiter spaceflight simulator, with the NASSP 8.0
-Apollo-mission add-on.&nbsp; Instead of interfacing this
-package to yaAGC, I will instead connect it to an adaptor that
-will take the data stream created for the 'ya' packages and
-translate the packet data to/from the correct hardware signals
-to interface with my AGC.<br><br></font><div align=right>— Steven Hauer, 11/2018<br></div></blockquote>
-Of course, I know that what you really want to see are the
-pictures, so here they are.&nbsp; Click any of them to see an
-enlarged view:<br><br><table cellspacing=2 cellpadding="2" border="0" align="center"><tbody><tr><td valign=middle align="center"><a
-href="StevenHauer/A01%20-%20A07%20+%20A13.jpg"><b><img
-src="StevenHauer/small-A01%20-%20A07%20+%20A13.jpg"
-alt="" width="274" height="327" border="2"></b></a><b><br></b><div align=center><b>A01 - A07 + A13</b><b><br></b></div></td><td valign=middle align="center"><b><a
-href="StevenHauer/A01%20-%20A15%20+%20B01.jpg"><img
-src="StevenHauer/small-A01%20-%20A15%20+%20B01.jpg"
-alt="" width="288" height="230" border="2"></a></b><b><br></b><div align=center><b>A01 - A15 + B01</b><b><br></b></div></td><td valign=middle align="center"><b><a
-href="StevenHauer/A05.jpg"><img
-src="StevenHauer/small-A05.jpg" alt="" width="301"
-height="280" border="2"></a></b><b><br></b><b>A05</b><b><br></b></td></tr><tr><td valign=middle align="center"><b><a
-href="StevenHauer/backplane%201.jpg"><img
-src="StevenHauer/small-backplane%201.jpg" alt=""
-width="290" height="271" border="2"></a></b><b><br></b><b>Backplane 1</b><b><br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/backplane%202.jpg"><img
-src="StevenHauer/small-backplane%202.jpg" alt=""
-width="302" height="301" border="2"></a><br>
-Backplane 2<br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/backplane%203.jpg"><img
-src="StevenHauer/small-backplane%203.jpg" alt=""
-width="277" height="248" border="2"></a><br>
-Backplane 3<br></b></td></tr><tr><td valign=middle align="center"><b><a
-href="StevenHauer/chassis%201.jpg"><img
-src="StevenHauer/small-chassis%201.jpg" alt=""
-width="394" height="302" border="2"></a><br>
-Chassis 1<br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/chassis%202.jpg"><img
-src="StevenHauer/small-chassis%202.jpg" alt=""
-width="403" height="302" border="2"></a><br>
-Chassis 2<br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/monitor%20board%201.jpg"><img
-src="StevenHauer/small-monitor%20board%201.jpg"
-alt="" width="403" height="302" border="2"></a><br>
-Monitor Board 1<br></b></td></tr><tr><td valign=middle align="center"><b><a
-href="StevenHauer/monitor%20board%202.jpg"><img
-src="StevenHauer/small-monitor%20board%202.jpg"
-alt="" width="403" height="302" border="2"></a><br>
-Monitor Board 2<br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/running%20with%20monitor%20board.jpg"><img
+        our own GitHub repository</a> was essential to his work.&nbsp;
+      Go figure!&nbsp; I didn't even know it was there.&nbsp; Good job,
+      Jim!<br>
+      <br>
+      As part of this, Mike has also been instrumental in acquiring
+      AURORA, a very early AGC LM program, because it was the <i>last</i>
+      AGC program to contain a full suite of test-suite software, which
+      should help him (and us!) to locate yet other subtle bugs in the
+      simulations, if bugs there be.<br>
+      <br>
+      Mike's project also stands out because he has used open-source
+      tools, so if you have the time, the expertise, and the will, you
+      can reuse the material from his project without having to acquire
+      proprietary tools to do so.<br>
+      <br>
+      So while I haven't any fancy exclusive-to-VirtualAGC graphics of
+      Mike's work to present to you here, I can't help but recommend it
+      highly to you!<br>
+      <br>
+      <hr size="2">
+      <h1><a name="Steven_Hauers_Implementation"></a>Steven Hauer's
+        Implementation</h1>
+      Although (see preceding section) I don't have fancy graphics from
+      Mike Stewart's project to show you, Steven Hauer has been busy
+      working on implementing Mike's work, and has sent graphics
+      galore.&nbsp; Because I am lazy, I'll let Steven describe it for
+      you himself without any of my normal, pesky reinterpretations or
+      editing.<br>
+      <blockquote>
+        <h3><font size="-1">OVERVIEW</font></h3>
+        <font size="-1">Here is a physical implementation currently in
+          progress of Mike Stewart's Block II AGC design.&nbsp; I
+          started the process of creating this AGC about 20 months ago
+          by researching available AGC design information and
+          implementation examples.&nbsp; I wanted to create a Block II
+          version of the AGC capable of running the full software.&nbsp;
+          The idea of creating an AGC that mimics the original Block II
+          circuits also appealed to me greatly, so Mike's design based
+          exclusively on NOR gates, inverters, and open collector
+          drivers was exactly what I was looking for.<br>
+          <br>
+          I have implemented Mike's design of A01 - A24 plus his version
+          of the fixed/erasable memory board B01 exactly as defined in
+          his KiCad schematics available online.&nbsp; The only
+          exception is a change in memory devices used on B01 to options
+          available for 5V logic and through-hole design.&nbsp; <br>
+          <br>
+          I intend this AGC to demonstrate full functionality so I have
+          brought out the full set of I/O signals and the monitor
+          connector signals.&nbsp; I use the monitor connector signals
+          for basic integration testing via a monitor breakout board of
+          my own design that also provides interfaces to a logic
+          analyzer.<br>
+          <br>
+          Instead of the transformer coupled I/O of the original AGC, I
+          applied open collector digital drivers for all outputs added
+          directly to the I/O boards.&nbsp; For the inputs I used a
+          simple emitter follower for the high speed inputs and the
+          original 'D' circuits for handling the switch inputs.&nbsp;
+          The simplification of the signal conditioning allowed me to
+          use only 2 interface circuit boards.<br>
+          <br>
+          My intention is to eventually create a full complement of
+          hardware based simulations of all peripheral devices,
+          uplink/downlink, and a working hardware implementation of the
+          monitor console (also called the core rope simulator) to
+          demonstrate historically accurate monitor functionality.<br>
+        </font>
+        <h3><font size="-1">DSKY</font></h3>
+        <font size="-1">The DSKY design is my own.&nbsp; Instead of
+          multiplexing the display drivers like in John Pultorak's DSKY,
+          I have decided to drive the led segments primarily from open
+          collector driver ICs and each 7-segment display will have its
+          own latching BCD decoder/driver instead of latching
+          relays.&nbsp; The translation of the AGC digit values to BCD
+          will be accomplished with some old 32x8 bit fused link bipolar
+          PROMS.&nbsp; Decoding of the AGC OUT1 channel (channel 10 oct)
+          will use a combination of a 4 to 16 decoder and a series of
+          nor-gate based flip flops and gating logic similar to the AGC
+          implementation.<br>
+          <br>
+          The DSKY push buttons are as close to the orginals as I could
+          find comercially available.&nbsp; They will be wired identical
+          to the original DSKY and make use of the same diode array for
+          encoding.<br>
+          <br>
+          There will be 4 PCBs in the DSKY:<br>
+          - Display board<br>
+          - Display driver board<br>
+          - Decode and latch board<br>
+          - I/O board with signal conditioning and the push button diode
+          array<br>
+          <br>
+          I currently have the first two boards completed.<br>
+        </font>
+        <h3><font size="-1">AGC CONSTRUCTION</font></h3>
+        <font size="-1">Each AGC module is fabricated on a 4 layer PCB
+          using 14-pin DIP packages.&nbsp; I initially thought I would
+          wire-wrap each module but after completing A01 and A02 I
+          quickly determined that wire-wrapping the modules was not a
+          viable option so I went with PCBs.&nbsp; I used KiCad for all
+          PCB layout to ensure they matched Mike's schematics.<br>
+          <br>
+          The chassis is made of aluminum plate and angle stock.&nbsp;
+          The plates for the module connectors and the card guides were
+          ordered online and laser cut.<br>
+          <br>
+          The backplane is wire-wrapped by hand.&nbsp; I generated a
+          backplane netlist within KiCad and printed out a hard
+          copy.&nbsp; Careful use of highlighter markers and triple
+          counting each pin has so far yielded an error free
+          backplane.&nbsp; The backplane took about 10 months of part
+          time effort (several hundred hours) to complete and I ended up
+          using about 2200 feet of wire.<br>
+        </font>
+        <h3><font size="-1">CURRENT FUNCTIONALITY</font></h3>
+        <font size="-1">Pictures show completed AGC with modules A01 -
+          A24 plus two input conditioning boards.&nbsp; I've included
+          some logic analyzer screen shots showing the first time I got
+          GOJAM working and also a couple screen shots showing the 4
+          instructions of the startup entry vector executing from the
+          validate code.&nbsp; The screen shots showing instruction
+          names are driven from signals via the monitor connector
+          breakout board.<br>
+          <br>
+          Current computer runs validation program successfully through
+          to completion.&nbsp; I don't have a DSKY yet so I confirmed
+          successful completion by watching '77' be written to CH10
+          (oct) for the DSKY signaling the sucessful completion of the
+          program.<br>
+          <br>
+          I have also loaded Luminary 210 and the program runs without
+          any alarms other than 'NO ATT' which makes sense since there
+          is no IMU (yet).&nbsp; I can watch PINBALL (the DSKY control
+          routine) clear the DSKY via my logic analyzer and observe some
+          of the interrupt driven idle behavior of Luminary at this
+          point.<br>
+        </font>
+        <h3><font size="-1">FUTURE PLANS</font></h3>
+        <font size="-1">After the DSKY is complete, I plan on creating
+          an interface to allow my physical AGC / DSKY to connect to the
+          Orbiter spaceflight simulator, with the NASSP 8.0
+          Apollo-mission add-on.&nbsp; Instead of interfacing this
+          package to yaAGC, I will instead connect it to an adaptor that
+          will take the data stream created for the 'ya' packages and
+          translate the packet data to/from the correct hardware signals
+          to interface with my AGC.<br>
+          <br>
+        </font>
+        <div align="right">— Steven Hauer, 11/2018<br>
+        </div>
+      </blockquote>
+      Of course, I know that what you really want to see are the
+      pictures, so here they are.&nbsp; Click any of them to see an
+      enlarged view:<br>
+      <br>
+      <table cellpadding="2" cellspacing="2" align="center" border="0">
+        <tbody>
+          <tr>
+            <td align="center" valign="middle"><a
+                href="StevenHauer/A01%20-%20A07%20+%20A13.jpg"><b><img
+                    src="StevenHauer/small-A01%20-%20A07%20+%20A13.jpg"
+                    alt="" border="2" height="327" width="274"></b></a><b><br>
+              </b>
+              <div align="center"><b>A01 - A07 + A13</b><b><br>
+                </b></div>
+            </td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/A01%20-%20A15%20+%20B01.jpg"><img
+                    src="StevenHauer/small-A01%20-%20A15%20+%20B01.jpg"
+                    alt="" border="2" height="230" width="288"></a></b><b><br>
+              </b>
+              <div align="center"><b>A01 - A15 + B01</b><b><br>
+                </b></div>
+            </td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/A05.jpg"><img
+                    src="StevenHauer/small-A05.jpg" alt="" border="2"
+                    height="280" width="301"></a></b><b><br>
+              </b><b>A05</b><b><br>
+              </b></td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/backplane%201.jpg"><img
+                    src="StevenHauer/small-backplane%201.jpg" alt=""
+                    border="2" height="271" width="290"></a></b><b><br>
+              </b><b>Backplane 1</b><b><br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/backplane%202.jpg"><img
+                    src="StevenHauer/small-backplane%202.jpg" alt=""
+                    border="2" height="301" width="302"></a><br>
+                Backplane 2<br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/backplane%203.jpg"><img
+                    src="StevenHauer/small-backplane%203.jpg" alt=""
+                    border="2" height="248" width="277"></a><br>
+                Backplane 3<br>
+              </b></td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/chassis%201.jpg"><img
+                    src="StevenHauer/small-chassis%201.jpg" alt=""
+                    border="2" height="302" width="394"></a><br>
+                Chassis 1<br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/chassis%202.jpg"><img
+                    src="StevenHauer/small-chassis%202.jpg" alt=""
+                    border="2" height="302" width="403"></a><br>
+                Chassis 2<br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/monitor%20board%201.jpg"><img
+                    src="StevenHauer/small-monitor%20board%201.jpg"
+                    alt="" border="2" height="302" width="403"></a><br>
+                Monitor Board 1<br>
+              </b></td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/monitor%20board%202.jpg"><img
+                    src="StevenHauer/small-monitor%20board%202.jpg"
+                    alt="" border="2" height="302" width="403"></a><br>
+                Monitor Board 2<br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/running%20with%20monitor%20board.jpg"><img
 src="StevenHauer/small-running%20with%20monitor%20board.jpg" alt=""
-width="302" height="403" border="2"></a><br>
-Running with Monitor Board<br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/GOJAM%20control%20signals.jpg"><img
-src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
-height="403" border="2"></a><br>
-GOJAM Control Signals<br></b></td></tr><tr><td valign=middle align="center"><b><a
-href="StevenHauer/start%20vector%201.jpg"><img
-src="StevenHauer/small-start%20vector%201.jpg"
-alt="" width="302" height="245" border="2"></a><br>
-Start Vector 1<br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/start%20vector%202.jpg"><img
-src="StevenHauer/small-start%20vector%202.jpg"
-alt="" width="302" height="287" border="2"></a><br>
-Start Vector 2<br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/DSKY%20Button%20Wiring.jpg"><img
-src="StevenHauer/small%20DSKY%20Button%20Wiring.jpg"
-alt="Click to enlarge" width="302" height="403"
-border="2"></a><br>
-DSKY Button Wiring<br></b></td></tr><tr><td valign=middle align="center"><b><a
-href="StevenHauer/DSKY%20Display%201.jpg"><img
-src="StevenHauer/small%20DSKY%20Display%201.jpg"
-alt="Click to enlarge" width="372" height="403"
-border="2"></a><br></b><b>DSKY Display 1</b><b><br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/DSKY%20Display%202.jpg"><img
-src="StevenHauer/small%20DSKY%20Display%202.jpg"
-alt="Click to enlarge" width="302" height="403"
-border="2"></a><br>
-DSKY Display 2<br></b></td><td valign=middle align="center"><b><a
-href="StevenHauer/DSKY%20Display%20Test.jpg"><img
-src="StevenHauer/small%20DSKY%20Display%20Test.jpg"
-alt="Click to enlarge" width="371" height="403"
-border="2"></a><br>
-DSKY Display Test<br></b></td></tr></tbody></table><br><br>
-&nbsp;<br><hr  size="2"><h1><a name=Dario_Kublers_Apollo_16_AGCDSKY></a>Dario Kubler's
-Apollo 16 AGC/DSKY Simulation Project</h1><img alt="" src="Esplorando.jpg" width="160" height="160"
-align="left"><a href="Casper.jpg"><img alt=""
-src="Casper-small.jpg" width="240" height="160" border="2"
-align="right"></a>Dario was part of a team (largely people
-from the <a href="http://www.foam13.it/">Fondazione Osservatorio
-Astronomico M13</a>)<span style="color: rgb(0, 0, 0);
-font-family: Verdana, Arial, Helvetica, sans-serif; font-size:
-18px; font-style: normal; font-variant-ligatures: normal;
-font-variant-caps: normal; font-weight: normal; letter-spacing:
-normal; orphans: 2; text-align: -webkit-left; text-indent: 0px;
-text-transform: none; white-space: normal; widows: 2;
-word-spacing: 0px; -webkit-text-stroke-width: 0px;
-background-color: rgb(255, 255, 255); text-decoration-style:
-initial; text-decoration-color: initial; display: inline
-!important; float: none;"></span> that created a 1:1 scale
-mockup of the Apollo 16 Command Module ("Casper") for 2012
-exhibition called Esplorando, in Varese, Italy, near Milan.&nbsp;
-Dario's part of the task was to create a working DSKY, which would
-be interfaced via bluetooth to a PC running the Artemis AGC
-program in our yaAGC AGC simulator software.&nbsp; Of course,
-yaAGC has no direct bluetooth support, but Dario wrote a C++
-program that interfaced between yaAGC and bluetooth.&nbsp; <br><br>
-Apparently, the exhibition went very well.&nbsp; Charlie Duke, the
-LMP for Apollo 16, was one of the visitors.&nbsp; I'm told that he
-entered the capsule, played with the AGC/DSKY combo, said that it
-was very realistic, and passed his compliments to us.&nbsp; So ...
-thanks, Dario! <br><br>
-Actually, there's a YouTube video, with Charlie Duke, of the
-Casper mockup's unveiling ceremony: <br><br><div align=center><iframe
-src="https://www.youtube.com/embed/ru33QY_9ZT4"
-allowfullscreen="" width="854" height="480" frameborder="0"></iframe><br></div><br>
-After Esplorando, the capsule was moved to the flight museum
-located in the Malpensa International Airport, in Milan.<br><br>
-Here's a YouTube link to a short video of Dario's AGC/DSKY combo
-in operation:<br><br><div align=center><iframe
-src="https://www.youtube.com/embed/sDMNhPDV5yc"
-allowfullscreen="" width="854" height="480" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
-</iframe> </div><br>
-Since then, Dario has managed to port yaAGC into an embedded
-system, based on the PIC32-MZ (a 32-bit MIPS-based MCU), with 2MB
-of flash memory and 512KB of RAM, using the XC32 gcc-based
-compiler.&nbsp; Dario himself works at Microchip (the
-manufacturer) himself, so that seems like a natural progression.<br><br><div align=center><a href="PIC32MZ.jpg"><img alt=""
-src="thm-PIC32MZ.jpg" width="533" height="400" border="2"></a><br></div><br></div><hr style="width: 100%; height: 2px;"><h1><a name=Dimitris_Vitoriss_Block_I_and_Block_II></a>Dimitris
-Vitoris's Block I and Block II AGC Project<br></h1>
-The project of Dimitris ("Jim") Vitoris takes over where John
-Pultorak's project stops.&nbsp; The project is still in its very
-first stages, so please don't take any statements made here as
-commitments!&nbsp; But the basic idea of the project is to be able
-to create a physical implementation of a Block II AGC and DSKY,
-which (unlike John Pultorak's Block I AGC above) can be constructed
-by hobbyists, without requiring the immense skill needed to
-construct a Pultorak AGC.<br><br>
-Here is a <span style="font-style: italic;">very uncertain</span>
-roadmap of the project.&nbsp; It may be that all of these phases
-will be completed, or it may be that the project will stop where it
-is now.&nbsp; Or perhaps some phases might be skipped.&nbsp; There
-is no timetable.&nbsp; But however it goes, thanks Dimitris!<br><br><table summary="" style="text-align: left; width: 100%;"
-cellspacing="2" cellpadding="2" border="1"><tbody><tr><td style="vertical-align: top; font-weight: bold;">Project
-Phase<br></td><td style="vertical-align: top; font-weight: bold;">
-Description<br></td><td style="vertical-align: top; font-weight: bold;"> Status<br></td></tr><tr><td style="vertical-align: top;">A0<br></td><td style="vertical-align: top;">Conversion of John Pultorak's
-Block I AGC design (schematics only!) to <span
-style="font-weight: bold;">Eagle</span> CAD, with
-corrections and small improvements.<br></td><td style="vertical-align: top;"><span style="font-weight:
-bold; color: rgb(0, 153, 0);">Ready now!</span><br></td></tr><tr><td style="vertical-align: top;">A1<br></td><td style="vertical-align: top;">A clean restructuring of the
-Block I design -- for example, with AGC, DSKY, and
-monitoring busses separated into independent assemblies
-rather than being a part of one large assembly.<br></td><td style="vertical-align: top;"><span style="color: rgb(0,
-153, 0);">Preliminary data available.&nbsp; (See</span> <a
-style="color: rgb(0, 153, 0);" href="changes.html">change
-log</a><span style="color: rgb(0, 153, 0);">.)</span><br></td></tr><tr><td style="vertical-align: top;">B0<br></td><td style="vertical-align: top;">Block II AGC design
-(schematics and printed-circuit board layout!) using 74xxx
-TTL logic.<br></td><td style="vertical-align: top;">Possible<br></td></tr><tr><td style="vertical-align: top;">B1<br></td><td style="vertical-align: top;">Size reduction of Block II
-design, using surface-mount parts and FPGAs.<br></td><td style="vertical-align: top;">Possible<br></td></tr><tr><td style="vertical-align: top;">C0<br></td><td style="vertical-align: top;">Further, final size reduction
-of the Block II design, with added Virtual AGC
-compatibility.&nbsp; (This would mean, for example, that one
-of Dimitris's physical DSKY could be used with a PC running
-Virtual AGC.)<br></td><td style="vertical-align: top;">Possible<br></td></tr></tbody></table><br><div style="text-align: center;"> <a
-href="DimitrisVitoris/AgcPhysicalImplementation-20090927.zip"> <big>Download
-20090927 snapshot now!</big></a><br></div><span style="font-family: arial;"><br></span> The download is a zipfile containing the complete set of
-materials that have been created by Dimitris so far.<br><br>
-Dimitris uses <span style="font-weight: bold;">Eagle</span> CAD for
-this project (<a href="http://www.cadsoft.de">www.cadsoft.de</a>).&nbsp;
-<span style="font-weight: bold;">Eagle</span> is a cross-platform
-program that is available for Linux, Windows, and Mac OS X.&nbsp;
-While <span style="font-weight: bold;">Eagle</span> is a
-proprietary program that costs money to purchase, there is a free
-version that can be used with small designs.&nbsp; I have verified
-that the free version does allow viewing of the phase A0 schematics
-on Linux.<br><br>
-Once phase B0 and beyond are reached, it would be valuable to have
-mechanical design and drawings of things such as DSKYs, enclosures,
-front panels, and so forth, so that complete physical units can be
-constructed.&nbsp; Any mechanical engineers who are interested
-should contact me at the email address at the bottom of this
-page.&nbsp; Mechanical design of a Block II DSKY in particular would
-be useful, regardless of the how far Dimitris cares to advance his
-project.<br><br>
-Dimitris has also sent some photos of the physical device he is
-constructing:<br><br><table summary="" style="text-align: left; width: 100%;"
-cellspacing="2" cellpadding="2" border="1"><tbody><tr><td style="vertical-align: top; text-align: center;"> <a
-href="PhysicalFaceplateWorkInProgress.jpg"><img alt=""
-title="Click to enlarge"
-src="thumb-PhysicalFaceplateWorkInProgress.jpg"
-style="border: 2px solid ; width: 400px; height: 300px;"
-width="400" height="300" border="0"></a><br><span style="font-style: italic;">The physical faceplate,
-work in progress!</span><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="CleanDskyFace.jpg"><img title="Click to enlarge."
-alt="" src="thumb-CleanDskyFace.jpg" style="border: 2px
-solid ; width: 209px; height: 240px;" width="209"
-height="240" border="0"></a><br><span style="font-style: italic;">Cleaned-up stylized
-drawing<br>
-from which measurements can<br>
-be taken.&nbsp; A <a href="DimitrisVitoris/DSKY.cdr">CorelDraw
-file</a> is also<br>
-available.<br></span></td></tr></tbody></table><br>
-Dimitris mentions that his best estimate of the faceplate dimensions
-is 18.9 cm (7.44 in.) wide and 21.8 cm. (8.58 in.) high, and points
-out that additional dimensions can be extract from the right-hand
-drawing above.<br><br>
-Incidentally, Dimitris owns various bits and pieces of Block I
-equipment, and here are some photos he was kind enough to send
-us.&nbsp; (<br><br><table summary="" style="text-align: left; width: 100%;"
-cellspacing="2" cellpadding="2" border="0"><tbody><tr align=center><td style="vertical-align: top;"><table summary="" style="text-align: left; margin-left:
-auto; margin-right: auto;" title="Block I AGC Logic
-Module" cellspacing="2" cellpadding="2" border="0"><tbody><tr><td style="text-align: center;"><a href="P9280525.JPG"><img
-alt="Block I AGC logic module" title="Click to
-enlarge" src="small-P9280525.JPG" style="border:
-2px solid ; width: 240px; height: 60px;"
-width="240" height="60" border="0"></a><br></td><td style="text-align: center;"><a href="P9280502.JPG"><img
-alt="Block I AGC logic module" title="Click to
-enlarge" src="small-P9280502.JPG" style="border:
-2px solid ; width: 240px; height: 47px;"
-width="240" height="47" border="0"></a><br></td></tr></tbody></table><span style="font-style: italic;">Block I AGC Logic Module</span><br><br></td></tr><tr align=center><td style="vertical-align: top;"><table summary="" style="text-align: left; margin-left:
-auto; margin-right: auto;" cellspacing="2" cellpadding="2"
-border="0"><tbody><tr><td style="text-align: center;"><a href="P9280496.JPG"><img
-alt="Block I AGC rope-memory module"
-title="Click to enlarge"
-src="small-P9280496.JPG" style="border: 2px
-solid ; width: 240px; height: 57px;" width="240"
-height="57" border="0"></a><br></td><td style="text-align: center;"><a href="P9280520.JPG"><img
-alt="Block I AGC rope-memory module"
-title="Click to enlarge"
-src="small-P9280520.JPG" style="border: 2px
-solid ; width: 240px; height: 56px;" width="240"
-height="56" border="0"></a><br></td><td style="text-align: center;"><a href="P9280521.JPG"><img
-alt="Block I AGC rope-memory module"
-title="Click to enlarge"
-src="small-P9280521.JPG" style="border: 2px
-solid ; width: 240px; height: 58px;" width="240"
-height="58" border="0"></a><br></td></tr></tbody></table><span style="font-style: italic;">Block I AGC Rope Memory
-Module</span><br><br></td></tr><tr align=center><td style="vertical-align: top;"><table summary="" style="text-align: left; margin-left:
-auto; margin-right: auto;" cellspacing="2" cellpadding="2"
-border="0"><tbody><tr><td style="vertical-align: top; text-align: center;"><a
-href="P9280518.JPG"><img alt="Block I DSKY power
-supply" title="Click to enlarge"
-src="small-P9280518.JPG" style="border: 2px
-solid ; width: 213px; height: 160px;"
-width="213" height="160" border="0"></a><br></td><td style="vertical-align: top; text-align: center;"><a
-href="P9280518.JPG"><img alt="Block I DSKY power
-supply" title="Click to enlarge"
-src="small-P9280493.JPG" style="border: 2px
-solid ; width: 213px; height: 160px;"
-width="213" height="160" border="0"></a><br></td></tr></tbody></table><span style="font-style: italic;">Block I DSKY Power Supply</span><br></td></tr></tbody></table><br><br><hr style="width: 100%; height: 2px;"><h1><a name=Philip_Schmidts_Block_I_AGC></a>Philip Schmidt's Block
-I AGC Project<br></h1>
-Philip Schmidt has also been kind enough to let us know about <span
-style="font-style: italic;">his</span> Block I physical
-implementation.&nbsp; You can see his write-up of what he's been
-doing at <a href="http://users.on.net/%7Epcschmidt/AGC/AGCRep.html">his
-own web-page</a>.&nbsp; Phil tells me that he will eventually
-provide all of the CAD files for his design (in <span
-style="font-weight: bold;">Altium Designer</span> format), but for
-right now it's all PDFs while it's a work in progress.<br><br><hr style="width: 100%; height: 2px;"><h1><a name=JuanJose></a>Juan Jose's Block I AGC Project, Running
-SOLARIUM<br></h1>
-Juan Jose has built a Block I AGC-plus-DSKY simulator using a
-Spartan3 (a Xilinx FPGA) board.&nbsp; I don't have too many details
-about how he did it, though he was kind enough to send our mailing
-list some nice photos of some of the proto-boards he had added to
-the basic Spartan3 board.<br><br>
-There are also some cute YouTube videos of it in action.&nbsp; Here
-is his "Block I Flyby" video — the "flyby" being of his contraption,
-and not of anything in space:<br><br><div align=center><iframe
-src="https://www.youtube.com/embed/C6fzSQpxJmE"
-allowfullscreen="" width="854" height="480" frameborder="0"></iframe><br><br><br></div>
-You can find more by looking at his YouTube user, which is
-"agcfanatic", but here are a few direct links:<br><ul><li><a href="http://www.youtube.com/watch?v=lTQmuC_O1T4">Apollo
-Computer Physical Implementation Test of DSKY display and
-C-Relays</a></li><li><a href="http://www.youtube.com/watch?v=c796AtpZEzM">Power Up
-my Apollo Guidance Computer Block I hardware copy Apollo 4</a></li><li><a href="http://www.youtube.com/watch?v=lD3vATVgWkY">Apollo
-Computer Physical Implementation Countdown Time Test.</a></li><li><a href="http://www.youtube.com/watch?v=pvLFQ6KZiM8">Apollo
-Computer Block I Physical Implementation Edit Memory Test.</a></li><li><a href="http://www.youtube.com/watch?v=0Xq_I9ylxKg">Apollo
-Computer Physical Implementation Monitoring Memory Counters.</a></li><li>Apollo Computer Physical Implementation&amp;copy. Test some
-functions: <a href="http://www.youtube.com/watch?v=oZlwTtB_Txw">video
-1</a> and <a
-href="http://www.youtube.com/watch?v=YgbQCP_EOvA">video 2</a>.</li></ul><hr style="width: 100%; height: 2px;"><h1><a name=DaveRoberts></a>Dave Roberts's Block II AGC Project<br></h1>
-Dave Roberts made a physical simulation of a Block II AGC, written
-in VHDL for a Xilinx Spartan-3E FPGA.&nbsp; <a
-href="http://opencores.org/websvn,listing,agcnorm">His code can be
-found here</a>.&nbsp; It was apparently, at least partially,
-intended to work with <a
-href="http://www.therpf.com/f11/apollo-lem-5-dsky-agc-188757/">Tony
-David's physical DSKY</a>, about which I know nothing.<br><br>
-Unfortunately, Dave was having some problems with his hardware Block
-II simulator at the time of the last commit (in 2012) of his source
-code as listed above, particularly in regard to the DV instruction.
-He apparently later fixed this DV problem, but the fix never
-migrated online.&nbsp; In point of fact, at that time yaAGC (which
-of course, Dave does not use) also had a number of problems with the
-implementation of the DV instruction, later fixed by Mike Stewart,
-and some of Dave's problem may have related to the Validation Suite
-of AGC code we provide having been in error due to this.<br><ul></ul><hr style="width: 100%; height: 2px;"><h1><a name=Whos_Building_Them></a>Who's Building Them?<br></h1><h2><a name=Alessandro_Cinquemani></a>Alessandro Cinquemani<br></h2>
-Of course, the great thing about these projects is that you can
-start from them and build your own AGC or DSKY.&nbsp; If you have
-done so, feel free to send me some photos and/or descriptions of
-what you've built.&nbsp; Where is <a
-href="http://en.wikipedia.org/wiki/Heathkit">Heathkit</a> when you
-need it?<br><br>
-Alessandro Cinquemani of Aviano, Italy, has sent in the very nifty
-photo (click to enlarge) seen below.<br><br><div style="text-align: center;"> <a href="Alessandro1.jpg"><img
-style="border: 2px solid ; width: 400px; height: 300px;"
-alt="Click to enlarge." src="Alessandro1-reduced.jpg"
-width="400" height="300"></a><br><div style="text-align: left;"> <br>
-As I understand it, here we're seeing the DSKY and CTL modules,
-which Alessandro built by following through on John Pultorak's
-documentation.&nbsp; Alessandro is still working on the MEM and
-PROC modules, but when the AGC is fully operational is
-considering making actual circuit boards.&nbsp; Great job,
-Alessandro!<br><br>
-Alessandro has sent us a whole gallery of photo updates,
-reluctantly down-sampled by me to save some space.&nbsp; He
-tells us (2009-06-17) that he thinks he may be able to finish it
-up in 3-4 months.&nbsp; Click'n'enjoy:<br><br><table summary="" style="text-align: left; width: 100%;"
-cellspacing="2" cellpadding="2" border="0"><tbody><tr><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-01.jpg"><img alt=""
-src="thm-AC-AGC-01.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-03.jpg"><img alt=""
-src="thm-AC-AGC-03.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-05.jpg"><img alt=""
-src="thm-AC-AGC-05.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-06.jpg"><img alt=""
-src="thm-AC-AGC-06.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-07.jpg"><img alt=""
-src="thm-AC-AGC-07.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-09.jpg"><img alt=""
-src="thm-AC-AGC-09.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-10.jpg"><img alt=""
-src="thm-AC-AGC-10.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td></tr><tr><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-12.jpg"><img alt=""
-src="thm-AC-AGC-12.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-13.jpg"><img alt=""
-src="thm-AC-AGC-13.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-14.jpg"><img alt=""
-src="thm-AC-AGC-14.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-15.jpg"><img alt=""
-src="thm-AC-AGC-15.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-16.jpg"><img alt=""
-src="thm-AC-AGC-16.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <a
-href="AC-AGC-17.jpg"><img alt=""
-src="thm-AC-AGC-17.jpg" style="border: 2px solid ;
-width: 200px; height: 150px;" width="200"
-height="150"></a><br></td><td style="vertical-align: top; text-align: center;"> <br></td></tr></tbody></table><br><h2><a name=Bruno_Muller></a>Bruno Muller</h2><p>Bruno Muller has created a physical DSKY that interacts with
-yaAGC via the NASSP plug-in for the Orbiter spacecraft
-simulator.&nbsp; He has made a video and sent me the following
-charming YouTube link:<br></p><p align=center><br><iframe
+                    border="2" height="403" width="302"></a><br>
+                Running with Monitor Board<br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/GOJAM%20control%20signals.jpg"><img
+src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" border="2"
+                    height="403" width="302"></a><br>
+                GOJAM Control Signals<br>
+              </b></td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/start%20vector%201.jpg"><img
+                    src="StevenHauer/small-start%20vector%201.jpg"
+                    alt="" border="2" height="245" width="302"></a><br>
+                Start Vector 1<br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/start%20vector%202.jpg"><img
+                    src="StevenHauer/small-start%20vector%202.jpg"
+                    alt="" border="2" height="287" width="302"></a><br>
+                Start Vector 2<br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/DSKY%20Button%20Wiring.jpg"><img
+                    src="StevenHauer/small%20DSKY%20Button%20Wiring.jpg"
+                    alt="Click to enlarge" border="2" height="403"
+                    width="302"></a><br>
+                DSKY Button Wiring<br>
+              </b></td>
+          </tr>
+          <tr>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/DSKY%20Display%201.jpg"><img
+                    src="StevenHauer/small%20DSKY%20Display%201.jpg"
+                    alt="Click to enlarge" border="2" height="403"
+                    width="372"></a><br>
+              </b><b>DSKY Display 1</b><b><br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/DSKY%20Display%202.jpg"><img
+                    src="StevenHauer/small%20DSKY%20Display%202.jpg"
+                    alt="Click to enlarge" border="2" height="403"
+                    width="302"></a><br>
+                DSKY Display 2<br>
+              </b></td>
+            <td align="center" valign="middle"><b><a
+                  href="StevenHauer/DSKY%20Display%20Test.jpg"><img
+                    src="StevenHauer/small%20DSKY%20Display%20Test.jpg"
+                    alt="Click to enlarge" border="2" height="403"
+                    width="371"></a><br>
+                DSKY Display Test<br>
+              </b></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      &nbsp;<br>
+      <hr size="2">
+      <h1><a name="Dario_Kublers_Apollo_16_AGCDSKY"></a>Dario Kubler's
+        Apollo 16 AGC/DSKY Simulation Project</h1>
+      <img alt="" src="Esplorando.jpg" align="left" height="160"
+        width="160"><a href="Casper.jpg"><img alt=""
+          src="Casper-small.jpg" align="right" border="2" height="160"
+          width="240"></a>Dario was part of a team (largely people
+      from the <a href="http://www.foam13.it/">Fondazione Osservatorio
+        Astronomico M13</a>)<span style="color: rgb(0, 0, 0);
+        font-family: Verdana, Arial, Helvetica, sans-serif; font-size:
+        18px; font-style: normal; font-variant-ligatures: normal;
+        font-variant-caps: normal; font-weight: normal; letter-spacing:
+        normal; orphans: 2; text-align: -webkit-left; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 2;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px;
+        background-color: rgb(255, 255, 255); text-decoration-style:
+        initial; text-decoration-color: initial; display: inline
+        !important; float: none;"></span> that created a 1:1 scale
+      mockup of the Apollo 16 Command Module ("Casper") for 2012
+      exhibition called Esplorando, in Varese, Italy, near Milan.&nbsp;
+      Dario's part of the task was to create a working DSKY, which would
+      be interfaced via bluetooth to a PC running the Artemis AGC
+      program in our yaAGC AGC simulator software.&nbsp; Of course,
+      yaAGC has no direct bluetooth support, but Dario wrote a C++
+      program that interfaced between yaAGC and bluetooth.&nbsp; <br>
+      <br>
+      Apparently, the exhibition went very well.&nbsp; Charlie Duke, the
+      LMP for Apollo 16, was one of the visitors.&nbsp; I'm told that he
+      entered the capsule, played with the AGC/DSKY combo, said that it
+      was very realistic, and passed his compliments to us.&nbsp; So ...
+      thanks, Dario! <br>
+      <br>
+      Actually, there's a YouTube video, with Charlie Duke, of the
+      Casper mockup's unveiling ceremony: <br>
+      <br>
+      <div align="center"><iframe
+          src="https://www.youtube.com/embed/ru33QY_9ZT4"
+          allowfullscreen="" frameborder="0" height="480" width="854"></iframe><br>
+      </div>
+      <br>
+      After Esplorando, the capsule was moved to the flight museum
+      located in the Malpensa International Airport, in Milan.<br>
+      <br>
+      Here's a YouTube link to a short video of Dario's AGC/DSKY combo
+      in operation:<br>
+      <br>
+      <div align="center"><iframe
+          src="https://www.youtube.com/embed/sDMNhPDV5yc"
+          allowfullscreen="" frameborder="0" height="480" width="854">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+        </iframe> </div>
+      <br>
+      Since then, Dario has managed to port yaAGC into an embedded
+      system, based on the PIC32-MZ (a 32-bit MIPS-based MCU), with 2MB
+      of flash memory and 512KB of RAM, using the XC32 gcc-based
+      compiler.&nbsp; Dario himself works at Microchip (the
+      manufacturer) himself, so that seems like a natural progression.<br>
+      <br>
+      <div align="center"><a href="PIC32MZ.jpg"><img alt=""
+            src="thm-PIC32MZ.jpg" border="2" height="400" width="533"></a><br>
+      </div>
+      <br>
+    </div>
+    <hr style="width: 100%; height: 2px;">
+    <h1><a name="Dimitris_Vitoriss_Block_I_and_Block_II"></a>Dimitris
+      Vitoris's Block I and Block II AGC Project<br>
+    </h1>
+    The project of Dimitris ("Jim") Vitoris takes over where John
+    Pultorak's project stops.&nbsp; The project is still in its very
+    first stages, so please don't take any statements made here as
+    commitments!&nbsp; But the basic idea of the project is to be able
+    to create a physical implementation of a Block II AGC and DSKY,
+    which (unlike John Pultorak's Block I AGC above) can be constructed
+    by hobbyists, without requiring the immense skill needed to
+    construct a Pultorak AGC.<br>
+    <br>
+    Here is a <span style="font-style: italic;">very uncertain</span>
+    roadmap of the project.&nbsp; It may be that all of these phases
+    will be completed, or it may be that the project will stop where it
+    is now.&nbsp; Or perhaps some phases might be skipped.&nbsp; There
+    is no timetable.&nbsp; But however it goes, thanks Dimitris!<br>
+    <br>
+    <table summary="" style="text-align: left; width: 100%;"
+      cellpadding="2" cellspacing="2" border="1">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; font-weight: bold;">Project
+            Phase<br>
+          </td>
+          <td style="vertical-align: top; font-weight: bold;">
+            Description<br>
+          </td>
+          <td style="vertical-align: top; font-weight: bold;"> Status<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">A0<br>
+          </td>
+          <td style="vertical-align: top;">Conversion of John Pultorak's
+            Block I AGC design (schematics only!) to <span
+              style="font-weight: bold;">Eagle</span> CAD, with
+            corrections and small improvements.<br>
+          </td>
+          <td style="vertical-align: top;"><span style="font-weight:
+              bold; color: rgb(0, 153, 0);">Ready now!</span><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">A1<br>
+          </td>
+          <td style="vertical-align: top;">A clean restructuring of the
+            Block I design -- for example, with AGC, DSKY, and
+            monitoring busses separated into independent assemblies
+            rather than being a part of one large assembly.<br>
+          </td>
+          <td style="vertical-align: top;"><span style="color: rgb(0,
+              153, 0);">Preliminary data available.&nbsp; (See</span> <a
+              style="color: rgb(0, 153, 0);" href="changes.html">change
+              log</a><span style="color: rgb(0, 153, 0);">.)</span><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">B0<br>
+          </td>
+          <td style="vertical-align: top;">Block II AGC design
+            (schematics and printed-circuit board layout!) using 74xxx
+            TTL logic.<br>
+          </td>
+          <td style="vertical-align: top;">Possible<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">B1<br>
+          </td>
+          <td style="vertical-align: top;">Size reduction of Block II
+            design, using surface-mount parts and FPGAs.<br>
+          </td>
+          <td style="vertical-align: top;">Possible<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">C0<br>
+          </td>
+          <td style="vertical-align: top;">Further, final size reduction
+            of the Block II design, with added Virtual AGC
+            compatibility.&nbsp; (This would mean, for example, that one
+            of Dimitris's physical DSKY could be used with a PC running
+            Virtual AGC.)<br>
+          </td>
+          <td style="vertical-align: top;">Possible<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <div style="text-align: center;"> <a
+        href="DimitrisVitoris/AgcPhysicalImplementation-20090927.zip"> <big>Download
+20090927
+          snapshot now!</big></a><br>
+    </div>
+    <span style="font-family: arial;"><br>
+    </span> The download is a zipfile containing the complete set of
+    materials that have been created by Dimitris so far.<br>
+    <br>
+    Dimitris uses <span style="font-weight: bold;">Eagle</span> CAD for
+    this project (<a href="http://www.cadsoft.de">www.cadsoft.de</a>).&nbsp;
+    <span style="font-weight: bold;">Eagle</span> is a cross-platform
+    program that is available for Linux, Windows, and Mac OS X.&nbsp;
+    While <span style="font-weight: bold;">Eagle</span> is a
+    proprietary program that costs money to purchase, there is a free
+    version that can be used with small designs.&nbsp; I have verified
+    that the free version does allow viewing of the phase A0 schematics
+    on Linux.&nbsp; Unfortunately, although the purely <a
+      href="http://kicad-pcb.org/">open-source KiCad CAD software</a>
+    purports to (and probably does, for all I know) import Eagle CAD
+    projects and schematics, I have found that KiCad 6 will not import
+    these files.<br>
+    <br>
+    Once phase B0 and beyond are reached, it would be valuable to have
+    mechanical design and drawings of things such as DSKYs, enclosures,
+    front panels, and so forth, so that complete physical units can be
+    constructed.&nbsp; Any mechanical engineers who are interested
+    should contact me at the email address at the bottom of this
+    page.&nbsp; Mechanical design of a Block II DSKY in particular would
+    be useful, regardless of the how far Dimitris cares to advance his
+    project.<br>
+    <br>
+    Dimitris has also sent some photos of the physical device he is
+    constructing:<br>
+    <br>
+    <table summary="" style="text-align: left; width: 100%;"
+      cellpadding="2" cellspacing="2" border="1">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; text-align: center;"> <a
+              href="PhysicalFaceplateWorkInProgress.jpg"><img alt=""
+                title="Click to enlarge"
+                src="thumb-PhysicalFaceplateWorkInProgress.jpg"
+                style="border: 2px solid ; width: 400px; height: 300px;"
+                border="0" height="300" width="400"></a><br>
+            <span style="font-style: italic;">The physical faceplate,
+              work in progress!</span><br>
+          </td>
+          <td style="vertical-align: top; text-align: center;"> <a
+              href="CleanDskyFace.jpg"><img title="Click to enlarge."
+                alt="" src="thumb-CleanDskyFace.jpg" style="border: 2px
+                solid ; width: 209px; height: 240px;" border="0"
+                height="240" width="209"></a><br>
+            <span style="font-style: italic;">Cleaned-up stylized
+              drawing<br>
+              from which measurements can<br>
+              be taken.&nbsp; A <a href="DimitrisVitoris/DSKY.cdr">CorelDraw
+                file</a> is also<br>
+              available.<br>
+            </span></td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    Dimitris mentions that his best estimate of the faceplate dimensions
+    is 18.9 cm (7.44 in.) wide and 21.8 cm. (8.58 in.) high, and points
+    out that additional dimensions can be extract from the right-hand
+    drawing above.<br>
+    <br>
+    Incidentally, Dimitris owns various bits and pieces of Block I
+    equipment, and here are some photos he was kind enough to send
+    us.&nbsp; (<br>
+    <br>
+    <table summary="" style="text-align: left; width: 100%;"
+      cellpadding="2" cellspacing="2" border="0">
+      <tbody>
+        <tr align="center">
+          <td style="vertical-align: top;">
+            <table summary="" style="text-align: left; margin-left:
+              auto; margin-right: auto;" title="Block I AGC Logic
+              Module" cellpadding="2" cellspacing="2" border="0">
+              <tbody>
+                <tr>
+                  <td style="text-align: center;"><a href="P9280525.JPG"><img
+                        alt="Block I AGC logic module" title="Click to
+                        enlarge" src="small-P9280525.JPG" style="border:
+                        2px solid ; width: 240px; height: 60px;"
+                        border="0" height="60" width="240"></a><br>
+                  </td>
+                  <td style="text-align: center;"><a href="P9280502.JPG"><img
+                        alt="Block I AGC logic module" title="Click to
+                        enlarge" src="small-P9280502.JPG" style="border:
+                        2px solid ; width: 240px; height: 47px;"
+                        border="0" height="47" width="240"></a><br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <span style="font-style: italic;">Block I AGC Logic Module</span><br>
+            <br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="vertical-align: top;">
+            <table summary="" style="text-align: left; margin-left:
+              auto; margin-right: auto;" cellpadding="2" cellspacing="2"
+              border="0">
+              <tbody>
+                <tr>
+                  <td style="text-align: center;"><a href="P9280496.JPG"><img
+                        alt="Block I AGC rope-memory module"
+                        title="Click to enlarge"
+                        src="small-P9280496.JPG" style="border: 2px
+                        solid ; width: 240px; height: 57px;" border="0"
+                        height="57" width="240"></a><br>
+                  </td>
+                  <td style="text-align: center;"><a href="P9280520.JPG"><img
+                        alt="Block I AGC rope-memory module"
+                        title="Click to enlarge"
+                        src="small-P9280520.JPG" style="border: 2px
+                        solid ; width: 240px; height: 56px;" border="0"
+                        height="56" width="240"></a><br>
+                  </td>
+                  <td style="text-align: center;"><a href="P9280521.JPG"><img
+                        alt="Block I AGC rope-memory module"
+                        title="Click to enlarge"
+                        src="small-P9280521.JPG" style="border: 2px
+                        solid ; width: 240px; height: 58px;" border="0"
+                        height="58" width="240"></a><br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <span style="font-style: italic;">Block I AGC Rope Memory
+              Module</span><br>
+            <br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="vertical-align: top;">
+            <table summary="" style="text-align: left; margin-left:
+              auto; margin-right: auto;" cellpadding="2" cellspacing="2"
+              border="0">
+              <tbody>
+                <tr>
+                  <td style="vertical-align: top; text-align: center;"><a
+                      href="P9280518.JPG"><img alt="Block I DSKY power
+                        supply" title="Click to enlarge"
+                        src="small-P9280518.JPG" style="border: 2px
+                        solid ; width: 213px; height: 160px;" border="0"
+                        height="160" width="213"></a><br>
+                  </td>
+                  <td style="vertical-align: top; text-align: center;"><a
+                      href="P9280518.JPG"><img alt="Block I DSKY power
+                        supply" title="Click to enlarge"
+                        src="small-P9280493.JPG" style="border: 2px
+                        solid ; width: 213px; height: 160px;" border="0"
+                        height="160" width="213"></a><br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <span style="font-style: italic;">Block I DSKY Power Supply</span><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h1><a name="Philip_Schmidts_Block_I_AGC"></a>Philip Schmidt's Block
+      I AGC Project<br>
+    </h1>
+    Philip Schmidt has also been kind enough to let us know about <span
+      style="font-style: italic;">his</span> Block I physical
+    implementation.&nbsp; You can see his write-up of what he's been
+    doing at <a href="http://users.on.net/%7Epcschmidt/AGC/AGCRep.html">his
+own
+      web-page</a>.&nbsp; Phil tells me that he will eventually
+    provide all of the CAD files for his design (in <span
+      style="font-weight: bold;">Altium Designer</span> format), but for
+    right now it's all PDFs while it's a work in progress.<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <h1><a name="JuanJose"></a>Juan Jose's Block I AGC Project, Running
+      SOLARIUM<br>
+    </h1>
+    Juan Jose has built a Block I AGC-plus-DSKY simulator using a
+    Spartan3 (a Xilinx FPGA) board.&nbsp; I don't have too many details
+    about how he did it, though he was kind enough to send our mailing
+    list some nice photos of some of the proto-boards he had added to
+    the basic Spartan3 board.<br>
+    <br>
+    There are also some cute YouTube videos of it in action.&nbsp; Here
+    is his "Block I Flyby" video — the "flyby" being of his contraption,
+    and not of anything in space:<br>
+    <br>
+    <div align="center"><iframe
+        src="https://www.youtube.com/embed/C6fzSQpxJmE"
+        allowfullscreen="" frameborder="0" height="480" width="854"></iframe><br>
+      <br>
+      <br>
+    </div>
+    You can find more by looking at his YouTube user, which is
+    "agcfanatic", but here are a few direct links:<br>
+    <ul>
+      <li><a href="http://www.youtube.com/watch?v=lTQmuC_O1T4">Apollo
+          Computer Physical Implementation Test of DSKY display and
+          C-Relays</a></li>
+      <li><a href="http://www.youtube.com/watch?v=c796AtpZEzM">Power Up
+          my Apollo Guidance Computer Block I hardware copy Apollo 4</a></li>
+      <li><a href="http://www.youtube.com/watch?v=lD3vATVgWkY">Apollo
+          Computer Physical Implementation Countdown Time Test.</a></li>
+      <li><a href="http://www.youtube.com/watch?v=pvLFQ6KZiM8">Apollo
+          Computer Block I Physical Implementation Edit Memory Test.</a></li>
+      <li><a href="http://www.youtube.com/watch?v=0Xq_I9ylxKg">Apollo
+          Computer Physical Implementation Monitoring Memory Counters.</a></li>
+      <li>Apollo Computer Physical Implementation&amp;copy. Test some
+        functions: <a href="http://www.youtube.com/watch?v=oZlwTtB_Txw">video
+          1</a> and <a
+          href="http://www.youtube.com/watch?v=YgbQCP_EOvA">video 2</a>.</li>
+    </ul>
+    <hr style="width: 100%; height: 2px;">
+    <h1><a name="DaveRoberts"></a>Dave Roberts's Block II AGC Project<br>
+    </h1>
+    Dave Roberts made a physical simulation of a Block II AGC, written
+    in VHDL for a Xilinx Spartan-3E FPGA.&nbsp; <a
+      href="http://opencores.org/websvn,listing,agcnorm">His code can be
+      found here</a>.&nbsp; It was apparently, at least partially,
+    intended to work with <a
+      href="http://www.therpf.com/f11/apollo-lem-5-dsky-agc-188757/">Tony
+David's
+      physical DSKY</a>, about which I know nothing.<br>
+    <br>
+    Unfortunately, Dave was having some problems with his hardware Block
+    II simulator at the time of the last commit (in 2012) of his source
+    code as listed above, particularly in regard to the DV instruction.
+    He apparently later fixed this DV problem, but the fix never
+    migrated online.&nbsp; In point of fact, at that time yaAGC (which
+    of course, Dave does not use) also had a number of problems with the
+    implementation of the DV instruction, later fixed by Mike Stewart,
+    and some of Dave's problem may have related to the Validation Suite
+    of AGC code we provide having been in error due to this.<br>
+    <ul>
+    </ul>
+    <hr style="width: 100%; height: 2px;">
+    <h1><a name="Whos_Building_Them"></a>Who's Building Them?<br>
+    </h1>
+    <h2><a name="Alessandro_Cinquemani"></a>Alessandro Cinquemani<br>
+    </h2>
+    Of course, the great thing about these projects is that you can
+    start from them and build your own AGC or DSKY.&nbsp; If you have
+    done so, feel free to send me some photos and/or descriptions of
+    what you've built.&nbsp; Where is <a
+      href="http://en.wikipedia.org/wiki/Heathkit">Heathkit</a> when you
+    need it?<br>
+    <br>
+    Alessandro Cinquemani of Aviano, Italy, has sent in the very nifty
+    photo (click to enlarge) seen below.<br>
+    <br>
+    <div style="text-align: center;"> <a href="Alessandro1.jpg"><img
+          style="border: 2px solid ; width: 400px; height: 300px;"
+          alt="Click to enlarge." src="Alessandro1-reduced.jpg"
+          height="300" width="400"></a><br>
+      <div style="text-align: left;"> <br>
+        As I understand it, here we're seeing the DSKY and CTL modules,
+        which Alessandro built by following through on John Pultorak's
+        documentation.&nbsp; Alessandro is still working on the MEM and
+        PROC modules, but when the AGC is fully operational is
+        considering making actual circuit boards.&nbsp; Great job,
+        Alessandro!<br>
+        <br>
+        Alessandro has sent us a whole gallery of photo updates,
+        reluctantly down-sampled by me to save some space.&nbsp; He
+        tells us (2009-06-17) that he thinks he may be able to finish it
+        up in 3-4 months.&nbsp; Click'n'enjoy:<br>
+        <br>
+        <table summary="" style="text-align: left; width: 100%;"
+          cellpadding="2" cellspacing="2" border="0">
+          <tbody>
+            <tr>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-01.jpg"><img alt=""
+                    src="thm-AC-AGC-01.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-03.jpg"><img alt=""
+                    src="thm-AC-AGC-03.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-05.jpg"><img alt=""
+                    src="thm-AC-AGC-05.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-06.jpg"><img alt=""
+                    src="thm-AC-AGC-06.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-07.jpg"><img alt=""
+                    src="thm-AC-AGC-07.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-09.jpg"><img alt=""
+                    src="thm-AC-AGC-09.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-10.jpg"><img alt=""
+                    src="thm-AC-AGC-10.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-12.jpg"><img alt=""
+                    src="thm-AC-AGC-12.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-13.jpg"><img alt=""
+                    src="thm-AC-AGC-13.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-14.jpg"><img alt=""
+                    src="thm-AC-AGC-14.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-15.jpg"><img alt=""
+                    src="thm-AC-AGC-15.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-16.jpg"><img alt=""
+                    src="thm-AC-AGC-16.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <a
+                  href="AC-AGC-17.jpg"><img alt=""
+                    src="thm-AC-AGC-17.jpg" style="border: 2px solid ;
+                    width: 200px; height: 150px;" height="150"
+                    width="200"></a><br>
+              </td>
+              <td style="vertical-align: top; text-align: center;"> <br>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        <h2><a name="Bruno_Muller"></a>Bruno Muller</h2>
+        <p>Bruno Muller has created a physical DSKY that interacts with
+          yaAGC via the NASSP plug-in for the Orbiter spacecraft
+          simulator.&nbsp; He has made a video and sent me the following
+          charming YouTube link:<br>
+        </p>
+        <p align="center"><br>
+          <iframe
 src="https://www.youtube.com/embed/ecZQtStWviY?feature=player_detailpage"
-allowfullscreen="" width="640" height="360" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;</iframe></p></div></div><hr style="width: 100%; height: 2px;"><h1><a name=Other_></a>Other?<br></h1>
-My personal bias is that I'd prefer it if these materials were
-available for use with a free and open-source CAD system rather than
-proprietary systems such as <span style="font-weight: bold;">Circuitmaker</span>
-and <span style="font-weight: bold;">Eagle</span>. &nbsp; The
-subsequent discontinuation of the <span style="font-weight: bold;">Circuitmaker</span>
-program (mentioned above) puts the problem in stark relief:&nbsp;
-John Pultorak spent a lot of time creating these materials, and yet
-within just a few years nobody will be able even to open the CAD
-files he created.&nbsp; This website deals with things that happened
-(as of this writing) 40 years ago, and I'd like the&nbsp;
-information presented here to still be useful 40 years from now ...
-or 400.&nbsp; But the CAD files have proven to have a shelf-life of
-less than 5!<br><br>
-Such absurd situations should come as no surprise to anybody with
-substantial experience in using electrical CAD systems.&nbsp;
-Speaking from experience, <span style="font-style: italic;">every</span>
-proprietary electrical CAD program is eventually discontinued either
-by virtue of acquisition of the manufacturer or else a strategic
-decision by the manufacturer, and the schematic format is then
-orphaned, usually even without any documentation.&nbsp; Yet I've
-never encountered an electrical designer who had noticed this fact
-or believed it was a problem; instead, CAD software is invariably
-chosen on the basis of whatever features are most convenient to the
-designer at that moment in time. &nbsp; Indeed, I've made such
-selections myself, based on whatever software has the fastest or
-best autorouter.&nbsp; But the autorouter relates only to PCB
-layout, and has essentially no relation to schematic capture, which
-could be done by a separate program from the PCB layout program
-entirely. Schematic capture and PCB layout are interrelated only by
-exchange of netlists and back-annotation info, and the notion that
-the two must be integrated into one program is a fantasy promoted by
-CAD manufacturers and swallowed <span style="font-style: italic;">en
-masse</span> by circuit designers.&nbsp; I'd venture the advice
-that if you're going to use a proprietary CAD program, it's best to
-use one that supports the <span style="font-weight: bold;">Orcad</span>
-file format, and to archive your work in that format, since it's the
-closest thing to a <span style="font-style: italic;">de facto</span>
-standard that exists at the present time.<br><br>
-It would be nice if an open-source CAD tools were used instead, so
-that the schematics, PCB layouts, etc., would be freely editable by
-everybody without purchasing a proprietary tool.&nbsp; If anybody
-wants to convert the CAD files into a more open format, your help
-would be welcomed.&nbsp; Among those who think the way I do, the <a
-href="http://kicad-pcb.org/">open-source KiCad tool</a> seems to
-have currently captured the most mind-share, and if all the cool
-kids are using it, you may as well too!&nbsp; Of course, if you
-absolutely insisted, we'd be happy to have <span
-style="font-weight: bold;">Orcad</span>, or any other format as
-well!&nbsp; I've so far not found an automated tool to perform the
-conversion of <span style="font-weight: bold;">Circuitmaker</span>
-or <span style="font-weight: bold;">Eagle</span> to any other
-format.&nbsp; (If you wanted to write a program that converted <span
-style="font-weight: bold;">Circuitmaker</span> or <span
-style="font-weight: bold;">Eagle</span> files to&nbsp; some open
-format, I'm sure that would be even more valuable than the
-conversion itself.)<br><hr style="width: 100%; height: 2px;"><center> <br><span style="color: rgb(84, 89, 93); font-family: sans-serif;
-font-size: 11.05px; font-style: normal; font-variant: normal;
-font-weight: normal; letter-spacing: normal; line-height:
-16.575px; orphans: auto; text-align: center; text-indent: 0px;
-text-transform: none; white-space: normal; widows: 1;
-word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
-inline !important; float: none; background-color: rgb(255, 255,
-255);"> This page is available under the <a
-href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
-Commons No Rights Reserved License</a></span><br><i><font size="-1">Last modified by <a
-href="mailto:info@sandroid.org">Ronald Burkey</a> on
-2018-11-27.<br><br><a href="http://www.ibiblio.org"><img style="border: 0px solid
-; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-by ibiblio.org" src="hosted.png" width="300" height="100"></a><br></font></i> </center><br></body></html>
+            allowfullscreen="" frameborder="0" height="360" width="640">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;</iframe></p>
+      </div>
+    </div>
+    <hr style="width: 100%; height: 2px;">
+    <h1><a name="Other_"></a>Other?<br>
+    </h1>
+    My personal bias is that I'd prefer it if these materials were
+    available for use with a free and open-source CAD system rather than
+    proprietary systems such as <span style="font-weight: bold;">Circuitmaker</span>
+    and <span style="font-weight: bold;">Eagle</span>. &nbsp; The
+    subsequent discontinuation of the <span style="font-weight: bold;">Circuitmaker</span>
+    program (mentioned above) puts the problem in stark relief:&nbsp;
+    John Pultorak spent a lot of time creating these materials, and yet
+    within just a few years nobody will be able even to open the CAD
+    files he created.&nbsp; This website deals with things that happened
+    (as of this writing) 40 years ago, and I'd like the&nbsp;
+    information presented here to still be useful 40 years from now ...
+    or 400.&nbsp; But the CAD files have proven to have a shelf-life of
+    less than 5!<br>
+    <br>
+    Such absurd situations should come as no surprise to anybody with
+    substantial experience in using electrical CAD systems.&nbsp;
+    Speaking from experience, <span style="font-style: italic;">every</span>
+    proprietary electrical CAD program is eventually discontinued either
+    by virtue of acquisition of the manufacturer or else a strategic
+    decision by the manufacturer, and the schematic format is then
+    orphaned, usually even without any documentation.&nbsp; Yet I've
+    never encountered an electrical designer who had noticed this fact
+    or believed it was a problem; instead, CAD software is invariably
+    chosen on the basis of whatever features are most convenient to the
+    designer at that moment in time. &nbsp; Indeed, I've made such
+    selections myself, based on whatever software has the fastest or
+    best autorouter.&nbsp; But the autorouter relates only to PCB
+    layout, and has essentially no relation to schematic capture, which
+    could be done by a separate program from the PCB layout program
+    entirely. Schematic capture and PCB layout are interrelated only by
+    exchange of netlists and back-annotation info, and the notion that
+    the two must be integrated into one program is a fantasy promoted by
+    CAD manufacturers and swallowed <span style="font-style: italic;">en
+      masse</span> by circuit designers.&nbsp; I'd venture the advice
+    that if you're going to use a proprietary CAD program, it's best to
+    use one that supports the <span style="font-weight: bold;">Orcad</span>
+    file format, and to archive your work in that format, since it's the
+    closest thing to a <span style="font-style: italic;">de facto</span>
+    standard that exists at the present time.<br>
+    <br>
+    It would be nice if an open-source CAD tools were used instead, so
+    that the schematics, PCB layouts, etc., would be freely editable by
+    everybody without purchasing a proprietary tool.&nbsp; If anybody
+    wants to convert the CAD files into a more open format, your help
+    would be welcomed.&nbsp; Among those who think the way I do, the <a
+      href="http://kicad-pcb.org/">open-source KiCad tool</a> seems to
+    have currently captured the most mind-share, and if all the cool
+    kids are using it, you may as well too!&nbsp; Of course, if you
+    absolutely insisted, we'd be happy to have <span
+      style="font-weight: bold;">Orcad</span>, or any other format as
+    well!&nbsp; I've so far not found an automated tool to perform the
+    conversion of <span style="font-weight: bold;">Circuitmaker</span>
+    or <span style="font-weight: bold;">Eagle</span> to any other
+    format.&nbsp; (If you wanted to write a program that converted <span
+      style="font-weight: bold;">Circuitmaker</span> or <span
+      style="font-weight: bold;">Eagle</span> files to&nbsp; some open
+    format, I'm sure that would be even more valuable than the
+    conversion itself.)<br>
+    <hr style="width: 100%; height: 2px;">
+    <center> <br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons
+          No Rights Reserved License</a></span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2019-01-21.<br>
+          <br>
+          <a href="http://www.ibiblio.org"><img style="border: 0px solid
+              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+        </font></i> </center>
+    <br>
+  </body>
+</html>
