@@ -1,0 +1,43 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 29 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 1 3
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 14700 12000 5450 8975
+U 5B8E7731
+F0 "1" 140
+F1 "1006548--p1of2.sch" 140
+F2 "0VDC" U R 20150 16900 140
+F3 "+3VDC" U R 20150 15750 140
+$EndSheet
+$Sheet
+S 24075 11975 5450 8975
+U 5D34B388
+F0 "2" 140
+F1 "1006548--p2of2.sch" 140
+F2 "+3VDC" U L 24075 15750 140
+F3 "0VDC" U L 24075 16900 140
+$EndSheet
+Text Notes 39300 31875 0    250  ~ 50
+LOGIC FLOW "H"
+Text Notes 40830 33105 0    250  ~ 50
+1006548
+Text Notes 38525 32325 0    225  ~ 45
+LOGIC MODULE NO. A30-31
+Wire Wire Line
+	20150 16900 24075 16900
+Wire Wire Line
+	24075 15750 20150 15750
+$EndSCHEMATC

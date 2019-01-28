@@ -1,0 +1,6 @@
+This folder contains the transcription of the original Apollo Program drawing 1006548- to KiCad.  This is the electrical schematic for Block I AGC modules A30-31.  Note that this is a 2-sheet drawing, and that while sheet 1 for a _later_ revision (1006548A) is additionally available, sheet 2 of that later revision is _not_ available.  Accordingly, rev "A" of the schematic has not been transcribed to CAS as of this writing, and the most we can really do with it is to note that the transcribed schematics not the latest revision.
+
+It is perhaps worth noting that the sheet 1 of the transcription was proofed vs sheet 1 of revision 1006548A, and the only mismatches noted were in naming of a handful of AGC4 and AGC5 backplane signals.  No electrical differences within the module were noted.
+
+In addition to the schematics, the transcription process was aided by the signal wiring diagram (drawing 1006128-), which is used to provide the reference designators and input-pin ordering for the NOR gates, since those are not explicitly shown on the schematic.  Since the revision level of the schematic and the wiring diagram match, we would expect there to be no mismatches between the electrical descriptions in the two, and none were noted during the transcription process.
+
