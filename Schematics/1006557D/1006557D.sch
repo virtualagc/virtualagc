@@ -326,7 +326,7 @@ F 0 "J1" H 37450 27475 140 0001 C CNN
 F 1 "ConnectorBlockI" H 37450 27575 140 0001 C CNN
 F 2 "" H 37450 27625 140 0001 C CNN
 F 3 "" H 37450 27625 140 0001 C CNN
-F 4 "069" H 37450 27300 100 0000 C TNB "agc4"
+F 4 "089" H 37450 27300 100 0000 C TNB "agc4"
 F 5 "0VDC" H 37450 27375 140 0001 C BNB "Caption"
 	120  37450 27150
 	1    0    0    -1  
@@ -513,7 +513,7 @@ GATE
 Wire Notes Line style solid
 	37968 1965 43503 1965
 Text Notes 38153 1935 0    140  ~ 28
-B
+D
 Text Notes 38533 1925 0    140  ~ 28
 REVISED PER TDRR 06035
 Wire Notes Line style solid
@@ -529,7 +529,7 @@ Wire Notes Line style solid
 Text Notes 38525 1675 0    140  ~ 28
 REVISED PER TDRR 04523
 Text Notes 38150 1675 0    140  ~ 28
-A
+C
 Text Notes 35225 5200 0    140  ~ 28
 Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program \n   drawing 1006557D. — RSB 2019\n2. The original drawing did not show reference designators or pin numbers \n   for the NOR gates, so this CAD drawing does not show them either.  \n   However, those items were derived instead from the original Apollo \n   signal wiring diagram, 1006137-, and can be accessed by editing the \n   NOR gates within a CAD system. — RSB 2019\n3. The numbered oval pads comprise connector J1. — RSB 2019\n4. Wiring diagram 1006137- indicates that the inputs of gate 77103 are \n   SB0/  and W2TD01, whereas schematic 1006557D (as well as revs "-" \n   through "C") indicate SB0/ and W2TD03.  I interpret this as an error in\n   rev "-" of the wiring diagram. — RSB 2019
 $Bitmap
