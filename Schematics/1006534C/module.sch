@@ -3650,4 +3650,6 @@ Wire Notes Line width 60 style solid
 	23200 21075 23200 20975
 Wire Notes Line width 60 style solid
 	23200 20975 23325 21025
+Text Notes 39625 33100 0    250  ~ 50
+E
 $EndSCHEMATC
