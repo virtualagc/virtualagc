@@ -1,0 +1,5 @@
+This folder contains the transcription of the original Apollo Program drawing 1006534C, along with its child drawings 1006087B and 1006088A, to KiCad.  These are the only revisions of those specific drawings available to us at this writing.  In the case of 1006088A, only those portions of the drawing relevant to its use with 1006534C were transcribed. 
+
+These drawings comprise the electrical schematic for interface modules A19 and A39, for certain early models of the Block I AGC.  Specifically, they relate to AGC models 1003186 MD2 and 1003469-011 MD1 for G&N system configurations -000 and -011 but, I believe, not to higher dash numbers of the G&N system configurations.
+
+The CAD file module.sch is the transcription of 1006534C itself.  It uses two reusable circuit blocks, of type "Y" and "T", whose schematics Y.sch and T.sch are taken from drawings 1006087B and 1006088A, respectively. The original drawing 1006088A contains schematics for additional circuit blocks of type "K" and "R" that are, in fact, not used in this module.  Therefore, their schematic diagrams have been eliminated from T.sch.
