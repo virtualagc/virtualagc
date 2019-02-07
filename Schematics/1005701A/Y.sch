@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 20 40
+Sheet 20 42
 Title ""
 Date ""
 Rev ""
@@ -121,27 +121,27 @@ SCHEMATICS
 Text Notes 36150 1400 2    200  ~ 40
 SYMBOLS
 $Comp
-L AGC_DSKY:Transformer3A T?
+L AGC_DSKY:Transformer3A T201
 U 1 1 5C5F4603
 P 28950 3175
-AR Path="/5C5F3EDA/5C5F4603" Ref="T?"  Part="1" 
+AR Path="/5C5F3EDA/5C5F4603" Ref="T201"  Part="1" 
 AR Path="/5C601720/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C603D9C/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C6053D8/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C606AF2/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C608772/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C60ADF8/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C60DA30/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C611282/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C6155EE/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C619F0C/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C61FAB6/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C626804/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C62DF36/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C63670E/5C5F4603" Ref="T?"  Part="1" 
-AR Path="/5C63FB42/5C5F4603" Ref="T?"  Part="1" 
+AR Path="/5C603D9C/5C5F4603" Ref="T701"  Part="1" 
+AR Path="/5C6053D8/5C5F4603" Ref="T801"  Part="1" 
+AR Path="/5C606AF2/5C5F4603" Ref="T901"  Part="1" 
+AR Path="/5C608772/5C5F4603" Ref="T1001"  Part="1" 
+AR Path="/5C60ADF8/5C5F4603" Ref="T1101"  Part="1" 
+AR Path="/5C60DA30/5C5F4603" Ref="T1201"  Part="1" 
+AR Path="/5C611282/5C5F4603" Ref="T1301"  Part="1" 
+AR Path="/5C6155EE/5C5F4603" Ref="T1401"  Part="1" 
+AR Path="/5C619F0C/5C5F4603" Ref="T1501"  Part="1" 
+AR Path="/5C61FAB6/5C5F4603" Ref="T1601"  Part="1" 
+AR Path="/5C626804/5C5F4603" Ref="T1701"  Part="1" 
+AR Path="/5C62DF36/5C5F4603" Ref="T1801"  Part="1" 
+AR Path="/5C63670E/5C5F4603" Ref="T1901"  Part="1" 
+AR Path="/5C63FB42/5C5F4603" Ref="T2001"  Part="1" 
 AR Path="/5C650CC8/5C5F4603" Ref="T?"  Part="1" 
-F 0 "T?" H 28975 4125 130 0001 C CNN
+F 0 "T2001" H 28975 4125 130 0001 C CNN
 F 1 "2:1" H 28800 2475 130 0000 C CNB
 F 2 "" V 28925 2525 130 0001 C CNN
 F 3 "" V 28925 2525 130 0001 C CNN
@@ -150,27 +150,27 @@ F 4 "T1" H 28950 3825 130 0000 C CNB "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R?
+L AGC_DSKY:Resistor R202
 U 1 1 5C5F62A1
 P 30375 2775
-AR Path="/5C5F3EDA/5C5F62A1" Ref="R?"  Part="1" 
+AR Path="/5C5F3EDA/5C5F62A1" Ref="R202"  Part="1" 
 AR Path="/5C601720/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C603D9C/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C6053D8/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C606AF2/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C608772/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C60ADF8/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C60DA30/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C611282/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C6155EE/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C619F0C/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C61FAB6/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C626804/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C62DF36/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C63670E/5C5F62A1" Ref="R?"  Part="1" 
-AR Path="/5C63FB42/5C5F62A1" Ref="R?"  Part="1" 
+AR Path="/5C603D9C/5C5F62A1" Ref="R702"  Part="1" 
+AR Path="/5C6053D8/5C5F62A1" Ref="R802"  Part="1" 
+AR Path="/5C606AF2/5C5F62A1" Ref="R902"  Part="1" 
+AR Path="/5C608772/5C5F62A1" Ref="R1002"  Part="1" 
+AR Path="/5C60ADF8/5C5F62A1" Ref="R1102"  Part="1" 
+AR Path="/5C60DA30/5C5F62A1" Ref="R1202"  Part="1" 
+AR Path="/5C611282/5C5F62A1" Ref="R1302"  Part="1" 
+AR Path="/5C6155EE/5C5F62A1" Ref="R1402"  Part="1" 
+AR Path="/5C619F0C/5C5F62A1" Ref="R1502"  Part="1" 
+AR Path="/5C61FAB6/5C5F62A1" Ref="R1602"  Part="1" 
+AR Path="/5C626804/5C5F62A1" Ref="R1702"  Part="1" 
+AR Path="/5C62DF36/5C5F62A1" Ref="R1802"  Part="1" 
+AR Path="/5C63670E/5C5F62A1" Ref="R1902"  Part="1" 
+AR Path="/5C63FB42/5C5F62A1" Ref="R2002"  Part="1" 
 AR Path="/5C650CC8/5C5F62A1" Ref="R?"  Part="1" 
-F 0 "R?" H 30350 2600 130 0001 C CNN
+F 0 "R2002" H 30350 2600 130 0001 C CNN
 F 1 "470" H 30375 2950 130 0000 C CNB
 F 2 "" H 30375 2775 130 0001 C CNN
 F 3 "" H 30375 2775 130 0001 C CNN
@@ -205,27 +205,27 @@ Wire Wire Line
 Wire Wire Line
 	29975 2775 29900 2775
 $Comp
-L AGC_DSKY:Resistor R?
+L AGC_DSKY:Resistor R201
 U 1 1 5C5F59B6
 P 29900 3175
-AR Path="/5C5F3EDA/5C5F59B6" Ref="R?"  Part="1" 
+AR Path="/5C5F3EDA/5C5F59B6" Ref="R201"  Part="1" 
 AR Path="/5C601720/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C603D9C/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C6053D8/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C606AF2/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C608772/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C60ADF8/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C60DA30/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C611282/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C6155EE/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C619F0C/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C61FAB6/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C626804/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C62DF36/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C63670E/5C5F59B6" Ref="R?"  Part="1" 
-AR Path="/5C63FB42/5C5F59B6" Ref="R?"  Part="1" 
+AR Path="/5C603D9C/5C5F59B6" Ref="R701"  Part="1" 
+AR Path="/5C6053D8/5C5F59B6" Ref="R801"  Part="1" 
+AR Path="/5C606AF2/5C5F59B6" Ref="R901"  Part="1" 
+AR Path="/5C608772/5C5F59B6" Ref="R1001"  Part="1" 
+AR Path="/5C60ADF8/5C5F59B6" Ref="R1101"  Part="1" 
+AR Path="/5C60DA30/5C5F59B6" Ref="R1201"  Part="1" 
+AR Path="/5C611282/5C5F59B6" Ref="R1301"  Part="1" 
+AR Path="/5C6155EE/5C5F59B6" Ref="R1401"  Part="1" 
+AR Path="/5C619F0C/5C5F59B6" Ref="R1501"  Part="1" 
+AR Path="/5C61FAB6/5C5F59B6" Ref="R1601"  Part="1" 
+AR Path="/5C626804/5C5F59B6" Ref="R1701"  Part="1" 
+AR Path="/5C62DF36/5C5F59B6" Ref="R1801"  Part="1" 
+AR Path="/5C63670E/5C5F59B6" Ref="R1901"  Part="1" 
+AR Path="/5C63FB42/5C5F59B6" Ref="R2001"  Part="1" 
 AR Path="/5C650CC8/5C5F59B6" Ref="R?"  Part="1" 
-F 0 "R?" H 29875 3000 130 0001 C CNN
+F 0 "R2001" H 29875 3000 130 0001 C CNN
 F 1 "51" V 30050 3475 130 0000 C CNB
 F 2 "" H 29900 3175 130 0001 C CNN
 F 3 "" H 29900 3175 130 0001 C CNN
@@ -276,26 +276,26 @@ Y
 Text Notes 35000 3600 0    140  ~ 28
 -----
 $Comp
-L AGC_DSKY:NodeGBody N?
+L AGC_DSKY:NodeGBody N201
 U 1 1 5C64CA26
 P 35450 3975
-AR Path="/5C5F3EDA/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C603D9C/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C6053D8/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C606AF2/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C608772/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C60ADF8/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C60DA30/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C611282/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C6155EE/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C619F0C/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C61FAB6/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C626804/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C62DF36/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C63670E/5C64CA26" Ref="N?"  Part="1" 
-AR Path="/5C63FB42/5C64CA26" Ref="N?"  Part="1" 
+AR Path="/5C5F3EDA/5C64CA26" Ref="N201"  Part="1" 
+AR Path="/5C603D9C/5C64CA26" Ref="N701"  Part="1" 
+AR Path="/5C6053D8/5C64CA26" Ref="N801"  Part="1" 
+AR Path="/5C606AF2/5C64CA26" Ref="N901"  Part="1" 
+AR Path="/5C608772/5C64CA26" Ref="N1001"  Part="1" 
+AR Path="/5C60ADF8/5C64CA26" Ref="N1101"  Part="1" 
+AR Path="/5C60DA30/5C64CA26" Ref="N1201"  Part="1" 
+AR Path="/5C611282/5C64CA26" Ref="N1301"  Part="1" 
+AR Path="/5C6155EE/5C64CA26" Ref="N1401"  Part="1" 
+AR Path="/5C619F0C/5C64CA26" Ref="N1501"  Part="1" 
+AR Path="/5C61FAB6/5C64CA26" Ref="N1601"  Part="1" 
+AR Path="/5C626804/5C64CA26" Ref="N1701"  Part="1" 
+AR Path="/5C62DF36/5C64CA26" Ref="N1801"  Part="1" 
+AR Path="/5C63670E/5C64CA26" Ref="N1901"  Part="1" 
+AR Path="/5C63FB42/5C64CA26" Ref="N2001"  Part="1" 
 AR Path="/5C650CC8/5C64CA26" Ref="N?"  Part="1" 
-F 0 "N?" H 35450 3775 50  0001 C CNN
+F 0 "N2001" H 35450 3775 50  0001 C CNN
 F 1 "NodeGBody" H 35450 3850 50  0001 C CNN
 F 2 "" H 35450 3975 50  0001 C CNN
 F 3 "" H 35450 3975 50  0001 C CNN
@@ -303,26 +303,26 @@ F 3 "" H 35450 3975 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:OvalBody2 X?
+L AGC_DSKY:OvalBody2 X203
 U 1 1 5C64D008
 P 36925 3175
-AR Path="/5C5F3EDA/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C603D9C/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C6053D8/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C606AF2/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C608772/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C60ADF8/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C60DA30/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C611282/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C6155EE/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C619F0C/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C61FAB6/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C626804/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C62DF36/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C63670E/5C64D008" Ref="X?"  Part="1" 
-AR Path="/5C63FB42/5C64D008" Ref="X?"  Part="1" 
+AR Path="/5C5F3EDA/5C64D008" Ref="X203"  Part="1" 
+AR Path="/5C603D9C/5C64D008" Ref="X703"  Part="1" 
+AR Path="/5C6053D8/5C64D008" Ref="X803"  Part="1" 
+AR Path="/5C606AF2/5C64D008" Ref="X903"  Part="1" 
+AR Path="/5C608772/5C64D008" Ref="X1003"  Part="1" 
+AR Path="/5C60ADF8/5C64D008" Ref="X1103"  Part="1" 
+AR Path="/5C60DA30/5C64D008" Ref="X1203"  Part="1" 
+AR Path="/5C611282/5C64D008" Ref="X1303"  Part="1" 
+AR Path="/5C6155EE/5C64D008" Ref="X1403"  Part="1" 
+AR Path="/5C619F0C/5C64D008" Ref="X1503"  Part="1" 
+AR Path="/5C61FAB6/5C64D008" Ref="X1603"  Part="1" 
+AR Path="/5C626804/5C64D008" Ref="X1703"  Part="1" 
+AR Path="/5C62DF36/5C64D008" Ref="X1803"  Part="1" 
+AR Path="/5C63670E/5C64D008" Ref="X1903"  Part="1" 
+AR Path="/5C63FB42/5C64D008" Ref="X2003"  Part="1" 
 AR Path="/5C650CC8/5C64D008" Ref="X?"  Part="1" 
-F 0 "X?" H 36975 2875 140 0001 C CNN
+F 0 "X2003" H 36975 2875 140 0001 C CNN
 F 1 "OvalBody2" H 36925 3475 140 0001 C CNN
 F 2 "" H 36925 3175 140 0001 C CNN
 F 3 "" H 36925 3175 140 0001 C CNN
@@ -330,26 +330,26 @@ F 3 "" H 36925 3175 140 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:OvalBody2 X?
+L AGC_DSKY:OvalBody2 X202
 U 1 1 5C64D5C9
 P 33950 3400
-AR Path="/5C5F3EDA/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C603D9C/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C6053D8/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C606AF2/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C608772/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C60ADF8/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C60DA30/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C611282/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C6155EE/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C619F0C/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C61FAB6/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C626804/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C62DF36/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C63670E/5C64D5C9" Ref="X?"  Part="1" 
-AR Path="/5C63FB42/5C64D5C9" Ref="X?"  Part="1" 
+AR Path="/5C5F3EDA/5C64D5C9" Ref="X202"  Part="1" 
+AR Path="/5C603D9C/5C64D5C9" Ref="X702"  Part="1" 
+AR Path="/5C6053D8/5C64D5C9" Ref="X802"  Part="1" 
+AR Path="/5C606AF2/5C64D5C9" Ref="X902"  Part="1" 
+AR Path="/5C608772/5C64D5C9" Ref="X1002"  Part="1" 
+AR Path="/5C60ADF8/5C64D5C9" Ref="X1102"  Part="1" 
+AR Path="/5C60DA30/5C64D5C9" Ref="X1202"  Part="1" 
+AR Path="/5C611282/5C64D5C9" Ref="X1302"  Part="1" 
+AR Path="/5C6155EE/5C64D5C9" Ref="X1402"  Part="1" 
+AR Path="/5C619F0C/5C64D5C9" Ref="X1502"  Part="1" 
+AR Path="/5C61FAB6/5C64D5C9" Ref="X1602"  Part="1" 
+AR Path="/5C626804/5C64D5C9" Ref="X1702"  Part="1" 
+AR Path="/5C62DF36/5C64D5C9" Ref="X1802"  Part="1" 
+AR Path="/5C63670E/5C64D5C9" Ref="X1902"  Part="1" 
+AR Path="/5C63FB42/5C64D5C9" Ref="X2002"  Part="1" 
 AR Path="/5C650CC8/5C64D5C9" Ref="X?"  Part="1" 
-F 0 "X?" H 34000 3100 140 0001 C CNN
+F 0 "X2002" H 34000 3100 140 0001 C CNN
 F 1 "OvalBody2" H 33950 3700 140 0001 C CNN
 F 2 "" H 33950 3400 140 0001 C CNN
 F 3 "" H 33950 3400 140 0001 C CNN
@@ -357,26 +357,26 @@ F 3 "" H 33950 3400 140 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:OvalBody2 X?
+L AGC_DSKY:OvalBody2 X201
 U 1 1 5C64DBC8
 P 33950 2925
-AR Path="/5C5F3EDA/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C603D9C/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C6053D8/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C606AF2/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C608772/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C60ADF8/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C60DA30/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C611282/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C6155EE/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C619F0C/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C61FAB6/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C626804/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C62DF36/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C63670E/5C64DBC8" Ref="X?"  Part="1" 
-AR Path="/5C63FB42/5C64DBC8" Ref="X?"  Part="1" 
+AR Path="/5C5F3EDA/5C64DBC8" Ref="X201"  Part="1" 
+AR Path="/5C603D9C/5C64DBC8" Ref="X701"  Part="1" 
+AR Path="/5C6053D8/5C64DBC8" Ref="X801"  Part="1" 
+AR Path="/5C606AF2/5C64DBC8" Ref="X901"  Part="1" 
+AR Path="/5C608772/5C64DBC8" Ref="X1001"  Part="1" 
+AR Path="/5C60ADF8/5C64DBC8" Ref="X1101"  Part="1" 
+AR Path="/5C60DA30/5C64DBC8" Ref="X1201"  Part="1" 
+AR Path="/5C611282/5C64DBC8" Ref="X1301"  Part="1" 
+AR Path="/5C6155EE/5C64DBC8" Ref="X1401"  Part="1" 
+AR Path="/5C619F0C/5C64DBC8" Ref="X1501"  Part="1" 
+AR Path="/5C61FAB6/5C64DBC8" Ref="X1601"  Part="1" 
+AR Path="/5C626804/5C64DBC8" Ref="X1701"  Part="1" 
+AR Path="/5C62DF36/5C64DBC8" Ref="X1801"  Part="1" 
+AR Path="/5C63670E/5C64DBC8" Ref="X1901"  Part="1" 
+AR Path="/5C63FB42/5C64DBC8" Ref="X2001"  Part="1" 
 AR Path="/5C650CC8/5C64DBC8" Ref="X?"  Part="1" 
-F 0 "X?" H 34000 2625 140 0001 C CNN
+F 0 "X2001" H 34000 2625 140 0001 C CNN
 F 1 "OvalBody2" H 33950 3225 140 0001 C CNN
 F 2 "" H 33950 2925 140 0001 C CNN
 F 3 "" H 33950 2925 140 0001 C CNN

@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 1 40
+Sheet 1 42
 Title ""
 Date ""
 Rev ""
@@ -38,74 +38,6 @@ Text Notes 40650 33375 2    140  ~ 28
 ______
 Text Notes 39225 32975 2    140  ~ 28
 ______
-Wire Notes Line width 30 style solid
-	33825 20650 41325 20650
-Wire Notes Line width 30 style solid
-	33825 20900 41325 20900
-Wire Notes Line width 30 style solid
-	33825 21150 41325 21150
-Wire Notes Line width 30 style solid
-	33825 21400 41325 21400
-Wire Notes Line width 30 style solid
-	33825 21650 41325 21650
-Wire Notes Line width 30 style solid
-	33825 21900 41325 21900
-Wire Notes Line width 30 style solid
-	33825 22150 41325 22150
-Wire Notes Line width 30 style solid
-	33825 22400 41325 22400
-Wire Notes Line width 30 style solid
-	33825 22650 41325 22650
-Wire Notes Line width 30 style solid
-	33825 22900 41325 22900
-Wire Notes Line width 30 style solid
-	33825 23150 41325 23150
-Wire Notes Line width 30 style solid
-	33825 23400 41325 23400
-Wire Notes Line width 30 style solid
-	33825 23650 41325 23650
-Wire Notes Line width 30 style solid
-	33825 23900 41325 23900
-Wire Notes Line width 30 style solid
-	33825 24150 41325 24150
-Wire Notes Line width 30 style solid
-	33825 24400 41325 24400
-Wire Notes Line width 30 style solid
-	33825 24650 41325 24650
-Wire Notes Line width 30 style solid
-	33825 24900 41325 24900
-Wire Notes Line width 30 style solid
-	33825 25150 41325 25150
-Wire Notes Line width 30 style solid
-	33825 25400 41325 25400
-Wire Notes Line width 30 style solid
-	33825 25650 41325 25650
-Wire Notes Line width 30 style solid
-	33825 20650 33825 25650
-Wire Notes Line width 30 style solid
-	34825 20650 34825 25650
-Wire Notes Line width 30 style solid
-	36725 20650 36725 25650
-Wire Notes Line width 30 style solid
-	38475 20650 38475 25650
-Wire Notes Line width 30 style solid
-	39600 20650 39600 25650
-Wire Notes Line width 30 style solid
-	40475 20650 40475 25650
-Wire Notes Line width 30 style solid
-	41325 20650 41325 25650
-Text Notes 34800 20900 2    140  ~ 28
-REF DES
-Text Notes 36250 20900 2    140  ~ 28
-PART NO.
-Text Notes 38225 20900 2    140  ~ 28
-DESCRIPTION
-Text Notes 39350 20900 2    140  ~ 28
-VALUE
-Text Notes 40200 20900 2    140  ~ 28
-TOL
-Text Notes 41275 20900 2    140  ~ 28
-RATING
 Text Notes 39075 27625 2    140  ~ 28
 REF DWG: INTERFACE MODULE ASSY
 Text Notes 38600 27900 2    140  ~ 28
@@ -116,10 +48,6 @@ Text Notes 1900 28350 2    140  ~ 28
 NOTES
 Text Notes 1775 30525 0    140  ~ 28
 1. INTERPRET DRAWING IN ACCORDANCE WITH\n   STANDARDS PRESCRIBED BY MIL-D-70327\n2. CIRCUIT NUMBERS FOR COMPUTER POSITION  19  ARE PREFIXED B7 71\n3. CIRCUIT NUMBERS FOR COMPUTER POSITION  39  ARE PREFIXED BY 73\n4. UPPER SIGNAL NAME USED IN COMPUTER POSITION 19\n5. LOWER SIGNAL NAME USED IN COMPUTER POSITION 39\n6. UNLESS OTHERWISE SPECIFIED:\n     A. RESISTOR VALUES ARE EXPRESSED IN OHMS\n     B. CAPACITOR VALUES ARE EXPRESSED IN MICROFARADS
-Text Notes 30250 1425 2    200  ~ 40
-SCHEMATICS
-Text Notes 36150 1400 2    200  ~ 40
-SYMBOLS
 $Sheet
 S 4350 2525 1025 1000
 U 5C5F3EDA
@@ -1030,8 +958,8 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text Notes 1300 32275 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD file was transcribed from the original Apollo Program drawing\n   1005701A, but has been divided into 6 separate sheets:  One for the \n   main circuit, and one each for the 5 hierarchical circuit blocks Y, D, T, \n   K, and R.  — RSB 2019
+Text Notes 1325 32725 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD file was transcribed from the original Apollo Program drawing\n   1005701A, but has been divided into 6 separate sheets:  One for the \n   main circuit, and one each for the 5 hierarchical circuit blocks Y, D, T, \n   K, and R.  Only the specific circuitry relevant to the main circuit or the\n   individual circuit blocks is shown on its associated CAD drawing.\n   — RSB 2019
 Text GLabel 4875 4025 0    140  Input ~ 28
 G
 Wire Wire Line
@@ -1041,11 +969,11 @@ Wire Wire Line
 Wire Wire Line
 	5650 4025 4875 4025
 Wire Wire Line
-	5375 3025 6025 3025
+	5375 3025 6075 3025
 Wire Wire Line
-	4350 2775 3700 2775
+	4350 2775 3650 2775
 Wire Wire Line
-	4350 3300 3700 3300
+	4350 3300 3650 3300
 Wire Notes Line style solid
 	5825 3025 5575 2950
 Wire Notes Line style solid
@@ -1091,9 +1019,9 @@ Wire Wire Line
 Wire Wire Line
 	5400 4975 6050 4975
 Wire Wire Line
-	4375 4725 3725 4725
+	4375 4725 3675 4725
 Wire Wire Line
-	4375 5250 3725 5250
+	4375 5250 3625 5250
 Wire Notes Line style solid
 	5850 4975 5600 4900
 Wire Notes Line style solid
@@ -1137,11 +1065,11 @@ Wire Wire Line
 Wire Wire Line
 	5675 7950 4900 7950
 Wire Wire Line
-	5400 6950 6050 6950
+	5400 6950 6075 6950
 Wire Wire Line
 	4375 6700 3725 6700
 Wire Wire Line
-	4375 7225 3725 7225
+	4375 7225 3675 7225
 Wire Notes Line style solid
 	5850 6950 5600 6875
 Wire Notes Line style solid
@@ -1187,9 +1115,9 @@ Wire Wire Line
 Wire Wire Line
 	5400 8925 6050 8925
 Wire Wire Line
-	4375 8675 3725 8675
+	4375 8675 3650 8675
 Wire Wire Line
-	4375 9200 3725 9200
+	4375 9200 3675 9200
 Wire Notes Line style solid
 	5850 8925 5600 8850
 Wire Notes Line style solid
@@ -1235,9 +1163,9 @@ Wire Wire Line
 Wire Wire Line
 	5400 10925 6050 10925
 Wire Wire Line
-	4375 10675 3725 10675
+	4375 10675 3650 10675
 Wire Wire Line
-	4375 11200 3725 11200
+	4375 11200 3675 11200
 Wire Notes Line style solid
 	5850 10925 5600 10850
 Wire Notes Line style solid
@@ -1281,11 +1209,9 @@ Wire Wire Line
 Wire Wire Line
 	5650 13900 4875 13900
 Wire Wire Line
-	5375 12900 6025 12900
+	5375 12900 6050 12900
 Wire Wire Line
-	4350 12650 3700 12650
-Wire Wire Line
-	4350 13175 3700 13175
+	4350 13175 3650 13175
 Wire Notes Line style solid
 	5825 12900 5575 12825
 Wire Notes Line style solid
@@ -1329,11 +1255,11 @@ Wire Wire Line
 Wire Wire Line
 	5650 15900 4875 15900
 Wire Wire Line
-	5375 14900 6025 14900
+	5375 14900 6050 14900
 Wire Wire Line
-	4350 14650 3700 14650
+	4350 14650 3625 14650
 Wire Wire Line
-	4350 15175 3700 15175
+	4350 15175 3650 15175
 Wire Notes Line style solid
 	5825 14900 5575 14825
 Wire Notes Line style solid
@@ -1377,11 +1303,11 @@ Wire Wire Line
 Wire Wire Line
 	5650 17875 4875 17875
 Wire Wire Line
-	5375 16875 6025 16875
+	5375 16875 6050 16875
 Wire Wire Line
-	4350 16625 3700 16625
+	4350 16625 3625 16625
 Wire Wire Line
-	4350 17150 3700 17150
+	4350 17150 3650 17150
 Wire Notes Line style solid
 	5825 16875 5575 16800
 Wire Notes Line style solid
@@ -1427,9 +1353,9 @@ Wire Wire Line
 Wire Wire Line
 	5375 18850 6025 18850
 Wire Wire Line
-	4350 18600 3700 18600
+	4350 18600 3625 18600
 Wire Wire Line
-	4350 19125 3700 19125
+	4350 19125 3625 19125
 Wire Notes Line style solid
 	5825 18850 5575 18775
 Wire Notes Line style solid
@@ -1473,11 +1399,11 @@ Wire Wire Line
 Wire Wire Line
 	5625 21875 4850 21875
 Wire Wire Line
-	5350 20875 6000 20875
+	5350 20875 6025 20875
 Wire Wire Line
-	4325 20625 3675 20625
+	4325 20625 3625 20625
 Wire Wire Line
-	4325 21150 3675 21150
+	4325 21150 3625 21150
 Wire Notes Line style solid
 	5800 20875 5550 20800
 Wire Notes Line style solid
@@ -1523,9 +1449,9 @@ Wire Wire Line
 Wire Wire Line
 	5350 22825 6000 22825
 Wire Wire Line
-	4325 22575 3675 22575
+	4325 22575 3625 22575
 Wire Wire Line
-	4325 23100 3675 23100
+	4325 23100 3625 23100
 Wire Notes Line style solid
 	5800 22825 5550 22750
 Wire Notes Line style solid
@@ -1571,9 +1497,9 @@ Wire Wire Line
 Wire Wire Line
 	5350 24825 6000 24825
 Wire Wire Line
-	4325 24575 3675 24575
+	4325 24575 3625 24575
 Wire Wire Line
-	4325 25100 3675 25100
+	4325 25100 3650 25100
 Wire Notes Line style solid
 	5800 24825 5550 24750
 Wire Notes Line style solid
@@ -1617,11 +1543,9 @@ Wire Wire Line
 Wire Wire Line
 	5600 27850 4825 27850
 Wire Wire Line
-	5325 26850 5975 26850
+	5325 26850 6025 26850
 Wire Wire Line
-	4300 26600 3650 26600
-Wire Wire Line
-	4300 27125 3650 27125
+	4300 26600 3625 26600
 Wire Notes Line style solid
 	5775 26850 5525 26775
 Wire Notes Line style solid
@@ -1665,11 +1589,11 @@ Wire Wire Line
 Wire Wire Line
 	11275 4000 10500 4000
 Wire Wire Line
-	11000 3000 11650 3000
+	11000 3000 11725 3000
 Wire Wire Line
-	9975 2750 9325 2750
+	9975 2750 9250 2750
 Wire Wire Line
-	9975 3275 9325 3275
+	9975 3275 9250 3275
 Wire Notes Line style solid
 	11450 3000 11200 2925
 Wire Notes Line style solid
@@ -1713,11 +1637,11 @@ Wire Wire Line
 Wire Wire Line
 	11275 5950 10500 5950
 Wire Wire Line
-	11000 4950 11650 4950
+	11000 4950 11675 4950
 Wire Wire Line
-	9975 4700 9325 4700
+	9975 4700 9250 4700
 Wire Wire Line
-	9975 5225 9325 5225
+	9975 5225 9250 5225
 Wire Notes Line style solid
 	11450 4950 11200 4875
 Wire Notes Line style solid
@@ -1751,7 +1675,7 @@ Wire Wire Line
 Wire Wire Line
 	9825 7725 9700 7725
 Wire Wire Line
-	10000 6950 9325 6950
+	10000 6950 9300 6950
 Wire Notes Line style solid
 	9750 6950 9500 6875
 Wire Notes Line style solid
@@ -1761,7 +1685,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9525 6950 9675 6950
 Wire Wire Line
-	11650 6950 10975 6950
+	11675 6950 10975 6950
 Wire Notes Line style solid
 	11425 6950 11175 6875
 Wire Notes Line style solid
@@ -1788,7 +1712,7 @@ Wire Wire Line
 Wire Wire Line
 	9800 9700 9675 9700
 Wire Wire Line
-	9975 8925 9300 8925
+	9975 8925 9275 8925
 Wire Notes Line style solid
 	9725 8925 9475 8850
 Wire Notes Line style solid
@@ -1798,7 +1722,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9500 8925 9650 8925
 Wire Wire Line
-	11625 8925 10950 8925
+	11675 8925 10950 8925
 Wire Notes Line style solid
 	11400 8925 11150 8850
 Wire Notes Line style solid
@@ -1825,7 +1749,7 @@ Wire Wire Line
 Wire Wire Line
 	9825 11725 9700 11725
 Wire Wire Line
-	10000 10950 9325 10950
+	10000 10950 9275 10950
 Wire Notes Line style solid
 	9750 10950 9500 10875
 Wire Notes Line style solid
@@ -1834,8 +1758,6 @@ Wire Notes Line style solid
 	9500 11025 9750 10950
 Wire Notes Line width 100 style solid
 	9525 10950 9675 10950
-Wire Wire Line
-	11650 10950 10975 10950
 Wire Notes Line style solid
 	11425 10950 11175 10875
 Wire Notes Line style solid
@@ -1845,7 +1767,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	11200 10950 11350 10950
 Wire Wire Line
-	9975 20875 9300 20875
+	9975 20875 9250 20875
 Wire Notes Line style solid
 	9725 20875 9475 20800
 Wire Notes Line style solid
@@ -1855,7 +1777,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9500 20875 9650 20875
 Wire Wire Line
-	11625 20875 10950 20875
+	11675 20875 10950 20875
 Wire Notes Line style solid
 	11375 20875 11125 20800
 Wire Notes Line style solid
@@ -1882,7 +1804,7 @@ F3 "G" I L 9975 13200 140
 F4 "K" O R 10950 12900 140
 $EndSheet
 Wire Wire Line
-	9975 12900 9300 12900
+	9975 12900 9275 12900
 Wire Notes Line style solid
 	9725 12900 9475 12825
 Wire Notes Line style solid
@@ -1892,7 +1814,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9500 12900 9650 12900
 Wire Wire Line
-	11625 12900 10950 12900
+	11675 12900 10950 12900
 Wire Notes Line style solid
 	11375 12900 11125 12825
 Wire Notes Line style solid
@@ -1919,7 +1841,7 @@ F3 "G" I L 9975 15175 140
 F4 "K" O R 10950 14875 140
 $EndSheet
 Wire Wire Line
-	9975 14875 9300 14875
+	9975 14875 9275 14875
 Wire Notes Line style solid
 	9725 14875 9475 14800
 Wire Notes Line style solid
@@ -1929,7 +1851,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9500 14875 9650 14875
 Wire Wire Line
-	11625 14875 10950 14875
+	11675 14875 10950 14875
 Wire Notes Line style solid
 	11375 14875 11125 14800
 Wire Notes Line style solid
@@ -1966,7 +1888,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9500 16875 9650 16875
 Wire Wire Line
-	11625 16875 10950 16875
+	11675 16875 10950 16875
 Wire Notes Line style solid
 	11375 16875 11125 16800
 Wire Notes Line style solid
@@ -1993,7 +1915,7 @@ F3 "G" I L 9975 19175 140
 F4 "K" O R 10950 18875 140
 $EndSheet
 Wire Wire Line
-	9975 18875 9300 18875
+	9975 18875 9250 18875
 Wire Notes Line style solid
 	9725 18875 9475 18800
 Wire Notes Line style solid
@@ -2003,7 +1925,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9500 18875 9650 18875
 Wire Wire Line
-	11625 18875 10950 18875
+	11650 18875 10950 18875
 Wire Notes Line style solid
 	11375 18875 11125 18800
 Wire Notes Line style solid
@@ -2030,7 +1952,7 @@ F3 "G" I L 9975 23150 140
 F4 "K" O R 10950 22850 140
 $EndSheet
 Wire Wire Line
-	9975 22850 9300 22850
+	9975 22850 9225 22850
 Wire Notes Line style solid
 	9725 22850 9475 22775
 Wire Notes Line style solid
@@ -2040,7 +1962,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9500 22850 9650 22850
 Wire Wire Line
-	11625 22850 10950 22850
+	11675 22850 10950 22850
 Wire Notes Line style solid
 	11375 22850 11125 22775
 Wire Notes Line style solid
@@ -2104,7 +2026,7 @@ F4 "G" I L 10000 25150 140
 F5 "H" O R 10975 24825 140
 $EndSheet
 Wire Wire Line
-	10000 24825 9325 24825
+	10000 24825 9275 24825
 Wire Notes Line style solid
 	9750 24825 9500 24750
 Wire Notes Line style solid
@@ -2114,7 +2036,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	9525 24825 9675 24825
 Wire Wire Line
-	11650 24825 10975 24825
+	11700 24825 10975 24825
 Wire Notes Line style solid
 	11400 24825 11150 24750
 Wire Notes Line style solid
@@ -2150,7 +2072,7 @@ F4 "G" I L 15600 25175 140
 F5 "H" O R 16575 24850 140
 $EndSheet
 Wire Wire Line
-	15600 24850 14925 24850
+	15600 24850 14875 24850
 Wire Notes Line style solid
 	15350 24850 15100 24775
 Wire Notes Line style solid
@@ -2160,7 +2082,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15125 24850 15275 24850
 Wire Wire Line
-	17250 24850 16575 24850
+	17300 24850 16575 24850
 Wire Notes Line style solid
 	17000 24850 16750 24775
 Wire Notes Line style solid
@@ -2196,7 +2118,7 @@ F4 "G" I L 15600 23150 140
 F5 "H" O R 16575 22825 140
 $EndSheet
 Wire Wire Line
-	15600 22825 14925 22825
+	15600 22825 14875 22825
 Wire Notes Line style solid
 	15350 22825 15100 22750
 Wire Notes Line style solid
@@ -2206,7 +2128,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15125 22825 15275 22825
 Wire Wire Line
-	17250 22825 16575 22825
+	17300 22825 16575 22825
 Wire Notes Line style solid
 	17000 22825 16750 22750
 Wire Notes Line style solid
@@ -2242,7 +2164,7 @@ F4 "G" I L 15600 21175 140
 F5 "H" O R 16575 20850 140
 $EndSheet
 Wire Wire Line
-	15600 20850 14925 20850
+	15600 20850 14900 20850
 Wire Notes Line style solid
 	15350 20850 15100 20775
 Wire Notes Line style solid
@@ -2288,7 +2210,7 @@ F4 "G" I L 15600 19175 140
 F5 "H" O R 16575 18850 140
 $EndSheet
 Wire Wire Line
-	15600 18850 14925 18850
+	15600 18850 14900 18850
 Wire Notes Line style solid
 	15350 18850 15100 18775
 Wire Notes Line style solid
@@ -2298,7 +2220,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15125 18850 15275 18850
 Wire Wire Line
-	17250 18850 16575 18850
+	17275 18850 16575 18850
 Wire Notes Line style solid
 	17000 18850 16750 18775
 Wire Notes Line style solid
@@ -2334,7 +2256,7 @@ F4 "G" I L 15575 17175 140
 F5 "H" O R 16550 16850 140
 $EndSheet
 Wire Wire Line
-	15575 16850 14900 16850
+	15575 16850 14875 16850
 Wire Notes Line style solid
 	15325 16850 15075 16775
 Wire Notes Line style solid
@@ -2344,7 +2266,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15100 16850 15250 16850
 Wire Wire Line
-	17225 16850 16550 16850
+	17275 16850 16550 16850
 Wire Notes Line style solid
 	16975 16850 16725 16775
 Wire Notes Line style solid
@@ -2390,7 +2312,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15100 14850 15250 14850
 Wire Wire Line
-	17225 14850 16550 14850
+	17300 14850 16550 14850
 Wire Notes Line style solid
 	16975 14850 16725 14775
 Wire Notes Line style solid
@@ -2436,7 +2358,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15125 12875 15275 12875
 Wire Wire Line
-	17250 12875 16575 12875
+	17300 12875 16575 12875
 Wire Notes Line style solid
 	17000 12875 16750 12800
 Wire Notes Line style solid
@@ -2482,7 +2404,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15125 10875 15275 10875
 Wire Wire Line
-	17250 10875 16575 10875
+	17275 10875 16575 10875
 Wire Notes Line style solid
 	17000 10875 16750 10800
 Wire Notes Line style solid
@@ -2518,7 +2440,7 @@ F4 "G" I L 15575 9225 140
 F5 "H" O R 16550 8900 140
 $EndSheet
 Wire Wire Line
-	15575 8900 14900 8900
+	15575 8900 14875 8900
 Wire Notes Line style solid
 	15325 8900 15075 8825
 Wire Notes Line style solid
@@ -2564,7 +2486,7 @@ F4 "G" I L 15575 7225 140
 F5 "H" O R 16550 6900 140
 $EndSheet
 Wire Wire Line
-	15575 6900 14900 6900
+	15575 6900 14875 6900
 Wire Notes Line style solid
 	15325 6900 15075 6825
 Wire Notes Line style solid
@@ -2574,7 +2496,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15100 6900 15250 6900
 Wire Wire Line
-	17225 6900 16550 6900
+	17300 6900 16550 6900
 Wire Notes Line style solid
 	16975 6900 16725 6825
 Wire Notes Line style solid
@@ -2610,7 +2532,7 @@ F4 "G" I L 15575 5250 140
 F5 "H" O R 16550 4925 140
 $EndSheet
 Wire Wire Line
-	15575 4925 14900 4925
+	15575 4925 14875 4925
 Wire Notes Line style solid
 	15325 4925 15075 4850
 Wire Notes Line style solid
@@ -2620,7 +2542,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15100 4925 15250 4925
 Wire Wire Line
-	17225 4925 16550 4925
+	17300 4925 16550 4925
 Wire Notes Line style solid
 	16975 4925 16725 4850
 Wire Notes Line style solid
@@ -2655,8 +2577,6 @@ F3 "P" I L 15600 2650 140
 F4 "G" I L 15600 3300 140
 F5 "H" O R 16575 2975 140
 $EndSheet
-Wire Wire Line
-	15600 2975 14925 2975
 Wire Notes Line style solid
 	15350 2975 15100 2900
 Wire Notes Line style solid
@@ -2666,7 +2586,7 @@ Wire Notes Line style solid
 Wire Notes Line width 100 style solid
 	15125 2975 15275 2975
 Wire Wire Line
-	17250 2975 16575 2975
+	17325 2975 16575 2975
 Wire Notes Line style solid
 	17000 2975 16750 2900
 Wire Notes Line style solid
@@ -2692,19 +2612,1341 @@ Wire Wire Line
 Wire Wire Line
 	15425 3700 15300 3700
 $Sheet
-S 21200 4425 1000 1000
+S 21200 4450 1000 1000
 U 5CD07B23
 F0 "--172" 140
 F1 "R.sch" 140
-F2 "L" I L 21200 4925 140
-F3 "M" O R 22200 4925 140
+F2 "L" I L 21200 4950 140
+F3 "M" O R 22200 4950 140
 $EndSheet
 $Sheet
-S 21225 6375 1000 1000
+S 21225 6400 1000 1000
 U 5CD2CBE0
 F0 "--173" 140
 F1 "R.sch" 140
-F2 "L" I L 21225 6875 140
-F3 "M" O R 22225 6875 140
+F2 "L" I L 21225 6900 140
+F3 "M" O R 22225 6900 140
 $EndSheet
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 52 1 5C5C5AB0
+P 9000 8925
+F 0 "J1" H 9000 9250 140 0001 C CNN
+F 1 "ConnectorGeneric" H 9000 9350 140 0001 C CNN
+F 2 "" H 9000 9400 140 0001 C CNN
+F 3 "" H 9000 9400 140 0001 C CNN
+F 4 "DE004" H 9000 9150 140 0000 C BNB "Caption"
+F 5 "DE040" H 9000 8700 140 0000 C TNB "Caption2"
+	52   9000 8925
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 53 1 5C5C5AB1
+P 11950 10950
+F 0 "J1" H 11950 11275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 11375 140 0001 C CNN
+F 2 "" H 11950 11425 140 0001 C CNN
+F 3 "" H 11950 11425 140 0001 C CNN
+F 4 "IN2-14" H 11975 11225 140 0000 C BNB "Caption"
+F 5 "IN0-12" H 11950 10725 140 0000 C TNB "Caption2"
+	53   11950 10950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 50 1 5C5C5AB2
+P 9025 6950
+F 0 "J1" H 9025 7275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 9025 7375 140 0001 C CNN
+F 2 "" H 9025 7425 140 0001 C CNN
+F 3 "" H 9025 7425 140 0001 C CNN
+F 4 "DE007" H 9025 7175 140 0000 C BNB "Caption"
+F 5 "DE060" H 9025 6725 140 0000 C TNB "Caption2"
+	50   9025 6950
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 51 1 5C5C5AB3
+P 11950 8925
+F 0 "J1" H 11950 9250 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 9350 140 0001 C CNN
+F 2 "" H 11950 9400 140 0001 C CNN
+F 3 "" H 11950 9400 140 0001 C CNN
+F 4 "IN2-7" H 11950 9150 140 0000 C BNB "Caption"
+F 5 "IN0-11" H 11950 8700 140 0000 C TNB "Caption2"
+	51   11950 8925
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 56 1 5C5C5AB4
+P 8950 22850
+F 0 "J1" H 8950 23175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 8950 23275 140 0001 C CNN
+F 2 "" H 8950 23325 140 0001 C CNN
+F 3 "" H 8950 23325 140 0001 C CNN
+F 4 "KE205" H 8950 23075 140 0000 C BNB "Caption"
+F 5 "KE210" H 8950 22625 140 0000 C TNB "Caption2"
+	56   8950 22850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 57 1 5C5C5AB5
+P 11950 12900
+F 0 "J1" H 11950 13225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 13325 140 0001 C CNN
+F 2 "" H 11950 13375 140 0001 C CNN
+F 3 "" H 11950 13375 140 0001 C CNN
+F 4 "IN0-6" H 11950 13125 140 0000 C BNB "Caption"
+F 5 "STRT1" H 11950 12675 140 0000 C TNB "Caption2"
+	57   11950 12900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 54 1 5C5C5AB6
+P 9000 10950
+F 0 "J1" H 9000 11275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 9000 11375 140 0001 C CNN
+F 2 "" H 9000 11425 140 0001 C CNN
+F 3 "" H 9000 11425 140 0001 C CNN
+F 4 "DE005" H 9025 11225 140 0000 C BNB "Caption"
+F 5 "DE058" H 9000 10725 140 0000 C TNB "Caption2"
+	54   9000 10950
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 55 1 5C5C5AB7
+P 11950 22850
+F 0 "J1" H 11950 23175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 23275 140 0001 C CNN
+F 2 "" H 11950 23325 140 0001 C CNN
+F 3 "" H 11950 23325 140 0001 C CNN
+F 4 "IN0-5" H 11950 23075 140 0000 C BNB "Caption"
+F 5 "IN3-15" H 11950 22625 140 0000 C TNB "Caption2"
+	55   11950 22850
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 58 1 5C5C5AB8
+P 9000 12900
+F 0 "J1" H 9000 13225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 9000 13325 140 0001 C CNN
+F 2 "" H 9000 13375 140 0001 C CNN
+F 3 "" H 9000 13375 140 0001 C CNN
+F 4 "KE246" H 9000 13125 140 0000 C BNB "Caption"
+F 5 "NC" H 9000 12675 140 0000 C TNB "Caption2"
+	58   9000 12900
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 59 1 5C5C5AB9
+P 11950 14875
+F 0 "J1" H 11950 15200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 15300 140 0001 C CNN
+F 2 "" H 11950 15350 140 0001 C CNN
+F 3 "" H 11950 15350 140 0001 C CNN
+F 4 "IN0-1" H 11950 15100 140 0000 C BNB "Caption"
+F 5 "KYRST2" H 11950 14650 140 0000 C TNB "Caption2"
+	59   11950 14875
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 8 1 5C5C5ABA
+P 6325 8925
+F 0 "J1" H 6325 9250 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6325 9350 140 0001 C CNN
+F 2 "" H 6325 9400 140 0001 C CNN
+F 3 "" H 6325 9400 140 0001 C CNN
+F 4 "IN2-10" H 6325 9150 140 0000 C BNB "Caption"
+F 5 "C46P" H 6325 8700 140 0000 C TNB "Caption2"
+	8    6325 8925
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 9 1 5C5C5ABB
+P 3400 9200
+F 0 "J1" H 3400 9525 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3400 9625 140 0001 C CNN
+F 2 "" H 3400 9675 140 0001 C CNN
+F 3 "" H 3400 9675 140 0001 C CNN
+F 4 "YE124R" H 3450 8775 140 0000 C BNB "Caption"
+F 5 "YG136R" H 3450 8725 140 0000 C TNB "Caption2"
+	9    3400 9200
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 4 1 5C5C5ABC
+P 3375 3300
+F 0 "J1" H 3375 3625 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 3725 140 0001 C CNN
+F 2 "" H 3375 3775 140 0001 C CNN
+F 3 "" H 3375 3775 140 0001 C CNN
+F 4 "YE183R" H 3450 2875 140 0000 C BNB "Caption"
+F 5 "YG133R" H 3450 2825 140 0000 C TNB "Caption2"
+	4    3375 3300
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 5 1 5C5C5ABD
+P 6350 3025
+F 0 "J1" H 6350 3350 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6350 3450 140 0001 C CNN
+F 2 "" H 6350 3500 140 0001 C CNN
+F 3 "" H 6350 3500 140 0001 C CNN
+F 4 "IN3-11" H 6350 3250 140 0000 C BNB "Caption"
+F 5 "C44M" H 6350 2800 140 0000 C TNB "Caption2"
+	5    6350 3025
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 6 1 5C5C5ABE
+P 3375 2775
+F 0 "J1" H 3375 3100 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 3200 140 0001 C CNN
+F 2 "" H 3375 3250 140 0001 C CNN
+F 3 "" H 3375 3250 140 0001 C CNN
+F 4 "YE183S" H 3350 3225 140 0000 C BNB "Caption"
+F 5 "YG133S" H 3375 3175 140 0000 C TNB "Caption2"
+	6    3375 2775
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 7 1 5C5C5ABF
+P 3375 8675
+F 0 "J1" H 3375 9000 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 9100 140 0001 C CNN
+F 2 "" H 3375 9150 140 0001 C CNN
+F 3 "" H 3375 9150 140 0001 C CNN
+F 4 "YE124S" H 3450 9100 140 0000 C BNB "Caption"
+F 5 "YG136S" H 3500 9075 140 0000 C TNB "Caption2"
+	7    3375 8675
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 1 1 5C5C5AC0
+P 3400 4725
+F 0 "J1" H 3400 5050 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3400 5150 140 0001 C CNN
+F 2 "" H 3400 5200 140 0001 C CNN
+F 3 "" H 3400 5200 140 0001 C CNN
+F 4 "YE138S" H 3450 5175 140 0000 C BNB "Caption"
+F 5 "YG134S" H 3450 5125 140 0000 C TNB "Caption2"
+	1    3400 4725
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 2 1 5C5C5AC1
+P 6325 4975
+F 0 "J1" H 6325 5300 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6325 5400 140 0001 C CNN
+F 2 "" H 6325 5450 140 0001 C CNN
+F 3 "" H 6325 5450 140 0001 C CNN
+F 4 "IN2-11" H 6325 5200 140 0000 C BNB "Caption"
+F 5 "C45P" H 6325 4750 140 0000 C TNB "Caption2"
+	2    6325 4975
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 3 1 5C5C5AC2
+P 3350 5250
+F 0 "J1" H 3350 5575 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 5675 140 0001 C CNN
+F 2 "" H 3350 5725 140 0001 C CNN
+F 3 "" H 3350 5725 140 0001 C CNN
+F 4 "YE138R" H 3425 4825 140 0000 C BNB "Caption"
+F 5 "YG134R" H 3425 4750 140 0000 C TNB "Caption2"
+	3    3350 5250
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 27 1 5C5C5AC3
+P 3350 21150
+F 0 "J1" H 3350 21475 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 21575 140 0001 C CNN
+F 2 "" H 3350 21625 140 0001 C CNN
+F 3 "" H 3350 21625 140 0001 C CNN
+F 4 "YG025R" H 3450 20775 140 0000 C BNB "Caption"
+F 5 "YG122R" H 3425 20725 140 0000 C TNB "Caption2"
+	27   3350 21150
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 26 1 5C5C5AC4
+P 6300 20875
+F 0 "J1" H 6300 21200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6300 21300 140 0001 C CNN
+F 2 "" H 6300 21350 140 0001 C CNN
+F 3 "" H 6300 21350 140 0001 C CNN
+F 4 "C41SP" H 6300 21100 140 0000 C BNB "Caption"
+F 5 "C51P" H 6300 20650 140 0000 C TNB "Caption2"
+	26   6300 20875
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 25 1 5C5C5AC5
+P 3350 20625
+F 0 "J1" H 3350 20950 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 21050 140 0001 C CNN
+F 2 "" H 3350 21100 140 0001 C CNN
+F 3 "" H 3350 21100 140 0001 C CNN
+F 4 "YG025S" H 3425 21075 140 0000 C BNB "Caption"
+F 5 "YG122S" H 3425 21050 140 0000 C TNB "Caption2"
+	25   3350 20625
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 24 1 5C5C5AC6
+P 3350 14650
+F 0 "J1" H 3350 14975 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 15075 140 0001 C CNN
+F 2 "" H 3350 15125 140 0001 C CNN
+F 3 "" H 3350 15125 140 0001 C CNN
+F 4 "Y-015S" H 3425 15125 140 0000 C BNB "Caption"
+F 5 "YG119S" H 3425 15075 140 0000 C TNB "Caption2"
+	24   3350 14650
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 23 1 5C5C5AC7
+P 6325 14900
+F 0 "J1" H 6325 15225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6325 15325 140 0001 C CNN
+F 2 "" H 6325 15375 140 0001 C CNN
+F 3 "" H 6325 15375 140 0001 C CNN
+F 4 "TLEND" H 6325 15125 140 0000 C BNB "Caption"
+F 5 "C47M" H 6325 14675 140 0000 C TNB "Caption2"
+	23   6325 14900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 22 1 5C5C5AC8
+P 3375 15175
+F 0 "J1" H 3375 15500 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 15600 140 0001 C CNN
+F 2 "" H 3375 15650 140 0001 C CNN
+F 3 "" H 3375 15650 140 0001 C CNN
+F 4 "Y-015R" H 3375 14775 140 0000 C BNB "Caption"
+F 5 "YG119R" H 3375 14725 140 0000 C TNB "Caption2"
+	22   3375 15175
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 21 1 5C5C5AC9
+P 3375 17150
+F 0 "J1" H 3375 17475 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 17575 140 0001 C CNN
+F 2 "" H 3375 17625 140 0001 C CNN
+F 3 "" H 3375 17625 140 0001 C CNN
+F 4 "Y-016R" H 3450 16725 140 0000 C BNB "Caption"
+F 5 "YG120R" H 3450 16675 140 0000 C TNB "Caption2"
+	21   3375 17150
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 20 1 5C5C5ACA
+P 6325 16875
+F 0 "J1" H 6325 17200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6325 17300 140 0001 C CNN
+F 2 "" H 6325 17350 140 0001 C CNN
+F 3 "" H 6325 17350 140 0001 C CNN
+F 4 "TLBSNC" H 6325 17100 140 0000 C BNB "Caption"
+F 5 "C50P" H 6325 16650 140 0000 C TNB "Caption2"
+	20   6325 16875
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 29 1 5C5C5ACB
+P 6300 18850
+F 0 "J1" H 6300 19175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6300 19275 140 0001 C CNN
+F 2 "" H 6300 19325 140 0001 C CNN
+F 3 "" H 6300 19325 140 0001 C CNN
+F 4 "C41S" H 6300 19075 140 0000 C BNB "Caption"
+F 5 "C50M" H 6300 18625 140 0000 C TNB "Caption2"
+	29   6300 18850
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 28 1 5C5C5ACC
+P 3350 19125
+F 0 "J1" H 3350 19450 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 19550 140 0001 C CNN
+F 2 "" H 3350 19600 140 0001 C CNN
+F 3 "" H 3350 19600 140 0001 C CNN
+F 4 "YG024R" H 3475 18700 140 0000 C BNB "Caption"
+F 5 "YG121R" H 3425 18625 140 0000 C TNB "Caption2"
+	28   3350 19125
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 81 1 5C5C5ACD
+P 17550 10875
+F 0 "J1" H 17550 11200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17550 11300 140 0001 C CNN
+F 2 "" H 17550 11350 140 0001 C CNN
+F 3 "" H 17550 11350 140 0001 C CNN
+F 4 "TE220" H 17500 11325 140 0000 C BNB "Caption"
+F 5 "T-234" H 17500 11275 140 0000 C TNB "Caption2"
+	81   17550 10875
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 111 1 5C5C5ACE
+P 11950 20875
+F 0 "J1" H 11950 21200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 21300 140 0001 C CNN
+F 2 "" H 11950 21350 140 0001 C CNN
+F 3 "" H 11950 21350 140 0001 C CNN
+F 4 "IN0-4" H 11950 21100 140 0000 C BNB "Caption"
+F 5 "KYRST1" H 11950 20650 140 0000 C TNB "Caption2"
+	111  11950 20875
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 83 1 5C5C5ACF
+P 14600 16850
+F 0 "J1" H 14600 17175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14600 17275 140 0001 C CNN
+F 2 "" H 14600 17325 140 0001 C CNN
+F 3 "" H 14600 17325 140 0001 C CNN
+F 4 "WOM10" H 14600 17075 140 0000 C BNB "Caption"
+F 5 "RPTLDS" H 14675 16575 140 0000 C TNB "Caption2"
+	83   14600 16850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 82 1 5C5C5AD0
+P 14650 10875
+F 0 "J1" H 14650 11200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14650 11300 140 0001 C CNN
+F 2 "" H 14650 11350 140 0001 C CNN
+F 3 "" H 14650 11350 140 0001 C CNN
+F 4 "WOM07" H 14650 11100 140 0000 C BNB "Caption"
+F 5 "PLDS" H 14600 10600 140 0000 C TNB "Caption2"
+	82   14650 10875
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 85 1 5C5C5AD1
+P 17575 14850
+F 0 "J1" H 17575 15175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17575 15275 140 0001 C CNN
+F 2 "" H 17575 15325 140 0001 C CNN
+F 3 "" H 17575 15325 140 0001 C CNN
+F 4 "TE222" H 17575 15300 140 0000 C BNB "Caption"
+F 5 "TE236" H 17550 15250 140 0000 C TNB "Caption2"
+	85   17575 14850
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 84 1 5C5C5AD2
+P 17550 16850
+F 0 "J1" H 17550 17175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17550 17275 140 0001 C CNN
+F 2 "" H 17550 17325 140 0001 C CNN
+F 3 "" H 17550 17325 140 0001 C CNN
+F 4 "TE223" H 17525 17300 140 0000 C BNB "Caption"
+F 5 "T-237" H 17550 17250 140 0000 C TNB "Caption2"
+	84   17550 16850
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 87 1 5C5C5AD3
+P 14625 20850
+F 0 "J1" H 14625 21175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14625 21275 140 0001 C CNN
+F 2 "" H 14625 21325 140 0001 C CNN
+F 3 "" H 14625 21325 140 0001 C CNN
+F 4 "WOM12" H 14625 21075 140 0000 C BNB "Caption"
+F 5 "PWREFM" H 14725 20575 140 0000 C TNB "Caption2"
+	87   14625 20850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 86 1 5C5C5AD4
+P 14625 14850
+F 0 "J1" H 14625 15175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14625 15275 140 0001 C CNN
+F 2 "" H 14625 15325 140 0001 C CNN
+F 3 "" H 14625 15325 140 0001 C CNN
+F 4 "WOM09" H 14625 15075 140 0000 C BNB "Caption"
+F 5 "WIM03" H 14650 14550 140 0000 C TNB "Caption2"
+	86   14625 14850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 113 1 5C5C5AD5
+P 22650 9600
+F 0 "J1" H 22650 9925 140 0001 C CNN
+F 1 "ConnectorGeneric" H 22650 10025 140 0001 C CNN
+F 2 "" H 22650 10075 140 0001 C CNN
+F 3 "" H 22650 10075 140 0001 C CNN
+F 4 "0VDC" H 21975 9550 140 0000 C BNB "Caption"
+	113  22650 9600
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 88 1 5C5C5AD6
+P 17525 20850
+F 0 "J1" H 17525 21175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17525 21275 140 0001 C CNN
+F 2 "" H 17525 21325 140 0001 C CNN
+F 3 "" H 17525 21325 140 0001 C CNN
+F 4 "TE225" H 17450 21300 140 0000 C BNB "Caption"
+F 5 "TC242" H 17450 21275 140 0000 C TNB "Caption2"
+	88   17525 20850
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 94 1 5C5C5AD7
+P 14600 22825
+F 0 "J1" H 14600 23150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14600 23250 140 0001 C CNN
+F 2 "" H 14600 23300 140 0001 C CNN
+F 3 "" H 14600 23300 140 0001 C CNN
+F 4 "WOM13" H 14600 23050 140 0000 C BNB "Caption"
+F 5 "ACTREQ" H 14700 22550 140 0000 C TNB "Caption2"
+	94   14600 22825
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 34 1 5C5C5AD8
+P 3350 23100
+F 0 "J1" H 3350 23425 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 23525 140 0001 C CNN
+F 2 "" H 3350 23575 140 0001 C CNN
+F 3 "" H 3350 23575 140 0001 C CNN
+F 4 "YG031R" H 3425 22650 140 0000 C BNB "Caption"
+F 5 "YG123R" H 3400 22575 140 0000 C TNB "Caption2"
+	34   3350 23100
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 35 1 5C5C5AD9
+P 6275 22825
+F 0 "J1" H 6275 23150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6275 23250 140 0001 C CNN
+F 2 "" H 6275 23300 140 0001 C CNN
+F 3 "" H 6275 23300 140 0001 C CNN
+F 4 "C56S" H 6275 23050 140 0000 C BNB "Caption"
+F 5 "C51M" H 6275 22600 140 0000 C TNB "Caption2"
+	35   6275 22825
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 36 1 5C5C5ADA
+P 3350 22575
+F 0 "J1" H 3350 22900 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 23000 140 0001 C CNN
+F 2 "" H 3350 23050 140 0001 C CNN
+F 3 "" H 3350 23050 140 0001 C CNN
+F 4 "YG031S" H 3400 23000 140 0000 C BNB "Caption"
+F 5 "YG123S" H 3400 22950 140 0000 C TNB "Caption2"
+	36   3350 22575
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 37 1 5C5C5ADB
+P 8975 2750
+F 0 "J1" H 8975 3075 140 0001 C CNN
+F 1 "ConnectorGeneric" H 8975 3175 140 0001 C CNN
+F 2 "" H 8975 3225 140 0001 C CNN
+F 3 "" H 8975 3225 140 0001 C CNN
+F 4 "YE092" H 8975 3200 140 0000 C BNB "Caption"
+F 5 "YG110S" H 9025 3150 140 0000 C TNB "Caption2"
+	37   8975 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 30 1 5C5C5ADC
+P 3350 18600
+F 0 "J1" H 3350 18925 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 19025 140 0001 C CNN
+F 2 "" H 3350 19075 140 0001 C CNN
+F 3 "" H 3350 19075 140 0001 C CNN
+F 4 "YG024S" H 3600 19025 140 0000 C BNB "Caption"
+F 5 "YG121S" H 3425 18975 140 0000 C TNB "Caption2"
+	30   3350 18600
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 31 1 5C5C5ADD
+P 3350 24575
+F 0 "J1" H 3350 24900 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 25000 140 0001 C CNN
+F 2 "" H 3350 25050 140 0001 C CNN
+F 3 "" H 3350 25050 140 0001 C CNN
+F 4 "YG032S" H 3425 25000 140 0000 C BNB "Caption"
+F 5 "YG108S" H 3425 24975 140 0000 C TNB "Caption2"
+	31   3350 24575
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 32 1 5C5C5ADE
+P 6275 24825
+F 0 "J1" H 6275 25150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6275 25250 140 0001 C CNN
+F 2 "" H 6275 25300 140 0001 C CNN
+F 3 "" H 6275 25300 140 0001 C CNN
+F 4 "C56SP" H 6275 25050 140 0000 C BNB "Caption"
+F 5 "C52P" H 6275 24600 140 0000 C TNB "Caption2"
+	32   6275 24825
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 33 1 5C5C5ADF
+P 3375 25100
+F 0 "J1" H 3375 25425 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 25525 140 0001 C CNN
+F 2 "" H 3375 25575 140 0001 C CNN
+F 3 "" H 3375 25575 140 0001 C CNN
+F 4 "YG032R" H 3475 24625 140 0000 C BNB "Caption"
+F 5 "YG108R" H 3475 24575 140 0000 C TNB "Caption2"
+	33   3375 25100
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 38 1 5C5C5AE0
+P 12000 3000
+F 0 "J1" H 12000 3325 140 0001 C CNN
+F 1 "ConnectorGeneric" H 12000 3425 140 0001 C CNN
+F 2 "" H 12000 3475 140 0001 C CNN
+F 3 "" H 12000 3475 140 0001 C CNN
+F 4 "IN0-9" H 12000 3225 140 0000 C BNB "Caption"
+F 5 "C53P" H 12000 2775 140 0000 C TNB "Caption2"
+	38   12000 3000
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 39 1 5C5C5AE1
+P 8975 3275
+F 0 "J1" H 8975 3600 140 0001 C CNN
+F 1 "ConnectorGeneric" H 8975 3700 140 0001 C CNN
+F 2 "" H 8975 3750 140 0001 C CNN
+F 3 "" H 8975 3750 140 0001 C CNN
+F 4 "YE040R" H 9075 2875 140 0000 C BNB "Caption"
+F 5 "YG110R" H 9050 2825 140 0000 C TNB "Caption2"
+	39   8975 3275
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 103 1 5C5C5AE2
+P 23275 4950
+F 0 "J1" H 23275 5275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 23275 5375 140 0001 C CNN
+F 2 "" H 23275 5425 140 0001 C CNN
+F 3 "" H 23275 5425 140 0001 C CNN
+F 4 "RD088" H 23275 5175 140 0000 C BNB "Caption"
+F 5 "RD089" H 23275 4725 140 0000 C TNB "Caption2"
+	103  23275 4950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 101 1 5C5C5AE3
+P 23250 2975
+F 0 "J1" H 23250 3300 140 0001 C CNN
+F 1 "ConnectorGeneric" H 23250 3400 140 0001 C CNN
+F 2 "" H 23250 3450 140 0001 C CNN
+F 3 "" H 23250 3450 140 0001 C CNN
+F 4 "RD086" H 23200 3225 140 0000 C BNB "Caption"
+F 5 "RD087" H 23200 2725 140 0000 C TNB "Caption2"
+	101  23250 2975
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 92 1 5C5C5AE4
+P 17575 24850
+F 0 "J1" H 17575 25175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17575 25275 140 0001 C CNN
+F 2 "" H 17575 25325 140 0001 C CNN
+F 3 "" H 17575 25325 140 0001 C CNN
+F 4 "TE227" H 17550 25300 140 0000 C BNB "Caption"
+F 5 "TC212" H 17575 25275 140 0000 C TNB "Caption2"
+	92   17575 24850
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 93 1 5C5C5AE5
+P 17575 22825
+F 0 "J1" H 17575 23150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17575 23250 140 0001 C CNN
+F 2 "" H 17575 23300 140 0001 C CNN
+F 3 "" H 17575 23300 140 0001 C CNN
+F 4 "TE226" H 17525 23250 140 0000 C BNB "Caption"
+F 5 "TC244" H 17525 23200 140 0000 C TNB "Caption2"
+	93   17575 22825
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 90 1 5C5C5AE6
+P 14625 18850
+F 0 "J1" H 14625 19175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14625 19275 140 0001 C CNN
+F 2 "" H 14625 19325 140 0001 C CNN
+F 3 "" H 14625 19325 140 0001 C CNN
+F 4 "WOM11" H 14625 19075 140 0000 C BNB "Caption"
+F 5 "TCLDS" H 14675 18575 140 0000 C TNB "Caption2"
+	90   14625 18850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 91 1 5C5C5AE7
+P 14600 24850
+F 0 "J1" H 14600 25175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14600 25275 140 0001 C CNN
+F 2 "" H 14600 25325 140 0001 C CNN
+F 3 "" H 14600 25325 140 0001 C CNN
+F 4 "WOM14" H 14600 25075 140 0000 C BNB "Caption"
+F 5 "PWREFN" H 14700 24600 140 0000 C TNB "Caption2"
+	91   14600 24850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 69 1 5C5C5AE8
+P 11975 24825
+F 0 "J1" H 11975 25150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11975 25250 140 0001 C CNN
+F 2 "" H 11975 25300 140 0001 C CNN
+F 3 "" H 11975 25300 140 0001 C CNN
+F 4 "TE214" H 12025 25275 140 0000 C BNB "Caption"
+F 5 "TE228" H 12000 25225 140 0000 C TNB "Caption2"
+	69   11975 24825
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 68 1 5C5C5AE9
+P 11900 26825
+F 0 "J1" H 11900 27150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11900 27250 140 0001 C CNN
+F 2 "" H 11900 27300 140 0001 C CNN
+F 3 "" H 11900 27300 140 0001 C CNN
+F 4 "TE215" H 11875 27275 140 0000 C BNB "Caption"
+F 5 "TE229" H 11850 27200 140 0000 C TNB "Caption2"
+	68   11900 26825
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 80 1 5C5C5AEA
+P 17575 12875
+F 0 "J1" H 17575 13200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17575 13300 140 0001 C CNN
+F 2 "" H 17575 13350 140 0001 C CNN
+F 3 "" H 17575 13350 140 0001 C CNN
+F 4 "TE221" H 17575 13350 140 0000 C BNB "Caption"
+F 5 "T-235" H 17575 13300 140 0000 C TNB "Caption2"
+	80   17575 12875
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 63 1 5C5C5AEB
+P 11925 18875
+F 0 "J1" H 11925 19200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11925 19300 140 0001 C CNN
+F 2 "" H 11925 19350 140 0001 C CNN
+F 3 "" H 11925 19350 140 0001 C CNN
+F 4 "IN0-3" H 11925 19100 140 0000 C BNB "Caption"
+F 5 "LTRST" H 11925 18650 140 0000 C TNB "Caption2"
+	63   11925 18875
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 62 1 5C5C5AEC
+P 9025 16875
+F 0 "J1" H 9025 17200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 9025 17300 140 0001 C CNN
+F 2 "" H 9025 17350 140 0001 C CNN
+F 3 "" H 9025 17350 140 0001 C CNN
+F 4 "KE202" H 9025 17100 140 0000 C BNB "Caption"
+F 5 "K-207" H 9025 16650 140 0000 C TNB "Caption2"
+	62   9025 16875
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 61 1 5C5C5AED
+P 11950 16875
+F 0 "J1" H 11950 17200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 17300 140 0001 C CNN
+F 2 "" H 11950 17350 140 0001 C CNN
+F 3 "" H 11950 17350 140 0001 C CNN
+F 4 "IN0-2" H 11950 17100 140 0000 C BNB "Caption"
+F 5 "ALTST" H 11950 16650 140 0000 C TNB "Caption2"
+	61   11950 16875
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 60 1 5C5C5AEE
+P 9000 14875
+F 0 "J1" H 9000 15200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 9000 15300 140 0001 C CNN
+F 2 "" H 9000 15350 140 0001 C CNN
+F 3 "" H 9000 15350 140 0001 C CNN
+F 4 "KE201" H 9000 15100 140 0000 C BNB "Caption"
+F 5 "K-206" H 9000 14650 140 0000 C TNB "Caption2"
+	60   9000 14875
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 67 1 5C5C5AEF
+P 9025 26825
+F 0 "J1" H 9025 27150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 9025 27250 140 0001 C CNN
+F 2 "" H 9025 27300 140 0001 C CNN
+F 3 "" H 9025 27300 140 0001 C CNN
+F 4 "WOM02" H 9025 27050 140 0000 C BNB "Caption"
+F 5 "WIM01" H 9025 26600 140 0000 C TNB "Caption2"
+	67   9025 26825
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 66 1 5C5C5AF0
+P 8975 20875
+F 0 "J1" H 8975 21200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 8975 21300 140 0001 C CNN
+F 2 "" H 8975 21350 140 0001 C CNN
+F 3 "" H 8975 21350 140 0001 C CNN
+F 4 "KE204" H 8975 21100 140 0000 C BNB "Caption"
+F 5 "K-209" H 8975 20650 140 0000 C TNB "Caption2"
+	66   8975 20875
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 65 1 5C5C5AF1
+P 22650 10875
+F 0 "J1" H 22650 11200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 22650 11300 140 0001 C CNN
+F 2 "" H 22650 11350 140 0001 C CNN
+F 3 "" H 22650 11350 140 0001 C CNN
+F 4 "BPLUSB" H 21850 10800 140 0000 C BNB "Caption"
+	65   22650 10875
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 64 1 5C5C5AF2
+P 8975 18875
+F 0 "J1" H 8975 19200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 8975 19300 140 0001 C CNN
+F 2 "" H 8975 19350 140 0001 C CNN
+F 3 "" H 8975 19350 140 0001 C CNN
+F 4 "KE203" H 8975 19100 140 0000 C BNB "Caption"
+F 5 "K-208" H 8975 18650 140 0000 C TNB "Caption2"
+	64   8975 18875
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 89 1 5C5C5AF3
+P 17550 18850
+F 0 "J1" H 17550 19175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17550 19275 140 0001 C CNN
+F 2 "" H 17550 19325 140 0001 C CNN
+F 3 "" H 17550 19325 140 0001 C CNN
+F 4 "TE224" H 17550 19300 140 0000 C BNB "Caption"
+F 5 "T-238" H 17550 19250 140 0000 C TNB "Caption2"
+	89   17550 18850
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 18 1 5C5C5AF4
+P 3375 10675
+F 0 "J1" H 3375 11000 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 11100 140 0001 C CNN
+F 2 "" H 3375 11150 140 0001 C CNN
+F 3 "" H 3375 11150 140 0001 C CNN
+F 4 "YG132S" H 3450 11150 140 0000 C BNB "Caption"
+F 5 "YG137S" H 3425 11100 140 0000 C TNB "Caption2"
+	18   3375 10675
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 19 1 5C5C5AF5
+P 3350 16625
+F 0 "J1" H 3350 16950 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 17050 140 0001 C CNN
+F 2 "" H 3350 17100 140 0001 C CNN
+F 3 "" H 3350 17100 140 0001 C CNN
+F 4 "Y-016S" H 3375 17075 140 0000 C BNB "Caption"
+F 5 "YG120S" H 3400 17025 140 0000 C TNB "Caption2"
+	19   3350 16625
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 16 1 5C5C5AF6
+P 3400 11200
+F 0 "J1" H 3400 11525 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3400 11625 140 0001 C CNN
+F 2 "" H 3400 11675 140 0001 C CNN
+F 3 "" H 3400 11675 140 0001 C CNN
+F 4 "YG132R" H 3450 10800 140 0000 C BNB "Caption"
+F 5 "YG137R" H 3450 10750 140 0000 C TNB "Caption2"
+	16   3400 11200
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 17 1 5C5C5AF7
+P 6325 10925
+F 0 "J1" H 6325 11250 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6325 11350 140 0001 C CNN
+F 2 "" H 6325 11400 140 0001 C CNN
+F 3 "" H 6325 11400 140 0001 C CNN
+F 4 "C44P" H 6325 11150 140 0000 C BNB "Caption"
+F 5 "C46M" H 6325 10700 140 0000 C TNB "Caption2"
+	17   6325 10925
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 14 1 5C5C5AF8
+P 6325 12900
+F 0 "J1" H 6325 13225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6325 13325 140 0001 C CNN
+F 2 "" H 6325 13375 140 0001 C CNN
+F 3 "" H 6325 13375 140 0001 C CNN
+F 4 "TLSTRT" H 6325 13125 140 0000 C BNB "Caption"
+F 5 "C47P" H 6325 12675 140 0000 C TNB "Caption2"
+	14   6325 12900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 15 1 5C5C5AF9
+P 3375 13175
+F 0 "J1" H 3375 13500 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 13600 140 0001 C CNN
+F 2 "" H 3375 13650 140 0001 C CNN
+F 3 "" H 3375 13650 140 0001 C CNN
+F 4 "Y-014R" H 3425 12775 140 0000 C BNB "Caption"
+F 5 "YG118R" H 3400 12725 140 0000 C TNB "Caption2"
+	15   3375 13175
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 12 1 5C5C5AFA
+P 3450 6700
+F 0 "J1" H 3450 7025 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3450 7125 140 0001 C CNN
+F 2 "" H 3450 7175 140 0001 C CNN
+F 3 "" H 3450 7175 140 0001 C CNN
+F 4 "YE141S" H 3425 7150 140 0000 C BNB "Caption"
+F 5 "YG135S" H 3425 7100 140 0000 C TNB "Caption2"
+	12   3450 6700
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 13 1 5C5C5AFB
+P 3400 12650
+F 0 "J1" H 3400 12975 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3400 13075 140 0001 C CNN
+F 2 "" H 3400 13125 140 0001 C CNN
+F 3 "" H 3400 13125 140 0001 C CNN
+F 4 "Y-014S" H 3450 13125 140 0000 C BNB "Caption"
+F 5 "YG118S" H 3400 13075 140 0000 C TNB "Caption2"
+	13   3400 12650
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 10 1 5C5C5AFC
+P 3400 7225
+F 0 "J1" H 3400 7550 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3400 7650 140 0001 C CNN
+F 2 "" H 3400 7700 140 0001 C CNN
+F 3 "" H 3400 7700 140 0001 C CNN
+F 4 "YE141R" H 3425 6825 140 0000 C BNB "Caption"
+F 5 "YG135R" H 3425 6775 140 0000 C TNB "Caption2"
+	10   3400 7225
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 11 1 5C5C5AFD
+P 6350 6950
+F 0 "J1" H 6350 7275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6350 7375 140 0001 C CNN
+F 2 "" H 6350 7425 140 0001 C CNN
+F 3 "" H 6350 7425 140 0001 C CNN
+F 4 "IN2-12" H 6350 7175 140 0000 C BNB "Caption"
+F 5 "C45M" H 6350 6725 140 0000 C TNB "Caption2"
+	11   6350 6950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 79 1 5C5C5AFF
+P 14650 12875
+F 0 "J1" H 14650 13200 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14650 13300 140 0001 C CNN
+F 2 "" H 14650 13350 140 0001 C CNN
+F 3 "" H 14650 13350 140 0001 C CNN
+F 4 "WOM08" H 14650 13100 140 0000 C BNB "Caption"
+F 5 "CTRLDS" H 14700 12600 140 0000 C TNB "Caption2"
+	79   14650 12875
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 70 1 5C5C5B00
+P 9000 24825
+F 0 "J1" H 9000 25150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 9000 25250 140 0001 C CNN
+F 2 "" H 9000 25300 140 0001 C CNN
+F 3 "" H 9000 25300 140 0001 C CNN
+F 4 "WOM01" H 9000 25050 140 0000 C BNB "Caption"
+F 5 "WOM16" H 9000 24600 140 0000 C TNB "Caption2"
+	70   9000 24825
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 71 1 5C5C5B01
+P 14600 4925
+F 0 "J1" H 14600 5250 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14600 5350 140 0001 C CNN
+F 2 "" H 14600 5400 140 0001 C CNN
+F 3 "" H 14600 5400 140 0001 C CNN
+F 4 "WOM04" H 14600 5150 140 0000 C BNB "Caption"
+F 5 "WIM04" H 14600 4700 140 0000 C TNB "Caption2"
+	71   14600 4925
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 72 1 5C5C5B02
+P 17575 4925
+F 0 "J1" H 17575 5250 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17575 5350 140 0001 C CNN
+F 2 "" H 17575 5400 140 0001 C CNN
+F 3 "" H 17575 5400 140 0001 C CNN
+F 4 "TE217" H 17600 5375 140 0000 C BNB "Caption"
+F 5 "TE231" H 17550 5325 140 0000 C TNB "Caption2"
+	72   17575 4925
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 73 1 5C5C5B03
+P 17600 2975
+F 0 "J1" H 17600 3300 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17600 3400 140 0001 C CNN
+F 2 "" H 17600 3450 140 0001 C CNN
+F 3 "" H 17600 3450 140 0001 C CNN
+F 4 "TE216" H 17575 3450 140 0000 C BNB "Caption"
+F 5 "TE230" H 17575 3400 140 0000 C TNB "Caption2"
+	73   17600 2975
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 74 1 5C5C5B04
+P 14650 2975
+F 0 "J1" H 14650 3300 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14650 3400 140 0001 C CNN
+F 2 "" H 14650 3450 140 0001 C CNN
+F 3 "" H 14650 3450 140 0001 C CNN
+F 4 "WOM03" H 14650 3200 140 0000 C BNB "Caption"
+F 5 "WIM02" H 14650 2750 140 0000 C TNB "Caption2"
+	74   14650 2975
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 75 1 5C5C5B05
+P 14600 8900
+F 0 "J1" H 14600 9225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14600 9325 140 0001 C CNN
+F 2 "" H 14600 9375 140 0001 C CNN
+F 3 "" H 14600 9375 140 0001 C CNN
+F 4 "WOM06" H 14625 9150 140 0000 C BNB "Caption"
+F 5 "SCALDS" H 14650 8650 140 0000 C TNB "Caption2"
+	75   14600 8900
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 76 1 5C5C5B06
+P 17500 8900
+F 0 "J1" H 17500 9225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17500 9325 140 0001 C CNN
+F 2 "" H 17500 9375 140 0001 C CNN
+F 3 "" H 17500 9375 140 0001 C CNN
+F 4 "TE219" H 17375 9350 140 0000 C BNB "Caption"
+F 5 "T-233" H 17375 9325 140 0000 C TNB "Caption2"
+	76   17500 8900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 77 1 5C5C5B07
+P 17575 6900
+F 0 "J1" H 17575 7225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 17575 7325 140 0001 C CNN
+F 2 "" H 17575 7375 140 0001 C CNN
+F 3 "" H 17575 7375 140 0001 C CNN
+F 4 "TE218" H 17575 7350 140 0000 C BNB "Caption"
+F 5 "TE232" H 17550 7300 140 0000 C TNB "Caption2"
+	77   17575 6900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 49 1 5C5C5B08
+P 11950 6950
+F 0 "J1" H 11950 7275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 7375 140 0001 C CNN
+F 2 "" H 11950 7425 140 0001 C CNN
+F 3 "" H 11950 7425 140 0001 C CNN
+F 4 "IN2-5" H 11950 7175 140 0000 C BNB "Caption"
+F 5 "IN0-13" H 11950 6725 140 0000 C TNB "Caption2"
+	49   11950 6950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 48 1 5C5C5B09
+P 23300 6900
+F 0 "J1" H 23300 7225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 23300 7325 140 0001 C CNN
+F 2 "" H 23300 7375 140 0001 C CNN
+F 3 "" H 23300 7375 140 0001 C CNN
+F 4 "RD090" H 23300 7125 140 0000 C BNB "Caption"
+F 5 "RD091" H 23300 6675 140 0000 C TNB "Caption2"
+	48   23300 6900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 45 1 5C5C5B0A
+P 22650 9100
+F 0 "J1" H 22650 9425 140 0001 C CNN
+F 1 "ConnectorGeneric" H 22650 9525 140 0001 C CNN
+F 2 "" H 22650 9575 140 0001 C CNN
+F 3 "" H 22650 9575 140 0001 C CNN
+F 4 "0VDC" H 21975 9000 140 0000 C BNB "Caption"
+	45   22650 9100
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 44 1 5C5C5B0B
+P 8975 4700
+F 0 "J1" H 8975 5025 140 0001 C CNN
+F 1 "ConnectorGeneric" H 8975 5125 140 0001 C CNN
+F 2 "" H 8975 5175 140 0001 C CNN
+F 3 "" H 8975 5175 140 0001 C CNN
+F 4 "YE112S" H 9050 5125 140 0000 C BNB "Caption"
+F 5 "YG111S" H 9025 5075 140 0000 C TNB "Caption2"
+	44   8975 4700
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 47 1 5C5C5B0C
+P 20300 3950
+F 0 "J1" H 20300 4275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 20300 4375 140 0001 C CNN
+F 2 "" H 20300 4425 140 0001 C CNN
+F 3 "" H 20300 4425 140 0001 C CNN
+F 4 "+28COM" H 20125 4225 140 0000 C BNB "Caption"
+F 5 "+28COM" H 20175 3675 140 0000 C TNB "Caption2"
+	47   20300 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 46 1 5C5C5B0D
+P 8975 5225
+F 0 "J1" H 8975 5550 140 0001 C CNN
+F 1 "ConnectorGeneric" H 8975 5650 140 0001 C CNN
+F 2 "" H 8975 5700 140 0001 C CNN
+F 3 "" H 8975 5700 140 0001 C CNN
+F 4 "YE112R" H 9025 4775 140 0000 C BNB "Caption"
+F 5 "YG111R" H 9050 4700 140 0000 C TNB "Caption2"
+	46   8975 5225
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 41 1 5C5C5B0E
+P 6300 26850
+F 0 "J1" H 6300 27175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 6300 27275 140 0001 C CNN
+F 2 "" H 6300 27325 140 0001 C CNN
+F 3 "" H 6300 27325 140 0001 C CNN
+F 4 "IN0-14" H 6325 27100 140 0000 C BNB "Caption"
+F 5 "C52M" H 6300 26625 140 0000 C TNB "Caption2"
+	41   6300 26850
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 40 1 5C5C5B0F
+P 3375 27125
+F 0 "J1" H 3375 27450 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3375 27550 140 0001 C CNN
+F 2 "" H 3375 27600 140 0001 C CNN
+F 3 "" H 3375 27600 140 0001 C CNN
+F 4 "YE035R" H 3475 26725 140 0000 C BNB "Caption"
+F 5 "YG109R" H 3475 26675 140 0000 C TNB "Caption2"
+	40   3375 27125
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 43 1 5C5C5B10
+P 11950 4950
+F 0 "J1" H 11950 5275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 11950 5375 140 0001 C CNN
+F 2 "" H 11950 5425 140 0001 C CNN
+F 3 "" H 11950 5425 140 0001 C CNN
+F 4 "IN0-10" H 11950 5175 140 0000 C BNB "Caption"
+F 5 "C53M" H 11950 4725 140 0000 C TNB "Caption2"
+	43   11950 4950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 42 1 5C5C5B11
+P 3350 26600
+F 0 "J1" H 3350 26925 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3350 27025 140 0001 C CNN
+F 2 "" H 3350 27075 140 0001 C CNN
+F 3 "" H 3350 27075 140 0001 C CNN
+F 4 "YE035S" H 3475 27050 140 0000 C BNB "Caption"
+F 5 "YG109S" H 3475 27000 140 0000 C TNB "Caption2"
+	42   3350 26600
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 78 1 5C5C5AFE
+P 14600 6900
+F 0 "J1" H 14600 7225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 14600 7325 140 0001 C CNN
+F 2 "" H 14600 7375 140 0001 C CNN
+F 3 "" H 14600 7375 140 0001 C CNN
+F 4 "WOM05" H 14600 7125 140 0000 C BNB "Caption"
+F 5 "WIM05" H 14600 6625 140 0000 C TNB "Caption2"
+	78   14600 6900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	14925 2975 15600 2975
+Text GLabel 21200 10875 0    140  Output ~ 0
+P
+Wire Wire Line
+	21200 10875 22375 10875
+Wire Wire Line
+	22375 9600 22050 9600
+Wire Wire Line
+	22050 9600 22050 9325
+Wire Wire Line
+	22050 9100 22375 9100
+Text GLabel 21175 9325 0    140  Output ~ 0
+G
+Wire Wire Line
+	21175 9325 22050 9325
+Connection ~ 22050 9325
+Wire Wire Line
+	22050 9325 22050 9100
+Text Notes 19875 9575 0    140  ~ 28
+ TO ALL\nPOINTS G
+Text Notes 19900 11125 0    140  ~ 28
+ TO ALL\nPOINTS P
+Wire Wire Line
+	22225 6900 23025 6900
+Wire Wire Line
+	22200 4950 23000 4950
+Wire Wire Line
+	22225 2975 22975 2975
+Wire Wire Line
+	21225 6900 20900 6900
+Wire Wire Line
+	20900 6900 20900 4950
+Wire Wire Line
+	20900 2975 21225 2975
+Wire Wire Line
+	20575 3950 20900 3950
+Connection ~ 20900 3950
+Wire Wire Line
+	20900 3950 20900 2975
+Wire Wire Line
+	21200 4950 20900 4950
+Connection ~ 20900 4950
+Wire Wire Line
+	20900 4950 20900 3950
+Wire Wire Line
+	3650 27125 4300 27125
+Wire Wire Line
+	3675 12650 4350 12650
+Wire Wire Line
+	10975 10950 11675 10950
 $EndSCHEMATC
