@@ -1,0 +1,276 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 29 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 4 38
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text Notes 38250 31750 0    236  ~ 47
+FLOW DIAGRAM & SCHEMATIC
+Text Notes 40805 33105 0    250  ~ 50
+1005702
+Text Notes 39350 32475 0    200  ~ 40
+INTERFACE MODULE\n   A20 OR A40
+Text Notes 39350 33375 2    140  ~ 28
+____
+Text Notes 40650 33375 2    140  ~ 28
+______
+Text Notes 39225 32975 2    140  ~ 28
+______
+Text Notes 2025 27150 0    160  ~ 32
+NOTES:
+Text Notes 2550 29375 0    160  ~ 32
+1. INTERPERT DRAWING IN ACCORDANCE WITH STANDARDS PRESCRIBED BY MIL-D-70327\n2. CIRCUIT NUMBERS FOR COMPUTER POSITION A20 ARE PREFIXED BY 72\n3. CIRCUIT NUMBERS FOR COMPUTER POSITION A40 ARE PREFIXED BY 74\n4. UPPER SIGNAL NAME USED IN COMPUTER POSITION A20 AND WILL HAVE B POWER\n5. LOWER SIGNAL NAME USED IN COMPUTER POSITION A40 AND WILL HAVE A POWER\n6. UNLESS OTHERWISE SPECIFIED:\n      A. RESISTOR VALUES ARE EXPRESSED IN OHMS\n      B. CAPACITOR VALUES ARE EXPRESSED IN MICROFARADS
+Text Notes 33325 28125 0    140  ~ 28
+REF DWG: INTERFACE MODULE ASSY A20 OR A40 DWG NO. 1003709
+Wire Notes Line style solid
+	32675 26250 40200 26250
+Wire Notes Line style solid
+	32675 26000 40200 26000
+Wire Notes Line style solid
+	32675 25750 40200 25750
+Wire Notes Line style solid
+	32675 25500 40200 25500
+Wire Notes Line style solid
+	32675 25250 40200 25250
+Wire Notes Line style solid
+	32675 25000 40200 25000
+Wire Notes Line style solid
+	32675 24750 40200 24750
+Wire Notes Line style solid
+	32675 24500 40200 24500
+Wire Notes Line style solid
+	32675 24250 40200 24250
+Wire Notes Line style solid
+	32675 24000 40200 24000
+Wire Notes Line style solid
+	32675 23750 40200 23750
+Wire Notes Line style solid
+	32675 23500 40200 23500
+Wire Notes Line style solid
+	32675 23250 40200 23250
+Wire Notes Line style solid
+	32675 23000 40200 23000
+Wire Notes Line style solid
+	32675 22750 40200 22750
+Wire Notes Line style solid
+	32675 22500 40200 22500
+Wire Notes Line style solid
+	32675 22250 40200 22250
+Wire Notes Line style solid
+	32675 22000 40200 22000
+Wire Notes Line style solid
+	32675 21550 40200 21550
+Wire Notes Line style solid
+	32675 21550 32675 26250
+Wire Notes Line style solid
+	33675 21550 33675 26250
+Wire Notes Line style solid
+	35550 21550 35550 26250
+Wire Notes Line style solid
+	37275 21550 37275 26250
+Wire Notes Line style solid
+	38425 21550 38425 26250
+Wire Notes Line style solid
+	39300 21575 39300 26275
+Wire Notes Line style solid
+	40200 21550 40200 26250
+Text Notes 32725 21900 0    140  ~ 28
+REF DES
+Text Notes 34075 21900 0    140  ~ 28
+PART NO.
+Text Notes 35725 21900 0    140  ~ 28
+DESCRIPTION
+Text Notes 37500 21900 0    140  ~ 28
+VALUE
+Text Notes 38675 21900 0    140  ~ 28
+TOL
+Text Notes 39350 21900 0    140  ~ 28
+RATING
+Text Notes 28025 950  0    200  ~ 40
+SCHEMATIC
+Text Notes 34700 950  0    200  ~ 40
+SYMBOLS
+$Comp
+L AGC_DSKY:Inductor L401
+U 1 1 5C5F7A34
+P 29375 7625
+AR Path="/5C5DFA78/5C5F7A34" Ref="L401"  Part="1" 
+AR Path="/5C62A925/5C5F7A34" Ref="L1201"  Part="1" 
+AR Path="/5C634EFB/5C5F7A34" Ref="L1701"  Part="1" 
+AR Path="/5C644395/5C5F7A34" Ref="L2201"  Part="1" 
+AR Path="/5C644415/5C5F7A34" Ref="L2701"  Part="1" 
+F 0 "L401" H 29325 7825 130 0001 C CNN
+F 1 "100 UH" H 29350 7900 130 0000 C CNB
+F 2 "" H 29325 7825 130 0001 C CNN
+F 3 "" H 29325 7825 130 0001 C CNN
+F 4 "L1" H 29375 7400 130 0000 C CNB "baseRefd"
+	1    29375 7625
+	1    0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor-Polarized C401
+U 1 1 5C5F879B
+P 30275 8700
+AR Path="/5C5DFA78/5C5F879B" Ref="C401"  Part="1" 
+AR Path="/5C62A925/5C5F879B" Ref="C1201"  Part="1" 
+AR Path="/5C634EFB/5C5F879B" Ref="C1701"  Part="1" 
+AR Path="/5C644395/5C5F879B" Ref="C2201"  Part="1" 
+AR Path="/5C644415/5C5F879B" Ref="C2701"  Part="1" 
+F 0 "C401" H 30450 8900 130 0001 C CNN
+F 1 "6.8" H 30625 8375 130 0000 C CNB
+F 2 "" H 30275 9100 130 0001 C CNN
+F 3 "" H 30275 9100 130 0001 C CNN
+F 4 "C1" H 30675 8600 130 0000 C CNB "baseRefd"
+	1    30275 8700
+	-1   0    0    -1  
+$EndComp
+Text HLabel 30775 7625 2    140  Output ~ 28
+F
+Text HLabel 28150 7625 0    140  Input ~ 28
+E
+Text HLabel 30050 9575 0    140  Input ~ 28
+G
+Wire Wire Line
+	28975 7625 28150 7625
+Wire Wire Line
+	29775 7625 30275 7625
+Wire Wire Line
+	30275 7625 30275 8425
+Connection ~ 30275 7625
+Wire Wire Line
+	30275 7625 30775 7625
+Wire Wire Line
+	30275 8950 30275 9575
+Wire Wire Line
+	30275 9575 30050 9575
+Wire Notes Line style solid
+	35425 8150 36400 8150
+Wire Notes Line style solid
+	36400 8150 36400 7150
+Wire Notes Line style solid
+	36400 7150 35425 7150
+Wire Notes Line style solid
+	35425 7150 35425 8150
+Text Notes 34400 7775 0    140  ~ 28
+E
+Text Notes 35825 7450 0    140  ~ 28
+P
+Text Notes 37225 7775 0    140  ~ 28
+F
+Text Notes 35875 8800 0    140  ~ 28
+G
+$Comp
+L AGC_DSKY:NodeGBody N401
+U 1 1 5C5FB1A3
+P 35950 8475
+AR Path="/5C5DFA78/5C5FB1A3" Ref="N401"  Part="1" 
+AR Path="/5C62A925/5C5FB1A3" Ref="N1201"  Part="1" 
+AR Path="/5C634EFB/5C5FB1A3" Ref="N1701"  Part="1" 
+AR Path="/5C644395/5C5FB1A3" Ref="N2201"  Part="1" 
+AR Path="/5C644415/5C5FB1A3" Ref="N2701"  Part="1" 
+F 0 "N401" H 35950 8275 50  0001 C CNN
+F 1 "NodeGBody" H 35950 8350 50  0001 C CNN
+F 2 "" H 35950 8475 50  0001 C CNN
+F 3 "" H 35950 8475 50  0001 C CNN
+	1    35950 8475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:NodeGBody N402
+U 1 1 5C5FB55E
+P 37125 7650
+AR Path="/5C5DFA78/5C5FB55E" Ref="N402"  Part="1" 
+AR Path="/5C62A925/5C5FB55E" Ref="N1202"  Part="1" 
+AR Path="/5C634EFB/5C5FB55E" Ref="N1702"  Part="1" 
+AR Path="/5C644395/5C5FB55E" Ref="N2202"  Part="1" 
+AR Path="/5C644415/5C5FB55E" Ref="N2702"  Part="1" 
+F 0 "N402" H 37125 7450 50  0001 C CNN
+F 1 "NodeGBody" H 37125 7525 50  0001 C CNN
+F 2 "" H 37125 7650 50  0001 C CNN
+F 3 "" H 37125 7650 50  0001 C CNN
+	1    37125 7650
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:OvalBody2 X401
+U 1 1 5C5FB6CE
+P 34500 7650
+AR Path="/5C5DFA78/5C5FB6CE" Ref="X401"  Part="1" 
+AR Path="/5C62A925/5C5FB6CE" Ref="X1201"  Part="1" 
+AR Path="/5C634EFB/5C5FB6CE" Ref="X1701"  Part="1" 
+AR Path="/5C644395/5C5FB6CE" Ref="X2201"  Part="1" 
+AR Path="/5C644415/5C5FB6CE" Ref="X2701"  Part="1" 
+F 0 "X401" H 34550 7350 140 0001 C CNN
+F 1 "OvalBody2" H 34500 7950 140 0001 C CNN
+F 2 "" H 34500 7650 140 0001 C CNN
+F 3 "" H 34500 7650 140 0001 C CNN
+	1    34500 7650
+	1    0    0    -1  
+$EndComp
+Wire Notes Line style solid
+	35950 8400 35950 8150
+Wire Notes Line style solid
+	36400 7650 37050 7650
+Text Notes 35450 8125 0    140  ~ 28
+-----
+Wire Notes Line style solid
+	36875 7650 36625 7600
+Wire Notes Line style solid
+	36625 7600 36625 7700
+Wire Notes Line style solid
+	36625 7700 36875 7650
+Wire Notes Line style solid
+	34775 7650 35425 7650
+Wire Notes Line style solid
+	35250 7650 35000 7600
+Wire Notes Line style solid
+	35000 7600 35000 7700
+Wire Notes Line style solid
+	35000 7700 35250 7650
+Text Notes 33000 24000 0    140  ~ 28
+C1
+Text Notes 33000 25250 0    140  ~ 28
+L1
+Text Notes 33850 24000 0    140  ~ 28
+1006755-79
+Text Notes 35775 24000 0    140  ~ 28
+CAPACITOR
+Text Notes 37625 24000 0    140  ~ 28
+6.8
+Text Notes 38525 24000 0    140  ~ 28
+±10%
+Text Notes 39375 24000 0    140  ~ 28
+35VDC
+Text Notes 33875 25250 0    140  ~ 28
+1010406-6
+Text Notes 35725 25250 0    140  ~ 28
+COIL
+Text Notes 37350 25250 0    140  ~ 28
+100 UH
+Text Notes 38525 25250 0    140  ~ 28
+±10%
+Text Notes 29700 7000 2    140  ~ 28
+P CIRCUIT
+Wire Notes Line width 60 style solid
+	35225 7650 34950 7700
+Wire Notes Line width 60 style solid
+	34950 7700 34950 7600
+Wire Notes Line width 60 style solid
+	34950 7600 35225 7650
+Wire Notes Line width 60 style solid
+	36850 7650 36575 7700
+Wire Notes Line width 60 style solid
+	36575 7700 36575 7600
+Wire Notes Line width 60 style solid
+	36575 7600 36850 7650
+$EndSCHEMATC

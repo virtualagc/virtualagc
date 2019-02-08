@@ -1,0 +1,216 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 29 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 37 38
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text Notes 38250 31750 0    236  ~ 47
+FLOW DIAGRAM & SCHEMATIC
+Text Notes 40805 33105 0    250  ~ 50
+1005702
+Text Notes 39350 32475 0    200  ~ 40
+INTERFACE MODULE\n   A20 OR A40
+Text Notes 39350 33375 2    140  ~ 28
+____
+Text Notes 40650 33375 2    140  ~ 28
+______
+Text Notes 39225 32975 2    140  ~ 28
+______
+Text Notes 2025 27150 0    160  ~ 32
+NOTES:
+Text Notes 2550 29375 0    160  ~ 32
+1. INTERPERT DRAWING IN ACCORDANCE WITH STANDARDS PRESCRIBED BY MIL-D-70327\n2. CIRCUIT NUMBERS FOR COMPUTER POSITION A20 ARE PREFIXED BY 72\n3. CIRCUIT NUMBERS FOR COMPUTER POSITION A40 ARE PREFIXED BY 74\n4. UPPER SIGNAL NAME USED IN COMPUTER POSITION A20 AND WILL HAVE B POWER\n5. LOWER SIGNAL NAME USED IN COMPUTER POSITION A40 AND WILL HAVE A POWER\n6. UNLESS OTHERWISE SPECIFIED:\n      A. RESISTOR VALUES ARE EXPRESSED IN OHMS\n      B. CAPACITOR VALUES ARE EXPRESSED IN MICROFARADS
+Text Notes 33325 28125 0    140  ~ 28
+REF DWG: INTERFACE MODULE ASSY A20 OR A40 DWG NO. 1003709
+Wire Notes Line style solid
+	32675 26250 40200 26250
+Wire Notes Line style solid
+	32675 26000 40200 26000
+Wire Notes Line style solid
+	32675 25750 40200 25750
+Wire Notes Line style solid
+	32675 25500 40200 25500
+Wire Notes Line style solid
+	32675 25250 40200 25250
+Wire Notes Line style solid
+	32675 25000 40200 25000
+Wire Notes Line style solid
+	32675 24750 40200 24750
+Wire Notes Line style solid
+	32675 24500 40200 24500
+Wire Notes Line style solid
+	32675 24250 40200 24250
+Wire Notes Line style solid
+	32675 24000 40200 24000
+Wire Notes Line style solid
+	32675 23750 40200 23750
+Wire Notes Line style solid
+	32675 23500 40200 23500
+Wire Notes Line style solid
+	32675 23250 40200 23250
+Wire Notes Line style solid
+	32675 23000 40200 23000
+Wire Notes Line style solid
+	32675 22750 40200 22750
+Wire Notes Line style solid
+	32675 22500 40200 22500
+Wire Notes Line style solid
+	32675 22250 40200 22250
+Wire Notes Line style solid
+	32675 22000 40200 22000
+Wire Notes Line style solid
+	32675 21550 40200 21550
+Wire Notes Line style solid
+	32675 21550 32675 26250
+Wire Notes Line style solid
+	33675 21550 33675 26250
+Wire Notes Line style solid
+	35550 21550 35550 26250
+Wire Notes Line style solid
+	37275 21550 37275 26250
+Wire Notes Line style solid
+	38425 21550 38425 26250
+Wire Notes Line style solid
+	39300 21575 39300 26275
+Wire Notes Line style solid
+	40200 21550 40200 26250
+Text Notes 32725 21900 0    140  ~ 28
+REF DES
+Text Notes 34075 21900 0    140  ~ 28
+PART NO.
+Text Notes 35725 21900 0    140  ~ 28
+DESCRIPTION
+Text Notes 37500 21900 0    140  ~ 28
+VALUE
+Text Notes 38675 21900 0    140  ~ 28
+TOL
+Text Notes 39350 21900 0    140  ~ 28
+RATING
+Text Notes 28025 950  0    200  ~ 40
+SCHEMATIC
+Text Notes 34700 950  0    200  ~ 40
+SYMBOLS
+Wire Notes Line style solid
+	35450 16950 36425 16950
+Wire Notes Line style solid
+	36425 16950 36425 15950
+Wire Notes Line style solid
+	36425 15950 35450 15950
+Wire Notes Line style solid
+	35450 15950 35450 16950
+Text Notes 34425 16575 0    140  ~ 28
+K
+Text Notes 35850 16250 0    140  ~ 28
+R
+$Comp
+L AGC_DSKY:OvalBody2 X?
+U 1 1 5C607F2B
+P 34525 16450
+AR Path="/5C5DFA78/5C607F2B" Ref="X?"  Part="1" 
+AR Path="/5C5DFA12/5C607F2B" Ref="X?"  Part="1" 
+AR Path="/5C5DFADA/5C607F2B" Ref="X501"  Part="1" 
+AR Path="/5C7CE2C4/5C607F2B" Ref="X3701"  Part="1" 
+AR Path="/5C7F2859/5C607F2B" Ref="X3801"  Part="1" 
+F 0 "X3701" H 34575 16150 140 0001 C CNN
+F 1 "OvalBody2" H 34525 16750 140 0001 C CNN
+F 2 "" H 34525 16450 140 0001 C CNN
+F 3 "" H 34525 16450 140 0001 C CNN
+	1    34525 16450
+	1    0    0    -1  
+$EndComp
+Wire Notes Line style solid
+	36450 16450 37075 16450
+Text Notes 35475 16925 0    140  ~ 28
+-----
+Wire Notes Line style solid
+	36900 16450 36650 16400
+Wire Notes Line style solid
+	36650 16400 36650 16500
+Wire Notes Line style solid
+	36650 16500 36900 16450
+Wire Notes Line style solid
+	34800 16450 35450 16450
+Wire Notes Line style solid
+	35275 16450 35025 16400
+Wire Notes Line style solid
+	35025 16400 35025 16500
+Wire Notes Line style solid
+	35025 16500 35275 16450
+Text Notes 37250 16575 0    140  ~ 28
+L
+$Comp
+L AGC_DSKY:OvalBody2 X?
+U 1 1 5C607F3C
+P 37350 16450
+AR Path="/5C5DFA78/5C607F3C" Ref="X?"  Part="1" 
+AR Path="/5C5DFA12/5C607F3C" Ref="X?"  Part="1" 
+AR Path="/5C5DFADA/5C607F3C" Ref="X502"  Part="1" 
+AR Path="/5C7CE2C4/5C607F3C" Ref="X3702"  Part="1" 
+AR Path="/5C7F2859/5C607F3C" Ref="X3802"  Part="1" 
+F 0 "X3702" H 37400 16150 140 0001 C CNN
+F 1 "OvalBody2" H 37350 16750 140 0001 C CNN
+F 2 "" H 37350 16450 140 0001 C CNN
+F 3 "" H 37350 16450 140 0001 C CNN
+	1    37350 16450
+	1    0    0    -1  
+$EndComp
+Text Notes 29650 15500 2    140  ~ 28
+R CIRCUIT
+$Comp
+L AGC_DSKY:Resistor R501
+U 1 1 5C60A7A3
+P 29625 16450
+AR Path="/5C5DFADA/5C60A7A3" Ref="R501"  Part="1" 
+AR Path="/5C7CE2C4/5C60A7A3" Ref="R3701"  Part="1" 
+AR Path="/5C7F2859/5C60A7A3" Ref="R3801"  Part="1" 
+F 0 "R3701" H 29600 16275 130 0001 C CNN
+F 1 "2000" H 29675 16225 130 0000 C CNB
+F 2 "" H 29625 16450 130 0001 C CNN
+F 3 "" H 29625 16450 130 0001 C CNN
+F 4 "R6" H 29625 16725 130 0000 C CNB "baseRefd"
+	1    29625 16450
+	-1   0    0    -1  
+$EndComp
+Text Notes 33275 23500 2    140  ~ 28
+R6
+Text Notes 35300 23500 2    140  ~ 28
+1006750-39
+Text Notes 36875 23500 2    140  ~ 28
+RESISTOR
+Text Notes 38100 23500 2    140  ~ 28
+2000
+Text Notes 39100 23500 2    140  ~ 28
+±2%
+Text Notes 40000 23500 2    140  ~ 28
+1/4W
+Text HLabel 28175 16450 0    140  Input ~ 28
+K
+Text HLabel 31000 16450 2    140  Output ~ 28
+L
+Wire Wire Line
+	30025 16450 31000 16450
+Wire Wire Line
+	29225 16450 28175 16450
+Wire Notes Line width 60 style solid
+	35250 16450 34975 16500
+Wire Notes Line width 60 style solid
+	34975 16500 34975 16400
+Wire Notes Line width 60 style solid
+	34975 16400 35250 16450
+Wire Notes Line width 60 style solid
+	36900 16450 36625 16500
+Wire Notes Line width 60 style solid
+	36625 16500 36625 16400
+Wire Notes Line width 60 style solid
+	36625 16400 36900 16450
+$EndSCHEMATC
