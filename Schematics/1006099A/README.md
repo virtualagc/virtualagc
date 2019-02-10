@@ -1,0 +1,1 @@
+This folder contains the transcription of the original Apollo Program drawing 1006099A to KiCad.  This is the electrical schematic for Block I AGC rope strand select module.  Revision 1006099- is also available, though not as CAD at this writing.
