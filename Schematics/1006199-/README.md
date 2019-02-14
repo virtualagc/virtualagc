@@ -1,1 +1,1 @@
-This folder contains the transcription of the original Apollo Program drawing 1006148E to KiCad.  This is the electrical schematic for Block I AGC strand gate module, B31.  This is the only available revision of the drawing.
+This folder contains the transcription of the original Apollo Program drawing 1006199- to KiCad.  This is the electrical schematic for strand gate module, B31, for later Block I AGC models.  This is the only available revision of the drawing.
