@@ -17,7 +17,7 @@ $EndDescr
 Text Notes 38285 32295 0    250  ~ 50
        SCHEMATIC,\nSTRAND GATE MODULE B31
 Text Notes 40780 33105 0    250  ~ 50
-1006148
+1006199
 Text Notes 38900 33375 0    140  ~ 28
 ___
 Text Notes 38905 33460 0    140  ~ 28
@@ -52,10 +52,10 @@ Text Notes 33935 32405 0    140  ~ 28
 //
 Text Notes 42375 33475 0    140  ~ 28
 1     2
-Text Notes 34950 7150 0    140  ~ 28
-Notes from the Virtual AGC project:\n1. This sheet is the CAD transcription of the original Project Apollo drawing\n   1006148E.  Since the original drawing showed only a single instance of \n   circuitry intended to be identical for circuit blocks 40501 through 40503,\n   that circuitry has instead been replaced by a hierarchical circuit block \n   in this CAD drawing.  Therefore, in so far as circuits 40501 through \n   40503 are concerned, this CAD drawing matches the original circuit \n   electrically but not in visual appearance. — RSB 2019\n2. The notation "(X/Y)" after a signal name means that in the original\n   drawing there was a connector pin with AGC4 pin number X and AGC5\n   pin number Y.  However, the pin number Y was duplicated (usually\n   with different X), and this duplication of pin numbers is not allowed in \n   CAD, so the duplicated connecter pin has been replaced with a different\n   CAD construct that preserves the electrical connection. — RSB 2019\n
+Text Notes 34925 4525 0    140  ~ 28
+Notes from the Virtual AGC project:\n1. This sheet is the CAD transcription of the original Project Apollo drawing\n   1006199-.  Since the original drawing showed only a single instance of \n   circuitry intended to be identical for circuit blocks 40501 through 40503,\n   that circuitry has instead been replaced by a hierarchical circuit block \n   in this CAD drawing.  Therefore, in so far as circuits 40501 through \n   40503 are concerned, this CAD drawing matches the original circuit \n   electrically but not in visual appearance. — RSB 2019\n2. The notation "(X/Y)" after a signal name means that in the original\n   drawing there was a connector pin with AGC4 pin number X and AGC5\n   pin number Y.  However, the pin number Y was duplicated (usually\n   with different X), and this duplication of pin numbers is not allowed in \n   CAD, so the duplicated connecter pin has been replaced with a different\n   CAD construct that preserves the electrical connection. — RSB 2019\n
 $Bitmap
-Pos 34700 4050
+Pos 34675 1425
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -937,7 +937,7 @@ Wire Notes Line
 Wire Notes Line
 	24125 525  24125 17925
 Wire Notes Line
-	25075 17925 25075 26375
+	25075 17975 25075 26425
 Wire Notes Line
 	16175 26375 16175 550 
 Wire Notes Line
@@ -1005,10 +1005,10 @@ F 3 "" H 19525 5175 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Inductor L101
+L AGC_DSKY:Inductor L2
 U 1 1 5C6A885F
 P 19525 6950
-F 0 "L101" H 19450 7450 130 0000 C CNN
+F 0 "L2" H 19450 7450 130 0000 C CNN
 F 1 "8.2UH" H 19525 7225 130 0000 C CNN
 F 2 "" H 19475 7150 130 0001 C CNN
 F 3 "" H 19475 7150 130 0001 C CNN
@@ -1527,7 +1527,7 @@ L AGC_DSKY:Resistor R33
 U 1 1 5C6FE6EF
 P 38900 22200
 F 0 "R33" H 38950 22725 130 0000 C CNN
-F 1 "5.1K" H 38925 22450 130 0000 C CNN
+F 1 "5100" H 38925 22450 130 0000 C CNN
 F 2 "" H 38900 22200 130 0001 C CNN
 F 3 "" H 38900 22200 130 0001 C CNN
 	1    38900 22200
@@ -1540,13 +1540,13 @@ Wire Wire Line
 $Comp
 L AGC_DSKY:Node2 N101
 U 1 1 5C703E61
-P 4225 19175
-F 0 "N101" H 4225 19275 50  0001 C CNN
-F 1 "Node2" H 4225 19350 50  0001 C CNN
-F 2 "" H 4225 19175 50  0001 C CNN
-F 3 "" H 4225 19175 50  0001 C CNN
-F 4 "BPLSIW" H 4075 19175 140 0000 R CNB "Caption"
-	1    4225 19175
+P 3575 19175
+F 0 "N101" H 3575 19275 50  0001 C CNN
+F 1 "Node2" H 3575 19350 50  0001 C CNN
+F 2 "" H 3575 19175 50  0001 C CNN
+F 3 "" H 3575 19175 50  0001 C CNN
+F 4 "BPLSIW" H 3425 19175 140 0000 R CNB "Caption"
+	1    3575 19175
 	1    0    0    -1  
 $EndComp
 Text Notes 1050 18325 0    140  ~ 28
@@ -1563,22 +1563,11 @@ F 3 "" H 3250 22850 130 0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor C16
-U 1 1 5C7050F1
-P 8600 22900
-F 0 "C16" H 9000 22925 130 0000 C CNN
-F 1 ".001UF" H 9125 22700 130 0000 C CNN
-F 2 "" H 8600 23300 130 0001 C CNN
-F 3 "" H 8600 23300 130 0001 C CNN
-	1    8600 22900
-	1    0    0    -1  
-$EndComp
-$Comp
 L AGC_DSKY:Resistor R13
 U 1 1 5C706307
 P 6375 21675
-F 0 "R13" H 6450 22125 130 0000 C CNN
-F 1 "200" H 6425 21875 130 0000 C CNN
+F 0 "R13" H 6400 22025 130 0000 C CNN
+F 1 "10K" H 6375 21850 130 0000 C CNN
 F 2 "" H 6375 21675 130 0001 C CNN
 F 3 "" H 6375 21675 130 0001 C CNN
 	1    6375 21675
@@ -1600,7 +1589,7 @@ L AGC_DSKY:Resistor R16
 U 1 1 5C7095B3
 P 12125 21000
 F 0 "R16" H 12200 21450 130 0000 C CNN
-F 1 "2000" H 12175 21200 130 0000 C CNN
+F 1 "470" H 12175 21200 130 0000 C CNN
 F 2 "" H 12125 21000 130 0001 C CNN
 F 3 "" H 12125 21000 130 0001 C CNN
 	1    12125 21000
@@ -1631,57 +1620,13 @@ $EndComp
 $Comp
 L AGC_DSKY:Resistor R11
 U 1 1 5C70B288
-P 3950 23075
-F 0 "R11" V 4100 23475 130 0000 C CNN
-F 1 "2000" V 3850 23525 130 0000 C CNN
-F 2 "" H 3950 23075 130 0001 C CNN
-F 3 "" H 3950 23075 130 0001 C CNN
-	1    3950 23075
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R17
-U 1 1 5C70B97F
-P 13400 19850
-F 0 "R17" V 13550 20175 130 0000 C CNN
-F 1 "1000" V 13300 20175 130 0000 C CNN
-F 2 "" H 13400 19850 130 0001 C CNN
-F 3 "" H 13400 19850 130 0001 C CNN
-	1    13400 19850
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R12
-U 1 1 5C70BEB0
-P 5550 20625
-F 0 "R12" V 5725 21025 130 0000 C CNN
-F 1 "10K" V 5475 21025 130 0000 C CNN
-F 2 "" H 5550 20625 130 0001 C CNN
-F 3 "" H 5550 20625 130 0001 C CNN
-	1    5550 20625
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR4
-U 1 1 5C70C8E5
-P 9000 21675
-F 0 "CR4" H 9050 21350 140 0000 C CNN
-F 1 "Diode" H 9000 21525 50  0001 C CNN
-F 2 "" H 8950 21500 50  0001 C CNN
-F 3 "" H 8950 21675 50  0001 C CNN
-	1    9000 21675
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR5
-U 1 1 5C70D1A8
-P 9700 21675
-F 0 "CR5" H 9750 21350 140 0000 C CNN
-F 1 "Diode" H 9700 21525 50  0001 C CNN
-F 2 "" H 9650 21500 50  0001 C CNN
-F 3 "" H 9650 21675 50  0001 C CNN
-	1    9700 21675
-	-1   0    0    1   
+P 4625 20725
+F 0 "R11" V 4525 21100 130 0000 C CNN
+F 1 "10K" V 4725 21100 130 0000 C CNN
+F 2 "" H 4625 20725 130 0001 C CNN
+F 3 "" H 4625 20725 130 0001 C CNN
+	1    4625 20725
+	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-NPN Q5
@@ -1717,30 +1662,16 @@ F 3 "" H 13250 21250 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3525 22450 3950 22450
-Wire Wire Line
-	3950 22675 3950 22450
-Connection ~ 3950 22450
-Wire Wire Line
-	3950 22450 5100 22450
-Wire Wire Line
 	3000 22450 2400 22450
 Wire Wire Line
 	5550 22700 5550 23925
 Wire Wire Line
-	5550 23925 3950 23925
-Wire Wire Line
-	3950 23925 3950 23475
-Wire Wire Line
-	3950 23925 3950 24375
-Connection ~ 3950 23925
+	7075 23925 7075 24675
 Wire Wire Line
 	5550 22200 5550 21675
 Wire Wire Line
 	5975 21675 5550 21675
 Connection ~ 5550 21675
-Wire Wire Line
-	5550 21675 5550 21025
 Wire Wire Line
 	6775 21675 7075 21675
 Wire Wire Line
@@ -1749,20 +1680,7 @@ Connection ~ 7075 21675
 Wire Wire Line
 	7075 21675 7525 21675
 Wire Wire Line
-	4300 19175 5550 19175
-Wire Wire Line
-	5550 19175 5550 20225
-Wire Wire Line
-	8325 21675 8600 21675
-Wire Wire Line
-	9200 21675 9500 21675
-Wire Wire Line
-	9900 21675 10650 21675
-Wire Wire Line
-	8600 22625 8600 21675
-Connection ~ 8600 21675
-Wire Wire Line
-	8600 21675 8800 21675
+	3650 19175 4625 19175
 Wire Wire Line
 	11100 21425 11100 21000
 Wire Wire Line
@@ -1773,40 +1691,22 @@ Wire Wire Line
 Wire Wire Line
 	12525 21000 12950 21000
 Wire Wire Line
-	13400 20750 13400 20450
+	13400 20750 13400 20500
 Wire Wire Line
 	13400 21250 13400 23925
 Wire Wire Line
 	13400 23925 11100 23925
-Connection ~ 5550 23925
 Wire Wire Line
 	7075 23150 7075 23925
 Connection ~ 7075 23925
 Wire Wire Line
 	7075 23925 5550 23925
 Wire Wire Line
-	8600 23150 8600 23925
-Connection ~ 8600 23925
-Wire Wire Line
-	8600 23925 7075 23925
-Wire Wire Line
 	11100 21925 11100 23925
 Connection ~ 11100 23925
-Wire Wire Line
-	11100 23925 8600 23925
-Wire Wire Line
-	13400 20450 14225 20450
-Connection ~ 13400 20450
-Wire Wire Line
-	13400 20450 13400 20250
-Wire Wire Line
-	13400 19450 13400 19175
-Wire Wire Line
-	13400 19175 11100 19175
 Connection ~ 5550 19175
 Wire Wire Line
 	11100 19700 11100 19175
-Connection ~ 11100 19175
 Wire Wire Line
 	11100 19175 5550 19175
 Text Notes 16750 18375 0    140  ~ 28
@@ -1889,10 +1789,10 @@ F 3 "" H 19700 24925 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor-Polarized C20
+L AGC_DSKY:Capacitor-Polarized C18
 U 1 1 5C786A2D
 P 20225 24525
-F 0 "C20" H 19850 24325 130 0000 C CNN
+F 0 "C18" H 19850 24325 130 0000 C CNN
 F 1 "22UF" H 19925 24150 130 0000 C CNN
 F 2 "" H 20225 24925 130 0001 C CNN
 F 3 "" H 20225 24925 130 0001 C CNN
@@ -1911,21 +1811,10 @@ F 3 "" H 19200 23025 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R35
-U 1 1 5C787B21
-P 20225 23725
-F 0 "R35" V 20125 24000 130 0000 C CNN
-F 1 "470" V 20325 24000 130 0000 C CNN
-F 2 "" H 20225 23725 130 0001 C CNN
-F 3 "" H 20225 23725 130 0001 C CNN
-	1    20225 23725
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R34
+L AGC_DSKY:Resistor R17
 U 1 1 5C788889
 P 18700 24475
-F 0 "R34" V 18600 24075 130 0000 C CNN
+F 0 "R17" V 18600 24075 130 0000 C CNN
 F 1 "2000" V 18800 24025 130 0000 C CNN
 F 2 "" H 18700 24475 130 0001 C CNN
 F 3 "" H 18700 24475 130 0001 C CNN
@@ -1948,7 +1837,7 @@ L AGC_DSKY:Resistor R18
 U 1 1 5C789CCF
 P 17650 22500
 F 0 "R18" V 17825 22100 130 0000 C CNN
-F 1 "1300" V 17550 22100 130 0000 C CNN
+F 1 "NOMINAL" V 17600 22000 130 0000 C CNN
 F 2 "" H 17650 22500 130 0001 C CNN
 F 3 "" H 17650 22500 130 0001 C CNN
 	1    17650 22500
@@ -1981,7 +1870,7 @@ L AGC_DSKY:Resistor R24
 U 1 1 5C78C538
 P 22275 21450
 F 0 "R24" V 22100 21075 130 0000 C CNN
-F 1 "2000" V 22375 21000 130 0000 C CNN
+F 1 "5100" V 22375 21000 130 0000 C CNN
 F 2 "" H 22275 21450 130 0001 C CNN
 F 3 "" H 22275 21450 130 0001 C CNN
 	1    22275 21450
@@ -2045,7 +1934,6 @@ Wire Wire Line
 	20225 24250 20225 24125
 Wire Wire Line
 	20225 24125 19700 24125
-Connection ~ 20225 24125
 Connection ~ 19700 24125
 Wire Wire Line
 	19700 24125 19700 24250
@@ -2061,14 +1949,7 @@ Wire Wire Line
 Wire Wire Line
 	20900 23900 20900 23700
 Wire Wire Line
-	20225 23325 19700 23325
-Wire Wire Line
-	19700 23325 19700 23475
-Wire Wire Line
 	19600 23025 19700 23025
-Wire Wire Line
-	19700 23325 19700 23025
-Connection ~ 19700 23325
 Connection ~ 19700 23025
 Wire Wire Line
 	20900 23700 22275 23700
@@ -2185,10 +2066,10 @@ F 3 "" H 33925 22375 130 0001 C CNN
 	0    -1   1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor-Polarized C18
+L AGC_DSKY:Capacitor-Polarized C16
 U 1 1 5C89B69B
 P 31025 22375
-F 0 "C18" H 31500 22425 130 0000 C CNN
+F 0 "C16" H 31500 22425 130 0000 C CNN
 F 1 "1UF" H 31475 22150 130 0000 C CNN
 F 2 "" H 31025 22775 130 0001 C CNN
 F 3 "" H 31025 22775 130 0001 C CNN
@@ -3045,29 +2926,29 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorBlockI J1
 U 80 1 5C645C0E
-P 14500 20450
-F 0 "J1" H 14500 20775 140 0001 C CNN
-F 1 "ConnectorBlockI" H 14500 20875 140 0001 C CNN
-F 2 "" H 14500 20925 140 0001 C CNN
-F 3 "" H 14500 20925 140 0001 C CNN
-F 4 "082" H 14500 20600 100 0000 C TNB "agc4"
-F 5 "STRT2" H 13800 20375 140 0000 C BNB "Caption"
-F 6 "" H 14500 20225 140 0000 C TNB "Caption2"
-	80   14500 20450
+P 10700 18475
+F 0 "J1" H 10700 18800 140 0001 C CNN
+F 1 "ConnectorBlockI" H 10700 18900 140 0001 C CNN
+F 2 "" H 10700 18950 140 0001 C CNN
+F 3 "" H 10700 18950 140 0001 C CNN
+F 4 "082" H 10700 18625 100 0000 C TNB "agc4"
+F 5 "STRT2" H 10000 18400 140 0000 C BNB "Caption"
+F 6 "" H 10700 18250 140 0000 C TNB "Caption2"
+	80   10700 18475
 	-1   0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorBlockI J1
 U 86 2 5C645C10
-P 3950 24550
-F 0 "J1" H 3950 24875 140 0001 C CNN
-F 1 "ConnectorBlockI" H 3950 24975 140 0001 C CNN
-F 2 "" H 3950 25025 140 0001 C CNN
-F 3 "" H 3950 25025 140 0001 C CNN
-F 4 "-" H 3950 24700 100 0000 C TNB "agc4"
-F 5 "0VDC" H 3950 24325 140 0000 C TNB "Caption"
-F 6 "" H 3950 24100 140 0000 C TNB "Caption2"
-	86   3950 24550
+P 7075 24850
+F 0 "J1" H 7075 25175 140 0001 C CNN
+F 1 "ConnectorBlockI" H 7075 25275 140 0001 C CNN
+F 2 "" H 7075 25325 140 0001 C CNN
+F 3 "" H 7075 25325 140 0001 C CNN
+F 4 "-" H 7075 25000 100 0000 C TNB "agc4"
+F 5 "0VDC" H 7075 24625 140 0000 C TNB "Caption"
+F 6 "" H 7075 24400 140 0000 C TNB "Caption2"
+	86   7075 24850
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -3192,11 +3073,11 @@ F 6 "" H 14225 5700 140 0000 C TNB "Caption2"
 	81   14225 5925
 	-1   0    0    -1  
 $EndComp
-Text Label 4375 19175 0    140  ~ 28
+Text Label 3650 19175 0    140  ~ 28
 BPLSIW
 Text Label 21050 19825 0    140  ~ 28
 BPLSIW
-Text Label 4075 23925 0    140  ~ 28
+Text Label 7175 23925 0    140  ~ 28
 0VDCC
 Text Label 17775 25000 0    140  ~ 28
 0VDCC
@@ -3208,4 +3089,91 @@ Text Notes 34950 27925 0    450  ~ 0
 ◯
 Text Notes 35150 27675 0    250  ~ 50
 _
+Wire Wire Line
+	10425 18475 10200 18475
+Wire Wire Line
+	10200 18475 10200 21000
+Wire Wire Line
+	10200 21000 11100 21000
+Wire Wire Line
+	14525 20500 14525 23025
+Wire Wire Line
+	14525 23025 17650 23025
+Wire Wire Line
+	13400 20500 14525 20500
+Text Notes 14675 23500 0    140  ~ 28
+TO CIRCUIT\n  40517
+Text Notes 16375 23500 0    140  ~ 28
+TO CIRCUIT\n  40516
+Wire Wire Line
+	7075 23925 11100 23925
+Wire Wire Line
+	4625 20325 4625 19175
+Wire Wire Line
+	4625 19175 5550 19175
+Wire Wire Line
+	4625 21125 4625 22450
+Wire Wire Line
+	3525 22450 4625 22450
+Connection ~ 4625 22450
+Wire Wire Line
+	4625 22450 5100 22450
+Connection ~ 4625 19175
+Wire Wire Line
+	5550 19175 5550 19400
+Wire Wire Line
+	5550 21675 5550 20700
+$Comp
+L AGC_DSKY:Resistor R12
+U 1 1 5C70BEB0
+P 5550 19800
+F 0 "R12" V 5675 19375 130 0000 C CNN
+F 1 "5.1K" V 5450 19375 130 0000 C CNN
+F 2 "" H 5550 19800 130 0001 C CNN
+F 3 "" H 5550 19800 130 0001 C CNN
+	1    5550 19800
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR4
+U 1 1 5CCD320F
+P 6600 20700
+F 0 "CR4" H 6600 20975 140 0000 C CNN
+F 1 "Diode" H 6600 20550 50  0001 C CNN
+F 2 "" H 6550 20525 50  0001 C CNN
+F 3 "" H 6550 20700 50  0001 C CNN
+	1    6600 20700
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	6400 20700 5550 20700
+Connection ~ 5550 20700
+Wire Wire Line
+	5550 20700 5550 20200
+Wire Wire Line
+	6800 20700 7075 20700
+Wire Wire Line
+	7075 20700 7075 21675
+Wire Wire Line
+	8325 21675 10650 21675
+Wire Wire Line
+	19700 23025 19700 23475
+$Comp
+L AGC_DSKY:Diode CR5
+U 1 1 5CDCE419
+P 20525 23700
+F 0 "CR5" H 20525 23925 140 0000 C CNN
+F 1 "Diode" H 20525 23550 50  0001 C CNN
+F 2 "" H 20475 23525 50  0001 C CNN
+F 3 "" H 20475 23700 50  0001 C CNN
+	1    20525 23700
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	20725 23700 20900 23700
+Wire Wire Line
+	20325 23700 20225 23700
+Wire Wire Line
+	20225 23700 20225 24125
+Connection ~ 20225 24125
 $EndSCHEMATC

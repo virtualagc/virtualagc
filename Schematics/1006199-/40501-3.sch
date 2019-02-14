@@ -14,80 +14,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text Notes 38285 32295 0    250  ~ 50
-       SCHEMATIC,\nSTRAND GATE MODULE B31
-Text Notes 40780 33105 0    250  ~ 50
-1006148
-Wire Notes Line style solid
-	37965 1415 43500 1415
-Text Notes 38900 33375 0    140  ~ 28
-___
-Text Notes 38905 33460 0    140  ~ 28
-//
-Text Notes 40250 33375 0    140  ~ 28
-______
-Text Notes 40410 33450 0    140  ~ 28
-//
-Text Notes 33525 33275 0    140  ~ 28
-____________
-Text Notes 33935 33360 0    140  ~ 28
-//
-Text Notes 33375 31750 0    140  ~ 28
-___
-Text Notes 33390 31820 0    140  ~ 28
-//
-Text Notes 34300 31750 0    140  ~ 28
-___
-Text Notes 34315 31825 0    140  ~ 28
-//
-Text Notes 35100 31750 0    140  ~ 28
-___
-Text Notes 35110 31820 0    140  ~ 28
-//
-Text Notes 33500 32800 0    140  ~ 28
-____________
-Text Notes 33930 32880 0    140  ~ 28
-//
-Text Notes 33450 32325 0    140  ~ 28
-____________
-Text Notes 33935 32405 0    140  ~ 28
-//
-Text Notes 42375 33475 0    140  ~ 28
-1     1
-Wire Notes Line style solid
-	37965 915  37965 2885
-Wire Notes Line style solid
-	37965 1150 43500 1150
-Wire Notes Line style solid
-	37965 1790 43500 1790
-Wire Notes Line style solid
-	37965 2325 43500 2325
-Wire Notes Line style solid
-	37965 2885 43500 2885
-Wire Notes Line style solid
-	38465 915  38465 2885
-Wire Notes Line style solid
-	41795 915  41795 2885
-Wire Notes Line style solid
-	42465 915  42465 2885
-Text Notes 38115 1140 0    140  ~ 28
-A   REVISED PER TDRR  04478
-Text Notes 38090 1395 0    140  ~ 28
-B   REVISED PER TDRR  06046
-Text Notes 38105 1715 0    140  ~ 28
-C   REVISED PER TDRR  06232
-Text Notes 38540 2030 0    140  ~ 28
-REVISED PER TDRR  07269
-Text Notes 38530 2580 0    140  ~ 28
-REVISED PER TDRR  07670
-Text Notes 38110 2175 0    140  ~ 28
-D
-Text Notes 38110 2720 0    140  ~ 28
-E
-Text Notes 38530 2290 0    140  ~ 28
-DR             CHK
-Text Notes 38525 2850 0    140  ~ 28
-DR             CHK
 Wire Notes Line
 	550  26375 41900 26375
 Wire Notes Line
@@ -527,10 +453,10 @@ Wire Wire Line
 	14175 7175 14175 9975
 Text Label 12975 7200 2    140  ~ 28
 0VDC
-Text Notes 34450 6975 0    140  ~ 28
-Notes from the Virtual AGC project:\n3. This CAD drawing is a transcription of the original Project Apollo drawing\n   1006148E, but with everything unrelated to circuits 40501 through 40503\n   removed, in order to implement a hierarchical circuit block for circuits\n   40501 through 40503. — RSB 2019\n4. The reference designators shown are those shown on the original drawing, \n   but are not the actual reference designators (e.g., in netlists), because\n   this circuit block is present in 3 instances (as circuits 40501 through 40503),\n   each of which has to have different reference designators.  The actual \n   reference designators are accessible by editing the components within \n   KiCad.  At present, the reference designators in circuits 40501 through\n   40503 are arbitrarily assigned, but eventually will match those shown on\n   insulator drawing 1004268; on 1004268, the reference designators are \n   the same on as shown on this CAD drawing, but prefixed by 1, 2, or 3 for\n   circuits 40501, 40502, and 40503 respectively. — RSB 2019\n
+Text Notes 34450 4800 0    140  ~ 28
+Notes from the Virtual AGC project:\n3. This CAD drawing is a transcription of the original Project Apollo drawing\n   1006199-, but with everything unrelated to circuits 40501 through 40503\n   removed, in order to implement a hierarchical circuit block for circuits\n   40501 through 40503. — RSB 2019\n4. The reference designators shown are those shown on the original drawing, \n   but are not the actual reference designators (e.g., in netlists), because\n   this circuit block is present in 3 instances (as circuits 40501 through 40503),\n   each of which has to have different reference designators.  The actual \n   reference designators are accessible by editing the components within \n   KiCad.  At present, the reference designators in circuits 40501 through\n   40503 are arbitrarily assigned, but eventually will the follow the rule that\n   they are same on as shown on this CAD drawing, but prefixed by 1, 2, or 3\n   for circuits 40501, 40502, and 40503 respectively. — RSB 2019\n
 $Bitmap
-Pos 34175 3625
+Pos 34175 1700
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -1414,4 +1340,48 @@ F 4 "BPLSIW" H 15100 7175 140 0000 R CNB "Caption"
 	1    15175 7175
 	-1   0    0    1   
 $EndComp
+Text Notes 38260 32295 0    250  ~ 50
+       SCHEMATIC,\nSTRAND GATE MODULE B31
+Text Notes 40755 33105 0    250  ~ 50
+1006199
+Text Notes 38875 33375 0    140  ~ 28
+___
+Text Notes 38880 33460 0    140  ~ 28
+//
+Text Notes 40225 33375 0    140  ~ 28
+______
+Text Notes 40385 33450 0    140  ~ 28
+//
+Text Notes 33500 33275 0    140  ~ 28
+____________
+Text Notes 33910 33360 0    140  ~ 28
+//
+Text Notes 33350 31750 0    140  ~ 28
+___
+Text Notes 33365 31820 0    140  ~ 28
+//
+Text Notes 34275 31750 0    140  ~ 28
+___
+Text Notes 34290 31825 0    140  ~ 28
+//
+Text Notes 35075 31750 0    140  ~ 28
+___
+Text Notes 35085 31820 0    140  ~ 28
+//
+Text Notes 33475 32800 0    140  ~ 28
+____________
+Text Notes 33905 32880 0    140  ~ 28
+//
+Text Notes 33425 32325 0    140  ~ 28
+____________
+Text Notes 33910 32405 0    140  ~ 28
+//
+Text Notes 42350 33475 0    140  ~ 28
+1     2
+Text Notes 35675 27750 0    200  ~ 40
+REPLACES 1006189 WITH CHANGES
+Text Notes 34850 27900 0    450  ~ 0
+◯
+Text Notes 35050 27650 0    250  ~ 50
+_
 $EndSCHEMATC
