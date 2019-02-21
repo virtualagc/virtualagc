@@ -118,6 +118,7 @@ module = "X"
 moduleA52 = False
 nd1021041 = False
 block1 = False
+shadow = False
 bit = False
 dupej = False
 norLength = 5
@@ -137,6 +138,9 @@ for line in sys.stdin:
 	if type == "nd1021041":
 		nd1021041 = True
 		continue
+	if type == "shadow1":
+		shadow = True
+		type = "block1"
 	if type == "block1":
 		block1 = True
 		aPins = ["1", "3", "5", "_"]
@@ -568,6 +572,11 @@ for line in sys.stdin:
 			continue
 		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "texts": texts, "x": posX, "y": posY, "rotated": rotated, "down": down, "up": up, "upperPinName":upperPinName }
 		nextXY()
+		if shadow:
+			posX = 25 * int(40 * (originX + xSpacing * nextX))
+			posY = 25 * int(40 * (originY + ySpacing * nextY))
+			objects["shadow" + id] = { "type": type, "refd": "X?", "symbol": "ShadowBodyAGC4", "unit": 1, "texts": texts, "x": posX, "y": posY, "rotated": False, "down": False, "up": False, "upperPinName":upperPinName, "lowerPinName":str(pinName) }
+			nextXY()
 		continue
 	
 	if type == "O" and numFields in [2, 3]:
@@ -780,47 +789,52 @@ for id in objects:
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		nextFieldPos = 4
+		isShadow = shadow and "lowerPinName" in object
 		if block1:
 			sys.stdout.write("F 4 \"" + object["upperPinName"] + "\" H " + str(posX) + " " + str(posY + 150) + " 100 0000 C TNB \"agc4\"\n")
 			nextFieldPos = 5
-		if bit:
-			sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + texts[0] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption\"\n")
-			for i in range(1,16):
-				sys.stdout.write("F " + str(4 + i) + " \"" + texts[i] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption" + str(i + 1) + "\"\n")
-		elif caption3 != "":
-			if rotated:
-				rotated = 0
-				inverted = True
-			if down:
-				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption3\"\n")
-			elif up:
-				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption3\"\n")
-			else:
-				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX-425) + " " + str(posY + 175) + " 140 0000 R BNB \"Caption\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY) + " 140 0000 R CNB \"Caption2\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX-425) + " " + str(posY - 175) + " 140 0000 R TNB \"Caption3\"\n")
-		elif caption2 != "" or block1:
-			if rotated:
-				rotated = 0
-				inverted = True
-			if down:
-				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
-			elif up:
-				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
-			else:
-				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
-				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
-		elif caption != ".":
-			if up or down:
-				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
-			else:
-				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
+			if isShadow:
+				sys.stdout.write("F 5 \"" + object["lowerPinName"] + "\" H " + str(posX) + " " + str(posY - 25) + " 100 0000 C TNB \"agc5\"\n")
+				nextFieldPos = 6
+		if not isShadow:
+			if bit:
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + texts[0] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption\"\n")
+				for i in range(1,16):
+					sys.stdout.write("F " + str(4 + i) + " \"" + texts[i] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption" + str(i + 1) + "\"\n")
+			elif caption3 != "":
+				if rotated:
+					rotated = 0
+					inverted = True
+				if down:
+					sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption3\"\n")
+				elif up:
+					sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption3\"\n")
+				else:
+					sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX-425) + " " + str(posY + 175) + " 140 0000 R BNB \"Caption\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY) + " 140 0000 R CNB \"Caption2\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX-425) + " " + str(posY - 175) + " 140 0000 R TNB \"Caption3\"\n")
+			elif caption2 != "" or block1:
+				if rotated:
+					rotated = 0
+					inverted = True
+				if down:
+					sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
+				elif up:
+					sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+				else:
+					sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
+					sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
+			elif caption != ".":
+				if up or down:
+					sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+				else:
+					sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
 		sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
 		if up:
 			sys.stdout.write("\t1    0    0    -1  \n")
