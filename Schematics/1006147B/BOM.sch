@@ -74,155 +74,155 @@ Text Notes 42375 33475 0    140  ~ 28
 2     2
 Text Notes 39950 32500 0    180  ~ 36
 B32 - B33
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 7700 7075 7700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 7950 7075 7950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 8200 7075 8200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 8700 7075 8700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 8950 7075 8950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 9200 7075 9200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 9450 7075 9450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 9700 7075 9700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 9950 7075 9950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 10450 7075 10450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 10700 7075 10700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 10950 7075 10950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 11200 7075 11200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 11450 7075 11450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 11700 7075 11700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 11950 7075 11950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 12450 7075 12450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 12700 7075 12700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 12950 7075 12950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 13200 7075 13200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 13450 7075 13450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 13700 7075 13700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 13950 7075 13950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 14450 7075 14450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 14700 7075 14700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 14950 7075 14950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 15200 7075 15200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 15450 7075 15450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 15950 7075 15950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 16200 7075 16200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 16450 7075 16450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 16700 7075 16700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 16950 7075 16950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 17200 7075 17200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 17450 7075 17450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 18200 7075 18200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 18450 7075 18450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 18700 7075 18700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 18950 7075 18950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 19200 7075 19200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 19450 7075 19450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 21950 7075 21950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 22450 7075 22450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 7450 17550 7450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 23200 17525 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	17550 6950 17550 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 8450 17550 8450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 10200 17550 10200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 12200 17550 12200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 14200 17550 14200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 15700 17550 15700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 17700 17550 17700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 17950 17550 17950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 19700 17550 19700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 19950 17550 19950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 20200 17550 20200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 20450 17550 20450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 20700 17550 20700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 20950 17550 20950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 21200 17550 21200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 21450 17550 21450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 21700 17550 21700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 22200 17550 22200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 22700 17550 22700
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 22950 17550 22950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	17550 6950 7075 6950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 6950 14650 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	13750 6950 13750 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	12875 6950 12875 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	11725 6950 11725 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10000 6950 10000 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	8100 6950 8100 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7075 6950 7075 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	16075 7225 16075 23200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14650 7225 17550 7225
 Text Notes 7325 7700 0    140  ~ 28
 R1
@@ -334,137 +334,137 @@ Text Notes 7325 22450 0    140  ~ 28
 L4
 Text Notes 7325 22700 0    140  ~ 28
 L5
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	31525 7225 28625 7225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 7725 28625 7725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 8225 28625 8225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 8475 28625 8475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 8725 28625 8725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 9225 28625 9225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 9475 28625 9475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 9725 28625 9725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 9975 28625 9975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 10225 28625 10225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 10475 28625 10475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 10725 28625 10725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 10975 28625 10975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 11225 28625 11225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 11475 28625 11475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 11975 28625 11975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 12225 28625 12225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 12475 28625 12475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 12725 28625 12725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 12975 28625 12975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 13225 28625 13225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 13475 28625 13475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 13725 28625 13725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 13975 28625 13975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 14225 28625 14225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 14725 28625 14725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 14975 28625 14975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 15225 28625 15225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 15475 28625 15475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 15725 28625 15725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 15975 28625 15975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 16225 28625 16225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 16475 28625 16475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 16725 28625 16725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 16975 28625 16975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 17725 28625 17725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 17975 28625 17975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 18225 28625 18225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 19475 28625 19475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 19975 28625 19975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 20225 28625 20225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 20475 28625 20475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 20975 28625 20975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 21225 28625 21225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 21475 28625 21475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 21975 28625 21975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 22225 28625 22225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 22475 28625 22475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 22975 28625 22975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 23225 28625 23225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 23725 28625 23725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 23975 28625 23975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 24225 28625 24225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 24725 28625 24725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 24975 28625 24975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 25225 28625 25225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 7475 31525 7475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 25475 31525 25475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 6975 31525 6975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	28625 6975 28625 25475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	30075 7200 30075 25475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	27725 6975 27725 25475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	26850 6975 26850 25475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	25725 6975 25725 25475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	23975 6975 23975 25475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 6975 21100 25475
 Text Notes 21325 7725 0    140  ~ 28
 CR1
@@ -604,59 +604,59 @@ Text Notes 21325 25225 0    140  ~ 28
 Q24
 Text Notes 21325 25475 0    140  ~ 28
 Q25
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 25025 14300 25025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 25275 14300 25275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 25525 14300 25525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 25775 14300 25775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 26025 14300 26025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 26275 14300 26275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 26525 14300 26525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 26775 14300 26775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 27025 14300 27025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 27275 14300 27275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 27525 14300 27525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 27775 14300 27775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 28025 14300 28025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 28275 14300 28275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 28525 14300 28525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 28775 14300 28775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 29025 14300 29025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 29275 14300 29275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 29525 14300 29525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 29775 14300 29775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 30025 14300 30025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 30275 14300 30275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 24500 14300 24500
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 23950 14300 23950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10550 23950 10550 30275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14300 23950 14300 30275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	11575 30275 11575 24500
 Text Notes 10650 24975 0    140  ~ 28
  VALUE\n(OHMS)
@@ -666,7 +666,7 @@ Text Notes 11450 24475 0    140  ~ 28
 SEE NOTE 4
 Text Notes 12000 25275 0    140  ~ 28
 1006788
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	12475 25325 12475 30225
 Wire Notes Line width 60 style solid
 	12475 30225 12425 30075
@@ -674,59 +674,59 @@ Wire Notes Line width 60 style solid
 	12425 30075 12525 30075
 Wire Notes Line width 60 style solid
 	12525 30075 12475 30225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 25025 18325 25025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 25275 18325 25275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 25525 18325 25525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 25775 18325 25775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 26025 18325 26025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 26275 18325 26275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 26525 18325 26525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 26775 18325 26775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 27025 18325 27025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 27275 18325 27275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 27525 18325 27525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 27775 18325 27775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 28025 18325 28025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 28275 18325 28275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 28525 18325 28525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 28775 18325 28775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 29025 18325 29025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 29275 18325 29275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 29525 18325 29525
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 29775 18325 29775
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 30025 18325 30025
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 30275 18325 30275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 24500 18325 24500
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 23950 18325 23950
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14575 23950 14575 30275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	18325 23950 18325 30275
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	15600 30275 15600 24500
 Text Notes 14675 24975 0    140  ~ 28
  VALUE\n(OHMS)
@@ -736,7 +736,7 @@ Text Notes 15650 24450 0    140  ~ 28
 SEE NOTE 4
 Text Notes 16025 25275 0    140  ~ 28
 1006788
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	16500 25325 16500 30225
 Wire Notes Line width 60 style solid
 	16500 30225 16450 30075
@@ -744,45 +744,45 @@ Wire Notes Line width 60 style solid
 	16450 30075 16550 30075
 Wire Notes Line width 60 style solid
 	16550 30075 16500 30225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 25000 10275 25000
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 25250 10275 25250
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 25500 10275 25500
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 25750 10275 25750
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 26000 10275 26000
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 26250 10275 26250
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 26500 10275 26500
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 26750 10275 26750
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 27000 10275 27000
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 27250 10275 27250
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 27500 10275 27500
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 27750 10275 27750
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 28000 10275 28000
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 28250 10275 28250
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 28500 10275 28500
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 24475 10275 24475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 23925 10275 23925
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	6525 23925 6525 28500
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10275 23925 10275 28500
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	7550 28500 7550 24475
 Text Notes 6625 24950 0    140  ~ 28
  VALUE\n(OHMS)
@@ -792,7 +792,7 @@ Text Notes 7700 24450 0    140  ~ 28
 SEE NOTE 4
 Text Notes 7975 25250 0    140  ~ 28
 1006788
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	8450 25300 8450 28450
 Wire Notes Line width 60 style solid
 	8450 28450 8400 28300
@@ -1066,7 +1066,7 @@ Text Notes 28650 7450 0    130  ~ 26
 MODULE NO 1
 Text Notes 30100 7450 0    130  ~ 26
 MODULE NO 2
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	8750 21775 8750 22650
 Wire Notes Line width 60 style solid
 	8750 22650 8700 22500
@@ -1074,7 +1074,7 @@ Wire Notes Line width 60 style solid
 	8700 22500 8800 22500
 Wire Notes Line width 60 style solid
 	8800 22500 8750 22650
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10850 21775 10850 22650
 Wire Notes Line width 60 style solid
 	10850 22650 10800 22500
@@ -1082,7 +1082,7 @@ Wire Notes Line width 60 style solid
 	10800 22500 10900 22500
 Wire Notes Line width 60 style solid
 	10900 22500 10850 22650
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	22700 25275 22700 25425
 Wire Notes Line width 60 style solid
 	22700 25425 22650 25275
@@ -1090,7 +1090,7 @@ Wire Notes Line width 60 style solid
 	22650 25275 22750 25275
 Wire Notes Line width 60 style solid
 	22750 25275 22700 25425
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	22700 24025 22700 24425
 Wire Notes Line width 60 style solid
 	22700 24425 22650 24275
@@ -1098,7 +1098,7 @@ Wire Notes Line width 60 style solid
 	22650 24275 22750 24275
 Wire Notes Line width 60 style solid
 	22750 24275 22700 24425
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	24825 19525 24825 25425
 Wire Notes Line width 60 style solid
 	24825 25425 24775 25275
@@ -1106,7 +1106,7 @@ Wire Notes Line width 60 style solid
 	24775 25275 24875 25275
 Wire Notes Line width 60 style solid
 	24875 25275 24825 25425
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	22700 22275 22700 22675
 Wire Notes Line width 60 style solid
 	22700 22675 22650 22525
@@ -1114,7 +1114,7 @@ Wire Notes Line width 60 style solid
 	22650 22525 22750 22525
 Wire Notes Line width 60 style solid
 	22750 22525 22700 22675
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	22700 21275 22700 21675
 Wire Notes Line width 60 style solid
 	22700 21675 22650 21525
@@ -1122,7 +1122,7 @@ Wire Notes Line width 60 style solid
 	22650 21525 22750 21525
 Wire Notes Line width 60 style solid
 	22750 21525 22700 21675
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	22775 7775 22775 18425
 Wire Notes Line width 60 style solid
 	22775 18425 22725 18275
@@ -1130,7 +1130,7 @@ Wire Notes Line width 60 style solid
 	22725 18275 22825 18275
 Wire Notes Line width 60 style solid
 	22825 18275 22775 18425
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	24850 7775 24850 18425
 Wire Notes Line width 60 style solid
 	24850 18425 24800 18275
@@ -1138,7 +1138,7 @@ Wire Notes Line width 60 style solid
 	24800 18275 24900 18275
 Wire Notes Line width 60 style solid
 	24900 18275 24850 18425
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	13325 19250 13325 19650
 Wire Notes Line width 60 style solid
 	13325 19650 13275 19500
@@ -1146,7 +1146,7 @@ Wire Notes Line width 60 style solid
 	13275 19500 13375 19500
 Wire Notes Line width 60 style solid
 	13375 19500 13325 19650
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	14200 7750 14200 19650
 Wire Notes Line width 60 style solid
 	14200 19650 14150 19500
@@ -1154,7 +1154,7 @@ Wire Notes Line width 60 style solid
 	14150 19500 14250 19500
 Wire Notes Line width 60 style solid
 	14250 19500 14200 19650
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	13300 7750 13300 9400
 Wire Notes Line width 60 style solid
 	13300 9400 13250 9250
@@ -1162,7 +1162,7 @@ Wire Notes Line width 60 style solid
 	13250 9250 13350 9250
 Wire Notes Line width 60 style solid
 	13350 9250 13300 9400
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	13325 9750 13325 10150
 Wire Notes Line width 60 style solid
 	13325 10150 13275 10000
@@ -1170,7 +1170,7 @@ Wire Notes Line width 60 style solid
 	13275 10000 13375 10000
 Wire Notes Line width 60 style solid
 	13375 10000 13325 10150
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	13325 10500 13325 18900
 Wire Notes Line width 60 style solid
 	13325 18900 13275 18750
@@ -1178,7 +1178,7 @@ Wire Notes Line width 60 style solid
 	13275 18750 13375 18750
 Wire Notes Line width 60 style solid
 	13375 18750 13325 18900
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	10850 7750 10850 19650
 Wire Notes Line width 60 style solid
 	10850 19650 10800 19500
@@ -1186,7 +1186,7 @@ Wire Notes Line width 60 style solid
 	10800 19500 10900 19500
 Wire Notes Line width 60 style solid
 	10900 19500 10850 19650
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	8750 7750 8750 8150
 Wire Notes Line width 60 style solid
 	8750 8150 8700 8000
@@ -1194,7 +1194,7 @@ Wire Notes Line width 60 style solid
 	8700 8000 8800 8000
 Wire Notes Line width 60 style solid
 	8800 8000 8750 8150
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	8750 8750 8750 9400
 Wire Notes Line width 60 style solid
 	8750 9400 8700 9250
@@ -1202,7 +1202,7 @@ Wire Notes Line width 60 style solid
 	8700 9250 8800 9250
 Wire Notes Line width 60 style solid
 	8800 9250 8750 9400
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	8725 10500 8725 18900
 Wire Notes Line width 60 style solid
 	8725 18900 8675 18750
@@ -1316,17 +1316,17 @@ Text Notes 30375 15950 0    140  ~ 28
 40356
 Text Notes 28900 17475 0    140  ~ 28
 40365
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 7975 31525 7975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 8975 31525 8975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 11725 31525 11725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 14475 31525 14475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 17225 31525 17225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 17475 31525 17475
 Text Notes 30375 17475 0    140  ~ 28
 40366
@@ -1334,17 +1334,17 @@ Text Notes 28875 18050 0    140  ~ 28
 40367
 Text Notes 30375 18050 0    140  ~ 28
 40368
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 18475 31525 18475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 18725 31525 18725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 18975 31525 18975
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 19225 31525 19225
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 19725 31525 19725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 20725 31525 20725
 Text Notes 28675 19725 0    140  ~ 28
 40311 THRU\n40318
@@ -1358,13 +1358,13 @@ Text Notes 28875 21300 0    140  ~ 28
 40351
 Text Notes 30375 21300 0    140  ~ 28
 40354
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 21725 31525 21725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 22725 31525 22725
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 23475 31525 23475
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	31525 6975 31525 25475
 Text Notes 28875 22325 0    140  ~ 28
 40352
@@ -1382,11 +1382,11 @@ Text Notes 28925 25075 0    140  ~ 28
 40367
 Text Notes 30375 25075 0    140  ~ 28
 40368
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	21100 24475 31525 24475
 Text Notes 22250 7725 0    140  ~ 28
 1006751
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	22100 6975 22100 25475
 Text Notes 24550 7725 0    140  ~ 28
 DIODE
@@ -1618,4 +1618,12 @@ Text Notes 12000 18950 0    140  ~ 28
 5100
 Text Notes 12150 19200 0    140  ~ 28
 20
+Text Notes 13025 7700 0    140  ~ 28
+±2%
+Text Notes 13025 9700 0    140  ~ 28
+±1%
+Text Notes 13025 10450 0    140  ~ 28
+±2%
+Text Notes 13075 19200 0    140  ~ 28
+±1%
 $EndSCHEMATC
