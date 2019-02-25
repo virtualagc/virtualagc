@@ -71,43 +71,43 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	550  13350 25200 13350
 $Comp
-L AGC_DSKY:Transistor-NPN Q4701
+L AGC_DSKY:Transistor-NPN 30Q2
 U 1 1 5CD4D7E4
 P 14475 11000
-AR Path="/5B992554/5CD4D7E4" Ref="30Q2"  Part="1"
-AR Path="/5B991F4D/5CD4D7E4" Ref="12Q2"  Part="1"
-AR Path="/5B991F60/5CD4D7E4" Ref="13Q2"  Part="1"
-AR Path="/5B991FBA/5CD4D7E4" Ref="14Q2"  Part="1"
-AR Path="/5B992014/5CD4D7E4" Ref="15Q2"  Part="1"
-AR Path="/5B99206E/5CD4D7E4" Ref="16Q2"  Part="1"
-AR Path="/5B9920C8/5CD4D7E4" Ref="17Q2"  Part="1"
-AR Path="/5B992122/5CD4D7E4" Ref="18Q2"  Part="1"
-AR Path="/5B99217C/5CD4D7E4" Ref="19Q2"  Part="1"
-AR Path="/5B9921D6/5CD4D7E4" Ref="20Q2"  Part="1"
-AR Path="/5B992230/5CD4D7E4" Ref="1Q2"  Part="1"
-AR Path="/5B99228A/5CD4D7E4" Ref="2Q2"  Part="1"
-AR Path="/5B9922E4/5CD4D7E4" Ref="3Q2"  Part="1"
-AR Path="/5B99233E/5CD4D7E4" Ref="4Q2"  Part="1"
-AR Path="/5B9923EC/5CD4D7E4" Ref="5Q2"  Part="1"
-AR Path="/5B992446/5CD4D7E4" Ref="21Q2"  Part="1"
-AR Path="/5B9924A0/5CD4D7E4" Ref="22Q2"  Part="1"
-AR Path="/5B9924FA/5CD4D7E4" Ref="23Q2"  Part="1"
-AR Path="/5B9925AE/5CD4D7E4" Ref="31Q2"  Part="1"
-AR Path="/5B992608/5CD4D7E4" Ref="32Q2"  Part="1"
-AR Path="/5B992662/5CD4D7E4" Ref="33Q2"  Part="1"
-AR Path="/5B9926BC/5CD4D7E4" Ref="34Q2"  Part="1"
-AR Path="/5B992716/5CD4D7E4" Ref="28Q2"  Part="1"
-AR Path="/5B992770/5CD4D7E4" Ref="29Q2"  Part="1"
-AR Path="/5B9927CA/5CD4D7E4" Ref="6Q2"  Part="1"
-AR Path="/5B992824/5CD4D7E4" Ref="7Q2"  Part="1"
-AR Path="/5B99287E/5CD4D7E4" Ref="8Q2"  Part="1"
-AR Path="/5B9928D8/5CD4D7E4" Ref="9Q2"  Part="1"
-AR Path="/5B992932/5CD4D7E4" Ref="10Q2"  Part="1"
-AR Path="/5B99298C/5CD4D7E4" Ref="11Q2"  Part="1"
-AR Path="/5B9929E6/5CD4D7E4" Ref="24Q2"  Part="1"
-AR Path="/5B992A40/5CD4D7E4" Ref="25Q2"  Part="1"
-AR Path="/5B992A9A/5CD4D7E4" Ref="26Q2"  Part="1"
-AR Path="/5B992AF4/5CD4D7E4" Ref="27Q2"  Part="1"
+AR Path="/5B992554/5CD4D7E4" Ref="30Q2"  Part="1" 
+AR Path="/5B991F4D/5CD4D7E4" Ref="12Q2"  Part="1" 
+AR Path="/5B991F60/5CD4D7E4" Ref="13Q2"  Part="1" 
+AR Path="/5B991FBA/5CD4D7E4" Ref="14Q2"  Part="1" 
+AR Path="/5B992014/5CD4D7E4" Ref="15Q2"  Part="1" 
+AR Path="/5B99206E/5CD4D7E4" Ref="16Q2"  Part="1" 
+AR Path="/5B9920C8/5CD4D7E4" Ref="17Q2"  Part="1" 
+AR Path="/5B992122/5CD4D7E4" Ref="18Q2"  Part="1" 
+AR Path="/5B99217C/5CD4D7E4" Ref="19Q2"  Part="1" 
+AR Path="/5B9921D6/5CD4D7E4" Ref="20Q2"  Part="1" 
+AR Path="/5B992230/5CD4D7E4" Ref="1Q2"  Part="1" 
+AR Path="/5B99228A/5CD4D7E4" Ref="2Q2"  Part="1" 
+AR Path="/5B9922E4/5CD4D7E4" Ref="3Q2"  Part="1" 
+AR Path="/5B99233E/5CD4D7E4" Ref="4Q2"  Part="1" 
+AR Path="/5B9923EC/5CD4D7E4" Ref="5Q2"  Part="1" 
+AR Path="/5B992446/5CD4D7E4" Ref="21Q2"  Part="1" 
+AR Path="/5B9924A0/5CD4D7E4" Ref="22Q2"  Part="1" 
+AR Path="/5B9924FA/5CD4D7E4" Ref="23Q2"  Part="1" 
+AR Path="/5B9925AE/5CD4D7E4" Ref="31Q2"  Part="1" 
+AR Path="/5B992608/5CD4D7E4" Ref="32Q2"  Part="1" 
+AR Path="/5B992662/5CD4D7E4" Ref="33Q2"  Part="1" 
+AR Path="/5B9926BC/5CD4D7E4" Ref="34Q2"  Part="1" 
+AR Path="/5B992716/5CD4D7E4" Ref="28Q2"  Part="1" 
+AR Path="/5B992770/5CD4D7E4" Ref="29Q2"  Part="1" 
+AR Path="/5B9927CA/5CD4D7E4" Ref="6Q2"  Part="1" 
+AR Path="/5B992824/5CD4D7E4" Ref="7Q2"  Part="1" 
+AR Path="/5B99287E/5CD4D7E4" Ref="8Q2"  Part="1" 
+AR Path="/5B9928D8/5CD4D7E4" Ref="9Q2"  Part="1" 
+AR Path="/5B992932/5CD4D7E4" Ref="10Q2"  Part="1" 
+AR Path="/5B99298C/5CD4D7E4" Ref="11Q2"  Part="1" 
+AR Path="/5B9929E6/5CD4D7E4" Ref="24Q2"  Part="1" 
+AR Path="/5B992A40/5CD4D7E4" Ref="25Q2"  Part="1" 
+AR Path="/5B992A9A/5CD4D7E4" Ref="26Q2"  Part="1" 
+AR Path="/5B992AF4/5CD4D7E4" Ref="27Q2"  Part="1" 
 AR Path="/5CD4D7E4" Ref="Q2"  Part="1" 
 F 0 "Q4001" H 15375 10975 50  0000 C CNN
 F 1 "Transistor-NPN" H 14475 11565 130 0001 C CNN
@@ -118,43 +118,43 @@ F 4 "Q2" H 15025 11000 140 0000 C CNN "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R4701
+L AGC_DSKY:Resistor 30R6
 U 1 1 5CD4D82D
 P 15525 10100
-AR Path="/5B992554/5CD4D82D" Ref="30R6"  Part="1"
-AR Path="/5B991F4D/5CD4D82D" Ref="12R6"  Part="1"
-AR Path="/5B991F60/5CD4D82D" Ref="13R6"  Part="1"
-AR Path="/5B991FBA/5CD4D82D" Ref="14R6"  Part="1"
-AR Path="/5B992014/5CD4D82D" Ref="15R6"  Part="1"
-AR Path="/5B99206E/5CD4D82D" Ref="16R6"  Part="1"
-AR Path="/5B9920C8/5CD4D82D" Ref="17R6"  Part="1"
-AR Path="/5B992122/5CD4D82D" Ref="18R6"  Part="1"
-AR Path="/5B99217C/5CD4D82D" Ref="19R6"  Part="1"
-AR Path="/5B9921D6/5CD4D82D" Ref="20R6"  Part="1"
-AR Path="/5B992230/5CD4D82D" Ref="1R6"  Part="1"
-AR Path="/5B99228A/5CD4D82D" Ref="2R6"  Part="1"
-AR Path="/5B9922E4/5CD4D82D" Ref="3R6"  Part="1"
-AR Path="/5B99233E/5CD4D82D" Ref="4R6"  Part="1"
-AR Path="/5B9923EC/5CD4D82D" Ref="5R6"  Part="1"
-AR Path="/5B992446/5CD4D82D" Ref="21R6"  Part="1"
-AR Path="/5B9924A0/5CD4D82D" Ref="22R6"  Part="1"
-AR Path="/5B9924FA/5CD4D82D" Ref="23R6"  Part="1"
-AR Path="/5B9925AE/5CD4D82D" Ref="31R6"  Part="1"
-AR Path="/5B992608/5CD4D82D" Ref="32R6"  Part="1"
-AR Path="/5B992662/5CD4D82D" Ref="33R6"  Part="1"
-AR Path="/5B9926BC/5CD4D82D" Ref="34R6"  Part="1"
-AR Path="/5B992716/5CD4D82D" Ref="28R6"  Part="1"
-AR Path="/5B992770/5CD4D82D" Ref="29R6"  Part="1"
-AR Path="/5B9927CA/5CD4D82D" Ref="6R6"  Part="1"
-AR Path="/5B992824/5CD4D82D" Ref="7R6"  Part="1"
-AR Path="/5B99287E/5CD4D82D" Ref="8R6"  Part="1"
-AR Path="/5B9928D8/5CD4D82D" Ref="9R6"  Part="1"
-AR Path="/5B992932/5CD4D82D" Ref="10R6"  Part="1"
-AR Path="/5B99298C/5CD4D82D" Ref="11R6"  Part="1"
-AR Path="/5B9929E6/5CD4D82D" Ref="24R6"  Part="1"
-AR Path="/5B992A40/5CD4D82D" Ref="25R6"  Part="1"
-AR Path="/5B992A9A/5CD4D82D" Ref="26R6"  Part="1"
-AR Path="/5B992AF4/5CD4D82D" Ref="27R6"  Part="1"
+AR Path="/5B992554/5CD4D82D" Ref="30R6"  Part="1" 
+AR Path="/5B991F4D/5CD4D82D" Ref="12R6"  Part="1" 
+AR Path="/5B991F60/5CD4D82D" Ref="13R6"  Part="1" 
+AR Path="/5B991FBA/5CD4D82D" Ref="14R6"  Part="1" 
+AR Path="/5B992014/5CD4D82D" Ref="15R6"  Part="1" 
+AR Path="/5B99206E/5CD4D82D" Ref="16R6"  Part="1" 
+AR Path="/5B9920C8/5CD4D82D" Ref="17R6"  Part="1" 
+AR Path="/5B992122/5CD4D82D" Ref="18R6"  Part="1" 
+AR Path="/5B99217C/5CD4D82D" Ref="19R6"  Part="1" 
+AR Path="/5B9921D6/5CD4D82D" Ref="20R6"  Part="1" 
+AR Path="/5B992230/5CD4D82D" Ref="1R6"  Part="1" 
+AR Path="/5B99228A/5CD4D82D" Ref="2R6"  Part="1" 
+AR Path="/5B9922E4/5CD4D82D" Ref="3R6"  Part="1" 
+AR Path="/5B99233E/5CD4D82D" Ref="4R6"  Part="1" 
+AR Path="/5B9923EC/5CD4D82D" Ref="5R6"  Part="1" 
+AR Path="/5B992446/5CD4D82D" Ref="21R6"  Part="1" 
+AR Path="/5B9924A0/5CD4D82D" Ref="22R6"  Part="1" 
+AR Path="/5B9924FA/5CD4D82D" Ref="23R6"  Part="1" 
+AR Path="/5B9925AE/5CD4D82D" Ref="31R6"  Part="1" 
+AR Path="/5B992608/5CD4D82D" Ref="32R6"  Part="1" 
+AR Path="/5B992662/5CD4D82D" Ref="33R6"  Part="1" 
+AR Path="/5B9926BC/5CD4D82D" Ref="34R6"  Part="1" 
+AR Path="/5B992716/5CD4D82D" Ref="28R6"  Part="1" 
+AR Path="/5B992770/5CD4D82D" Ref="29R6"  Part="1" 
+AR Path="/5B9927CA/5CD4D82D" Ref="6R6"  Part="1" 
+AR Path="/5B992824/5CD4D82D" Ref="7R6"  Part="1" 
+AR Path="/5B99287E/5CD4D82D" Ref="8R6"  Part="1" 
+AR Path="/5B9928D8/5CD4D82D" Ref="9R6"  Part="1" 
+AR Path="/5B992932/5CD4D82D" Ref="10R6"  Part="1" 
+AR Path="/5B99298C/5CD4D82D" Ref="11R6"  Part="1" 
+AR Path="/5B9929E6/5CD4D82D" Ref="24R6"  Part="1" 
+AR Path="/5B992A40/5CD4D82D" Ref="25R6"  Part="1" 
+AR Path="/5B992A9A/5CD4D82D" Ref="26R6"  Part="1" 
+AR Path="/5B992AF4/5CD4D82D" Ref="27R6"  Part="1" 
 AR Path="/5CD4D82D" Ref="R6"  Part="1" 
 F 0 "R4001" H 15800 10525 50  0000 C CNN
 F 1 "2000" H 15475 10325 130 0000 C CNN
@@ -516,28 +516,28 @@ Text Notes 42235 23276 0    140  ~ 28
 35VDC
 Text Notes 42235 23526 0    140  ~ 28
 35VDC
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37160 21376 37160 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37160 22526 37110 22376
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37210 22376 37160 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39235 21376 39235 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39235 22526 39185 22376
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39285 22376 39235 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41710 21376 41710 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41710 22526 41660 22376
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41760 22376 41710 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42560 21376 42560 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42560 22526 42510 22376
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42610 22376 42560 22526
 $EndSCHEMATC

@@ -73,13 +73,13 @@ Wire Notes Line style solid
 Text Notes 21700 9300 0    200  ~ 40
 R CIRCUIT
 $Comp
-L AGC_DSKY:Resistor R1801
+L AGC_DSKY:Resistor 2R7
 U 1 1 5CD48153
 P 22625 10200
-AR Path="/5B99182E/5CD48153" Ref="2R7"  Part="1"
-AR Path="/5B991130/5CD48153" Ref="1R7"  Part="1"
-AR Path="/5B9917D6/5CD48153" Ref="4R7"  Part="1"
-AR Path="/5B991886/5CD48153" Ref="3R7"  Part="1"
+AR Path="/5B99182E/5CD48153" Ref="2R7"  Part="1" 
+AR Path="/5B991130/5CD48153" Ref="1R7"  Part="1" 
+AR Path="/5B9917D6/5CD48153" Ref="4R7"  Part="1" 
+AR Path="/5B991886/5CD48153" Ref="3R7"  Part="1" 
 AR Path="/5CD48153" Ref="R7"  Part="1" 
 F 0 "R1701" H 22975 10625 50  0000 C CNN
 F 1 "2000" H 22625 10425 130 0000 C CNN
@@ -323,28 +323,28 @@ Text Notes 42235 23276 0    140  ~ 28
 35VDC
 Text Notes 42235 23526 0    140  ~ 28
 35VDC
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37160 21376 37160 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37160 22526 37110 22376
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37210 22376 37160 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39235 21376 39235 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39235 22526 39185 22376
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39285 22376 39235 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41710 21376 41710 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41710 22526 41660 22376
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41760 22376 41710 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42560 21376 42560 22526
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42560 22526 42510 22376
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42610 22376 42560 22526
 $EndSCHEMATC

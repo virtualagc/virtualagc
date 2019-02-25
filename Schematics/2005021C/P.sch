@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 15 63
+Sheet 2 63
 Title ""
 Date ""
 Rev ""
@@ -77,14 +77,14 @@ G
 Text HLabel 6675 10475 2    140  Output ~ 28
 J
 $Comp
-L AGC_DSKY:Inductor L201
+L AGC_DSKY:Inductor 2L1
 U 1 1 5CD3D50C
 P 4525 10475
-AR Path="/5B99108F/5CD3D50C" Ref="2L1"  Part="1"
-AR Path="/5B991709/5CD3D50C" Ref="1L1"  Part="1"
-AR Path="/5B991763/5CD3D50C" Ref="3L1"  Part="1"
+AR Path="/5B99108F/5CD3D50C" Ref="2L1"  Part="1" 
+AR Path="/5B991709/5CD3D50C" Ref="1L1"  Part="1" 
+AR Path="/5B991763/5CD3D50C" Ref="3L1"  Part="1" 
 AR Path="/5CD3D50C" Ref="L1"  Part="1" 
-F 0 "L1501" H 4825 10925 50  0000 C CNN
+F 0 "2L1" H 4825 10925 50  0000 C CNN
 F 1 "100 UH" H 4525 10725 130 0000 C CNN
 F 2 "" H 4475 10675 130 0001 C CNN
 F 3 "" H 4475 10675 130 0001 C CNN
@@ -93,14 +93,14 @@ F 4 "L1" H 4525 10925 140 0000 C CNN "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor-Polarized C201
+L AGC_DSKY:Capacitor-Polarized 2C2
 U 1 1 5CD3D5B5
 P 5275 11200
-AR Path="/5B99108F/5CD3D5B5" Ref="2C2"  Part="1"
-AR Path="/5B991709/5CD3D5B5" Ref="1C2"  Part="1"
-AR Path="/5B991763/5CD3D5B5" Ref="3C2"  Part="1"
+AR Path="/5B99108F/5CD3D5B5" Ref="2C2"  Part="1" 
+AR Path="/5B991709/5CD3D5B5" Ref="1C2"  Part="1" 
+AR Path="/5B991763/5CD3D5B5" Ref="3C2"  Part="1" 
 AR Path="/5CD3D5B5" Ref="C2"  Part="1" 
-F 0 "C1501" H 6050 11250 50  0000 C CNN
+F 0 "2C2" H 6050 11250 50  0000 C CNN
 F 1 "6.8" H 5725 11050 130 0000 C CNN
 F 2 "" H 5275 11600 130 0001 C CNN
 F 3 "" H 5275 11600 130 0001 C CNN
@@ -138,7 +138,7 @@ P 9875 10950
 AR Path="/5B99108F/5CF0C9E8" Ref="N201"  Part="1" 
 AR Path="/5B991763/5CF0C9E8" Ref="N1601"  Part="1" 
 AR Path="/5B991709/5CF0C9E8" Ref="N1501"  Part="1" 
-F 0 "N1501" H 9860 10750 140 0001 C CNN
+F 0 "N201" H 9860 10750 140 0001 C CNN
 F 1 "HierBody" H 9880 11130 140 0001 C CNN
 F 2 "" H 9875 10950 140 0001 C CNN
 F 3 "" H 9875 10950 140 0001 C CNN
@@ -153,7 +153,7 @@ P 9875 11275
 AR Path="/5B99108F/5CF0CA10" Ref="N202"  Part="1" 
 AR Path="/5B991763/5CF0CA10" Ref="N1602"  Part="1" 
 AR Path="/5B991709/5CF0CA10" Ref="N1502"  Part="1" 
-F 0 "N1502" H 9860 11075 140 0001 C CNN
+F 0 "N202" H 9860 11075 140 0001 C CNN
 F 1 "HierBody" H 9880 11455 140 0001 C CNN
 F 2 "" H 9875 11275 140 0001 C CNN
 F 3 "" H 9875 11275 140 0001 C CNN
@@ -168,7 +168,7 @@ P 10675 10950
 AR Path="/5B99108F/5CF0CA38" Ref="N203"  Part="1" 
 AR Path="/5B991763/5CF0CA38" Ref="N1603"  Part="1" 
 AR Path="/5B991709/5CF0CA38" Ref="N1503"  Part="1" 
-F 0 "N1503" H 10660 10750 140 0001 C CNN
+F 0 "N203" H 10660 10750 140 0001 C CNN
 F 1 "HierBody" H 10680 11130 140 0001 C CNN
 F 2 "" H 10675 10950 140 0001 C CNN
 F 3 "" H 10675 10950 140 0001 C CNN
@@ -362,28 +362,28 @@ Text Notes 42226 23280 0    140  ~ 28
 35VDC
 Text Notes 42226 23530 0    140  ~ 28
 35VDC
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37151 21380 37151 22530
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37151 22530 37101 22380
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37201 22380 37151 22530
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39226 21380 39226 22530
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39226 22530 39176 22380
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39276 22380 39226 22530
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41701 21380 41701 22530
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41701 22530 41651 22380
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41751 22380 41701 22530
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42551 21380 42551 22530
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42551 22530 42501 22380
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42601 22380 42551 22530
 $EndSCHEMATC

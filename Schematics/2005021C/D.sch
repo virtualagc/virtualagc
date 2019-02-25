@@ -73,19 +73,19 @@ Wire Notes Line style solid
 Text Notes 20425 2700 0    200  ~ 40
 D CIRCUIT
 $Comp
-L AGC_DSKY:Resistor R2601
+L AGC_DSKY:Resistor 4R4
 U 1 1 5CD537B3
 P 20225 3875
-AR Path="/5B991DE9/5CD537B3" Ref="4R4"  Part="1"
-AR Path="/5B991C14/5CD537B3" Ref="10R4"  Part="1"
-AR Path="/5B991C27/5CD537B3" Ref="9R4"  Part="1"
-AR Path="/5B991C81/5CD537B3" Ref="8R4"  Part="1"
-AR Path="/5B991CDB/5CD537B3" Ref="7R4"  Part="1"
-AR Path="/5B991D35/5CD537B3" Ref="6R4"  Part="1"
-AR Path="/5B991D8F/5CD537B3" Ref="5R4"  Part="1"
-AR Path="/5B991E43/5CD537B3" Ref="3R4"  Part="1"
-AR Path="/5B991E9D/5CD537B3" Ref="2R4"  Part="1"
-AR Path="/5B991EF7/5CD537B3" Ref="1R4"  Part="1"
+AR Path="/5B991DE9/5CD537B3" Ref="4R4"  Part="1" 
+AR Path="/5B991C14/5CD537B3" Ref="10R4"  Part="1" 
+AR Path="/5B991C27/5CD537B3" Ref="9R4"  Part="1" 
+AR Path="/5B991C81/5CD537B3" Ref="8R4"  Part="1" 
+AR Path="/5B991CDB/5CD537B3" Ref="7R4"  Part="1" 
+AR Path="/5B991D35/5CD537B3" Ref="6R4"  Part="1" 
+AR Path="/5B991D8F/5CD537B3" Ref="5R4"  Part="1" 
+AR Path="/5B991E43/5CD537B3" Ref="3R4"  Part="1" 
+AR Path="/5B991E9D/5CD537B3" Ref="2R4"  Part="1" 
+AR Path="/5B991EF7/5CD537B3" Ref="1R4"  Part="1" 
 AR Path="/5CD537B3" Ref="R4"  Part="1" 
 F 0 "R2401" H 20525 4325 50  0000 C CNN
 F 1 "20K" H 20200 4100 130 0000 C CNN
@@ -96,19 +96,19 @@ F 4 "R4" H 20200 4300 140 0000 C CNN "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R2602
+L AGC_DSKY:Resistor 4R5
 U 1 1 5CD53849
 P 22425 4675
-AR Path="/5B991DE9/5CD53849" Ref="4R5"  Part="1"
-AR Path="/5B991C14/5CD53849" Ref="10R5"  Part="1"
-AR Path="/5B991C27/5CD53849" Ref="9R5"  Part="1"
-AR Path="/5B991C81/5CD53849" Ref="8R5"  Part="1"
-AR Path="/5B991CDB/5CD53849" Ref="7R5"  Part="1"
-AR Path="/5B991D35/5CD53849" Ref="6R5"  Part="1"
-AR Path="/5B991D8F/5CD53849" Ref="5R5"  Part="1"
-AR Path="/5B991E43/5CD53849" Ref="3R5"  Part="1"
-AR Path="/5B991E9D/5CD53849" Ref="2R5"  Part="1"
-AR Path="/5B991EF7/5CD53849" Ref="1R5"  Part="1"
+AR Path="/5B991DE9/5CD53849" Ref="4R5"  Part="1" 
+AR Path="/5B991C14/5CD53849" Ref="10R5"  Part="1" 
+AR Path="/5B991C27/5CD53849" Ref="9R5"  Part="1" 
+AR Path="/5B991C81/5CD53849" Ref="8R5"  Part="1" 
+AR Path="/5B991CDB/5CD53849" Ref="7R5"  Part="1" 
+AR Path="/5B991D35/5CD53849" Ref="6R5"  Part="1" 
+AR Path="/5B991D8F/5CD53849" Ref="5R5"  Part="1" 
+AR Path="/5B991E43/5CD53849" Ref="3R5"  Part="1" 
+AR Path="/5B991E9D/5CD53849" Ref="2R5"  Part="1" 
+AR Path="/5B991EF7/5CD53849" Ref="1R5"  Part="1" 
 AR Path="/5CD53849" Ref="R5"  Part="1" 
 F 0 "R2402" V 22325 5325 50  0000 C CNN
 F 1 "2000" V 22550 5050 130 0000 C CNN
@@ -119,19 +119,19 @@ F 4 "R5" V 22325 5025 140 0000 C CNN "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Capacitor-Polarized C2601
+L AGC_DSKY:Capacitor-Polarized 4C1
 U 1 1 5CD53908
 P 21175 4675
-AR Path="/5B991DE9/5CD53908" Ref="4C1"  Part="1"
-AR Path="/5B991C14/5CD53908" Ref="10C1"  Part="1"
-AR Path="/5B991C27/5CD53908" Ref="9C1"  Part="1"
-AR Path="/5B991C81/5CD53908" Ref="8C1"  Part="1"
-AR Path="/5B991CDB/5CD53908" Ref="7C1"  Part="1"
-AR Path="/5B991D35/5CD53908" Ref="6C1"  Part="1"
-AR Path="/5B991D8F/5CD53908" Ref="5C1"  Part="1"
-AR Path="/5B991E43/5CD53908" Ref="3C1"  Part="1"
-AR Path="/5B991E9D/5CD53908" Ref="2C1"  Part="1"
-AR Path="/5B991EF7/5CD53908" Ref="1C1"  Part="1"
+AR Path="/5B991DE9/5CD53908" Ref="4C1"  Part="1" 
+AR Path="/5B991C14/5CD53908" Ref="10C1"  Part="1" 
+AR Path="/5B991C27/5CD53908" Ref="9C1"  Part="1" 
+AR Path="/5B991C81/5CD53908" Ref="8C1"  Part="1" 
+AR Path="/5B991CDB/5CD53908" Ref="7C1"  Part="1" 
+AR Path="/5B991D35/5CD53908" Ref="6C1"  Part="1" 
+AR Path="/5B991D8F/5CD53908" Ref="5C1"  Part="1" 
+AR Path="/5B991E43/5CD53908" Ref="3C1"  Part="1" 
+AR Path="/5B991E9D/5CD53908" Ref="2C1"  Part="1" 
+AR Path="/5B991EF7/5CD53908" Ref="1C1"  Part="1" 
 AR Path="/5CD53908" Ref="C1"  Part="1" 
 F 0 "C2401" H 21875 4775 50  0000 C CNN
 F 1 "6.8" H 21575 4575 130 0000 C CNN
@@ -433,28 +433,28 @@ Text Notes 42229 23270 0    140  ~ 28
 35VDC
 Text Notes 42229 23520 0    140  ~ 28
 35VDC
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37154 21370 37154 22520
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37154 22520 37104 22370
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	37204 22370 37154 22520
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39229 21370 39229 22520
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39229 22520 39179 22370
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	39279 22370 39229 22520
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41704 21370 41704 22520
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41704 22520 41654 22370
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	41754 22370 41704 22520
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42554 21370 42554 22520
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42554 22520 42504 22370
-Wire Notes Line width 50 style solid
+Wire Notes Line style solid
 	42604 22370 42554 22520
 $EndSCHEMATC
