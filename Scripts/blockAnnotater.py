@@ -35,6 +35,11 @@
 #	stripped of any trailing non-numerical characters.  For example,
 #	if the sheet name is 15XT, then the prefix is 15.  Thus the parent
 #	drawing must be prepared with the appropriate "Sheet name" fields.
+#	The sheet name can optionally have a prefix of "--", "xx", or "XX",
+#	and if so, it will be removed from the prefix automatically.  Also,
+#	if greater than 99, the prefix is automatically truncated to just
+#	its final two digits, or to just one digit if necessary to prevent
+#	having a leading 0.
 
 # The script overwrites in-place all of the child schematics it processes.  
 # Therefore, it should only be run in folders that have been backed up or 
@@ -78,8 +83,11 @@ for line in sys.stdin:
 		inSheet = False
 		if timestamp != "" and sheetname != "" and filename != "":
 			if filename not in blocks:
-				blocks[filename] = {}
-			blocks[filename][timestamp] = sheetname
+				blocks[filename] = { "min":1000000 }
+			sheetnum = int(sheetname)
+			if sheetnum < blocks[filename]["min"]:
+				blocks[filename]["min"] = sheetnum
+			blocks[filename][timestamp] = sheetnum
 		continue
 	if not inSheet:
 		continue
@@ -88,6 +96,8 @@ for line in sys.stdin:
 		timestamp = fields[1]
 		continue
 	if numFields == 3 and fields[0] == "F0":
+		if fields[1][1:3] in ["--", "xx", "XX"]:
+			fields[1] = fields[1][3:]
 		sheetname = re.sub("\D.*", "", fields[1].strip('"'))
 		continue
 	if numFields == 3 and fields[0] == "F1":
@@ -134,7 +144,8 @@ for filename in blocks:
 		timestamp = re.sub("/.*", "", fields[1][7:])
 		#print(timestamp)
 		if timestamp in blocks[filename]:
-			refd = blocks[filename][timestamp] + baseRefd
+			prefix = str(blocks[filename][timestamp] - blocks[filename]["min"] + 1) 
+			refd = prefix + baseRefd
 			lines[i] = fields[0] + " " + fields[1] + " " + 'Ref="' + refd + '"  ' + fields[3] + "\n"
 			#print("Replacing " + fields[2] + " by " + blocks[filename][timestamp] + baseRefd)
 	
