@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 5 5
+Sheet 4 5
 Title ""
 Date ""
 Rev ""
@@ -127,13 +127,13 @@ Text Notes 2075 3150 0    140  ~ 28
 Text Notes 2075 3500 0    140  ~ 28
 NUMBERS  40501, 40502, 40503
 $Comp
-L AGC_DSKY:Resistor R304
+L AGC_DSKY:Resistor 1R1
 U 1 1 5C6878D1
 P 6075 6050
-AR Path="/5C686ADC/5C6878D1" Ref="R304"  Part="1" 
-AR Path="/5C687067/5C6878D1" Ref="R404"  Part="1" 
-AR Path="/5C68750A/5C6878D1" Ref="R504"  Part="1" 
-F 0 "R504" H 6050 5875 130 0001 C CNN
+AR Path="/5C686ADC/5C6878D1" Ref="1R1"  Part="1" 
+AR Path="/5C687067/5C6878D1" Ref="2R1"  Part="1" 
+AR Path="/5C68750A/5C6878D1" Ref="3R1"  Part="1" 
+F 0 "2R1" H 6050 5875 130 0001 C CNN
 F 1 "200" H 6150 6275 130 0000 C CNB
 F 2 "" H 6075 6050 130 0001 C CNN
 F 3 "" H 6075 6050 130 0001 C CNN
@@ -142,13 +142,13 @@ F 4 "R1" H 6175 6525 130 0000 C CNB "baseRefd"
 	-1   0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R303
+L AGC_DSKY:Resistor 1R2
 U 1 1 5C687E5E
 P 6000 8550
-AR Path="/5C686ADC/5C687E5E" Ref="R303"  Part="1" 
-AR Path="/5C687067/5C687E5E" Ref="R403"  Part="1" 
-AR Path="/5C68750A/5C687E5E" Ref="R503"  Part="1" 
-F 0 "R503" H 5975 8375 130 0001 C CNN
+AR Path="/5C686ADC/5C687E5E" Ref="1R2"  Part="1" 
+AR Path="/5C687067/5C687E5E" Ref="2R2"  Part="1" 
+AR Path="/5C68750A/5C687E5E" Ref="3R2"  Part="1" 
+F 0 "2R2" H 5975 8375 130 0001 C CNN
 F 1 "200" H 6075 8775 130 0000 C CNB
 F 2 "" H 6000 8550 130 0001 C CNN
 F 3 "" H 6000 8550 130 0001 C CNN
@@ -157,13 +157,13 @@ F 4 "R2" H 6100 9025 130 0000 C CNB "baseRefd"
 	-1   0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R301
+L AGC_DSKY:Resistor 1R3
 U 1 1 5C6883D1
 P 4525 6625
-AR Path="/5C686ADC/5C6883D1" Ref="R301"  Part="1" 
-AR Path="/5C687067/5C6883D1" Ref="R401"  Part="1" 
-AR Path="/5C68750A/5C6883D1" Ref="R501"  Part="1" 
-F 0 "R501" H 4500 6450 130 0001 C CNN
+AR Path="/5C686ADC/5C6883D1" Ref="1R3"  Part="1" 
+AR Path="/5C687067/5C6883D1" Ref="2R3"  Part="1" 
+AR Path="/5C68750A/5C6883D1" Ref="3R3"  Part="1" 
+F 0 "2R3" H 4500 6450 130 0001 C CNN
 F 1 "3000" V 4375 7050 130 0000 C CNB
 F 2 "" H 4525 6625 130 0001 C CNN
 F 3 "" H 4525 6625 130 0001 C CNN
@@ -172,13 +172,13 @@ F 4 "R3" V 4625 6950 130 0000 C CNB "baseRefd"
 	0    1    -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R302
+L AGC_DSKY:Resistor 1R4
 U 1 1 5C688FA1
 P 4525 7950
-AR Path="/5C686ADC/5C688FA1" Ref="R302"  Part="1" 
-AR Path="/5C687067/5C688FA1" Ref="R402"  Part="1" 
-AR Path="/5C68750A/5C688FA1" Ref="R502"  Part="1" 
-F 0 "R502" H 4500 7775 130 0001 C CNN
+AR Path="/5C686ADC/5C688FA1" Ref="1R4"  Part="1" 
+AR Path="/5C687067/5C688FA1" Ref="2R4"  Part="1" 
+AR Path="/5C68750A/5C688FA1" Ref="3R4"  Part="1" 
+F 0 "2R4" H 4500 7775 130 0001 C CNN
 F 1 "3000" V 4375 8375 130 0000 C CNB
 F 2 "" H 4525 7950 130 0001 C CNN
 F 3 "" H 4525 7950 130 0001 C CNN
@@ -187,13 +187,13 @@ F 4 "R4" V 4625 8275 130 0000 C CNB "baseRefd"
 	0    1    -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R305
+L AGC_DSKY:Resistor 1R5
 U 1 1 5C689386
 P 9650 5550
-AR Path="/5C686ADC/5C689386" Ref="R305"  Part="1" 
-AR Path="/5C687067/5C689386" Ref="R405"  Part="1" 
-AR Path="/5C68750A/5C689386" Ref="R505"  Part="1" 
-F 0 "R505" H 9625 5375 130 0001 C CNN
+AR Path="/5C686ADC/5C689386" Ref="1R5"  Part="1" 
+AR Path="/5C687067/5C689386" Ref="2R5"  Part="1" 
+AR Path="/5C68750A/5C689386" Ref="3R5"  Part="1" 
+F 0 "2R5" H 9625 5375 130 0001 C CNN
 F 1 "1000" H 9725 5775 130 0000 C CNB
 F 2 "" H 9650 5550 130 0001 C CNN
 F 3 "" H 9650 5550 130 0001 C CNN
@@ -202,13 +202,13 @@ F 4 "R5" H 9750 6025 130 0000 C CNB "baseRefd"
 	-1   0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R306
+L AGC_DSKY:Resistor 1R6
 U 1 1 5C6899E8
 P 9650 9025
-AR Path="/5C686ADC/5C6899E8" Ref="R306"  Part="1" 
-AR Path="/5C687067/5C6899E8" Ref="R406"  Part="1" 
-AR Path="/5C68750A/5C6899E8" Ref="R506"  Part="1" 
-F 0 "R506" H 9625 8850 130 0001 C CNN
+AR Path="/5C686ADC/5C6899E8" Ref="1R6"  Part="1" 
+AR Path="/5C687067/5C6899E8" Ref="2R6"  Part="1" 
+AR Path="/5C68750A/5C6899E8" Ref="3R6"  Part="1" 
+F 0 "2R6" H 9625 8850 130 0001 C CNN
 F 1 "1000" H 9725 9250 130 0000 C CNB
 F 2 "" H 9650 9025 130 0001 C CNN
 F 3 "" H 9650 9025 130 0001 C CNN
@@ -217,13 +217,13 @@ F 4 "R6" H 9750 9500 130 0000 C CNB "baseRefd"
 	-1   0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R308
+L AGC_DSKY:Resistor 1R7
 U 1 1 5C68A1EA
 P 10875 4525
-AR Path="/5C686ADC/5C68A1EA" Ref="R308"  Part="1" 
-AR Path="/5C687067/5C68A1EA" Ref="R408"  Part="1" 
-AR Path="/5C68750A/5C68A1EA" Ref="R508"  Part="1" 
-F 0 "R508" H 10850 4350 130 0001 C CNN
+AR Path="/5C686ADC/5C68A1EA" Ref="1R7"  Part="1" 
+AR Path="/5C687067/5C68A1EA" Ref="2R7"  Part="1" 
+AR Path="/5C68750A/5C68A1EA" Ref="3R7"  Part="1" 
+F 0 "2R7" H 10850 4350 130 0001 C CNN
 F 1 "2000" H 10950 4750 130 0000 C CNB
 F 2 "" H 10875 4525 130 0001 C CNN
 F 3 "" H 10875 4525 130 0001 C CNN
@@ -232,13 +232,13 @@ F 4 "R7" H 10975 5000 130 0000 C CNB "baseRefd"
 	-1   0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R307
+L AGC_DSKY:Resistor 1R8
 U 1 1 5C68A7B6
 P 10850 10000
-AR Path="/5C686ADC/5C68A7B6" Ref="R307"  Part="1" 
-AR Path="/5C687067/5C68A7B6" Ref="R407"  Part="1" 
-AR Path="/5C68750A/5C68A7B6" Ref="R507"  Part="1" 
-F 0 "R507" H 10825 9825 130 0001 C CNN
+AR Path="/5C686ADC/5C68A7B6" Ref="1R8"  Part="1" 
+AR Path="/5C687067/5C68A7B6" Ref="2R8"  Part="1" 
+AR Path="/5C68750A/5C68A7B6" Ref="3R8"  Part="1" 
+F 0 "2R8" H 10825 9825 130 0001 C CNN
 F 1 "2000" H 10925 10225 130 0000 C CNB
 F 2 "" H 10850 10000 130 0001 C CNN
 F 3 "" H 10850 10000 130 0001 C CNN
@@ -247,13 +247,13 @@ F 4 "R8" H 10950 10475 130 0000 C CNB "baseRefd"
 	-1   0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R309
+L AGC_DSKY:Resistor 1R9
 U 1 1 5C68AFA8
 P 11450 6600
-AR Path="/5C686ADC/5C68AFA8" Ref="R309"  Part="1" 
-AR Path="/5C687067/5C68AFA8" Ref="R409"  Part="1" 
-AR Path="/5C68750A/5C68AFA8" Ref="R509"  Part="1" 
-F 0 "R509" H 11425 6425 130 0001 C CNN
+AR Path="/5C686ADC/5C68AFA8" Ref="1R9"  Part="1" 
+AR Path="/5C687067/5C68AFA8" Ref="2R9"  Part="1" 
+AR Path="/5C68750A/5C68AFA8" Ref="3R9"  Part="1" 
+F 0 "2R9" H 11425 6425 130 0001 C CNN
 F 1 "2000" V 11350 7025 130 0000 C CNB
 F 2 "" H 11450 6600 130 0001 C CNN
 F 3 "" H 11450 6600 130 0001 C CNN
@@ -262,13 +262,13 @@ F 4 "R9" V 11600 6925 130 0000 C CNB "baseRefd"
 	0    1    -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R310
+L AGC_DSKY:Resistor 1R10
 U 1 1 5C68BEDF
 P 11450 7800
-AR Path="/5C686ADC/5C68BEDF" Ref="R310"  Part="1" 
-AR Path="/5C687067/5C68BEDF" Ref="R410"  Part="1" 
-AR Path="/5C68750A/5C68BEDF" Ref="R510"  Part="1" 
-F 0 "R510" H 11425 7625 130 0001 C CNN
+AR Path="/5C686ADC/5C68BEDF" Ref="1R10"  Part="1" 
+AR Path="/5C687067/5C68BEDF" Ref="2R10"  Part="1" 
+AR Path="/5C68750A/5C68BEDF" Ref="3R10"  Part="1" 
+F 0 "2R10" H 11425 7625 130 0001 C CNN
 F 1 "2000" V 11350 8225 130 0000 C CNB
 F 2 "" H 11450 7800 130 0001 C CNN
 F 3 "" H 11450 7800 130 0001 C CNN
@@ -277,13 +277,13 @@ F 4 "R10" V 11600 8125 130 0000 C CNB "baseRefd"
 	0    1    -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Diode CR302
+L AGC_DSKY:Diode 1CR1
 U 1 1 5C68C560
 P 8875 6475
-AR Path="/5C686ADC/5C68C560" Ref="CR302"  Part="1" 
-AR Path="/5C687067/5C68C560" Ref="CR402"  Part="1" 
-AR Path="/5C68750A/5C68C560" Ref="CR502"  Part="1" 
-F 0 "CR502" H 8875 6675 140 0001 C CNN
+AR Path="/5C686ADC/5C68C560" Ref="1CR1"  Part="1" 
+AR Path="/5C687067/5C68C560" Ref="2CR1"  Part="1" 
+AR Path="/5C68750A/5C68C560" Ref="3CR1"  Part="1" 
+F 0 "2CR1" H 8875 6675 140 0001 C CNN
 F 1 "Diode" H 8875 6325 50  0001 C CNN
 F 2 "" H 8825 6300 50  0001 C CNN
 F 3 "" H 8825 6475 50  0001 C CNN
@@ -292,13 +292,13 @@ F 4 "CR1" V 8825 6900 130 0000 C CNB "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Diode CR303
+L AGC_DSKY:Diode 1CR2
 U 1 1 5C68CBB6
 P 8875 7975
-AR Path="/5C686ADC/5C68CBB6" Ref="CR303"  Part="1" 
-AR Path="/5C687067/5C68CBB6" Ref="CR403"  Part="1" 
-AR Path="/5C68750A/5C68CBB6" Ref="CR503"  Part="1" 
-F 0 "CR503" H 8875 8175 140 0001 C CNN
+AR Path="/5C686ADC/5C68CBB6" Ref="1CR2"  Part="1" 
+AR Path="/5C687067/5C68CBB6" Ref="2CR2"  Part="1" 
+AR Path="/5C68750A/5C68CBB6" Ref="3CR2"  Part="1" 
+F 0 "2CR2" H 8875 8175 140 0001 C CNN
 F 1 "Diode" H 8875 7825 50  0001 C CNN
 F 2 "" H 8825 7800 50  0001 C CNN
 F 3 "" H 8825 7975 50  0001 C CNN
@@ -307,13 +307,13 @@ F 4 "CR2" V 8850 7500 130 0000 C CNB "baseRefd"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Diode CR301
+L AGC_DSKY:Diode 1CR3
 U 1 1 5C68D855
 P 5175 10025
-AR Path="/5C686ADC/5C68D855" Ref="CR301"  Part="1" 
-AR Path="/5C687067/5C68D855" Ref="CR401"  Part="1" 
-AR Path="/5C68750A/5C68D855" Ref="CR501"  Part="1" 
-F 0 "CR501" H 5175 10225 140 0001 C CNN
+AR Path="/5C686ADC/5C68D855" Ref="1CR3"  Part="1" 
+AR Path="/5C687067/5C68D855" Ref="2CR3"  Part="1" 
+AR Path="/5C68750A/5C68D855" Ref="3CR3"  Part="1" 
+F 0 "2CR3" H 5175 10225 140 0001 C CNN
 F 1 "Diode" H 5175 9875 50  0001 C CNN
 F 2 "" H 5125 9850 50  0001 C CNN
 F 3 "" H 5125 10025 50  0001 C CNN
@@ -322,43 +322,43 @@ F 4 "CR3" H 5150 10325 130 0000 C CNB "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-NPN Q301
+L AGC_DSKY:Transistor-NPN 1Q1
 U 1 1 5C68E32B
 P 7300 6050
-AR Path="/5C686ADC/5C68E32B" Ref="Q301"  Part="1" 
-AR Path="/5C687067/5C68E32B" Ref="Q401"  Part="1" 
-AR Path="/5C68750A/5C68E32B" Ref="Q501"  Part="1" 
-F 0 "Q501" H 7300 6465 130 0001 C CNN
+AR Path="/5C686ADC/5C68E32B" Ref="1Q1"  Part="1" 
+AR Path="/5C687067/5C68E32B" Ref="2Q1"  Part="1" 
+AR Path="/5C68750A/5C68E32B" Ref="3Q1"  Part="1" 
+F 0 "2Q1" H 7300 6465 130 0001 C CNN
 F 1 "Transistor-NPN" H 7300 6615 130 0001 C CNN
 F 2 "" H 7300 6300 130 0001 C CNN
 F 3 "" H 7300 6300 130 0001 C CNN
-F 4 "Q1" H 7850 6075 130 0000 C CNB "Caption"
+F 4 "Q1" H 7300 6050 50  0000 C CNN "baseRefd"
 	1    7300 6050
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-NPN Q302
+L AGC_DSKY:Transistor-NPN 1Q2
 U 1 1 5C68EF69
 P 7300 8550
-AR Path="/5C686ADC/5C68EF69" Ref="Q302"  Part="1" 
-AR Path="/5C687067/5C68EF69" Ref="Q402"  Part="1" 
-AR Path="/5C68750A/5C68EF69" Ref="Q502"  Part="1" 
-F 0 "Q502" H 7300 8965 130 0001 C CNN
+AR Path="/5C686ADC/5C68EF69" Ref="1Q2"  Part="1" 
+AR Path="/5C687067/5C68EF69" Ref="2Q2"  Part="1" 
+AR Path="/5C68750A/5C68EF69" Ref="3Q2"  Part="1" 
+F 0 "2Q2" H 7300 8965 130 0001 C CNN
 F 1 "Transistor-NPN" H 7300 9115 130 0001 C CNN
 F 2 "" H 7300 8800 130 0001 C CNN
 F 3 "" H 7300 8800 130 0001 C CNN
-F 4 "Q2" H 6825 8950 130 0000 C CNB "Caption"
+F 4 "Q2" H 7300 8550 50  0000 C CNN "baseRefd"
 	1    7300 8550
 	1    0    0    1   
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-PNP Q303
+L AGC_DSKY:Transistor-PNP 1Q3
 U 1 1 5C68FE25
 P 11300 5550
-AR Path="/5C686ADC/5C68FE25" Ref="Q303"  Part="1" 
-AR Path="/5C687067/5C68FE25" Ref="Q403"  Part="1" 
-AR Path="/5C68750A/5C68FE25" Ref="Q503"  Part="1" 
-F 0 "Q503" H 11275 5960 130 0001 C CNN
+AR Path="/5C686ADC/5C68FE25" Ref="1Q3"  Part="1" 
+AR Path="/5C687067/5C68FE25" Ref="2Q3"  Part="1" 
+AR Path="/5C68750A/5C68FE25" Ref="3Q3"  Part="1" 
+F 0 "2Q3" H 11275 5960 130 0001 C CNN
 F 1 "Transistor-PNP" H 11300 6115 130 0001 C CNN
 F 2 "" H 11300 5300 130 0001 C CNN
 F 3 "" H 11300 5300 130 0001 C CNN
@@ -367,13 +367,13 @@ F 4 "Q3" H 11900 5650 130 0000 C CNB "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-PNP Q304
+L AGC_DSKY:Transistor-PNP 1Q4
 U 1 1 5C690BCA
 P 11300 9025
-AR Path="/5C686ADC/5C690BCA" Ref="Q304"  Part="1" 
-AR Path="/5C687067/5C690BCA" Ref="Q404"  Part="1" 
-AR Path="/5C68750A/5C690BCA" Ref="Q504"  Part="1" 
-F 0 "Q504" H 11275 9435 130 0001 C CNN
+AR Path="/5C686ADC/5C690BCA" Ref="1Q4"  Part="1" 
+AR Path="/5C687067/5C690BCA" Ref="2Q4"  Part="1" 
+AR Path="/5C68750A/5C690BCA" Ref="3Q4"  Part="1" 
+F 0 "2Q4" H 11275 9435 130 0001 C CNN
 F 1 "Transistor-PNP" H 11300 9590 130 0001 C CNN
 F 2 "" H 11300 8775 130 0001 C CNN
 F 3 "" H 11300 8775 130 0001 C CNN
@@ -505,7 +505,7 @@ P 12900 7225
 AR Path="/5C686ADC/5C6A075F" Ref="N301"  Part="1" 
 AR Path="/5C687067/5C6A075F" Ref="N401"  Part="1" 
 AR Path="/5C68750A/5C6A075F" Ref="N501"  Part="1" 
-F 0 "N501" H 12900 7325 50  0001 C CNN
+F 0 "N401" H 12900 7325 50  0001 C CNN
 F 1 "Node2" H 12900 7400 50  0001 C CNN
 F 2 "" H 12900 7225 50  0001 C CNN
 F 3 "" H 12900 7225 50  0001 C CNN
@@ -527,7 +527,7 @@ P 15025 7200
 AR Path="/5C686ADC/5C6A2D77" Ref="N302"  Part="1" 
 AR Path="/5C687067/5C6A2D77" Ref="N402"  Part="1" 
 AR Path="/5C68750A/5C6A2D77" Ref="N502"  Part="1" 
-F 0 "N502" H 15025 7300 50  0001 C CNN
+F 0 "N402" H 15025 7300 50  0001 C CNN
 F 1 "Node2" H 15025 7375 50  0001 C CNN
 F 2 "" H 15025 7200 50  0001 C CNN
 F 3 "" H 15025 7200 50  0001 C CNN
@@ -549,7 +549,7 @@ BPLSIW
 Text Label 12825 7225 2    140  ~ 28
 0VDC
 Text Notes 34450 6975 0    140  ~ 28
-Notes from the Virtual AGC project:\n3. This CAD drawing is a transcription of the original Project Apollo drawing\n   1006148E, but with everything unrelated to circuits 40501 through 40503\n   removed, in order to implement a hierarchical circuit block for circuits\n   40501 through 40503. — RSB 2019\n4. The reference designators shown are those shown on the original drawing, \n   but are not the actual reference designators (e.g., in netlists), because\n   this circuit block is present in 3 instances (as circuits 40501 through 40503),\n   each of which has to have different reference designators.  The actual \n   reference designators are accessible by editing the components within \n   KiCad.  At present, the reference designators in circuits 40501 through\n   40503 are arbitrarily assigned, but eventually will match those shown on\n   insulator drawing 1004268; on 1004268, the reference designators are \n   the same on as shown on this CAD drawing, but prefixed by 1, 2, or 3 for\n   circuits 40501, 40502, and 40503 respectively. — RSB 2019\n
+Notes from the Virtual AGC project:\n3. This CAD drawing is a transcription of the original Project Apollo drawing\n   1006148E, but with everything unrelated to circuits 40501 through 40503\n   removed, in order to implement a hierarchical circuit block for circuits\n   40501 through 40503. — RSB 2019\n4. The reference designators shown are those shown on the original drawing, \n   but are not the actual reference designators (e.g., in netlists), because\n   this circuit block is present in 3 instances (as circuits 40501 through 40503),\n   each of which has to have different reference designators.  The actual \n   reference designators are accessible by editing the components within \n   KiCad.  The reference designators in circuits 40501 through\n   40503 are intended to match those on INSULATOR drawing 1004268; on \n   1004268, the reference designators are the same as shown on this \n   CAD drawing, but prefixed by 1, 2, or 3 for circuits 40501, 40502, and \n   40503 respectively. — RSB 2019\n
 $Bitmap
 Pos 34175 3625
 Scale 1.000000
