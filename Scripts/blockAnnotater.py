@@ -85,6 +85,8 @@ for line in sys.stdin:
 		continue
 	if numFields == 1 and fields[0] == "$EndSheet":
 		inSheet = False
+		if sheetname == "":
+			sheetname = "0"
 		if timestamp != "" and sheetname != "" and filename != "":
 			if filename not in blocks:
 				blocks[filename] = { "min":1000000 }
@@ -155,15 +157,24 @@ for filename in blocks:
 		if not inComponent:
 			continue
 		
+		if len(fields) == 4 and fields[0] == "L" and baseRefd != "":
+			lines[i] = fields[0] + " " + fields[1] + " " + baseRefd + "\n"
+			continue
+		if len(fields) == 10 and fields[0] == "F" and fields[1] == "0" and baseRefd != "":
+			lines[i] = fields[0] + " " + fields[1] + ' "' + baseRefd + '" ' + fields[3] + " " + fields[4] + " " + fields[5] + " " + fields[6] + " " + fields[7] + " " + fields[8] + " " + fields[9] + "\n"
+			continue
 		if len(fields) != 4 or fields[0] != "AR" or fields[1][:7] != 'Path="/':
 			continue
 		timestamp = re.sub("/.*", "", fields[1][7:])
 		#print(timestamp)
 		if timestamp in blocks[filename]:
 			sheetname = blocks[filename][timestamp]
-			index = sheetnames.index(sheetname)
 			#prefix = str(blocks[filename][timestamp] - blocks[filename]["min"] + numberFrom)
-			prefix = str(index + numberFrom)
+			if sheetname == 0:
+				prefix = ""
+			else:
+				index = sheetnames.index(sheetname)
+				prefix = str(index + numberFrom)
 			refd = prefix + baseRefd
 			lines[i] = fields[0] + " " + fields[1] + " " + 'Ref="' + refd + '"  ' + fields[3] + "\n"
 			#print("Replacing " + fields[2] + " by " + blocks[filename][timestamp] + baseRefd)
