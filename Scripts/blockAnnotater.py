@@ -119,6 +119,15 @@ for filename in blocks:
 	lines = f.readlines();
 	f.close();
 	
+	# Get a sorted list of all the sheetnames.
+	sheetnames = []
+	#print(blocks[filename])
+	for timestamp in blocks[filename]:
+		if timestamp != "min":
+			sheetnames.append(blocks[filename][timestamp])
+	sheetnames.sort()
+	#print(sheetnames)
+	
 	# Now, process it, to replace all of the reference designators that
 	# were previously annotated.
 	numberFrom = 1
@@ -139,7 +148,7 @@ for filename in blocks:
 				if numFields2 == 1 and fields2[0] == "$EndComp":
 					inComponent = False
 					break
-				if numFields2 == 11 and fields2[10] == '"baseRefd"':
+				if numFields2 == 11 and fields2[10] in ['"baseRefd"', '"OREFD"']:
 					baseRefd = fields2[2].strip('"')
 					#print(baseRefd)
 					break
@@ -151,7 +160,10 @@ for filename in blocks:
 		timestamp = re.sub("/.*", "", fields[1][7:])
 		#print(timestamp)
 		if timestamp in blocks[filename]:
-			prefix = str(blocks[filename][timestamp] - blocks[filename]["min"] + numberFrom) 
+			sheetname = blocks[filename][timestamp]
+			index = sheetnames.index(sheetname)
+			#prefix = str(blocks[filename][timestamp] - blocks[filename]["min"] + numberFrom)
+			prefix = str(index + numberFrom)
 			refd = prefix + baseRefd
 			lines[i] = fields[0] + " " + fields[1] + " " + 'Ref="' + refd + '"  ' + fields[3] + "\n"
 			#print("Replacing " + fields[2] + " by " + blocks[filename][timestamp] + baseRefd)
