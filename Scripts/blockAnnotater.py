@@ -36,10 +36,14 @@
 #	if the sheet name is 15XT, then the prefix is 15.  Thus the parent
 #	drawing must be prepared with the appropriate "Sheet name" fields.
 #	The sheet name can optionally have a prefix of "--", "xx", or "XX",
-#	and if so, it will be removed from the prefix automatically.  Also,
-#	if greater than 99, the prefix is automatically truncated to just
-#	its final two digits, or to just one digit if necessary to prevent
-#	having a leading 0.
+#	and if so, it will be removed from the prefix automatically.  For 
+#	each different child filename, the prefixes start from 1.  So for
+#	example, if the sheet names were 40356, 40357, and 40358 for a given
+#	sheet 1006666.sch, then the prefixes would be 1, 2, 3, respectively.
+#   3.  Sometimes, starting the prefixes at 1 for every different sheet 
+#	file (as described above) isn't desirable.  If one of the 4 comment
+#	fields in a child sheet has the form "NumberFrom=N", then the 
+#	prefixes for that circuit block are instead N, N+1, N+2, etc.
 
 # The script overwrites in-place all of the child schematics it processes.  
 # Therefore, it should only be run in folders that have been backed up or 
@@ -117,9 +121,12 @@ for filename in blocks:
 	
 	# Now, process it, to replace all of the reference designators that
 	# were previously annotated.
+	numberFrom = 1
 	for i in range(0, len(lines)):
 		fields = lines[i].strip().split()
 		numFields = len(fields)
+		if numFields == 2 and fields[0][:7] == "Comment" and fields[1][:12] == '"NumberFrom=':
+			numberFrom = int(re.sub("\D", "", fields[1]))
 		if numFields == 1 and fields[0] == "$EndComp":
 			inComponent = False
 			continue
@@ -144,7 +151,7 @@ for filename in blocks:
 		timestamp = re.sub("/.*", "", fields[1][7:])
 		#print(timestamp)
 		if timestamp in blocks[filename]:
-			prefix = str(blocks[filename][timestamp] - blocks[filename]["min"] + 1) 
+			prefix = str(blocks[filename][timestamp] - blocks[filename]["min"] + numberFrom) 
 			refd = prefix + baseRefd
 			lines[i] = fields[0] + " " + fields[1] + " " + 'Ref="' + refd + '"  ' + fields[3] + "\n"
 			#print("Replacing " + fields[2] + " by " + blocks[filename][timestamp] + baseRefd)

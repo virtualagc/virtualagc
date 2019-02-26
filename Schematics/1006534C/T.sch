@@ -9,7 +9,7 @@ Title ""
 Date ""
 Rev ""
 Comp ""
-Comment1 ""
+Comment1 "NumberFrom=30"
 Comment2 ""
 Comment3 ""
 Comment4 ""
@@ -46,8 +46,8 @@ Text Notes 1175 11750 0    140  ~ 28
 NOTES:-
 Text Notes 1600 12475 0    140  ~ 28
 1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS\n   PRESCRIBED BY MIL-D-70327\n2. NOT IN INTERFACE MODULE
-Text Notes 1175 16325 0    140  ~ 28
-Notes from the Virtual AGC Project:\n2. This CAD drawing was transcribed from the original\n   Apollo Program drawing 1006088A.  — RSB 2019\n3. Circuits originally marked with NOTE 2 "NOT IN INTERFACE \n   MODULE" (see above) have been omitted from the CAD \n   transcription in order to preserve electrical correctness.  \n   — RSB 2019\n4. The original drawing did not list signal names as such for \n   the "T" circuit block.  The names used here ("P", "G", "F",\n   "H") have been arbitrarily taken from the electrical \n   schematic for a later version of module A19/A20, namely \n   drawing 1005701A.  — RSB 2019\n7. Resistors R1 and R2 have been changed to R3 and R4,\n   respectively, to preserved the uniqueness of the reference\n   designators across sheets.  — RSB 2019
+Text Notes 1175 15600 0    140  ~ 28
+Notes from the Virtual AGC Project:\n2. This CAD drawing was transcribed from the original\n   Apollo Program drawing 1006088A.  — RSB 2019\n3. Circuits originally marked with NOTE 2 "NOT IN INTERFACE \n   MODULE" (see above) have been omitted from the CAD \n   transcription in order to preserve electrical correctness.  \n   — RSB 2019\n4. The original drawing did not list signal names as such for \n   the "T" circuit block.  The names used here ("P", "G", "F",\n   "H") have been arbitrarily taken from the electrical \n   schematic for a later version of module A19/A20, namely \n   drawing 1005701A.  — RSB 2019
 $Bitmap
 Pos 925  12975
 Scale 1.000000
@@ -965,9 +965,9 @@ TOL
 Text Notes 20450 8200 0    120  ~ 24
 RATING
 Text Notes 16125 8475 0    120  ~ 24
-R3
+R1
 Text Notes 16125 8725 0    120  ~ 24
-R4
+R2
 Text Notes 16475 8475 0    120  ~ 24
 1006750-49
 Text Notes 16475 8725 0    120  ~ 24
@@ -1208,27 +1208,27 @@ AR Path="/5C5B4931/5C5B386D" Ref="R3201"  Part="1"
 AR Path="/5C5B493F/5C5B386D" Ref="R3301"  Part="1" 
 AR Path="/5C5B9E87/5C5B386D" Ref="R3401"  Part="1" 
 AR Path="/5C5B9E95/5C5B386D" Ref="R3501"  Part="1" 
-AR Path="/5E45834D/5C5B386D" Ref="6R3"  Part="1"
-AR Path="/5E57251B/5C5B386D" Ref="7R3"  Part="1"
-AR Path="/5E5C480A/5C5B386D" Ref="8R3"  Part="1"
-AR Path="/5E5EF09A/5C5B386D" Ref="9R3"  Part="1"
-AR Path="/5E643B17/5C5B386D" Ref="10R3"  Part="1"
-AR Path="/5E66E03A/5C5B386D" Ref="11R3"  Part="1"
-AR Path="/5E6986F7/5C5B386D" Ref="12R3"  Part="1"
-AR Path="/5E6C2CD5/5C5B386D" Ref="13R3"  Part="1"
+AR Path="/5E45834D/5C5B386D" Ref="35R1"  Part="1"
+AR Path="/5E57251B/5C5B386D" Ref="36R1"  Part="1"
+AR Path="/5E5C480A/5C5B386D" Ref="37R1"  Part="1"
+AR Path="/5E5EF09A/5C5B386D" Ref="38R1"  Part="1"
+AR Path="/5E643B17/5C5B386D" Ref="39R1"  Part="1"
+AR Path="/5E66E03A/5C5B386D" Ref="40R1"  Part="1"
+AR Path="/5E6986F7/5C5B386D" Ref="41R1"  Part="1"
+AR Path="/5E6C2CD5/5C5B386D" Ref="42R1"  Part="1"
 AR Path="/5E6ED1FB/5C5B386D" Ref="R?"  Part="1" 
 AR Path="/5E7023CE/5C5B386D" Ref="R?"  Part="1" 
-AR Path="/5E73CDBD/5C5B386D" Ref="14R3"  Part="1"
-AR Path="/5E767323/5C5B386D" Ref="5R3"  Part="1"
-AR Path="/5E7A6CB3/5C5B386D" Ref="4R3"  Part="1"
-AR Path="/5E7D1281/5C5B386D" Ref="3R3"  Part="1"
-AR Path="/5E7FB8B0/5C5B386D" Ref="2R3"  Part="1"
-AR Path="/5E83AF5E/5C5B386D" Ref="1R3"  Part="1"
-F 0 "2R1" H 4575 2625 130 0001 C CNN
+AR Path="/5E73CDBD/5C5B386D" Ref="43R1"  Part="1"
+AR Path="/5E767323/5C5B386D" Ref="34R1"  Part="1"
+AR Path="/5E7A6CB3/5C5B386D" Ref="33R1"  Part="1"
+AR Path="/5E7D1281/5C5B386D" Ref="32R1"  Part="1"
+AR Path="/5E7FB8B0/5C5B386D" Ref="31R1"  Part="1"
+AR Path="/5E83AF5E/5C5B386D" Ref="30R1"  Part="1"
+F 0 "11R1" H 4575 2625 130 0001 C CNN
 F 1 "5.1K" V 4650 2400 130 0000 C CNB
 F 2 "" H 4600 2800 130 0001 C CNN
 F 3 "" H 4600 2800 130 0001 C CNN
-F 4 "R3" V 4450 2375 130 0000 C CNB "baseRefd"
+F 4 "R1" V 4450 2375 130 0000 C CNB "baseRefd"
 	1    4600 2800
 	0    1    1    0   
 $EndComp
@@ -1250,27 +1250,27 @@ AR Path="/5C5B4931/5C5B4229" Ref="R3202"  Part="1"
 AR Path="/5C5B493F/5C5B4229" Ref="R3302"  Part="1" 
 AR Path="/5C5B9E87/5C5B4229" Ref="R3402"  Part="1" 
 AR Path="/5C5B9E95/5C5B4229" Ref="R3502"  Part="1" 
-AR Path="/5E45834D/5C5B4229" Ref="6R4"  Part="1"
-AR Path="/5E57251B/5C5B4229" Ref="7R4"  Part="1"
-AR Path="/5E5C480A/5C5B4229" Ref="8R4"  Part="1"
-AR Path="/5E5EF09A/5C5B4229" Ref="9R4"  Part="1"
-AR Path="/5E643B17/5C5B4229" Ref="10R4"  Part="1"
-AR Path="/5E66E03A/5C5B4229" Ref="11R4"  Part="1"
-AR Path="/5E6986F7/5C5B4229" Ref="12R4"  Part="1"
-AR Path="/5E6C2CD5/5C5B4229" Ref="13R4"  Part="1"
+AR Path="/5E45834D/5C5B4229" Ref="35R2"  Part="1"
+AR Path="/5E57251B/5C5B4229" Ref="36R2"  Part="1"
+AR Path="/5E5C480A/5C5B4229" Ref="37R2"  Part="1"
+AR Path="/5E5EF09A/5C5B4229" Ref="38R2"  Part="1"
+AR Path="/5E643B17/5C5B4229" Ref="39R2"  Part="1"
+AR Path="/5E66E03A/5C5B4229" Ref="40R2"  Part="1"
+AR Path="/5E6986F7/5C5B4229" Ref="41R2"  Part="1"
+AR Path="/5E6C2CD5/5C5B4229" Ref="42R2"  Part="1"
 AR Path="/5E6ED1FB/5C5B4229" Ref="R?"  Part="1" 
 AR Path="/5E7023CE/5C5B4229" Ref="R?"  Part="1" 
-AR Path="/5E73CDBD/5C5B4229" Ref="14R4"  Part="1"
-AR Path="/5E767323/5C5B4229" Ref="5R4"  Part="1"
-AR Path="/5E7A6CB3/5C5B4229" Ref="4R4"  Part="1"
-AR Path="/5E7D1281/5C5B4229" Ref="3R4"  Part="1"
-AR Path="/5E7FB8B0/5C5B4229" Ref="2R4"  Part="1"
-AR Path="/5E83AF5E/5C5B4229" Ref="1R4"  Part="1"
-F 0 "2R2" H 6050 2650 130 0001 C CNN
+AR Path="/5E73CDBD/5C5B4229" Ref="43R2"  Part="1"
+AR Path="/5E767323/5C5B4229" Ref="34R2"  Part="1"
+AR Path="/5E7A6CB3/5C5B4229" Ref="33R2"  Part="1"
+AR Path="/5E7D1281/5C5B4229" Ref="32R2"  Part="1"
+AR Path="/5E7FB8B0/5C5B4229" Ref="31R2"  Part="1"
+AR Path="/5E83AF5E/5C5B4229" Ref="30R2"  Part="1"
+F 0 "11R2" H 6050 2650 130 0001 C CNN
 F 1 "2K" H 6075 3000 130 0000 C CNB
 F 2 "" H 6075 2825 130 0001 C CNN
 F 3 "" H 6075 2825 130 0001 C CNN
-F 4 "R4" H 6125 2625 130 0000 C CNB "baseRefd"
+F 4 "R2" H 6125 2625 130 0000 C CNB "baseRefd"
 	1    6075 2825
 	1    0    0    -1  
 $EndComp
@@ -1292,23 +1292,23 @@ AR Path="/5C5B4931/5C5B4855" Ref="Q3201"  Part="1"
 AR Path="/5C5B493F/5C5B4855" Ref="Q3301"  Part="1" 
 AR Path="/5C5B9E87/5C5B4855" Ref="Q3401"  Part="1" 
 AR Path="/5C5B9E95/5C5B4855" Ref="Q3501"  Part="1" 
-AR Path="/5E45834D/5C5B4855" Ref="6Q1"  Part="1"
-AR Path="/5E57251B/5C5B4855" Ref="7Q1"  Part="1"
-AR Path="/5E5C480A/5C5B4855" Ref="8Q1"  Part="1"
-AR Path="/5E5EF09A/5C5B4855" Ref="9Q1"  Part="1"
-AR Path="/5E643B17/5C5B4855" Ref="10Q1"  Part="1"
-AR Path="/5E66E03A/5C5B4855" Ref="11Q1"  Part="1"
-AR Path="/5E6986F7/5C5B4855" Ref="12Q1"  Part="1"
-AR Path="/5E6C2CD5/5C5B4855" Ref="13Q1"  Part="1"
+AR Path="/5E45834D/5C5B4855" Ref="35Q1"  Part="1"
+AR Path="/5E57251B/5C5B4855" Ref="36Q1"  Part="1"
+AR Path="/5E5C480A/5C5B4855" Ref="37Q1"  Part="1"
+AR Path="/5E5EF09A/5C5B4855" Ref="38Q1"  Part="1"
+AR Path="/5E643B17/5C5B4855" Ref="39Q1"  Part="1"
+AR Path="/5E66E03A/5C5B4855" Ref="40Q1"  Part="1"
+AR Path="/5E6986F7/5C5B4855" Ref="41Q1"  Part="1"
+AR Path="/5E6C2CD5/5C5B4855" Ref="42Q1"  Part="1"
 AR Path="/5E6ED1FB/5C5B4855" Ref="Q?"  Part="1" 
 AR Path="/5E7023CE/5C5B4855" Ref="Q?"  Part="1" 
-AR Path="/5E73CDBD/5C5B4855" Ref="14Q1"  Part="1"
-AR Path="/5E767323/5C5B4855" Ref="5Q1"  Part="1"
-AR Path="/5E7A6CB3/5C5B4855" Ref="4Q1"  Part="1"
-AR Path="/5E7D1281/5C5B4855" Ref="3Q1"  Part="1"
-AR Path="/5E7FB8B0/5C5B4855" Ref="2Q1"  Part="1"
-AR Path="/5E83AF5E/5C5B4855" Ref="1Q1"  Part="1"
-F 0 "2Q1" H 5375 3765 130 0001 C CNN
+AR Path="/5E73CDBD/5C5B4855" Ref="43Q1"  Part="1"
+AR Path="/5E767323/5C5B4855" Ref="34Q1"  Part="1"
+AR Path="/5E7A6CB3/5C5B4855" Ref="33Q1"  Part="1"
+AR Path="/5E7D1281/5C5B4855" Ref="32Q1"  Part="1"
+AR Path="/5E7FB8B0/5C5B4855" Ref="31Q1"  Part="1"
+AR Path="/5E83AF5E/5C5B4855" Ref="30Q1"  Part="1"
+F 0 "11Q1" H 5375 3765 130 0001 C CNN
 F 1 "Transistor-NPN" H 5375 3915 130 0001 C CNN
 F 2 "" H 5375 3600 130 0001 C CNN
 F 3 "" H 5375 3600 130 0001 C CNN
