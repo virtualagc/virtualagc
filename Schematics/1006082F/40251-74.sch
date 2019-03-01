@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 25
+Sheet 4 25
 Title ""
 Date ""
 Rev ""
@@ -73,7 +73,7 @@ DR      CHK
 Text Notes 38125 2650 0    140  ~ 28
 F
 Text Notes 1275 30975 0    140  ~ 28
-Notes from the Virtual AGC Project:\nd) This CAD sheet was transcribed from the original Project Apollo drawing\n   1006082F, but with all elements not specific to circuit blocks 40251 through\n   40274 discarded. — RSB 2019
+Notes from the Virtual AGC Project:\ne) This CAD sheet was transcribed from the original Project Apollo drawing\n   1006082F, but with all elements not specific to circuit blocks 40251 through\n   40274 discarded. — RSB 2019
 $Bitmap
 Pos 1025 30300
 Scale 1.000000
@@ -947,107 +947,74 @@ C
 Text HLabel 13850 23100 2    140  Output ~ 28
 D
 $Comp
-L AGC_DSKY:Transistor-NPN-1inch Q1
-U 1 1 5CCD815A
-P 10850 23250
-AR Path="/5CCB9E0D/5CCD815A" Ref="Q1"  Part="1" 
-AR Path="/5CE57C9D/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CE6CB10/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEB0477/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEB0493/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEB04AF/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEF3610/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEF362C/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEF3648/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEFEDE5/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEFEE01/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5CEFEE1D/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D011508/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D011524/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D011540/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D01155C/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D011578/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D011594/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D0115B0/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D0115CC/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D0115E8/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D011604/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D011620/5CCD815A" Ref="Q?"  Part="1" 
-AR Path="/5D01163C/5CCD815A" Ref="Q?"  Part="1" 
-F 0 "Q?" V 10475 22575 130 0000 C CNN
-F 1 "Transistor-NPN-1inch" H 10850 23815 130 0001 C CNN
-F 2 "" H 10850 23500 130 0001 C CNN
-F 3 "" H 10850 23500 130 0001 C CNN
-	1    10850 23250
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R2
+L AGC_DSKY:Resistor 12R2
 U 1 1 5CCD9D0C
 P 10850 24250
-AR Path="/5CCB9E0D/5CCD9D0C" Ref="R2"  Part="1" 
-AR Path="/5CE57C9D/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CE6CB10/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEB0477/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEB0493/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEB04AF/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEF3610/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEF362C/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEF3648/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEFEDE5/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEFEE01/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5CEFEE1D/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D011508/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D011524/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D011540/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D01155C/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D011578/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D011594/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D0115B0/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D0115CC/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D0115E8/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D011604/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D011620/5CCD9D0C" Ref="R?"  Part="1" 
-AR Path="/5D01163C/5CCD9D0C" Ref="R?"  Part="1" 
-F 0 "R?" V 10675 24525 130 0000 C CNN
+AR Path="/5CCB9E0D/5CCD9D0C" Ref="12R2"  Part="1" 
+AR Path="/5CE57C9D/5CCD9D0C" Ref="8R2"  Part="1" 
+AR Path="/5CE6CB10/5CCD9D0C" Ref="11R2"  Part="1" 
+AR Path="/5CEB0477/5CCD9D0C" Ref="7R2"  Part="1" 
+AR Path="/5CEB0493/5CCD9D0C" Ref="9R2"  Part="1" 
+AR Path="/5CEB04AF/5CCD9D0C" Ref="5R2"  Part="1" 
+AR Path="/5CEF3610/5CCD9D0C" Ref="10R2"  Part="1" 
+AR Path="/5CEF362C/5CCD9D0C" Ref="6R2"  Part="1" 
+AR Path="/5CEF3648/5CCD9D0C" Ref="3R2"  Part="1" 
+AR Path="/5CEFEDE5/5CCD9D0C" Ref="1R2"  Part="1" 
+AR Path="/5CEFEE01/5CCD9D0C" Ref="2R2"  Part="1" 
+AR Path="/5CEFEE1D/5CCD9D0C" Ref="4R2"  Part="1" 
+AR Path="/5D011508/5CCD9D0C" Ref="20R2"  Part="1" 
+AR Path="/5D011524/5CCD9D0C" Ref="15R2"  Part="1" 
+AR Path="/5D011540/5CCD9D0C" Ref="19R2"  Part="1" 
+AR Path="/5D01155C/5CCD9D0C" Ref="16R2"  Part="1" 
+AR Path="/5D011578/5CCD9D0C" Ref="17R2"  Part="1" 
+AR Path="/5D011594/5CCD9D0C" Ref="13R2"  Part="1" 
+AR Path="/5D0115B0/5CCD9D0C" Ref="18R2"  Part="1" 
+AR Path="/5D0115CC/5CCD9D0C" Ref="14R2"  Part="1" 
+AR Path="/5D0115E8/5CCD9D0C" Ref="21R2"  Part="1" 
+AR Path="/5D011604/5CCD9D0C" Ref="23R2"  Part="1" 
+AR Path="/5D011620/5CCD9D0C" Ref="24R2"  Part="1" 
+AR Path="/5D01163C/5CCD9D0C" Ref="22R2"  Part="1" 
+F 0 "11R2" V 10675 24525 130 0001 C CNN
 F 1 "200" V 10925 24600 130 0000 C CNN
 F 2 "" H 10850 24250 130 0001 C CNN
 F 3 "" H 10850 24250 130 0001 C CNN
+F 4 "R2" V 10725 24550 130 0000 C CNN "baseRefd"
 	1    10850 24250
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R1
+L AGC_DSKY:Resistor 12R1
 U 1 1 5CCDA49D
 P 10850 25275
-AR Path="/5CCB9E0D/5CCDA49D" Ref="R1"  Part="1" 
-AR Path="/5CE57C9D/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CE6CB10/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEB0477/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEB0493/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEB04AF/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEF3610/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEF362C/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEF3648/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEFEDE5/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEFEE01/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5CEFEE1D/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D011508/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D011524/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D011540/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D01155C/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D011578/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D011594/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D0115B0/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D0115CC/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D0115E8/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D011604/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D011620/5CCDA49D" Ref="R?"  Part="1" 
-AR Path="/5D01163C/5CCDA49D" Ref="R?"  Part="1" 
-F 0 "R?" V 10800 25575 130 0000 C CNN
+AR Path="/5CCB9E0D/5CCDA49D" Ref="12R1"  Part="1" 
+AR Path="/5CE57C9D/5CCDA49D" Ref="8R1"  Part="1" 
+AR Path="/5CE6CB10/5CCDA49D" Ref="11R1"  Part="1" 
+AR Path="/5CEB0477/5CCDA49D" Ref="7R1"  Part="1" 
+AR Path="/5CEB0493/5CCDA49D" Ref="9R1"  Part="1" 
+AR Path="/5CEB04AF/5CCDA49D" Ref="5R1"  Part="1" 
+AR Path="/5CEF3610/5CCDA49D" Ref="10R1"  Part="1" 
+AR Path="/5CEF362C/5CCDA49D" Ref="6R1"  Part="1" 
+AR Path="/5CEF3648/5CCDA49D" Ref="3R1"  Part="1" 
+AR Path="/5CEFEDE5/5CCDA49D" Ref="1R1"  Part="1" 
+AR Path="/5CEFEE01/5CCDA49D" Ref="2R1"  Part="1" 
+AR Path="/5CEFEE1D/5CCDA49D" Ref="4R1"  Part="1" 
+AR Path="/5D011508/5CCDA49D" Ref="20R1"  Part="1" 
+AR Path="/5D011524/5CCDA49D" Ref="15R1"  Part="1" 
+AR Path="/5D011540/5CCDA49D" Ref="19R1"  Part="1" 
+AR Path="/5D01155C/5CCDA49D" Ref="16R1"  Part="1" 
+AR Path="/5D011578/5CCDA49D" Ref="17R1"  Part="1" 
+AR Path="/5D011594/5CCDA49D" Ref="13R1"  Part="1" 
+AR Path="/5D0115B0/5CCDA49D" Ref="18R1"  Part="1" 
+AR Path="/5D0115CC/5CCDA49D" Ref="14R1"  Part="1" 
+AR Path="/5D0115E8/5CCDA49D" Ref="21R1"  Part="1" 
+AR Path="/5D011604/5CCDA49D" Ref="23R1"  Part="1" 
+AR Path="/5D011620/5CCDA49D" Ref="24R1"  Part="1" 
+AR Path="/5D01163C/5CCDA49D" Ref="22R1"  Part="1" 
+F 0 "11R1" V 10800 25575 130 0001 C CNN
 F 1 "2K" V 11000 25550 130 0000 C CNN
 F 2 "" H 10850 25275 130 0001 C CNN
 F 3 "" H 10850 25275 130 0001 C CNN
+F 4 "R1" V 10800 25550 130 0000 C CNN "baseRefd"
 	1    10850 25275
 	0    1    1    0   
 $EndComp
@@ -1082,4 +1049,178 @@ Wire Notes Line
 	13350 26875 13350 21525
 Wire Notes Line
 	13350 21525 7775 21525
+Wire Notes Line style solid
+	21450 2925 29175 2925
+Wire Notes Line style solid
+	21450 3175 29175 3175
+Wire Notes Line style solid
+	21450 3425 29175 3425
+Wire Notes Line style solid
+	21450 3675 29175 3675
+Wire Notes Line style solid
+	21450 3925 29175 3925
+Wire Notes Line style solid
+	21450 4175 29175 4175
+Wire Notes Line style solid
+	21450 4425 29175 4425
+Wire Notes Line style solid
+	21450 4925 29175 4925
+Wire Notes Line style solid
+	21450 5175 29175 5175
+Wire Notes Line style solid
+	21450 5425 29175 5425
+Wire Notes Line style solid
+	21450 5675 29175 5675
+Wire Notes Line style solid
+	21450 5925 29175 5925
+Wire Notes Line style solid
+	21450 6175 29175 6175
+Wire Notes Line style solid
+	21450 6425 29175 6425
+Wire Notes Line style solid
+	21450 6675 29175 6675
+Wire Notes Line style solid
+	21450 6925 29175 6925
+Wire Notes Line style solid
+	21450 7175 29175 7175
+Wire Notes Line style solid
+	21450 7425 29175 7425
+Wire Notes Line style solid
+	21450 7675 29175 7675
+Wire Notes Line style solid
+	21450 7925 29175 7925
+Wire Notes Line style solid
+	21450 8175 29175 8175
+Wire Notes Line style solid
+	21450 8425 29175 8425
+Wire Notes Line style solid
+	21450 8675 29175 8675
+Wire Notes Line style solid
+	21450 8925 29175 8925
+Wire Notes Line style solid
+	21450 9175 29175 9175
+Wire Notes Line style solid
+	21450 9425 29175 9425
+Wire Notes Line style solid
+	21450 9675 29175 9675
+Wire Notes Line style solid
+	21450 9925 29175 9925
+Wire Notes Line style solid
+	21450 10175 29175 10175
+Wire Notes Line style solid
+	21450 10425 29175 10425
+Wire Notes Line style solid
+	21450 10675 29175 10675
+Wire Notes Line style solid
+	21450 10925 29175 10925
+Wire Notes Line style solid
+	21450 11175 29175 11175
+Wire Notes Line style solid
+	21450 11425 29175 11425
+Wire Notes Line style solid
+	21450 11675 29175 11675
+Wire Notes Line style solid
+	21450 11925 29175 11925
+Wire Notes Line style solid
+	21450 12175 29175 12175
+Wire Notes Line style solid
+	21450 12425 29175 12425
+Wire Notes Line style solid
+	21450 12675 29175 12675
+Wire Notes Line style solid
+	21450 12925 29175 12925
+Wire Notes Line width 50 style solid
+	21450 2650 29175 2650
+Wire Notes Line style solid
+	21450 2175 29175 2175
+Text Notes 21650 2525 0    140  ~ 28
+REF DES.
+Text Notes 23150 2525 0    140  ~ 28
+PART NO.
+Text Notes 24650 2525 0    140  ~ 28
+DESCRIPTION
+Text Notes 26525 2525 0    140  ~ 28
+VALUE
+Text Notes 27725 2525 0    140  ~ 28
+TOL.
+Text Notes 28375 2525 0    140  ~ 28
+RATING
+Wire Notes Line style solid
+	21450 4675 29175 4675
+Wire Notes Line style solid
+	21450 2175 21450 12925
+Wire Notes Line style solid
+	22725 2175 22725 12925
+Wire Notes Line style solid
+	24500 2175 24500 12925
+Wire Notes Line style solid
+	26250 2175 26250 12925
+Wire Notes Line style solid
+	27525 2175 27525 12925
+Wire Notes Line style solid
+	29175 2175 29175 12925
+Wire Notes Line style solid
+	28350 2175 28350 12925
+Text Notes 21875 2900 0    140  ~ 28
+R1
+Text Notes 21900 8650 0    140  ~ 28
+Q1
+Text Notes 21900 9650 0    140  ~ 28
+R2
+Text Notes 22850 2900 0    140  ~ 28
+1006750-39
+Text Notes 22800 8650 0    140  ~ 28
+1006752
+Text Notes 24625 8650 0    140  ~ 28
+TRANSISTOR
+Text Notes 24700 2900 0    140  ~ 28
+RESISTOR
+Text Notes 22850 9650 0    140  ~ 28
+1006750-15
+Text Notes 28425 9650 0    140  ~ 28
+1/4W
+Text Notes 26675 9650 0    140  ~ 28
+200
+Text Notes 26550 2900 0    140  ~ 28
+2K
+Text Notes 28425 2900 0    140  ~ 28
+1/4W
+Text Notes 24700 9650 0    140  ~ 28
+RESISTOR
+$Comp
+L AGC_DSKY:Transistor-NPN-1inch 12Q1
+U 1 1 5CCD815A
+P 10850 23250
+AR Path="/5CCB9E0D/5CCD815A" Ref="12Q1"  Part="1" 
+AR Path="/5CE57C9D/5CCD815A" Ref="8Q1"  Part="1" 
+AR Path="/5CE6CB10/5CCD815A" Ref="11Q1"  Part="1" 
+AR Path="/5CEB0477/5CCD815A" Ref="7Q1"  Part="1" 
+AR Path="/5CEB0493/5CCD815A" Ref="9Q1"  Part="1" 
+AR Path="/5CEB04AF/5CCD815A" Ref="5Q1"  Part="1" 
+AR Path="/5CEF3610/5CCD815A" Ref="10Q1"  Part="1" 
+AR Path="/5CEF362C/5CCD815A" Ref="6Q1"  Part="1" 
+AR Path="/5CEF3648/5CCD815A" Ref="3Q1"  Part="1" 
+AR Path="/5CEFEDE5/5CCD815A" Ref="1Q1"  Part="1" 
+AR Path="/5CEFEE01/5CCD815A" Ref="2Q1"  Part="1" 
+AR Path="/5CEFEE1D/5CCD815A" Ref="4Q1"  Part="1" 
+AR Path="/5D011508/5CCD815A" Ref="20Q1"  Part="1" 
+AR Path="/5D011524/5CCD815A" Ref="15Q1"  Part="1" 
+AR Path="/5D011540/5CCD815A" Ref="19Q1"  Part="1" 
+AR Path="/5D01155C/5CCD815A" Ref="16Q1"  Part="1" 
+AR Path="/5D011578/5CCD815A" Ref="17Q1"  Part="1" 
+AR Path="/5D011594/5CCD815A" Ref="13Q1"  Part="1" 
+AR Path="/5D0115B0/5CCD815A" Ref="18Q1"  Part="1" 
+AR Path="/5D0115CC/5CCD815A" Ref="14Q1"  Part="1" 
+AR Path="/5D0115E8/5CCD815A" Ref="21Q1"  Part="1" 
+AR Path="/5D011604/5CCD815A" Ref="23Q1"  Part="1" 
+AR Path="/5D011620/5CCD815A" Ref="24Q1"  Part="1" 
+AR Path="/5D01163C/5CCD815A" Ref="22Q1"  Part="1" 
+F 0 "11Q1" V 10500 22575 130 0001 C CNN
+F 1 "Transistor-NPN-1inch" H 10850 23815 130 0001 C CNN
+F 2 "" H 10850 23500 130 0001 C CNN
+F 3 "" H 10850 23500 130 0001 C CNN
+F 4 "Q1" V 10525 22650 130 0000 C CNN "baseRefd"
+	1    10850 23250
+	0    -1   -1   0   
+$EndComp
 $EndSCHEMATC
