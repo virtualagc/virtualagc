@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 9
+Sheet 9 9
 Title ""
 Date ""
 Rev ""
@@ -459,7 +459,7 @@ Text Notes 36925 28025 0    130  ~ 26
 Text HLabel 3175 8900 3    250  Input ~ 50
 C
 Text HLabel 6300 8900 3    250  Input ~ 50
-E
+GND
 Text HLabel 6300 2925 1    250  Input ~ 50
 D
 Text HLabel 8750 2925 1    250  Output ~ 50
@@ -479,6 +479,13 @@ AR Path="/5F20C3B9/5EE99B9A" Ref="R?"  Part="1"
 AR Path="/5F20C3C3/5EE99B9A" Ref="R?"  Part="1" 
 AR Path="/5F20C3CD/5EE99B9A" Ref="R?"  Part="1" 
 AR Path="/5F20C3D7/5EE99B9A" Ref="R?"  Part="1" 
+AR Path="/5F562B57/5EE99B9A" Ref="R?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99B9A" Ref="R?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99B9A" Ref="R?"  Part="1" 
+AR Path="/5F622F9F/5EE99B9A" Ref="R?"  Part="1" 
+AR Path="/5F6630F7/5EE99B9A" Ref="R?"  Part="1" 
+AR Path="/5F6A322A/5EE99B9A" Ref="R?"  Part="1" 
+AR Path="/5F6E334A/5EE99B9A" Ref="R?"  Part="1" 
 F 0 "R?" H 4800 6050 130 0000 C CNN
 F 1 "200" H 4800 5850 130 0000 C CNN
 F 2 "" H 4775 6300 130 0001 C CNN
@@ -507,6 +514,13 @@ AR Path="/5F20C3B9/5EE99BA4" Ref="R?"  Part="1"
 AR Path="/5F20C3C3/5EE99BA4" Ref="R?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BA4" Ref="R?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BA4" Ref="R?"  Part="1" 
+AR Path="/5F562B57/5EE99BA4" Ref="R?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BA4" Ref="R?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BA4" Ref="R?"  Part="1" 
+AR Path="/5F622F9F/5EE99BA4" Ref="R?"  Part="1" 
+AR Path="/5F6630F7/5EE99BA4" Ref="R?"  Part="1" 
+AR Path="/5F6A322A/5EE99BA4" Ref="R?"  Part="1" 
+AR Path="/5F6E334A/5EE99BA4" Ref="R?"  Part="1" 
 F 0 "R?" V 6150 4650 130 0000 C CNN
 F 1 "1K" V 6350 4675 130 0000 C CNN
 F 2 "" H 6300 4375 130 0001 C CNN
@@ -527,6 +541,13 @@ AR Path="/5F20C3B9/5EE99BAA" Ref="R?"  Part="1"
 AR Path="/5F20C3C3/5EE99BAA" Ref="R?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BAA" Ref="R?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BAA" Ref="R?"  Part="1" 
+AR Path="/5F562B57/5EE99BAA" Ref="R?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BAA" Ref="R?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BAA" Ref="R?"  Part="1" 
+AR Path="/5F622F9F/5EE99BAA" Ref="R?"  Part="1" 
+AR Path="/5F6630F7/5EE99BAA" Ref="R?"  Part="1" 
+AR Path="/5F6A322A/5EE99BAA" Ref="R?"  Part="1" 
+AR Path="/5F6E334A/5EE99BAA" Ref="R?"  Part="1" 
 F 0 "R?" V 4400 5350 130 0000 C CNN
 F 1 "3.0K" V 4625 5425 130 0000 C CNN
 F 2 "" H 4475 5025 130 0001 C CNN
@@ -547,6 +568,13 @@ AR Path="/5F20C3B9/5EE99BB0" Ref="R?"  Part="1"
 AR Path="/5F20C3C3/5EE99BB0" Ref="R?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BB0" Ref="R?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BB0" Ref="R?"  Part="1" 
+AR Path="/5F562B57/5EE99BB0" Ref="R?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BB0" Ref="R?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BB0" Ref="R?"  Part="1" 
+AR Path="/5F622F9F/5EE99BB0" Ref="R?"  Part="1" 
+AR Path="/5F6630F7/5EE99BB0" Ref="R?"  Part="1" 
+AR Path="/5F6A322A/5EE99BB0" Ref="R?"  Part="1" 
+AR Path="/5F6E334A/5EE99BB0" Ref="R?"  Part="1" 
 F 0 "R?" V 6125 7175 130 0000 C CNN
 F 1 "5.1K" V 6350 7250 130 0000 C CNN
 F 2 "" H 6300 6900 130 0001 C CNN
@@ -567,6 +595,13 @@ AR Path="/5F20C3B9/5EE99BB6" Ref="R?"  Part="1"
 AR Path="/5F20C3C3/5EE99BB6" Ref="R?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BB6" Ref="R?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BB6" Ref="R?"  Part="1" 
+AR Path="/5F562B57/5EE99BB6" Ref="R?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BB6" Ref="R?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BB6" Ref="R?"  Part="1" 
+AR Path="/5F622F9F/5EE99BB6" Ref="R?"  Part="1" 
+AR Path="/5F6630F7/5EE99BB6" Ref="R?"  Part="1" 
+AR Path="/5F6A322A/5EE99BB6" Ref="R?"  Part="1" 
+AR Path="/5F6E334A/5EE99BB6" Ref="R?"  Part="1" 
 F 0 "R?" V 7375 6000 130 0000 C CNN
 F 1 "20" V 7575 6025 130 0000 C CNN
 F 2 "" H 7525 5725 130 0001 C CNN
@@ -587,6 +622,13 @@ AR Path="/5F20C3B9/5EE99BBC" Ref="Q?"  Part="1"
 AR Path="/5F20C3C3/5EE99BBC" Ref="Q?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BBC" Ref="Q?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BBC" Ref="Q?"  Part="1" 
+AR Path="/5F562B57/5EE99BBC" Ref="Q?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BBC" Ref="Q?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BBC" Ref="Q?"  Part="1" 
+AR Path="/5F622F9F/5EE99BBC" Ref="Q?"  Part="1" 
+AR Path="/5F6630F7/5EE99BBC" Ref="Q?"  Part="1" 
+AR Path="/5F6A322A/5EE99BBC" Ref="Q?"  Part="1" 
+AR Path="/5F6E334A/5EE99BBC" Ref="Q?"  Part="1" 
 F 0 "Q?" H 7950 4900 130 0000 C CNN
 F 1 "Transistor-NPN" H 7375 5465 130 0001 C CNN
 F 2 "" H 7375 5150 130 0001 C CNN
@@ -607,6 +649,13 @@ AR Path="/5F20C3B9/5EE99BC2" Ref="Q?"  Part="1"
 AR Path="/5F20C3C3/5EE99BC2" Ref="Q?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BC2" Ref="Q?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BC2" Ref="Q?"  Part="1" 
+AR Path="/5F562B57/5EE99BC2" Ref="Q?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BC2" Ref="Q?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BC2" Ref="Q?"  Part="1" 
+AR Path="/5F622F9F/5EE99BC2" Ref="Q?"  Part="1" 
+AR Path="/5F6630F7/5EE99BC2" Ref="Q?"  Part="1" 
+AR Path="/5F6A322A/5EE99BC2" Ref="Q?"  Part="1" 
+AR Path="/5F6E334A/5EE99BC2" Ref="Q?"  Part="1" 
 F 0 "Q?" H 5900 6275 130 0000 C CNN
 F 1 "Transistor-NPN" H 5375 6865 130 0001 C CNN
 F 2 "" H 5375 6550 130 0001 C CNN
@@ -627,6 +676,13 @@ AR Path="/5F20C3B9/5EE99BC8" Ref="Q?"  Part="1"
 AR Path="/5F20C3C3/5EE99BC8" Ref="Q?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BC8" Ref="Q?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BC8" Ref="Q?"  Part="1" 
+AR Path="/5F562B57/5EE99BC8" Ref="Q?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BC8" Ref="Q?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BC8" Ref="Q?"  Part="1" 
+AR Path="/5F622F9F/5EE99BC8" Ref="Q?"  Part="1" 
+AR Path="/5F6630F7/5EE99BC8" Ref="Q?"  Part="1" 
+AR Path="/5F6A322A/5EE99BC8" Ref="Q?"  Part="1" 
+AR Path="/5F6E334A/5EE99BC8" Ref="Q?"  Part="1" 
 F 0 "Q?" H 9125 6300 130 0000 C CNN
 F 1 "Transistor-NPN" H 8600 6865 130 0001 C CNN
 F 2 "" H 8600 6550 130 0001 C CNN
@@ -647,6 +703,13 @@ AR Path="/5F20C3B9/5EE99BCE" Ref="R?"  Part="1"
 AR Path="/5F20C3C3/5EE99BCE" Ref="R?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BCE" Ref="R?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BCE" Ref="R?"  Part="1" 
+AR Path="/5F562B57/5EE99BCE" Ref="R?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BCE" Ref="R?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BCE" Ref="R?"  Part="1" 
+AR Path="/5F622F9F/5EE99BCE" Ref="R?"  Part="1" 
+AR Path="/5F6630F7/5EE99BCE" Ref="R?"  Part="1" 
+AR Path="/5F6A322A/5EE99BCE" Ref="R?"  Part="1" 
+AR Path="/5F6E334A/5EE99BCE" Ref="R?"  Part="1" 
 F 0 "R?" V 9000 7275 130 0000 C CNN
 F 1 "Resistor-shortlead" H 8750 7200 130 0001 C CNN
 F 2 "" H 8750 7025 130 0001 C CNN
@@ -669,6 +732,13 @@ AR Path="/5F20C3B9/5EE99BD5" Ref="L?"  Part="1"
 AR Path="/5F20C3C3/5EE99BD5" Ref="L?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BD5" Ref="L?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BD5" Ref="L?"  Part="1" 
+AR Path="/5F562B57/5EE99BD5" Ref="L?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BD5" Ref="L?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BD5" Ref="L?"  Part="1" 
+AR Path="/5F622F9F/5EE99BD5" Ref="L?"  Part="1" 
+AR Path="/5F6630F7/5EE99BD5" Ref="L?"  Part="1" 
+AR Path="/5F6A322A/5EE99BD5" Ref="L?"  Part="1" 
+AR Path="/5F6E334A/5EE99BD5" Ref="L?"  Part="1" 
 F 0 "L?" V 8550 7625 130 0000 C CNN
 F 1 ".33μH" V 8800 7550 130 0000 C CNN
 F 2 "" H 8700 8050 130 0001 C CNN
@@ -689,6 +759,13 @@ AR Path="/5F20C3B9/5EE99BDB" Ref="CR?"  Part="1"
 AR Path="/5F20C3C3/5EE99BDB" Ref="CR?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BDB" Ref="CR?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BDB" Ref="CR?"  Part="1" 
+AR Path="/5F562B57/5EE99BDB" Ref="CR?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BDB" Ref="CR?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BDB" Ref="CR?"  Part="1" 
+AR Path="/5F622F9F/5EE99BDB" Ref="CR?"  Part="1" 
+AR Path="/5F6630F7/5EE99BDB" Ref="CR?"  Part="1" 
+AR Path="/5F6A322A/5EE99BDB" Ref="CR?"  Part="1" 
+AR Path="/5F6E334A/5EE99BDB" Ref="CR?"  Part="1" 
 F 0 "CR?" V 7500 7550 130 0000 C CNN
 F 1 "Diode" H 7525 7050 50  0001 C CNN
 F 2 "" H 7475 7025 50  0001 C CNN
@@ -709,6 +786,13 @@ AR Path="/5F20C3B9/5EE99BE1" Ref="CR?"  Part="1"
 AR Path="/5F20C3C3/5EE99BE1" Ref="CR?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BE1" Ref="CR?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BE1" Ref="CR?"  Part="1" 
+AR Path="/5F562B57/5EE99BE1" Ref="CR?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BE1" Ref="CR?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BE1" Ref="CR?"  Part="1" 
+AR Path="/5F622F9F/5EE99BE1" Ref="CR?"  Part="1" 
+AR Path="/5F6630F7/5EE99BE1" Ref="CR?"  Part="1" 
+AR Path="/5F6A322A/5EE99BE1" Ref="CR?"  Part="1" 
+AR Path="/5F6E334A/5EE99BE1" Ref="CR?"  Part="1" 
 F 0 "CR?" V 7500 7075 130 0000 C CNN
 F 1 "Diode" H 7525 6575 50  0001 C CNN
 F 2 "" H 7475 6550 50  0001 C CNN
@@ -729,6 +813,13 @@ AR Path="/5F20C3B9/5EE99BE7" Ref="CR?"  Part="1"
 AR Path="/5F20C3C3/5EE99BE7" Ref="CR?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BE7" Ref="CR?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BE7" Ref="CR?"  Part="1" 
+AR Path="/5F562B57/5EE99BE7" Ref="CR?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BE7" Ref="CR?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BE7" Ref="CR?"  Part="1" 
+AR Path="/5F622F9F/5EE99BE7" Ref="CR?"  Part="1" 
+AR Path="/5F6630F7/5EE99BE7" Ref="CR?"  Part="1" 
+AR Path="/5F6A322A/5EE99BE7" Ref="CR?"  Part="1" 
+AR Path="/5F6E334A/5EE99BE7" Ref="CR?"  Part="1" 
 F 0 "CR?" V 6300 6225 130 0000 C CNN
 F 1 "Diode" H 6300 5675 50  0001 C CNN
 F 2 "" H 6250 5650 50  0001 C CNN
@@ -749,6 +840,13 @@ AR Path="/5F20C3B9/5EE99BED" Ref="CR?"  Part="1"
 AR Path="/5F20C3C3/5EE99BED" Ref="CR?"  Part="1" 
 AR Path="/5F20C3CD/5EE99BED" Ref="CR?"  Part="1" 
 AR Path="/5F20C3D7/5EE99BED" Ref="CR?"  Part="1" 
+AR Path="/5F562B57/5EE99BED" Ref="CR?"  Part="1" 
+AR Path="/5F5A2C4C/5EE99BED" Ref="CR?"  Part="1" 
+AR Path="/5F5E2DE7/5EE99BED" Ref="CR?"  Part="1" 
+AR Path="/5F622F9F/5EE99BED" Ref="CR?"  Part="1" 
+AR Path="/5F6630F7/5EE99BED" Ref="CR?"  Part="1" 
+AR Path="/5F6A322A/5EE99BED" Ref="CR?"  Part="1" 
+AR Path="/5F6E334A/5EE99BED" Ref="CR?"  Part="1" 
 F 0 "CR?" V 6300 5700 130 0000 C CNN
 F 1 "Diode" H 6300 5175 50  0001 C CNN
 F 2 "" H 6250 5150 50  0001 C CNN

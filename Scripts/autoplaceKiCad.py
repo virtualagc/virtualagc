@@ -119,6 +119,7 @@ moduleA52 = False
 nd1021041 = False
 block1 = False
 shadow = False
+mirror = False
 bit = False
 dupej = False
 norLength = 5
@@ -139,6 +140,10 @@ for line in sys.stdin:
 		nd1021041 = True
 		continue
 	if type == "shadow1":
+		shadow = True
+		type = "block1"
+	if type == "mirror1":
+		mirror = True
 		shadow = True
 		type = "block1"
 	if type == "block1":
@@ -575,7 +580,10 @@ for line in sys.stdin:
 		if shadow:
 			posX = 25 * int(40 * (originX + xSpacing * nextX))
 			posY = 25 * int(40 * (originY + ySpacing * nextY))
-			objects["shadow" + id] = { "type": type, "refd": "X?", "symbol": "ShadowBodyAGC4", "unit": 1, "texts": texts, "x": posX, "y": posY, "rotated": False, "down": False, "up": False, "upperPinName":upperPinName, "lowerPinName":str(pinName) }
+			lowerPin = int(pinName)
+			if mirror:
+				lowerPin = 143 - lowerPin
+			objects["shadow" + id] = { "type": type, "refd": "X?", "symbol": "ShadowBodyAGC4", "unit": 1, "texts": texts, "x": posX, "y": posY, "rotated": False, "down": False, "up": False, "upperPinName":upperPinName, "lowerPinName":str(lowerPin) }
 			nextXY()
 		continue
 	
