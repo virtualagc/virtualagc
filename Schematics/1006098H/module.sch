@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 1 2
+Sheet 1 3
 Title ""
 Date ""
 Rev ""
@@ -444,4 +444,488 @@ Text Notes 24975 11975 0    140  ~ 28
 SEE NOTE 3
 Text Notes 15875 12025 0    140  ~ 28
 SEE NOTE 3
+Text Notes 28630 8500 0    130  ~ 26
+CR10
+Text Notes 28630 8813 0    130  ~ 26
+CR11
+Text Notes 28630 9126 0    130  ~ 26
+CR12
+Text Notes 28630 9439 0    130  ~ 26
+CR13
+Text Notes 28630 9752 0    130  ~ 26
+CR14
+Text Notes 28630 10065 0    130  ~ 26
+CR15
+Text Notes 28665 10375 0    130  ~ 26
+K1
+Text Notes 28670 12245 0    130  ~ 26
+Q5
+Text Notes 28670 12558 0    130  ~ 26
+Q6
+Text Notes 28670 12871 0    130  ~ 26
+Q7
+Text Notes 28670 13184 0    130  ~ 26
+Q8
+Text Notes 28670 13497 0    130  ~ 26
+Q9
+Text Notes 28670 13810 0    130  ~ 26
+Q10
+Text Notes 28670 14123 0    130  ~ 26
+Q11
+Text Notes 28670 14436 0    130  ~ 26
+Q12
+Text Notes 28635 21010 0    130  ~ 26
+R19
+Text Notes 28635 21323 0    130  ~ 26
+R20
+Text Notes 28635 21636 0    130  ~ 26
+R21
+Text Notes 28635 21949 0    130  ~ 26
+R22
+Text Notes 28635 22262 0    130  ~ 26
+R23
+Text Notes 28635 22575 0    130  ~ 26
+R24
+Text Notes 28635 22888 0    130  ~ 26
+R25
+Text Notes 28635 23201 0    130  ~ 26
+R26
+Text Notes 28635 23514 0    130  ~ 26
+R27
+Text Notes 28635 23827 0    130  ~ 26
+R28
+Text Notes 28635 24140 0    130  ~ 26
+R29
+Text Notes 28635 24453 0    130  ~ 26
+R30
+Text Notes 28635 24766 0    130  ~ 26
+R31
+Text Notes 28635 25079 0    130  ~ 26
+R32
+Text Notes 28635 25392 0    130  ~ 26
+R33
+Text Notes 28635 25705 0    130  ~ 26
+R34
+Text Notes 28635 26018 0    130  ~ 26
+R35
+Text Notes 28635 26331 0    130  ~ 26
+R36
+Text Notes 28635 26644 0    130  ~ 26
+R37
+Text Notes 28635 26957 0    130  ~ 26
+R38
+Text Notes 28635 27270 0    130  ~ 26
+R39
+Text Notes 28635 27583 0    130  ~ 26
+R40
+Text Notes 28635 27896 0    130  ~ 26
+R41
+Text Notes 28635 28209 0    130  ~ 26
+R42
+Text Notes 28635 28522 0    130  ~ 26
+R43
+Text Notes 29195 21650 0    130  ~ 26
+*
+Text Notes 31280 8500 0    130  ~ 26
+DIODE
+Text Notes 31280 8813 0    130  ~ 26
+DIODE
+Text Notes 31280 9126 0    130  ~ 26
+DIODE
+Text Notes 31280 9439 0    130  ~ 26
+DIODE
+Text Notes 31280 9752 0    130  ~ 26
+DIODE
+Text Notes 31280 10065 0    130  ~ 26
+DIODE
+Text Notes 31280 10378 0    130  ~ 26
+RELAY
+Text Notes 32625 9440 0    130  ~ 26
+6.2K
+Text Notes 32625 9753 0    130  ~ 26
+6.2K
+Text Notes 32625 10066 0    130  ~ 26
+6.2K
+Text Notes 31275 12250 0    130  ~ 26
+TSTR
+Text Notes 31275 12563 0    130  ~ 26
+TSTR
+Text Notes 31275 12876 0    130  ~ 26
+TSTR
+Text Notes 31275 13189 0    130  ~ 26
+TSTR
+Text Notes 31275 13502 0    130  ~ 26
+TSTR
+Text Notes 31275 13815 0    130  ~ 26
+TSTR
+Text Notes 31275 14128 0    130  ~ 26
+TSTR
+Text Notes 31275 14441 0    130  ~ 26
+TSTR
+Text Notes 31140 21015 0    130  ~ 26
+RES
+Text Notes 31140 21328 0    130  ~ 26
+RES
+Text Notes 31140 21641 0    130  ~ 26
+RES
+Text Notes 31140 21954 0    130  ~ 26
+RES
+Text Notes 31140 22267 0    130  ~ 26
+RES
+Text Notes 31140 22580 0    130  ~ 26
+RES
+Text Notes 31140 22893 0    130  ~ 26
+RES
+Text Notes 31140 23206 0    130  ~ 26
+RES
+Text Notes 31140 23519 0    130  ~ 26
+RES
+Text Notes 31140 23832 0    130  ~ 26
+RES
+Text Notes 31140 24145 0    130  ~ 26
+RES
+Text Notes 31140 24458 0    130  ~ 26
+RES
+Text Notes 31140 24771 0    130  ~ 26
+RES
+Text Notes 31140 25084 0    130  ~ 26
+RES
+Text Notes 31140 25397 0    130  ~ 26
+RES
+Text Notes 31140 25710 0    130  ~ 26
+RES
+Text Notes 31140 26023 0    130  ~ 26
+RES
+Text Notes 31140 26336 0    130  ~ 26
+RES
+Text Notes 31140 26649 0    130  ~ 26
+RES
+Text Notes 31140 26962 0    130  ~ 26
+RES
+Text Notes 31140 27275 0    130  ~ 26
+RES
+Text Notes 31140 27588 0    130  ~ 26
+RES
+Text Notes 31140 27901 0    130  ~ 26
+RES
+Text Notes 31140 28214 0    130  ~ 26
+RES
+Text Notes 31140 28527 0    130  ~ 26
+RES
+Text Notes 33660 21005 0    130  ~ 26
+2%
+Text Notes 33660 21318 0    130  ~ 26
+2%
+Text Notes 33660 21631 0    130  ~ 26
+2%
+Text Notes 33660 21944 0    130  ~ 26
+2%
+Text Notes 33660 22257 0    130  ~ 26
+2%
+Text Notes 33660 22570 0    130  ~ 26
+2%
+Text Notes 33660 22883 0    130  ~ 26
+2%
+Text Notes 33660 23196 0    130  ~ 26
+2%
+Text Notes 33660 23509 0    130  ~ 26
+2%
+Text Notes 33660 23822 0    130  ~ 26
+2%
+Text Notes 33660 24135 0    130  ~ 26
+2%
+Text Notes 33660 24448 0    130  ~ 26
+2%
+Text Notes 33660 24761 0    130  ~ 26
+2%
+Text Notes 33660 25074 0    130  ~ 26
+2%
+Text Notes 33660 25387 0    130  ~ 26
+2%
+Text Notes 33660 25700 0    130  ~ 26
+2%
+Text Notes 33660 26013 0    130  ~ 26
+2%
+Text Notes 33660 26326 0    130  ~ 26
+2%
+Text Notes 33660 26639 0    130  ~ 26
+2%
+Text Notes 33660 26952 0    130  ~ 26
+2%
+Text Notes 33660 27265 0    130  ~ 26
+2%
+Text Notes 33660 27578 0    130  ~ 26
+2%
+Text Notes 33660 27891 0    130  ~ 26
+2%
+Text Notes 33660 28204 0    130  ~ 26
+2%
+Text Notes 33660 28517 0    130  ~ 26
+2%
+Text Notes 34465 21010 0    130  ~ 26
+1/2W
+Text Notes 34465 21323 0    130  ~ 26
+1/4W
+Text Notes 34465 21636 0    130  ~ 26
+1/4W
+Text Notes 34465 21949 0    130  ~ 26
+1/4W
+Text Notes 34465 22262 0    130  ~ 26
+1/4W
+Text Notes 34465 22575 0    130  ~ 26
+1/4W
+Text Notes 34465 22888 0    130  ~ 26
+1/4W
+Text Notes 34465 23201 0    130  ~ 26
+1/4W
+Text Notes 34465 23514 0    130  ~ 26
+1/4W
+Text Notes 34465 23827 0    130  ~ 26
+1/4W
+Text Notes 34465 24140 0    130  ~ 26
+1/4W
+Text Notes 34465 24453 0    130  ~ 26
+1/4W
+Text Notes 34465 24766 0    130  ~ 26
+1/4W
+Text Notes 34465 25079 0    130  ~ 26
+1/4W
+Text Notes 34465 25392 0    130  ~ 26
+1/4W
+Text Notes 34465 25705 0    130  ~ 26
+1/4W
+Text Notes 34465 26018 0    130  ~ 26
+1/4W
+Text Notes 34465 26331 0    130  ~ 26
+1/4W
+Text Notes 34465 26644 0    130  ~ 26
+1/4W
+Text Notes 34465 26957 0    130  ~ 26
+1/4W
+Text Notes 34465 27270 0    130  ~ 26
+1/4W
+Text Notes 34465 27583 0    130  ~ 26
+1/4W
+Text Notes 34465 27896 0    130  ~ 26
+1/4W
+Text Notes 34465 28209 0    130  ~ 26
+1/2W
+Text Notes 34465 28522 0    130  ~ 26
+1/2W
+Text Notes 33010 21000 0    130  ~ 26
+Ω
+Text Notes 33010 21313 0    130  ~ 26
+Ω
+Text Notes 32680 21635 0    130  ~ 26
+NE
+Text Notes 33010 21939 0    130  ~ 26
+Ω
+Text Notes 33010 22252 0    130  ~ 26
+Ω
+Text Notes 33010 22565 0    130  ~ 26
+Ω
+Text Notes 33010 22878 0    130  ~ 26
+Ω
+Text Notes 33010 23191 0    130  ~ 26
+Ω
+Text Notes 33010 23504 0    130  ~ 26
+Ω
+Text Notes 33010 23817 0    130  ~ 26
+Ω
+Text Notes 33010 24130 0    130  ~ 26
+Ω
+Text Notes 33010 24443 0    130  ~ 26
+Ω
+Text Notes 33010 24756 0    130  ~ 26
+Ω
+Text Notes 33010 25069 0    130  ~ 26
+Ω
+Text Notes 33010 25382 0    130  ~ 26
+Ω
+Text Notes 33010 25695 0    130  ~ 26
+Ω
+Text Notes 33010 26008 0    130  ~ 26
+Ω
+Text Notes 33010 26321 0    130  ~ 26
+Ω
+Text Notes 33010 26634 0    130  ~ 26
+Ω
+Text Notes 33010 26947 0    130  ~ 26
+Ω
+Text Notes 33010 27260 0    130  ~ 26
+Ω
+Text Notes 33010 27573 0    130  ~ 26
+Ω
+Text Notes 33010 27886 0    130  ~ 26
+Ω
+Text Notes 33010 28199 0    130  ~ 26
+Ω
+Text Notes 33010 28512 0    130  ~ 26
+Ω
+Text Notes 32600 21315 0    130  ~ 26
+10K
+Text Notes 32595 21940 0    130  ~ 26
+10K
+Text Notes 32600 22565 0    130  ~ 26
+10K
+Text Notes 32605 23505 0    130  ~ 26
+10K
+Text Notes 32595 24130 0    130  ~ 26
+10K
+Text Notes 32595 24440 0    130  ~ 26
+10K
+Text Notes 32605 25070 0    130  ~ 26
+10K
+Text Notes 32615 22250 0    130  ~ 26
+62K
+Text Notes 32600 22885 0    130  ~ 26
+18K
+Text Notes 32505 23200 0    130  ~ 26
+2000
+Text Notes 32615 23815 0    130  ~ 26
+62K
+Text Notes 32500 24760 0    130  ~ 26
+2700
+Text Notes 32600 25380 0    130  ~ 26
+10K
+Text Notes 32595 26010 0    130  ~ 26
+10K
+Text Notes 32600 26640 0    130  ~ 26
+10K
+Text Notes 32590 26950 0    130  ~ 26
+10K
+Text Notes 32605 27265 0    130  ~ 26
+10K
+Text Notes 32615 28200 0    130  ~ 26
+10K
+Text Notes 32505 26320 0    130  ~ 26
+1000
+Text Notes 32605 25695 0    130  ~ 26
+510
+Text Notes 32605 27575 0    130  ~ 26
+18K
+Text Notes 32510 27885 0    130  ~ 26
+3000
+Text Notes 32495 28510 0    130  ~ 26
+1000
+Text Notes 29495 21005 0    130  ~ 26
+1006760-28
+Text Notes 29505 21320 0    130  ~ 26
+1006750-
+Text Notes 29505 21633 0    130  ~ 26
+1006750
+Text Notes 29505 21946 0    130  ~ 26
+1006750-
+Text Notes 29505 22259 0    130  ~ 26
+1006750-
+Text Notes 29505 22572 0    130  ~ 26
+1006750-
+Text Notes 29505 22885 0    130  ~ 26
+1006750-
+Text Notes 29505 23198 0    130  ~ 26
+1006750-
+Text Notes 29505 23511 0    130  ~ 26
+1006750-
+Text Notes 29505 23824 0    130  ~ 26
+1006750-
+Text Notes 29505 24137 0    130  ~ 26
+1006750-
+Text Notes 29505 24450 0    130  ~ 26
+1006750-
+Text Notes 29505 24763 0    130  ~ 26
+1006750-
+Text Notes 29505 25076 0    130  ~ 26
+1006750-
+Text Notes 29505 25389 0    130  ~ 26
+1006750-
+Text Notes 29505 25702 0    130  ~ 26
+1006750-
+Text Notes 29505 26015 0    130  ~ 26
+1006750-
+Text Notes 29505 26328 0    130  ~ 26
+1006750-
+Text Notes 29505 26641 0    130  ~ 26
+1006750-
+Text Notes 29505 26954 0    130  ~ 26
+1006750-
+Text Notes 29505 27267 0    130  ~ 26
+1006750-
+Text Notes 29505 27580 0    130  ~ 26
+1006750-
+Text Notes 29505 27893 0    130  ~ 26
+1006750-
+Text Notes 29505 28206 0    130  ~ 26
+1006760-56
+Text Notes 29505 28519 0    130  ~ 26
+1006760-32
+Text Notes 30540 21320 0    130  ~ 26
+56
+Text Notes 30540 21955 0    130  ~ 26
+56
+Text Notes 30535 22580 0    130  ~ 26
+56
+Text Notes 30530 22260 0    130  ~ 26
+75
+Text Notes 30530 22880 0    130  ~ 26
+62
+Text Notes 30530 23200 0    130  ~ 26
+39
+Text Notes 30530 23510 0    130  ~ 26
+56
+Text Notes 30550 24125 0    130  ~ 26
+56
+Text Notes 30540 24450 0    130  ~ 26
+56
+Text Notes 30550 25075 0    130  ~ 26
+56
+Text Notes 30530 23820 0    130  ~ 26
+75
+Text Notes 30545 24770 0    130  ~ 26
+42
+Text Notes 30545 25390 0    130  ~ 26
+56
+Text Notes 30530 26015 0    130  ~ 26
+56
+Text Notes 30540 26640 0    130  ~ 26
+56
+Text Notes 30540 26960 0    130  ~ 26
+56
+Text Notes 30540 27270 0    130  ~ 26
+56
+Text Notes 30540 25700 0    130  ~ 26
+25
+Text Notes 30530 26330 0    130  ~ 26
+32
+Text Notes 30530 27575 0    130  ~ 26
+62
+Text Notes 30530 27895 0    130  ~ 26
+43
+Text Notes 29565 12555 0    130  ~ 26
+1010376-1
+Text Notes 29565 12868 0    130  ~ 26
+1010376-1
+Text Notes 29565 13181 0    130  ~ 26
+1010376-1
+Text Notes 29640 13500 0    130  ~ 26
+1006829
+Text Notes 29640 13813 0    130  ~ 26
+1006829
+Text Notes 29705 14135 0    130  ~ 26
+1006752
+Text Notes 29705 14448 0    130  ~ 26
+1006752
+Text Notes 29670 8495 0    130  ~ 26
+1006751
+Text Notes 29670 8808 0    130  ~ 26
+1006751
+Text Notes 29670 9121 0    130  ~ 26
+1006751
+Text Notes 29670 9435 0    130  ~ 26
+1006838
+Text Notes 29670 9748 0    130  ~ 26
+1006838
+Text Notes 29670 10061 0    130  ~ 26
+1006838
+Text Notes 29515 10375 0    130  ~ 26
+1006815-2
 $EndSCHEMATC
