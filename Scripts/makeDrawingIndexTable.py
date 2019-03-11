@@ -17,9 +17,13 @@
 # sheet number (usually left off if there is only one sheet), and F is the frame
 # number (omitted if the sheet has only one frame). Since archive.org sorts
 # hyphens *after* alphabeticals but 'sort' puts them before, it's convenient
-# to replace '-' -> '_', then sort, then replace '_' -> '-' when creating the
-# sorted list.  Regardless, this script expects this specific naming scheme.
-# I also allow fields "-crummy", "-lighter", or "-darker" to be present.
+# to replace '-' by something that definitely goes *after* all upper-case letters
+# in the sorting order, then sort, then replace all of the '-' characters again. 
+# If, say, you have a tar file containing the JPEG2000 or PNG images uploaded 
+# to archive.org, you could do this:
+#	 tar -tvf IMAGES.tar | awk '{print $6}' | egrep '(png|jp2)' | sed -e 's@.*/@@' -e 's@\-@z@g' | sort | sed 's/z/-/g' >INPUT_images
+# Regardless of how you do the sorting, though, this script expects this specific 
+# naming scheme. I also allow fields "-crummy", "-lighter", or "-darker" to be present.
 
 # The archive.org stuff is for recurring usage, but as a one-off, if the base URL
 # is "SCDs/", then it can also be used on the local folder of SCDs that Mike 
@@ -89,10 +93,13 @@ try:
 					rev = line[-1:].upper()
 				pages.append({ "filename":filename, "drawing":drawing, "rev":rev, "sheet":"1", "frame":"1" })
 				continue
-			if line[-8:] != ".png.jp2":
+			if line[-8:] == ".png.jp2":
+				line = line[:-8]
+			elif line [-4:] == ".png":
+				line = line[:-4]
+			else:
 				print >> sys.stderr, "Filename improper: " + line
 				sys.exit(1)
-			line = line[:-8]
 			fields = line.split("-")
 			if "crummy" in fields:
 				fields.remove("crummy")
