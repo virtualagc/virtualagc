@@ -39,6 +39,8 @@ if len(sys.argv) < 4:
 inputTsvFilename = sys.argv[1]
 inputImagesFilename = sys.argv[2]
 baseUrl = sys.argv[3]
+if baseUrl[:7] != "http://" and baseUrl[:8] != "https://":
+	baseUrl = "https://archive.org/stream/" + sys.argv[3]
 SCDs = False
 if baseUrl == "SCDs/":
 	SCDs = True
