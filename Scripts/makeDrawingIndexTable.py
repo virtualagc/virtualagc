@@ -153,26 +153,26 @@ except:
 # Ready to output the table.
 if SCDs:
 	print '''
-	    <table cellspacing="2" cellpadding="2" border="1" align="center">
+	    <table border="1">
 	      <tbody>
 	        <tr>
-	          <th valign="middle" align="center">Link<br></th>
-	          <th valign="middle" align="center">Drawing<br></th>
-	          <th valign="middle" align="center">Rev<br></th>
+	          <th>Link<br></th>
+	          <th>Drawing<br></th>
+	          <th>Rev<br></th>
 	          <th valign="middle">Title<br></th>
 	          <th valign="middle">Comment<br></th>
 	        </tr>
 	'''
 else:
 	print '''
-	    <table cellspacing="2" cellpadding="2" border="1" align="center">
+	    <table border="1">
 	      <tbody>
 	        <tr>
-	          <th valign="middle" align="center">Page<br></th>
-	          <th valign="middle" align="center">Drawing<br></th>
-	          <th valign="middle" align="center">Rev<br></th>
-	          <th valign="middle" align="center">Sheet<br></th>
-	          <th valign="middle" align="center">Frame<br></th>
+	          <th>Page<br></th>
+	          <th>Drawing<br></th>
+	          <th>Rev<br></th>
+	          <th>Sheet<br></th>
+	          <th>Frame<br></th>
 	          <th valign="middle">Title<br></th>
 	          <th valign="middle">Comment<br></th>
 	        </tr>
@@ -186,14 +186,14 @@ for i in range(0, len(pages)):
 	frame = pages[i]["frame"]
 	notes = inputTsv[drawing]["notes"]
 	if SCDs:
-		print '<tr><td valign="middle" align="center"><a href="' + baseUrl + filename + '">drawing<br></a></td>'
+		print '<tr><td><a href="' + baseUrl + filename + '">drawing<br></a></td>'
 	else:
-		print '<tr><td valign="middle" align="center"><a href="' + baseUrl + '#page/n' + str(i) + '/mode/1up">' + str(i+1) + '<br></a></td>'
-        print '<td valign="middle" align="center">' + drawing + '<br></td>'
-        print '<td valign="middle" align="center">' + rev + '<br></td>'
+		print '<tr><td><a href="' + baseUrl + '#page/n' + str(i) + '/mode/1up">' + str(i+1) + '<br></a></td>'
+        print '<td>' + drawing + '<br></td>'
+        print '<td>' + rev + '<br></td>'
         if not SCDs:
-	        print '<td valign="middle" align="center">' + sheet + '<br></td>'
-	        print '<td valign="middle" align="center">' + frame + '<br></td>'
-        print '<td valign="middle">' + title + '</td>'
-        print '<td valign="middle">' + notes + '</td></tr>'
+	        print '<td>' + sheet + '<br></td>'
+	        print '<td>' + frame + '<br></td>'
+        print '<td>' + title + '</td>'
+        print '<td>' + notes + '</td></tr>'
 print '</tbody></table>'
