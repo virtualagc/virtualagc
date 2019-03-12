@@ -30,6 +30,31 @@
 # gave me. In that case, the comments about the filenaming convention and other
 # details change.
 
+# In addition to preparing the HTML, which this script does, it's important to 
+# know how to usefully combine the drawing index table so-produced with other,
+# previously-created drawing indices.  In other words, to present a nice, sorted
+# table of all drawings, rather than just a table for the current batch, preserving
+# all editing (such as comments or fixes) made to the prior data.
+
+# In essence, that way that's done is to:
+#   1.	"Cut" the existing index table, in a browser, from the HTML file it's currently in.
+#   2.	"Paste" that data into an empty Google Sheets spreadsheet.
+#   3.	Do the same with the indext-table HTML created by this script, except paste
+#   	the data at the end of the Google Sheet just created instead of into an empty one.
+#   4.  Sort the Google Sheet using columns B+C+D+E as keys, making sure to exclude the
+#	column headings. (Or else move the column headings back to the top after sorting.)
+#   5.  Cut/paste the active rows/columns of the Google Sheet back into the HTML file
+#	containing the master document index.
+
+# I say "in essence" because, while the procedure just described works, the HTML ends up with
+# innumerable inline styles and other useless attributes that balloons the file size enormously.
+# So what we actually need to do is to strip out all of that useless junk before the final
+# paste into the master HTML.  So instead of step 5 as listed above, the steps are:
+#  4.5.	Cut/paste the active rows/columns of the Google Sheet into a new, empty HTML file (say, temp.html).
+#  4.6. Strip the junk, creating a new file (say, temp2.html) with the following command:
+#		sed -e '1h;2,$H;$!d;g' -re 's/(style|target|class|data\-sheets\-value|width)="[^"]*"//g' temp.html >temp2.html
+#   5.  Cut/paste the table from temp2.html back into the HTML file containing the master document index.
+
 import sys
 
 if len(sys.argv) < 4:
