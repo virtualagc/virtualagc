@@ -1579,9 +1579,9 @@ Wire Wire Line
 Connection ~ 3425 5725
 Wire Wire Line
 	3425 5725 3425 5225
-Text Notes 1800 5900 0    1750 ~ 0
+Text Notes 1800 5900 0    1750 ~ 30
 {
-Text Notes 5675 5850 0    1750 ~ 0
+Text Notes 5675 5850 0    1750 ~ 30
 }
 Wire Wire Line
 	3250 9150 3425 9150
@@ -1625,9 +1625,9 @@ Wire Wire Line
 Connection ~ 5250 7675
 Wire Wire Line
 	5250 7675 5250 7200
-Text Notes 5725 8875 0    1550 ~ 0
+Text Notes 5725 8875 0    1550 ~ 30
 }
-Text Notes 1850 8875 0    1550 ~ 0
+Text Notes 1850 8875 0    1550 ~ 30
 {
 Wire Wire Line
 	5375 12100 5250 12100
@@ -1671,9 +1671,9 @@ Wire Wire Line
 Connection ~ 3400 11600
 Wire Wire Line
 	3400 11600 3400 11125
-Text Notes 1775 12025 0    1750 ~ 0
+Text Notes 1775 12025 0    1750 ~ 30
 {
-Text Notes 5675 12000 0    1750 ~ 0
+Text Notes 5675 12000 0    1750 ~ 30
 }
 Wire Notes Line
 	2975 13000 2975 13350

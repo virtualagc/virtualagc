@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Sheet
-S 7850 2725 5450 8975
+S 8125 2825 5450 8975
 U 5B8E7731
 F0 "1" 140
 F1 "1005700A.sch" 140
