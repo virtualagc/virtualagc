@@ -443,7 +443,7 @@ for line in sys.stdin:
 		nextXY()
 		continue
 	
-	if type in ['J', 'j', 'K', 'k'] and numFields >= 2 and (numFields <= 5 or (bit and numFields == 18)) and (fields[1].isdigit() or fields[1] == "." or block1):
+	if type in ['J', 'j', 'K', 'k'] and numFields >= 2 and (numFields <= 6 or (bit and numFields == 18)) and (fields[1].isdigit() or fields[1] == "." or block1):
 		if fields[1] == ".":
 			fields[1] = str(padNumber)
 			padNumber += 1
@@ -783,10 +783,11 @@ for id in objects:
 		unit = object["unit"]
 		texts = object["texts"]
 		if not bit:
-			texts += ["", "", ""]
+			texts += ["", "", "", ""]
 			caption = texts[0]
 			caption2 = texts[1]
 			caption3 = texts[2]
+			caption4 = texts[3]
 		rotated = object["rotated"]
 		sys.stdout.write("$Comp\n")
 		sys.stdout.write("L AGC_DSKY:" + symbol + " " + refd + "\n")
@@ -809,6 +810,12 @@ for id in objects:
 				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + texts[0] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption\"\n")
 				for i in range(1,16):
 					sys.stdout.write("F " + str(4 + i) + " \"" + texts[i] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption" + str(i + 1) + "\"\n")
+			elif caption4 != "":
+				# This is really only for "j" at the moment.
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY + 75) + " 140 0000 R BIB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption + "\" H " + str(posX-425) + " " + str(posY - 100) + " 140 0000 R CIB \"Caption2\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption4 + "\" H " + str(posX-2925) + " " + str(posY + 75) + " 140 0000 R BIB \"Caption3\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+3) + " \"" + caption3 + "\" H " + str(posX-2925) + " " + str(posY - 100) + " 140 0000 R CIB \"Caption3\"\n")
 			elif caption3 != "":
 				if rotated:
 					rotated = 0

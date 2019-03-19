@@ -1,0 +1,427 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 29 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 5 11
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text Notes 39875 31725 0    200  ~ 40
+SCHEMATIC
+Text Notes 40575 33075 0    250  ~ 50
+1006162
+Text Notes 38700 32075 0    200  ~ 40
+DECODING MODULE D1-D6
+Text Notes 42425 33455 0    140  ~ 28
+1     3
+Text Notes 39225 32450 0    200  ~ 40
+AGC  DSKY  NAV & MAIN
+Text Notes 38475 32950 0    140  ~ 28
+________
+Wire Notes Line style solid
+	37965 910  37965 1515
+Wire Notes Line style solid
+	37965 1515 43500 1515
+Wire Notes Line style solid
+	37965 1160 43500 1160
+Wire Notes Line style solid
+	38465 910  38465 1515
+Wire Notes Line style solid
+	41800 910  41800 1515
+Wire Notes Line style solid
+	42465 910  42465 1515
+Text Notes 38105 1130 0    140  Italic 28
+A   REVISED PER TDRR 04320
+Text Notes 38095 1430 0    140  ~ 28
+B   REVISED PER TDRR 04730
+$Comp
+L AGC_DSKY:Transistor-PNP Q?
+U 1 1 5CCAF295
+P 3950 14825
+F 0 "Q?" H 3925 15235 130 0001 C CNN
+F 1 "Transistor-PNP" H 3950 15390 130 0001 C CNN
+F 2 "" H 3950 14575 130 0001 C CNN
+F 3 "" H 3950 14575 130 0001 C CNN
+F 4 "Q1" H 4500 14850 130 0000 C CIN "baseRefd"
+	1    3950 14825
+	1    0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q?
+U 1 1 5CCAFDD9
+P 5475 12975
+F 0 "Q?" H 5475 13390 130 0001 C CNN
+F 1 "Transistor-NPN" H 5475 13540 130 0001 C CNN
+F 2 "" H 5475 13225 130 0001 C CNN
+F 3 "" H 5475 13225 130 0001 C CNN
+F 4 "Q2" H 6025 12950 130 0000 C CIN "baseRefd"
+	1    5475 12975
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q?
+U 1 1 5CCB04E7
+P 7950 12950
+F 0 "Q?" H 7950 13365 130 0001 C CNN
+F 1 "Transistor-NPN" H 7950 13515 130 0001 C CNN
+F 2 "" H 7950 13200 130 0001 C CNN
+F 3 "" H 7950 13200 130 0001 C CNN
+F 4 "Q3" H 8575 12950 130 0000 C CIN "baseRefd"
+	1    7950 12950
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CCB0D6F
+P 2625 15550
+F 0 "R?" H 2600 15375 130 0001 C CNN
+F 1 "Resistor" H 2625 15725 130 0001 C CNN
+F 2 "" H 2625 15550 130 0001 C CNN
+F 3 "" H 2625 15550 130 0001 C CNN
+F 4 "R1" V 2625 15175 130 0000 C CIN "baseRefd"
+	1    2625 15550
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CCB1275
+P 3125 15550
+F 0 "R?" H 3100 15375 130 0001 C CNN
+F 1 "Resistor" H 3125 15725 130 0001 C CNN
+F 2 "" H 3125 15550 130 0001 C CNN
+F 3 "" H 3125 15550 130 0001 C CNN
+F 4 "R2" V 3125 15850 130 0000 C CIN "baseRefd"
+	1    3125 15550
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CCB176E
+P 4100 13675
+F 0 "R?" H 4075 13500 130 0001 C CNN
+F 1 "Resistor" H 4100 13850 130 0001 C CNN
+F 2 "" H 4100 13675 130 0001 C CNN
+F 3 "" H 4100 13675 130 0001 C CNN
+F 4 "R3" V 4100 13300 130 0000 C CIN "baseRefd"
+	1    4100 13675
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CCB1E09
+P 4675 13725
+F 0 "R?" H 4650 13550 130 0001 C CNN
+F 1 "Resistor" H 4675 13900 130 0001 C CNN
+F 2 "" H 4675 13725 130 0001 C CNN
+F 3 "" H 4675 13725 130 0001 C CNN
+F 4 "R4" V 4625 14075 130 0000 C CIN "baseRefd"
+	1    4675 13725
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CCB236E
+P 7125 13750
+F 0 "R?" H 7100 13575 130 0001 C CNN
+F 1 "Resistor" H 7125 13925 130 0001 C CNN
+F 2 "" H 7125 13750 130 0001 C CNN
+F 3 "" H 7125 13750 130 0001 C CNN
+F 4 "R6" V 7075 14100 130 0000 C CIN "baseRefd"
+	1    7125 13750
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CCB2805
+P 5625 11400
+F 0 "R?" H 5600 11225 130 0001 C CNN
+F 1 "Resistor" H 5625 11575 130 0001 C CNN
+F 2 "" H 5625 11400 130 0001 C CNN
+F 3 "" H 5625 11400 130 0001 C CNN
+F 4 "R7" V 5575 11750 130 0000 C CIN "baseRefd"
+	1    5625 11400
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CCB2CC0
+P 6400 12150
+F 0 "R?" H 6375 11975 130 0001 C CNN
+F 1 "Resistor" H 6400 12325 130 0001 C CNN
+F 2 "" H 6400 12150 130 0001 C CNN
+F 3 "" H 6400 12150 130 0001 C CNN
+F 4 "R5" H 6400 12400 130 0000 C CIN "baseRefd"
+	1    6400 12150
+	1    0    0    -1  
+$EndComp
+Text HLabel 1075 16275 0    140  Input Italic 28
+F
+Text HLabel 9925 14475 2    140  Output Italic 28
+WD239
+Text HLabel 5625 10700 1    140  Input Italic 28
+WD241
+Text HLabel 3975 10675 1    140  Input Italic 28
+X
+Text HLabel 8100 10675 1    140  Input Italic 28
+Y
+Wire Wire Line
+	1075 16275 2625 16275
+Wire Wire Line
+	2625 16275 2625 15950
+Wire Wire Line
+	2625 15150 2625 14825
+Wire Wire Line
+	2625 14825 3125 14825
+Wire Wire Line
+	3125 15150 3125 14825
+Connection ~ 3125 14825
+Wire Wire Line
+	3125 14825 3650 14825
+Wire Wire Line
+	4100 15075 4100 16275
+Wire Wire Line
+	4100 16275 3125 16275
+Wire Wire Line
+	3125 16275 3125 15950
+Wire Wire Line
+	4100 16275 4100 17850
+Wire Wire Line
+	4100 17850 9925 17850
+Connection ~ 4100 16275
+Text HLabel 9925 17850 2    140  Input Italic 28
+WD241
+Wire Wire Line
+	4100 14575 4100 14075
+Wire Wire Line
+	4100 13275 4100 12975
+Wire Wire Line
+	4100 12975 4675 12975
+Wire Wire Line
+	4675 13325 4675 12975
+Connection ~ 4675 12975
+Wire Wire Line
+	4675 12975 5175 12975
+Wire Wire Line
+	4675 14125 4675 14475
+Wire Wire Line
+	4675 14475 5625 14475
+Wire Wire Line
+	5625 13225 5625 14475
+Connection ~ 5625 14475
+Wire Wire Line
+	5625 14475 7125 14475
+Wire Wire Line
+	7125 14150 7125 14475
+Connection ~ 7125 14475
+Wire Wire Line
+	7125 14475 8100 14475
+Wire Wire Line
+	7125 13350 7125 12950
+Wire Wire Line
+	7125 12950 7650 12950
+Wire Wire Line
+	7125 12950 7125 12150
+Wire Wire Line
+	7125 12150 6800 12150
+Connection ~ 7125 12950
+Wire Wire Line
+	5625 12725 5625 12150
+Wire Wire Line
+	5625 12150 6000 12150
+Wire Wire Line
+	5625 12150 3975 12150
+Wire Wire Line
+	3975 12150 3975 10675
+Connection ~ 5625 12150
+Wire Wire Line
+	5625 12150 5625 11800
+Wire Wire Line
+	5625 11000 5625 10700
+Wire Wire Line
+	8100 12700 8100 10675
+Wire Wire Line
+	8100 13200 8100 14475
+Connection ~ 8100 14475
+Wire Wire Line
+	8100 14475 9925 14475
+Wire Notes Line
+	1850 10950 1850 18225
+Wire Notes Line
+	1850 18225 9425 18225
+Wire Notes Line
+	9425 18225 9425 10950
+Wire Notes Line
+	9425 10950 1850 10950
+Text Notes 4775 15925 0    140  Italic 28
+SEE CIRCUIT IDENT TABLE\nFOR REF DES PREFIX\nNUMBER
+Text Notes 4325 17200 0    140  Italic 28
+2 IDENTICAL CIRCUITS EACH MODULE\n90024 THRU 90029  NAV DSKY\n90624 THRU 90629  MAIN DSKY
+Wire Notes Line style solid
+	15300 26150 23150 26150
+Wire Notes Line style solid
+	15300 26425 23150 26425
+Wire Notes Line style solid
+	15300 26700 23150 26700
+Wire Notes Line style solid
+	15300 26975 23150 26975
+Wire Notes Line style solid
+	15300 27250 23150 27250
+Wire Notes Line style solid
+	15300 27525 23150 27525
+Wire Notes Line style solid
+	15300 27800 23150 27800
+Wire Notes Line style solid
+	15300 28075 23150 28075
+Wire Notes Line style solid
+	15300 28350 23150 28350
+Wire Notes Line style solid
+	15300 28625 23150 28625
+Wire Notes Line style solid
+	15300 28900 23150 28900
+Wire Notes Line style solid
+	15300 29175 23150 29175
+Wire Notes Line style solid
+	15300 29450 23150 29450
+Wire Notes Line style solid
+	15300 26150 15300 29450
+Wire Notes Line style solid
+	23150 26150 23150 29450
+Wire Notes Line style solid
+	22150 26425 22150 29450
+Wire Notes Line style solid
+	21400 26425 21400 29450
+Wire Notes Line style solid
+	20275 26425 20275 29450
+Wire Notes Line style solid
+	18425 26425 18425 29450
+Wire Notes Line style solid
+	16525 26425 16525 29450
+Text Notes 16950 26400 0    140  Italic 28
+90024 - 90029  &  90624 - 90629
+Text Notes 15425 26675 0    140  Italic 28
+REF DES
+Text Notes 16925 26675 0    140  Italic 28
+PART NO.
+Text Notes 18650 26675 0    140  Italic 28
+DESCRIPTION
+Text Notes 20475 26675 0    140  Italic 28
+VALUE
+Text Notes 21550 26675 0    140  Italic 28
+TOL
+Text Notes 22275 26675 0    140  Italic 28
+RATING
+Text Notes 15675 26950 0    140  Italic 28
+Q1
+Text Notes 15675 27225 0    140  Italic 28
+Q2
+Text Notes 15675 27500 0    140  Italic 28
+Q3
+Text Notes 15675 27775 0    140  Italic 28
+R1
+Text Notes 15675 28050 0    140  Italic 28
+R2
+Text Notes 15675 28325 0    140  Italic 28
+R3
+Text Notes 15675 28600 0    140  Italic 28
+R4
+Text Notes 15675 28875 0    140  Italic 28
+R5
+Text Notes 15675 29150 0    140  Italic 28
+R6
+Text Notes 15675 29425 0    140  Italic 28
+R7
+Text Notes 18725 26950 0    140  Italic 28
+TRANSISTOR
+Text Notes 18725 27225 0    140  Italic 28
+TRANSISTOR
+Text Notes 18725 27500 0    140  Italic 28
+TRANSISTOR
+Text Notes 18800 27775 0    140  Italic 28
+RESISTOR
+Text Notes 18800 29425 0    140  Italic 28
+RESISTOR
+Text Notes 16900 26950 0    140  Italic 28
+1006753
+Text Notes 16900 27225 0    140  Italic 28
+1006752
+Text Notes 16900 27500 0    140  Italic 28
+1006752
+Text Notes 16700 27775 0    140  Italic 28
+1006750-15
+Text Notes 16700 28050 0    140  Italic 28
+1006750-39
+Text Notes 16700 28325 0    140  Italic 28
+1006750-39
+Text Notes 16700 28600 0    140  Italic 28
+1006750-39
+Text Notes 16700 28875 0    140  Italic 28
+1006750-39
+Text Notes 16700 29150 0    140  Italic 28
+1006750-39
+Text Notes 16700 29425 0    140  Italic 28
+1006750-39
+Text Notes 20600 27775 0    140  Italic 28
+200
+Text Notes 20525 28050 0    140  Italic 28
+2000
+Text Notes 20525 28325 0    140  Italic 28
+2000
+Text Notes 20525 28600 0    140  Italic 28
+2000
+Text Notes 20525 28875 0    140  Italic 28
+2000
+Text Notes 20525 29150 0    140  Italic 28
+2000
+Text Notes 20525 29425 0    140  Italic 28
+2000
+Text Notes 21500 27775 0    140  Italic 28
+±2%
+Text Notes 21500 28050 0    140  Italic 28
+±2%
+Text Notes 21500 28325 0    140  Italic 28
+±2%
+Text Notes 21500 28600 0    140  Italic 28
+±2%
+Text Notes 21500 28875 0    140  Italic 28
+±2%
+Text Notes 21500 29150 0    140  Italic 28
+±2%
+Text Notes 21500 29425 0    140  Italic 28
+±2%
+Text Notes 22275 27775 0    140  Italic 28
+1/4W
+Text Notes 22275 28050 0    140  Italic 28
+1/4W
+Text Notes 22275 28325 0    140  Italic 28
+1/4W
+Text Notes 22275 28600 0    140  Italic 28
+1/4W
+Text Notes 22275 28875 0    140  Italic 28
+1/4W
+Text Notes 22275 29150 0    140  Italic 28
+1/4W
+Text Notes 22275 29425 0    140  Italic 28
+1/4W
+Wire Notes Line style solid
+	19350 27875 19350 29100
+Wire Notes Line width 60 style solid
+	19300 28975 19350 29100
+Wire Notes Line width 60 style solid
+	19350 29100 19400 28975
+Wire Notes Line width 60 style solid
+	19400 28975 19300 28975
+Wire Notes Line width 60 style solid
+	19400 28000 19350 27875
+Wire Notes Line width 60 style solid
+	19350 27875 19300 28000
+Wire Notes Line width 60 style solid
+	19300 28000 19400 28000
+$EndSCHEMATC
