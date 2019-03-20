@@ -157,11 +157,11 @@ for filename in blocks:
 		if not inComponent:
 			continue
 		
-		if len(fields) == 4 and fields[0] == "L" and baseRefd != "":
-			lines[i] = fields[0] + " " + fields[1] + " " + baseRefd + "\n"
+		if len(fields) == 3 and fields[0] == "L" and baseRefd != "":
+			lines[i] = fields[0] + " " + fields[1] + " " + str(numberFrom) + baseRefd + "\n"
 			continue
 		if len(fields) == 10 and fields[0] == "F" and fields[1] == "0" and baseRefd != "":
-			lines[i] = fields[0] + " " + fields[1] + ' "' + baseRefd + '" ' + fields[3] + " " + fields[4] + " " + fields[5] + " " + fields[6] + " " + fields[7] + " " + fields[8] + " " + fields[9] + "\n"
+			lines[i] = fields[0] + " " + fields[1] + ' "' + str(numberFrom) + baseRefd + '" ' + fields[3] + " " + fields[4] + " " + fields[5] + " " + fields[6] + " " + fields[7] + " " + fields[8] + " " + fields[9] + "\n"
 			continue
 		if len(fields) != 4 or fields[0] != "AR" or fields[1][:7] != 'Path="/':
 			continue
