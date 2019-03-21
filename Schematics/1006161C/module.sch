@@ -2,7 +2,7 @@ EESchema Schematic File Version 4
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
-$Descr E 44000 34000
+$Descr User 50000 34000
 encoding utf-8
 Sheet 1 2
 Title ""
@@ -15,63 +15,39 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Sheet
-S 18950 12200 5450 8975
+S 22600 12150 5450 8975
 U 5B8E7731
 F0 "1" 140
 F1 "1006161C.sch" 140
 $EndSheet
-Text Notes 39725 31875 0    250  ~ 50
-SCHEMATIC,
-Text Notes 39150 32300 0    200  ~ 40
-ERASABLE MEMORY STICK
-Text Notes 33250 33325 0    140  ~ 28
-____________
-Text Notes 33800 33400 0    140  ~ 28
-//
-Text Notes 33275 32850 0    140  ~ 28
-____________
-Text Notes 33825 32925 0    140  ~ 28
-//
-Text Notes 33275 32350 0    140  ~ 28
-____________
-Text Notes 33825 32425 0    140  ~ 28
-//
-Text Notes 35075 31750 0    140  ~ 28
-___
-Text Notes 35100 31825 0    140  ~ 28
-//
-Text Notes 34175 31750 0    140  ~ 28
-___
-Text Notes 34200 31825 0    140  ~ 28
-//
-Text Notes 33200 31750 0    140  ~ 28
-___
-Text Notes 33225 31825 0    140  ~ 28
-//
-Text Notes 38850 33375 0    140  ~ 28
-___
-Text Notes 38875 33450 0    140  ~ 28
-//
+Text Notes 45750 31725 0    250  ~ 50
+SCHEMATIC
+Text Notes 44350 32400 0    190  ~ 38
+RELAY MODULE ASSEMBLY D7-D14\n     AGC DSKY NAV & MAIN
+Text Notes 46825 33125 0    250  ~ 50
+1006161
+Text Notes 44875 33500 0    140  ~ 28
+NONE
+Text Notes 44450 32900 0    140  ~ 28
+________
 Wire Notes Line style solid
-	37965 905  37965 1790
+	43965 985  43965 1785
 Wire Notes Line style solid
-	37965 1790 43500 1790
+	43965 1785 49500 1785
 Wire Notes Line style solid
-	38465 905  38465 1790
+	43965 1470 49500 1470
+Text Notes 44130 1270 0    140  ~ 28
+B
+Text Notes 44120 1735 0    140  ~ 28
+C
+Text Notes 44515 1740 0    140  ~ 28
+REVISED PER TDRR 06050
+Text Notes 44495 1450 0    140  ~ 28
+REPLACES REV   WITH\nCHANGE PER TDRR 04722
 Wire Notes Line style solid
-	41800 905  41800 1790
+	44465 985  44465 1785
 Wire Notes Line style solid
-	42465 905  42465 1790
+	47810 985  47810 1785
 Wire Notes Line style solid
-	37965 1520 43500 1520
-Wire Notes Line style solid
-	37965 1220 43500 1220
-Text Notes 38175 1160 0    140  ~ 28
-A   REVISED PER TDRR 00674
-Text Notes 38145 1480 0    140  ~ 28
-B   REVISED PER TDRR 01169
-Text Notes 38150 1765 0    140  ~ 28
-C   REVISED PER TDRR 01296
-Text Notes 40925 33100 0    250  ~ 50
-1006061
+	48470 985  48470 1785
 $EndSCHEMATC
