@@ -1709,13 +1709,13 @@ ____
 Text Notes 15200 7975 0    130  ~ 26
 ±2%
 Text Notes 15125 8225 0    130  ~ 26
-±1.0%
+±0.1%
 Wire Notes Line style solid
 	15525 8325 15525 9200
 Wire Notes Line style solid
 	16350 8325 16350 9200
 Text Notes 15150 9475 0    130  ~ 26
-±1.0%
+±0.1%
 Text Notes 15250 9725 0    130  ~ 26
 ±2%
 Text Notes 15200 18225 0    130  ~ 26
