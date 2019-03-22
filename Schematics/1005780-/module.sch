@@ -28,6 +28,6 @@ Text Notes 46825 33125 0    250  ~ 50
 1005780
 Text Notes 44875 33500 0    140  ~ 28
 NONE
-Text Notes 44450 32900 0    140  ~ 28
-________
+Text Notes 44285 33125 0    250  ~ 50
+80230
 $EndSCHEMATC
