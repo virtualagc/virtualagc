@@ -1546,17 +1546,17 @@ ROPES
 Text GLabel 30250 9450 0    140  Input ~ 28
 ROPET
 Text GLabel 7275 12000 0    140  Input ~ 28
-ROPER
+RPR
 Text GLabel 14700 12000 0    140  Input ~ 28
-ROPER
+RPR
 Text GLabel 7275 12375 0    140  Input ~ 28
-ROPES
+RPS
 Text GLabel 14700 12375 0    140  Input ~ 28
-ROPES
+RPS
 Text GLabel 7275 12750 0    140  Input ~ 28
-ROPET
+RPT
 Text GLabel 14700 12750 0    140  Input ~ 28
-ROPET
+RPT
 Text GLabel 40100 7475 0    140  Input ~ 28
 SE19
 Text GLabel 40100 8175 0    140  Input ~ 28
@@ -1907,9 +1907,9 @@ Wire Wire Line
 Wire Wire Line
 	26525 11900 26150 11900
 Wire Wire Line
-	31775 5200 32175 5200
+	31775 5200 32000 5200
 Wire Wire Line
-	31775 7250 32175 7250
+	31775 7250 32000 7250
 Wire Wire Line
 	30700 4800 30250 4800
 Wire Wire Line
@@ -1923,11 +1923,38 @@ Wire Wire Line
 Wire Wire Line
 	30700 7625 30250 7625
 Wire Wire Line
-	31775 9450 32175 9450
+	31775 9450 32000 9450
 Wire Wire Line
 	30700 9825 30250 9825
 Wire Wire Line
 	30700 9450 30250 9450
 Wire Wire Line
 	30700 9050 30250 9050
+Text GLabel 32200 5700 2    140  Output ~ 28
+RPR
+Text GLabel 32200 7775 2    140  Output ~ 28
+RPS
+Text GLabel 32200 9950 2    140  Output ~ 28
+RPT
+Wire Wire Line
+	32200 9950 32000 9950
+Wire Wire Line
+	32000 9950 32000 9450
+Connection ~ 32000 9450
+Wire Wire Line
+	32000 9450 32175 9450
+Wire Wire Line
+	32200 7775 32000 7775
+Wire Wire Line
+	32000 7775 32000 7250
+Connection ~ 32000 7250
+Wire Wire Line
+	32000 7250 32175 7250
+Wire Wire Line
+	32200 5700 32000 5700
+Wire Wire Line
+	32000 5700 32000 5200
+Connection ~ 32000 5200
+Wire Wire Line
+	32000 5200 32175 5200
 $EndSCHEMATC
