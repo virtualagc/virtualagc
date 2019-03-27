@@ -18,7 +18,7 @@ $Sheet
 S 9500 11875 5600 8925
 U 5B842FBB
 F0 "1" 140
-F1 "2005260A-p1of3.sch" 140
+F1 "2005260--p1of3.sch" 140
 F2 "0VDCA" U R 15100 16950 140
 F3 "+4VDC" U R 15100 16050 140
 F4 "FAP" U R 15100 15200 140
@@ -27,7 +27,7 @@ $Sheet
 S 19200 11875 5600 8925
 U 5B84300F
 F0 "2" 140
-F1 "2005260A-p2of3.sch" 140
+F1 "2005260--p2of3.sch" 140
 F2 "+4VDC" U L 19200 16050 140
 F3 "0VDCA" U L 19200 16950 140
 F4 "FAP" U L 19200 15200 140
@@ -36,7 +36,7 @@ $Sheet
 S 28650 11875 5600 8925
 U 5B84301C
 F0 "3" 140
-F1 "2005260A-p3of3.sch" 140
+F1 "2005260--p3of3.sch" 140
 F2 "0VDCA" U L 28650 16950 140
 F3 "FAP" U L 28650 15200 140
 F4 "+4SW" U L 28650 16050 140
@@ -53,26 +53,6 @@ Text Notes 38250 33125 0    250  ~ 50
 80230
 Text Notes 38950 33425 0    140  ~ 28
 ____
-Wire Notes Line width 6 style solid
-	36461 985  36461 1310
-Wire Notes Line width 6 style solid
-	36839 984  36839 1310
-Wire Notes Line width 6 style solid
-	37350 984  37350 1310
-Wire Notes Line width 6 style solid
-	40831 984  40831 1310
-Wire Notes Line width 6 style solid
-	41331 984  41331 1310
-Wire Notes Line width 6 style solid
-	41831 984  41831 1310
-Wire Notes Line width 6 style solid
-	42480 984  42480 1310
-Wire Notes Line width 6 style solid
-	43500 1310 36465 1310
-Text Notes 36600 1250 0    140  ~ 28
-A
-Text Notes 37450 1250 0    140  ~ 28
-REVISED PER TDRR      30754
 $Comp
 L AGC_DSKY:PWR_FLAG #FLG0101
 U 1 1 5C914190
