@@ -522,26 +522,6 @@ Text Notes 42396 33456 0    140  ~ 28
 2
 Text Notes 43060 33456 0    140  ~ 28
 2
-Wire Notes Line width 6 style solid
-	36461 982  36461 1300
-Wire Notes Line width 6 style solid
-	36464 1300 43500 1300
-Wire Notes Line width 6 style solid
-	42480 984  42480 1300
-Wire Notes Line width 6 style solid
-	41831 984  41831 1300
-Wire Notes Line width 6 style solid
-	41331 984  41331 1300
-Wire Notes Line width 6 style solid
-	40831 984  40831 1298
-Wire Notes Line width 6 style solid
-	36839 984  36839 1300
-Wire Notes Line width 6 style solid
-	37350 983  37350 1300
-Text Notes 36560 1274 0    160  ~ 32
-A
-Text Notes 37382 1274 0    160  ~ 32
-REVISED PER TDRR 30754
 $Comp
 L AGC_DSKY:ConnectorA1-400 J4
 U 67 1 5D8BD282
