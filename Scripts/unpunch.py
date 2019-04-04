@@ -41,6 +41,7 @@ baseURL = "BASEURL"
 if len(sys.argv) > 1:
 	baseURL = sys.argv[1]
 
+dupList = {}
 htmlList = {}
 for line in sys.stdin:
 	line = line.strip()
@@ -122,8 +123,25 @@ for line in sys.stdin:
 		"frameNumber" : frameNumber,
 		"title" : title,
 		"copy" : copy, 
-		"dup" : dup
+		"dup" : dup,
+		"numFrames" : numFrames,
+		"numSheets" : numSheets,
+		"tdrr" : tdrr, 
+		"group" : group,
+		"line" : rawLine
 	}
+	if dup > 1:
+		if basename_ in dupList:
+			dupList[basename_].append(htmlList[basename])
+		else:
+			dupList[basename_] = [htmlList[basename_], htmlList[basename]]
+
+print(": '")
+for n in dupList:
+	print(n)
+	for m in dupList[n]:
+		print("\tdup:" + str(m["dup"]) + " " + m["line"])
+print("'")
 
 sys.stderr.write("<table><tbody>\n<tr>")
 sys.stderr.write("<td><b>Link</b></td>")
