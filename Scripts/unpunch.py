@@ -108,15 +108,21 @@ for line in sys.stdin:
 
 	revision_ = revision.replace("-", "_")
 	basename_ = docNumber + revision_ + "_" + docType + "_" + sheetNum + "_" + frameNumber + "_" + title + copy
-	print("mv '" + rawLine + "-000.png' '" + basename_ + ".png'")
-	htmlList[basename_] = {
+	basename = basename_
+	dup = 1
+	while basename in htmlList:
+		basename = basename_ + "_d" + str(dup)
+		dup += 1
+	print("mv '" + rawLine + "-000.png' '" + basename + ".png'")
+	htmlList[basename] = {
 		"docNumber" : docNumber,
 		"revision" : revision,
 		"docType" : docType,
 		"sheetNum" : sheetNum,
 		"frameNumber" : frameNumber,
 		"title" : title,
-		"copy" : copy
+		"copy" : copy, 
+		"dup" : dup
 	}
 
 sys.stderr.write("<table><tbody>\n<tr>")
@@ -140,7 +146,11 @@ for key in sorted(htmlList):
 	sys.stderr.write("<td>" + htmlList[key]["sheetNum"] + "</td>") 
 	sys.stderr.write("<td>" + htmlList[key]["frameNumber"] + "</td>") 
 	sys.stderr.write("<td>" + htmlList[key]["title"] + "</td>") 
-	sys.stderr.write("<td></td>") 
+	dup = htmlList[key]["dup"]
+	if dup == 1:
+		sys.stderr.write("<td></td>") 
+	else:
+		sys.stderr.write("<td>Internal error, duplicate " + str(dup) + "</td>")
 	sys.stderr.write("</tr>\n")
 	pageNumber += 1
 
