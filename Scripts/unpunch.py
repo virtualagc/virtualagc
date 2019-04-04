@@ -137,10 +137,12 @@ for line in sys.stdin:
 			dupList[basename_] = [htmlList[basename_], htmlList[basename]]
 
 print(": '")
+count = 1
 for n in dupList:
-	print(n)
+	print("# " + str(count) + ": " + n)
+	count += 1
 	for m in dupList[n]:
-		print("\tdup:" + str(m["dup"]) + " " + m["line"])
+		print("xreader '" + m["line"] + "' &")
 print("'")
 
 sys.stderr.write("<table><tbody>\n<tr>")
