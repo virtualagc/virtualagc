@@ -146,3 +146,13 @@ An exception is the rare case in which extra NOR gates or NOR gates with additio
 It is my intention to convert every available scan of an AGC or DSKY electrical drawing (and there are over a hundred of them) to CAD. I've gotten this down to a science, so to maintain aesthetic and electrical consistency it's perhaps best that I continue that as an individual effort.  If I die or something, feel free to jump in and finish it up!
 
 Where help _would_ be appreciated is in proof-reading the transcribed CAD files vs the scans of the original drawings.  If you would care to assist, please contact me.
+
+## License
+
+I am not a lawyer, but my opinion is that the MIT Instrumentation Labs drawings on which the CAD files herein are based are in the public domain.  However that fact alone does not actually restrict the licensing of the CAD files ... I think.
+
+The controlling principle, I think, is that these CAD files are supposed to be 100% accurate reproductions of the original drawings, the act of transcribing them is not "creative" in nature, and therefore is not entitled to copyright protection  In other words, I cannot assert copyright even if I wanted to.  Therefore, it is natural if the CAD files themselves are in the public domain.  
+
+However, the "public domain" is not a valid concept in many places outside the U.S.  Instead, the appropriate license is the CC0 (Creative Commons Zero or Public Domain) License, which is equivalent to the public domain where that concept is valid, but falls back to waiving the greatest possible number of rights.  See the file LICENSE.txt.
+
+I, Ron Burkey, hereby assert that all KiCad CAD transcriptions provided in this repository fall under the CC0 licensed expressed by the file LICENSE.txt.
