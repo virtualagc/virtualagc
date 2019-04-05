@@ -29,6 +29,8 @@ suffixed by .dxf or .step, where
 * PURPOSE is something that expresses the _intent_ of the CAD file.  In most cases, "exact" should be used, to indicate that the purpose is a 100% accurate transcription of the original.  However, for some purposes, such as 3D printing, it may be necessary to modify the design slightly (perhaps to conform to using material with a different strength than originally used), so a different PURPOSE string should be used that conveys what the difference from an exact transcription is.  In general, for contributed models, I would expect an "exact" model to come first, and an altered model to follow that, so I wouldn't expect an altered model to be contributed without an exact model being contributed as well.
 * TITLE is preferably taken from the title block of the original Project Apollo drawing, or else is an abbreviated form of it.
 
+It's important to note that if the drawing is revision "-", then the filename will have two consecutive dashes, such as "1004713--exact-TRAY A COVER.step".
+
 # Metadata and Licensing
 
 Each .dxf or .step file can optionally be accompanied by a "readme" file _of the same name_ but suffixed by ".md" rather than ".dxf" or ".step".  The ".md" suffix indicates that the file is in "markdown" format, which is a rich text format (used, for example, by this README.md file you are looking at) to allow headings, bulleted lists, and so on.  However, it can contain plain text without any such flourishes if you prefer.
