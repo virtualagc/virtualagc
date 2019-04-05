@@ -1,7 +1,6 @@
 Virtual Apollo Guidance Computer
 ================================
 
-
 ### Build status
 
 | Travis CI (Linux) |
@@ -18,6 +17,18 @@ Each of the spacecraft needed to be able to navigate through space, with or with
 An important part of the guidance system was the Apollo Guidance Computer—or just "AGC" for short.  On any given Apollo mission, there were two AGCs, one for the Command Module, and one for the Lunar Module.  The two AGCs were identical and interchangeable, but they ran different software because the tasks the spacecraft had to perform were different.  Moreover, the software run by the AGC evolved over time, so that the AGC software used in later missions like Apollo 17 differed somewhat from that of earlier missions like Apollo 8.
 
 Considered just as a computer, the AGC was severely underpowered by modern standards.  
+
+# Other Repository Branches
+
+Since you are looking at this README file, you are in the "master" branch of the repository, which contains source-code transcriptions of the original Project Apollo software for the Apollo Guidance Computer (AGC) and Abort Guidance System (AGS), as well as our software for emulating the AGC, AGS, and some of their peripheral devices (such as the display-keyboard unit, or DSKY).
+
+Other branches of the repository often contain very different files.  Here are some of the more-significant branches which differ in that way from the master branch:
+
+* "gh-pages": HTML files and imagery for the main Virtual AGC Project website.  Contains the complete website, exclusive of the large library of scanned supplementary documentation and drawings.
+* "mechanical":  2D CAD files and 3D models in DXF and STEP formats, intended to replicate the original AGC/DSKY mechanical design.
+* "scenarios":  Pad loads or other setup for mission scenarios.
+* "schematics":  CAD transcriptions in KiCad format of the original AGC/DSKY electrical design.
+* "wiki":  Wiki files associated with the repository.
 
 # AGC Specifications
 * 2048 words of RAM.  A "word" was 15 bits of data—therefore just under 2 bytes (16 bits) of data—and so the total RAM was just 3840 bytes.
