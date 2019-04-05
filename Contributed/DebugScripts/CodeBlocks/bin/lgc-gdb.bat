@@ -1,1 +1,0 @@
-@call C:\Code\virtualagc\yaAGC\yaAGC.exe --core=C:\Code\virtualagc\yaCode\Luminary131\Luminary131.bin --port=19797 --debug --fullname --dump-time=3600 --quiet --cfg=C:\Code\virtualagc\yaDSKY\src\LM.ini
