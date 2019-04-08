@@ -18,7 +18,7 @@ $Sheet
 S 16275 12450 4850 7175
 U 5C0B8FEF
 F0 "1" 140
-F1 "2005252A-p1of2.sch" 140
+F1 "2005252--p1of2.sch" 140
 F2 "0VDCA" U R 21125 14775 140
 F3 "+4SW" U R 21125 15975 140
 F4 "FAP" U R 21125 17200 140
@@ -27,7 +27,7 @@ $Sheet
 S 24900 12450 4850 7175
 U 5C0B8FFB
 F0 "2" 140
-F1 "2005252A-p2of2.sch" 140
+F1 "2005252--p2of2.sch" 140
 F2 "0VDCA" U L 24900 14775 140
 F3 "+4SW" U L 24900 15975 140
 F4 "FAP" U L 24900 17200 140
@@ -80,24 +80,6 @@ $EndComp
 Connection ~ 23050 15975
 Wire Wire Line
 	23050 15975 24900 15975
-Text Notes 36568 1309 0    150  ~ 30
-A       REVISED PER TDRR 30754
-Wire Notes Line width 6 style solid
-	43500 1400 36460 1400
-Wire Notes Line width 6 style solid
-	36461 1400 36461 983 
-Wire Notes Line width 6 style solid
-	36839 1400 36839 984 
-Wire Notes Line width 6 style solid
-	37350 1400 37350 984 
-Wire Notes Line width 6 style solid
-	41331 1400 41331 984 
-Wire Notes Line width 6 style solid
-	41831 1400 41831 983 
-Wire Notes Line width 6 style solid
-	42480 1400 42480 984 
-Wire Notes Line width 6 style solid
-	40831 1400 40831 984 
 Text Notes 38550 31700 0    250  ~ 50
 LOGIC  FLOW  DIAGRAM
 Text Notes 41025 33075 0    250  ~ 50
