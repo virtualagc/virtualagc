@@ -18,7 +18,7 @@ $Sheet
 S 15250 11550 5450 8975
 U 5B8E7731
 F0 "1" 140
-F1 "2005256A-p1of2.sch" 140
+F1 "2005256--p1of2.sch" 140
 F2 "0VDCA" U R 20700 17550 140
 F3 "+4SW" U R 20700 16425 140
 F4 "FAP" U R 20700 15375 140
@@ -27,7 +27,7 @@ $Sheet
 S 25125 11550 5450 8975
 U 5B8E7796
 F0 "2" 140
-F1 "2005256A-p2of2.sch" 140
+F1 "2005256--p2of2.sch" 140
 F2 "0VDCA" U L 25125 17550 140
 F3 "+4SW" U L 25125 16425 140
 F4 "FAP" U L 25125 15375 140
@@ -92,22 +92,4 @@ Text Notes 39950 32450 0    200  ~ 40
 4 BIT MODULE
 Text Notes 38900 33375 0    140  ~ 28
 ____
-Wire Notes Line width 6 style solid
-	36839 983  36839 1300
-Wire Notes Line width 6 style solid
-	36461 1300 43500 1300
-Wire Notes Line width 6 style solid
-	36461 983  36461 1300
-Wire Notes Line width 6 style solid
-	37350 982  37350 1299
-Wire Notes Line width 6 style solid
-	40831 983  40831 1300
-Wire Notes Line width 6 style solid
-	41331 983  41331 1300
-Wire Notes Line width 6 style solid
-	41831 983  41831 1300
-Wire Notes Line width 6 style solid
-	42480 983  42480 1300
-Text Notes 36550 1250 0    160  ~ 32
-A      REVISED PER TDRR 30754
 $EndSCHEMATC
