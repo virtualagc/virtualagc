@@ -18,7 +18,7 @@ $Sheet
 S 15250 11550 5450 8975
 U 5B8E7731
 F0 "1" 140
-F1 "2005253A-p1of2.sch" 140
+F1 "2005253--p1of2.sch" 140
 F2 "0VDCA" U R 20700 17550 140
 F3 "+4SW" U R 20700 16425 140
 F4 "FAP" U R 20700 15375 140
@@ -27,7 +27,7 @@ $Sheet
 S 25125 11550 5450 8975
 U 5B8E7796
 F0 "2" 140
-F1 "2005253A-p2of2.sch" 140
+F1 "2005253--p2of2.sch" 140
 F2 "0VDCA" U L 25125 17550 140
 F3 "+4SW" U L 25125 16425 140
 F4 "FAP" U L 25125 15375 140
@@ -92,22 +92,4 @@ Text Notes 39050 32425 0    200  ~ 40
 PARITY AND S REGISTER
 Text Notes 38825 33450 0    140  ~ 28
 NONE
-Wire Notes Line width 6 style solid
-	43500 1300 36461 1300
-Wire Notes Line width 6 style solid
-	36461 1300 36461 975 
-Wire Notes Line width 6 style solid
-	36839 1300 36839 975 
-Wire Notes Line width 6 style solid
-	37350 1300 37350 975 
-Wire Notes Line width 6 style solid
-	40831 1300 40831 975 
-Wire Notes Line width 6 style solid
-	41331 1300 41331 975 
-Wire Notes Line width 6 style solid
-	41831 1300 41831 975 
-Wire Notes Line width 6 style solid
-	42480 1300 42480 975 
-Text Notes 36550 1250 0    160  ~ 32
-A      REVISED PER TDRR 30754
 $EndSCHEMATC
