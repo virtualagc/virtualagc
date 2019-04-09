@@ -3214,13 +3214,6 @@ Wire Wire Line
 Wire Wire Line
 	7625 26100 8000 26100
 Wire Wire Line
-	9250 26100 9250 26075
-Wire Wire Line
-	9250 26075 9225 26100
-Connection ~ 9225 26100
-Wire Wire Line
-	9225 26100 9250 26100
-Wire Wire Line
 	7600 28050 7725 28050
 Text Notes 25800 24475 0    140  ~ 28
 B_
@@ -4260,12 +4253,9 @@ Wire Wire Line
 Wire Wire Line
 	12825 29450 11950 29450
 Connection ~ 12825 29450
-Wire Wire Line
-	13000 29175 12975 29175
 Connection ~ 12825 29175
 Wire Wire Line
 	12825 29175 12825 29450
-Connection ~ 12975 29175
 Wire Wire Line
 	12975 29175 12825 29175
 Wire Wire Line
