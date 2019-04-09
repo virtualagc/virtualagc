@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -4164,14 +4164,9 @@ Wire Wire Line
 	23625 23700 24400 23700
 Connection ~ 23625 21250
 Wire Wire Line
-	24425 23975 24400 23975
-Wire Wire Line
 	22575 23975 22575 28825
 Wire Wire Line
 	22575 28825 24400 28825
-Connection ~ 24400 23975
-Wire Wire Line
-	24400 23975 22575 23975
 Wire Wire Line
 	22575 23975 22575 18975
 Wire Wire Line
@@ -5674,4 +5669,6 @@ Connection ~ 36100 12250
 Wire Wire Line
 	36100 12250 37475 12250
 Connection ~ 26300 17850
+Wire Wire Line
+	22575 23975 24400 23975
 $EndSCHEMATC
