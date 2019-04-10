@@ -9,7 +9,8 @@ function errorMessage(msg) { print x1/1000, ", ", y1/1000, ", ", x2/1000, ", ", 
 
 BEGIN {
 	nextLine = 0
-	short = 50
+	short = 49.9
+	medium = 299.9
 	grid = 25
 	lowSlope = 0.05
 }
@@ -44,7 +45,13 @@ BEGIN {
 			errorMessage("Too short")
 		}
 		
-		# Poor angle? 
+		# Poor angle for short wires?  This will have a false positive
+		# for short wires I sometimes add at transistor leads. 
+		else if (slope > 0 && len < medium) {
+			errorMessage("Short incline")
+		}
+		
+		# Poor angle for long wires? 
 		else if (slope > 0 && slope < lowSlope) {
 			errorMessage("Slight incline")
 		}
