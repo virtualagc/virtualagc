@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -2778,11 +2778,11 @@ Wire Wire Line
 Wire Wire Line
 	34600 17100 34600 17625
 Wire Wire Line
-	6550 17975 6825 16800
+	6550 17975 6825 16775
 Wire Wire Line
-	7050 16825 7050 16800
+	7050 16825 7050 16775
 Wire Wire Line
-	7050 16800 6825 16800
+	7050 16775 6825 16775
 Text Notes 14850 3250 0    160  ~ 32
 T SPARE 2 LINE (11000)
 $Comp
