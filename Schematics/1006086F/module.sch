@@ -1,5 +1,5 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
@@ -2102,9 +2102,9 @@ F 3 "" H 7025 14625 130 0001 C CNN
 	1    7025 14625
 	0    1    1    0   
 $EndComp
-Text Notes 7125 13625 0    250  ~ 30
+Text Notes 7125 13625 0    250  ~ 50
 ◯
-Text Notes 7235 13570 0    140  ~ 28
+Text Notes 7260 13565 0    140  ~ 28
 T
 Wire Wire Line
 	7025 13600 7025 12850
@@ -2112,7 +2112,6 @@ Wire Wire Line
 	7025 12850 4800 12850
 Wire Wire Line
 	4800 12850 4800 12975
-Connection ~ 4800 12850
 Wire Wire Line
 	4800 13775 4800 13850
 Wire Wire Line
@@ -2244,9 +2243,9 @@ F 3 "" H 12800 14625 130 0001 C CNN
 	1    12800 14625
 	0    1    1    0   
 $EndComp
-Text Notes 12900 13625 0    250  ~ 30
+Text Notes 12900 13625 0    250  ~ 50
 ◯
-Text Notes 13010 13570 0    140  ~ 28
+Text Notes 13040 13575 0    140  ~ 28
 T
 Wire Wire Line
 	12800 13600 12800 12850
@@ -2310,13 +2309,13 @@ F 3 "" H 30000 6275 130 0001 C CNN
 	1    30000 6275
 	1    0    0    -1  
 $EndComp
-Text Notes 34000 6050 0    250  ~ 30
+Text Notes 34000 6050 0    250  ~ 50
 ◯
-Text Notes 34110 5995 0    140  ~ 28
+Text Notes 34135 5990 0    140  ~ 28
 T
-Text Notes 34075 7450 0    250  ~ 30
+Text Notes 34075 7450 0    250  ~ 50
 ◯
-Text Notes 34185 7395 0    140  ~ 28
+Text Notes 34210 7385 0    140  ~ 28
 T
 $Comp
 L AGC_DSKY:Resistor R15
@@ -2411,12 +2410,12 @@ Text Notes 34550 7025 0    200  ~ 40
 $Comp
 L AGC_DSKY:Inductor L2
 U 1 1 5D71EFFF
-P 33975 7725
-F 0 "L2" V 33950 8075 130 0000 C CNN
-F 1 ".33μH" V 34175 8175 130 0000 C CNN
-F 2 "" H 33925 7925 130 0001 C CNN
-F 3 "" H 33925 7925 130 0001 C CNN
-	1    33975 7725
+P 33975 7750
+F 0 "L2" V 33950 8100 130 0000 C CNN
+F 1 ".33μH" V 34175 8200 130 0000 C CNN
+F 2 "" H 33925 7950 130 0001 C CNN
+F 3 "" H 33925 7950 130 0001 C CNN
+	1    33975 7750
 	0    1    1    0   
 $EndComp
 $Comp
@@ -2605,7 +2604,7 @@ Wire Wire Line
 Wire Wire Line
 	33975 6525 33975 6700
 Wire Wire Line
-	33975 7300 33975 7325
+	33975 7300 33975 7350
 Wire Notes Line
 	29100 2875 29600 2875
 Wire Notes Line
@@ -2639,13 +2638,13 @@ F 3 "" H 15875 14800 130 0001 C CNN
 	1    15875 14800
 	1    0    0    -1  
 $EndComp
-Text Notes 19925 14550 0    250  ~ 30
+Text Notes 19925 14550 0    250  ~ 50
 ◯
-Text Notes 20035 14495 0    140  ~ 28
+Text Notes 20060 14485 0    140  ~ 28
 T
-Text Notes 19925 16075 0    250  ~ 30
+Text Notes 19925 16075 0    250  ~ 50
 ◯
-Text Notes 20035 16020 0    140  ~ 28
+Text Notes 20060 16020 0    140  ~ 28
 T
 $Comp
 L AGC_DSKY:Resistor R26
@@ -2981,9 +2980,9 @@ F 3 "" H 25050 7875 130 0001 C CNN
 	1    25050 7625
 	1    0    0    -1  
 $EndComp
-Text Notes 26175 4525 0    250  ~ 30
+Text Notes 26175 4525 0    250  ~ 50
 ◯
-Text Notes 26285 4470 0    140  ~ 28
+Text Notes 26310 4465 0    140  ~ 28
 T
 $Comp
 L AGC_DSKY:Inductor L1
@@ -3535,7 +3534,7 @@ Text Label 33850 8300 2    140  ~ 28
 Wire Wire Line
 	33975 8300 33975 8800
 Wire Wire Line
-	33975 8300 33975 8125
+	33975 8300 33975 8150
 Connection ~ 33975 8300
 Wire Wire Line
 	32750 7375 32750 8300
@@ -4882,12 +4881,8 @@ Text Label 10575 16275 1    140  ~ 28
 GND
 Wire Wire Line
 	10575 14775 10575 16275
-Wire Wire Line
-	4775 11500 4550 11500
-Wire Wire Line
-	4775 11500 4800 12850
 Wire Notes Line
-	4775 11500 4775 11075
+	4800 11500 4800 11075
 Wire Notes Line
 	4775 11075 4575 11075
 Wire Notes Line
@@ -7103,4 +7098,9 @@ Wire Notes Line
 	38350 10700 38625 10700
 Wire Notes Line
 	38625 10700 38625 11175
+Wire Wire Line
+	4800 12850 4800 11500
+Wire Wire Line
+	4800 11500 4550 11500
+Connection ~ 4800 12850
 $EndSCHEMATC
