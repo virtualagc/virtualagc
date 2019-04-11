@@ -1,10 +1,9 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 2
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -555,13 +554,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-200 J2
 U 7 1 63A22BE6
-P 35750 2900
-F 0 "J2" H 35750 3225 140 0001 C CNN
-F 1 "ConnectorA1-200" H 35750 3325 140 0001 C CNN
-F 2 "" H 35750 3375 140 0001 C CNN
-F 3 "" H 35750 3375 140 0001 C CNN
-F 4 "MVFAIL/" H 35625 2600 140 0000 C CNB "Caption"
-	7    35750 2900
+P 35800 2900
+F 0 "J2" H 35800 3225 140 0001 C CNN
+F 1 "ConnectorA1-200" H 35800 3325 140 0001 C CNN
+F 2 "" H 35800 3375 140 0001 C CNN
+F 3 "" H 35800 3375 140 0001 C CNN
+F 4 "MVFAIL/" H 35675 2600 140 0000 C CNB "Caption"
+	7    35800 2900
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -1744,13 +1743,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-200 J2
 U 38 1 63A22B8F
-P 36175 13700
-F 0 "J2" H 36175 14025 140 0001 C CNN
-F 1 "ConnectorA1-200" H 36175 14125 140 0001 C CNN
-F 2 "" H 36175 14175 140 0001 C CNN
-F 3 "" H 36175 14175 140 0001 C CNN
-F 4 "WARN" H 35525 13700 140 0000 C CNB "Caption"
-	38   36175 13700
+P 36175 13725
+F 0 "J2" H 36175 14050 140 0001 C CNN
+F 1 "ConnectorA1-200" H 36175 14150 140 0001 C CNN
+F 2 "" H 36175 14200 140 0001 C CNN
+F 3 "" H 36175 14200 140 0001 C CNN
+F 4 "WARN" H 35525 13725 140 0000 C CNB "Caption"
+	38   36175 13725
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -1908,13 +1907,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-100 J1
 U 22 1 63A22B8D
-P 12000 13600
-F 0 "J1" H 12000 13925 140 0001 C CNN
-F 1 "ConnectorA1-100" H 12000 14025 140 0001 C CNN
-F 2 "" H 12000 14075 140 0001 C CNN
-F 3 "" H 12000 14075 140 0001 C CNN
-F 4 "MTCAL/" H 11300 13625 140 0000 C CNB "Caption"
-	22   12000 13600
+P 12000 13575
+F 0 "J1" H 12000 13900 140 0001 C CNN
+F 1 "ConnectorA1-100" H 12000 14000 140 0001 C CNN
+F 2 "" H 12000 14050 140 0001 C CNN
+F 3 "" H 12000 14050 140 0001 C CNN
+F 4 "MTCAL/" H 11300 13600 140 0000 C CNB "Caption"
+	22   12000 13575
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -2180,14 +2179,14 @@ $EndComp
 $Comp
 L D3NOR-+4VDC-0VDCA:D3NOR-+4VDC-0VDCA-BC_-DFE U145
 U 1 1 63A22B75
-P 34650 13700
-F 0 "U145" H 34650 14025 140 0001 C CNB
-F 1 "D3NOR-+4VDC-0VDCA-BC_-DFE" H 34650 14125 140 0001 C CNN
-F 2 "" H 34650 14175 140 0001 C CNN
-F 3 "" H 34650 14175 140 0001 C CNN
-F 4 "41227" H 34650 13700 140 0000 C CNB "Location"
-F 5 "45" H 34650 13500 140 0000 C CNB "Location2"
-	1    34650 13700
+P 34650 13725
+F 0 "U145" H 34650 14050 140 0001 C CNB
+F 1 "D3NOR-+4VDC-0VDCA-BC_-DFE" H 34650 14150 140 0001 C CNN
+F 2 "" H 34650 14200 140 0001 C CNN
+F 3 "" H 34650 14200 140 0001 C CNN
+F 4 "41227" H 34650 13725 140 0000 C CNB "Location"
+F 5 "45" H 34650 13525 140 0000 C CNB "Location2"
+	1    34650 13725
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -2526,14 +2525,14 @@ $EndComp
 $Comp
 L D3NOR-FAP-0VDCA-expander:D3NOR-FAP-0VDCA-expander-_C_-DEF U104
 U 1 1 63A22BCE
-P 19600 19600
-F 0 "U104" H 19600 19925 140 0001 C CNB
-F 1 "D3NOR-FAP-0VDCA-expander-_C_-DEF" H 19600 20025 140 0001 C CNN
-F 2 "" H 19600 20075 140 0001 C CNN
-F 3 "" H 19600 20075 140 0001 C CNN
-F 4 "41144" H 19525 19600 130 0000 C CNB "Location"
-F 5 "04" H 19525 19800 130 0000 C CNB "Location2"
-	1    19600 19600
+P 19625 19600
+F 0 "U104" H 19625 19925 140 0001 C CNB
+F 1 "D3NOR-FAP-0VDCA-expander-_C_-DEF" H 19625 20025 140 0001 C CNN
+F 2 "" H 19625 20075 140 0001 C CNN
+F 3 "" H 19625 20075 140 0001 C CNN
+F 4 "41144" H 19550 19600 130 0000 C CNB "Location"
+F 5 "04" H 19550 19800 130 0000 C CNB "Location2"
+	1    19625 19600
 	1    0    0    1   
 $EndComp
 $Comp
@@ -2977,18 +2976,6 @@ F 4 "F08B/" H 40550 14900 140 0000 C CNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-200 J2
-U 66 1 63A22BB5
-P 38325 16675
-F 0 "J2" H 38325 17000 140 0001 C CNN
-F 1 "ConnectorA1-200" H 38325 17100 140 0001 C CNN
-F 2 "" H 38325 17150 140 0001 C CNN
-F 3 "" H 38325 17150 140 0001 C CNN
-F 4 "FS10" H 37650 16675 140 0000 C CNB "Caption"
-	66   38325 16675
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorA1-200 J2
 U 67 1 63A22BB6
 P 38325 16125
 F 0 "J2" H 38325 16450 140 0001 C CNN
@@ -3166,8 +3153,6 @@ Wire Wire Line
 	28575 2425 28575 2200
 Wire Wire Line
 	28575 2200 28700 2200
-Wire Wire Line
-	30575 2425 30575 2400
 Connection ~ 30575 1925
 Wire Wire Line
 	30575 1925 31100 1925
@@ -3209,9 +3194,6 @@ Wire Wire Line
 	28000 6375 27750 6375
 Wire Wire Line
 	28575 2800 30575 2400
-Connection ~ 30575 2400
-Wire Wire Line
-	30575 2400 30575 1925
 Wire Wire Line
 	30575 2800 28575 2425
 Wire Wire Line
@@ -3463,9 +3445,7 @@ Wire Wire Line
 Wire Wire Line
 	5125 15525 7350 15025
 Wire Wire Line
-	7325 15525 5150 15050
-Wire Wire Line
-	5150 15050 5125 15025
+	7325 15525 5125 15025
 Wire Wire Line
 	2375 11125 2375 14800
 Wire Wire Line
@@ -3526,8 +3506,6 @@ Wire Wire Line
 	11575 13575 11500 13575
 Wire Wire Line
 	11575 13575 11725 13575
-Wire Wire Line
-	11725 13575 11725 13600
 Connection ~ 11575 13575
 Wire Wire Line
 	10500 18000 10600 18000
@@ -3543,9 +3521,6 @@ Wire Wire Line
 	15500 22900 16350 22900
 Wire Wire Line
 	18475 22900 18675 22900
-Wire Wire Line
-	20450 22900 20475 22900
-Connection ~ 20475 22900
 Wire Wire Line
 	20475 22900 21125 22900
 Wire Wire Line
@@ -3747,15 +3722,12 @@ Wire Wire Line
 Wire Wire Line
 	18100 20150 18725 20150
 Wire Wire Line
-	18725 19600 18700 19600
-Wire Wire Line
 	18100 18000 18100 19600
 Connection ~ 18100 19600
 Wire Wire Line
 	18100 19600 18100 20150
-Connection ~ 18700 19600
 Wire Wire Line
-	18700 19600 18100 19600
+	18725 19600 18100 19600
 Wire Wire Line
 	18100 20150 16600 20150
 Wire Wire Line
@@ -3766,7 +3738,7 @@ Connection ~ 18100 20150
 Wire Wire Line
 	20525 20425 20650 20425
 Wire Wire Line
-	20500 19600 20650 19600
+	20525 19600 20650 19600
 Wire Wire Line
 	20650 19600 20650 20425
 Connection ~ 20650 20425
@@ -4036,16 +4008,14 @@ Wire Wire Line
 Wire Wire Line
 	33550 13725 33625 13725
 Wire Wire Line
-	33750 13725 33750 13700
+	33750 13450 33625 13450
 Wire Wire Line
-	33750 13425 33625 13425
-Wire Wire Line
-	33625 13425 33625 13725
+	33625 13450 33625 13725
 Connection ~ 33625 13725
 Wire Wire Line
 	33625 13725 33750 13725
 Wire Wire Line
-	35550 13700 35900 13700
+	35550 13725 35900 13725
 Wire Wire Line
 	31750 13450 31600 13450
 Wire Wire Line
@@ -4124,19 +4094,11 @@ Wire Wire Line
 Wire Wire Line
 	38750 15175 38600 15175
 Wire Wire Line
-	40525 14900 40550 14900
-Connection ~ 40550 14900
-Wire Wire Line
 	40550 14900 40925 14900
 Wire Wire Line
 	40550 16400 40900 16400
 Wire Wire Line
 	38750 16125 38600 16125
-Wire Wire Line
-	38775 16675 38750 16675
-Connection ~ 38750 16675
-Wire Wire Line
-	38750 16675 38600 16675
 Wire Wire Line
 	38775 17625 38600 17625
 Wire Wire Line
@@ -4192,9 +4154,7 @@ Connection ~ 33650 23075
 Wire Wire Line
 	33650 23075 33925 23075
 Wire Wire Line
-	31625 22475 33625 22125
-Wire Wire Line
-	33625 22125 33650 22125
+	31625 22475 33650 22125
 Wire Wire Line
 	33650 22525 31600 22100
 $Comp
@@ -4438,7 +4398,7 @@ Connection ~ 8625 20250
 Wire Wire Line
 	8625 20250 13100 20250
 Wire Wire Line
-	35450 2900 35475 2900
+	35450 2900 35525 2900
 Wire Wire Line
 	33650 2900 33600 2900
 Connection ~ 33600 2900
@@ -5450,4 +5410,20 @@ Text Notes 8975 33325 0    140  ~ 28
 Notes from the Virtual AGC Project:\n1. This drawing was manually transcribed from the original Apollo Program\n   drawing 2005269-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators for the components.\n   For purposes of ERC and netlist generation, the reference designators of the\n   NOR gates are U1nn, where nn is the 2-digit number displayed on the NOR-gate\n   symbol.  The oval pads numbered 101-171 comprise connector J1, while those\n   numbered 201-271 comprise connector J2. — RSB 2018\n3. On the original drawing, on predecessor drawing (2005069), and in associated   \n   documentation (ND-1021042), connector pad 127 is labeled "F10A".  Continuity\n   tests on a physical AGC (s/n 14) show that the signal is connected externally to net\n   F10A/ instead.  In simulation of the ciruitry with the signal connected to net F10A\n   as marked, the AGC sticks in an endless reboot loop.  Therefore, the F10A \n   labeling is regarded as a mistake in the original drawing(s).  In this transcription, \n   pad 127 is labeled "F10A/". — RSB 2018\n
 Text Notes 2575 27075 0    140  ~ 28
 XXX
+Wire Wire Line
+	30575 1925 30575 2400
+Wire Wire Line
+	38750 16675 38600 16675
+$Comp
+L AGC_DSKY:ConnectorA1-200 J2
+U 66 1 63A22BB5
+P 38325 16675
+F 0 "J2" H 38325 17000 140 0001 C CNN
+F 1 "ConnectorA1-200" H 38325 17100 140 0001 C CNN
+F 2 "" H 38325 17150 140 0001 C CNN
+F 3 "" H 38325 17150 140 0001 C CNN
+F 4 "FS10" H 37650 16675 140 0000 C CNB "Caption"
+	66   38325 16675
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
