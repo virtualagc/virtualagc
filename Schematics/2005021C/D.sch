@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 24 63
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -76,16 +76,16 @@ $Comp
 L AGC_DSKY:Resistor 4R4
 U 1 1 5CD537B3
 P 20225 3875
-AR Path="/5B991DE9/5CD537B3" Ref="4R4"  Part="1"
-AR Path="/5B991C14/5CD537B3" Ref="10R4"  Part="1"
-AR Path="/5B991C27/5CD537B3" Ref="9R4"  Part="1"
-AR Path="/5B991C81/5CD537B3" Ref="8R4"  Part="1"
-AR Path="/5B991CDB/5CD537B3" Ref="7R4"  Part="1"
-AR Path="/5B991D35/5CD537B3" Ref="6R4"  Part="1"
-AR Path="/5B991D8F/5CD537B3" Ref="5R4"  Part="1"
-AR Path="/5B991E43/5CD537B3" Ref="3R4"  Part="1"
-AR Path="/5B991E9D/5CD537B3" Ref="2R4"  Part="1"
-AR Path="/5B991EF7/5CD537B3" Ref="1R4"  Part="1"
+AR Path="/5B991DE9/5CD537B3" Ref="4R4"  Part="1" 
+AR Path="/5B991C14/5CD537B3" Ref="10R4"  Part="1" 
+AR Path="/5B991C27/5CD537B3" Ref="9R4"  Part="1" 
+AR Path="/5B991C81/5CD537B3" Ref="8R4"  Part="1" 
+AR Path="/5B991CDB/5CD537B3" Ref="7R4"  Part="1" 
+AR Path="/5B991D35/5CD537B3" Ref="6R4"  Part="1" 
+AR Path="/5B991D8F/5CD537B3" Ref="5R4"  Part="1" 
+AR Path="/5B991E43/5CD537B3" Ref="3R4"  Part="1" 
+AR Path="/5B991E9D/5CD537B3" Ref="2R4"  Part="1" 
+AR Path="/5B991EF7/5CD537B3" Ref="1R4"  Part="1" 
 AR Path="/5CD537B3" Ref="R4"  Part="1" 
 F 0 "R2401" H 20525 4325 50  0000 C CNN
 F 1 "20K" H 20200 4100 130 0000 C CNN
@@ -99,16 +99,16 @@ $Comp
 L AGC_DSKY:Resistor 4R5
 U 1 1 5CD53849
 P 22425 4675
-AR Path="/5B991DE9/5CD53849" Ref="4R5"  Part="1"
-AR Path="/5B991C14/5CD53849" Ref="10R5"  Part="1"
-AR Path="/5B991C27/5CD53849" Ref="9R5"  Part="1"
-AR Path="/5B991C81/5CD53849" Ref="8R5"  Part="1"
-AR Path="/5B991CDB/5CD53849" Ref="7R5"  Part="1"
-AR Path="/5B991D35/5CD53849" Ref="6R5"  Part="1"
-AR Path="/5B991D8F/5CD53849" Ref="5R5"  Part="1"
-AR Path="/5B991E43/5CD53849" Ref="3R5"  Part="1"
-AR Path="/5B991E9D/5CD53849" Ref="2R5"  Part="1"
-AR Path="/5B991EF7/5CD53849" Ref="1R5"  Part="1"
+AR Path="/5B991DE9/5CD53849" Ref="4R5"  Part="1" 
+AR Path="/5B991C14/5CD53849" Ref="10R5"  Part="1" 
+AR Path="/5B991C27/5CD53849" Ref="9R5"  Part="1" 
+AR Path="/5B991C81/5CD53849" Ref="8R5"  Part="1" 
+AR Path="/5B991CDB/5CD53849" Ref="7R5"  Part="1" 
+AR Path="/5B991D35/5CD53849" Ref="6R5"  Part="1" 
+AR Path="/5B991D8F/5CD53849" Ref="5R5"  Part="1" 
+AR Path="/5B991E43/5CD53849" Ref="3R5"  Part="1" 
+AR Path="/5B991E9D/5CD53849" Ref="2R5"  Part="1" 
+AR Path="/5B991EF7/5CD53849" Ref="1R5"  Part="1" 
 AR Path="/5CD53849" Ref="R5"  Part="1" 
 F 0 "R2402" V 22325 5325 50  0000 C CNN
 F 1 "2000" V 22550 5050 130 0000 C CNN
@@ -122,16 +122,16 @@ $Comp
 L AGC_DSKY:Capacitor-Polarized 4C1
 U 1 1 5CD53908
 P 21175 4675
-AR Path="/5B991DE9/5CD53908" Ref="4C1"  Part="1"
-AR Path="/5B991C14/5CD53908" Ref="10C1"  Part="1"
-AR Path="/5B991C27/5CD53908" Ref="9C1"  Part="1"
-AR Path="/5B991C81/5CD53908" Ref="8C1"  Part="1"
-AR Path="/5B991CDB/5CD53908" Ref="7C1"  Part="1"
-AR Path="/5B991D35/5CD53908" Ref="6C1"  Part="1"
-AR Path="/5B991D8F/5CD53908" Ref="5C1"  Part="1"
-AR Path="/5B991E43/5CD53908" Ref="3C1"  Part="1"
-AR Path="/5B991E9D/5CD53908" Ref="2C1"  Part="1"
-AR Path="/5B991EF7/5CD53908" Ref="1C1"  Part="1"
+AR Path="/5B991DE9/5CD53908" Ref="4C1"  Part="1" 
+AR Path="/5B991C14/5CD53908" Ref="10C1"  Part="1" 
+AR Path="/5B991C27/5CD53908" Ref="9C1"  Part="1" 
+AR Path="/5B991C81/5CD53908" Ref="8C1"  Part="1" 
+AR Path="/5B991CDB/5CD53908" Ref="7C1"  Part="1" 
+AR Path="/5B991D35/5CD53908" Ref="6C1"  Part="1" 
+AR Path="/5B991D8F/5CD53908" Ref="5C1"  Part="1" 
+AR Path="/5B991E43/5CD53908" Ref="3C1"  Part="1" 
+AR Path="/5B991E9D/5CD53908" Ref="2C1"  Part="1" 
+AR Path="/5B991EF7/5CD53908" Ref="1C1"  Part="1" 
 AR Path="/5CD53908" Ref="C1"  Part="1" 
 F 0 "C2401" H 21875 4775 50  0000 C CNN
 F 1 "6.8" H 21575 4575 130 0000 C CNN
@@ -162,15 +162,12 @@ Connection ~ 22425 3875
 Wire Wire Line
 	22425 3875 23700 3875
 Wire Wire Line
-	21175 4900 21175 4925
-Wire Wire Line
 	21175 5425 22425 5425
 Wire Wire Line
 	22425 5075 22425 5425
 Connection ~ 22425 5425
 Wire Wire Line
 	22425 5425 23075 5425
-Connection ~ 21175 4925
 Wire Wire Line
 	21175 4925 21175 5425
 Wire Notes Line style solid
