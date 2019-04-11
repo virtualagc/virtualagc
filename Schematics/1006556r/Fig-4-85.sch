@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 13 24
+Sheet 12 24
 Title "BLOCK I LOGIC FLOW S, MODULE A21, DRAWING 1006556"
 Date "2018-11-25"
 Rev "Draft"
@@ -136,4 +136,36 @@ Text HLabel 5050 1625 0    140  Input ~ 28
 T04_
 Wire Wire Line
 	5425 1625 5050 1625
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 1 5CE568AB
+P 2650 7150
+AR Path="/5F3224B7/5CE568AB" Ref="N?"  Part="1" 
+AR Path="/6006530B/5CE568AB" Ref="N1201"  Part="1" 
+F 0 "N1201" H 2650 7250 50  0001 C CNN
+F 1 "Node2" H 2650 7325 50  0001 C CNN
+F 2 "" H 2650 7150 50  0001 C CNN
+F 3 "" H 2650 7150 50  0001 C CNN
+F 4 "+3VDC" H 2575 7150 140 0001 R CNB "Caption"
+	1    2650 7150
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 1 5CE568B4
+P 2650 7425
+AR Path="/5F3224B7/5CE568B4" Ref="N?"  Part="0" 
+AR Path="/6006530B/5CE568B4" Ref="N1202"  Part="1" 
+F 0 "N1202" H 2650 7525 50  0001 C CNN
+F 1 "Node2" H 2650 7600 50  0001 C CNN
+F 2 "" H 2650 7425 50  0001 C CNN
+F 3 "" H 2650 7425 50  0001 C CNN
+F 4 "0VDC" H 2575 7425 140 0001 R CNB "Caption"
+	1    2650 7425
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1725 7425 2575 7425
+Wire Wire Line
+	1725 7150 2575 7150
 $EndSCHEMATC

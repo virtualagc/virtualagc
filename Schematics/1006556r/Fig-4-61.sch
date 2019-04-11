@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -74,4 +74,32 @@ Text HLabel 1550 7500 0    140  Input ~ 28
 0VDC
 Text HLabel 8325 3175 2    140  Output ~ 28
 T02_B
+$Comp
+L AGC_DSKY:Node2 N801
+U 1 1 5CDDFACB
+P 2475 7225
+F 0 "N801" H 2475 7325 50  0001 C CNN
+F 1 "Node2" H 2475 7400 50  0001 C CNN
+F 2 "" H 2475 7225 50  0001 C CNN
+F 3 "" H 2475 7225 50  0001 C CNN
+F 4 "+3VDC" H 2400 7225 140 0001 R CNB "Caption"
+	1    2475 7225
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Node2 N802
+U 1 1 5CDE0067
+P 2475 7500
+F 0 "N802" H 2475 7600 50  0001 C CNN
+F 1 "Node2" H 2475 7675 50  0001 C CNN
+F 2 "" H 2475 7500 50  0001 C CNN
+F 3 "" H 2475 7500 50  0001 C CNN
+F 4 "0VDC" H 2400 7500 140 0001 R CNB "Caption"
+	1    2475 7500
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1550 7500 2400 7500
+Wire Wire Line
+	1550 7225 2400 7225
 $EndSCHEMATC
