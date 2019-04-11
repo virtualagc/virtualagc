@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -632,15 +632,15 @@ F4 "G" I L 30500 28875 140
 $EndSheet
 $Comp
 L AGC_DSKY:NodeG N106
-U 1 1 5B996BEB
+U 0 0 5B996BEB
 P 4850 25125
 F 0 "N106" H 4850 24925 50  0001 C CNN
 F 1 "NodeG" H 4850 25000 50  0001 C CNN
 F 2 "" H 4850 25125 50  0001 C CNN
 F 3 "" H 4850 25125 50  0001 C CNN
 F 4 "G" H 5115 25125 140 0001 R CNB "Caption"
-	1    4850 25125
-	0    -1   -1   0   
+	0    4850 25125
+	0    1    1    0   
 $EndComp
 Wire Wire Line
 	6075 26375 5550 26375
