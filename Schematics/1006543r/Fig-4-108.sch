@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -978,4 +978,32 @@ EndData
 $EndBitmap
 Wire Wire Line
 	4550 3575 4950 3575
+Wire Wire Line
+	1525 750  2400 750 
+$Comp
+L AGC_DSKY:Node2 N201
+U 1 1 5CBEFA21
+P 2475 750
+F 0 "N201" H 2475 850 50  0001 C CNN
+F 1 "Node2" H 2475 925 50  0001 C CNN
+F 2 "" H 2475 750 50  0001 C CNN
+F 3 "" H 2475 750 50  0001 C CNN
+F 4 "+3VDC" H 2400 750 140 0001 R CNB "Caption"
+	1    2475 750 
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Node2 N202
+U 1 0 5CBF03D5
+P 2475 1100
+F 0 "N202" H 2475 1200 50  0001 C CNN
+F 1 "Node2" H 2475 1275 50  0001 C CNN
+F 2 "" H 2475 1100 50  0001 C CNN
+F 3 "" H 2475 1100 50  0001 C CNN
+F 4 "0VDC" H 2400 1100 140 0001 R CNB "Caption"
+	1    2475 1100
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	2400 1100 1525 1100
 $EndSCHEMATC
