@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr D 34000 22000
 encoding utf-8
-Sheet 2 2
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -1581,9 +1581,7 @@ Wire Wire Line
 Wire Wire Line
 	15275 8900 15325 8875
 Wire Wire Line
-	15275 11150 16575 11150
-Wire Wire Line
-	16575 11150 16575 11125
+	15275 11150 16400 11150
 Wire Wire Line
 	16575 10000 16250 10000
 Wire Wire Line
@@ -1851,4 +1849,8 @@ e1
 NoConn ~ 11575 9225
 Wire Wire Line
 	11700 9225 11575 9225
+Wire Wire Line
+	16575 11125 16400 11125
+Wire Wire Line
+	16400 11125 16400 11150
 $EndSCHEMATC
