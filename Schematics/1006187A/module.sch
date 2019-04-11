@@ -1,5 +1,5 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
@@ -934,9 +934,6 @@ Wire Wire Line
 	20000 16850 20000 15475
 Wire Wire Line
 	20000 14975 20000 14500
-Wire Wire Line
-	20000 14075 20000 14100
-Connection ~ 20000 14100
 Wire Wire Line
 	24500 16350 22900 16350
 Wire Wire Line
