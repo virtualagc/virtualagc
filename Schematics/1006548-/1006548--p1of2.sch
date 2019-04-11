@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -118,24 +118,23 @@ Wire Wire Line
 $Comp
 L AGC_DSKY:PWR_FLAG #FLG0101
 U 1 1 5C6B2E45
-P 29000 19350
-F 0 "#FLG0101" H 29000 19875 50  0001 C CNN
-F 1 "PWR_FLAG" H 29010 19810 50  0001 C CNN
-F 2 "" H 29000 19350 50  0001 C CNN
-F 3 "~" H 29000 19350 50  0001 C CNN
-	1    29000 19350
+P 28650 19350
+F 0 "#FLG0101" H 28650 19875 50  0001 C CNN
+F 1 "PWR_FLAG" H 28660 19810 50  0001 C CNN
+F 2 "" H 28650 19350 50  0001 C CNN
+F 3 "~" H 28650 19350 50  0001 C CNN
+	1    28650 19350
 	1    0    0    -1  
 $EndComp
-Connection ~ 29625 19350
 $Comp
 L AGC_DSKY:PWR_FLAG #FLG0102
 U 1 1 5C6C556F
-P 29000 21050
-F 0 "#FLG0102" H 29000 21575 50  0001 C CNN
-F 1 "PWR_FLAG" H 29010 21510 50  0001 C CNN
-F 2 "" H 29000 21050 50  0001 C CNN
-F 3 "~" H 29000 21050 50  0001 C CNN
-	1    29000 21050
+P 28650 21050
+F 0 "#FLG0102" H 28650 21575 50  0001 C CNN
+F 1 "PWR_FLAG" H 28660 21510 50  0001 C CNN
+F 2 "" H 28650 21050 50  0001 C CNN
+F 3 "~" H 28650 21050 50  0001 C CNN
+	1    28650 21050
 	1    0    0    -1  
 $EndComp
 Text Notes 30875 19375 0    140  ~ 28
@@ -1050,9 +1049,9 @@ $EndBitmap
 Text Notes 1525 32550 0    140  ~ 28
 Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing 1006548-.  — RSB 2019\n2. The original drawing did not show reference designators or pin numbers for the NOR gates, so this \n   CAD drawing does not show them either.  That information has been taken instead from the signal \n   wiring diagram, drawing 1006128-. Though not visible, reference designators and pin numbers can \n   be accessed by editing the NOR gates within a CAD system.  — RSB 2019\n3. The numbered oval pads comprise connector J1. — RSB 2019
 Wire Wire Line
-	28400 21050 29000 21050
+	28400 21050 28650 21050
 Wire Wire Line
-	28400 19350 29000 19350
+	28400 19350 28650 19350
 Text Notes 1775 26925 0    140  ~ 28
 2. SEE DRAWING NO. 1006013 FOR LOGIC DESIGN CRITERIA\n
 Text Notes 3675 27450 0    140  ~ 28
@@ -1327,12 +1326,12 @@ Wire Wire Line
 	27450 25700 27450 26325
 Text Notes 8100 1575 0    250  ~ 50
 COUNTER INCREMENT PRIORITY
-Connection ~ 29000 19350
+Connection ~ 28650 19350
 Wire Wire Line
-	29000 19350 29625 19350
-Connection ~ 29000 21050
+	28650 19350 29625 19350
+Connection ~ 28650 21050
 Wire Wire Line
-	29000 21050 29625 21050
+	28650 21050 29625 21050
 Text HLabel 29875 21050 2    140  UnSpc ~ 28
 0VDC
 Text HLabel 29875 19350 2    140  UnSpc ~ 28
@@ -1732,14 +1731,14 @@ $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-block1:D3NOR-+3VDC-0VDC-block1-3_5-___ U56
 U 1 1 5C4F3564
-P 6225 6225
-F 0 "U56" H 6225 6550 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-block1-3_5-___" H 6225 6650 140 0001 C CNN
-F 2 "" H 6225 6700 140 0001 C CNN
-F 3 "" H 6225 6700 140 0001 C CNN
-F 4 "2A3" H 6225 6125 140 0000 C CNB "agc4"
-F 5 "--050" H 6225 6325 140 0000 C CNB "agc5"
-	1    6225 6225
+P 6200 6225
+F 0 "U56" H 6200 6550 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-block1-3_5-___" H 6200 6650 140 0001 C CNN
+F 2 "" H 6200 6700 140 0001 C CNN
+F 3 "" H 6200 6700 140 0001 C CNN
+F 4 "2A3" H 6200 6125 140 0000 C CNB "agc4"
+F 5 "--050" H 6200 6325 140 0000 C CNB "agc5"
+	1    6200 6225
 	1    0    0    1   
 $EndComp
 $Comp
@@ -2372,7 +2371,7 @@ Wire Wire Line
 Wire Wire Line
 	10700 2275 10350 2275
 Wire Wire Line
-	7125 6225 7350 6225
+	7100 6225 7350 6225
 Wire Wire Line
 	5325 4900 3300 4900
 Wire Wire Line
@@ -2380,10 +2379,7 @@ Wire Wire Line
 Wire Wire Line
 	5325 5450 2500 5450
 Wire Wire Line
-	5350 5950 5325 5950
-Connection ~ 5325 5950
-Wire Wire Line
-	5325 5950 4975 5950
+	5300 5950 4975 5950
 Wire Wire Line
 	10700 6500 10250 6500
 Wire Wire Line
@@ -2414,7 +2410,7 @@ Wire Wire Line
 Wire Wire Line
 	4950 6725 4950 6500
 Wire Wire Line
-	4950 6500 5325 6500
+	4950 6500 5300 6500
 Wire Wire Line
 	7125 7775 7325 7775
 Wire Wire Line
@@ -2900,4 +2896,9 @@ Wire Wire Line
 Connection ~ 3300 4900
 Wire Wire Line
 	3300 4900 2500 4900
+Text Label 28750 19350 0    140  ~ 28
++3VDC
+Connection ~ 29625 19350
+Text Label 28775 21050 0    140  ~ 28
+0VDC
 $EndSCHEMATC
