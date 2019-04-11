@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -53,8 +53,6 @@ Wire Wire Line
 Wire Wire Line
 	24575 11175 25900 11175
 Wire Wire Line
-	8350 8500 9250 8500
-Wire Wire Line
 	17700 8500 17700 11175
 Wire Wire Line
 	17700 11175 19150 11175
@@ -73,8 +71,6 @@ Wire Wire Line
 Wire Wire Line
 	25025 10700 25900 10700
 Wire Wire Line
-	8350 8000 9250 8000
-Wire Wire Line
 	19150 10700 18100 10700
 Wire Wire Line
 	18100 10700 18100 8000
@@ -88,34 +84,6 @@ Wire Wire Line
 Connection ~ 11100 8000
 Wire Wire Line
 	11100 8000 18100 8000
-$Comp
-L AGC_DSKY:PWR_FLAG #FLG0101
-U 1 1 5C11120F
-P 9250 8000
-F 0 "#FLG0101" H 9250 8525 50  0001 C CNN
-F 1 "PWR_FLAG" H 9260 8460 50  0001 C CNN
-F 2 "" H 9250 8000 50  0001 C CNN
-F 3 "~" H 9250 8000 50  0001 C CNN
-	1    9250 8000
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:PWR_FLAG #FLG0102
-U 1 1 5C111858
-P 9250 8500
-F 0 "#FLG0102" H 9250 9025 50  0001 C CNN
-F 1 "PWR_FLAG" H 9260 8960 50  0001 C CNN
-F 2 "" H 9250 8500 50  0001 C CNN
-F 3 "~" H 9250 8500 50  0001 C CNN
-	1    9250 8500
-	1    0    0    -1  
-$EndComp
-Connection ~ 9250 8500
-Wire Wire Line
-	9250 8500 10725 8500
-Connection ~ 9250 8000
-Wire Wire Line
-	9250 8000 11100 8000
 Text Notes 23775 5600 0    140  ~ 28
 Notes from the Virtual AGC Project:\n1. None of the official Block I AGC electrical-schematic drawings were available at\n   the time this CAD drawing was made.  Rather, it is a transcription of the schematic\n   drawings in the figures of AC Electronics document ND-1021041, which are also\n   believed to comprise a complete but unofficial set of schematics. — RSB 2018\n2. The figures in ND-1021041 do not indicate reference designators for components.\n   In this drawing, the numbered oval pads comprise connector J1.  All other \n   electrical components presently have reference designators assigned by the\n   KiCad CAD software. — RSB 2018\n3. The oval connector pads are associated with captions giving the name of the\n   AGC backplane signal they correspond to, while NOR gates are associated with\n   5-digit gate numbers.  In each case, two such signal names or gate numbers are\n   shown on the drawing.  The top ones are for module A33, while the bottom ones\n   are for module A34. — RSB 2018\n8. ND-1021041 is not entirely consistent in depicting the corresponding components\n   from modules A33 and A34 within the same Figures.  In this drawing, these are\n   represented by a single symbol, and necessarily are on the same sheet.\n   However, the sheets of this drawing correspond to the figures in ND-1021041.\n   It therefore occasionally happens that a component which would be expected to be\n   on a particular sheet will actually appear on a different sheet. — RSB 2018
 $Bitmap
@@ -984,4 +952,40 @@ EndData
 $EndBitmap
 Wire Wire Line
 	23175 13175 25900 13175
+Wire Wire Line
+	8350 8500 9250 8500
+Wire Wire Line
+	9250 8500 10725 8500
+Connection ~ 9250 8500
+$Comp
+L AGC_DSKY:PWR_FLAG #FLG0102
+U 1 1 5C111858
+P 9250 8500
+F 0 "#FLG0102" H 9250 9025 50  0001 C CNN
+F 1 "PWR_FLAG" H 9260 8960 50  0001 C CNN
+F 2 "" H 9250 8500 50  0001 C CNN
+F 3 "~" H 9250 8500 50  0001 C CNN
+	1    9250 8500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9250 8000 11100 8000
+Wire Wire Line
+	8350 8000 9250 8000
+Connection ~ 9250 8000
+$Comp
+L AGC_DSKY:PWR_FLAG #FLG0101
+U 1 1 5C11120F
+P 9250 8000
+F 0 "#FLG0101" H 9250 8525 50  0001 C CNN
+F 1 "PWR_FLAG" H 9260 8460 50  0001 C CNN
+F 2 "" H 9250 8000 50  0001 C CNN
+F 3 "~" H 9250 8000 50  0001 C CNN
+	1    9250 8000
+	1    0    0    -1  
+$EndComp
+Text Label 9425 8000 0    140  ~ 28
++3VDC
+Text Label 9500 8500 0    140  ~ 28
+0VDC
 $EndSCHEMATC

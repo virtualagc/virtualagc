@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -574,7 +574,7 @@ Wire Wire Line
 	23300 7200 23550 7200
 Text HLabel 3225 15050 0    140  Input ~ 28
 +3VDC
-Text HLabel 3225 15500 0    140  Input ~ 28
+Text HLabel 3225 15425 0    140  Input ~ 28
 0VDC
 Text HLabel 2750 9625 0    140  Input ~ 28
 PIN85
@@ -1511,4 +1511,40 @@ Wire Wire Line
 Connection ~ 18525 5750
 Wire Wire Line
 	18525 5750 23525 5750
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 1 5CC3198F
+P 4150 15050
+AR Path="/5BEFD31A/5CC3198F" Ref="N?"  Part="1" 
+AR Path="/5BEFD383/5CC3198F" Ref="N401"  Part="1" 
+F 0 "N401" H 4150 15150 50  0001 C CNN
+F 1 "Node2" H 4150 15225 50  0001 C CNN
+F 2 "" H 4150 15050 50  0001 C CNN
+F 3 "" H 4150 15050 50  0001 C CNN
+F 4 "+3VDC" H 4075 15050 140 0001 R CNB "Caption"
+	1    4150 15050
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 1 5CC31998
+P 4150 15425
+AR Path="/5BEFD31A/5CC31998" Ref="N?"  Part="1" 
+AR Path="/5BEFD383/5CC31998" Ref="N402"  Part="1" 
+F 0 "N402" H 4150 15525 50  0001 C CNN
+F 1 "Node2" H 4150 15600 50  0001 C CNN
+F 2 "" H 4150 15425 50  0001 C CNN
+F 3 "" H 4150 15425 50  0001 C CNN
+F 4 "0VDC" H 4075 15425 140 0001 R CNB "Caption"
+	1    4150 15425
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3225 15050 4075 15050
+Wire Wire Line
+	3225 15425 4075 15425
+Text Label 4075 15050 2    140  ~ 28
++3VDC
+Text Label 4075 15425 2    140  ~ 28
+0VDC
 $EndSCHEMATC

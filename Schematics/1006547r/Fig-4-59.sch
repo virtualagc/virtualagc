@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -1852,15 +1852,6 @@ Connection ~ 28000 12875
 Wire Wire Line
 	28000 12875 28625 12875
 Wire Wire Line
-	30100 15325 30950 15325
-Wire Wire Line
-	30950 14950 30950 15325
-Connection ~ 30950 15325
-Wire Wire Line
-	30950 15325 30975 15325
-Wire Wire Line
-	30950 15325 34775 15325
-Wire Wire Line
 	34775 15325 34775 12500
 Wire Wire Line
 	34775 11450 35325 11450
@@ -2008,15 +1999,6 @@ Wire Wire Line
 Connection ~ 43400 15300
 Wire Wire Line
 	43400 15300 43400 16050
-Wire Wire Line
-	45450 15300 46350 15300
-Wire Wire Line
-	46350 14975 46350 15300
-Connection ~ 46350 15300
-Wire Wire Line
-	46350 15300 46375 15300
-Wire Wire Line
-	46350 15300 50100 15300
 Wire Wire Line
 	50100 15300 50100 12400
 Wire Wire Line
@@ -2637,7 +2619,7 @@ Wire Wire Line
 	60825 19200 61725 19200
 Text HLabel 2550 29075 0    140  Input ~ 28
 +3VDC
-Text HLabel 2550 29425 0    140  Input ~ 28
+Text HLabel 2550 29675 0    140  Input ~ 28
 0VDC
 Text Notes 54725 2850 0    140  ~ 28
 Notes from the Virtual AGC Project:\n4. Figures 4-59 and 4-153 of ND-1021041 conflict in their usage of connector pad\n   8 in module A33.  However, module A34 in those figures makes it clear that the\n   figure 4-59 is correct, and that the pad carries net F04A/ in A33.  — RSB 2018\n9. Figure 4-59 of ND-1021041 for module A34 mistakenly feeds the output of gate\n   53058 into pad 123 (F16A/).  It should be pad 133 (F15A/) instead, and that is what\n   is shown in this drawing.  — RSB 2018
@@ -3548,4 +3530,46 @@ Wire Notes Line
 	2175 17575 2175 18825
 Wire Notes Line
 	2175 17575 64950 17575
+Wire Wire Line
+	30100 15325 30950 15325
+Wire Wire Line
+	30950 15325 30950 14950
+Wire Wire Line
+	30950 15325 34775 15325
+Connection ~ 30950 15325
+Wire Wire Line
+	45450 15300 46350 15300
+Wire Wire Line
+	46350 14975 46350 15300
+Connection ~ 46350 15300
+Wire Wire Line
+	46350 15300 50100 15300
+$Comp
+L AGC_DSKY:Node2 N201
+U 1 1 5CB42A49
+P 3675 29075
+F 0 "N201" H 3675 29175 50  0001 C CNN
+F 1 "Node2" H 3675 29250 50  0001 C CNN
+F 2 "" H 3675 29075 50  0001 C CNN
+F 3 "" H 3675 29075 50  0001 C CNN
+F 4 "+3VDC" H 3600 29075 140 0001 R CNB "Caption"
+	1    3675 29075
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Node2 N202
+U 1 1 5CB630C3
+P 3675 29675
+F 0 "N202" H 3675 29775 50  0001 C CNN
+F 1 "Node2" H 3675 29850 50  0001 C CNN
+F 2 "" H 3675 29675 50  0001 C CNN
+F 3 "" H 3675 29675 50  0001 C CNN
+F 4 "0VDC" H 3600 29675 140 0001 R CNB "Caption"
+	1    3675 29675
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	2550 29075 3600 29075
+Wire Wire Line
+	2550 29675 3600 29675
 $EndSCHEMATC
