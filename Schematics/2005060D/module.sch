@@ -1,6 +1,6 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
-EELAYER 28 0
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -130,4 +130,8 @@ $EndComp
 Connection ~ 17575 20825
 Wire Wire Line
 	17575 20825 18600 20825
+Text Label 17750 10975 0    140  ~ 28
++4VDC
+Text Label 17750 20825 0    140  ~ 28
+0VDC
 $EndSCHEMATC
