@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 2
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -4748,14 +4748,14 @@ Connection ~ 36025 23550
 Wire Wire Line
 	36025 23550 35950 23550
 Wire Wire Line
-	35975 25550 36000 25550
+	35975 25550 36025 25550
 Wire Wire Line
-	36000 25550 36000 26550
+	36025 25550 36025 26550
 Wire Wire Line
-	36000 26550 35975 26550
-Connection ~ 36000 25550
+	36025 26550 35975 26550
+Connection ~ 36025 25550
 Wire Wire Line
-	36000 25550 36325 25550
+	36025 25550 36325 25550
 Wire Wire Line
 	29225 29100 30000 29100
 Wire Wire Line
