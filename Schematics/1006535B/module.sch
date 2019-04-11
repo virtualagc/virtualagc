@@ -1,5 +1,5 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
@@ -2772,71 +2772,71 @@ F1 "K.sch" 140
 F2 "K" U L 29475 5725 140
 F3 "G" I L 29475 6250 140
 $EndSheet
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 15575 41300 15575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 15825 41300 15825
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 16075 41300 16075
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 16575 41300 16575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 17075 41300 17075
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 17575 41300 17575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 18075 41300 18075
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 18575 41300 18575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 19075 41300 19075
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 19575 41300 19575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 20075 41300 20075
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 20575 41300 20575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 21075 41300 21075
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 21575 41300 21575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 22075 41300 22075
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 16325 41300 16325
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 16825 41300 16825
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 17325 41300 17325
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 17825 41300 17825
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 18325 41300 18325
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 18825 41300 18825
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 19325 41300 19325
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 19825 41300 19825
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 20325 41300 20325
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 20825 41300 20825
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 21325 41300 21325
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 21825 41300 21825
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 22325 41300 22325
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 15200 41300 15200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	36700 15200 36700 22325
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	37525 22325 37525 15575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	39075 22325 39075 15575
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	41300 15200 41300 22325
 Text Notes 38050 16075 0    140  ~ 28
 K1
@@ -4170,8 +4170,6 @@ F 5 "PS2B" H 20400 9450 140 0000 C TNB "Caption2"
 	75   20400 9025
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	14725 7400 14700 7400
 Wire Wire Line
 	14725 7400 15700 7400
 Wire Wire Line
