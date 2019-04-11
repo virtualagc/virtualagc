@@ -1,5 +1,5 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr User 80000 34000
@@ -9606,9 +9606,9 @@ Wire Wire Line
 Wire Wire Line
 	50825 7800 50825 7650
 Wire Wire Line
-	50675 7800 50675 8675
+	50675 7800 50675 8650
 Wire Wire Line
-	50675 8675 43800 8650
+	50675 8650 43800 8650
 Wire Wire Line
 	43800 8650 43800 7625
 Connection ~ 50675 7800
