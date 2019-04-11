@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -1113,4 +1113,8 @@ Wire Wire Line
 Connection ~ 24400 13700
 Wire Wire Line
 	24400 13700 23450 13700
+Text Label 8450 6400 0    140  ~ 28
++3VDC
+Text Label 8525 6900 0    140  ~ 28
+0VDC
 $EndSCHEMATC
