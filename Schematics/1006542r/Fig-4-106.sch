@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -101,4 +101,36 @@ Text HLabel 3850 4650 0    140  Input ~ 28
 PIN57
 Text Notes 3150 4500 0    140  ~ 28
 (12/)
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 1 5CBB88D5
+P 2825 7325
+AR Path="/5BEFD1AD/5CBB88D5" Ref="N?"  Part="1" 
+AR Path="/5F321222/5CBB88D5" Ref="N401"  Part="1" 
+F 0 "N401" H 2825 7425 50  0001 C CNN
+F 1 "Node2" H 2825 7500 50  0001 C CNN
+F 2 "" H 2825 7325 50  0001 C CNN
+F 3 "" H 2825 7325 50  0001 C CNN
+F 4 "+3VDC" H 2750 7325 140 0001 R CNB "Caption"
+	1    2825 7325
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 0 5CBB88DE
+P 2825 7675
+AR Path="/5BEFD1AD/5CBB88DE" Ref="N?"  Part="1" 
+AR Path="/5F321222/5CBB88DE" Ref="N402"  Part="1" 
+F 0 "N402" H 2825 7775 50  0001 C CNN
+F 1 "Node2" H 2825 7850 50  0001 C CNN
+F 2 "" H 2825 7675 50  0001 C CNN
+F 3 "" H 2825 7675 50  0001 C CNN
+F 4 "0VDC" H 2750 7675 140 0001 R CNB "Caption"
+	1    2825 7675
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1575 7325 2750 7325
+Wire Wire Line
+	1575 7675 2750 7675
 $EndSCHEMATC

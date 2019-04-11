@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -928,15 +928,15 @@ Wire Wire Line
 	30650 16575 31200 16575
 Wire Wire Line
 	30650 16075 31200 16075
-Text GLabel 31625 16075 2    140  Output ~ 28
+Text GLabel 32300 16075 2    140  Output ~ 28
 +3VDC
-Text GLabel 31625 16575 2    140  Output ~ 28
+Text GLabel 32300 16575 2    140  Output ~ 28
 0VDC
 Wire Wire Line
-	31625 16575 31200 16575
+	32300 16575 31200 16575
 Connection ~ 31200 16575
 Wire Wire Line
-	31625 16075 31200 16075
+	32300 16075 31200 16075
 Connection ~ 31200 16075
 Text GLabel 7400 13600 0    140  Input ~ 28
 +3VDC
@@ -1262,4 +1262,8 @@ Text GLabel 26375 15150 2    140  Output ~ 28
 PIN63
 Wire Wire Line
 	26375 15150 25900 15150
+Text Label 31350 16075 0    140  ~ 28
++3VDC
+Text Label 31375 16575 0    140  ~ 28
+0VDC
 $EndSCHEMATC
