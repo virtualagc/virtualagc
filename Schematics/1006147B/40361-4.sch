@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -125,11 +125,11 @@ Text HLabel 15900 7625 3    140  Input ~ 28
 Text HLabel 19450 3600 2    140  Output ~ 28
 F
 $Comp
-L AGC_DSKY:Transistor-NPN Q3
+L AGC_DSKY:Transistor-NPN 1Q3
 U 1 1 5E6A940C
 P 13950 4025
-AR Path="/5C88CA1D/5E6A940C" Ref="1Q3"  Part="1"
-AR Path="/5E76F892/5E6A940C" Ref="2Q3"  Part="1"
+AR Path="/5C88CA1D/5E6A940C" Ref="1Q3"  Part="1" 
+AR Path="/5E76F892/5E6A940C" Ref="2Q3"  Part="1" 
 AR Path="/5D333D72/5E6A940C" Ref="Q?"  Part="1" 
 AR Path="/5D35AA65/5E6A940C" Ref="Q?"  Part="1" 
 F 0 "Q3" H 13950 4440 130 0001 C CNN
@@ -141,11 +141,11 @@ F 4 "Q3" H 13625 4575 130 0000 C CNN "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-NPN Q4
+L AGC_DSKY:Transistor-NPN 1Q4
 U 1 1 5E6A986D
 P 15750 3475
-AR Path="/5C88CA1D/5E6A986D" Ref="1Q4"  Part="1"
-AR Path="/5E76F892/5E6A986D" Ref="2Q4"  Part="1"
+AR Path="/5C88CA1D/5E6A986D" Ref="1Q4"  Part="1" 
+AR Path="/5E76F892/5E6A986D" Ref="2Q4"  Part="1" 
 AR Path="/5D333D72/5E6A986D" Ref="Q?"  Part="1" 
 AR Path="/5D35AA65/5E6A986D" Ref="Q?"  Part="1" 
 F 0 "Q4" H 15750 3890 130 0001 C CNN
@@ -157,11 +157,11 @@ F 4 "Q4" H 16325 3650 130 0000 C CNN "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-NPN Q5
+L AGC_DSKY:Transistor-NPN 1Q5
 U 1 1 5E6A9F04
 P 17400 5000
-AR Path="/5C88CA1D/5E6A9F04" Ref="1Q5"  Part="1"
-AR Path="/5E76F892/5E6A9F04" Ref="2Q5"  Part="1"
+AR Path="/5C88CA1D/5E6A9F04" Ref="1Q5"  Part="1" 
+AR Path="/5E76F892/5E6A9F04" Ref="2Q5"  Part="1" 
 AR Path="/5D333D72/5E6A9F04" Ref="Q?"  Part="1" 
 AR Path="/5D35AA65/5E6A9F04" Ref="Q?"  Part="1" 
 F 0 "Q5" H 17400 5415 130 0001 C CNN
@@ -173,11 +173,11 @@ F 4 "Q5" H 17975 5100 130 0000 C CNN "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-NPN Q6
+L AGC_DSKY:Transistor-NPN 1Q6
 U 1 1 5E6AA6AF
 P 18650 4375
-AR Path="/5C88CA1D/5E6AA6AF" Ref="1Q6"  Part="1"
-AR Path="/5E76F892/5E6AA6AF" Ref="2Q6"  Part="1"
+AR Path="/5C88CA1D/5E6AA6AF" Ref="1Q6"  Part="1" 
+AR Path="/5E76F892/5E6AA6AF" Ref="2Q6"  Part="1" 
 AR Path="/5D333D72/5E6AA6AF" Ref="Q?"  Part="1" 
 AR Path="/5D35AA65/5E6AA6AF" Ref="Q?"  Part="1" 
 F 0 "Q6" H 18650 4790 130 0001 C CNN
@@ -189,11 +189,11 @@ F 4 "Q6" H 19225 4475 130 0000 C CNN "baseRefd"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Diode CR1
+L AGC_DSKY:Diode 1CR3
 U 1 1 5E6AFD5C
 P 14850 4025
-AR Path="/5C88CA1D/5E6AFD5C" Ref="1CR3"  Part="1"
-AR Path="/5E76F892/5E6AFD5C" Ref="2CR3"  Part="1"
+AR Path="/5C88CA1D/5E6AFD5C" Ref="1CR3"  Part="1" 
+AR Path="/5E76F892/5E6AFD5C" Ref="2CR3"  Part="1" 
 AR Path="/5D333D72/5E6AFD5C" Ref="CR?"  Part="1" 
 AR Path="/5D35AA65/5E6AFD5C" Ref="CR?"  Part="1" 
 F 0 "CR1" H 14850 4225 140 0001 C CNN
@@ -205,11 +205,11 @@ F 4 "CR3" V 14850 3650 130 0000 C CNN "baseRefd"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Diode CR2
+L AGC_DSKY:Diode 1CR4
 U 1 1 5E6B0358
 P 14850 4575
-AR Path="/5C88CA1D/5E6B0358" Ref="1CR4"  Part="1"
-AR Path="/5E76F892/5E6B0358" Ref="2CR4"  Part="1"
+AR Path="/5C88CA1D/5E6B0358" Ref="1CR4"  Part="1" 
+AR Path="/5E76F892/5E6B0358" Ref="2CR4"  Part="1" 
 AR Path="/5D333D72/5E6B0358" Ref="CR?"  Part="1" 
 AR Path="/5D35AA65/5E6B0358" Ref="CR?"  Part="1" 
 F 0 "CR2" H 14850 4775 140 0001 C CNN
@@ -221,11 +221,11 @@ F 4 "CR4" V 14850 4200 130 0000 C CNN "baseRefd"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Diode CR3
+L AGC_DSKY:Diode 1CR5
 U 1 1 5E6B0935
 P 15900 5650
-AR Path="/5C88CA1D/5E6B0935" Ref="1CR5"  Part="1"
-AR Path="/5E76F892/5E6B0935" Ref="2CR5"  Part="1"
+AR Path="/5C88CA1D/5E6B0935" Ref="1CR5"  Part="1" 
+AR Path="/5E76F892/5E6B0935" Ref="2CR5"  Part="1" 
 AR Path="/5D333D72/5E6B0935" Ref="CR?"  Part="1" 
 AR Path="/5D35AA65/5E6B0935" Ref="CR?"  Part="1" 
 F 0 "CR3" H 15900 5850 140 0001 C CNN
@@ -237,11 +237,11 @@ F 4 "CR5" V 15900 5275 130 0000 C CNN "baseRefd"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Diode CR4
+L AGC_DSKY:Diode 1CR6
 U 1 1 5E6B10B2
 P 15900 6475
-AR Path="/5C88CA1D/5E6B10B2" Ref="1CR6"  Part="1"
-AR Path="/5E76F892/5E6B10B2" Ref="2CR6"  Part="1"
+AR Path="/5C88CA1D/5E6B10B2" Ref="1CR6"  Part="1" 
+AR Path="/5E76F892/5E6B10B2" Ref="2CR6"  Part="1" 
 AR Path="/5D333D72/5E6B10B2" Ref="CR?"  Part="1" 
 AR Path="/5D35AA65/5E6B10B2" Ref="CR?"  Part="1" 
 F 0 "CR4" H 15900 6675 140 0001 C CNN
@@ -253,11 +253,11 @@ F 4 "CR6" V 15900 6100 130 0000 C CNN "baseRefd"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L AGC_DSKY:Inductor L2
+L AGC_DSKY:Inductor 1L2
 U 1 1 5E6B178E
 P 17550 6850
-AR Path="/5C88CA1D/5E6B178E" Ref="1L2"  Part="1"
-AR Path="/5E76F892/5E6B178E" Ref="2L2"  Part="1"
+AR Path="/5C88CA1D/5E6B178E" Ref="1L2"  Part="1" 
+AR Path="/5E76F892/5E6B178E" Ref="2L2"  Part="1" 
 AR Path="/5D333D72/5E6B178E" Ref="L?"  Part="1" 
 AR Path="/5D35AA65/5E6B178E" Ref="L?"  Part="1" 
 F 0 "L2" H 17500 7050 130 0001 C CNN
@@ -269,11 +269,11 @@ F 4 "L2" V 17475 7200 130 0000 C CNN "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Inductor L3
+L AGC_DSKY:Inductor 1L3
 U 1 1 5E6B2148
 P 18800 6850
-AR Path="/5C88CA1D/5E6B2148" Ref="1L3"  Part="1"
-AR Path="/5E76F892/5E6B2148" Ref="2L3"  Part="1"
+AR Path="/5C88CA1D/5E6B2148" Ref="1L3"  Part="1" 
+AR Path="/5E76F892/5E6B2148" Ref="2L3"  Part="1" 
 AR Path="/5D333D72/5E6B2148" Ref="L?"  Part="1" 
 AR Path="/5D35AA65/5E6B2148" Ref="L?"  Part="1" 
 F 0 "L3" H 18750 7050 130 0001 C CNN
@@ -285,11 +285,11 @@ F 4 "L3" V 18725 7150 130 0000 C CNN "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R6
+L AGC_DSKY:Resistor 1R5
 U 1 1 5E6B2643
 P 12275 3350
-AR Path="/5C88CA1D/5E6B2643" Ref="1R5"  Part="1"
-AR Path="/5E76F892/5E6B2643" Ref="2R5"  Part="1"
+AR Path="/5C88CA1D/5E6B2643" Ref="1R5"  Part="1" 
+AR Path="/5E76F892/5E6B2643" Ref="2R5"  Part="1" 
 AR Path="/5D333D72/5E6B2643" Ref="R?"  Part="1" 
 AR Path="/5D35AA65/5E6B2643" Ref="R?"  Part="1" 
 F 0 "R6" H 12250 3175 130 0001 C CNN
@@ -301,11 +301,11 @@ F 4 "R5" V 12075 3675 130 0000 C CNN "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R8
+L AGC_DSKY:Resistor 1R7
 U 1 1 5E6B292D
 P 14100 2925
-AR Path="/5C88CA1D/5E6B292D" Ref="1R7"  Part="1"
-AR Path="/5E76F892/5E6B292D" Ref="2R7"  Part="1"
+AR Path="/5C88CA1D/5E6B292D" Ref="1R7"  Part="1" 
+AR Path="/5E76F892/5E6B292D" Ref="2R7"  Part="1" 
 AR Path="/5D333D72/5E6B292D" Ref="R?"  Part="1" 
 AR Path="/5D35AA65/5E6B292D" Ref="R?"  Part="1" 
 F 0 "R8" H 14075 2750 130 0001 C CNN
@@ -317,11 +317,11 @@ F 4 "R7" V 13925 3275 130 0000 C CNN "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R10
+L AGC_DSKY:Resistor 1R9
 U 1 1 5E6B2E8D
 P 15900 4275
-AR Path="/5C88CA1D/5E6B2E8D" Ref="1R9"  Part="1"
-AR Path="/5E76F892/5E6B2E8D" Ref="2R9"  Part="1"
+AR Path="/5C88CA1D/5E6B2E8D" Ref="1R9"  Part="1" 
+AR Path="/5E76F892/5E6B2E8D" Ref="2R9"  Part="1" 
 AR Path="/5D333D72/5E6B2E8D" Ref="R?"  Part="1" 
 AR Path="/5D35AA65/5E6B2E8D" Ref="R?"  Part="1" 
 F 0 "R10" H 15875 4100 130 0001 C CNN
@@ -333,11 +333,11 @@ F 4 "R9" V 15725 4625 130 0000 C CNN "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R9
+L AGC_DSKY:Resistor 1R8
 U 1 1 5E6B35CE
 P 14850 5525
-AR Path="/5C88CA1D/5E6B35CE" Ref="1R8"  Part="1"
-AR Path="/5E76F892/5E6B35CE" Ref="2R8"  Part="1"
+AR Path="/5C88CA1D/5E6B35CE" Ref="1R8"  Part="1" 
+AR Path="/5E76F892/5E6B35CE" Ref="2R8"  Part="1" 
 AR Path="/5D333D72/5E6B35CE" Ref="R?"  Part="1" 
 AR Path="/5D35AA65/5E6B35CE" Ref="R?"  Part="1" 
 F 0 "R9" H 14825 5350 130 0001 C CNN
@@ -349,11 +349,11 @@ F 4 "R8" V 14700 5825 130 0000 C CNN "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R7
+L AGC_DSKY:Resistor 1R6
 U 1 1 5E6B4590
 P 12950 4025
-AR Path="/5C88CA1D/5E6B4590" Ref="1R6"  Part="1"
-AR Path="/5E76F892/5E6B4590" Ref="2R6"  Part="1"
+AR Path="/5C88CA1D/5E6B4590" Ref="1R6"  Part="1" 
+AR Path="/5E76F892/5E6B4590" Ref="2R6"  Part="1" 
 AR Path="/5D333D72/5E6B4590" Ref="R?"  Part="1" 
 AR Path="/5D35AA65/5E6B4590" Ref="R?"  Part="1" 
 F 0 "R7" H 12925 3850 130 0001 C CNN
@@ -365,11 +365,11 @@ F 4 "R6" H 13025 4325 130 0000 C CNN "baseRefd"
 	-1   0    0    1   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R11
+L AGC_DSKY:Resistor 1R10
 U 1 1 5E6B5372
 P 17550 5875
-AR Path="/5C88CA1D/5E6B5372" Ref="1R10"  Part="1"
-AR Path="/5E76F892/5E6B5372" Ref="2R10"  Part="1"
+AR Path="/5C88CA1D/5E6B5372" Ref="1R10"  Part="1" 
+AR Path="/5E76F892/5E6B5372" Ref="2R10"  Part="1" 
 AR Path="/5D333D72/5E6B5372" Ref="R?"  Part="1" 
 AR Path="/5D35AA65/5E6B5372" Ref="R?"  Part="1" 
 F 0 "R11" H 17525 5700 130 0001 C CNN
@@ -381,11 +381,11 @@ F 4 "R10" V 17375 6225 130 0000 C CNN "baseRefd"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R49
+L AGC_DSKY:Resistor 1R11
 U 1 1 5E6B5981
 P 18800 5875
-AR Path="/5C88CA1D/5E6B5981" Ref="1R11"  Part="1"
-AR Path="/5E76F892/5E6B5981" Ref="2R11"  Part="1"
+AR Path="/5C88CA1D/5E6B5981" Ref="1R11"  Part="1" 
+AR Path="/5E76F892/5E6B5981" Ref="2R11"  Part="1" 
 AR Path="/5D333D72/5E6B5981" Ref="R?"  Part="1" 
 AR Path="/5D35AA65/5E6B5981" Ref="R?"  Part="1" 
 F 0 "R49" H 18775 5700 130 0001 C CNN

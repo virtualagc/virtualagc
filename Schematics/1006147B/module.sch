@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -5046,7 +5046,7 @@ Text GLabel 11325 7850 2    140  Output ~ 28
 +3MX1,Y1
 Text GLabel 11325 10775 2    140  Output ~ 28
 +3MX1,Y1
-Text GLabel 17125 2025 2    140  Output ~ 28
+Text GLabel 17125 2000 2    140  Output ~ 28
 +3MX2,Y2
 Text GLabel 17125 4925 2    140  Output ~ 28
 +3MX2,Y2
