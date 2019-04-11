@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr D 34000 22000
 encoding utf-8
-Sheet 2 4
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -329,12 +329,12 @@ $EndComp
 $Comp
 L AGC_DSKY:Resistor R17
 U 1 1 5BDCCA75
-P 11100 6800
-F 0 "R17" V 11125 7125 130 0000 C CNN
-F 1 "Resistor" H 11100 6975 130 0001 C CNN
-F 2 "" H 11100 6800 130 0001 C CNN
-F 3 "" H 11100 6800 130 0001 C CNN
-	1    11100 6800
+P 11100 6775
+F 0 "R17" V 11125 7100 130 0000 C CNN
+F 1 "Resistor" H 11100 6950 130 0001 C CNN
+F 2 "" H 11100 6775 130 0001 C CNN
+F 3 "" H 11100 6775 130 0001 C CNN
+	1    11100 6775
 	0    1    1    0   
 $EndComp
 $Comp
@@ -754,7 +754,7 @@ Wire Wire Line
 Wire Wire Line
 	11125 5825 11100 5825
 Wire Wire Line
-	11100 6325 11100 6400
+	11100 6325 11100 6375
 Wire Wire Line
 	11825 5100 11925 5100
 Wire Wire Line
@@ -929,14 +929,14 @@ Wire Wire Line
 	5800 8000 6500 8000
 Connection ~ 6500 8000
 Wire Wire Line
-	6500 8000 6500 7000
+	6500 8000 6500 7050
 Wire Wire Line
-	5175 6950 5175 7000
+	5175 6950 5175 7050
 Wire Wire Line
-	5175 7000 6500 7000
-Connection ~ 6500 7000
+	5175 7050 6500 7050
+Connection ~ 6500 7050
 Wire Wire Line
-	6500 7000 6500 6975
+	6500 7050 6500 6975
 Wire Wire Line
 	4550 7825 4550 8000
 Wire Wire Line
@@ -1925,7 +1925,7 @@ Wire Wire Line
 	3025 9225 1775 9225
 Connection ~ 3025 9225
 Wire Wire Line
-	11100 7200 11100 7225
+	11100 7175 11100 7225
 Text Notes 1900 21150 0    140  ~ 28
 Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program\n   document, but is not itself original to the Apollo Program. — RSB 2018\n2. The original drawing did not supply reference designators for the connector to\n   the AGC backplane.  On this drawing, 4 connectors (J1, J3, J5, J6) have been used;\n   the oval pad numbered "xyy" would be pin yy of connector Jx. — RSB 2018
 $Bitmap
