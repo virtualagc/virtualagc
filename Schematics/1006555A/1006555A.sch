@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 2
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -4548,15 +4548,15 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorBlockI J1
 U 1 1 5C422079
-P 11625 4125
-F 0 "J1" H 11625 4450 140 0001 C CNN
-F 1 "ConnectorBlockI" H 11625 4550 140 0001 C CNN
-F 2 "" H 11625 4600 140 0001 C CNN
-F 3 "" H 11625 4600 140 0001 C CNN
-F 4 "037" H 11625 4275 100 0000 C TNB "agc4"
-F 5 "T11/" H 11000 4050 140 0000 C BNB "Caption"
-F 6 "" H 11625 3900 140 0000 C TNB "Caption2"
-	1    11625 4125
+P 11625 4150
+F 0 "J1" H 11625 4475 140 0001 C CNN
+F 1 "ConnectorBlockI" H 11625 4575 140 0001 C CNN
+F 2 "" H 11625 4625 140 0001 C CNN
+F 3 "" H 11625 4625 140 0001 C CNN
+F 4 "037" H 11625 4300 100 0000 C TNB "agc4"
+F 5 "T11/" H 11000 4075 140 0000 C BNB "Caption"
+F 6 "" H 11625 3925 140 0000 C TNB "Caption2"
+	1    11625 4150
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -6239,8 +6239,6 @@ Wire Wire Line
 Wire Wire Line
 	16250 4150 11900 4150
 Wire Wire Line
-	11900 4150 11900 4125
-Wire Wire Line
 	16250 4700 15675 4700
 Wire Wire Line
 	23500 2300 23100 2300
@@ -6294,9 +6292,6 @@ Wire Wire Line
 	25325 15050 25825 15050
 Wire Wire Line
 	27625 15050 27975 15050
-Wire Wire Line
-	28000 15050 27975 15050
-Connection ~ 27975 15050
 Wire Wire Line
 	25300 16150 25300 15525
 Wire Wire Line
@@ -6517,9 +6512,6 @@ Wire Wire Line
 	29475 5300 30050 5300
 Wire Wire Line
 	31850 4200 32575 4200
-Wire Wire Line
-	32600 4200 32575 4200
-Connection ~ 32575 4200
 Wire Wire Line
 	31750 5025 32625 5025
 Wire Wire Line
