@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -1653,14 +1653,14 @@ Connection ~ 12550 24225
 Wire Wire Line
 	12550 24225 13400 24225
 Wire Wire Line
-	13750 21675 13725 21675
+	13750 21675 13675 21675
 Wire Wire Line
 	12550 21725 12625 21675
 Wire Wire Line
-	13725 21675 13725 30075
-Connection ~ 13725 21675
+	13675 21675 13675 30075
+Connection ~ 13675 21675
 Wire Wire Line
-	13725 21675 12625 21675
+	13675 21675 12625 21675
 Wire Wire Line
 	14675 21675 14675 19925
 Wire Wire Line
@@ -1799,13 +1799,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 17 2 5C8283E9
-P 13725 30250
-F 0 "J1" H 13725 30575 140 0001 C CNN
-F 1 "ConnectorGeneric" H 13725 30675 140 0001 C CNN
-F 2 "" H 13725 30725 140 0001 C CNN
-F 3 "" H 13725 30725 140 0001 C CNN
-F 4 "VFAIL" H 13725 29925 140 0000 C TNB "Caption"
-	17   13725 30250
+P 13675 30250
+F 0 "J1" H 13675 30575 140 0001 C CNN
+F 1 "ConnectorGeneric" H 13675 30675 140 0001 C CNN
+F 2 "" H 13675 30725 140 0001 C CNN
+F 3 "" H 13675 30725 140 0001 C CNN
+F 4 "VFAIL" H 13675 29925 140 0000 C TNB "Caption"
+	17   13675 30250
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -2191,10 +2191,10 @@ Wire Wire Line
 	6025 18100 6725 18100
 Wire Wire Line
 	6050 21000 6725 21000
-Text Notes 20525 33175 0    140  ~ 28
-Notes from the Virtual AGC Project:\na) This CAD drawing was transcribed from the original Project Apollo drawing \n   1006098H.  — RSB 2019\nb) Because the original design used identical circuitry for control blocks A1 and A2,\n   in order to faithfully preserve the electrical properties of the circuit within the \n   CAD context, this transcription differs visually somewhat from the original \n   drawing in so far as circuits A1 and A2 are concerned.  — RSB 2019
+Text Notes 20225 32800 0    140  ~ 28
+Notes from the Virtual AGC Project:\na) This CAD drawing was transcribed from the original Project Apollo drawing \n   1006098H.  — RSB 2019\nb) Because the original design used identical circuitry for control blocks A1 and A2,\n   in order to faithfully preserve the electrical properties of the circuit within the \n   CAD context, this transcription differs visually somewhat from the original \n   drawing in so far as circuits A1 and A2 are concerned.  — RSB 2019\nc) The R and GND signals of hierarchical blocks A1 and A2 may exhibit warnings\n   with ERC because they are internally shorted within the hierarchical blocks.\n   This is expected and is okay.  — RSB 2019
 $Bitmap
-Pos 20200 31750
+Pos 19950 30650
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
