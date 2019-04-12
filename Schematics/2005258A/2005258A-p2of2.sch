@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:module-cache
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -5806,18 +5806,16 @@ Wire Notes Line width 6 style solid
 Text Notes 36550 1250 0    160  ~ 32
 A      REVISED PER TDRR 30754
 Wire Wire Line
-	3775 31350 3775 31375
-Wire Wire Line
 	3100 31350 3775 31350
 $Comp
 L AGC_DSKY:Ground-chassis G2
 U 1 1 6B5BB116
-P 3775 31625
-F 0 "G2" H 3625 31725 130 0001 C CNN
-F 1 "Ground-chassis" H 3775 32125 130 0001 C CNN
-F 2 "" H 3775 31625 130 0001 C CNN
-F 3 "" H 3775 31625 130 0001 C CNN
-	1    3775 31625
+P 3775 31600
+F 0 "G2" H 3625 31700 130 0001 C CNN
+F 1 "Ground-chassis" H 3775 32100 130 0001 C CNN
+F 2 "" H 3775 31600 130 0001 C CNN
+F 3 "" H 3775 31600 130 0001 C CNN
+	1    3775 31600
 	1    0    0    -1  
 $EndComp
 $Comp
