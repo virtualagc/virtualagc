@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:module-cache
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -2396,9 +2396,9 @@ Wire Wire Line
 Wire Wire Line
 	7125 4100 7325 4100
 Wire Wire Line
-	7325 4100 7300 3675
+	7325 4100 7325 3675
 Wire Wire Line
-	7300 3675 4950 3050
+	7325 3675 4950 3050
 Wire Wire Line
 	4950 3050 4950 2825
 Wire Wire Line

@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:module-cache
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -2334,9 +2334,9 @@ Connection ~ 15125 17300
 Wire Wire Line
 	15125 17300 16425 17300
 Wire Wire Line
-	15100 18850 15125 18400
+	15100 18850 15100 18375
 Wire Wire Line
-	15125 18400 12725 17775
+	15100 18375 12725 17775
 Wire Wire Line
 	12725 17775 12725 17575
 Wire Wire Line
@@ -2425,9 +2425,9 @@ Connection ~ 15575 10950
 Wire Wire Line
 	18200 4500 19500 4500
 Wire Wire Line
-	15125 4225 15100 4700
+	15125 4225 15125 4700
 Wire Wire Line
-	15100 4700 12725 5325
+	15125 4700 12725 5325
 Wire Wire Line
 	12725 5325 12725 5450
 Wire Wire Line
