@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 14 63
+Sheet 1 63
 Title ""
 Date ""
 Rev ""
@@ -183,11 +183,9 @@ Wire Wire Line
 Wire Wire Line
 	6250 3950 6250 4700
 Wire Wire Line
-	5050 5800 5175 5800
+	5050 5800 5150 5800
 Wire Wire Line
-	5175 5800 5175 4950
-Wire Wire Line
-	5175 4950 5150 4950
+	5150 5800 5150 4950
 $Comp
 L AGC_DSKY:Diode CR?
 U 1 1 5CD321E9
