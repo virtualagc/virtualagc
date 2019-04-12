@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:module-cache
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -3272,12 +3272,12 @@ L_
 $Comp
 L AGC_DSKY:Ground-chassis G301
 U 1 1 61AF03DF
-P 35625 28450
-F 0 "G301" H 35475 28550 130 0001 C CNN
-F 1 "Ground-chassis" H 35625 28950 130 0001 C CNN
-F 2 "" H 35625 28450 130 0001 C CNN
-F 3 "" H 35625 28450 130 0001 C CNN
-	1    35625 28450
+P 35625 28425
+F 0 "G301" H 35475 28525 130 0001 C CNN
+F 1 "Ground-chassis" H 35625 28925 130 0001 C CNN
+F 2 "" H 35625 28425 130 0001 C CNN
+F 3 "" H 35625 28425 130 0001 C CNN
+	1    35625 28425
 	1    0    0    -1  
 $EndComp
 Text Notes 35250 21550 0    140  ~ 28
@@ -3935,8 +3935,6 @@ Connection ~ 26050 12450
 Wire Wire Line
 	36300 28175 35625 28175
 Wire Wire Line
-	35625 28175 35625 28200
-Wire Wire Line
 	37125 11925 37350 11925
 Wire Wire Line
 	35325 11650 35175 11650
@@ -4099,8 +4097,6 @@ Wire Wire Line
 Wire Wire Line
 	23950 19625 24100 19625
 Wire Wire Line
-	26000 20250 26000 20275
-Wire Wire Line
 	26000 20775 25925 20775
 Wire Wire Line
 	27050 20350 27375 20350
@@ -4119,9 +4115,6 @@ Wire Wire Line
 Connection ~ 26000 19900
 Wire Wire Line
 	26000 20275 23950 19900
-Connection ~ 26000 20275
-Wire Wire Line
-	26000 20275 26000 20775
 Wire Wire Line
 	29375 15900 30375 15900
 Wire Wire Line
@@ -5899,4 +5892,6 @@ A      REVISED PER TDRR 30754
 Wire Wire Line
 	9025 26100 9375 26100
 Connection ~ 9025 26100
+Wire Wire Line
+	26000 20275 26000 20775
 $EndSCHEMATC
