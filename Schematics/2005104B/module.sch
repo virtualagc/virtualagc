@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -2253,7 +2253,7 @@ F 5 "40017A" H 1800 26276 140 0000 C CNB "Caption2"
 $EndComp
 Text GLabel 3574 26363 2    140  UnSpc ~ 28
 PIN101
-Text GLabel 7349 18763 0    140  UnSpc ~ 28
+Text GLabel 7349 18738 0    140  UnSpc ~ 28
 PIN101
 Text GLabel 7349 21913 0    140  UnSpc ~ 28
 PIN101
