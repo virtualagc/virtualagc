@@ -1,5 +1,5 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
@@ -370,17 +370,6 @@ F 1 "Transistor-NPN" H 31600 21365 130 0001 C CNN
 F 2 "" H 31600 21050 130 0001 C CNN
 F 3 "" H 31600 21050 130 0001 C CNN
 	1    31600 20800
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Transistor-PNP Q10
-U 1 1 5C65279F
-P 30125 20200
-F 0 "Q10" H 30875 20200 130 0000 C CNN
-F 1 "Transistor-PNP" H 30125 20765 130 0001 C CNN
-F 2 "" H 30125 19950 130 0001 C CNN
-F 3 "" H 30125 19950 130 0001 C CNN
-	1    30125 20200
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1019,26 +1008,10 @@ Wire Wire Line
 Wire Wire Line
 	15875 16300 15875 19400
 Wire Wire Line
-	15875 19400 17400 19400
-Wire Wire Line
-	18900 19400 18900 20600
-Wire Wire Line
 	16675 19100 16675 20250
 Connection ~ 16675 20250
 Wire Wire Line
 	16675 20250 16950 20250
-Wire Wire Line
-	17400 18925 17400 19400
-Connection ~ 17400 19400
-Wire Wire Line
-	17400 19400 18900 19400
-Wire Wire Line
-	17400 20000 17400 19400
-Wire Wire Line
-	17400 19400 17375 19400
-Wire Wire Line
-	18900 19400 18900 19150
-Connection ~ 18900 19400
 Wire Wire Line
 	18900 18350 18900 17850
 Wire Wire Line
@@ -1129,10 +1102,6 @@ Wire Wire Line
 	31750 21050 31750 21825
 Wire Wire Line
 	31300 20800 30275 20800
-Wire Wire Line
-	30275 20800 30275 20450
-Wire Wire Line
-	30275 19350 30275 19950
 Connection ~ 30275 19350
 Wire Wire Line
 	30275 19350 31750 19350
@@ -1158,8 +1127,6 @@ Wire Wire Line
 Connection ~ 29550 17850
 Wire Wire Line
 	29550 17850 30275 17850
-Wire Wire Line
-	29825 20200 29825 20225
 Wire Wire Line
 	29825 20225 29550 20225
 Wire Wire Line
@@ -2370,12 +2337,6 @@ Text GLabel 22775 10150 2    140  UnSpc ~ 0
 VYF2
 Wire Wire Line
 	22400 10150 22775 10150
-Text GLabel 22775 10950 2    140  UnSpc ~ 0
-0VDC
-Wire Wire Line
-	22775 10925 22775 10950
-Wire Wire Line
-	22775 10950 22400 10950
 Text GLabel 22750 12150 2    140  UnSpc ~ 0
 BPLSWY
 Text GLabel 20400 12150 0    140  UnSpc ~ 0
@@ -2408,12 +2369,6 @@ Text GLabel 22775 5650 2    140  UnSpc ~ 0
 VYF1
 Wire Wire Line
 	22400 5650 22775 5650
-Text GLabel 22775 6450 2    140  UnSpc ~ 0
-0VDC
-Wire Wire Line
-	22775 6425 22775 6450
-Wire Wire Line
-	22775 6450 22400 6450
 Text GLabel 22750 7650 2    140  UnSpc ~ 0
 BPLSWY
 Wire Wire Line
@@ -2440,22 +2395,10 @@ Text GLabel 17525 10150 2    140  UnSpc ~ 0
 VYF1
 Wire Wire Line
 	17150 10150 17525 10150
-Text GLabel 17525 10950 2    140  UnSpc ~ 0
-0VDC
-Wire Wire Line
-	17525 10925 17525 10950
-Wire Wire Line
-	17525 10950 17150 10950
 Text GLabel 17525 5650 2    140  UnSpc ~ 0
 VYF2
 Wire Wire Line
 	17150 5650 17525 5650
-Text GLabel 17525 6450 2    140  UnSpc ~ 0
-0VDC
-Wire Wire Line
-	17525 6425 17525 6450
-Wire Wire Line
-	17525 6450 17150 6450
 Text GLabel 17500 12150 2    140  UnSpc ~ 0
 BPLSWY
 Wire Wire Line
@@ -2528,20 +2471,12 @@ Text GLabel 12250 10150 2    140  UnSpc ~ 0
 VYF1
 Wire Wire Line
 	11875 10150 12250 10150
-Text GLabel 12250 10950 2    140  UnSpc ~ 0
-0VDC
-Wire Wire Line
-	12250 10925 12250 10950
-Wire Wire Line
-	12250 10950 11875 10950
 Text GLabel 12275 5650 2    140  UnSpc ~ 0
 VYF2
 Wire Wire Line
 	11900 5650 12275 5650
 Text GLabel 12275 6450 2    140  UnSpc ~ 0
 0VDC
-Wire Wire Line
-	12275 6425 12275 6450
 Wire Wire Line
 	12275 6450 11900 6450
 Text GLabel 12225 12150 2    140  UnSpc ~ 0
@@ -2619,8 +2554,6 @@ Wire Wire Line
 Text GLabel 6875 10950 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	6875 10925 6875 10950
-Wire Wire Line
 	6875 10950 6500 10950
 Text GLabel 6875 5650 2    140  UnSpc ~ 0
 VYF2
@@ -2628,8 +2561,6 @@ Wire Wire Line
 	6500 5650 6875 5650
 Text GLabel 6875 6450 2    140  UnSpc ~ 0
 0VDC
-Wire Wire Line
-	6875 6425 6875 6450
 Wire Wire Line
 	6875 6450 6500 6450
 Text GLabel 6850 12150 2    140  UnSpc ~ 0
@@ -3692,4 +3623,53 @@ Wire Wire Line
 Wire Wire Line
 	21700 26450 21700 25900
 Connection ~ 21700 25900
+Wire Wire Line
+	12225 10950 11875 10950
+Text GLabel 12225 10950 2    140  UnSpc ~ 0
+0VDC
+Wire Wire Line
+	17500 6450 17150 6450
+Text GLabel 17500 6450 2    140  UnSpc ~ 0
+0VDC
+Wire Wire Line
+	17550 10950 17150 10950
+Text GLabel 17550 10950 2    140  UnSpc ~ 0
+0VDC
+Wire Wire Line
+	22775 6450 22400 6450
+Text GLabel 22775 6450 2    140  UnSpc ~ 0
+0VDC
+Wire Wire Line
+	22775 10950 22400 10950
+Text GLabel 22775 10950 2    140  UnSpc ~ 0
+0VDC
+Wire Wire Line
+	30275 19350 30275 19975
+Wire Wire Line
+	30275 20800 30275 20475
+$Comp
+L AGC_DSKY:Transistor-PNP Q10
+U 1 1 5C65279F
+P 30125 20225
+F 0 "Q10" H 30875 20225 130 0000 C CNN
+F 1 "Transistor-PNP" H 30125 20790 130 0001 C CNN
+F 2 "" H 30125 19975 130 0001 C CNN
+F 3 "" H 30125 19975 130 0001 C CNN
+	1    30125 20225
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	18900 19150 18900 19400
+Wire Wire Line
+	15875 19400 17400 19400
+Connection ~ 18900 19400
+Wire Wire Line
+	18900 19400 18900 20600
+Wire Wire Line
+	17400 20000 17400 19400
+Connection ~ 17400 19400
+Wire Wire Line
+	17400 19400 18900 19400
+Wire Wire Line
+	17400 19400 17400 18925
 $EndSCHEMATC
