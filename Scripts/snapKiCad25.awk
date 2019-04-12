@@ -1,4 +1,4 @@
-#!/usr/bin/awk
+#!/usr/bin/awk -f
 # I, the author, Ron Burkey, declare this to be in the Public Domain.
 
 # All of the KiCad schematics I've created for the AGC/DSKY schematics
@@ -8,10 +8,6 @@
 # seem to be anything in KiCad itself that allows me to snap everything
 # back onto the grid.  So here's a tools for that.  It takes a .sch
 # file on stdin and outputs the snapped version of that on stdout.
-
-# Since I only have components, text, and no-connects at this point ---
-# because I can't snap any wires onto the pins! --- those are the only
-# entities I'm going to worry about yet.
 
 # Snap the input value to the nearest multiple of 25.
 function snap(value) {
@@ -26,10 +22,17 @@ function snap(value) {
 
 BEGIN {
 	unit = "blern"
+	inwire = 0
 }
 
 {
-	if ($1 == "U") {
+	if (inwire) {
+		$1 = "\t" snap($1)
+		$2 = snap($2)
+		$3 = snap($3)
+		$4 = snap($4)
+		inwire = 0
+	} else if ($1 == "U") {
 		unit = $2
 	} else if ($1 == "NoConn") {
 		$3 = snap($3)
@@ -37,9 +40,9 @@ BEGIN {
 	} else if ($1 == "P") {
 		$2 = snap($2)
 		$3 = snap($3)
-	} else if ($1 == "F") {
-		$5 = snap($5)
-		$6 = snap($6)
+	#} else if ($1 == "F") {
+	#	$5 = snap($5)
+	#	$6 = snap($6)
 	} else if ($1 == unit) {
 		$1 = "\t" unit
 		$2 = snap($2)
@@ -47,6 +50,14 @@ BEGIN {
 		unit = "blern"
 	} else if ($1 == "$EndComp") {
 		unit = "blern"
+	} else if ($1 == "Wire" && $2 == "Wire") {
+		inwire = 1
+	} else if ($1 == "Connection" && $2 == "-") {
+		$3 = snap($3)
+		$4 = snap($4)
+	} else if ($1 == "Text" && $2 == "GLabel") {
+		$3 = snap($3)
+		$4 = snap($4)
 	}
 	print $0
 }
