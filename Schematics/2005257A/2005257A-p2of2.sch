@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:module-cache
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -4072,8 +4072,6 @@ Wire Wire Line
 Wire Wire Line
 	23950 19625 24100 19625
 Wire Wire Line
-	26000 20250 26000 20275
-Wire Wire Line
 	26000 20775 25925 20775
 Wire Wire Line
 	27050 20350 27375 20350
@@ -4092,9 +4090,6 @@ Wire Wire Line
 Connection ~ 26000 19900
 Wire Wire Line
 	26000 20275 23950 19900
-Connection ~ 26000 20275
-Wire Wire Line
-	26000 20275 26000 20775
 Wire Wire Line
 	29375 15900 30375 15900
 Wire Wire Line
@@ -5881,18 +5876,16 @@ Wire Wire Line
 Connection ~ 37125 27400
 Connection ~ 40975 27000
 Wire Wire Line
-	9500 30825 9500 30850
-Wire Wire Line
 	8825 30825 9500 30825
 $Comp
 L AGC_DSKY:Ground-chassis G2
 U 1 1 6B5BB116
-P 9500 31100
-F 0 "G2" H 9350 31200 130 0001 C CNN
-F 1 "Ground-chassis" H 9500 31600 130 0001 C CNN
-F 2 "" H 9500 31100 130 0001 C CNN
-F 3 "" H 9500 31100 130 0001 C CNN
-	1    9500 31100
+P 9500 31075
+F 0 "G2" H 9350 31175 130 0001 C CNN
+F 1 "Ground-chassis" H 9500 31575 130 0001 C CNN
+F 2 "" H 9500 31075 130 0001 C CNN
+F 3 "" H 9500 31075 130 0001 C CNN
+	1    9500 31075
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -5907,4 +5900,6 @@ F 4 "CGA10" H 7900 30850 140 0000 C CNB "Caption"
 	1    8550 30825
 	1    0    0    1   
 $EndComp
+Wire Wire Line
+	26000 20275 26000 20775
 $EndSCHEMATC
