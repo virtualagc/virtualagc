@@ -1,5 +1,5 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
@@ -958,18 +958,6 @@ Wire Wire Line
 	14575 16225 14575 19400
 Wire Wire Line
 	14575 19400 15425 19400
-Wire Wire Line
-	17075 19400 17075 20525
-Connection ~ 15925 19400
-Wire Wire Line
-	15925 19400 17075 19400
-Wire Wire Line
-	15925 19925 15925 19400
-Wire Wire Line
-	15925 19400 15900 19400
-Wire Wire Line
-	17075 19400 17075 19075
-Connection ~ 17075 19400
 Wire Wire Line
 	17075 18275 17075 17775
 Wire Wire Line
@@ -2338,8 +2326,6 @@ Wire Wire Line
 Text GLabel 22200 10925 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	22200 10900 22200 10925
-Wire Wire Line
 	22200 10925 21825 10925
 Text GLabel 22175 12125 2    140  UnSpc ~ 0
 BPLSWY
@@ -2376,8 +2362,6 @@ Wire Wire Line
 Text GLabel 22200 6425 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	22200 6400 22200 6425
-Wire Wire Line
 	22200 6425 21825 6425
 Text GLabel 22175 7625 2    140  UnSpc ~ 0
 BPLSWY
@@ -2408,8 +2392,6 @@ Wire Wire Line
 Text GLabel 16950 10925 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	16950 10900 16950 10925
-Wire Wire Line
 	16950 10925 16575 10925
 Text GLabel 16950 5625 2    140  UnSpc ~ 0
 VY2
@@ -2417,8 +2399,6 @@ Wire Wire Line
 	16575 5625 16950 5625
 Text GLabel 16950 6425 2    140  UnSpc ~ 0
 0VDC
-Wire Wire Line
-	16950 6400 16950 6425
 Wire Wire Line
 	16950 6425 16575 6425
 Text GLabel 16925 12125 2    140  UnSpc ~ 0
@@ -2496,19 +2476,15 @@ Wire Wire Line
 Text GLabel 11675 10925 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	11675 10900 11675 10925
-Wire Wire Line
 	11675 10925 11300 10925
 Text GLabel 11700 5625 2    140  UnSpc ~ 0
 VY2
 Wire Wire Line
 	11325 5625 11700 5625
-Text GLabel 11700 6425 2    140  UnSpc ~ 0
+Text GLabel 11675 6425 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	11700 6400 11700 6425
-Wire Wire Line
-	11700 6425 11325 6425
+	11675 6425 11325 6425
 Text GLabel 11650 12125 2    140  UnSpc ~ 0
 BPLSWY
 Wire Wire Line
@@ -2584,19 +2560,15 @@ Wire Wire Line
 Text GLabel 6300 10925 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	6300 10900 6300 10925
-Wire Wire Line
 	6300 10925 5925 10925
 Text GLabel 6300 5625 2    140  UnSpc ~ 0
 VY2
 Wire Wire Line
 	5925 5625 6300 5625
-Text GLabel 6300 6425 2    140  UnSpc ~ 0
+Text GLabel 6275 6425 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	6300 6400 6300 6425
-Wire Wire Line
-	6300 6425 5925 6425
+	6275 6425 5925 6425
 Text GLabel 6275 12125 2    140  UnSpc ~ 0
 BPLSWY
 Wire Wire Line
@@ -3670,9 +3642,6 @@ F 5 "VYF1" H 13025 16050 140 0000 C CNB "Caption2"
 $EndComp
 Wire Wire Line
 	15425 18925 15425 19400
-Connection ~ 15425 19400
-Wire Wire Line
-	15425 19400 15925 19400
 Text Notes 4875 24925 0    140  ~ 28
 40619
 Wire Wire Line
@@ -3702,4 +3671,17 @@ Wire Wire Line
 	29050 18325 29050 17775
 Text Notes 4050 3875 0    140  ~ 28
 40611-40618
+Wire Wire Line
+	17075 19075 17075 19400
+Wire Wire Line
+	15425 19400 15925 19400
+Connection ~ 15425 19400
+Connection ~ 17075 19400
+Wire Wire Line
+	17075 19400 17075 20525
+Wire Wire Line
+	15925 19925 15925 19400
+Connection ~ 15925 19400
+Wire Wire Line
+	15925 19400 17075 19400
 $EndSCHEMATC
