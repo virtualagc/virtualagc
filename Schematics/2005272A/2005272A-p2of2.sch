@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
-EELAYER 26 0
+EESchema Schematic File Version 5
+LIBS:errors-cache
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -3476,9 +3476,9 @@ Wire Wire Line
 Wire Wire Line
 	7100 3825 7100 10675
 Wire Wire Line
-	4825 6200 4825 12225
+	4825 6200 4825 12250
 Wire Wire Line
-	4825 12225 5000 12250
+	4825 12250 5000 12250
 Connection ~ 4825 6200
 Wire Wire Line
 	5000 9650 2325 9650
@@ -3711,7 +3711,7 @@ Wire Wire Line
 	7400 16475 7400 16225
 Wire Wire Line
 	7400 16225 7525 16225
-Connection ~ 4825 12225
+Connection ~ 4825 12250
 Wire Wire Line
 	7525 10950 7400 10950
 Wire Wire Line
@@ -3776,7 +3776,7 @@ Wire Wire Line
 Wire Wire Line
 	4825 18825 5025 18825
 Wire Wire Line
-	4825 12225 4825 18825
+	4825 12250 4825 18825
 Wire Wire Line
 	5025 19375 2375 19375
 Wire Wire Line
