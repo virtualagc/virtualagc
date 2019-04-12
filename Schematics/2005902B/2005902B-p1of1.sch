@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr User 51000 34000
 encoding utf-8
-Sheet 2 2
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -3344,7 +3344,7 @@ F 3 "" H 18025 13125 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	16575 12925 16600 12925
+	16550 12925 16600 12925
 Wire Wire Line
 	17400 12925 17550 12925
 Wire Wire Line
@@ -6623,13 +6623,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 50 1 5DD1379A
-P 16300 12925
-F 0 "J2" H 16300 13250 140 0001 C CNN
-F 1 "ConnectorD1_D6_2" H 16300 13350 140 0001 C CNN
-F 2 "" H 16300 13100 140 0001 C CNN
-F 3 "" H 16300 13100 140 0001 C CNN
-F 4 "WO243" H 15575 12925 140 0000 C CNB "Caption"
-	50   16300 12925
+P 16275 12925
+F 0 "J2" H 16275 13250 140 0001 C CNN
+F 1 "ConnectorD1_D6_2" H 16275 13350 140 0001 C CNN
+F 2 "" H 16275 13100 140 0001 C CNN
+F 3 "" H 16275 13100 140 0001 C CNN
+F 4 "WO243" H 15550 12925 140 0000 C CNB "Caption"
+	50   16275 12925
 	1    0    0    -1  
 $EndComp
 $Comp
