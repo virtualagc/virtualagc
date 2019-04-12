@@ -1,4 +1,4 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
 EELAYER 29 0
 EELAYER END
@@ -5143,7 +5143,7 @@ F 5 "XPCN" H 13675 21925 140 0000 C CNB "Caption2"
 $EndComp
 Text GLabel 39800 15875 2    140  Output ~ 28
 +4MX2_Y2
-Text GLabel 33000 15875 2    140  Output ~ 28
+Text GLabel 33000 15900 2    140  Output ~ 28
 +4MX1_Y1
 Wire Wire Line
 	39800 15875 39425 15875
