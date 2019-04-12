@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
-EELAYER 28 0
+EESchema Schematic File Version 5
+LIBS:errors-cache
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 4
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -1211,13 +1211,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-200 J2
 U 42 1 5D3ADB57
-P 7700 19025
-F 0 "J2" H 7700 19350 140 0001 C CNN
-F 1 "ConnectorA1-200" H 7700 19450 140 0001 C CNN
-F 2 "" H 7700 19500 140 0001 C CNN
-F 3 "" H 7700 19500 140 0001 C CNN
-F 4 "PHS2/" H 7700 19250 140 0000 C BNB "Caption"
-	42   7700 19025
+P 7700 19050
+F 0 "J2" H 7700 19375 140 0001 C CNN
+F 1 "ConnectorA1-200" H 7700 19475 140 0001 C CNN
+F 2 "" H 7700 19525 140 0001 C CNN
+F 3 "" H 7700 19525 140 0001 C CNN
+F 4 "PHS2/" H 7700 19275 140 0000 C BNB "Caption"
+	42   7700 19050
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1878,8 +1878,6 @@ Wire Wire Line
 	13800 18725 13800 19050
 Wire Wire Line
 	13800 19050 8400 19050
-Wire Wire Line
-	7975 19050 7975 19025
 Wire Wire Line
 	8400 19050 8400 20375
 Wire Wire Line
