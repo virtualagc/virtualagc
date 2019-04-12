@@ -1,10 +1,10 @@
-EESchema Schematic File Version 4
-LIBS:module-cache
+EESchema Schematic File Version 5
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -418,13 +418,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-100 J1
 U 67 1 5F1B04F6
-P 15950 4250
-F 0 "J1" H 15950 4575 140 0001 C CNN
-F 1 "ConnectorA1-100" H 15950 4675 140 0001 C CNN
-F 2 "" H 15950 4725 140 0001 C CNN
-F 3 "" H 15950 4725 140 0001 C CNN
-F 4 "MONEX/" H 15100 4175 140 0000 C BNB "Caption"
-	67   15950 4250
+P 15950 4225
+F 0 "J1" H 15950 4550 140 0001 C CNN
+F 1 "ConnectorA1-100" H 15950 4650 140 0001 C CNN
+F 2 "" H 15950 4700 140 0001 C CNN
+F 3 "" H 15950 4700 140 0001 C CNN
+F 4 "MONEX/" H 15100 4150 140 0000 C BNB "Caption"
+	67   15950 4225
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -3641,15 +3641,9 @@ Wire Wire Line
 Wire Wire Line
 	7775 13075 3000 13075
 Wire Wire Line
-	7800 13625 7775 13625
-Connection ~ 7775 13625
-Wire Wire Line
 	7775 13625 6775 13625
 Wire Wire Line
 	7775 14700 2975 14700
-Wire Wire Line
-	7825 15225 7800 15225
-Connection ~ 7800 15225
 Wire Wire Line
 	7800 15225 7550 15225
 Wire Wire Line
@@ -4195,8 +4189,6 @@ Wire Wire Line
 	12925 2950 12500 2950
 Wire Wire Line
 	14975 4225 15675 4225
-Wire Wire Line
-	15675 4225 15675 4250
 $Comp
 L AGC_DSKY:ArrowTwiddle X45
 U 1 1 5C0A76D2
