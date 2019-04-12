@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:module-cache
+LIBS:errors-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -3647,11 +3647,11 @@ Connection ~ 28250 3825
 Wire Wire Line
 	28250 3825 28250 3200
 Wire Wire Line
-	30300 5100 30325 5100
+	30300 5100 30350 5100
 Wire Wire Line
-	30325 5100 30325 5625
+	30350 5100 30350 5625
 Wire Wire Line
-	30325 5625 30475 5625
+	30350 5625 30475 5625
 Wire Wire Line
 	32325 5175 32625 5175
 Wire Wire Line
@@ -4072,8 +4072,6 @@ Wire Wire Line
 Wire Wire Line
 	23950 19625 24100 19625
 Wire Wire Line
-	26000 20250 26000 20275
-Wire Wire Line
 	26000 20775 25925 20775
 Wire Wire Line
 	27050 20350 27375 20350
@@ -4092,9 +4090,6 @@ Wire Wire Line
 Connection ~ 26000 19900
 Wire Wire Line
 	26000 20275 23950 19900
-Connection ~ 26000 20275
-Wire Wire Line
-	26000 20275 26000 20775
 Wire Wire Line
 	29375 15900 30375 15900
 Wire Wire Line
@@ -4562,9 +4557,9 @@ Wire Wire Line
 Wire Wire Line
 	2950 8200 3150 8200
 Wire Wire Line
-	2850 4775 2400 4775
+	2850 4775 2425 4775
 Wire Wire Line
-	2400 4775 2425 8750
+	2425 4775 2425 8750
 Wire Wire Line
 	2425 30125 2150 30125
 Wire Wire Line
@@ -4708,9 +4703,9 @@ Connection ~ 6300 17275
 Wire Wire Line
 	6300 17275 6025 17275
 Wire Wire Line
-	9775 19300 9775 18700
+	9775 19300 9775 18725
 Wire Wire Line
-	9775 18700 27375 18725
+	9775 18725 27375 18725
 Wire Wire Line
 	27375 18725 27375 19350
 Wire Wire Line
@@ -5905,4 +5900,6 @@ F 4 "CGA10" H 7925 31150 140 0000 C CNB "Caption"
 $EndComp
 Wire Wire Line
 	8850 31125 9825 31125
+Wire Wire Line
+	26000 20275 26000 20775
 $EndSCHEMATC
