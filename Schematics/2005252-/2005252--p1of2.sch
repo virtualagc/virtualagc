@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:errors-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 1 1
+Sheet 1 3
 Title ""
 Date ""
 Rev ""
@@ -5798,6 +5798,6 @@ F 4 "SR/" H 11500 18550 140 0000 C BNB "Caption"
 $EndComp
 Wire Wire Line
 	12875 18275 11700 18275
-Text GLabel 14450 10250 0    140  UnSpc ~ 28
+Text HLabel 14450 10250 0    140  UnSpc ~ 28
 0VDCA
 $EndSCHEMATC
