@@ -1,6 +1,6 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
-EELAYER 28 0
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
