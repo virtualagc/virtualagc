@@ -43,9 +43,11 @@ works for me is:
    	hyperlink's URL.  This can be accomplished by:
    	    a)	Saving the spreadsheet as a .fodc file (say, temp.fods).
    	    b)	Processing with:
-   	    		sed --in-place -e 's@<text:a xlink:href="@@' \
-   	    			-e 's@" xlink:type="simple">[^<]*</text:a>@@' \
-   	    			temp.fods
+			sed --in-place -e 's@<text:a xlink:href="@@' -e 's@" xlink:type="simple">[^<]*</text:a>@@' temp.fods
    	    c)	Reimporting temp.fods into LibreOffice Calc.
-    4.	Save as drawings.csv file.
+    4.	Save as drawings.csv file with a tab delimiter.
  
+The drawings.csv file is relatively handy for creating a JSON file for
+use with "Tipue Search".  You can do that with the MakeTipueSearch.py
+script.
+
