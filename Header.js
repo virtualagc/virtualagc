@@ -1,4 +1,8 @@
-/* Google search bar */
+/* Google search bar for site.  Maintain this custom search or others
+ * by logging into google with my account and going to 
+ * https://cse.google.com/cse/all.  If you're not me, and if I never
+ * told you that you are then you're probably not, I can assign other
+ * google users to be able to maintain the URLs for the searches. */
 (function() {
   var cx = '005579885767466475821:oqt5wpxqlt8';
   var gcse = document.createElement('script');
