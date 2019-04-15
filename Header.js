@@ -3,15 +3,17 @@
  * https://cse.google.com/cse/all.  If you're not me, and if I never
  * told you that you are then you're probably not, I can assign other
  * google users to be able to maintain the URLs for the searches. */
-(function() {
-  var cx = '005579885767466475821:oqt5wpxqlt8';
-  var gcse = document.createElement('script');
-  gcse.type = 'text/javascript';
-  gcse.async = true;
-  gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
-  var s = document.getElementsByTagName('script')[0];
-  s.parentNode.insertBefore(gcse, s);
-})();
+if (typeof ignoreGcse == 'undefined') {
+	(function() {
+	  var cx = '005579885767466475821:oqt5wpxqlt8';
+	  var gcse = document.createElement('script');
+	  gcse.type = 'text/javascript';
+	  gcse.async = true;
+	  gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+	  var s = document.getElementsByTagName('script')[0];
+	  s.parentNode.insertBefore(gcse, s);
+	})();
+}
 
 /* Get the logo URL. */
 var date = new Date();
@@ -151,12 +153,14 @@ headerTemplate = '<table summary="" nosave="" width="100%" border="1" cellpaddin
   + '<td nosave="" align="center" height="200" valign="middle" width="200">' 
   + '<center><img src="' + logo + '" alt="" align="middle" height="200" hspace="0" vspace="0" width="200" border="0"> </center>' 
   + '</td>' 
-  + '</tr>' 
-  + '<tr>' 
-  + '<td colspan="2" rowspan="1"><gcse:search></gcse:search><br>' 
-  + '</td>' 
-  + '</tr>' 
-  + '</tbody>' 
+  + '</tr>';
+if (typeof ignoreGcse == 'undefined') {
+	headerTemplate 	+= '<tr>' 
+		+ '<td colspan="2" rowspan="1"><gcse:search></gcse:search><br>' 
+		+ '</td>' 
+		+ '</tr>';
+}
+headerTemplate += '</tbody>' 
   + '</table>';
 
 /* 
