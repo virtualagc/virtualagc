@@ -22,14 +22,6 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Search Page"
     <h1>
       <center>Enter Search Terms</center>
     </h1>
-    <div style="width:50%; margin:auto">
-      <ul>
-        <li>Use a minus character ("-") before a word to excludes all
-          results that include the word. <br>
-        </li>
-        <li>Use single or double quotes to search for an exact phrase.</li>
-      </ul>
-    </div>
     <form>
       <div class="tipue_search_group" style="width:50%;
         border-style:solid; margin:auto"> <input name="q"
@@ -39,6 +31,29 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Search Page"
           <div class="tipue_search_icon">⚲</div>
         </button> </div>
     </form>
+    <div style="width:50%; margin:auto">
+      <ul>
+      </ul>
+      &nbsp;<u>Extra search-term features:</u><br>
+      <ul>
+        <li>Use a dash ("-") before a word to <i>exclude</i> all
+          results that include the word. <br>
+        </li>
+        <li>Use enclosing single or double quotes to search for an exact
+          phrase.</li>
+        <li>To search for a specific drawing number, for example
+          2005003, use the following variations:</li>
+        <ul>
+          <li>2005003 (with <i>no</i> trailing dash, <i>no</i>
+            enclosing quotes) finds specific revision 2005003-</li>
+          <li>2005003A (with <i>no</i> enclosing quotes) finds the
+            specific revision 2005003A</li>
+          <li>"2005003" (<i>with</i> enclosing quotes) finds all
+            revisions of drawing 2005003.<br>
+          </li>
+        </ul>
+      </ul>
+    </div>
     <h1>
       <center>Search Results</center>
     </h1>
@@ -86,7 +101,8 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Search Page"
     			"descriptiveWords": 100,
     			"minimumLength": 2,
     			"footerPages": 10,
-    			"show": 10
+    			"show": 10,
+    			"showRelated": false
     		});
 	});
     </script>
