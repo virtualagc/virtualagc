@@ -4,6 +4,13 @@ Tipue Search 7.1
 Copyright (c) 2019 Tipue
 Tipue Search is released under the MIT License
 http://www.tipue.com/search
+
+Modified slightly by Ron Burkey.  Places where that has been done are marked with the initials RSB.
+I can make these changes because I understand the pattern of data that's being fed in.
+2019-04-15	Deleted ellipsis ("...") that was being automatically suffixed to the displayed text.
+2019-04-16	Modified how the titles were being displayed to make them more verbose and self-explanatory
+						without having to increase the size of the downloaded content .js.  Similarly, modified
+						how URLs are displayed.
 */
 
 
@@ -372,9 +379,30 @@ http://www.tipue.com/search
                                    if (l_o >= start && l_o < set.show + start)
                                    {
                                         out += '<div class="tipue_search_result">';
+                                        
+                                        /* RSB */
+                                        /* out += '<div class="tipue_search_content_title"><a href="' + found[i].url + '"' + tipue_search_w + '>' +  found[i].title + '</a></div>'; */
+                                        
+                                        /* 
+                                         * Fix up the search title to be a bit nicer. What's being fed in is 
+                                         * NNNNNNNR-T-S-F, and that's a bit too terse ... but I don't want to 
+                                         * modified the .js that's feeding in this content, because the file
+                                         * is quite big already.
+                                         */
+                                        var title = found[i].title.substring(0,8);
+                                        var drawingFields = found[i].title.substring(9).split("-");
+                                        if (drawingFields[0] == "1")
+                                        	title += ", drawing";
+                                        else if (drawingFields[0] == "2")
+                                        	title += ", test requirements";
+                                        else
+                                        	title += ", type " + drawingFields[0];
+                                        title += ", sheet " + drawingFields[1] + ", frame " + drawingFields[2]
+                                        
+                                        /* Output the pepped up title. */
+                                        out += '<div class="tipue_search_content_title"><a href="' + found[i].url + '"' + tipue_search_w + '>' +  title + '</a></div>';
+                                        /* /RSB */
                                                                            
-                                        out += '<div class="tipue_search_content_title"><a href="' + found[i].url + '"' + tipue_search_w + '>' +  found[i].title + '</a></div>';
- 
                                         if (set.debug)
                                         {                                             
                                              out += '<div class="tipue_search_content_debug">Score: ' + found[i].score + '</div>';
@@ -383,10 +411,44 @@ http://www.tipue.com/search
                                         if (set.showURL)
                                         {
                                              var s_u = found[i].url.toLowerCase();
+                                             
+                                             /* RSB */
+                                             /*
+                                              * What Tipue Search wants to display as the URL (namely, the actual URL)
+                                              * is too big and complex.  We want to tone it down to be just informative
+                                              * enough without overwhelming.  Most of the URLs are from archive.org,
+                                              * but some are from ibiblio.org, and the two need to be processed differently.
+                                              */
+                                             var fields = s_u.split("/");
+                                             if (fields[0] == "http:" || fields[0] == "https:")
+                                            	 fields = fields.splice(2);
+                                             if (fields[0].substring(0,4) == "www.")
+                                            	 fields[0] = fields[0].substring(4);
+                                             if (fields[0] == "archive.org") {
+                                            	 var pageNumber
+                                            	 var group
+                                            	 var n = fields[2].search("#");
+                                            	 if (n < 0) {
+                                            		 group = fields[2]
+                                            		 pageNumber = fields[4].substring(1)
+                                            	 } else {
+                                            		 group = fields[2].substring(0,n)
+                                            		 pageNumber = fields[3].substring(1)
+                                            	 }
+                                            	 s_u = "Internet Archive virtualagcproject, " + group + ", page " + pageNumber;
+                                             } else {
+                                            	 var n = s_u.search("/apollo/");
+                                            	 if (n >= 0)
+                                            		 s_u = "Virtual AGC site, " + s_u.substring(n + 8);
+                                             }
+                                             
+                                             /* /RSB */
+                                             
                                              if (s_u.indexOf('http://') == 0)
                                              {
                                                   s_u = s_u.slice(7);
-                                             }                                             
+                                             }     
+                                             
                                              out += '<div class="tipue_search_content_url"><a href="' + found[i].url + '"' + tipue_search_w + '>' + s_u + '</a></div>';
                                         }
                                         
@@ -456,7 +518,7 @@ http://www.tipue.com/search
                                                   }
                                              }
                                              t_d = $.trim(t_d);
-                                             /*
+                                             /* RSB
                                              if (t_d.charAt(t_d.length - 1) != '.')
                                              {
                                                   t_d += ' ...';

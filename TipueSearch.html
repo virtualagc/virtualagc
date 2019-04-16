@@ -23,8 +23,12 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Search Page"
       <center>Enter Search Terms</center>
     </h1>
     <div style="width:50%; margin:auto">
-      <p>The minus character before a word excludes all results that include the word. 
-      Use single or double quotes to search for an exact phrase.</p>
+      <ul>
+        <li>Use a minus character ("-") before a word to excludes all
+          results that include the word. <br>
+        </li>
+        <li>Use single or double quotes to search for an exact phrase.</li>
+      </ul>
     </div>
     <form>
       <div class="tipue_search_group" style="width:50%;
@@ -38,26 +42,6 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Search Page"
     <h1>
       <center>Search Results</center>
     </h1>
-    <div style="width:50%; margin:auto">
-      <p>For the displayed results, note that the titles of the results
-        follow the pattern<br>
-        <center><b><i>NNNNNNNR-T-S-F</i></b><br></center>
-      </p>
-      <ul>
-        <li><b><i>NNNNNNN</i></b> is the 7-digit drawing number.</li>
-        <li><b><i>R</i></b> is the revision code:&nbsp; -, A, B, ..., Z,
-          AA, AB, ....</li>
-        <li><b><i>T</i></b> is the document type:&nbsp; 1 for drawings
-          or 2 for acceptance &amp; test requirements documents.</li>
-        <li><b><i>S</i></b> is the sheet number</li>
-        <li><b><i>F</i></b> is the frame number, for sheets that were
-          too big for a single microfilm slide.<br>
-        </li>
-      </ul>
-      <p>The descriptive text in the search result is the actual title
-        from the drawing's title block.<br>
-      </p>
-    </div>
     <div id="tipue_search_content" style="width:50%; border-style:solid;
       margin:auto"></div>
     <br>
@@ -84,7 +68,7 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Search Page"
         rgb(255, 255, 255);"></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-04-15.<br>
+          2019-04-16.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
@@ -100,7 +84,9 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Search Page"
     			"contextLength": 1024,
     			"contextStart": 1024,
     			"descriptiveWords": 100,
-    			"minimumLength": 2
+    			"minimumLength": 2,
+    			"footerPages": 10,
+    			"show": 10
     		});
 	});
     </script>
