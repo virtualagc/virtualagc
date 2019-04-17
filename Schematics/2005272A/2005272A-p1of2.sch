@@ -1,6 +1,6 @@
-EESchema Schematic File Version 4
+EESchema Schematic File Version 5
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -5923,4 +5923,17 @@ Wire Wire Line
 	26050 26100 26125 26100
 Wire Wire Line
 	28925 11425 29125 11425
+$Comp
+L AGC_DSKY:OvalBody2 X207
+U 1 1 5CBE7C60
+P 2425 31750
+F 0 "X207" H 2475 31450 140 0001 C CNN
+F 1 "OvalBody2" H 2425 32050 140 0001 C CNN
+F 2 "" H 2425 31750 140 0001 C CNN
+F 3 "" H 2425 31750 140 0001 C CNN
+	1    2425 31750
+	1    0    0    -1  
+$EndComp
+Text Notes 2205 31860 0    140  ~ 28
+XXX
 $EndSCHEMATC

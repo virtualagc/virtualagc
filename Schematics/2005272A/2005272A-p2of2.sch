@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:errors-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 1 1
+Sheet 3 3
 Title ""
 Date ""
 Rev ""
@@ -5724,4 +5724,6 @@ EndData
 $EndBitmap
 Text Notes 36900 4300 0    140  ~ 28
 Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original \n   Apollo Program drawing 2005272A, but does not itself \n   date from the Apollo period. — RSB 2018\n2. The original drawing did not show any reference\n   designators for the components, so they have also been\n   omitted from this CAD drawing.  Though not visibly \n   shown, the NOR gates have been assigned the reference \n   designators U2nn, where nn is the 2-digit number shown\n   within the NOR-gate symbol.  The oval pads numbered\n   301-371 comprise connector J3, while those numbered\n   401-471 comprise connector J4. — RSB 2018\n
+Text Notes 16250 25400 0    140  ~ 28
+SPARE PINS
 $EndSCHEMATC
