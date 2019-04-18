@@ -40,6 +40,9 @@ import re
 baseURL = "BASEURL"
 if len(sys.argv) > 1:
 	baseURL = sys.argv[1]
+correctMetadata = False
+if len(sys.argv) > 2:
+	correctMetadata = True
 
 dupList = {}
 htmlList = {}
@@ -77,35 +80,36 @@ for line in sys.stdin:
 	while len(frameNumber) < 2:
 		frameNumber = "0" + frameNumber
 
-	# Whether it's a problem in the system that initially punched
-	# the aperture cards or whether it's a problem with the scanner
-	# software I don't know, but the fact is that the metadata the
-	# scanner reads from the cards departs from the (correct) printing
-	# on the card, with semi-systematic replacements of some characters
-	# in some fields by other characters.  For example, almost all
-	# (but not QUITE all!) revision fields "Y" are replaced by "0",
-	# and all "H" characters in the title field are replaced by "&".
-	# But there are real "&" characters in the title field as well,
-	# sometimes, though many less of them.  Yikes!  The following 
-	# block of code tries to fix the most egregious errors, but it's
-	# simply impossible to fix everything in an automated way.
-	# So if you have (for example) at title "NAV&MAIN DSKY", it's 
-	# going to end up being "fixed" by this code as "NAVHMAIN DSKY",
-	# and there's just nothing I can do about it.  Fortunately, as
-	# far as I know right now, all of the unfixable errors are in the
-	# titles, and those will eventually be manually entered from data
-	# on the drawings anyway.  I.e., the titles have been taken initially
-	# from card data for expedience, but will eventually be corrected.
-	docNumber = docNumber.replace(" ", "8")
-	revision = revision.replace("&","H").replace("0", "Y")
-	tdrr = tdrr.replace(" ", "8")
-	while revision[:1] == " ":
-		revision = revision[1:]
-	while len(sheetNum) > 3 and sheetNum[:1] in [ " ", "0" ]:
-		sheetNum = sheetNum[1:]
-	while len(frameNumber) > 2 and frameNumber[:1] in [ " ", "0" ]:
-		frameNumber = frameNumber[1:]
-	title = title.replace("&", "H").replace("0", "Y").replace("-", "Q").replace(" H ", " & ")
+	if correctMetadata:
+		# Whether it's a problem in the system that initially punched
+		# the aperture cards or whether it's a problem with the scanner
+		# software I don't know, but the fact is that the metadata the
+		# scanner reads from the cards departs from the (correct) printing
+		# on the card, with semi-systematic replacements of some characters
+		# in some fields by other characters.  For example, almost all
+		# (but not QUITE all!) revision fields "Y" are replaced by "0",
+		# and all "H" characters in the title field are replaced by "&".
+		# But there are real "&" characters in the title field as well,
+		# sometimes, though many less of them.  Yikes!  The following 
+		# block of code tries to fix the most egregious errors, but it's
+		# simply impossible to fix everything in an automated way.
+		# So if you have (for example) at title "NAV&MAIN DSKY", it's 
+		# going to end up being "fixed" by this code as "NAVHMAIN DSKY",
+		# and there's just nothing I can do about it.  Fortunately, as
+		# far as I know right now, all of the unfixable errors are in the
+		# titles, and those will eventually be manually entered from data
+		# on the drawings anyway.  I.e., the titles have been taken initially
+		# from card data for expedience, but will eventually be corrected.
+		docNumber = docNumber.replace(" ", "8")
+		revision = revision.replace("&","H").replace("0", "Y")
+		tdrr = tdrr.replace(" ", "8")
+		while revision[:1] == " ":
+			revision = revision[1:]
+		while len(sheetNum) > 3 and sheetNum[:1] in [ " ", "0" ]:
+			sheetNum = sheetNum[1:]
+		while len(frameNumber) > 2 and frameNumber[:1] in [ " ", "0" ]:
+			frameNumber = frameNumber[1:]
+		title = title.replace("&", "H").replace("0", "Y").replace("-", "Q").replace(" H ", " & ")
 
 	revision_ = revision.replace("-", "_")
 	basename_ = docNumber + revision_ + "_" + docType + "_" + sheetNum + "_" + frameNumber + "_" + title + copy
