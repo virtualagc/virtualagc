@@ -392,9 +392,9 @@ I can make these changes because I understand the pattern of data that's being f
                                          */
                                         var title;
 					var drawingFields;
-					var splitAt = 8
-					if found[i].title[splitAt] != "-":
-						splitAt = 9
+					var splitAt = 8;
+					if (found[i].title[splitAt] != "-")
+						splitAt = 9;
 					title = found[i].title.substring(0, splitAt);
                                         drawingFields = found[i].title.substring(splitAt + 1).split("-");
                                         if (drawingFields[0] == "1")
