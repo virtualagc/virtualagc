@@ -11,6 +11,7 @@ I can make these changes because I understand the pattern of data that's being f
 2019-04-16	Modified how the titles were being displayed to make them more verbose and self-explanatory
 						without having to increase the size of the downloaded content .js.  Similarly, modified
 						how URLs are displayed.
+2019-04-18	Accounted for 2-character revision codes, I hope.  (No way to test right now.)
 */
 
 
@@ -389,8 +390,13 @@ I can make these changes because I understand the pattern of data that's being f
                                          * modified the .js that's feeding in this content, because the file
                                          * is quite big already.
                                          */
-                                        var title = found[i].title.substring(0,8);
-                                        var drawingFields = found[i].title.substring(9).split("-");
+                                        var title;
+					var drawingFields;
+					var splitAt = 8
+					if found[i].title[splitAt] != "-":
+						splitAt = 9
+					title = found[i].title.substring(0, splitAt);
+                                        drawingFields = found[i].title.substring(splitAt + 1).split("-");
                                         if (drawingFields[0] == "1")
                                         	title += ", drawing";
                                         else if (drawingFields[0] == "2")
