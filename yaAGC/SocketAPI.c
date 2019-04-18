@@ -77,6 +77,17 @@
 				same size as data packets.  Otherwise, it makes
 				low-level debugging of the streaming data hard,
 				because the packet alignment changes over time.
+		01/30/18 MAS	Removed old RHC input handling, to be replaced
+				with new logic later.
+		02/06/18 MAS	Added a skeleton PulseOutput() function for
+				which will be responsible for interpreting output
+				counter pulses and forwarding decoded info.
+		02/25/18 MAS	Added a PulseInput() function which handles most
+				input pulses to the AGC, with a few exceptions
+				which will be implemented shortly.
+		03/12/18 MAS	Added basic implementation of the LR and RR
+				interfaces, sans actually getting data from
+				the socket.
 */
 
 #include <errno.h>
@@ -93,6 +104,9 @@ typedef unsigned short uint16_t;
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
+
+// Roughly 25ms for simulated keypreses
+#define AUTO_KEYPRESS_DURATION 2096
 
 //-----------------------------------------------------------------------------
 // Function for broadcasting "output channel" data to all connected clients of
@@ -112,13 +126,6 @@ ChannelOutput (agc_t * State, int Channel, int Value)
     {
       State->InputChannel[7] = State->OutputChannel7 = (Value & 0160);
       return;
-    }
-  // Stick data into the RHCCTR registers, if bits 8,9 of channel 013 are set.
-  if (Channel == 013 && 0600 == (0600 & Value) && !CmOrLm)
-    {
-      State->Erasable[0][042] = LastRhcPitch;
-      State->Erasable[0][043] = LastRhcYaw;
-      State->Erasable[0][044] = LastRhcRoll;
     }
   // Most output channels are simply transmitted to clients representing
   // hardware simulations.
@@ -157,6 +164,12 @@ ChannelOutput (agc_t * State, int Channel, int Value)
 static int CurrentChannelValues[256] = { 0 };
 static const unsigned char Signatures[4] = { 0x00, 0x40, 0x80, 0xC0 };
 static const unsigned char SignaturesAgs[4] = { 0x00, 0xC0, 0x80, 0x40 };
+static int Ch15ResetCycles = 0;
+static int Ch16ResetCycles = 0;
+static int PipaModing[3] = {0, 0, 0};
+static int PipaAccel[3] = {0, 0, 0};
+static unsigned short LRData = 0;
+static unsigned short RRData = 0;
 
 int
 ChannelInput (agc_t *State)
@@ -166,6 +179,29 @@ ChannelInput (agc_t *State)
   unsigned char c;
   Client_t *Client;
   int Channel, Value;
+
+  // Check if we need to reset a DSKY keypress
+  if (Ch15ResetCycles > 0)
+    {
+      Ch15ResetCycles--;
+      if (Ch15ResetCycles == 0)
+        {
+          WriteIO(State, 015, 0);
+          State->Keyrupt1Enabled = 1;
+          State->Keyrupt1Pending = 0;
+        }
+    }
+
+  if (Ch16ResetCycles > 0)
+    {
+      Ch16ResetCycles--;
+      if (Ch16ResetCycles == 0)
+        {
+          WriteIO(State, 016, ReadIO(State, 016) & 077740);
+          State->Keyrupt2Enabled = 1;
+          State->Keyrupt2Pending = 0;
+        }
+    }
 
   //We use SocketInterlace to slow down the number
   // of polls of the sockets.
@@ -222,7 +258,7 @@ ChannelInput (agc_t *State)
 		        // In this case we're dealing with a counter increment.
 			// So increment the counter.
 			//printf ("Channel=%02o Int=%o\n", Channel, Value);
-			UnprogrammedIncrement (State, Channel, Value);
+			//UnprogrammedIncrement (State, Channel, Value);
 			Client->Size = 0;
 			return (1);
 		      }
@@ -233,36 +269,42 @@ ChannelInput (agc_t *State)
 			  ReadIO (State,
 				  Channel) & ~Client->ChannelMasks[Channel];
 			WriteIO (State, Channel, Value);
-			// If this is a keystroke from the DSKY, generate an interrupt req.
-			if (Channel == 015)
-			  State->InterruptRequests[5] = 1;
-			// If this is on fictitious input channel 0173, then the data
-			// should be placed in the INLINK counter register, and an
-			// UPRUPT interrupt request should be set.
+                        if (Channel == 015)
+                          {
+                            // 0 writes to channel 15 re-enable KEYRUPT1 and
+                            // cancels pending interrupts
+                            if (Value == 0)
+                              {
+                                State->Keyrupt1Enabled = 1;
+                                State->Keyrupt1Pending = 0;
+                              }
+                            // For backwards compatibility, we can automatically
+                            // zero out pressed keys after some press duration
+                            else if (State->AutoClearKeys)
+                              Ch15ResetCycles = AUTO_KEYPRESS_DURATION;
+                          }
+                        else if (Channel == 016)
+                          {
+                            // KEYRUPT2 logic is the same, for bits 1-5 of CH16
+                            if ((Value & 037) == 0)
+                              {
+                                State->Keyrupt2Enabled = 1;
+                                State->Keyrupt2Pending = 0;
+                              }
+                            else if (State->AutoClearKeys)
+                              Ch16ResetCycles = AUTO_KEYPRESS_DURATION;
+
+                            // MARKRUPT logic is the same, for bits 6-7 of CH16
+                            if ((Value & 0140) == 0)
+                              {
+                                State->MarkruptEnabled = 1;
+                                State->MarkruptPending = 0;
+                              }
+                          }
 			else if (Channel == 0173)
 			  {
 			    State->Erasable[0][RegINLINK] = (Value & 077777);
 			    State->InterruptRequests[7] = 1;
-			  }
-			// Fictitious registers for rotational hand controller (RHC).
-			// Note that the RHC angles are not immediately used, but
-			// merely squirreled away for later.  They won't actually
-			// go into the counter registers until the RHC counters are
-			// enabled and the data requested (bits 8,9 of channel 13).
-			else if (Channel == 0166)
-			  {
-			    LastRhcPitch = Value;
-			    ChannelOutput (State, Channel, Value);	// echo
-			  }
-			else if (Channel == 0167)
-			  {
-			    LastRhcYaw = Value;
-			    ChannelOutput (State, Channel, Value);	// echo
-			  }
-			else if (Channel == 0170)
-			  {
-			    LastRhcRoll = Value;
-			    ChannelOutput (State, Channel, Value);	// echo
 			  }
 			//---------------------------------------------------------------
 			// For --debug-dsky mode.
@@ -390,6 +432,254 @@ ChannelInput (agc_t *State)
   return (0);
 }
 
+void
+PulseOutput(agc_t * State, int SignalId)
+{
+  int i;
+  switch(SignalId)
+    {
+    case OUTPUT_PIPA_DATA:
+      // The AGC expects to receive one pulse from each PIPA for each data strobe.
+      // This implementatation models the PIPA Simiulator described in the North
+      // American report "Mission Evaluation 103 (Mission D) Presimulation Report,
+      // Part II: Simulator Description". Under no acceleration, it will supply
+      // a stream of 3 plus and 3 minus counts to the AGC through the pulse input
+      // pins. When the direction of counting is changed, a check is performed on
+      // the accleration storage, and if there are any pending acceleration counts,
+      // these are played back until they read 0, at which point the 3-3 moding
+      // will be continued.
+      for (i = 0; i < 3; i++)
+        {
+          if ((PipaAccel[i] == 0) || ((PipaModing[i] != 0) && PipaModing[i] != 3))
+            {
+              // There's either no acceleration, or we are not at a direction change.
+              // Simply continue with the 3-3 moding.
+              if (PipaModing[i] >= 3)
+                PulseInput(State, INPUT_PIPAX_MINUS-2*i);
+              else
+                PulseInput(State, INPUT_PIPAX_PLUS-2*i);
+
+              PipaModing[i] = (PipaModing[i] + 1) % 6;
+            }
+          else
+            {
+              // This axis is under acceleration. Apply the appropriate pulse to
+              // diminish the stored acceleration.
+              if (PipaAccel[i] > 0)
+                {
+                  PulseInput(State, INPUT_PIPAX_PLUS-2*i);
+                  PipaAccel[i]--;
+                }
+              else
+                {
+                  PulseInput(State, INPUT_PIPAX_MINUS-2*i);
+                  PipaAccel[i]++;
+                }
+            }
+        }
+      break;
+
+    case OUTPUT_LR_SYNC:
+      if (LRData & 040000)
+        PulseInput(State, INPUT_LR_ONE);
+      else
+        PulseInput(State, INPUT_LR_ZERO);
+      LRData <<= 1;
+      break;
+
+    case OUTPUT_RR_SYNC:
+      if (RRData & 040000)
+        PulseInput(State, INPUT_RR_ONE);
+      else
+        PulseInput(State, INPUT_RR_ZERO);
+      RRData <<= 1;
+      break;
+
+    default:
+      fprintf(stderr, "Pulse %u\n", SignalId);
+      break;
+    }
+}
+
+void
+PulseInput(agc_t * State, int SignalId)
+{
+  int CountType;
+  switch(SignalId)
+    {
+    // CDU input pulses generate count requests directly, without
+    // any enabling or throttling.
+    case INPUT_CDUX_PLUS:
+      CounterRequest(State, COUNTER_CDUX, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_CDUX_MINUS:
+      CounterRequest(State, COUNTER_CDUX, COUNTER_CELL_MINUS);
+      break;
+    case INPUT_CDUY_PLUS:
+      CounterRequest(State, COUNTER_CDUY, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_CDUY_MINUS:
+      CounterRequest(State, COUNTER_CDUY, COUNTER_CELL_MINUS);
+      break;
+    case INPUT_CDUZ_PLUS:
+      CounterRequest(State, COUNTER_CDUZ, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_CDUZ_MINUS:
+      CounterRequest(State, COUNTER_CDUZ, COUNTER_CELL_MINUS);
+      break;
+    case INPUT_OPTY_PLUS:
+      CounterRequest(State, COUNTER_OPTY, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_OPTY_MINUS:
+      CounterRequest(State, COUNTER_OPTY, COUNTER_CELL_MINUS);
+      break;
+    case INPUT_OPTX_PLUS:
+      CounterRequest(State, COUNTER_OPTX, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_OPTX_MINUS:
+      CounterRequest(State, COUNTER_OPTX, COUNTER_CELL_MINUS);
+      break;
+    
+    // PIPA input pulses are "pre-counted" per channel. Under no acceleration,
+    // each PIPA will generate a constant stream of 3 plus pulses followed by
+    // three minus pulses. This steady state is called "3:3 moding". The AGC
+    // internally contains pre-counting circuits that filter out this moding.
+    // Each precounter constantly counts from 0 to 3, then back to 0, with
+    // each incoming PIPA pulse. Under acceleration, the PIPAs will generate
+    // extra pulses in the direction of acceleration. Whenever a precounter
+    // attempts to count beyond 3 or below 0, it will instead allow the pulse
+    // through to generate a counter request.
+    case INPUT_PIPAX_PLUS:
+      State->PipaMissX = 0;
+      State->PipaNoXPlus = 0;
+      if (State->PipaPrecount[0] == 3)
+        CounterRequest(State, COUNTER_PIPAX, COUNTER_CELL_PLUS);
+      else
+        State->PipaPrecount[0]++;
+      break;
+    case INPUT_PIPAX_MINUS:
+      State->PipaMissX = 0;
+      State->PipaNoXMinus = 0;
+      if (State->PipaPrecount[0] == 0)
+        CounterRequest(State, COUNTER_PIPAX, COUNTER_CELL_MINUS);
+      else
+        State->PipaPrecount[0]--;
+      break;
+
+    case INPUT_PIPAY_PLUS:
+      State->PipaMissY = 0;
+      State->PipaNoYPlus = 0;
+      if (State->PipaPrecount[1] == 3)
+        CounterRequest(State, COUNTER_PIPAY, COUNTER_CELL_PLUS);
+      else
+        State->PipaPrecount[1]++;
+      break;
+    case INPUT_PIPAY_MINUS:
+      State->PipaMissY = 0;
+      State->PipaNoYMinus = 0;
+      if (State->PipaPrecount[1] == 0)
+        CounterRequest(State, COUNTER_PIPAY, COUNTER_CELL_MINUS);
+      else
+        State->PipaPrecount[1]--;
+      break;
+
+    case INPUT_PIPAZ_PLUS:
+      State->PipaMissZ = 0;
+      State->PipaNoZPlus = 0;
+      if (State->PipaPrecount[2] == 3)
+        CounterRequest(State, COUNTER_PIPAZ, COUNTER_CELL_PLUS);
+      else
+        State->PipaPrecount[2]++;
+      break;
+    case INPUT_PIPAZ_MINUS:
+      State->PipaMissZ = 0;
+      State->PipaNoZMinus = 0;
+      if (State->PipaPrecount[2] == 0)
+        CounterRequest(State, COUNTER_PIPAZ, COUNTER_CELL_MINUS);
+      else
+        State->PipaPrecount[2]--;
+      break;
+
+    // The UPLINK and CROSSLINK input pulses both generate count requests for
+    // the INLINK counter, assuming they are enabled. Only one interface is
+    // allowed to be active at a time. The active interface is selected via
+    // channel 13 bit 5, with a 1 indicating crosslink and a 0 indicating
+    // uplink. Uplink, but not crosslink, can also be totally disabled via
+    // input channel 33 bit 10. If pulses arrive on an enabled channel, they
+    // are allowed to directly generate count requests, unless too little
+    // time has elapsed since the previous pulse. The maximum allowable rate
+    // is 6400pps, with each F04A time pulse resetting the limiting flip-flop.
+    // If a pulse arrives too early, channl 33 bit 11 will be set.
+    case INPUT_UPLINK_ONE:
+    case INPUT_UPLINK_ZERO:
+      if (SignalId == INPUT_UPLINK_ONE)
+        CountType = COUNTER_CELL_ONE;
+      else
+        CountType = COUNTER_CELL_ZERO;
+
+      if ((State->InputChannel[033] & 01000) &&
+          ((State->InputChannel[013] & 020) == 0))
+        {
+          if (State->UplinkTooFast)
+            State->InputChannel[033] &= ~073777;
+          else if ((State->InputChannel[013] & 040) == 0)
+            CounterRequest(State, COUNTER_INLINK, CountType);
+        }
+      break;
+
+    case INPUT_CROSSLINK_ONE:
+    case INPUT_CROSSLINK_ZERO:
+      if (SignalId == INPUT_CROSSLINK_ONE)
+        CountType = COUNTER_CELL_ONE;
+      else
+        CountType = COUNTER_CELL_ZERO;
+
+      if (State->InputChannel[013] & 020)
+        {
+          if (State->UplinkTooFast)
+            State->InputChannel[033] &= ~073777;
+          else if ((State->InputChannel[013] & 040) == 0)
+            CounterRequest(State, COUNTER_INLINK, CountType);
+        }
+      break;
+
+    // Radar input pulses are allowed as long as channel 13 bit 4 is
+    // set. Landing Radar pulses also require chanel 13 bit 3 to be set,
+    // while Rendezvous Radar pulses require at least one of channel 13
+    // bits 1 and 2 to be set.
+    case INPUT_LR_ONE:
+    case INPUT_LR_ZERO:
+      if (SignalId == INPUT_LR_ONE)
+        CountType = COUNTER_CELL_ONE;
+      else
+        CountType = COUNTER_CELL_ZERO;
+
+      if ((State->InputChannel[013] & 014) == 014)
+        CounterRequest(State, COUNTER_RNRAD, CountType);
+      break;
+
+    case INPUT_RR_ONE:
+    case INPUT_RR_ZERO:
+      if (SignalId == INPUT_RR_ONE)
+        CountType = COUNTER_CELL_ONE;
+      else
+        CountType = COUNTER_CELL_ZERO;
+
+      if ((State->InputChannel[013] & 010) && (State->InputChannel[013] & 03))
+        CounterRequest(State, COUNTER_RNRAD, CountType);
+      break;
+
+    case INPUT_DOWNLINK_START:
+      break;
+    case INPUT_DOWNLINK_SYNC:
+      break;
+    case INPUT_DOWNLINK_END:
+      State->InterruptRequests[RUPT_DOWNRUPT] = 1;
+      break;
+    }
+}
+
+
 //----------------------------------------------------------------------
 // A generic function for handling client connects/disconnects.
 // The input parameters are the CPU-dependent state (may be an agc_t
@@ -478,6 +768,8 @@ UpdateAgcPeripheralConnect (void *AgcState, Client_t *Client)
       FormIoPacket (i, State->InputChannel[i], Packet);
       send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
     }
+  FormIoPacket(0163, State->DskyChannel163, Packet);
+  send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
 #undef State
 }
 
@@ -501,5 +793,3 @@ ShiftToDeda (agc_t *State, int Data)
   for (i = 0, Client = Clients; i < MAX_CLIENTS; i++, Client++)
     send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
 }
-
-

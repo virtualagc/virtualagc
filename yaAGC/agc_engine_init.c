@@ -91,6 +91,17 @@
  * 		05/16/17 MAS    Enabled interrupts at startup.
  * 		05/31/17 RSB	Added --initialize-sunburst-37.
  * 		07/13/17 MAS	Added initialization of the three HANDRUPT traps.
+ * 		01/28/18 MAS	Added initialization for the new counter and scaler
+ *                              state variables.
+ * 		01/30/18 MAS	Added initialization for RHC state info.
+ * 		01/31/18 MAS	Added initialization for radar state info.
+ * 		02/01/18 MAS	Added initialization for gyro drive and CDU drive
+ *                              state info.
+ * 		02/01/18 MAS	Added initialization for THRUST and EMSD counter
+ *                              state info.
+ * 		02/01/18 MAS	Added initialization for OUTLINK and ALTM counter
+ *                              state info, and removed some old placeholders.
+ * 		02/12/18 MAS	Added initialization for PIPA state info.
  */
 
 // For Orbiter.
@@ -265,11 +276,9 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->ExtraCode = 0;
   State->AllowInterrupt = 1; // The GOJAM sequence enables interrupts
   State->InterruptRequests[8] = 1;	// DOWNRUPT.
-  //State->RegA16 = 0;
   State->PendFlag = 0;
   State->PendDelay = 0;
   State->ExtraDelay = 0;
-  //State->RegQ16 = 0;
 
   State->OutputChannel7 = 0;
   for (j = 0; j < 16; j++)
@@ -277,6 +286,9 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->IndexValue = 0;
   for (j = 0; j < 1 + NUM_INTERRUPT_TYPES; j++)
     State->InterruptRequests[j] = 0;
+  for (j = 0; j < NUM_COUNTERS; j++)
+    State->CounterCell[j] = 0;
+  State->HighestPriorityCounter = NUM_COUNTERS;
   State->InIsr = 0;
   State->SubstituteInstruction = 0;
   State->DownruptTimeValid = 1;
@@ -290,6 +302,8 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->TCTrap = 0;
   State->NoTC = 0;
   State->ParityFail = 0;
+  State->RequestedCounter = 0;
+  State->CounterLock = 0;
 
   State->WarningFilter = 0;
   State->GeneratedWarning = 0;
@@ -299,12 +313,22 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->SbyPressed = 0;
   State->SbyStillPressed = 0;
 
+  State->InputVoltagemV = 28000;
+  State->InputVoltageLow = 0;
+
   State->NextZ = 0;
   State->ScalerCounter = 0;
+  State->ScalerValue = 0;
   State->ChannelRoutineCount = 0;
+  State->RestartHold = 0;
 
-  State->DskyTimer = 0;
-  State->DskyFlash = 0;
+  State->Keyrupt1Pending = 0;
+  State->Keyrupt2Pending = 0;
+  State->MarkruptPending = 0;
+  State->Keyrupt1Enabled = 1;
+  State->Keyrupt2Enabled = 1;
+  State->MarkruptEnabled = 1;
+
   State->DskyChannel163 = 0;
 
   State->TookBZF = 0;
@@ -313,6 +337,49 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->Trap31A = 0;
   State->Trap31B = 0;
   State->Trap32 = 0;
+  State->Trap31APending = 0;
+  State->Trap31BPending = 0;
+  State->Trap32Pending = 0;
+
+  State->AutoClearKeys = 1;
+
+  State->RHCPending = 0;
+  for (i = 0; i < 3; i++)
+    {
+      State->RHCVoltagemV[i] = 0;
+      State->RHCCounts[i] = 0;
+    }
+
+  State->RadarGateCounter = 0;
+  State->RadarSync = 0;
+
+  State->GyroDriveActive = 0;
+
+  State->ThrustPlusActive = 0;
+  State->ThrustMinusActive = 0;
+
+  State->EMSPlusActive = 0;
+  State->EMSMinusActive = 0;
+
+  State->OutlinkActive = 0;
+  State->OutlinkStarting = 0;
+
+  State->AltActive = 0;
+  State->AltStarting = 0;
+
+  State->UplinkTooFast = 0;
+
+  State->PipaMissX = 0;
+  State->PipaMissY = 0;
+  State->PipaMissZ = 0;
+  State->PipaNoXPlus = 0;
+  State->PipaNoXMinus = 0;
+  State->PipaNoYPlus = 0;
+  State->PipaNoYMinus = 0;
+  State->PipaNoZPlus = 0;
+  State->PipaNoZMinus = 0;
+  for (i = 0; i < 3; i++)
+    State->PipaPrecount[i] = 0;
 
   if (initializeSunburst37)
     {
@@ -327,6 +394,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
       cd = fopen (CoreDump, "r");
       if (cd == NULL)
 	{
+          PerformGOJAM(State);
 	  if (AllOrErasable)
 	    RetVal = 6;
 	  else
@@ -381,7 +449,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 		goto Done;
 	      State->ExtraDelay = i;
 	      //if (1 != fscanf (cd, "%o", &i))
-	      //  goto Done;
+	        //goto Done;
 	      //State->RegQ16 = i;
 	      if (1 != fscanf (cd, "%o", &i))
 		goto Done;
@@ -419,13 +487,18 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 		goto Done;
 	      State->Downlink = i;
 	    }
+          else
+            PerformGOJAM(State);
 
 	  RetVal = 0;
 	}
     }
+  else
+    PerformGOJAM(State);
 
   Done: if (cd != NULL)
     fclose (cd);
+  
   return (RetVal);
 }
 

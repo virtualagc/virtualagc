@@ -43,6 +43,10 @@
 	        01/29/17 MAS    Switched off the infinite loop check if
                                 alarms aren't inhibited (so the TC Trap
                                 can do its thing).
+	        01/28/18 MAS    Made the halt check logic look at
+                                PendDelay instead of PendFlag, since
+                                PendFlag is no longer used.
+
  */
 
 #include <stdio.h>
@@ -192,7 +196,7 @@ DbgHasBreakEvent ()
 {
   int BreakFlag = 0;
 
-  if (Debugger.State->PendFlag)
+  if (Debugger.State->PendDelay > 0)
     BreakFlag = 0;
   else
     {
@@ -1391,7 +1395,7 @@ DbgExecute ()
 		      Breakpoints[j].WatchValue = DbgGetWatch (Debugger.State,
 							       &Breakpoints[j]);
 		}
-	      Debugger.State->PendFlag = SingleStepCounter = 0;
+	      SingleStepCounter = 0;
 	      Break = 1;
 	      SimSetCycleCount (SIM_CYCLECOUNT_AGC);
 

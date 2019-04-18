@@ -117,6 +117,30 @@
 				which is the logical OR of channel 11 bit 4 and
 				channel 30 bit 15. The AGC did this internally
 				so the light would still work in standby.
+		01/28/18 MAS	Refactored the scaler and added a framework for
+				counter cell simulation, which enables cycle-
+				accurate simulation of counter handling.
+		01/30/18 MAS	Added fields and constants for RHC simulation.
+				There was a hardware difference in AGCs between
+				those on LM-1 through LM-3, and LM-4 and later
+				(earlier AGCs produce 32 counts for max RHC
+				deflections, and later ones produce 42). We
+				are simulating the later AGCs, with 42 max.
+		01/31/18 MAS	Added state fields for radar simulation, as well
+				as defines for interrupt indexes.
+		02/01/18 MAS	Added state fields for gyro drive and CDU drive
+				simulation.
+		02/02/18 MAS	Added state fields for THRUST and EMSD counters.
+		02/02/18 MAS	Added state fields for OUTLINK and ALTM counters,
+				removed the placeholder state fields for holding
+				outputs, and added IDs for the various output
+				counter signals for use with PulseOutput().
+		02/25/18 MAS	Added state fields for PIPA handling and a bunch
+				of input signal definitions for use with the new
+				PulseInput(), which is intended to complement the
+				PulseOutput() function.
+		03/12/18 MAS	Corrected some pin mappings and deleted the
+				placeholder RadarData from State.
  
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -243,14 +267,64 @@ extern long random (void);
 #define RegCDUZCMD 052
 #define RegOPTYCMD 053
 #define RegOPTXCMD 054
-// 055-056 are spares.
+#define RegTHRUST 055
+#define RegEMSD   056
 #define RegOUTLINK 057
 #define RegALTM 060
 // Addresses 061-03777 are general-purpose RAM.
-#define RegRAM 060
-// Addresses 04000-0117777 are ROM (core memory).
+#define RegRAM 061
+// Addresses 04000-0117777 are ROM (core rope memory).
 #define RegCORE 04000
 #define RegEND 0120000
+
+// Zero-based counter names for use in counter cell processing
+#define NUM_COUNTERS    29
+#define COUNTER_TIME2   (RegTIME2-RegCOUNTER)
+#define COUNTER_TIME1   (RegTIME1-RegCOUNTER)
+#define COUNTER_TIME3   (RegTIME3-RegCOUNTER)
+#define COUNTER_TIME4   (RegTIME4-RegCOUNTER)
+#define COUNTER_TIME5   (RegTIME5-RegCOUNTER)
+#define COUNTER_TIME6   (RegTIME6-RegCOUNTER)
+#define COUNTER_CDUX    (RegCDUX-RegCOUNTER)
+#define COUNTER_CDUY    (RegCDUY-RegCOUNTER)
+#define COUNTER_CDUZ    (RegCDUZ-RegCOUNTER)
+#define COUNTER_OPTY    (RegOPTY-RegCOUNTER)
+#define COUNTER_OPTX    (RegOPTX-RegCOUNTER)
+#define COUNTER_PIPAX   (RegPIPAX-RegCOUNTER)
+#define COUNTER_PIPAY   (RegPIPAY-RegCOUNTER)
+#define COUNTER_PIPAZ   (RegPIPAZ-RegCOUNTER)
+#define COUNTER_RHCP    (RegRHCP-RegCOUNTER)
+#define COUNTER_RHCY    (RegRHCY-RegCOUNTER)
+#define COUNTER_RHCR    (RegRHCR-RegCOUNTER)
+#define COUNTER_INLINK  (RegINLINK-RegCOUNTER)
+#define COUNTER_RNRAD   (RegRNRAD-RegCOUNTER)
+#define COUNTER_GYROCMD (RegGYROCTR-RegCOUNTER)
+#define COUNTER_CDUXCMD (RegCDUXCMD-RegCOUNTER)
+#define COUNTER_CDUYCMD (RegCDUYCMD-RegCOUNTER)
+#define COUNTER_CDUZCMD (RegCDUZCMD-RegCOUNTER)
+#define COUNTER_OPTYCMD (RegOPTYCMD-RegCOUNTER)
+#define COUNTER_OPTXCMD (RegOPTXCMD-RegCOUNTER)
+#define COUNTER_THRUST  (RegTHRUST-RegCOUNTER)
+#define COUNTER_EMSD    (RegEMSD-RegCOUNTER)
+#define COUNTER_OUTLINK (RegOUTLINK-RegCOUNTER)
+#define COUNTER_ALTM    (RegALTM-RegCOUNTER)
+
+// Types of counts that can be requested. For shifts,
+// SHINC = MINUS and SHANC = PLUS.
+#define COUNTER_CELL_PLUS  1
+#define COUNTER_CELL_MINUS 2
+#define COUNTER_CELL_ONE   COUNTER_CELL_PLUS
+#define COUNTER_CELL_ZERO  COUNTER_CELL_MINUS
+
+// Number of millivolts per count for RHC input channels. There were
+// actually two types of AGCs here: LM-2 and earlier used 123-124mV
+// per count, leading to a maximum (at 2.8VRMS/3.96Vp) of 32 counts
+// in each RHC channel. Aurora 12 and Sunburst 37 both expect this
+// scaling. All Luminary versions, and the flown version of Sundance
+// (LM-3 and later), expect 42 counts maximum, which translates to
+// about 94-95mV per count. We use the latter number since the only
+// programs that expected the 32 maximum never flew.
+#define RHC_MV_PER_COUNT  94
 
 // Constants related to "input/output channels".
 #define NUM_CHANNELS 512
@@ -258,11 +332,15 @@ extern long random (void);
 #define ChanSCALER1 04
 #define ChanS 07
 
+// Channel 77 alarm bits
 #define CH77_PARITY_FAIL    000001
 #define CH77_TC_TRAP        000004
 #define CH77_RUPT_LOCK      000010
 #define CH77_NIGHT_WATCHMAN 000020
+#define CH77_VOLTAGE_FAIL   000040
+#define CH77_COUNTER_FAIL   000100
 
+// Channel 163 DSKY light bits
 #define DSKY_AGC_WARN 000001
 #define DSKY_TEMP     000010
 #define DSKY_KEY_REL  000020
@@ -272,7 +350,78 @@ extern long random (void);
 #define DSKY_STBY     000400
 #define DSKY_EL_OFF   001000
 
+// Interrupts
+#define RUPT_T6RUPT   1
+#define RUPT_T5RUPT   2
+#define RUPT_T3RUPT   3
+#define RUPT_T4RUPT   4
+#define RUPT_KEYRUPT1 5
+#define RUPT_KEYRUPT2 6
+#define RUPT_UPRUPT   7
+#define RUPT_DOWNRUPT 8
+#define RUPT_RADARUPT 9
+#define RUPT_HANDRUPT 10
 #define NUM_INTERRUPT_TYPES 10
+
+// Pulse output signals (numbered according to AGC main connector
+// pin numbers, which should hopefully make cross-referencing these
+// signals with the LM Systems Handbook easier). The outlink and
+// EMSD pins are guesses, since the interfaces weren't used.
+#define OUTPUT_GYROCMD_SET   318
+#define OUTPUT_PIPA_DATA     325
+#define OUTPUT_CDUZCMD_MINUS 328
+#define OUTPUT_CDUZCMD_PLUS  329
+#define OUTPUT_CDUYCMD_MINUS 330
+#define OUTPUT_CDUYCMD_PLUS  332
+#define OUTPUT_CDUXCMD_MINUS 333
+#define OUTPUT_CDUXCMD_PLUS  334
+#define OUTPUT_OPTYCMD_MINUS 335
+#define OUTPUT_OPTYCMD_PLUS  336
+#define OUTPUT_OPTXCMD_MINUS 337
+#define OUTPUT_OPTXCMD_PLUS  338
+#define OUTPUT_LR_SYNC       340
+#define OUTPUT_RR_SYNC       346
+#define OUTPUT_EMSD_MINUS    349
+#define OUTPUT_EMSD_PLUS     350
+#define OUTPUT_THRUST_MINUS  353
+#define OUTPUT_THRUST_PLUS   354
+#define OUTPUT_ALTRATE_ZERO  355
+#define OUTPUT_ALTRATE_ONE   356
+#define OUTPUT_ALT_ZERO      357
+#define OUTPUT_ALT_ONE       358
+#define OUTPUT_OUTLINK_ONE   517
+#define OUTPUT_OUTLINK_ZERO  518
+
+// Pulse input signals (again numbered as AGC main connector
+// pin numbers). Crosslink pins are guesses since the interface
+// wasn't used.
+#define INPUT_CROSSLINK_ONE  122
+#define INPUT_CROSSLINK_ZERO 123
+#define INPUT_LR_ONE         124
+#define INPUT_LR_ZERO        125
+#define INPUT_RR_ONE         126
+#define INPUT_RR_ZERO        127
+#define INPUT_UPLINK_ONE     128
+#define INPUT_UPLINK_ZERO    129
+#define INPUT_DOWNLINK_SYNC  130
+#define INPUT_DOWNLINK_END   132
+#define INPUT_DOWNLINK_START 133
+#define INPUT_PIPAZ_MINUS    134
+#define INPUT_PIPAZ_PLUS     135
+#define INPUT_PIPAY_MINUS    136
+#define INPUT_PIPAY_PLUS     137
+#define INPUT_PIPAX_MINUS    138
+#define INPUT_PIPAX_PLUS     139
+#define INPUT_CDUZ_MINUS     143
+#define INPUT_CDUZ_PLUS      144
+#define INPUT_CDUY_MINUS     145
+#define INPUT_CDUY_PLUS      146
+#define INPUT_CDUX_MINUS     147
+#define INPUT_CDUX_PLUS      148
+#define INPUT_OPTX_MINUS     149
+#define INPUT_OPTX_PLUS      150
+#define INPUT_OPTY_MINUS     151
+#define INPUT_OPTY_PLUS      152
 
 // Max number of 15-bit words in a downlink-telemetry list.
 #define MAX_DOWNLINK_LIST 260
@@ -296,6 +445,53 @@ extern long random (void);
 #define DL_LM_LUNAR_SURFACE_ALIGN 8
 #define DL_CM_ENTRY_UPDATE 9
 #define DL_LM_AGS_INITIALIZATION_UPDATE 10
+
+// Scaler frequency bit positions in State->ScalerValue
+#define SCALER_FS03 0x00000001
+#define SCALER_FS04 0x00000002
+#define SCALER_FS05 0x00000004
+#define SCALER_FS06 0x00000008
+#define SCALER_FS07 0x00000010
+#define SCALER_FS08 0x00000020
+#define SCALER_FS09 0x00000040
+#define SCALER_FS10 0x00000080
+#define SCALER_FS11 0x00000100
+#define SCALER_FS12 0x00000200
+#define SCALER_FS13 0x00000400
+#define SCALER_FS14 0x00000800
+#define SCALER_FS15 0x00001000
+#define SCALER_FS16 0x00002000
+#define SCALER_FS17 0x00004000
+#define SCALER_FS18 0x00008000
+
+// Scaler frequency masks for determining timing pulses
+#define SCALER_MASK_F03 0x00000001
+#define SCALER_MASK_F04 0x00000003
+#define SCALER_MASK_F05 0x00000007
+#define SCALER_MASK_F06 0x0000000F
+#define SCALER_MASK_F07 0x0000001F
+#define SCALER_MASK_F08 0x0000003F
+#define SCALER_MASK_F09 0x0000007F
+#define SCALER_MASK_F10 0x000000FF
+#define SCALER_MASK_F11 0x000001FF
+#define SCALER_MASK_F12 0x000003FF
+#define SCALER_MASK_F13 0x000007FF
+#define SCALER_MASK_F14 0x00000FFF
+#define SCALER_MASK_F15 0x00001FFF
+#define SCALER_MASK_F16 0x00003FFF
+#define SCALER_MASK_F17 0x00007FFF
+#define SCALER_MASK_F18 0x0000FFFF
+
+// Scaler-derived timing logic. GTSET, GTRST, and GTONE are
+// synchronous with F05B, and are generated based on the values
+// of scaler stages 6-9.
+#define SCALER_GTSET (SCALER_FS06 | SCALER_FS07 | SCALER_FS08 | SCALER_FS09)
+#define SCALER_GTRST (SCALER_FS07 | SCALER_FS08 | SCALER_FS09)
+#define SCALER_GTONE 0
+
+// Voltage fail alarm threshold, in millivolts. This number is the
+// lower of two types of modules (the the other alarming at 22.8V).
+#define VFAIL_THRESHOLD 20300
 
 //---------------------------------------------------------------------------
 // Data types.
@@ -360,13 +556,11 @@ typedef struct
   // CPU internal flags.
   unsigned ExtraCode:1;		// Set by the "Extend" instruction.
   unsigned AllowInterrupt:1;
-  //unsigned RegA16:1;		// Bit "16" of register A.
   unsigned InIsr:1;		// Set when in an ISR, reset when in normal code.
   unsigned SubstituteInstruction:1;	// Use BBRUPT register.
-  unsigned PendFlag:1;		// Multi-MCT instruction pending.
+  unsigned PendFlag:1;		// (Deprecated) Multi-MCT instruction pending.
   unsigned PendDelay:3;		// Countdown to pending instruction.
-  unsigned ExtraDelay:3;	// ... and extra, for special cases.
-  //unsigned RegQ16:1;		// Bit "16" of register Q.
+  unsigned ExtraDelay:3;	// (Deprecated) ... and extra, for special cases.
   unsigned DownruptTimeValid:1;	// Set if the DownruptTime field is valid.
   unsigned NightWatchman:1;     // Set when Night Watchman is watching. Cleared by accessing address 67.
   unsigned NightWatchmanTripped:1; // Set when Night Watchman has been tripped and its CH77 bit is being asserted.
@@ -383,18 +577,59 @@ typedef struct
   unsigned TookBZF:1;           // Flag for having just taken a BZF branch, used for simulation of a TC Trap hardware bug
   unsigned TookBZMF:1;          // Flag for having just taken a BZMF branch, used for simulation of a TC Trap hardware bug
   unsigned GeneratedWarning:1;  // Whether there is a pending input to the warning filter
+  unsigned InputVoltageLow:1;   // Set while VFAIL circuit is detecting low input voltage
   unsigned Trap31A:1;           // Enable flag for Trap 31A
+  unsigned Trap31APending:1;    // Pending flag for Trap 31A
   unsigned Trap31B:1;           // Enable flag for Trap 31B
+  unsigned Trap31BPending:1;    // Pending flag for Trap 31B
   unsigned Trap32:1;            // Enable flag for Trap 32
-  uint32_t WarningFilter;       // Current voltage of the AGC warning filter
+  unsigned Trap32Pending:1;     // Pending flag for Trap 32
+  unsigned RestartHold:1;       // Set when the AGC is being held in restart by a voltage failure
+  unsigned HighestPriorityCounter:5; // Highest priority pending counter
+  unsigned RequestedCounter:1;  // Flag indicating a counter was requested for use by counter alarm
+  unsigned CounterLock:1;       // Set when only counter instructions have been executing
+  unsigned AutoClearKeys:1;     // Flag to make yaAGC automatically reset DSKY input keys, for backward compatibility
+  unsigned Keyrupt1Enabled:1;   // Enable for KEYRUPT1. Cleared upon KEYRUPT1 interrupt, and set by CH15 being zero.
+  unsigned Keyrupt1Pending:1;   // Flag indicating a DSKY key is pressed and an interrupt may occur
+  unsigned Keyrupt2Enabled:1;   // Enable for KEYRUPT2. Cleared upon KEYRUPT2 interrupt, and set by CH16 bits 1-5 being zero.
+  unsigned Keyrupt2Pending:1;   // Flag indicating a NAV DSKY key is pressed and an interrupt may occur
+  unsigned MarkruptEnabled:1;   // Enable for MARKRUPT. Cleared upon MARKRUPT interrupt, and set by CH16 bits 6-7 being zero.
+  unsigned MarkruptPending:1;   // Flag indicating a MARK key is pressed and an interrupt may occur
+  unsigned RHCPending:1;
+  unsigned RadarSync:1;
+  unsigned GyroDriveActive:1;
+  unsigned ThrustPlusActive:1;
+  unsigned ThrustMinusActive:1;
+  unsigned EMSPlusActive:1;
+  unsigned EMSMinusActive:1;
+  unsigned OutlinkActive:1;
+  unsigned OutlinkStarting:1;
+  unsigned AltActive:1;
+  unsigned AltStarting:1;
+  unsigned UplinkTooFast:1;
+  unsigned PipaMissX:1;
+  unsigned PipaMissY:1;
+  unsigned PipaMissZ:1;
+  unsigned PipaNoXPlus:1;
+  unsigned PipaNoXMinus:1;
+  unsigned PipaNoYPlus:1;
+  unsigned PipaNoYMinus:1;
+  unsigned PipaNoZPlus:1;
+  unsigned PipaNoZMinus:1;
+  uint8_t CounterCell[NUM_COUNTERS]; // Counter cells storing requested plus or minus counts
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
+  uint32_t WarningFilter;       // Current voltage of the AGC warning filter
   int Downlink;
   int NextZ;                    // Next value for the Z register
   int ScalerCounter;            // Counter to keep track of scaler increment timing
+  uint32_t ScalerValue;         // Current value of scaler stages 3 through 33, plus one
   int ChannelRoutineCount;      // Counter to keep track of channel interface routine timing
-  unsigned DskyTimer;           // Timer for DSKY-related timing
-  unsigned DskyFlash;           // DSKY flash counter (0 = flash occurring)
   unsigned DskyChannel163;      // Copy of the fake DSKY channel 163
+  int InputVoltagemV;           // Input voltage in millivolts, monitored by the voltage fail alarm
+  int RHCVoltagemV[3];
+  int RHCCounts[3];
+  uint8_t RadarGateCounter;
+  uint8_t PipaPrecount[3];
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.
@@ -492,7 +727,6 @@ ProcessDownlinkList_t *ProcessDownlinkList = NULL;
 int CmOrLm = 0;	// Default is 0 (LM); other choice is 1 (CM)
 char Sbuffer[SHEIGHT][SWIDTH + 1];
 int Sheight = DEFAULT_SHEIGHT, Swidth = DEFAULT_SWIDTH;
-int LastRhcPitch = 0, LastRhcYaw = 0, LastRhcRoll = 0;
 #else //AGC_ENGINE_C
 extern int DebugMode;
 extern int SingleStepCounter;
@@ -515,7 +749,6 @@ extern ProcessDownlinkList_t *ProcessDownlinkList;
 extern int CmOrLm;
 extern char Sbuffer[SHEIGHT][SWIDTH + 1];
 extern int Sheight, Swidth;
-extern int LastRhcPitch, LastRhcYaw, LastRhcRoll;
 #endif //AGC_ENGINE_C
 
 #ifndef DECODE_DIGITAL_DOWNLINK_C
@@ -538,9 +771,11 @@ int agc_engine (agc_t * State);
 int agc_engine_init (agc_t * State, const char *RomImage,
 		     const char *CoreDump, int AllOrErasable);
 int agc_load_binfile(agc_t *Stage, const char *RomImage);
+void PerformGOJAM(agc_t * State);
 int ReadIO (agc_t * State, int Address);
 void WriteIO (agc_t * State, int Address, int Value);
 void CpuWriteIO (agc_t * State, int Address, int Value);
+void SetInputVoltage (agc_t * State, int Millivolts);
 void MakeCoreDump (agc_t * State, const char *CoreDump);
 void UnblockSocket (int SocketNum);
 //FILE *rfopen (const char *Filename, const char *mode);
@@ -551,6 +786,7 @@ int16_t OverflowCorrected (int Value);
 int SignExtend (int16_t Word);
 int AddSP16 (int Addend1, int Addend2);
 void UnprogrammedIncrement (agc_t *State, int Counter, int IncType);
+void CounterRequest(agc_t * State, unsigned Counter, unsigned Type);
 
 void DecodeDigitalDownlink (int Channel, int Value, int CmOrLm);
 ProcessDownlinkList_t PrintDownlinkList;
@@ -566,6 +802,8 @@ void ChannelOutput (agc_t * State, int Channel, int Value);
 int ChannelInput (agc_t * State);
 void ChannelRoutine (agc_t *State);
 void ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t *));
+void PulseInput(agc_t * State, int SignalId);
+void PulseOutput(agc_t * State, int SignalId);
 void ShiftToDeda (agc_t *State, int Data);
 
 #endif // AGC_ENGINE_H
