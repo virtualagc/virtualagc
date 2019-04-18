@@ -40,9 +40,9 @@ import re
 baseURL = "BASEURL"
 if len(sys.argv) > 1:
 	baseURL = sys.argv[1]
-correctMetadata = False
+correctMetadata = True
 if len(sys.argv) > 2:
-	correctMetadata = True
+	correctMetadata = False
 
 dupList = {}
 htmlList = {}
@@ -63,7 +63,9 @@ for line in sys.stdin:
 	if numFrames == "":
 		numFrames = "1"
 	docNumber = line[6:13]
-	sheetNum = line[14:17].strip()
+	if line[15] != " " and line[16] == " ":
+		line[16] = "8"
+	sheetNum = line[14:17]
 	if sheetNum == "":
 		sheetNum = "1"
 	revision = line[19:21].strip()
