@@ -7,9 +7,12 @@
 # The naming assumes that the PDFs created by the C400 have actually
 # been pre-converted to PNGs.  The steps I envisage for doing that
 # are:
-#	pdfimages -png C400File.PDF DestFolder
-#	cd DestFolder
+#	cd FolderOfScannedCardPDFs
+#	for n in *.PDF ; do pdfimages -png "$n" DestFolder_images/"$n"
+#	cd DestFolder_images
 #	optipng *.png
+# (The destination folder is something_images because the _images 
+# part is required by archive.org's "generic book" upload format.)
 # Whether or not the latter two steps have been done, the first step
 # creates files with the same names as the original (including the
 # trailing ".PDF") suffixed by "-000.png".  Alas, the pdfimages on my
@@ -25,12 +28,12 @@
 #
 # This script doesn't actually rename the files, but itself just 
 # produces a script that you can run to rename the files:
-#	cd FolderContainingPDFs
-#	ls -1 *.PDF | unpunch.py >RenamingScript.sh 2>IndexTable.html
-#	cd FolderContainingPNGs
+#	cd FolderOfScannedCardPDFs
+#	ls -1 *.PDF | unpunch.py "DestFolder_images" >RenamingScript.sh 2>IndexTable.html
+#	cd DestFolder_images
 #	bash RenamingScript.sh
 # Additional steps you'd usually take after that are:
-#	create a zipfile called SOMETHING_images.zip from the FolderContainingPNGs
+#	create a zipfile called DestFolder_images.zip
 #	upload the zipfile to archive.org
 #	create an index page for the box at ibiblio.org/apollo
 
