@@ -181,7 +181,7 @@ for key in sorted(htmlList):
 	sys.stderr.write("<td>" + htmlList[key]["docNumber"] + "</td>") 
 	revision = htmlList[key]["revision"]
 	if len(revision) == 2 and revision[0] == "-":
-		revision = revision[2]
+		revision = revision[1]
 	sys.stderr.write("<td>" + revision + "</td>") 
 	sys.stderr.write("<td>" + htmlList[key]["docType"] + "</td>") 
 	sys.stderr.write("<td>" + htmlList[key]["sheetNum"] + "</td>") 
