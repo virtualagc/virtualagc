@@ -21,7 +21,7 @@
 # so I have to transfer the files to a different computer to do that
 # step, and then transfer them back.
 #
-# Aside from the renaming, it also creates an HTML index of the 
+# Aside from the renaming, this script also creates an HTML index of the 
 # drawings, in which you afterward have to replace the string BASEURL
 # with the appropriate name at which the drawings are going to be
 # uploaded to archive.org.
@@ -66,19 +66,28 @@ for line in sys.stdin:
 	if numFrames == "":
 		numFrames = "1"
 	docNumber = line[6:13]
-	if line[15] != " " and line[16] == " ":
-		line[16] = "8"
 	sheetNum = line[14:17]
-	if sheetNum == "":
-		sheetNum = "1"
-	revision = line[19:21].strip()
+	if sheetNum[1] != " " and sheetNum[2] == " ":
+		sheetNum = sheetNum[:2] + "8"
+	if sheetNum[1] == " ":
+		sheetNum = sheetNum[0] + "0" + sheetNum[2]
+	if sheetNum[0] == " ":
+		sheetNum = "0" + sheetNum[1:]
+	if sheetNum == "00 ":
+		sheetNum = "001"
+	if line[19].isalpha():
+		revision = line[19:21].strip()
+	else:
+		revision = line[20].strip()
 	if revision == "":
 		revision = "-"
+	if len(revision) == 1:
+		revision = "-" + revision
 	tdrr = line[21:26]
 	numSheets = line[27:29].strip()
 	if numSheets == "":
 		numSheets = "1"
-	title = line[30:52].strip()
+	title = re.sub(r" +", " ", line[30:52].strip())
 	group = line[54:57]
 	while len(sheetNum) < 3:
 		sheetNum = "0" + sheetNum
@@ -170,7 +179,10 @@ for key in sorted(htmlList):
 	sys.stderr.write("<tr>")
 	sys.stderr.write("<td><a href=\"https://archive.org/stream/" + baseURL + "#page/n" + str(pageNumber) + "/mode/1up\">" + str(pageNumber) + "</a></td>") 
 	sys.stderr.write("<td>" + htmlList[key]["docNumber"] + "</td>") 
-	sys.stderr.write("<td>" + htmlList[key]["revision"] + "</td>") 
+	revision = htmlList[key]["revision"]
+	if len(revision) == 2 and revision[0] == "-":
+		revision = revision[2]
+	sys.stderr.write("<td>" + revision + "</td>") 
 	sys.stderr.write("<td>" + htmlList[key]["docType"] + "</td>") 
 	sys.stderr.write("<td>" + htmlList[key]["sheetNum"] + "</td>") 
 	sys.stderr.write("<td>" + htmlList[key]["frameNumber"] + "</td>") 
