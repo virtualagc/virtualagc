@@ -1,5 +1,5 @@
 EESchema Schematic File Version 5
-LIBS:errors-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
@@ -1655,8 +1655,6 @@ Wire Wire Line
 Connection ~ 17475 11150
 Wire Wire Line
 	17475 11150 18575 11150
-Wire Wire Line
-	14500 10850 14500 9900
 Wire Wire Line
 	17475 9800 19025 9800
 Connection ~ 17475 9800
@@ -4754,4 +4752,6 @@ Wire Wire Line
 	24625 16425 26000 16425
 Wire Wire Line
 	7350 30525 7775 30525
+Wire Wire Line
+	14500 9800 14500 10850
 $EndSCHEMATC
