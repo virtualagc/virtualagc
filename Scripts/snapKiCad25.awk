@@ -23,6 +23,7 @@ function snap(value) {
 BEGIN {
 	unit = "blern"
 	inwire = 0
+	insheet = 0
 }
 
 {
@@ -58,6 +59,17 @@ BEGIN {
 	} else if ($1 == "Text" && $2 == "GLabel") {
 		$3 = snap($3)
 		$4 = snap($4)
+	} else if ($1 == "$Sheet") {
+		insheet = 1
+	} else if ($1 == "$EndSheet") {
+		insheet = 0
+	} else if (insheet) {
+		start = substr($1, 1, 1)
+		end = substr($1, 2)
+		if (start == "F" && +end >= 2) {
+			$5 = snap($5)
+			$6 = snap($6)
+		}
 	}
 	print $0
 }
