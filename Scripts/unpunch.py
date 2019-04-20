@@ -33,8 +33,8 @@
 #	cd DestFolder_images
 #	bash RenamingScript.sh
 # Additional steps you'd usually take after that are:
-#	create a zipfile called DestFolder_images.zip
-#	upload the zipfile to archive.org
+#	create a tar file called DestFolder_images.zip
+#	upload the tar file to archive.org
 #	create an index page for the box at ibiblio.org/apollo
 
 import sys
