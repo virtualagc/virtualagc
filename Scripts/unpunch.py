@@ -191,7 +191,7 @@ for key in sorted(htmlList):
 	if dup == 1:
 		sys.stderr.write("<td></td>") 
 	else:
-		sys.stderr.write("<td>Internal error, duplicate " + str(dup) + "</td>")
+		sys.stderr.write("<td>Copy number " + str(dup) + "</td>")
 	sys.stderr.write("</tr>\n")
 	pageNumber += 1
 
