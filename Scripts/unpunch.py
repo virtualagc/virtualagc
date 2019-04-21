@@ -32,10 +32,13 @@
 #	ls -1 *.PDF | unpunch.py "DestFolder_images" >RenamingScript.sh 2>IndexTable.html
 #	cd DestFolder_images
 #	bash RenamingScript.sh
-# Additional steps you'd usually take after that are:
-#	create a tar file called DestFolder_images.zip
+#
+# Additional steps you'd usually take after all this are:
+#	create a tar file called DestFolder_images.tar
 #	upload the tar file to archive.org
-#	create an index page for the box at ibiblio.org/apollo
+#	create an index page for the box at ibiblio.org/apollo, using IndexTable.html
+#	update the drawing search engine using the instructions in MakeTipueSearch.py
+#	correct all drawing titles in the index page and search engine
 
 import sys
 import re
