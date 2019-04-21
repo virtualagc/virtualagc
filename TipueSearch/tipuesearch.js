@@ -391,11 +391,11 @@ I can make these changes because I understand the pattern of data that's being f
                                          * is quite big already.
                                          */
                                         var title;
-					var drawingFields;
-					var splitAt = 8;
-					if (found[i].title[splitAt] != "-")
-						splitAt = 9;
-					title = found[i].title.substring(0, splitAt);
+										var drawingFields;
+										var splitAt = 8;
+										if (found[i].title[splitAt] != "-")
+											splitAt = 9;
+										title = found[i].title.substring(0, splitAt);
                                         drawingFields = found[i].title.substring(splitAt + 1).split("-");
                                         if (drawingFields[0] == "1")
                                         	title += ", drawing";
@@ -436,7 +436,10 @@ I can make these changes because I understand the pattern of data that's being f
                                             	 var n = fields[2].search("#");
                                             	 if (n < 0) {
                                             		 group = fields[2]
-                                            		 pageNumber = fields[4].substring(1)
+                                            		 if (fields.length >= 5)
+                                            			 pageNumber = fields[4].substring(1)
+                                            		 else
+                                            			 pageNumber = "1"
                                             	 } else {
                                             		 group = fields[2].substring(0,n)
                                             		 pageNumber = fields[3].substring(1)
