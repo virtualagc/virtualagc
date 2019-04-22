@@ -37,7 +37,7 @@ works for me is:
    	cut-and-pasted (from SeaMonkey Composer) into a LibreOffice Calc,
    	with the column headers removed.
    2.	The data is sorted, as mentioned above, with the primary key being
-   	column B and the sixth key being column F.
+   	column B and the fifth key being column F.
    3.	For data cut-and-pasted from the existing HTML indices, column A
    	will be a hyperlink, whereas we wish it instead to be just the
    	hyperlink's URL.  This can be accomplished by:
