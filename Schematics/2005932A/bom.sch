@@ -785,8 +785,6 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	28450 6575 28450 8975
 Wire Notes Line style solid
-	28450 20100 28450 22225
-Wire Notes Line style solid
 	30200 20100 30200 22225
 Wire Notes Line style solid
 	29575 25275 29575 3225
@@ -1097,37 +1095,37 @@ Text Notes 28050 14750 0    130  ~ 26
 Text Notes 29925 15500 0    130  ~ 26
 DIODE
 Text Notes 27975 15500 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 15750 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 16000 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 16250 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 16500 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 16750 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 17000 0    130  ~ 26
 2004112-002
 Text Notes 27975 17250 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 17500 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 17750 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 18250 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 18500 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 18750 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 19000 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 19250 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 27975 19500 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 29925 19500 0    130  ~ 26
 DIODE
 Text Notes 27975 18000 0    130  ~ 26
@@ -1136,50 +1134,8 @@ Text Notes 29675 20000 0    130  ~ 26
 TRANSISTOR
 Text Notes 29675 22500 0    130  ~ 26
 TRANSISTOR
-Text Notes 27975 20000 0    130  ~ 26
-2004004-002
-Text Notes 27975 22500 0    130  ~ 26
-2004004
-Text Notes 28850 20250 0    130  ~ 26
--
-Text Notes 28850 20500 0    130  ~ 26
--
-Text Notes 28850 20750 0    130  ~ 26
--
-Text Notes 28850 21000 0    130  ~ 26
--
-Text Notes 28850 21250 0    130  ~ 26
--
-Text Notes 28850 21500 0    130  ~ 26
--
-Text Notes 28850 21750 0    130  ~ 26
--
-Text Notes 28850 22000 0    130  ~ 26
--
-Text Notes 28850 22250 0    130  ~ 26
--
-Text Notes 28850 22500 0    130  ~ 26
--
-Text Notes 29025 22500 0    130  ~ 26
-001
-Text Notes 29025 22000 0    130  ~ 26
-001
-Text Notes 29025 21750 0    130  ~ 26
-001
-Text Notes 29025 21250 0    130  ~ 26
-001
-Text Notes 29025 21000 0    130  ~ 26
-001
-Text Notes 29000 20250 0    130  ~ 26
-001
-Text Notes 29000 20500 0    130  ~ 26
-002
-Text Notes 29000 20750 0    130  ~ 26
-002
-Text Notes 29025 21500 0    130  ~ 26
-002
-Text Notes 29025 22250 0    130  ~ 26
-002
+Text Notes 27950 20000 0    130  ~ 26
+2004004-006
 Text Notes 28025 23500 0    130  ~ 26
 1006293
 Text Notes 28025 23750 0    130  ~ 26
@@ -1247,12 +1203,6 @@ Wire Notes Line width 60 style solid
 Wire Notes Line width 60 style solid
 	30250 19100 30200 19200
 Wire Notes Line width 60 style solid
-	28450 22200 28400 22100
-Wire Notes Line width 60 style solid
-	28400 22100 28500 22100
-Wire Notes Line width 60 style solid
-	28500 22100 28450 22200
-Wire Notes Line width 60 style solid
 	30200 22200 30150 22100
 Wire Notes Line width 60 style solid
 	30150 22100 30250 22100
@@ -1270,42 +1220,10 @@ Wire Notes Line width 60 style solid
 	30150 20200 30250 20200
 Wire Notes Line width 60 style solid
 	30250 20200 30200 20100
-Wire Notes Line width 60 style solid
-	28450 20100 28400 20200
-Wire Notes Line width 60 style solid
-	28400 20200 28500 20200
-Wire Notes Line width 60 style solid
-	28500 20200 28450 20100
-Wire Notes Line style solid
-	37958 910  37958 2290
-Wire Notes Line style solid
-	37968 2290 43493 2290
-Wire Notes Line style solid
-	37968 1715 43493 1715
-Wire Notes Line style solid
-	42458 910  42458 2290
-Wire Notes Line style solid
-	41793 910  41793 2290
-Wire Notes Line style solid
-	38458 910  38458 2290
-Text Notes 38118 1540 0    140  ~ 28
-A
-Text Notes 38118 2090 0    140  ~ 28
-B
-Text Notes 38543 1665 0    140  ~ 28
-REVISED PER TDRR 29077\nDR     CHK      APPD
-Text Notes 38543 2240 0    140  ~ 28
-REVISED PER TDRR 29821\nDR     CHK      APPD
-Wire Notes Line style solid
-	43493 1165 37968 1165
-Text Notes 38093 1115 0    140  ~ 28
--
-Text Notes 38543 1140 0    140  ~ 28
-RELEASED PER TDRR
 Text Notes 39669 31699 0    250  ~ 50
 SCHEMATIC
 Text Notes 40894 33099 0    250  ~ 50
-2005920
+2005932
 Text Notes 38269 33099 0    250  ~ 50
 80230
 Text Notes 38669 32049 0    200  ~ 40
@@ -1354,4 +1272,38 @@ Wire Notes Line style solid
 	34269 31774 34344 31674
 Wire Notes Line style solid
 	35244 31774 35319 31674
+Wire Notes Line style solid
+	37958 910  37958 1165
+Wire Notes Line style solid
+	42458 910  42458 1165
+Wire Notes Line style solid
+	41793 910  41793 1165
+Wire Notes Line style solid
+	38458 910  38458 1165
+Wire Notes Line style solid
+	43493 1165 37968 1165
+Text Notes 38093 1140 0    125  ~ 25
+A
+Text Notes 38493 1140 0    125  ~ 25
+INITIAL RELEASE PER TDRR 32559
+Text Notes 27950 20500 0    130  ~ 26
+2004004-006
+Text Notes 27950 20750 0    130  ~ 26
+2004004-002
+Text Notes 27950 21500 0    130  ~ 26
+2004004-002
+Text Notes 27950 20250 0    130  ~ 26
+2004184-001
+Text Notes 27950 21000 0    130  ~ 26
+2004184-001
+Text Notes 27950 21250 0    130  ~ 26
+2004184-001
+Text Notes 27950 21750 0    130  ~ 26
+2004184-001
+Text Notes 27950 22000 0    130  ~ 26
+2004184-001
+Text Notes 27950 22250 0    130  ~ 26
+2004004-002
+Text Notes 27950 22500 0    130  ~ 26
+2004184-001
 $EndSCHEMATC

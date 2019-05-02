@@ -1,5 +1,5 @@
 EESchema Schematic File Version 5
-LIBS:errors-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
@@ -2480,11 +2480,11 @@ Wire Wire Line
 Text GLabel 11700 5625 2    140  UnSpc ~ 0
 VY2
 Wire Wire Line
-	11325 5625 11700 5625
+	11300 5625 11700 5625
 Text GLabel 11675 6425 2    140  UnSpc ~ 0
 0VDC
 Wire Wire Line
-	11675 6425 11325 6425
+	11675 6425 11300 6425
 Text GLabel 11650 12125 2    140  UnSpc ~ 0
 BPLSWY
 Wire Wire Line
@@ -2492,7 +2492,7 @@ Wire Wire Line
 Text GLabel 11675 7625 2    140  UnSpc ~ 0
 BPLSWY
 Wire Wire Line
-	11325 7625 11675 7625
+	11300 7625 11675 7625
 Text GLabel 9300 12125 0    140  UnSpc ~ 0
 VZ
 Text GLabel 9300 12525 0    140  UnSpc ~ 0
