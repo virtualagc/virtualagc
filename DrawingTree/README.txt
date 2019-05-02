@@ -1,3 +1,10 @@
+*************************************************************
+NOTE: The stuff in this folder is in the very early stages of 
+development, so don't expect it to do anything as of yet!
+The descriptions below relate to my gameplan for what I hope
+it to do eventually.
+*************************************************************
+
 This folder contains files that allow building a drawing tree.
 The files have the file extension .csv to make them easier to
 load/save in LibreOffice Calc, but are in fact TSV files with
@@ -9,8 +16,8 @@ There are two types of files:
 	DRAWINGNUMBERPLUSREF.csv
 
 drawings.csv is a single file containing, basically, a dump of all 
-the drawing index tables from the website files AgcDrawingIndexXXXXXX.html, 
-merged and sorted.  It has the fields
+the drawing index tables from the Virtual AGC website files 
+AgcDrawingIndexXXXXXX.html, merged and sorted.  It has the fields
 
 	URL DRAWINGNUMBER REV DOCTYPE SHEETNUM FRAMENUM TITLE NOTES
 
@@ -18,14 +25,14 @@ The sorting uses the keys from fields 2 (DRAWINGNUMBER) through
 6 (SHEETNUM), in that order.
 
 There is a separate DRAWINGNUMBERPLUSREF.csv file for each drawing 
-relevant to this effort of expanding the drawing trees.  It is essentially 
-the same as the find-table in the associated drawing, with the data 
-ordered in the same way.  I.e., find numbers increase from bottom to top,
-and dash numbers increase from right to left.  The column headers are the
-dash numbers.  The cell entries the same as the the cells in the drawing.
-In general those cell entries will be DRAWINGNUMBER[-DASHNUMBER] (with 
-no REV), though I allow also the syntax of having several such items 
-within the same cell, joined by " or ".
+relevant to this effort of expanding the drawing trees ... i.e., for each
+assembly.  It is essentially the same as the find-table in the associated 
+drawing, with the data ordered in the same way.  I.e., find numbers 
+increase from bottom to top, and dash numbers increase from right to left.  
+The column headers are the dash numbers.  The cell entries the same as the 
+cells in the drawing. In general those cell entries will be 
+DRAWINGNUMBER[-DASHNUMBER] (with no REV), though I allow also the syntax 
+of having several such items within the same cell, joined by " or ".
 
 I expect there will be software (presently TBD) that uses these files
 as input but produces HTML for the website.
