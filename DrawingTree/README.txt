@@ -37,24 +37,15 @@ of having several such items within the same cell, joined by " or ".
 I expect there will be software (presently TBD) that uses these files
 as input but produces HTML for the website.
 
-Finally, in terms of how to produce the file drawings.csv, a method that
-works for me is:
+Finally, in terms of how to produce the file drawings.csv, I used to have
+a fairly manually-intensive method here that involved cut-and-pasting from
+a bunch of web-pages, importing into LibreOffice Calc, exporting stuff,
+running scripts on it, reimporting into Calc, and so on.  Fortunately, 
+there's now just a couple of Python scripts to run to cut through all that
+nonsense:
 
-   1.	The HTML tables from AgcDrawingIndexXXXXX.html are sequentially 
-   	cut-and-pasted (from SeaMonkey Composer) into a LibreOffice Calc,
-   	with the column headers removed.
-   2.	The data is sorted, as mentioned above, with the primary key being
-   	column B and the fifth key being column F.
-   3.	For data cut-and-pasted from the existing HTML indices, column A
-   	will be a hyperlink, whereas we wish it instead to be just the
-   	hyperlink's URL.  This can be accomplished by:
-   	    a)	Saving the spreadsheet as a .fodc file (say, temp.fods).
-   	    b)	Processing with:
-			sed --in-place -e 's@<text:a xlink:href="@@' -e 's@" xlink:type="simple">[^<]*</text:a>@@' temp.fods
-   	    c)	Reimporting temp.fods into LibreOffice Calc.
-    4.	Save as drawings.csv file with a tab delimiter.
- 
-The drawings.csv file is relatively handy for creating a JSON file for
-use with "Tipue Search".  You can do that with the MakeTipueSearch.py
-script.
+	'cd' into the VirtualAGC hd-pages repo branch
+	cat AgcDrawingIndex*.html | AgcDrawingIndex.py >drawings.csv
+	MakeTipueSearch.py <drawings.csv >TipueSearch/tipuesearch_content.js
+	move drawings.csv into the DrawingTree/ folder of the VirtualAGC schematics repo branch
 

@@ -17,14 +17,30 @@
 # "*** CHECK ME ***" being added to "note" column in the output.  
 # Questionable data includes things like
 #
-#	Consecutive part numbers with the same drawing titles -- probably due
-#	to my messing up when pasting the titles into the AgcDrawingIndexXXXX.html
-#	files.
+#	Consecutive part numbers with the same drawing titles.  (These are usually
+#	due to my messing up when pasting the titles into the AgcDrawingIndexXXXX.html
+#	files.  But sometimes there really are consecutive drawing number with the
+#	same titles!  Hardcode those in the ignore[] array to cause the checker
+#	to skip this test for them.)
 #
 #	Drawings with the same drawing number + doc type having different titles.
 #	(It's actually possible for this to happen correctly, since the original
 #	developers didn't always use the same drawing titles verbatim from one
-#	revision to the next, but it's more-usually because I messed up somehow.)
+#	revision to the next, but it's more-usually because I messed up somehow.
+#	At present, I always try to use the *same* title for these, regardless
+#	of what the developers wrote in the title blocks.)
+#
+#	Titles which contain lower-case characters.
+#
+#	A document type other than 1 (01) or 2 (02).  I don't know if there are
+#	other possible document types, but if so I've not encountered them yet.
+#
+#	Sheet numbers or frame numbers with non-alphabetical characters in them.
+#	(A final character of 'A' is allowed for sheet numbers, since there are
+#	a handful of them in type 02 documents.)
+#
+# One goal is to eliminate all of the CHECK ME's. This doesn't guarantee that 
+# all errors have been found, but it's a good start.
 
 # The drawing data must appear in the HTML file in the form of tables.  
 # Tables are only processed if they have the attribute class="drawingIndex".
@@ -59,8 +75,8 @@
 # warning messages that are embedded in the output TSV, rather than saving the TSV itself:
 #
 #	cat AgcDrawingIndex*.html | AgcDrawingIndex.py | \
-#		grep --before-context=1 '(changed title)' | \
-#		awk -F $'\t' '{match($1, /[^/]*#/); print $2 " " $3 " " $4 " " $5 " " $6 "\t" $7 "\t" substr($1, RSTART, RLENGTH)}' | less
+#		grep --before-context=1 'CHECK ME' | \
+#		awk -F $'\t' '{match($1, /[^/]*#/); print $2 " " $3 " " $4 " " $5 " " $6 "\t" $7 "\t" substr($1, RSTART, RLENGTH)} "\t" $8' | less
 
 from HTMLParser import HTMLParser
 import sys
@@ -144,6 +160,8 @@ class HTMLTableParser(HTMLParser):
                     while dkey in self.allData:
                     	dupe += 1
                     	dkey = key + "_d" + str(dupe)
+                    if '"' in self.row[6]:
+                    	self.row[6] = '"' + self.row[6].replace('"', '""') + '"'
                     self.allData[dkey] = {
                         "url" : self.row[0],
                         "drawing" : self.row[1],
@@ -167,7 +185,8 @@ class HTMLTableParser(HTMLParser):
     	subs = { 
     	    "amp" : "&", 
     	    "gt" : ">", 
-    	    "lt" : "<"
+    	    "lt" : "<",
+    	    "nbsp" : " "
     	}
     	if self.in_cell and self.valid_table and name in subs:
     	    self.cell_data = self.cell_data + subs[name]
@@ -191,20 +210,42 @@ parser = HTMLTableParser()
 parser.feed(sys.stdin.read()) 
 
 # Now do a little detection of possible errors in the data.
+# Here's a hard-coded list of drawing numbers known to give a false positives on 
+# the "unchanged title" test.  I'm sorry to hardcode them, but I'm tired
+# of seeing the warning messages and haven't been able to think of a better way to
+# handle them.
+ignore = [ 1004218, 1004219, 1004227, 1004283, 1004536, 1004646, 1005009, 1005011,
+	1005799, 1006350, 1006351, 1006800, 1006814, 1006818, 1006819, 1008944,
+	1010865, 2003081, 2003082, 2003121, 2003955, 2003972, 2004120,
+	2004121, 2004122, 2004123, 2004124, 2004125, 2004685, 2005029, 2005036,
+	2005944, 2005954, 2007172, 2010760 ] 
+digits = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
 lastDrawing = ["", "", ""]
 lastTitle = ["", "", ""]
 for key, value in sorted(parser.allData.iteritems()):
 	drawing = value["drawing"]
 	type = int(value["type"])
 	title = value["title"]
+	sheet = value["sheet"]
+	frame = value["frame"]
 	prefix = ""
 	if type not in [1, 2]:
 		prefix = "*** CHECK ME (bad type) *** "
 		type = 0
 	elif drawing == lastDrawing[type] and title != lastTitle[type]:
 		prefix = "*** CHECK ME (changed title) *** "
-	elif drawing != lastDrawing[type] and title == lastTitle[type]:
+	elif drawing != lastDrawing[type] and title == lastTitle[type] and int(drawing) not in ignore:
 		prefix = "*** CHECK ME (unchanged title) *** "
+	if any(c.islower() for c in title):
+		prefix = prefix + " *** CHECK ME (lower-case title) *** "
+	if sheet[-1] == 'A':
+		ssheet = sheet[:-1]
+	else:
+		ssheet = sheet
+	if any((c not in digits) for c in ssheet):
+		prefix = prefix + " *** CHECK ME (non-digit sheet number) *** "
+	if any((c not in digits) for c in frame):
+		prefix = prefix + " *** CHECK ME (non-digit frame number) *** "
 	if prefix != "":
 		value["note"] = prefix + value["note"]
 	lastDrawing[type] = drawing
