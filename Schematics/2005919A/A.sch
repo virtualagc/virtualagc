@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:errors-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 1 1
+Sheet 7 10
 Title ""
 Date ""
 Rev ""
@@ -15,19 +15,19 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L AGC_DSKY:SENSEAMP SA301
+L AGC_DSKY:SENSEAMP 7SA1
 U 1 1 5C5C30E4
 P 11150 5850
-AR Path="/5C5B2A2B/5C5C30E4" Ref="SA301"  Part="1" 
-AR Path="/5C92E690/5C5C30E4" Ref="SA401"  Part="1" 
-AR Path="/5C9366D7/5C5C30E4" Ref="SA501"  Part="1" 
-AR Path="/5C93E62E/5C5C30E4" Ref="SA601"  Part="1" 
-AR Path="/5C94DFFB/5C5C30E4" Ref="SA701"  Part="1" 
-AR Path="/5C956110/5C5C30E4" Ref="SA801"  Part="1" 
-AR Path="/5C95E0B5/5C5C30E4" Ref="SA901"  Part="1" 
-AR Path="/5C96678A/5C5C30E4" Ref="SA1001"  Part="1" 
+AR Path="/5C5B2A2B/5C5C30E4" Ref="7SA1"  Part="1" 
+AR Path="/5C92E690/5C5C30E4" Ref="6SA1"  Part="1" 
+AR Path="/5C9366D7/5C5C30E4" Ref="5SA1"  Part="1" 
+AR Path="/5C93E62E/5C5C30E4" Ref="4SA1"  Part="1" 
+AR Path="/5C94DFFB/5C5C30E4" Ref="3SA1"  Part="1" 
+AR Path="/5C956110/5C5C30E4" Ref="2SA1"  Part="1" 
+AR Path="/5C95E0B5/5C5C30E4" Ref="1SA1"  Part="1" 
+AR Path="/5C96678A/5C5C30E4" Ref="8SA1"  Part="1" 
 AR Path="/5C5C30E4" Ref="SA601"  Part="1" 
-F 0 "SA601" H 11075 5750 50  0000 C CNN
+F 0 "3SA1" H 11075 5750 50  0000 C CNN
 F 1 "SENSEAMP" H 11150 6150 140 0001 C CNN
 F 2 "" H 11150 8050 140 0001 C CNN
 F 3 "" H 11150 8050 140 0001 C CNN
@@ -36,19 +36,19 @@ F 4 "SA1" H 11075 5950 180 0000 C CNB "OREFD"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:SENSEAMP SA302
+L AGC_DSKY:SENSEAMP 7SA2
 U 1 1 5C5C59F8
 P 11150 11850
-AR Path="/5C5B2A2B/5C5C59F8" Ref="SA302"  Part="1" 
-AR Path="/5C92E690/5C5C59F8" Ref="SA402"  Part="1" 
-AR Path="/5C9366D7/5C5C59F8" Ref="SA502"  Part="1" 
-AR Path="/5C93E62E/5C5C59F8" Ref="SA602"  Part="1" 
-AR Path="/5C94DFFB/5C5C59F8" Ref="SA702"  Part="1" 
-AR Path="/5C956110/5C5C59F8" Ref="SA802"  Part="1" 
-AR Path="/5C95E0B5/5C5C59F8" Ref="SA902"  Part="1" 
-AR Path="/5C96678A/5C5C59F8" Ref="SA1002"  Part="1" 
+AR Path="/5C5B2A2B/5C5C59F8" Ref="7SA2"  Part="1" 
+AR Path="/5C92E690/5C5C59F8" Ref="6SA2"  Part="1" 
+AR Path="/5C9366D7/5C5C59F8" Ref="5SA2"  Part="1" 
+AR Path="/5C93E62E/5C5C59F8" Ref="4SA2"  Part="1" 
+AR Path="/5C94DFFB/5C5C59F8" Ref="3SA2"  Part="1" 
+AR Path="/5C956110/5C5C59F8" Ref="2SA2"  Part="1" 
+AR Path="/5C95E0B5/5C5C59F8" Ref="1SA2"  Part="1" 
+AR Path="/5C96678A/5C5C59F8" Ref="8SA2"  Part="1" 
 AR Path="/5C5C59F8" Ref="SA602"  Part="1" 
-F 0 "SA602" H 11100 11975 50  0000 C CNN
+F 0 "3SA2" H 11100 11975 50  0000 C CNN
 F 1 "SENSEAMP" H 11150 12150 140 0001 C CNN
 F 2 "" H 11150 14050 140 0001 C CNN
 F 3 "" H 11150 14050 140 0001 C CNN
@@ -57,19 +57,19 @@ F 4 "SA2" H 11075 11800 180 0000 C CNB "OREFD"
 	1    0    0    1   
 $EndComp
 $Comp
-L AGC_DSKY:Transformer2 T301
+L AGC_DSKY:Transformer2 7T1
 U 1 1 5C5CD693
 P 6275 5875
-AR Path="/5C5B2A2B/5C5CD693" Ref="T301"  Part="1" 
-AR Path="/5C92E690/5C5CD693" Ref="T401"  Part="1" 
-AR Path="/5C9366D7/5C5CD693" Ref="T501"  Part="1" 
-AR Path="/5C93E62E/5C5CD693" Ref="T601"  Part="1" 
-AR Path="/5C94DFFB/5C5CD693" Ref="T701"  Part="1" 
-AR Path="/5C956110/5C5CD693" Ref="T801"  Part="1" 
-AR Path="/5C95E0B5/5C5CD693" Ref="T901"  Part="1" 
-AR Path="/5C96678A/5C5CD693" Ref="T1001"  Part="1" 
+AR Path="/5C5B2A2B/5C5CD693" Ref="7T1"  Part="1" 
+AR Path="/5C92E690/5C5CD693" Ref="6T1"  Part="1" 
+AR Path="/5C9366D7/5C5CD693" Ref="5T1"  Part="1" 
+AR Path="/5C93E62E/5C5CD693" Ref="4T1"  Part="1" 
+AR Path="/5C94DFFB/5C5CD693" Ref="3T1"  Part="1" 
+AR Path="/5C956110/5C5CD693" Ref="2T1"  Part="1" 
+AR Path="/5C95E0B5/5C5CD693" Ref="1T1"  Part="1" 
+AR Path="/5C96678A/5C5CD693" Ref="8T1"  Part="1" 
 AR Path="/5C5CD693" Ref="T601"  Part="1" 
-F 0 "T601" H 6225 6650 50  0000 C CNN
+F 0 "3T1" H 6225 6650 50  0000 C CNN
 F 1 "Transformer2" H 6300 7025 130 0001 C CNN
 F 2 "" V 6300 6325 130 0001 C CNN
 F 3 "" V 6300 6325 130 0001 C CNN
@@ -78,19 +78,19 @@ F 4 "T1" H 6225 6800 140 0000 C CNN "OREFD"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Transformer2A T302
+L AGC_DSKY:Transformer2A 7T2
 U 1 1 5C5D9082
 P 6300 11825
-AR Path="/5C5B2A2B/5C5D9082" Ref="T302"  Part="1" 
-AR Path="/5C92E690/5C5D9082" Ref="T402"  Part="1" 
-AR Path="/5C9366D7/5C5D9082" Ref="T502"  Part="1" 
-AR Path="/5C93E62E/5C5D9082" Ref="T602"  Part="1" 
-AR Path="/5C94DFFB/5C5D9082" Ref="T702"  Part="1" 
-AR Path="/5C956110/5C5D9082" Ref="T802"  Part="1" 
-AR Path="/5C95E0B5/5C5D9082" Ref="T902"  Part="1" 
-AR Path="/5C96678A/5C5D9082" Ref="T1002"  Part="1" 
+AR Path="/5C5B2A2B/5C5D9082" Ref="7T2"  Part="1" 
+AR Path="/5C92E690/5C5D9082" Ref="6T2"  Part="1" 
+AR Path="/5C9366D7/5C5D9082" Ref="5T2"  Part="1" 
+AR Path="/5C93E62E/5C5D9082" Ref="4T2"  Part="1" 
+AR Path="/5C94DFFB/5C5D9082" Ref="3T2"  Part="1" 
+AR Path="/5C956110/5C5D9082" Ref="2T2"  Part="1" 
+AR Path="/5C95E0B5/5C5D9082" Ref="1T2"  Part="1" 
+AR Path="/5C96678A/5C5D9082" Ref="8T2"  Part="1" 
 AR Path="/5C5D9082" Ref="T602"  Part="1" 
-F 0 "T602" H 6300 11050 50  0000 C CNN
+F 0 "3T2" H 6300 11050 50  0000 C CNN
 F 1 "Transformer2A" H 6325 12975 130 0001 C CNN
 F 2 "" V 6325 11375 130 0001 C CNN
 F 3 "" V 6325 11375 130 0001 C CNN
@@ -99,19 +99,19 @@ F 4 "T2" H 6300 10900 130 0000 C CNN "OREFD"
 	1    0    0    1   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R301
+L AGC_DSKY:Resistor 7R1
 U 1 1 5C5DAD11
 P 4550 5400
-AR Path="/5C5B2A2B/5C5DAD11" Ref="R301"  Part="1" 
-AR Path="/5C92E690/5C5DAD11" Ref="R401"  Part="1" 
-AR Path="/5C9366D7/5C5DAD11" Ref="R501"  Part="1" 
-AR Path="/5C93E62E/5C5DAD11" Ref="R601"  Part="1" 
-AR Path="/5C94DFFB/5C5DAD11" Ref="R701"  Part="1" 
-AR Path="/5C956110/5C5DAD11" Ref="R801"  Part="1" 
-AR Path="/5C95E0B5/5C5DAD11" Ref="R901"  Part="1" 
-AR Path="/5C96678A/5C5DAD11" Ref="R1001"  Part="1" 
+AR Path="/5C5B2A2B/5C5DAD11" Ref="7R1"  Part="1" 
+AR Path="/5C92E690/5C5DAD11" Ref="6R1"  Part="1" 
+AR Path="/5C9366D7/5C5DAD11" Ref="5R1"  Part="1" 
+AR Path="/5C93E62E/5C5DAD11" Ref="4R1"  Part="1" 
+AR Path="/5C94DFFB/5C5DAD11" Ref="3R1"  Part="1" 
+AR Path="/5C956110/5C5DAD11" Ref="2R1"  Part="1" 
+AR Path="/5C95E0B5/5C5DAD11" Ref="1R1"  Part="1" 
+AR Path="/5C96678A/5C5DAD11" Ref="8R1"  Part="1" 
 AR Path="/5C5DAD11" Ref="R601"  Part="1" 
-F 0 "R601" V 4375 5875 50  0000 C CNN
+F 0 "3R1" V 4375 5875 50  0000 C CNN
 F 1 "2700" V 4600 5775 130 0000 C CNN
 F 2 "" H 4550 5400 130 0001 C CNN
 F 3 "" H 4550 5400 130 0001 C CNN
@@ -120,19 +120,19 @@ F 4 "R1" V 4375 5650 130 0000 C CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R302
+L AGC_DSKY:Resistor 7R2
 U 1 1 5C5DB871
 P 4550 6425
-AR Path="/5C5B2A2B/5C5DB871" Ref="R302"  Part="1" 
-AR Path="/5C92E690/5C5DB871" Ref="R402"  Part="1" 
-AR Path="/5C9366D7/5C5DB871" Ref="R502"  Part="1" 
-AR Path="/5C93E62E/5C5DB871" Ref="R602"  Part="1" 
-AR Path="/5C94DFFB/5C5DB871" Ref="R702"  Part="1" 
-AR Path="/5C956110/5C5DB871" Ref="R802"  Part="1" 
-AR Path="/5C95E0B5/5C5DB871" Ref="R902"  Part="1" 
-AR Path="/5C96678A/5C5DB871" Ref="R1002"  Part="1" 
+AR Path="/5C5B2A2B/5C5DB871" Ref="7R2"  Part="1" 
+AR Path="/5C92E690/5C5DB871" Ref="6R2"  Part="1" 
+AR Path="/5C9366D7/5C5DB871" Ref="5R2"  Part="1" 
+AR Path="/5C93E62E/5C5DB871" Ref="4R2"  Part="1" 
+AR Path="/5C94DFFB/5C5DB871" Ref="3R2"  Part="1" 
+AR Path="/5C956110/5C5DB871" Ref="2R2"  Part="1" 
+AR Path="/5C95E0B5/5C5DB871" Ref="1R2"  Part="1" 
+AR Path="/5C96678A/5C5DB871" Ref="8R2"  Part="1" 
 AR Path="/5C5DB871" Ref="R602"  Part="1" 
-F 0 "R602" V 4375 6900 50  0000 C CNN
+F 0 "3R2" V 4375 6900 50  0000 C CNN
 F 1 "2700" V 4600 6800 130 0000 C CNN
 F 2 "" H 4550 6425 130 0001 C CNN
 F 3 "" H 4550 6425 130 0001 C CNN
@@ -141,19 +141,19 @@ F 4 "R2" V 4375 6675 130 0000 C CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R303
+L AGC_DSKY:Resistor 7R3
 U 1 1 5C5DC27A
 P 4575 11400
-AR Path="/5C5B2A2B/5C5DC27A" Ref="R303"  Part="1" 
-AR Path="/5C92E690/5C5DC27A" Ref="R403"  Part="1" 
-AR Path="/5C9366D7/5C5DC27A" Ref="R503"  Part="1" 
-AR Path="/5C93E62E/5C5DC27A" Ref="R603"  Part="1" 
-AR Path="/5C94DFFB/5C5DC27A" Ref="R703"  Part="1" 
-AR Path="/5C956110/5C5DC27A" Ref="R803"  Part="1" 
-AR Path="/5C95E0B5/5C5DC27A" Ref="R903"  Part="1" 
-AR Path="/5C96678A/5C5DC27A" Ref="R1003"  Part="1" 
+AR Path="/5C5B2A2B/5C5DC27A" Ref="7R3"  Part="1" 
+AR Path="/5C92E690/5C5DC27A" Ref="6R3"  Part="1" 
+AR Path="/5C9366D7/5C5DC27A" Ref="5R3"  Part="1" 
+AR Path="/5C93E62E/5C5DC27A" Ref="4R3"  Part="1" 
+AR Path="/5C94DFFB/5C5DC27A" Ref="3R3"  Part="1" 
+AR Path="/5C956110/5C5DC27A" Ref="2R3"  Part="1" 
+AR Path="/5C95E0B5/5C5DC27A" Ref="1R3"  Part="1" 
+AR Path="/5C96678A/5C5DC27A" Ref="8R3"  Part="1" 
 AR Path="/5C5DC27A" Ref="R603"  Part="1" 
-F 0 "R603" V 4400 11875 50  0000 C CNN
+F 0 "3R3" V 4400 11875 50  0000 C CNN
 F 1 "2700" V 4625 11775 130 0000 C CNN
 F 2 "" H 4575 11400 130 0001 C CNN
 F 3 "" H 4575 11400 130 0001 C CNN
@@ -162,19 +162,19 @@ F 4 "R3" V 4400 11650 130 0000 C CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R304
+L AGC_DSKY:Resistor 7R4
 U 1 1 5C5DCE72
 P 4575 12350
-AR Path="/5C5B2A2B/5C5DCE72" Ref="R304"  Part="1" 
-AR Path="/5C92E690/5C5DCE72" Ref="R404"  Part="1" 
-AR Path="/5C9366D7/5C5DCE72" Ref="R504"  Part="1" 
-AR Path="/5C93E62E/5C5DCE72" Ref="R604"  Part="1" 
-AR Path="/5C94DFFB/5C5DCE72" Ref="R704"  Part="1" 
-AR Path="/5C956110/5C5DCE72" Ref="R804"  Part="1" 
-AR Path="/5C95E0B5/5C5DCE72" Ref="R904"  Part="1" 
-AR Path="/5C96678A/5C5DCE72" Ref="R1004"  Part="1" 
+AR Path="/5C5B2A2B/5C5DCE72" Ref="7R4"  Part="1" 
+AR Path="/5C92E690/5C5DCE72" Ref="6R4"  Part="1" 
+AR Path="/5C9366D7/5C5DCE72" Ref="5R4"  Part="1" 
+AR Path="/5C93E62E/5C5DCE72" Ref="4R4"  Part="1" 
+AR Path="/5C94DFFB/5C5DCE72" Ref="3R4"  Part="1" 
+AR Path="/5C956110/5C5DCE72" Ref="2R4"  Part="1" 
+AR Path="/5C95E0B5/5C5DCE72" Ref="1R4"  Part="1" 
+AR Path="/5C96678A/5C5DCE72" Ref="8R4"  Part="1" 
 AR Path="/5C5DCE72" Ref="R604"  Part="1" 
-F 0 "R604" V 4400 12825 50  0000 C CNN
+F 0 "3R4" V 4400 12825 50  0000 C CNN
 F 1 "2700" V 4625 12725 130 0000 C CNN
 F 2 "" H 4575 12350 130 0001 C CNN
 F 3 "" H 4575 12350 130 0001 C CNN
@@ -183,19 +183,19 @@ F 4 "R4" V 4400 12600 130 0000 C CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R305
+L AGC_DSKY:Resistor 7R5
 U 1 1 5C5DF009
 P 8000 5400
-AR Path="/5C5B2A2B/5C5DF009" Ref="R305"  Part="1" 
-AR Path="/5C92E690/5C5DF009" Ref="R405"  Part="1" 
-AR Path="/5C9366D7/5C5DF009" Ref="R505"  Part="1" 
-AR Path="/5C93E62E/5C5DF009" Ref="R605"  Part="1" 
-AR Path="/5C94DFFB/5C5DF009" Ref="R705"  Part="1" 
-AR Path="/5C956110/5C5DF009" Ref="R805"  Part="1" 
-AR Path="/5C95E0B5/5C5DF009" Ref="R905"  Part="1" 
-AR Path="/5C96678A/5C5DF009" Ref="R1005"  Part="1" 
+AR Path="/5C5B2A2B/5C5DF009" Ref="7R5"  Part="1" 
+AR Path="/5C92E690/5C5DF009" Ref="6R5"  Part="1" 
+AR Path="/5C9366D7/5C5DF009" Ref="5R5"  Part="1" 
+AR Path="/5C93E62E/5C5DF009" Ref="4R5"  Part="1" 
+AR Path="/5C94DFFB/5C5DF009" Ref="3R5"  Part="1" 
+AR Path="/5C956110/5C5DF009" Ref="2R5"  Part="1" 
+AR Path="/5C95E0B5/5C5DF009" Ref="1R5"  Part="1" 
+AR Path="/5C96678A/5C5DF009" Ref="8R5"  Part="1" 
 AR Path="/5C5DF009" Ref="R605"  Part="1" 
-F 0 "R605" V 7825 5875 50  0000 C CNN
+F 0 "3R5" V 7825 5875 50  0000 C CNN
 F 1 "470" V 8050 5775 130 0000 C CNN
 F 2 "" H 8000 5400 130 0001 C CNN
 F 3 "" H 8000 5400 130 0001 C CNN
@@ -204,19 +204,19 @@ F 4 "R5" V 7825 5650 130 0000 C CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R306
+L AGC_DSKY:Resistor 7R6
 U 1 1 5C5E0172
 P 8000 6375
-AR Path="/5C5B2A2B/5C5E0172" Ref="R306"  Part="1" 
-AR Path="/5C92E690/5C5E0172" Ref="R406"  Part="1" 
-AR Path="/5C9366D7/5C5E0172" Ref="R506"  Part="1" 
-AR Path="/5C93E62E/5C5E0172" Ref="R606"  Part="1" 
-AR Path="/5C94DFFB/5C5E0172" Ref="R706"  Part="1" 
-AR Path="/5C956110/5C5E0172" Ref="R806"  Part="1" 
-AR Path="/5C95E0B5/5C5E0172" Ref="R906"  Part="1" 
-AR Path="/5C96678A/5C5E0172" Ref="R1006"  Part="1" 
+AR Path="/5C5B2A2B/5C5E0172" Ref="7R6"  Part="1" 
+AR Path="/5C92E690/5C5E0172" Ref="6R6"  Part="1" 
+AR Path="/5C9366D7/5C5E0172" Ref="5R6"  Part="1" 
+AR Path="/5C93E62E/5C5E0172" Ref="4R6"  Part="1" 
+AR Path="/5C94DFFB/5C5E0172" Ref="3R6"  Part="1" 
+AR Path="/5C956110/5C5E0172" Ref="2R6"  Part="1" 
+AR Path="/5C95E0B5/5C5E0172" Ref="1R6"  Part="1" 
+AR Path="/5C96678A/5C5E0172" Ref="8R6"  Part="1" 
 AR Path="/5C5E0172" Ref="R606"  Part="1" 
-F 0 "R606" V 7825 6850 50  0000 C CNN
+F 0 "3R6" V 7825 6850 50  0000 C CNN
 F 1 "470" V 8050 6750 130 0000 C CNN
 F 2 "" H 8000 6375 130 0001 C CNN
 F 3 "" H 8000 6375 130 0001 C CNN
@@ -225,19 +225,19 @@ F 4 "R6" V 7825 6625 130 0000 C CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R307
+L AGC_DSKY:Resistor 7R7
 U 1 1 5C5E0AA5
 P 8000 11375
-AR Path="/5C5B2A2B/5C5E0AA5" Ref="R307"  Part="1" 
-AR Path="/5C92E690/5C5E0AA5" Ref="R407"  Part="1" 
-AR Path="/5C9366D7/5C5E0AA5" Ref="R507"  Part="1" 
-AR Path="/5C93E62E/5C5E0AA5" Ref="R607"  Part="1" 
-AR Path="/5C94DFFB/5C5E0AA5" Ref="R707"  Part="1" 
-AR Path="/5C956110/5C5E0AA5" Ref="R807"  Part="1" 
-AR Path="/5C95E0B5/5C5E0AA5" Ref="R907"  Part="1" 
-AR Path="/5C96678A/5C5E0AA5" Ref="R1007"  Part="1" 
+AR Path="/5C5B2A2B/5C5E0AA5" Ref="7R7"  Part="1" 
+AR Path="/5C92E690/5C5E0AA5" Ref="6R7"  Part="1" 
+AR Path="/5C9366D7/5C5E0AA5" Ref="5R7"  Part="1" 
+AR Path="/5C93E62E/5C5E0AA5" Ref="4R7"  Part="1" 
+AR Path="/5C94DFFB/5C5E0AA5" Ref="3R7"  Part="1" 
+AR Path="/5C956110/5C5E0AA5" Ref="2R7"  Part="1" 
+AR Path="/5C95E0B5/5C5E0AA5" Ref="1R7"  Part="1" 
+AR Path="/5C96678A/5C5E0AA5" Ref="8R7"  Part="1" 
 AR Path="/5C5E0AA5" Ref="R607"  Part="1" 
-F 0 "R607" V 7825 11850 50  0000 C CNN
+F 0 "3R7" V 7825 11850 50  0000 C CNN
 F 1 "470" V 8050 11750 130 0000 C CNN
 F 2 "" H 8000 11375 130 0001 C CNN
 F 3 "" H 8000 11375 130 0001 C CNN
@@ -246,19 +246,19 @@ F 4 "R7" V 7825 11625 130 0000 C CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R308
+L AGC_DSKY:Resistor 7R8
 U 1 1 5C5E1613
 P 8000 12350
-AR Path="/5C5B2A2B/5C5E1613" Ref="R308"  Part="1" 
-AR Path="/5C92E690/5C5E1613" Ref="R408"  Part="1" 
-AR Path="/5C9366D7/5C5E1613" Ref="R508"  Part="1" 
-AR Path="/5C93E62E/5C5E1613" Ref="R608"  Part="1" 
-AR Path="/5C94DFFB/5C5E1613" Ref="R708"  Part="1" 
-AR Path="/5C956110/5C5E1613" Ref="R808"  Part="1" 
-AR Path="/5C95E0B5/5C5E1613" Ref="R908"  Part="1" 
-AR Path="/5C96678A/5C5E1613" Ref="R1008"  Part="1" 
+AR Path="/5C5B2A2B/5C5E1613" Ref="7R8"  Part="1" 
+AR Path="/5C92E690/5C5E1613" Ref="6R8"  Part="1" 
+AR Path="/5C9366D7/5C5E1613" Ref="5R8"  Part="1" 
+AR Path="/5C93E62E/5C5E1613" Ref="4R8"  Part="1" 
+AR Path="/5C94DFFB/5C5E1613" Ref="3R8"  Part="1" 
+AR Path="/5C956110/5C5E1613" Ref="2R8"  Part="1" 
+AR Path="/5C95E0B5/5C5E1613" Ref="1R8"  Part="1" 
+AR Path="/5C96678A/5C5E1613" Ref="8R8"  Part="1" 
 AR Path="/5C5E1613" Ref="R608"  Part="1" 
-F 0 "R608" V 7825 12825 50  0000 C CNN
+F 0 "3R8" V 7825 12825 50  0000 C CNN
 F 1 "470" V 8050 12725 130 0000 C CNN
 F 2 "" H 8000 12350 130 0001 C CNN
 F 3 "" H 8000 12350 130 0001 C CNN
@@ -267,19 +267,19 @@ F 4 "R8" V 7825 12600 130 0000 C CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R310
+L AGC_DSKY:Resistor 7R10
 U 1 1 5C5E1E2C
 P 11650 9600
-AR Path="/5C5B2A2B/5C5E1E2C" Ref="R310"  Part="1" 
-AR Path="/5C92E690/5C5E1E2C" Ref="R410"  Part="1" 
-AR Path="/5C9366D7/5C5E1E2C" Ref="R510"  Part="1" 
-AR Path="/5C93E62E/5C5E1E2C" Ref="R610"  Part="1" 
-AR Path="/5C94DFFB/5C5E1E2C" Ref="R710"  Part="1" 
-AR Path="/5C956110/5C5E1E2C" Ref="R810"  Part="1" 
-AR Path="/5C95E0B5/5C5E1E2C" Ref="R910"  Part="1" 
-AR Path="/5C96678A/5C5E1E2C" Ref="R1010"  Part="1" 
+AR Path="/5C5B2A2B/5C5E1E2C" Ref="7R10"  Part="1" 
+AR Path="/5C92E690/5C5E1E2C" Ref="6R10"  Part="1" 
+AR Path="/5C9366D7/5C5E1E2C" Ref="5R10"  Part="1" 
+AR Path="/5C93E62E/5C5E1E2C" Ref="4R10"  Part="1" 
+AR Path="/5C94DFFB/5C5E1E2C" Ref="3R10"  Part="1" 
+AR Path="/5C956110/5C5E1E2C" Ref="2R10"  Part="1" 
+AR Path="/5C95E0B5/5C5E1E2C" Ref="1R10"  Part="1" 
+AR Path="/5C96678A/5C5E1E2C" Ref="8R10"  Part="1" 
 AR Path="/5C5E1E2C" Ref="R610"  Part="1" 
-F 0 "R610" V 11500 10225 50  0000 C CNN
+F 0 "3R10" V 11500 10225 50  0000 C CNN
 F 1 "NOM" V 11700 9975 130 0000 C CNN
 F 2 "" H 11650 9600 130 0001 C CNN
 F 3 "" H 11650 9600 130 0001 C CNN
@@ -288,19 +288,19 @@ F 4 "R10" V 11500 9750 130 0000 L CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R309
+L AGC_DSKY:Resistor 7R9
 U 1 1 5C5E2915
 P 11650 8125
-AR Path="/5C5B2A2B/5C5E2915" Ref="R309"  Part="1" 
-AR Path="/5C92E690/5C5E2915" Ref="R409"  Part="1" 
-AR Path="/5C9366D7/5C5E2915" Ref="R509"  Part="1" 
-AR Path="/5C93E62E/5C5E2915" Ref="R609"  Part="1" 
-AR Path="/5C94DFFB/5C5E2915" Ref="R709"  Part="1" 
-AR Path="/5C956110/5C5E2915" Ref="R809"  Part="1" 
-AR Path="/5C95E0B5/5C5E2915" Ref="R909"  Part="1" 
-AR Path="/5C96678A/5C5E2915" Ref="R1009"  Part="1" 
+AR Path="/5C5B2A2B/5C5E2915" Ref="7R9"  Part="1" 
+AR Path="/5C92E690/5C5E2915" Ref="6R9"  Part="1" 
+AR Path="/5C9366D7/5C5E2915" Ref="5R9"  Part="1" 
+AR Path="/5C93E62E/5C5E2915" Ref="4R9"  Part="1" 
+AR Path="/5C94DFFB/5C5E2915" Ref="3R9"  Part="1" 
+AR Path="/5C956110/5C5E2915" Ref="2R9"  Part="1" 
+AR Path="/5C95E0B5/5C5E2915" Ref="1R9"  Part="1" 
+AR Path="/5C96678A/5C5E2915" Ref="8R9"  Part="1" 
 AR Path="/5C5E2915" Ref="R609"  Part="1" 
-F 0 "R609" V 11500 8750 50  0000 C CNN
+F 0 "3R9" V 11500 8750 50  0000 C CNN
 F 1 "NOM" V 11700 8500 130 0000 C CNN
 F 2 "" H 11650 8125 130 0001 C CNN
 F 3 "" H 11650 8125 130 0001 C CNN
@@ -309,19 +309,19 @@ F 4 "R9" V 11500 8275 130 0000 L CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R312
+L AGC_DSKY:Resistor 7R13
 U 1 1 5C5E3868
 P 13975 8150
-AR Path="/5C5B2A2B/5C5E3868" Ref="R312"  Part="1" 
-AR Path="/5C92E690/5C5E3868" Ref="R412"  Part="1" 
-AR Path="/5C9366D7/5C5E3868" Ref="R512"  Part="1" 
-AR Path="/5C93E62E/5C5E3868" Ref="R612"  Part="1" 
-AR Path="/5C94DFFB/5C5E3868" Ref="R712"  Part="1" 
-AR Path="/5C956110/5C5E3868" Ref="R812"  Part="1" 
-AR Path="/5C95E0B5/5C5E3868" Ref="R912"  Part="1" 
-AR Path="/5C96678A/5C5E3868" Ref="R1012"  Part="1" 
+AR Path="/5C5B2A2B/5C5E3868" Ref="7R13"  Part="1" 
+AR Path="/5C92E690/5C5E3868" Ref="6R13"  Part="1" 
+AR Path="/5C9366D7/5C5E3868" Ref="5R13"  Part="1" 
+AR Path="/5C93E62E/5C5E3868" Ref="4R13"  Part="1" 
+AR Path="/5C94DFFB/5C5E3868" Ref="3R13"  Part="1" 
+AR Path="/5C956110/5C5E3868" Ref="2R13"  Part="1" 
+AR Path="/5C95E0B5/5C5E3868" Ref="1R13"  Part="1" 
+AR Path="/5C96678A/5C5E3868" Ref="8R13"  Part="1" 
 AR Path="/5C5E3868" Ref="R612"  Part="1" 
-F 0 "R612" V 13825 8775 50  0000 C CNN
+F 0 "3R13" V 13825 8775 50  0000 C CNN
 F 1 "1000" V 14025 8525 130 0000 C CNN
 F 2 "" H 13975 8150 130 0001 C CNN
 F 3 "" H 13975 8150 130 0001 C CNN
@@ -330,19 +330,19 @@ F 4 "R13" V 13825 8300 130 0000 L CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R313
+L AGC_DSKY:Resistor 7R14
 U 1 1 5C5E3E61
 P 13975 9575
-AR Path="/5C5B2A2B/5C5E3E61" Ref="R313"  Part="1" 
-AR Path="/5C92E690/5C5E3E61" Ref="R413"  Part="1" 
-AR Path="/5C9366D7/5C5E3E61" Ref="R513"  Part="1" 
-AR Path="/5C93E62E/5C5E3E61" Ref="R613"  Part="1" 
-AR Path="/5C94DFFB/5C5E3E61" Ref="R713"  Part="1" 
-AR Path="/5C956110/5C5E3E61" Ref="R813"  Part="1" 
-AR Path="/5C95E0B5/5C5E3E61" Ref="R913"  Part="1" 
-AR Path="/5C96678A/5C5E3E61" Ref="R1013"  Part="1" 
+AR Path="/5C5B2A2B/5C5E3E61" Ref="7R14"  Part="1" 
+AR Path="/5C92E690/5C5E3E61" Ref="6R14"  Part="1" 
+AR Path="/5C9366D7/5C5E3E61" Ref="5R14"  Part="1" 
+AR Path="/5C93E62E/5C5E3E61" Ref="4R14"  Part="1" 
+AR Path="/5C94DFFB/5C5E3E61" Ref="3R14"  Part="1" 
+AR Path="/5C956110/5C5E3E61" Ref="2R14"  Part="1" 
+AR Path="/5C95E0B5/5C5E3E61" Ref="1R14"  Part="1" 
+AR Path="/5C96678A/5C5E3E61" Ref="8R14"  Part="1" 
 AR Path="/5C5E3E61" Ref="R613"  Part="1" 
-F 0 "R613" V 13825 10200 50  0000 C CNN
+F 0 "3R14" V 13825 10200 50  0000 C CNN
 F 1 "5100" V 14025 9950 130 0000 C CNN
 F 2 "" H 13975 9575 130 0001 C CNN
 F 3 "" H 13975 9575 130 0001 C CNN
@@ -351,19 +351,19 @@ F 4 "R14" V 13825 9725 130 0000 L CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R314
+L AGC_DSKY:Resistor 7R12
 U 1 1 5C5E4528
 P 14275 12375
-AR Path="/5C5B2A2B/5C5E4528" Ref="R314"  Part="1" 
-AR Path="/5C92E690/5C5E4528" Ref="R414"  Part="1" 
-AR Path="/5C9366D7/5C5E4528" Ref="R514"  Part="1" 
-AR Path="/5C93E62E/5C5E4528" Ref="R614"  Part="1" 
-AR Path="/5C94DFFB/5C5E4528" Ref="R714"  Part="1" 
-AR Path="/5C956110/5C5E4528" Ref="R814"  Part="1" 
-AR Path="/5C95E0B5/5C5E4528" Ref="R914"  Part="1" 
-AR Path="/5C96678A/5C5E4528" Ref="R1014"  Part="1" 
+AR Path="/5C5B2A2B/5C5E4528" Ref="7R12"  Part="1" 
+AR Path="/5C92E690/5C5E4528" Ref="6R12"  Part="1" 
+AR Path="/5C9366D7/5C5E4528" Ref="5R12"  Part="1" 
+AR Path="/5C93E62E/5C5E4528" Ref="4R12"  Part="1" 
+AR Path="/5C94DFFB/5C5E4528" Ref="3R12"  Part="1" 
+AR Path="/5C956110/5C5E4528" Ref="2R12"  Part="1" 
+AR Path="/5C95E0B5/5C5E4528" Ref="1R12"  Part="1" 
+AR Path="/5C96678A/5C5E4528" Ref="8R12"  Part="1" 
 AR Path="/5C5E4528" Ref="R614"  Part="1" 
-F 0 "R614" V 14125 13000 50  0000 C CNN
+F 0 "3R12" V 14125 13000 50  0000 C CNN
 F 1 "2000" V 14375 12750 130 0000 C CNN
 F 2 "" H 14275 12375 130 0001 C CNN
 F 3 "" H 14275 12375 130 0001 C CNN
@@ -372,19 +372,19 @@ F 4 "R12" V 14125 12525 130 0000 L CNN "OREFD"
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Resistor R311
+L AGC_DSKY:Resistor 7R11
 U 1 1 5C5E4F94
 P 13150 11850
-AR Path="/5C5B2A2B/5C5E4F94" Ref="R311"  Part="1" 
-AR Path="/5C92E690/5C5E4F94" Ref="R411"  Part="1" 
-AR Path="/5C9366D7/5C5E4F94" Ref="R511"  Part="1" 
-AR Path="/5C93E62E/5C5E4F94" Ref="R611"  Part="1" 
-AR Path="/5C94DFFB/5C5E4F94" Ref="R711"  Part="1" 
-AR Path="/5C956110/5C5E4F94" Ref="R811"  Part="1" 
-AR Path="/5C95E0B5/5C5E4F94" Ref="R911"  Part="1" 
-AR Path="/5C96678A/5C5E4F94" Ref="R1011"  Part="1" 
+AR Path="/5C5B2A2B/5C5E4F94" Ref="7R11"  Part="1" 
+AR Path="/5C92E690/5C5E4F94" Ref="6R11"  Part="1" 
+AR Path="/5C9366D7/5C5E4F94" Ref="5R11"  Part="1" 
+AR Path="/5C93E62E/5C5E4F94" Ref="4R11"  Part="1" 
+AR Path="/5C94DFFB/5C5E4F94" Ref="3R11"  Part="1" 
+AR Path="/5C956110/5C5E4F94" Ref="2R11"  Part="1" 
+AR Path="/5C95E0B5/5C5E4F94" Ref="1R11"  Part="1" 
+AR Path="/5C96678A/5C5E4F94" Ref="8R11"  Part="1" 
 AR Path="/5C5E4F94" Ref="R611"  Part="1" 
-F 0 "R611" H 12925 12050 50  0000 C CNN
+F 0 "3R11" H 12925 12050 50  0000 C CNN
 F 1 "1000" H 13175 12250 130 0000 C CNN
 F 2 "" H 13150 11850 130 0001 C CNN
 F 3 "" H 13150 11850 130 0001 C CNN
@@ -393,19 +393,19 @@ F 4 "R11" H 13000 12050 130 0000 L CNN "OREFD"
 	-1   0    0    1   
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-PNP Q301
+L AGC_DSKY:Transistor-PNP 7Q1
 U 1 1 5C5E622F
 P 14275 10350
-AR Path="/5C5B2A2B/5C5E622F" Ref="Q301"  Part="1" 
-AR Path="/5C92E690/5C5E622F" Ref="Q401"  Part="1" 
-AR Path="/5C9366D7/5C5E622F" Ref="Q501"  Part="1" 
-AR Path="/5C93E62E/5C5E622F" Ref="Q601"  Part="1" 
-AR Path="/5C94DFFB/5C5E622F" Ref="Q701"  Part="1" 
-AR Path="/5C956110/5C5E622F" Ref="Q801"  Part="1" 
-AR Path="/5C95E0B5/5C5E622F" Ref="Q901"  Part="1" 
-AR Path="/5C96678A/5C5E622F" Ref="Q1001"  Part="1" 
+AR Path="/5C5B2A2B/5C5E622F" Ref="7Q1"  Part="1" 
+AR Path="/5C92E690/5C5E622F" Ref="6Q1"  Part="1" 
+AR Path="/5C9366D7/5C5E622F" Ref="5Q1"  Part="1" 
+AR Path="/5C93E62E/5C5E622F" Ref="4Q1"  Part="1" 
+AR Path="/5C94DFFB/5C5E622F" Ref="3Q1"  Part="1" 
+AR Path="/5C956110/5C5E622F" Ref="2Q1"  Part="1" 
+AR Path="/5C95E0B5/5C5E622F" Ref="1Q1"  Part="1" 
+AR Path="/5C96678A/5C5E622F" Ref="8Q1"  Part="1" 
 AR Path="/5C5E622F" Ref="Q601"  Part="1" 
-F 0 "Q601" V 14175 9775 50  0000 C CNN
+F 0 "3Q1" V 14175 9775 50  0000 C CNN
 F 1 "Transistor-PNP" H 14275 10915 130 0001 C CNN
 F 2 "" H 14275 10100 130 0001 C CNN
 F 3 "" H 14275 10100 130 0001 C CNN
@@ -670,9 +670,9 @@ Wire Wire Line
 Wire Wire Line
 	13975 9975 13975 10125
 Text Notes 1550 33075 0    140  ~ 28
-Notes from the Virtual AGC Project:\n4. Reference designators of components in this circuit block are represented in two\n   ways: a large designator (such as "R7") next to another one (such as "R805") in \n   small print.  The larger ones are the reference designators as shown in the\n   original Apollo Program drawing, and are the same in each instance of this \n   circuit block.  The smaller are unique reference designators used by the CAD \n   system for purposes such as netlist generation, and differ in each instance of \n   this circuit block.\n
+Notes from the Virtual AGC Project:\nd) Reference designators of components in this circuit block are represented in two\n   ways: a large designator (such as "R7") next to another one (such as "2R7") in \n   small print.  The larger ones are the reference designators as shown in the\n   original Apollo Program drawing, and are the same in each instance of this \n   circuit block.  The smaller are unique reference designators used by the CAD \n   system for purposes such as netlist generation, and differ in each instance of \n   this circuit block, but are supposed to match the INSULATOR drawings.  \n   — RSB 2019\n
 $Bitmap
-Pos 1150 31425
+Pos 1250 31175
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 

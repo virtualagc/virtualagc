@@ -1,5 +1,5 @@
 EESchema Schematic File Version 5
-LIBS:errors-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
@@ -108,26 +108,26 @@ Wire Notes Line
 Wire Notes Line
 	34875 4675 28750 4675
 $Comp
-L AGC_DSKY:Transistor-NPN Q3
+L AGC_DSKY:Transistor-PNP Q3
 U 1 1 5C62FBCA
 P 33600 10475
-F 0 "Q3" H 34125 10650 130 0000 C CNN
-F 1 "Transistor-NPN" H 33600 11040 130 0001 C CNN
+F 0 "Q3" H 34050 10225 130 0000 C CNN
+F 1 "Transistor-PNP" H 33600 11040 130 0001 C CNN
 F 2 "" H 33600 10725 130 0001 C CNN
 F 3 "" H 33600 10725 130 0001 C CNN
 	1    33600 10475
-	1    0    0    -1  
+	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-NPN Q2
 U 1 1 5C630F6D
 P 32225 8200
-F 0 "Q2" H 32625 8450 130 0000 C CNN
+F 0 "Q2" H 32675 7950 130 0000 C CNN
 F 1 "Transistor-NPN" H 32225 8765 130 0001 C CNN
 F 2 "" H 32225 8450 130 0001 C CNN
 F 3 "" H 32225 8450 130 0001 C CNN
 	1    32225 8200
-	1    0    0    -1  
+	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R16
@@ -266,8 +266,6 @@ Wire Wire Line
 Connection ~ 34600 9775
 Wire Wire Line
 	34600 9775 35500 9775
-Wire Wire Line
-	33750 11175 33750 10725
 Wire Wire Line
 	34600 11225 34600 12125
 Wire Wire Line
@@ -2161,14 +2159,14 @@ F 4 "GBR16" H 19475 10475 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 40 1 5E0B4E05
-P 9600 5250
-F 0 "J2" H 9600 5575 140 0001 C CNN
-F 1 "ConnectorB8-200" H 9600 5675 140 0001 C CNN
-F 2 "" H 9600 5725 140 0001 C CNN
-F 3 "" H 9600 5725 140 0001 C CNN
-F 4 "GAR04" H 8875 5175 140 0000 C BNB "Caption"
-	40   9600 5250
+U 48 1 5E0B4E05
+P 9575 5250
+F 0 "J2" H 9575 5575 140 0001 C CNN
+F 1 "ConnectorB8-200" H 9575 5675 140 0001 C CNN
+F 2 "" H 9575 5725 140 0001 C CNN
+F 3 "" H 9575 5725 140 0001 C CNN
+F 4 "GAR04" H 8850 5175 140 0000 C BNB "Caption"
+	48   9575 5250
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -2546,7 +2544,7 @@ Wire Wire Line
 Wire Wire Line
 	10200 5650 9875 5650
 Wire Wire Line
-	10200 5250 9875 5250
+	10200 5250 9850 5250
 Text GLabel 6875 10150 2    140  UnSpc ~ 0
 VYF1
 Wire Wire Line
@@ -2646,7 +2644,7 @@ Text Notes 13500 3675 0    140  ~ 28
 Text Notes 33750 22925 0    140  ~ 28
 REF DWG.
 Text Notes 35700 23300 0    140  ~ 28
-SENSE AMPLIFIER ASSY DWG NO. 2003982
+SENSE AMPLIFIER ASSY DWG NO. 2003981
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
 U 69 2 5DF01688
@@ -2689,7 +2687,7 @@ NOTES:
 Text Notes 2025 29850 0    140  ~ 28
 1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS\n   PRESCRIBED BY MIL-D-70327\n2. RESISTOR VALUES SHALL BE IN OHMS UNLESS OTHERWISE SPECIFIED\n3. CAPACITOR VALUES SHALL BE IN MICROFARADS UNLESS OTHERWISE SPECIFIED\n4. NOMINAL VALUES ARE TO BE SELECTED BY ELECTRICAL TEST, CHART A AND B\n5. ONE, TWO OR THREE DIODES TO BE SELECTED BY ELECTRICAL TEST
 Text Notes 2025 33375 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was adapted from a CAD drawing previously transcribed from \n   the original Apollo Program drawing 2005920B, and then cross-checked against \n   the original Apollo Program drawing 2005919A.  However, this CAD drawing does\n   not itself date from the Apollo period. — RSB 2018\n2. The oval pads numbered 101-169 comprise connector J1, while those numbered\n   201-269 comprise connector J2. — RSB 2018\n3. The CAD drawing differs in the visual appearance of circuits 40611 - 40618, \n   compared to the original drawing.  This was necessary to correctly represent \n   the electrical connectivity for these circuits, since the original drawing provided \n   that information in tabular form rather than using wires or net labels to do so.\n   A separate drawing has been created that matches the visual appearance of the\n   original drawing. — RSB 2018
+Notes from the Virtual AGC Project:\na) This CAD drawing was adapted from a CAD drawing previously transcribed from \n   the original Apollo Program drawing 2005920B, and then cross-checked against \n   the original Apollo Program drawing 2005919A.  However, this CAD drawing does\n   not itself date from the Apollo period. — RSB 2018\nb) The oval pads numbered 101-169 comprise connector J1, while those numbered\n   201-269 comprise connector J2. — RSB 2018\nc) The CAD drawing differs in the visual appearance of circuits 40611 - 40618, \n   compared to the original drawing.  This was necessary to correctly represent \n   the electrical connectivity for these circuits, since the original drawing provided \n   that information in tabular form rather than using wires or net labels to do so.\n   A separate drawing has been created that matches the visual appearance of the\n   original drawing. — RSB 2018
 $Bitmap
 Pos 1725 30500
 Scale 1.000000
@@ -3672,4 +3670,6 @@ Wire Wire Line
 	17400 19400 18900 19400
 Wire Wire Line
 	17400 19400 17400 18925
+Wire Wire Line
+	33750 11175 33750 10725
 $EndSCHEMATC

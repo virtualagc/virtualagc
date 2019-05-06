@@ -18,20 +18,20 @@ $Sheet
 S 15250 11550 5450 8975
 U 5B8E7731
 F0 "1" 140
-F1 "2005919A-p1of2.sch" 140
+F1 "2005929A-p1of2.sch" 140
 $EndSheet
 $Sheet
 S 25125 11550 5450 8975
 U 5B8E7796
 F0 "2" 140
-F1 "2005919A-p2of2.sch" 140
+F1 "2005929A-p2of2.sch" 140
 $EndSheet
 Text Notes 1550 32850 0    500  ~ 100
 NOTE: The sheets of this CAD drawing are \nintended to match only the appearance\nof the original Apollo Program drawing,\nand are not ELECTRICALLY valid.
 Text Notes 39659 31724 0    250  ~ 50
 SCHEMATIC
 Text Notes 40884 33124 0    250  ~ 50
-2005919
+2005929
 Text Notes 38259 33124 0    250  ~ 50
 80230
 Text Notes 38659 32074 0    200  ~ 40
@@ -81,17 +81,17 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	35234 31799 35309 31699
 Wire Notes Line style solid
-	37964 1435 43489 1435
+	37964 1135 43489 1135
 Wire Notes Line style solid
-	42461 916  42461 1435
-Text Notes 38114 1260 0    140  ~ 28
+	42461 916  42461 1135
+Text Notes 38150 1125 0    125  ~ 25
 A
-Text Notes 38539 1385 0    140  ~ 28
-REVISED PER TDRR 30751\nDR     CHK      APPD
+Text Notes 38500 1125 0    125  ~ 25
+INITIAL RELEASE PER TDRR 32559
 Wire Notes Line style solid
-	41795 916  41795 1435
+	41795 916  41795 1135
 Wire Notes Line style solid
-	38462 916  38462 1435
+	38462 916  38462 1135
 Wire Notes Line style solid
-	37961 916  37961 1435
+	37961 916  37961 1135
 $EndSCHEMATC
