@@ -15,559 +15,543 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Wire Notes Line style solid rgb(0, 0, 0)
-	6330 2958 6330 2960
+	6480 2908 6480 2910
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 2967 8582 2967
+	1732 2917 8732 2917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 3217 8582 3217
+	1732 3167 8732 3167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 3467 8582 3467
+	1732 3417 8732 3417
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 4217 8582 4217
+	1732 4167 8732 4167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 3967 8582 3967
+	1732 3917 8732 3917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 3717 8582 3717
+	1732 3667 8732 3667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 4467 8582 4467
+	1732 4417 8732 4417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 4717 1582 4717
+	8732 4667 1732 4667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 4967 8582 4967
+	1732 4917 8732 4917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 5217 1582 5217
+	8732 5167 1732 5167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 5467 8582 5467
+	1732 5417 8732 5417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 5717 1582 5717
+	8732 5667 1732 5667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 5967 8582 5967
+	1732 5917 8732 5917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 6217 1582 6217
+	8732 6167 1732 6167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 6467 8582 6467
+	1732 6417 8732 6417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 8967 1582 8967
+	8732 8917 1732 8917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 6967 8582 6967
+	1732 6917 8732 6917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 7217 1582 7217
+	8732 7167 1732 7167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 7467 8582 7467
+	1732 7417 8732 7417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 7717 1582 7717
+	8732 7667 1732 7667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 7967 8582 7967
+	1732 7917 8732 7917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 8217 1582 8217
+	8732 8167 1732 8167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 8467 8582 8467
+	1732 8417 8732 8417
 Wire Notes Line style solid rgb(0, 0, 0)
-	5912 8675 5912 8677
+	1732 8667 8732 8667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 8717 8582 8717
+	1732 9167 8732 9167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 9217 8582 9217
+	1732 9917 8732 9917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 9967 8582 9967
+	1732 9667 8732 9667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 9717 8582 9717
+	1732 9417 8732 9417
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 9467 8582 9467
+	1732 10167 8732 10167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 10217 8582 10217
+	8732 10417 1732 10417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 10467 1582 10467
+	1732 10667 8732 10667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 10717 8582 10717
+	8732 10917 1732 10917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 10967 1582 10967
+	1732 11167 8732 11167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 11217 8582 11217
+	8732 11417 1732 11417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 11467 1582 11467
+	1732 11667 8732 11667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 11717 8582 11717
+	8732 11917 1732 11917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 11967 1582 11967
+	1732 12167 8732 12167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 12217 8582 12217
+	8732 12417 1732 12417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 12467 1582 12467
+	1732 12667 8732 12667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 12717 8582 12717
+	8732 12917 1732 12917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 12967 1582 12967
+	1732 13167 8732 13167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 13217 8582 13217
+	8732 13417 1732 13417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 13467 1582 13467
+	1732 13667 8732 13667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 13717 8582 13717
+	8732 13917 1732 13917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 13967 1582 13967
+	1732 14167 8732 14167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 14217 8582 14217
+	1732 14417 8732 14417
 Wire Notes Line style solid rgb(0, 0, 0)
-	5912 14425 5912 14427
+	1732 14667 8732 14667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 14467 8582 14467
+	1732 14917 8732 14917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 14717 8582 14717
+	1732 15667 8732 15667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 14967 8582 14967
+	1732 15417 8732 15417
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 15717 8582 15717
+	1732 15167 8732 15167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 15467 8582 15467
+	1732 15917 8732 15917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 15217 8582 15217
+	8732 16167 1732 16167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 15967 8582 15967
+	1732 16417 8732 16417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 16217 1582 16217
+	8732 16667 1732 16667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 16467 8582 16467
+	1732 16917 8732 16917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 16717 1582 16717
+	8732 17167 1732 17167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 16967 8582 16967
-Wire Notes Line style solid rgb(0, 0, 0)
-	8582 17217 1582 17217
-Wire Notes Line style solid rgb(0, 0, 0)
-	1582 6717 8582 6717
-Text Notes 1582 3192 0    130  ~ 26
-REF DEG
-Text Notes 2782 3192 0    130  ~ 26
+	1732 6667 8732 6667
+Text Notes 1732 3142 0    130  ~ 26
+REF DES
+Text Notes 2932 3142 0    130  ~ 26
 PART NO.
-Text Notes 4082 3192 0    130  ~ 26
+Text Notes 4232 3142 0    130  ~ 26
 DESCRIPTION
-Text Notes 5757 3192 0    130  ~ 26
+Text Notes 5907 3142 0    130  ~ 26
 VALUE
-Text Notes 6857 3192 0    130  ~ 26
+Text Notes 7007 3142 0    130  ~ 26
 TOL.
-Text Notes 7682 3192 0    130  ~ 26
+Text Notes 7832 3142 0    130  ~ 26
 RATING
-Text Notes 1932 3442 0    130  ~ 26
+Text Notes 2082 3392 0    130  ~ 26
 R1
-Text Notes 1932 3692 0    130  ~ 26
+Text Notes 2082 3642 0    130  ~ 26
 R2
-Text Notes 1932 3942 0    130  ~ 26
+Text Notes 2082 3892 0    130  ~ 26
 R3
-Text Notes 1932 4192 0    130  ~ 26
+Text Notes 2082 4142 0    130  ~ 26
 R4
-Text Notes 1932 4442 0    130  ~ 26
+Text Notes 2082 4392 0    130  ~ 26
 R5
-Text Notes 1932 4692 0    130  ~ 26
+Text Notes 2082 4642 0    130  ~ 26
 R6
-Text Notes 1932 4942 0    130  ~ 26
+Text Notes 2082 4892 0    130  ~ 26
 R7
-Text Notes 1932 5192 0    130  ~ 26
+Text Notes 2082 5142 0    130  ~ 26
 R8
-Text Notes 1932 5442 0    130  ~ 26
+Text Notes 2082 5392 0    130  ~ 26
 R9
-Text Notes 1857 5692 0    130  ~ 26
+Text Notes 2007 5642 0    130  ~ 26
 R10
-Text Notes 1857 5942 0    130  ~ 26
+Text Notes 2007 5892 0    130  ~ 26
 R11
-Text Notes 1857 6192 0    130  ~ 26
+Text Notes 2007 6142 0    130  ~ 26
 R12
-Text Notes 1857 6442 0    130  ~ 26
+Text Notes 2007 6392 0    130  ~ 26
 R13
-Text Notes 1857 6692 0    130  ~ 26
+Text Notes 2007 6642 0    130  ~ 26
 R14
-Text Notes 1857 6942 0    130  ~ 26
+Text Notes 2007 6892 0    130  ~ 26
 R15
-Text Notes 1857 7192 0    130  ~ 26
+Text Notes 2007 7142 0    130  ~ 26
 R16
-Text Notes 1857 7442 0    130  ~ 26
+Text Notes 2007 7392 0    130  ~ 26
 R17
-Text Notes 1857 7692 0    130  ~ 26
+Text Notes 2007 7642 0    130  ~ 26
 R18
-Text Notes 1857 7942 0    130  ~ 26
+Text Notes 2007 7892 0    130  ~ 26
 R19
-Text Notes 1857 8192 0    130  ~ 26
+Text Notes 2007 8142 0    130  ~ 26
 R20
-Text Notes 1857 8442 0    130  ~ 26
+Text Notes 2007 8392 0    130  ~ 26
 R21
-Text Notes 1857 8692 0    130  ~ 26
+Text Notes 2007 8642 0    130  ~ 26
 R22
-Text Notes 1857 8942 0    130  ~ 26
+Text Notes 2007 8892 0    130  ~ 26
 R23
-Text Notes 1857 9192 0    130  ~ 26
+Text Notes 2007 9142 0    130  ~ 26
 R24
-Text Notes 1957 10192 0    130  ~ 26
+Text Notes 2107 10142 0    130  ~ 26
 C1
-Text Notes 2582 3442 0    130  ~ 26
+Text Notes 2732 3392 0    130  ~ 26
 1006750-56
-Text Notes 2607 4192 0    130  ~ 26
+Text Notes 2757 4142 0    130  ~ 26
 1006750-56
-Text Notes 2607 4442 0    130  ~ 26
+Text Notes 2757 4392 0    130  ~ 26
 1006750-62
-Text Notes 2607 4692 0    130  ~ 26
+Text Notes 2757 4642 0    130  ~ 26
 1006750-56
-Text Notes 2607 4942 0    130  ~ 26
+Text Notes 2757 4892 0    130  ~ 26
 1006750-56
-Text Notes 2607 5442 0    130  ~ 26
+Text Notes 2757 5392 0    130  ~ 26
 1006750-56
-Text Notes 2607 5192 0    130  ~ 26
+Text Notes 2757 5142 0    130  ~ 26
 1006750-62
-Text Notes 2607 5692 0    130  ~ 26
+Text Notes 2757 5642 0    130  ~ 26
 1006750-62
-Text Notes 2607 5942 0    130  ~ 26
+Text Notes 2757 5892 0    130  ~ 26
 1006750-56
-Text Notes 2607 9192 0    130  ~ 26
+Text Notes 2757 9142 0    130  ~ 26
 1006750-56
-Text Notes 4282 3442 0    130  ~ 26
+Text Notes 4432 3392 0    130  ~ 26
 RESISTOR
-Text Notes 4315 9440 0    130  ~ 26
+Text Notes 4465 9390 0    130  ~ 26
 RESISTOR
-Text Notes 4707 3642 0    130  ~ 26
-↑
 Wire Notes Line width 33 style solid
-	4804 3611 4804 9172
+	4954 3561 4954 9122
 Wire Notes Line
-	4812 8917 4807 8917
+	4962 8867 4957 8867
 Wire Notes Line
-	4807 8917 4807 8907
-Text Notes 4707 9213 0    130  ~ 26
+	4957 8867 4957 8857
+Text Notes 4857 9163 0    130  ~ 26
 ↓
 Wire Notes Line
-	3287 8897 3297 8897
+	3437 8847 3447 8847
 Wire Notes Line
-	3297 8897 3297 8902
-Text Notes 7782 3442 0    130  ~ 26
+	3447 8847 3447 8852
+Text Notes 7932 3392 0    130  ~ 26
 1/4W
-Text Notes 6832 3442 0    130  ~ 26
+Text Notes 6982 3392 0    130  ~ 26
 ±2%
-Text Notes 5832 3442 0    130  ~ 26
+Text Notes 5982 3392 0    130  ~ 26
 10K
-Text Notes 5832 4192 0    130  ~ 26
+Text Notes 5982 4142 0    130  ~ 26
 10K
-Text Notes 6957 3642 0    130  ~ 26
+Text Notes 8132 3617 0    130  ~ 26
 ↑
-Text Notes 7982 3642 0    130  ~ 26
-↑
-Text Notes 5832 4442 0    130  ~ 26
+Text Notes 5982 4392 0    130  ~ 26
 18K
-Text Notes 5832 4692 0    130  ~ 26
+Text Notes 5982 4642 0    130  ~ 26
 10K
-Text Notes 5832 4942 0    130  ~ 26
+Text Notes 5982 4892 0    130  ~ 26
 10K
-Text Notes 5832 5192 0    130  ~ 26
+Text Notes 5982 5142 0    130  ~ 26
 18K
-Text Notes 5832 5442 0    130  ~ 26
+Text Notes 5982 5392 0    130  ~ 26
 10K
-Text Notes 5832 5942 0    130  ~ 26
+Text Notes 5982 5892 0    130  ~ 26
 10K
-Text Notes 5832 5692 0    130  ~ 26
+Text Notes 5982 5642 0    130  ~ 26
 18K
-Text Notes 5875 9185 0    130  ~ 26
+Text Notes 6025 9135 0    130  ~ 26
 10K
-Text Notes 6840 9440 0    130  ~ 26
+Text Notes 6990 9390 0    130  ~ 26
 ±2%
-Text Notes 7800 9440 0    130  ~ 26
+Text Notes 7950 9390 0    130  ~ 26
 1/4W
-Text Notes 6957 9211 0    130  ~ 26
+Text Notes 7107 9161 0    130  ~ 26
 ↓
-Text Notes 7982 9208 0    130  ~ 26
+Text Notes 8132 9158 0    130  ~ 26
 ↓
 Wire Notes Line width 33 style solid
-	7054 9176 7054 3611
-Wire Notes Line
-	7057 3642 7082 3642
+	7204 9126 7204 3561
 Wire Notes Line width 33 style solid
-	8079 3617 8079 9173
-Text Notes 1957 10442 0    130  ~ 26
+	8229 3567 8229 9123
+Text Notes 2107 10392 0    130  ~ 26
 C2
-Text Notes 1957 10692 0    130  ~ 26
+Text Notes 2107 10642 0    130  ~ 26
 C3
-Text Notes 1957 10942 0    130  ~ 26
+Text Notes 2107 10892 0    130  ~ 26
 C4
-Text Notes 1957 11192 0    130  ~ 26
+Text Notes 2107 11142 0    130  ~ 26
 C5
-Text Notes 1957 11442 0    130  ~ 26
+Text Notes 2107 11392 0    130  ~ 26
 C6
-Text Notes 1957 11692 0    130  ~ 26
+Text Notes 2107 11642 0    130  ~ 26
 C7
-Text Notes 1957 12442 0    130  ~ 26
+Text Notes 2107 12392 0    130  ~ 26
 L1
-Text Notes 1957 12692 0    130  ~ 26
+Text Notes 2107 12642 0    130  ~ 26
 L2
-Text Notes 1932 13192 0    130  ~ 26
+Text Notes 2082 13142 0    130  ~ 26
 Q1
-Text Notes 1932 13442 0    130  ~ 26
+Text Notes 2082 13392 0    130  ~ 26
 Q2
-Text Notes 1932 13692 0    130  ~ 26
+Text Notes 2082 13642 0    130  ~ 26
 Q3
-Text Notes 1932 13942 0    130  ~ 26
+Text Notes 2082 13892 0    130  ~ 26
 Q4
-Text Notes 1932 14192 0    130  ~ 26
+Text Notes 2082 14142 0    130  ~ 26
 Q5
-Text Notes 1932 14442 0    130  ~ 26
+Text Notes 2082 14392 0    130  ~ 26
 Q6
-Text Notes 1932 14692 0    130  ~ 26
+Text Notes 2082 14642 0    130  ~ 26
 Q7
-Text Notes 1932 14942 0    130  ~ 26
+Text Notes 2082 14892 0    130  ~ 26
 Q8
-Text Notes 1932 15192 0    130  ~ 26
+Text Notes 2082 15142 0    130  ~ 26
 Q9
-Text Notes 1857 15442 0    130  ~ 26
+Text Notes 2007 15392 0    130  ~ 26
 Q10
-Text Notes 1857 15692 0    130  ~ 26
+Text Notes 2007 15642 0    130  ~ 26
 Q11
-Text Notes 1857 15942 0    130  ~ 26
+Text Notes 2007 15892 0    130  ~ 26
 Q12
-Text Notes 1857 16192 0    130  ~ 26
+Text Notes 2007 16142 0    130  ~ 26
 Q13
-Text Notes 2600 10195 0    130  ~ 26
+Text Notes 2750 10145 0    130  ~ 26
 1006755-126
-Text Notes 2582 10442 0    130  ~ 26
+Text Notes 2732 10392 0    130  ~ 26
 1006755-126
-Text Notes 2582 10692 0    130  ~ 26
+Text Notes 2732 10642 0    130  ~ 26
 1006755-106
-Text Notes 2582 11692 0    130  ~ 26
+Text Notes 2732 11642 0    130  ~ 26
 1006755-106
-Text Notes 3207 10867 0    130  ~ 26
+Text Notes 3357 10842 0    130  ~ 26
 ↑
-Text Notes 3207 11442 0    130  ~ 26
+Text Notes 3357 11417 0    130  ~ 26
 ↓
 Wire Notes Line width 33 style solid
-	3304 10843 3304 11343
-Wire Notes Line
-	3307 11342 3332 11342
-Text Notes 5750 10175 0    130  ~ 26
+	3454 10818 3454 11318
+Text Notes 5900 10125 0    130  ~ 26
 4.7 μF
-Text Notes 5732 10442 0    130  ~ 26
+Text Notes 5882 10392 0    130  ~ 26
 4.7 μF
-Text Notes 5732 10692 0    130  ~ 26
+Text Notes 5882 10642 0    130  ~ 26
 0.1 μF
-Text Notes 5732 11692 0    130  ~ 26
+Text Notes 5882 11642 0    130  ~ 26
 0.1 μF
-Text Notes 4257 10192 0    130  ~ 26
+Text Notes 4407 10142 0    130  ~ 26
 CAPACITOR
-Text Notes 4257 11692 0    130  ~ 26
+Text Notes 4407 11642 0    130  ~ 26
 CAPACITOR
-Text Notes 4682 10367 0    130  ~ 26
-↑
-Text Notes 4682 11442 0    130  ~ 26
+Text Notes 4832 11417 0    130  ~ 26
 ↓
-Text Notes 5957 11442 0    130  ~ 26
+Text Notes 6107 11392 0    130  ~ 26
 ↓
-Text Notes 5957 10892 0    130  ~ 26
+Text Notes 6107 10842 0    130  ~ 26
 ↑
-Text Notes 6782 10192 0    130  ~ 26
+Text Notes 6932 10142 0    130  ~ 26
 ±10%
-Text Notes 6782 11692 0    130  ~ 26
+Text Notes 6932 11642 0    130  ~ 26
 ±10%
-Text Notes 7857 10192 0    130  ~ 26
+Text Notes 8007 10142 0    130  ~ 26
 50V
-Text Notes 7857 11692 0    130  ~ 26
+Text Notes 8007 11642 0    130  ~ 26
 50V
-Text Notes 6982 10392 0    130  ~ 26
+Text Notes 7132 10342 0    130  ~ 26
 ↑
-Text Notes 6982 11442 0    130  ~ 26
+Text Notes 7132 11392 0    130  ~ 26
 ↓
-Text Notes 7957 10392 0    130  ~ 26
+Text Notes 8107 10342 0    130  ~ 26
 ↑
-Text Notes 7957 11442 0    130  ~ 26
+Text Notes 8107 11392 0    130  ~ 26
 ↓
 Wire Notes Line width 33 style solid
-	4779 10345 4779 11320
+	6204 10817 6204 11292
 Wire Notes Line width 33 style solid
-	6054 10867 6054 11342
+	7229 10316 7229 11291
 Wire Notes Line width 33 style solid
-	7079 10366 7079 11341
-Wire Notes Line width 33 style solid
-	8054 10369 8054 11344
-Text Notes 2682 12442 0    130  ~ 26
+	8204 10319 8204 11294
+Text Notes 2832 12392 0    130  ~ 26
 1010406-7
-Text Notes 2682 12692 0    130  ~ 26
+Text Notes 2832 12642 0    130  ~ 26
 1010406-7
-Text Notes 4357 12442 0    130  ~ 26
+Text Notes 4507 12392 0    130  ~ 26
 COIL, R.F.
-Text Notes 4357 12692 0    130  ~ 26
+Text Notes 4507 12642 0    130  ~ 26
 COIL, R.F.
-Text Notes 5707 12442 0    130  ~ 26
+Text Notes 5857 12392 0    130  ~ 26
 8.2 μH
-Text Notes 5707 12692 0    130  ~ 26
+Text Notes 5857 12642 0    130  ~ 26
 8.2 μH
-Text Notes 6782 12442 0    130  ~ 26
+Text Notes 6932 12392 0    130  ~ 26
 ±10%
-Text Notes 6782 12692 0    130  ~ 26
+Text Notes 6932 12642 0    130  ~ 26
 ±10%
-Text Notes 2582 13192 0    130  ~ 26
+Text Notes 2732 13142 0    130  ~ 26
 2004004-002
-Text Notes 2582 14942 0    130  ~ 26
+Text Notes 2732 14892 0    130  ~ 26
 2004004-002
-Text Notes 2582 16192 0    130  ~ 26
+Text Notes 2732 16142 0    130  ~ 26
 2004004-002
-Text Notes 2582 13442 0    130  ~ 26
-2004004-001
-Text Notes 2582 14692 0    130  ~ 26
-2004004-001
-Text Notes 4232 13192 0    130  ~ 26
+Text Notes 2732 13392 0    130  ~ 26
+2004184-005
+Text Notes 2732 14642 0    130  ~ 26
+2004184-005
+Text Notes 4382 13142 0    130  ~ 26
 TRANSISTOR
-Text Notes 4207 16192 0    130  ~ 26
+Text Notes 4357 16142 0    130  ~ 26
 TRANSISTOR
-Text Notes 3157 13642 0    130  ~ 26
+Text Notes 3307 13617 0    130  ~ 26
 ↑
-Text Notes 4732 13367 0    130  ~ 26
+Text Notes 4882 13367 0    130  ~ 26
 ↑
-Text Notes 3182 15142 0    130  ~ 26
+Text Notes 3332 15117 0    130  ~ 26
 ↑
-Text Notes 3182 15942 0    130  ~ 26
+Text Notes 3332 15892 0    130  ~ 26
 ↓
-Text Notes 4732 15942 0    130  ~ 26
-↓
-Wire Notes Line width 33 style solid
-	3279 15817 3279 15117
-Text Notes 3157 14467 0    130  ~ 26
+Text Notes 4882 15892 0    130  ~ 26
 ↓
 Wire Notes Line width 33 style solid
-	3254 13581 3254 14381
+	3429 15767 3429 15067
+Text Notes 3307 14417 0    130  ~ 26
+↓
 Wire Notes Line width 33 style solid
-	4829 13322 4829 15872
+	3404 13531 3404 14331
+Wire Notes Line width 33 style solid
+	4979 13272 4979 15822
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 17717 1582 17717
+	8732 17667 1732 17667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 17967 8582 17967
+	1732 17917 8732 17917
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 18217 1582 18217
+	8732 18167 1732 18167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 18467 8582 18467
+	1732 18417 8732 18417
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 18967 8582 18967
+	1732 18917 8732 18917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 19467 8582 19467
+	1732 19417 8732 19417
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 20217 8582 20217
+	1732 20167 8732 20167
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 20467 8582 20467
+	1732 20417 8732 20417
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 20967 8582 20967
-Text Notes 1807 18192 0    130  ~ 26
+	1732 20917 8732 20917
+Text Notes 1957 18142 0    130  ~ 26
 CR44\n
-Text Notes 1807 17942 0    130  ~ 26
+Text Notes 1957 17892 0    130  ~ 26
 CR43
-Text Notes 1807 18442 0    130  ~ 26
+Text Notes 1957 18392 0    130  ~ 26
 CR45
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 18717 8582 18717
+	1732 18667 8732 18667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 19217 8582 19217
+	1732 19167 8732 19167
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 19717 1582 19717
-Text Notes 1807 18692 0    130  ~ 26
+	8732 19667 1732 19667
+Text Notes 1957 18642 0    130  ~ 26
 CR46
-Text Notes 1807 18942 0    130  ~ 26
+Text Notes 1957 18892 0    130  ~ 26
 CR47
-Text Notes 1807 19192 0    130  ~ 26
+Text Notes 1957 19142 0    130  ~ 26
 CR48
-Text Notes 1807 19442 0    130  ~ 26
+Text Notes 1957 19392 0    130  ~ 26
 CR49
-Text Notes 1807 19692 0    130  ~ 26
+Text Notes 1957 19642 0    130  ~ 26
 CR50
-Text Notes 1807 19892 0    120  ~ 24
+Text Notes 1957 19842 0    120  ~ 24
 CR51
-Text Notes 1814 20051 0    120  ~ 24
+Text Notes 1964 20001 0    120  ~ 24
 THRU
-Text Notes 1807 20217 0    120  ~ 24
+Text Notes 1957 20167 0    120  ~ 24
 CR64
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 20717 8582 20717
+	1732 20667 8732 20667
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 21467 8582 21467
+	1732 21417 8732 21417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 21967 1582 21967
+	8732 21917 1732 21917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 22467 8582 22467
+	1732 22417 8732 22417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 22967 1582 22967
+	8732 22917 1732 22917
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 23467 8582 23467
+	1732 23417 8732 23417
 Wire Notes Line style solid rgb(0, 0, 0)
-	8582 2967 8582 23467
+	8732 2917 8732 23417
 Wire Notes Line style solid rgb(0, 0, 0)
-	7582 2967 7582 23467
+	7732 2917 7732 23417
 Wire Notes Line style solid rgb(0, 0, 0)
-	6582 2967 6582 23467
+	6732 2917 6732 23417
 Wire Notes Line style solid rgb(0, 0, 0)
-	5582 2967 5582 23467
+	5732 2917 5732 23417
 Wire Notes Line style solid rgb(0, 0, 0)
-	4082 2967 4082 23467
+	4232 2917 4232 23417
 Wire Notes Line style solid rgb(0, 0, 0)
-	2582 2967 2582 23467
+	2732 2917 2732 23417
 Wire Notes Line style solid rgb(0, 0, 0)
-	1582 2967 1582 23467
-Text Notes 1632 21417 0    130  ~ 26
+	1732 2917 1732 23417
+Text Notes 1782 21367 0    130  ~ 26
 K1 THRU\n   K5
-Text Notes 1632 21917 0    130  ~ 26
+Text Notes 1782 21867 0    130  ~ 26
 K6 THRU\n  K10
-Text Notes 1584 22419 0    130  ~ 26
+Text Notes 1734 22369 0    130  ~ 26
 K11 THRU\n  K15
-Text Notes 1584 22923 0    130  ~ 26
+Text Notes 1734 22873 0    130  ~ 26
 K16 THRU\n  K20
-Text Notes 1607 23292 0    130  ~ 26
+Text Notes 1757 23242 0    130  ~ 26
 K21&K22
-Text Notes 1582 17667 0    130  ~ 26
+Text Notes 1732 17617 0    130  ~ 26
 CR1 THRU\n  CR42
-Text Notes 2632 17567 0    130  ~ 26
-2004103-001
-Text Notes 2607 20067 0    130  ~ 26
-2004103-001
-Text Notes 3182 17917 0    130  ~ 26
+Text Notes 2782 17517 0    130  ~ 26
+2004183-001
+Text Notes 2757 20017 0    130  ~ 26
+2004183-001
+Text Notes 3332 17867 0    130  ~ 26
 ↑
-Text Notes 3182 19692 0    130  ~ 26
+Text Notes 3332 19642 0    130  ~ 26
 ↓
-Text Notes 4507 17567 0    130  ~ 26
+Text Notes 4657 17517 0    130  ~ 26
 DIODE
-Text Notes 4507 20042 0    130  ~ 26
+Text Notes 4657 19992 0    130  ~ 26
 DIODE
-Text Notes 4707 19692 0    130  ~ 26
+Text Notes 4857 19642 0    130  ~ 26
 ↓
-Text Notes 4707 17942 0    130  ~ 26
+Text Notes 4857 17892 0    130  ~ 26
 ↑
 Wire Notes Line width 33 style solid
-	3279 17889 3279 19589
+	3429 17839 3429 19539
 Wire Notes Line width 33 style solid
-	4804 17914 4804 19639
-Text Notes 2707 21317 0    130  ~ 26
-1006282-2
-Text Notes 2707 22817 0    130  ~ 26
-1006282-2
-Text Notes 2707 23292 0    130  ~ 26
-1010784-9
-Text Notes 4507 21317 0    130  ~ 26
+	4954 17864 4954 19589
+Text Notes 2857 21267 0    130  ~ 26
+SEE NOTE 3
+Text Notes 2857 22767 0    130  ~ 26
+SEE NOTE 3
+Text Notes 2857 23242 0    130  ~ 26
+2004689-2
+Text Notes 4657 21267 0    130  ~ 26
 RELAY
-Text Notes 4507 23292 0    130  ~ 26
+Text Notes 4657 23242 0    130  ~ 26
 RELAY
-Text Notes 5882 21317 0    130  ~ 26
+Text Notes 6032 21267 0    130  ~ 26
 26V
-Text Notes 5882 23292 0    130  ~ 26
+Text Notes 6032 23242 0    130  ~ 26
 26V
-Text Notes 3207 22417 0    130  ~ 26
+Text Notes 3357 22367 0    130  ~ 26
 ↓
-Text Notes 4707 22917 0    130  ~ 26
+Text Notes 4857 22867 0    130  ~ 26
 ↓
-Text Notes 5957 22917 0    130  ~ 26
+Text Notes 6107 22867 0    130  ~ 26
 ↓
-Text Notes 3207 21642 0    130  ~ 26
+Text Notes 3357 21617 0    130  ~ 26
 ↑
-Text Notes 4707 21642 0    130  ~ 26
+Text Notes 4857 21617 0    130  ~ 26
 ↑
-Text Notes 5957 21642 0    130  ~ 26
+Text Notes 6107 21617 0    130  ~ 26
 ↑
 Wire Notes Line width 33 style solid
-	3304 21590 3304 22315
+	3454 21540 3454 22265
 Wire Notes Line width 33 style solid
-	4804 21623 4804 22798
+	4954 21573 4954 22748
 Wire Notes Line width 33 style solid
-	6054 21642 6054 22817
-Text Notes 1544 30412 0    140  ~ 28
+	6204 21592 6204 22767
+Text Notes 1569 30412 0    140  ~ 28
 RELAY CKT FOR K21 & K22\nTO SWITCH FROM POSITION\nSHOWN, APPLY PLUS VOLTAGE\nON PIN 1
 Text Notes 6133 31662 0    140  ~ 28
-CKT FOR LATCHING RELAY K1-\nK6,K6-K10,K11-K15,& K16-K20\nTO SWITCH AND LATCH FROM\nPOSITION SHOWN,APPLY PLUS\nVOLTAGE ON PIN 10
+CKT FOR LATCHING RELAY K1-\nK6,K6-K10,K11-K15,& K16-K20\nTO SWITCH AND LATCH FROM\nPOSITION SHOWN, APPLY PLUS\nVOLTAGE ON PIN 10
 Text Notes 1076 31932 0    140  ~ 28
 NOTES
 Text Notes 2030 32484 0    140  ~ 28
@@ -578,546 +562,506 @@ Text Notes 1520 32220 0    140  ~ 28
 1.
 Text Notes 1520 32742 0    140  ~ 28
 2.
-Text Notes 2743 25749 0    100  ~ 20
+Text Notes 2793 25724 0    100  ~ 20
 ◯
 Wire Notes Line width 24 style solid
-	2775 25678 2315 25678
+	2825 25653 2365 25653
+Wire Notes Line width 24 style solid
+	3494 25391 2921 25633
+Wire Notes Line width 24 style solid
+	3854 25172 3375 25172
+Wire Notes Line width 24 style solid
+	3375 25172 3375 25394
+Wire Notes Line width 24 style solid
+	3375 25975 3376 26181
+Wire Notes Line width 24 style solid
+	3376 26181 3824 26182
+Wire Notes Line width 24 style solid
+	3331 25276 3376 25394
+Wire Notes Line width 24 style solid
+	3331 25276 3418 25276
+Wire Notes Line width 24 style solid
+	3418 25276 3375 25395
 Wire Notes Line
-	2315 25678 2314 25677
+	3364 25326 3355 25288
 Wire Notes Line width 24 style solid
-	3444 25416 2871 25658
+	3355 25288 3365 25326
 Wire Notes Line width 24 style solid
-	3804 25197 3325 25197
+	3387 25331 3396 25288
 Wire Notes Line width 24 style solid
-	3325 25197 3325 25419
+	3376 26181 3376 25959
+Wire Notes Line width 24 style solid
+	3332 26077 3377 25959
+Wire Notes Line width 24 style solid
+	3332 26077 3419 26077
+Wire Notes Line width 24 style solid
+	3419 26077 3376 25958
 Wire Notes Line
-	3325 25419 3326 25419
+	3365 26027 3356 26065
 Wire Notes Line width 24 style solid
-	3325 26000 3326 26206
+	3356 26065 3366 26027
 Wire Notes Line width 24 style solid
-	3326 26206 3774 26207
-Wire Notes Line
-	3774 26207 3773 26207
-Wire Notes Line width 24 style solid
-	3281 25301 3326 25419
-Wire Notes Line width 24 style solid
-	3281 25301 3368 25301
-Wire Notes Line width 24 style solid
-	3368 25301 3325 25420
-Wire Notes Line
-	3314 25351 3305 25313
-Wire Notes Line width 24 style solid
-	3305 25313 3315 25351
-Wire Notes Line width 24 style solid
-	3337 25356 3346 25313
-Wire Notes Line width 24 style solid
-	3326 26206 3326 25984
-Wire Notes Line width 24 style solid
-	3282 26102 3327 25984
-Wire Notes Line width 24 style solid
-	3282 26102 3369 26102
-Wire Notes Line width 24 style solid
-	3369 26102 3326 25983
-Wire Notes Line
-	3315 26052 3306 26090
-Wire Notes Line width 24 style solid
-	3306 26090 3316 26052
-Wire Notes Line width 24 style solid
-	3338 26047 3347 26090
-Text Notes 2739 27285 0    100  ~ 20
+	3388 26022 3397 26065
+Text Notes 2789 27260 0    100  ~ 20
 ◯
 Wire Notes Line width 24 style solid
-	2771 27214 2311 27214
+	2821 27189 2361 27189
+Wire Notes Line width 24 style solid
+	3490 26927 2917 27169
+Wire Notes Line width 24 style solid
+	3850 26696 3371 26696
+Wire Notes Line width 24 style solid
+	3371 26696 3371 26918
+Wire Notes Line width 24 style solid
+	3371 27479 3372 27685
+Wire Notes Line width 24 style solid
+	3372 27685 3820 27686
+Wire Notes Line width 24 style solid
+	3327 26800 3372 26918
+Wire Notes Line width 24 style solid
+	3327 26800 3414 26800
+Wire Notes Line width 24 style solid
+	3414 26800 3371 26919
 Wire Notes Line
-	2311 27214 2310 27213
+	3360 26850 3351 26812
 Wire Notes Line width 24 style solid
-	3440 26952 2867 27194
+	3351 26812 3361 26850
 Wire Notes Line width 24 style solid
-	3800 26721 3321 26721
+	3383 26855 3392 26812
 Wire Notes Line width 24 style solid
-	3321 26721 3321 26943
+	3372 27685 3372 27463
+Wire Notes Line width 24 style solid
+	3328 27581 3373 27463
+Wire Notes Line width 24 style solid
+	3328 27581 3415 27581
+Wire Notes Line width 24 style solid
+	3415 27581 3372 27462
 Wire Notes Line
-	3321 26955 3322 26955
+	3361 27531 3352 27569
 Wire Notes Line width 24 style solid
-	3321 27504 3322 27710
+	3352 27569 3362 27531
 Wire Notes Line width 24 style solid
-	3322 27710 3770 27711
-Wire Notes Line
-	3770 27711 3769 27711
-Wire Notes Line width 24 style solid
-	3277 26825 3322 26943
-Wire Notes Line width 24 style solid
-	3277 26825 3364 26825
-Wire Notes Line width 24 style solid
-	3364 26825 3321 26944
-Wire Notes Line
-	3310 26875 3301 26837
-Wire Notes Line width 24 style solid
-	3301 26837 3311 26875
-Wire Notes Line width 24 style solid
-	3333 26880 3342 26837
-Wire Notes Line width 24 style solid
-	3322 27710 3322 27488
-Wire Notes Line width 24 style solid
-	3278 27606 3323 27488
-Wire Notes Line width 24 style solid
-	3278 27606 3365 27606
-Wire Notes Line width 24 style solid
-	3365 27606 3322 27487
-Wire Notes Line
-	3311 27556 3302 27594
-Wire Notes Line width 24 style solid
-	3302 27594 3312 27556
-Wire Notes Line width 24 style solid
-	3334 27551 3343 27594
-Text Notes 2032 25752 0    140  ~ 28
+	3384 27526 3393 27569
+Text Notes 2082 25727 0    140  ~ 28
 4
-Text Notes 3856 25288 0    140  ~ 28
+Text Notes 3906 25263 0    140  ~ 28
 6
-Text Notes 3848 26296 0    140  ~ 28
+Text Notes 3898 26271 0    140  ~ 28
 7
-Text Notes 3864 26800 0    140  ~ 28
+Text Notes 3914 26775 0    140  ~ 28
 2
-Text Notes 2032 27320 0    140  ~ 28
+Text Notes 2082 27295 0    140  ~ 28
 8
-Text Notes 3852 27804 0    140  ~ 28
+Text Notes 3902 27779 0    140  ~ 28
 3
-Text Notes 3928 28436 0    140  ~ 28
+Text Notes 3978 28411 0    140  ~ 28
 1
-Text Notes 3924 29176 0    140  ~ 28
+Text Notes 3974 29151 0    140  ~ 28
 5
-Text Notes 3656 28528 0    140  ~ 28
+Text Notes 3706 28503 0    140  ~ 28
 +
-Text Notes 3652 29072 0    140  ~ 28
+Text Notes 3702 29047 0    140  ~ 28
 -
 Wire Notes Line width 24
-	3064 25596 3060 28080
+	3114 25571 3110 28055
 Wire Notes Line width 24
-	3060 28080 3064 28064
+	3110 28055 3114 28039
 Wire Notes Line width 24 style solid
-	2851 28084 3316 28083
+	2901 28059 3366 28058
 Wire Notes Line width 24 style solid
-	3311 28202 2808 28203
+	3361 28177 2858 28178
 Wire Notes Line width 24 style solid
-	2808 28203 2807 29225
+	2858 28178 2857 29200
 Wire Notes Line width 24 style solid
-	2807 29225 3314 29223
+	2857 29200 3364 29198
 Wire Notes Line width 24 style solid
-	3314 29223 3313 28202
+	3364 29198 3363 28177
 Wire Notes Line width 24 style solid
-	3790 28326 2809 28325
+	3840 28301 2859 28300
 Wire Notes Line width 24 style solid
-	2810 28837 3313 28835
+	2860 28812 3363 28810
 Wire Notes Line width 24 style solid
-	3823 29079 3316 29079
+	3873 29054 3366 29054
 Wire Notes Line width 24 style solid
-	2809 28326 2771 28342
+	2859 28301 2821 28317
 Wire Notes Line width 24 style solid
-	2771 28342 2737 28363
+	2821 28317 2787 28338
 Wire Notes Line width 24 style solid
-	2737 28363 2712 28384
+	2787 28338 2762 28359
 Wire Notes Line width 24 style solid
-	2712 28384 2693 28407
+	2762 28359 2743 28382
 Wire Notes Line width 24 style solid
-	2693 28407 2680 28429
+	2743 28382 2730 28404
 Wire Notes Line width 24 style solid
-	2680 28429 2675 28455
+	2730 28404 2725 28430
 Wire Notes Line width 24 style solid
-	2675 28455 2677 28480
+	2725 28430 2727 28455
 Wire Notes Line width 24 style solid
-	2677 28480 2684 28505
+	2727 28455 2734 28480
 Wire Notes Line width 24 style solid
-	2684 28505 2696 28528
+	2734 28480 2746 28503
 Wire Notes Line width 24 style solid
-	2696 28528 2709 28547
+	2746 28503 2759 28522
 Wire Notes Line width 24 style solid
-	2709 28547 2728 28566
+	2759 28522 2778 28541
 Wire Notes Line width 24 style solid
-	2728 28566 2746 28577
+	2778 28541 2796 28552
 Wire Notes Line width 24 style solid
-	2746 28577 2768 28587
+	2796 28552 2818 28562
 Wire Notes Line width 24 style solid
-	2768 28587 2805 28597
+	2818 28562 2855 28572
 Wire Notes Line width 24 style solid
-	2805 28597 2804 28596
+	2855 28572 2854 28571
 Wire Notes Line width 24 style solid
-	2801 28834 2763 28850
+	2851 28809 2813 28825
 Wire Notes Line width 24 style solid
-	2763 28850 2729 28871
+	2813 28825 2779 28846
 Wire Notes Line width 24 style solid
-	2729 28871 2704 28892
+	2779 28846 2754 28867
 Wire Notes Line width 24 style solid
-	2704 28892 2685 28915
+	2754 28867 2735 28890
 Wire Notes Line width 24 style solid
-	2685 28915 2672 28937
+	2735 28890 2722 28912
 Wire Notes Line width 24 style solid
-	2672 28937 2667 28963
+	2722 28912 2717 28938
 Wire Notes Line width 24 style solid
-	2667 28963 2669 28988
+	2717 28938 2719 28963
 Wire Notes Line width 24 style solid
-	2669 28988 2676 29013
+	2719 28963 2726 28988
 Wire Notes Line width 24 style solid
-	2676 29013 2688 29036
+	2726 28988 2738 29011
 Wire Notes Line width 24 style solid
-	2688 29036 2701 29055
+	2738 29011 2751 29030
 Wire Notes Line width 24 style solid
-	2701 29055 2720 29074
+	2751 29030 2770 29049
 Wire Notes Line width 24 style solid
-	2720 29074 2738 29085
+	2770 29049 2788 29060
 Wire Notes Line width 24 style solid
-	2738 29085 2760 29095
+	2788 29060 2810 29070
 Wire Notes Line width 24 style solid
-	2760 29095 2797 29105
+	2810 29070 2847 29080
 Wire Notes Line width 24 style solid
-	3323 28826 3361 28810
+	3373 28801 3411 28785
 Wire Notes Line width 24 style solid
-	3361 28810 3395 28789
+	3411 28785 3445 28764
 Wire Notes Line width 24 style solid
-	3395 28789 3420 28768
+	3445 28764 3470 28743
 Wire Notes Line width 24 style solid
-	3420 28768 3439 28745
+	3470 28743 3489 28720
 Wire Notes Line width 24 style solid
-	3439 28745 3452 28723
+	3489 28720 3502 28698
 Wire Notes Line width 24 style solid
-	3452 28723 3457 28697
+	3502 28698 3507 28672
 Wire Notes Line width 24 style solid
-	3457 28697 3455 28672
+	3507 28672 3505 28647
 Wire Notes Line width 24 style solid
-	3455 28672 3448 28647
+	3505 28647 3498 28622
 Wire Notes Line width 24 style solid
-	3448 28647 3436 28624
+	3498 28622 3486 28599
 Wire Notes Line width 24 style solid
-	3436 28624 3423 28605
+	3486 28599 3473 28580
 Wire Notes Line width 24 style solid
-	3423 28605 3404 28586
+	3473 28580 3454 28561
 Wire Notes Line width 24 style solid
-	3404 28586 3386 28575
+	3454 28561 3436 28550
 Wire Notes Line width 24 style solid
-	3386 28575 3364 28565
+	3436 28550 3414 28540
 Wire Notes Line width 24 style solid
-	3364 28565 3327 28555
-Text Notes 7315 25737 0    100  ~ 20
+	3414 28540 3377 28530
+Text Notes 7340 25737 0    100  ~ 20
 ◯
 Wire Notes Line width 24 style solid
-	7347 25666 6887 25666
+	7372 25666 6912 25666
+Wire Notes Line width 24 style solid
+	8041 25404 7468 25646
+Wire Notes Line width 24 style solid
+	8401 25185 7922 25185
+Wire Notes Line width 24 style solid
+	7922 25185 7922 25407
+Wire Notes Line width 24 style solid
+	7922 25988 7923 26194
+Wire Notes Line width 24 style solid
+	7878 25289 7923 25407
+Wire Notes Line width 24 style solid
+	7878 25289 7965 25289
+Wire Notes Line width 24 style solid
+	7965 25289 7922 25408
 Wire Notes Line
-	6887 25666 6886 25665
+	7911 25339 7902 25301
 Wire Notes Line width 24 style solid
-	8016 25404 7443 25646
+	7902 25301 7912 25339
 Wire Notes Line width 24 style solid
-	8376 25185 7897 25185
+	7934 25344 7943 25301
 Wire Notes Line width 24 style solid
-	7897 25185 7897 25407
+	7923 26194 7923 25972
+Wire Notes Line width 24 style solid
+	7879 26090 7924 25972
+Wire Notes Line width 24 style solid
+	7879 26090 7966 26090
+Wire Notes Line width 24 style solid
+	7966 26090 7923 25971
 Wire Notes Line
-	7897 25407 7898 25407
+	7912 26040 7903 26078
 Wire Notes Line width 24 style solid
-	7897 25988 7898 26194
+	7903 26078 7913 26040
 Wire Notes Line width 24 style solid
-	7898 26194 8346 26195
-Wire Notes Line
-	8346 26195 8345 26195
-Wire Notes Line width 24 style solid
-	7853 25289 7898 25407
-Wire Notes Line width 24 style solid
-	7853 25289 7940 25289
-Wire Notes Line width 24 style solid
-	7940 25289 7897 25408
-Wire Notes Line
-	7886 25339 7877 25301
-Wire Notes Line width 24 style solid
-	7877 25301 7887 25339
-Wire Notes Line width 24 style solid
-	7909 25344 7918 25301
-Wire Notes Line width 24 style solid
-	7898 26194 7898 25972
-Wire Notes Line width 24 style solid
-	7854 26090 7899 25972
-Wire Notes Line width 24 style solid
-	7854 26090 7941 26090
-Wire Notes Line width 24 style solid
-	7941 26090 7898 25971
-Wire Notes Line
-	7887 26040 7878 26078
-Wire Notes Line width 24 style solid
-	7878 26078 7888 26040
-Wire Notes Line width 24 style solid
-	7910 26035 7919 26078
-Text Notes 7311 27273 0    100  ~ 20
+	7935 26035 7944 26078
+Text Notes 7336 27273 0    100  ~ 20
 ◯
 Wire Notes Line width 24 style solid
-	7343 27202 6883 27202
+	7368 27202 6908 27202
+Wire Notes Line width 24 style solid
+	8037 26940 7464 27182
+Wire Notes Line width 24 style solid
+	7918 26709 7918 26931
+Wire Notes Line width 24 style solid
+	7918 27492 7919 27698
+Wire Notes Line width 24 style solid
+	7874 26813 7919 26931
+Wire Notes Line width 24 style solid
+	7874 26813 7961 26813
+Wire Notes Line width 24 style solid
+	7961 26813 7918 26932
 Wire Notes Line
-	6883 27202 6882 27201
+	7907 26863 7898 26825
 Wire Notes Line width 24 style solid
-	8012 26940 7439 27182
+	7898 26825 7908 26863
 Wire Notes Line width 24 style solid
-	8372 26709 7893 26709
+	7930 26868 7939 26825
 Wire Notes Line width 24 style solid
-	7893 26709 7893 26931
+	7919 27698 7919 27476
+Wire Notes Line width 24 style solid
+	7875 27594 7920 27476
+Wire Notes Line width 24 style solid
+	7875 27594 7962 27594
+Wire Notes Line width 24 style solid
+	7962 27594 7919 27475
 Wire Notes Line
-	7893 26943 7894 26943
+	7908 27544 7899 27582
 Wire Notes Line width 24 style solid
-	7893 27492 7894 27698
+	7899 27582 7909 27544
 Wire Notes Line width 24 style solid
-	7894 27698 8342 27699
-Wire Notes Line
-	8342 27699 8341 27699
-Wire Notes Line width 24 style solid
-	7849 26813 7894 26931
-Wire Notes Line width 24 style solid
-	7849 26813 7936 26813
-Wire Notes Line width 24 style solid
-	7936 26813 7893 26932
-Wire Notes Line
-	7882 26863 7873 26825
-Wire Notes Line width 24 style solid
-	7873 26825 7883 26863
-Wire Notes Line width 24 style solid
-	7905 26868 7914 26825
-Wire Notes Line width 24 style solid
-	7894 27698 7894 27476
-Wire Notes Line width 24 style solid
-	7850 27594 7895 27476
-Wire Notes Line width 24 style solid
-	7850 27594 7937 27594
-Wire Notes Line width 24 style solid
-	7937 27594 7894 27475
-Wire Notes Line
-	7883 27544 7874 27582
-Wire Notes Line width 24 style solid
-	7874 27582 7884 27544
-Wire Notes Line width 24 style solid
-	7906 27539 7915 27582
-Text Notes 6604 25740 0    140  ~ 28
+	7931 27539 7940 27582
+Text Notes 6629 25740 0    140  ~ 28
 4
-Text Notes 8514 26316 0    140  ~ 28
-6
-Text Notes 8514 25278 0    140  ~ 28
+Text Notes 8539 25278 0    140  ~ 28
 7
-Text Notes 8496 27804 0    140  ~ 28
-2
-Text Notes 6604 27308 0    140  ~ 28
+Text Notes 6629 27308 0    140  ~ 28
 8
-Text Notes 8520 26802 0    140  ~ 28
-3
-Text Notes 8500 28424 0    140  ~ 28
+Text Notes 8525 28424 0    140  ~ 28
 1
-Text Notes 8496 29164 0    140  ~ 28
+Text Notes 8521 29164 0    140  ~ 28
 5
-Text Notes 8280 28518 0    140  ~ 28
+Text Notes 8305 28518 0    140  ~ 28
 +
-Text Notes 8286 29070 0    140  ~ 28
+Text Notes 8311 29070 0    140  ~ 28
 -
 Wire Notes Line width 24
-	7636 25584 7632 28068
-Wire Notes Line width 24
-	7632 28068 7636 28052
+	7661 25584 7657 28068
 Wire Notes Line width 24 style solid
-	7423 28072 7888 28071
+	7448 28072 7913 28071
 Wire Notes Line width 24 style solid
-	7883 28190 7380 28191
+	7908 28190 7405 28191
 Wire Notes Line width 24 style solid
-	8362 28314 7381 28313
+	8387 28314 7406 28313
 Wire Notes Line width 24 style solid
-	7382 28825 7885 28823
+	7407 28825 7910 28823
 Wire Notes Line width 24 style solid
-	8395 29067 7888 29067
+	8420 29067 7913 29067
 Wire Notes Line width 24 style solid
-	7381 28314 7343 28330
+	7406 28314 7368 28330
 Wire Notes Line width 24 style solid
-	7343 28330 7309 28351
+	7368 28330 7334 28351
 Wire Notes Line width 24 style solid
-	7309 28351 7284 28372
+	7334 28351 7309 28372
 Wire Notes Line width 24 style solid
-	7284 28372 7265 28395
+	7309 28372 7290 28395
 Wire Notes Line width 24 style solid
-	7265 28395 7252 28417
+	7290 28395 7277 28417
 Wire Notes Line width 24 style solid
-	7252 28417 7247 28443
+	7277 28417 7272 28443
 Wire Notes Line width 24 style solid
-	7247 28443 7249 28468
+	7272 28443 7274 28468
 Wire Notes Line width 24 style solid
-	7249 28468 7256 28493
+	7274 28468 7281 28493
 Wire Notes Line width 24 style solid
-	7256 28493 7268 28516
+	7281 28493 7293 28516
 Wire Notes Line width 24 style solid
-	7268 28516 7281 28535
+	7293 28516 7306 28535
 Wire Notes Line width 24 style solid
-	7281 28535 7300 28554
+	7306 28535 7325 28554
 Wire Notes Line width 24 style solid
-	7300 28554 7318 28565
+	7325 28554 7343 28565
 Wire Notes Line width 24 style solid
-	7318 28565 7340 28575
+	7343 28565 7365 28575
 Wire Notes Line width 24 style solid
-	7340 28575 7377 28585
+	7365 28575 7402 28585
 Wire Notes Line width 24 style solid
-	7377 28585 7376 28584
+	7402 28585 7401 28584
 Wire Notes Line width 24 style solid
-	7373 28822 7335 28838
+	7398 28822 7360 28838
 Wire Notes Line width 24 style solid
-	7335 28838 7301 28859
+	7360 28838 7326 28859
 Wire Notes Line width 24 style solid
-	7301 28859 7276 28880
+	7326 28859 7301 28880
 Wire Notes Line width 24 style solid
-	7276 28880 7257 28903
+	7301 28880 7282 28903
 Wire Notes Line width 24 style solid
-	7257 28903 7244 28925
+	7282 28903 7269 28925
 Wire Notes Line width 24 style solid
-	7244 28925 7239 28951
+	7269 28925 7264 28951
 Wire Notes Line width 24 style solid
-	7239 28951 7241 28976
+	7264 28951 7266 28976
 Wire Notes Line width 24 style solid
-	7241 28976 7248 29001
+	7266 28976 7273 29001
 Wire Notes Line width 24 style solid
-	7248 29001 7260 29024
+	7273 29001 7285 29024
 Wire Notes Line width 24 style solid
-	7260 29024 7273 29043
+	7285 29024 7298 29043
 Wire Notes Line width 24 style solid
-	7273 29043 7292 29062
+	7298 29043 7317 29062
 Wire Notes Line width 24 style solid
-	7292 29062 7310 29073
+	7317 29062 7335 29073
 Wire Notes Line width 24 style solid
-	7310 29073 7332 29083
+	7335 29073 7357 29083
 Wire Notes Line width 24 style solid
-	7332 29083 7369 29093
+	7357 29083 7394 29093
 Wire Notes Line width 24 style solid
-	7895 28814 7933 28798
+	7920 28814 7958 28798
 Wire Notes Line width 24 style solid
-	7933 28798 7967 28777
+	7958 28798 7992 28777
 Wire Notes Line width 24 style solid
-	7967 28777 7992 28756
+	7992 28777 8017 28756
 Wire Notes Line width 24 style solid
-	7992 28756 8011 28733
+	8017 28756 8036 28733
 Wire Notes Line width 24 style solid
-	8011 28733 8024 28711
+	8036 28733 8049 28711
 Wire Notes Line width 24 style solid
-	8024 28711 8029 28685
+	8049 28711 8054 28685
 Wire Notes Line width 24 style solid
-	8029 28685 8027 28660
+	8054 28685 8052 28660
 Wire Notes Line width 24 style solid
-	8027 28660 8020 28635
+	8052 28660 8045 28635
 Wire Notes Line width 24 style solid
-	8020 28635 8008 28612
+	8045 28635 8033 28612
 Wire Notes Line width 24 style solid
-	8008 28612 7995 28593
+	8033 28612 8020 28593
 Wire Notes Line width 24 style solid
-	7995 28593 7976 28574
+	8020 28593 8001 28574
 Wire Notes Line width 24 style solid
-	7976 28574 7958 28563
+	8001 28574 7983 28563
 Wire Notes Line width 24 style solid
-	7958 28563 7936 28553
+	7983 28563 7961 28553
 Wire Notes Line width 24 style solid
-	7936 28553 7899 28543
-Text Notes 8502 29424 0    140  ~ 28
+	7961 28553 7924 28543
+Text Notes 8527 29424 0    140  ~ 28
 9
-Text Notes 8418 30174 0    140  ~ 28
+Text Notes 8443 30174 0    140  ~ 28
 10
-Text Notes 8278 29496 0    140  ~ 28
+Text Notes 8303 29496 0    140  ~ 28
 +
-Text Notes 8284 30048 0    140  ~ 28
+Text Notes 8309 30048 0    140  ~ 28
 -
 Wire Notes Line width 24 style solid
-	8360 29292 7379 29291
+	8385 29292 7404 29291
 Wire Notes Line width 24 style solid
-	7380 29803 7883 29801
+	7405 29803 7908 29801
 Wire Notes Line width 24 style solid
-	8393 30045 7886 30045
+	8418 30045 7911 30045
 Wire Notes Line width 24 style solid
-	7379 29292 7341 29308
+	7404 29292 7366 29308
 Wire Notes Line width 24 style solid
-	7341 29308 7307 29329
+	7366 29308 7332 29329
 Wire Notes Line width 24 style solid
-	7307 29329 7282 29350
+	7332 29329 7307 29350
 Wire Notes Line width 24 style solid
-	7282 29350 7263 29373
+	7307 29350 7288 29373
 Wire Notes Line width 24 style solid
-	7263 29373 7250 29395
+	7288 29373 7275 29395
 Wire Notes Line width 24 style solid
-	7250 29395 7245 29421
+	7275 29395 7270 29421
 Wire Notes Line width 24 style solid
-	7245 29421 7247 29446
+	7270 29421 7272 29446
 Wire Notes Line width 24 style solid
-	7247 29446 7254 29471
+	7272 29446 7279 29471
 Wire Notes Line width 24 style solid
-	7254 29471 7266 29494
+	7279 29471 7291 29494
 Wire Notes Line width 24 style solid
-	7266 29494 7279 29513
+	7291 29494 7304 29513
 Wire Notes Line width 24 style solid
-	7279 29513 7298 29532
+	7304 29513 7323 29532
 Wire Notes Line width 24 style solid
-	7298 29532 7316 29543
+	7323 29532 7341 29543
 Wire Notes Line width 24 style solid
-	7316 29543 7338 29553
+	7341 29543 7363 29553
 Wire Notes Line width 24 style solid
-	7338 29553 7375 29563
+	7363 29553 7400 29563
 Wire Notes Line width 24 style solid
-	7375 29563 7374 29562
+	7400 29563 7399 29562
 Wire Notes Line width 24 style solid
-	7371 29800 7333 29816
+	7396 29800 7358 29816
 Wire Notes Line width 24 style solid
-	7333 29816 7299 29837
+	7358 29816 7324 29837
 Wire Notes Line width 24 style solid
-	7299 29837 7274 29858
+	7324 29837 7299 29858
 Wire Notes Line width 24 style solid
-	7274 29858 7255 29881
+	7299 29858 7280 29881
 Wire Notes Line width 24 style solid
-	7255 29881 7242 29903
+	7280 29881 7267 29903
 Wire Notes Line width 24 style solid
-	7242 29903 7237 29929
+	7267 29903 7262 29929
 Wire Notes Line width 24 style solid
-	7237 29929 7239 29954
+	7262 29929 7264 29954
 Wire Notes Line width 24 style solid
-	7239 29954 7246 29979
+	7264 29954 7271 29979
 Wire Notes Line width 24 style solid
-	7246 29979 7258 30002
+	7271 29979 7283 30002
 Wire Notes Line width 24 style solid
-	7258 30002 7271 30021
+	7283 30002 7296 30021
 Wire Notes Line width 24 style solid
-	7271 30021 7290 30040
+	7296 30021 7315 30040
 Wire Notes Line width 24 style solid
-	7290 30040 7308 30051
+	7315 30040 7333 30051
 Wire Notes Line width 24 style solid
-	7308 30051 7330 30061
+	7333 30051 7355 30061
 Wire Notes Line width 24 style solid
-	7330 30061 7367 30071
+	7355 30061 7392 30071
 Wire Notes Line width 24 style solid
-	7893 29792 7931 29776
+	7918 29792 7956 29776
 Wire Notes Line width 24 style solid
-	7931 29776 7965 29755
+	7956 29776 7990 29755
 Wire Notes Line width 24 style solid
-	7965 29755 7990 29734
+	7990 29755 8015 29734
 Wire Notes Line width 24 style solid
-	7990 29734 8009 29711
+	8015 29734 8034 29711
 Wire Notes Line width 24 style solid
-	8009 29711 8022 29689
+	8034 29711 8047 29689
 Wire Notes Line width 24 style solid
-	8022 29689 8027 29663
+	8047 29689 8052 29663
 Wire Notes Line width 24 style solid
-	8027 29663 8025 29638
+	8052 29663 8050 29638
 Wire Notes Line width 24 style solid
-	8025 29638 8018 29613
+	8050 29638 8043 29613
 Wire Notes Line width 24 style solid
-	8018 29613 8006 29590
+	8043 29613 8031 29590
 Wire Notes Line width 24 style solid
-	8006 29590 7993 29571
+	8031 29590 8018 29571
 Wire Notes Line width 24 style solid
-	7993 29571 7974 29552
+	8018 29571 7999 29552
 Wire Notes Line width 24 style solid
-	7974 29552 7956 29541
+	7999 29552 7981 29541
 Wire Notes Line width 24 style solid
-	7956 29541 7934 29531
+	7981 29541 7959 29531
 Wire Notes Line width 24 style solid
-	7934 29531 7897 29521
+	7959 29531 7922 29521
 Wire Notes Line width 24 style solid
-	7383 28191 7380 30210
+	7408 28191 7405 30210
 Wire Notes Line width 24 style solid
-	7380 30210 7878 30213
+	7405 30210 7903 30213
 Wire Notes Line width 24 style solid
-	7878 30213 7875 28191
+	7903 30213 7900 28191
 Text Notes 12504 30312 0    140  ~ 28
 REFERENCE
-Text Notes 13308 30582 0    140  ~ 28
-1. ASSEMBLY DWG NO.2003952
 Wire Notes Line width 15 style solid
 	46010 33378 46774 33378
 Wire Notes Line style solid
@@ -1129,7 +1073,7 @@ Text Notes 49416 33470 0    140  ~ 28
 Text Notes 50080 33470 0    140  ~ 28
 1
 Text Notes 47944 33174 0    250  ~ 50
-2005952
+2005940
 Text Notes 46592 31766 0    300  ~ 60
 SCHEMATIC
 Text Notes 46480 32126 0    200  ~ 40
@@ -1137,3314 +1081,2274 @@ INDICATOR DRIVER
 Text Notes 46968 32390 0    140  ~ 28
 MODULE D1-D6
 $Comp
-L AGC_DSKY:Diode CR1
-U 1 1 5B6AE828
-P 15550 26150
-F 0 "CR1" V 15725 25650 140 0000 L CNN
-F 1 "Diode" H 15550 26000 50  0001 C CNN
-F 2 "" H 15500 25975 50  0001 C CNN
-F 3 "" H 15500 26150 50  0001 C CNN
-	1    15550 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR2
-U 1 1 5B6C471E
-P 15850 26150
-F 0 "CR2" V 16025 26275 140 0000 L CNN
-F 1 "Diode" H 15850 26000 50  0001 C CNN
-F 2 "" H 15800 25975 50  0001 C CNN
-F 3 "" H 15800 26150 50  0001 C CNN
-	1    15850 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Relay-1006282 K1
-U 1 1 5B6DAB5F
-P 15700 27325
-F 0 "K1" H 15550 27325 140 0000 L CNN
-F 1 "Relay-1006282" H 15700 27475 50  0001 C CNN
-F 2 "" H 14950 27700 50  0001 C CNN
-F 3 "" H 14950 27700 50  0001 C CNN
-	1    15700 27325
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	15550 26850 15550 26350
-Wire Wire Line
-	15850 26350 15850 26850
-$Comp
-L AGC_DSKY:Diode CR3
-U 1 1 5B6CCE9E
-P 20700 26150
-F 0 "CR3" V 20875 25600 140 0000 L CNN
-F 1 "Diode" H 20700 26000 50  0001 C CNN
-F 2 "" H 20650 25975 50  0001 C CNN
-F 3 "" H 20650 26150 50  0001 C CNN
-	1    20700 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR4
-U 1 1 5B6CCEA4
-P 21000 26150
-F 0 "CR4" V 21175 26275 140 0000 L CNN
-F 1 "Diode" H 21000 26000 50  0001 C CNN
-F 2 "" H 20950 25975 50  0001 C CNN
-F 3 "" H 20950 26150 50  0001 C CNN
-	1    21000 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Relay-1006282 K2
-U 1 1 5B6CCEAA
-P 20850 27325
-F 0 "K2" H 20700 27325 140 0000 L CNN
-F 1 "Relay-1006282" H 20850 27475 50  0001 C CNN
-F 2 "" H 20100 27700 50  0001 C CNN
-F 3 "" H 20100 27700 50  0001 C CNN
-	1    20850 27325
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	20700 26850 20700 26350
-Wire Wire Line
-	21000 26350 21000 26850
-$Comp
-L AGC_DSKY:Diode CR5
-U 1 1 5B6D4830
-P 25850 26150
-F 0 "CR5" V 26025 25600 140 0000 L CNN
-F 1 "Diode" H 25850 26000 50  0001 C CNN
-F 2 "" H 25800 25975 50  0001 C CNN
-F 3 "" H 25800 26150 50  0001 C CNN
-	1    25850 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR6
-U 1 1 5B6D4836
-P 26150 26150
-F 0 "CR6" V 26325 26275 140 0000 L CNN
-F 1 "Diode" H 26150 26000 50  0001 C CNN
-F 2 "" H 26100 25975 50  0001 C CNN
-F 3 "" H 26100 26150 50  0001 C CNN
-	1    26150 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Relay-1006282 K3
-U 1 1 5B6D483C
-P 26000 27325
-F 0 "K3" H 25850 27325 140 0000 L CNN
-F 1 "Relay-1006282" H 26000 27475 50  0001 C CNN
-F 2 "" H 25250 27700 50  0001 C CNN
-F 3 "" H 25250 27700 50  0001 C CNN
-	1    26000 27325
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	25850 26850 25850 26350
-Wire Wire Line
-	26150 26350 26150 26850
-$Comp
-L AGC_DSKY:Diode CR7
-U 1 1 5B6DBED7
-P 30900 26150
-F 0 "CR7" V 31075 25575 140 0000 L CNN
-F 1 "Diode" H 30900 26000 50  0001 C CNN
-F 2 "" H 30850 25975 50  0001 C CNN
-F 3 "" H 30850 26150 50  0001 C CNN
-	1    30900 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR8
-U 1 1 5B6DBEDD
-P 31200 26150
-F 0 "CR8" V 31375 26275 140 0000 L CNN
-F 1 "Diode" H 31200 26000 50  0001 C CNN
-F 2 "" H 31150 25975 50  0001 C CNN
-F 3 "" H 31150 26150 50  0001 C CNN
-	1    31200 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Relay-1006282 K4
-U 1 1 5B6DBEE3
-P 31050 27325
-F 0 "K4" H 30900 27325 140 0000 L CNN
-F 1 "Relay-1006282" H 31050 27475 50  0001 C CNN
-F 2 "" H 30300 27700 50  0001 C CNN
-F 3 "" H 30300 27700 50  0001 C CNN
-	1    31050 27325
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	30900 26850 30900 26350
-Wire Wire Line
-	31200 26350 31200 26850
-$Comp
-L AGC_DSKY:Diode CR9
-U 1 1 5B6EABAA
-P 35950 26150
-F 0 "CR9" V 36125 25575 140 0000 L CNN
-F 1 "Diode" H 35950 26000 50  0001 C CNN
-F 2 "" H 35900 25975 50  0001 C CNN
-F 3 "" H 35900 26150 50  0001 C CNN
-	1    35950 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR10
-U 1 1 5B6EABB0
-P 36250 26150
-F 0 "CR10" V 36425 26275 140 0000 L CNN
-F 1 "Diode" H 36250 26000 50  0001 C CNN
-F 2 "" H 36200 25975 50  0001 C CNN
-F 3 "" H 36200 26150 50  0001 C CNN
-	1    36250 26150
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Relay-1006282 K5
-U 1 1 5B6EABB6
-P 36100 27325
-F 0 "K5" H 35950 27325 140 0000 L CNN
-F 1 "Relay-1006282" H 36100 27475 50  0001 C CNN
-F 2 "" H 35350 27700 50  0001 C CNN
-F 3 "" H 35350 27700 50  0001 C CNN
-	1    36100 27325
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	35950 26850 35950 26350
-Wire Wire Line
-	36250 26350 36250 26850
-$Comp
 L AGC_DSKY:Diode CR11
 U 1 1 5B6F2770
-P 15550 22450
-F 0 "CR11" V 15725 21800 140 0000 L CNN
-F 1 "Diode" H 15550 22300 50  0001 C CNN
-F 2 "" H 15500 22275 50  0001 C CNN
-F 3 "" H 15500 22450 50  0001 C CNN
-	1    15550 22450
+P 15525 22600
+F 0 "CR11" V 15700 21950 140 0000 L CNN
+F 1 "Diode" H 15525 22450 50  0001 C CNN
+F 2 "" H 15475 22425 50  0001 C CNN
+F 3 "" H 15475 22600 50  0001 C CNN
+	1    15525 22600
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR12
 U 1 1 5B6F2776
-P 15850 22450
-F 0 "CR12" V 16025 22575 140 0000 L CNN
-F 1 "Diode" H 15850 22300 50  0001 C CNN
-F 2 "" H 15800 22275 50  0001 C CNN
-F 3 "" H 15800 22450 50  0001 C CNN
-	1    15850 22450
+P 15825 22600
+F 0 "CR12" V 16000 22725 140 0000 L CNN
+F 1 "Diode" H 15825 22450 50  0001 C CNN
+F 2 "" H 15775 22425 50  0001 C CNN
+F 3 "" H 15775 22600 50  0001 C CNN
+	1    15825 22600
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Relay-1006282 K6
-U 1 1 5B6F277C
-P 15700 23625
-F 0 "K6" H 15550 23625 140 0000 L CNN
-F 1 "Relay-1006282" H 15700 23775 50  0001 C CNN
-F 2 "" H 14950 24000 50  0001 C CNN
-F 3 "" H 14950 24000 50  0001 C CNN
-	1    15700 23625
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	15550 23150 15550 22650
-Wire Wire Line
-	15850 22650 15850 23150
-$Comp
 L AGC_DSKY:Diode CR13
 U 1 1 5B6F2784
-P 20700 22450
-F 0 "CR13" V 20875 21775 140 0000 L CNN
-F 1 "Diode" H 20700 22300 50  0001 C CNN
-F 2 "" H 20650 22275 50  0001 C CNN
-F 3 "" H 20650 22450 50  0001 C CNN
-	1    20700 22450
+P 20675 22600
+F 0 "CR13" V 20875 21800 140 0000 L CNN
+F 1 "Diode" H 20675 22450 50  0001 C CNN
+F 2 "" H 20625 22425 50  0001 C CNN
+F 3 "" H 20625 22600 50  0001 C CNN
+	1    20675 22600
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR14
 U 1 1 5B6F278A
-P 21000 22450
-F 0 "CR14" V 21175 22575 140 0000 L CNN
-F 1 "Diode" H 21000 22300 50  0001 C CNN
-F 2 "" H 20950 22275 50  0001 C CNN
-F 3 "" H 20950 22450 50  0001 C CNN
-	1    21000 22450
+P 20975 22600
+F 0 "CR14" V 21150 22725 140 0000 L CNN
+F 1 "Diode" H 20975 22450 50  0001 C CNN
+F 2 "" H 20925 22425 50  0001 C CNN
+F 3 "" H 20925 22600 50  0001 C CNN
+	1    20975 22600
 	0    1    1    0   
 $EndComp
-$Comp
-L AGC_DSKY:Relay-1006282 K7
-U 1 1 5B6F2790
-P 20850 23625
-F 0 "K7" H 20700 23625 140 0000 L CNN
-F 1 "Relay-1006282" H 20850 23775 50  0001 C CNN
-F 2 "" H 20100 24000 50  0001 C CNN
-F 3 "" H 20100 24000 50  0001 C CNN
-	1    20850 23625
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	20700 23150 20700 22650
-Wire Wire Line
-	21000 22650 21000 23150
-$Comp
-L AGC_DSKY:Diode CR15
-U 1 1 5B6F2798
-P 25850 22450
-F 0 "CR15" V 26025 21775 140 0000 L CNN
-F 1 "Diode" H 25850 22300 50  0001 C CNN
-F 2 "" H 25800 22275 50  0001 C CNN
-F 3 "" H 25800 22450 50  0001 C CNN
-	1    25850 22450
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR16
-U 1 1 5B6F279E
-P 26150 22450
-F 0 "CR16" V 26325 22575 140 0000 L CNN
-F 1 "Diode" H 26150 22300 50  0001 C CNN
-F 2 "" H 26100 22275 50  0001 C CNN
-F 3 "" H 26100 22450 50  0001 C CNN
-	1    26150 22450
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Relay-1006282 K8
-U 1 1 5B6F27A4
-P 26000 23625
-F 0 "K8" H 25850 23625 140 0000 L CNN
-F 1 "Relay-1006282" H 26000 23775 50  0001 C CNN
-F 2 "" H 25250 24000 50  0001 C CNN
-F 3 "" H 25250 24000 50  0001 C CNN
-	1    26000 23625
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	25850 23150 25850 22650
-Wire Wire Line
-	26150 22650 26150 23150
 $Comp
 L AGC_DSKY:Diode CR17
 U 1 1 5B6F27AC
-P 30900 22450
-F 0 "CR17" V 31075 21750 140 0000 L CNN
-F 1 "Diode" H 30900 22300 50  0001 C CNN
-F 2 "" H 30850 22275 50  0001 C CNN
-F 3 "" H 30850 22450 50  0001 C CNN
-	1    30900 22450
+P 30825 22600
+F 0 "CR17" V 31000 21900 140 0000 L CNN
+F 1 "Diode" H 30825 22450 50  0001 C CNN
+F 2 "" H 30775 22425 50  0001 C CNN
+F 3 "" H 30775 22600 50  0001 C CNN
+	1    30825 22600
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR18
 U 1 1 5B6F27B2
-P 31200 22450
-F 0 "CR18" V 31375 22575 140 0000 L CNN
-F 1 "Diode" H 31200 22300 50  0001 C CNN
-F 2 "" H 31150 22275 50  0001 C CNN
-F 3 "" H 31150 22450 50  0001 C CNN
-	1    31200 22450
+P 31125 22600
+F 0 "CR18" V 31300 22725 140 0000 L CNN
+F 1 "Diode" H 31125 22450 50  0001 C CNN
+F 2 "" H 31075 22425 50  0001 C CNN
+F 3 "" H 31075 22600 50  0001 C CNN
+	1    31125 22600
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Relay-1006282 K9
-U 1 1 5B6F27B8
-P 31050 23625
-F 0 "K9" H 30900 23625 140 0000 L CNN
-F 1 "Relay-1006282" H 31050 23775 50  0001 C CNN
-F 2 "" H 30300 24000 50  0001 C CNN
-F 3 "" H 30300 24000 50  0001 C CNN
-	1    31050 23625
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	30900 23150 30900 22650
-Wire Wire Line
-	31200 22650 31200 23150
-$Comp
 L AGC_DSKY:Diode CR19
 U 1 1 5B6F27C0
-P 35950 22450
-F 0 "CR19" V 36125 21775 140 0000 L CNN
-F 1 "Diode" H 35950 22300 50  0001 C CNN
-F 2 "" H 35900 22275 50  0001 C CNN
-F 3 "" H 35900 22450 50  0001 C CNN
-	1    35950 22450
+P 35875 22600
+F 0 "CR19" V 36050 21925 140 0000 L CNN
+F 1 "Diode" H 35875 22450 50  0001 C CNN
+F 2 "" H 35825 22425 50  0001 C CNN
+F 3 "" H 35825 22600 50  0001 C CNN
+	1    35875 22600
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR20
 U 1 1 5B6F27C6
-P 36250 22450
-F 0 "CR20" V 36425 22575 140 0000 L CNN
-F 1 "Diode" H 36250 22300 50  0001 C CNN
-F 2 "" H 36200 22275 50  0001 C CNN
-F 3 "" H 36200 22450 50  0001 C CNN
-	1    36250 22450
+P 36175 22600
+F 0 "CR20" V 36350 22725 140 0000 L CNN
+F 1 "Diode" H 36175 22450 50  0001 C CNN
+F 2 "" H 36125 22425 50  0001 C CNN
+F 3 "" H 36125 22600 50  0001 C CNN
+	1    36175 22600
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Relay-1006282 K10
-U 1 1 5B6F27CC
-P 36100 23625
-F 0 "K10" H 35900 23625 140 0000 L CNN
-F 1 "Relay-1006282" H 36100 23775 50  0001 C CNN
-F 2 "" H 35350 24000 50  0001 C CNN
-F 3 "" H 35350 24000 50  0001 C CNN
-	1    36100 23625
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	35950 23150 35950 22650
-Wire Wire Line
-	36250 22650 36250 23150
-$Comp
 L AGC_DSKY:Diode CR21
 U 1 1 5B6FB2EB
-P 15550 18700
-F 0 "CR21" V 15725 18050 140 0000 L CNN
-F 1 "Diode" H 15550 18550 50  0001 C CNN
-F 2 "" H 15500 18525 50  0001 C CNN
-F 3 "" H 15500 18700 50  0001 C CNN
-	1    15550 18700
+P 15525 18925
+F 0 "CR21" V 15700 18275 140 0000 L CNN
+F 1 "Diode" H 15525 18775 50  0001 C CNN
+F 2 "" H 15475 18750 50  0001 C CNN
+F 3 "" H 15475 18925 50  0001 C CNN
+	1    15525 18925
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR22
 U 1 1 5B6FB2F1
-P 15850 18700
-F 0 "CR22" V 16025 18825 140 0000 L CNN
-F 1 "Diode" H 15850 18550 50  0001 C CNN
-F 2 "" H 15800 18525 50  0001 C CNN
-F 3 "" H 15800 18700 50  0001 C CNN
-	1    15850 18700
+P 15825 18925
+F 0 "CR22" V 16000 19050 140 0000 L CNN
+F 1 "Diode" H 15825 18775 50  0001 C CNN
+F 2 "" H 15775 18750 50  0001 C CNN
+F 3 "" H 15775 18925 50  0001 C CNN
+	1    15825 18925
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K11
 U 1 1 5B6FB2F7
-P 15700 19875
-F 0 "K11" H 15475 19875 140 0000 L CNN
-F 1 "Relay-1006282" H 15700 20025 50  0001 C CNN
-F 2 "" H 14950 20250 50  0001 C CNN
-F 3 "" H 14950 20250 50  0001 C CNN
-	1    15700 19875
+P 15675 20025
+F 0 "K11" H 15450 20025 140 0000 L CNN
+F 1 "Relay-1006282" H 15675 20175 50  0001 C CNN
+F 2 "" H 14925 20400 50  0001 C CNN
+F 3 "" H 14925 20400 50  0001 C CNN
+	1    15675 20025
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	15550 19400 15550 18900
+	15525 19550 15525 19125
 Wire Wire Line
-	15850 18900 15850 19400
+	15825 19125 15825 19550
 $Comp
 L AGC_DSKY:Diode CR23
 U 1 1 5B6FB2FF
-P 20700 18700
-F 0 "CR23" V 20875 18025 140 0000 L CNN
-F 1 "Diode" H 20700 18550 50  0001 C CNN
-F 2 "" H 20650 18525 50  0001 C CNN
-F 3 "" H 20650 18700 50  0001 C CNN
-	1    20700 18700
+P 20675 18850
+F 0 "CR23" V 20850 18175 140 0000 L CNN
+F 1 "Diode" H 20675 18700 50  0001 C CNN
+F 2 "" H 20625 18675 50  0001 C CNN
+F 3 "" H 20625 18850 50  0001 C CNN
+	1    20675 18850
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR24
 U 1 1 5B6FB305
-P 21000 18700
-F 0 "CR24" V 21175 18825 140 0000 L CNN
-F 1 "Diode" H 21000 18550 50  0001 C CNN
-F 2 "" H 20950 18525 50  0001 C CNN
-F 3 "" H 20950 18700 50  0001 C CNN
-	1    21000 18700
+P 20975 18850
+F 0 "CR24" V 21150 18975 140 0000 L CNN
+F 1 "Diode" H 20975 18700 50  0001 C CNN
+F 2 "" H 20925 18675 50  0001 C CNN
+F 3 "" H 20925 18850 50  0001 C CNN
+	1    20975 18850
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K12
 U 1 1 5B6FB30B
-P 20850 19875
-F 0 "K12" H 20625 19875 140 0000 L CNN
-F 1 "Relay-1006282" H 20850 20025 50  0001 C CNN
-F 2 "" H 20100 20250 50  0001 C CNN
-F 3 "" H 20100 20250 50  0001 C CNN
-	1    20850 19875
+P 20825 20025
+F 0 "K12" H 20600 20025 140 0000 L CNN
+F 1 "Relay-1006282" H 20825 20175 50  0001 C CNN
+F 2 "" H 20075 20400 50  0001 C CNN
+F 3 "" H 20075 20400 50  0001 C CNN
+	1    20825 20025
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	20700 19400 20700 18900
+	20675 19550 20675 19050
 Wire Wire Line
-	21000 18900 21000 19400
+	20975 19050 20975 19550
 $Comp
 L AGC_DSKY:Diode CR25
 U 1 1 5B6FB313
-P 25850 18700
-F 0 "CR25" V 26025 18050 140 0000 L CNN
-F 1 "Diode" H 25850 18550 50  0001 C CNN
-F 2 "" H 25800 18525 50  0001 C CNN
-F 3 "" H 25800 18700 50  0001 C CNN
-	1    25850 18700
+P 25750 18850
+F 0 "CR25" V 25925 18200 140 0000 L CNN
+F 1 "Diode" H 25750 18700 50  0001 C CNN
+F 2 "" H 25700 18675 50  0001 C CNN
+F 3 "" H 25700 18850 50  0001 C CNN
+	1    25750 18850
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR26
 U 1 1 5B6FB319
-P 26150 18700
-F 0 "CR26" V 26325 18825 140 0000 L CNN
-F 1 "Diode" H 26150 18550 50  0001 C CNN
-F 2 "" H 26100 18525 50  0001 C CNN
-F 3 "" H 26100 18700 50  0001 C CNN
-	1    26150 18700
+P 26050 18850
+F 0 "CR26" V 26225 18975 140 0000 L CNN
+F 1 "Diode" H 26050 18700 50  0001 C CNN
+F 2 "" H 26000 18675 50  0001 C CNN
+F 3 "" H 26000 18850 50  0001 C CNN
+	1    26050 18850
 	0    1    1    0   
 $EndComp
-$Comp
-L AGC_DSKY:Relay-1006282 K13
-U 1 1 5B6FB31F
-P 26000 19875
-F 0 "K13" H 25800 19875 140 0000 L CNN
-F 1 "Relay-1006282" H 26000 20025 50  0001 C CNN
-F 2 "" H 25250 20250 50  0001 C CNN
-F 3 "" H 25250 20250 50  0001 C CNN
-	1    26000 19875
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
-	25850 19400 25850 18900
+	25750 19525 25750 19050
 Wire Wire Line
-	26150 18900 26150 19400
+	26050 19050 26050 19525
 $Comp
 L AGC_DSKY:Diode CR27
 U 1 1 5B6FB327
-P 30900 18700
-F 0 "CR27" V 31075 18025 140 0000 L CNN
-F 1 "Diode" H 30900 18550 50  0001 C CNN
-F 2 "" H 30850 18525 50  0001 C CNN
-F 3 "" H 30850 18700 50  0001 C CNN
-	1    30900 18700
+P 30800 18850
+F 0 "CR27" V 30975 18175 140 0000 L CNN
+F 1 "Diode" H 30800 18700 50  0001 C CNN
+F 2 "" H 30750 18675 50  0001 C CNN
+F 3 "" H 30750 18850 50  0001 C CNN
+	1    30800 18850
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR28
 U 1 1 5B6FB32D
-P 31200 18700
-F 0 "CR28" V 31375 18825 140 0000 L CNN
-F 1 "Diode" H 31200 18550 50  0001 C CNN
-F 2 "" H 31150 18525 50  0001 C CNN
-F 3 "" H 31150 18700 50  0001 C CNN
-	1    31200 18700
+P 31100 18850
+F 0 "CR28" V 31275 18975 140 0000 L CNN
+F 1 "Diode" H 31100 18700 50  0001 C CNN
+F 2 "" H 31050 18675 50  0001 C CNN
+F 3 "" H 31050 18850 50  0001 C CNN
+	1    31100 18850
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K14
 U 1 1 5B6FB333
-P 31050 19875
-F 0 "K14" H 30850 19875 140 0000 L CNN
-F 1 "Relay-1006282" H 31050 20025 50  0001 C CNN
-F 2 "" H 30300 20250 50  0001 C CNN
-F 3 "" H 30300 20250 50  0001 C CNN
-	1    31050 19875
+P 30950 20025
+F 0 "K14" H 30750 20025 140 0000 L CNN
+F 1 "Relay-1006282" H 30950 20175 50  0001 C CNN
+F 2 "" H 30200 20400 50  0001 C CNN
+F 3 "" H 30200 20400 50  0001 C CNN
+	1    30950 20025
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	30900 19400 30900 18900
+	30800 19550 30800 19050
 Wire Wire Line
-	31200 18900 31200 19400
+	31100 19050 31100 19550
 $Comp
 L AGC_DSKY:Diode CR29
 U 1 1 5B6FB33B
-P 35950 18700
-F 0 "CR29" V 36125 18025 140 0000 L CNN
-F 1 "Diode" H 35950 18550 50  0001 C CNN
-F 2 "" H 35900 18525 50  0001 C CNN
-F 3 "" H 35900 18700 50  0001 C CNN
-	1    35950 18700
+P 35850 18850
+F 0 "CR29" V 36025 18175 140 0000 L CNN
+F 1 "Diode" H 35850 18700 50  0001 C CNN
+F 2 "" H 35800 18675 50  0001 C CNN
+F 3 "" H 35800 18850 50  0001 C CNN
+	1    35850 18850
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR30
 U 1 1 5B6FB341
-P 36250 18700
-F 0 "CR30" V 36425 18825 140 0000 L CNN
-F 1 "Diode" H 36250 18550 50  0001 C CNN
-F 2 "" H 36200 18525 50  0001 C CNN
-F 3 "" H 36200 18700 50  0001 C CNN
-	1    36250 18700
+P 36150 18850
+F 0 "CR30" V 36325 18975 140 0000 L CNN
+F 1 "Diode" H 36150 18700 50  0001 C CNN
+F 2 "" H 36100 18675 50  0001 C CNN
+F 3 "" H 36100 18850 50  0001 C CNN
+	1    36150 18850
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K15
 U 1 1 5B6FB347
-P 36100 19875
-F 0 "K15" H 35900 19875 140 0000 L CNN
-F 1 "Relay-1006282" H 36100 20025 50  0001 C CNN
-F 2 "" H 35350 20250 50  0001 C CNN
-F 3 "" H 35350 20250 50  0001 C CNN
-	1    36100 19875
+P 36000 19975
+F 0 "K15" H 35800 19975 140 0000 L CNN
+F 1 "Relay-1006282" H 36000 20125 50  0001 C CNN
+F 2 "" H 35250 20350 50  0001 C CNN
+F 3 "" H 35250 20350 50  0001 C CNN
+	1    36000 19975
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	35950 19400 35950 18900
+	35850 19500 35850 19050
 Wire Wire Line
-	36250 18900 36250 19400
+	36150 19050 36150 19500
 $Comp
 L AGC_DSKY:Diode CR33
 U 1 1 5B714D70
-P 15550 14950
-F 0 "CR33" V 15725 14275 140 0000 L CNN
-F 1 "Diode" H 15550 14800 50  0001 C CNN
-F 2 "" H 15500 14775 50  0001 C CNN
-F 3 "" H 15500 14950 50  0001 C CNN
-	1    15550 14950
+P 15550 15150
+F 0 "CR33" V 15725 14475 140 0000 L CNN
+F 1 "Diode" H 15550 15000 50  0001 C CNN
+F 2 "" H 15500 14975 50  0001 C CNN
+F 3 "" H 15500 15150 50  0001 C CNN
+	1    15550 15150
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR34
 U 1 1 5B714D76
-P 15850 14950
-F 0 "CR34" V 16025 15075 140 0000 L CNN
-F 1 "Diode" H 15850 14800 50  0001 C CNN
-F 2 "" H 15800 14775 50  0001 C CNN
-F 3 "" H 15800 14950 50  0001 C CNN
-	1    15850 14950
+P 15850 15150
+F 0 "CR34" V 16025 15275 140 0000 L CNN
+F 1 "Diode" H 15850 15000 50  0001 C CNN
+F 2 "" H 15800 14975 50  0001 C CNN
+F 3 "" H 15800 15150 50  0001 C CNN
+	1    15850 15150
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K17
 U 1 1 5B714D7C
-P 15700 16125
-F 0 "K17" H 15475 16125 140 0000 L CNN
-F 1 "Relay-1006282" H 15700 16275 50  0001 C CNN
-F 2 "" H 14950 16500 50  0001 C CNN
-F 3 "" H 14950 16500 50  0001 C CNN
-	1    15700 16125
+P 15700 16325
+F 0 "K17" H 15475 16325 140 0000 L CNN
+F 1 "Relay-1006282" H 15700 16475 50  0001 C CNN
+F 2 "" H 14950 16700 50  0001 C CNN
+F 3 "" H 14950 16700 50  0001 C CNN
+	1    15700 16325
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	15550 15650 15550 15150
+	15550 15850 15550 15350
 Wire Wire Line
-	15850 15150 15850 15650
+	15850 15350 15850 15850
 $Comp
 L AGC_DSKY:Diode CR31
 U 1 1 5B714D84
-P 20700 14950
-F 0 "CR31" V 20850 14300 140 0000 L CNN
-F 1 "Diode" H 20700 14800 50  0001 C CNN
-F 2 "" H 20650 14775 50  0001 C CNN
-F 3 "" H 20650 14950 50  0001 C CNN
-	1    20700 14950
+P 20650 15175
+F 0 "CR31" V 20800 14525 140 0000 L CNN
+F 1 "Diode" H 20650 15025 50  0001 C CNN
+F 2 "" H 20600 15000 50  0001 C CNN
+F 3 "" H 20600 15175 50  0001 C CNN
+	1    20650 15175
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR32
 U 1 1 5B714D8A
-P 21000 14950
-F 0 "CR32" V 21175 15075 140 0000 L CNN
-F 1 "Diode" H 21000 14800 50  0001 C CNN
-F 2 "" H 20950 14775 50  0001 C CNN
-F 3 "" H 20950 14950 50  0001 C CNN
-	1    21000 14950
+P 20950 15175
+F 0 "CR32" V 21125 15300 140 0000 L CNN
+F 1 "Diode" H 20950 15025 50  0001 C CNN
+F 2 "" H 20900 15000 50  0001 C CNN
+F 3 "" H 20900 15175 50  0001 C CNN
+	1    20950 15175
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K16
 U 1 1 5B714D90
-P 20850 16125
-F 0 "K16" H 20625 16125 140 0000 L CNN
-F 1 "Relay-1006282" H 20850 16275 50  0001 C CNN
-F 2 "" H 20100 16500 50  0001 C CNN
-F 3 "" H 20100 16500 50  0001 C CNN
-	1    20850 16125
+P 20800 16275
+F 0 "K16" H 20575 16275 140 0000 L CNN
+F 1 "Relay-1006282" H 20800 16425 50  0001 C CNN
+F 2 "" H 20050 16650 50  0001 C CNN
+F 3 "" H 20050 16650 50  0001 C CNN
+	1    20800 16275
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	20700 15650 20700 15150
+	20650 15800 20650 15375
 Wire Wire Line
-	21000 15150 21000 15650
+	20950 15375 20950 15800
 $Comp
 L AGC_DSKY:Diode CR35
 U 1 1 5B714D98
-P 25850 14950
-F 0 "CR35" V 26025 14300 140 0000 L CNN
-F 1 "Diode" H 25850 14800 50  0001 C CNN
-F 2 "" H 25800 14775 50  0001 C CNN
-F 3 "" H 25800 14950 50  0001 C CNN
-	1    25850 14950
+P 25725 15175
+F 0 "CR35" V 25900 14525 140 0000 L CNN
+F 1 "Diode" H 25725 15025 50  0001 C CNN
+F 2 "" H 25675 15000 50  0001 C CNN
+F 3 "" H 25675 15175 50  0001 C CNN
+	1    25725 15175
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR36
 U 1 1 5B714D9E
-P 26150 14950
-F 0 "CR36" V 26325 15075 140 0000 L CNN
-F 1 "Diode" H 26150 14800 50  0001 C CNN
-F 2 "" H 26100 14775 50  0001 C CNN
-F 3 "" H 26100 14950 50  0001 C CNN
-	1    26150 14950
+P 26025 15175
+F 0 "CR36" V 26200 15300 140 0000 L CNN
+F 1 "Diode" H 26025 15025 50  0001 C CNN
+F 2 "" H 25975 15000 50  0001 C CNN
+F 3 "" H 25975 15175 50  0001 C CNN
+	1    26025 15175
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K18
 U 1 1 5B714DA4
-P 26000 16125
-F 0 "K18" H 25775 16125 140 0000 L CNN
-F 1 "Relay-1006282" H 26000 16275 50  0001 C CNN
-F 2 "" H 25250 16500 50  0001 C CNN
-F 3 "" H 25250 16500 50  0001 C CNN
-	1    26000 16125
+P 25875 16275
+F 0 "K18" H 25650 16275 140 0000 L CNN
+F 1 "Relay-1006282" H 25875 16425 50  0001 C CNN
+F 2 "" H 25125 16650 50  0001 C CNN
+F 3 "" H 25125 16650 50  0001 C CNN
+	1    25875 16275
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	25850 15650 25850 15150
+	25725 15800 25725 15375
 Wire Wire Line
-	26150 15150 26150 15650
+	26025 15375 26025 15800
 $Comp
 L AGC_DSKY:Diode CR37
 U 1 1 5B714DAC
-P 30900 14950
-F 0 "CR37" V 31075 14250 140 0000 L CNN
-F 1 "Diode" H 30900 14800 50  0001 C CNN
-F 2 "" H 30850 14775 50  0001 C CNN
-F 3 "" H 30850 14950 50  0001 C CNN
-	1    30900 14950
+P 30800 15150
+F 0 "CR37" V 30975 14450 140 0000 L CNN
+F 1 "Diode" H 30800 15000 50  0001 C CNN
+F 2 "" H 30750 14975 50  0001 C CNN
+F 3 "" H 30750 15150 50  0001 C CNN
+	1    30800 15150
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR38
 U 1 1 5B714DB2
-P 31200 14950
-F 0 "CR38" V 31375 15075 140 0000 L CNN
-F 1 "Diode" H 31200 14800 50  0001 C CNN
-F 2 "" H 31150 14775 50  0001 C CNN
-F 3 "" H 31150 14950 50  0001 C CNN
-	1    31200 14950
+P 31100 15150
+F 0 "CR38" V 31275 15275 140 0000 L CNN
+F 1 "Diode" H 31100 15000 50  0001 C CNN
+F 2 "" H 31050 14975 50  0001 C CNN
+F 3 "" H 31050 15150 50  0001 C CNN
+	1    31100 15150
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K19
 U 1 1 5B714DB8
-P 31050 16125
-F 0 "K19" H 30825 16125 140 0000 L CNN
-F 1 "Relay-1006282" H 31050 16275 50  0001 C CNN
-F 2 "" H 30300 16500 50  0001 C CNN
-F 3 "" H 30300 16500 50  0001 C CNN
-	1    31050 16125
+P 30950 16275
+F 0 "K19" H 30725 16275 140 0000 L CNN
+F 1 "Relay-1006282" H 30950 16425 50  0001 C CNN
+F 2 "" H 30200 16650 50  0001 C CNN
+F 3 "" H 30200 16650 50  0001 C CNN
+	1    30950 16275
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	30900 15650 30900 15150
+	30800 15800 30800 15350
 Wire Wire Line
-	31200 15150 31200 15650
+	31100 15350 31100 15800
 $Comp
 L AGC_DSKY:Diode CR39
 U 1 1 5B714DC0
-P 35950 14950
-F 0 "CR39" V 36125 14275 140 0000 L CNN
-F 1 "Diode" H 35950 14800 50  0001 C CNN
-F 2 "" H 35900 14775 50  0001 C CNN
-F 3 "" H 35900 14950 50  0001 C CNN
-	1    35950 14950
+P 35825 15150
+F 0 "CR39" V 36000 14475 140 0000 L CNN
+F 1 "Diode" H 35825 15000 50  0001 C CNN
+F 2 "" H 35775 14975 50  0001 C CNN
+F 3 "" H 35775 15150 50  0001 C CNN
+	1    35825 15150
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR40
 U 1 1 5B714DC6
-P 36250 14950
-F 0 "CR40" V 36425 15075 140 0000 L CNN
-F 1 "Diode" H 36250 14800 50  0001 C CNN
-F 2 "" H 36200 14775 50  0001 C CNN
-F 3 "" H 36200 14950 50  0001 C CNN
-	1    36250 14950
+P 36125 15150
+F 0 "CR40" V 36300 15275 140 0000 L CNN
+F 1 "Diode" H 36125 15000 50  0001 C CNN
+F 2 "" H 36075 14975 50  0001 C CNN
+F 3 "" H 36075 15150 50  0001 C CNN
+	1    36125 15150
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:Relay-1006282 K20
 U 1 1 5B714DCC
-P 36100 16125
-F 0 "K20" H 35875 16125 140 0000 L CNN
-F 1 "Relay-1006282" H 36100 16275 50  0001 C CNN
-F 2 "" H 35350 16500 50  0001 C CNN
-F 3 "" H 35350 16500 50  0001 C CNN
-	1    36100 16125
+P 35975 16275
+F 0 "K20" H 35750 16275 140 0000 L CNN
+F 1 "Relay-1006282" H 35975 16425 50  0001 C CNN
+F 2 "" H 35225 16650 50  0001 C CNN
+F 3 "" H 35225 16650 50  0001 C CNN
+	1    35975 16275
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	35950 15650 35950 15150
+	35825 15800 35825 15350
 Wire Wire Line
-	36250 15150 36250 15650
+	36125 15350 36125 15800
 Wire Wire Line
-	12300 14600 15550 14600
+	12725 14750 15550 14750
 Wire Wire Line
-	15550 14600 15550 14750
+	15550 14750 15550 14950
+Connection ~ 15550 14750
 Wire Wire Line
-	15550 14600 15850 14600
+	20650 14750 20650 14975
 Wire Wire Line
-	15850 14600 15850 14750
-Connection ~ 15550 14600
+	20650 14750 20950 14750
 Wire Wire Line
-	15850 14600 20700 14600
+	20950 14750 20950 14975
+Connection ~ 20650 14750
 Wire Wire Line
-	20700 14600 20700 14750
+	20950 14750 25725 14750
 Wire Wire Line
-	20700 14600 21000 14600
+	29800 14700 30800 14700
 Wire Wire Line
-	21000 14600 21000 14750
-Connection ~ 20700 14600
+	30800 14700 30800 14950
 Wire Wire Line
-	21000 14600 25850 14600
+	30800 14700 31100 14700
 Wire Wire Line
-	29900 14500 30900 14500
+	31100 14700 31100 14950
+Connection ~ 30800 14700
 Wire Wire Line
-	30900 14500 30900 14750
+	35825 14950 35825 14700
 Wire Wire Line
-	30900 14500 31200 14500
+	35825 14700 34800 14700
 Wire Wire Line
-	31200 14500 31200 14750
-Connection ~ 30900 14500
+	35825 14700 36125 14700
 Wire Wire Line
-	35950 14750 35950 14500
+	36125 14700 36125 14950
+Connection ~ 35825 14700
 Wire Wire Line
-	35950 14500 34925 14500
+	14500 15500 15250 15500
 Wire Wire Line
-	35950 14500 36250 14500
+	15250 15500 15250 15850
 Wire Wire Line
-	36250 14500 36250 14750
-Connection ~ 35950 14500
+	14850 16100 14500 16100
 Wire Wire Line
-	14500 15300 15250 15300
+	14850 16550 14500 16550
 Wire Wire Line
-	15250 15300 15250 15650
+	16750 15500 16150 15500
 Wire Wire Line
-	14850 15900 14500 15900
+	16150 15500 16150 15850
 Wire Wire Line
-	14850 16350 14500 16350
+	16750 16100 16550 16100
 Wire Wire Line
-	16750 15300 16150 15300
+	16750 16550 16550 16550
 Wire Wire Line
-	16150 15300 16150 15650
+	21950 16050 21650 16050
 Wire Wire Line
-	16750 15900 16550 15900
+	21950 16500 21650 16500
 Wire Wire Line
-	16750 16350 16550 16350
+	19625 16050 19950 16050
 Wire Wire Line
-	22000 15300 21300 15300
+	19625 16500 19950 16500
 Wire Wire Line
-	22000 15900 21700 15900
+	24700 15525 25425 15525
 Wire Wire Line
-	22000 16350 21700 16350
+	24700 16050 25025 16050
 Wire Wire Line
-	21300 15650 21300 15300
+	24700 16500 25025 16500
 Wire Wire Line
-	19675 15300 20400 15300
+	25425 15525 25425 15800
+Connection ~ 20950 14750
 Wire Wire Line
-	20400 15300 20400 15650
+	26025 14975 26025 14750
 Wire Wire Line
-	19675 15900 20000 15900
+	25725 14975 25725 14750
+Connection ~ 25725 14750
 Wire Wire Line
-	19675 16350 20000 16350
+	25725 14750 26025 14750
 Wire Wire Line
-	24825 15300 25550 15300
+	27025 15525 26325 15525
 Wire Wire Line
-	24825 15900 25150 15900
+	27025 16050 26725 16050
 Wire Wire Line
-	24825 16350 25150 16350
+	27025 16500 26725 16500
 Wire Wire Line
-	25550 15300 25550 15650
-Connection ~ 21000 14600
-Connection ~ 15850 14600
+	26325 15525 26325 15800
 Wire Wire Line
-	26150 14750 26150 14600
+	29775 15500 30500 15500
 Wire Wire Line
-	25850 14750 25850 14600
-Connection ~ 25850 14600
+	29775 16050 30100 16050
 Wire Wire Line
-	25850 14600 26150 14600
+	29775 16500 30100 16500
 Wire Wire Line
-	27150 15300 26450 15300
+	32100 15500 31400 15500
 Wire Wire Line
-	27150 15900 26850 15900
+	32100 16050 31800 16050
 Wire Wire Line
-	27150 16350 26850 16350
+	31400 15500 31400 15800
 Wire Wire Line
-	26450 15300 26450 15650
+	30500 15500 30500 15800
 Wire Wire Line
-	29875 15300 30600 15300
+	34800 15500 35525 15500
 Wire Wire Line
-	29875 15900 30200 15900
+	34800 16500 35125 16500
 Wire Wire Line
-	29875 16350 30200 16350
+	37400 15500 36425 15500
 Wire Wire Line
-	32200 15300 31500 15300
+	37400 16050 36825 16050
 Wire Wire Line
-	32200 15900 31900 15900
+	37400 16500 36825 16500
 Wire Wire Line
-	31500 15300 31500 15650
+	36425 15500 36425 15800
 Wire Wire Line
-	30600 15300 30600 15650
+	35525 15500 35525 15800
 Wire Wire Line
-	34925 15300 35650 15300
+	12700 17025 16150 17025
 Wire Wire Line
-	34925 16350 35250 16350
+	16150 17025 26325 17025
 Wire Wire Line
-	37250 15300 36550 15300
+	26325 17025 26325 16750
 Wire Wire Line
-	37250 15900 36950 15900
+	15250 17350 15250 16800
 Wire Wire Line
-	37250 16350 36950 16350
+	20350 17350 20350 16750
 Wire Wire Line
-	36550 15300 36550 15650
+	21250 16750 21250 17300
 Wire Wire Line
-	35650 15300 35650 15650
+	21250 17300 21950 17300
 Wire Wire Line
-	12750 16850 16150 16850
+	27025 17225 25425 17225
 Wire Wire Line
-	16150 16850 16150 16600
+	25425 17225 25425 16750
 Wire Wire Line
-	16150 16850 26450 16850
+	14825 20250 14475 20250
 Wire Wire Line
-	26450 16850 26450 16600
-Connection ~ 16150 16850
+	19975 20250 19625 20250
 Wire Wire Line
-	11800 17300 15250 17300
+	21875 19800 21675 19800
 Wire Wire Line
-	15250 17300 15250 16600
+	29775 20250 29975 20250
 Wire Wire Line
-	15250 17300 20400 17300
+	37150 19750 36850 19750
 Wire Wire Line
-	20400 17300 20400 16600
-Connection ~ 15250 17300
+	36425 16750 36425 17550
 Wire Wire Line
-	21300 16600 21300 17250
+	36425 17550 32075 17550
 Wire Wire Line
-	21300 17250 22000 17250
+	32075 17550 32075 16500
 Wire Wire Line
-	27150 17000 25550 17000
+	31400 17550 31400 16750
 Wire Wire Line
-	25550 17000 25550 16600
+	31400 17550 13275 17550
+Connection ~ 31400 17550
 Wire Wire Line
-	14850 20100 14500 20100
+	16125 20900 16125 20500
+Connection ~ 16125 20900
 Wire Wire Line
-	20000 20100 19650 20100
+	31400 20900 31400 20500
+Connection ~ 26350 20900
 Wire Wire Line
-	21900 19650 21700 19650
-Wire Wire Line
-	29875 20100 30075 20100
-Wire Wire Line
-	37250 19650 36950 19650
-Wire Wire Line
-	36550 16600 36550 17500
-Wire Wire Line
-	36550 17500 31900 17500
-Wire Wire Line
-	31900 17500 31900 16350
-Wire Wire Line
-	31500 17500 31500 16600
-Wire Wire Line
-	31500 17500 13350 17500
-Wire Wire Line
-	13350 17500 13350 20850
-Connection ~ 31500 17500
-Wire Wire Line
-	13350 20850 16150 20850
-Wire Wire Line
-	16150 20850 16150 20350
-Wire Wire Line
-	16150 20850 19875 20850
-Wire Wire Line
-	19875 20850 19875 19650
-Wire Wire Line
-	19875 19650 20000 19650
-Connection ~ 16150 20850
-Wire Wire Line
-	19875 20850 26450 20850
-Wire Wire Line
-	26450 20850 26450 20350
-Connection ~ 19875 20850
-Wire Wire Line
-	31500 20850 31500 20350
-Connection ~ 26450 20850
-Wire Wire Line
-	36550 20850 36550 20350
-Wire Wire Line
-	36950 20100 37250 20100
-Wire Wire Line
-	37250 20100 37250 20850
-Wire Wire Line
-	37250 20850 36550 20850
-Connection ~ 36550 20850
-Wire Wire Line
-	13350 20850 13350 23400
-Wire Wire Line
-	13350 24600 16150 24600
-Wire Wire Line
-	16150 24100 16150 24600
-Connection ~ 13350 20850
-Wire Wire Line
-	16150 24600 19875 24600
-Wire Wire Line
-	19875 24600 19875 23400
-Wire Wire Line
-	19875 23400 20000 23400
-Connection ~ 16150 24600
-Wire Wire Line
-	19875 24600 26450 24600
-Wire Wire Line
-	26450 24600 26450 24100
-Connection ~ 19875 24600
-Wire Wire Line
-	31500 24600 31500 24100
-Connection ~ 26450 24600
-Wire Wire Line
-	37250 24600 37250 23850
-Wire Wire Line
-	37250 23850 36950 23850
-Wire Wire Line
-	36550 24100 36550 24600
-Connection ~ 36550 24600
-Wire Wire Line
-	36550 24600 37250 24600
-Wire Wire Line
-	12675 23400 13350 23400
-Connection ~ 13350 23400
-Wire Wire Line
-	13350 23400 13350 24600
-Text Notes 11275 24025 0    130  ~ 26
+	36450 20900 36450 20450
+Connection ~ 36450 20900
+Text Notes 11200 24100 0    130  ~ 26
         OSGRD\n(OFF SEGMENT GRD)
 Wire Wire Line
-	13350 24600 13350 28325
+	16125 28350 19850 28350
 Wire Wire Line
-	13350 28325 16150 28325
+	19850 28350 19850 27250
+Connection ~ 19850 28350
 Wire Wire Line
-	16150 28325 16150 27800
-Connection ~ 13350 24600
+	37125 28350 37125 27650
+Connection ~ 36425 28350
 Wire Wire Line
-	16150 28325 19875 28325
+	36425 28350 37125 28350
 Wire Wire Line
-	19875 28325 19875 27100
+	35525 16750 35525 17700
 Wire Wire Line
-	19875 27100 20000 27100
-Connection ~ 16150 28325
+	35525 17700 33775 17700
 Wire Wire Line
-	19875 28325 26450 28325
+	33775 17700 33775 16050
 Wire Wire Line
-	26450 28325 26450 27800
-Connection ~ 19875 28325
+	30500 17700 30500 16750
 Wire Wire Line
-	31500 28325 31500 27800
-Connection ~ 26450 28325
+	30500 17700 11525 17700
+Connection ~ 30500 17700
 Wire Wire Line
-	37250 28325 37250 27550
+	11525 17700 11525 21375
 Wire Wire Line
-	37250 27550 36950 27550
+	11525 21375 15225 21375
 Wire Wire Line
-	36550 27800 36550 28325
-Connection ~ 36550 28325
+	15225 21375 15225 20500
 Wire Wire Line
-	36550 28325 37250 28325
+	15225 21375 20375 21375
 Wire Wire Line
-	35650 16600 35650 17650
+	20375 21375 20375 20500
+Connection ~ 15225 21375
+Connection ~ 20375 21375
 Wire Wire Line
-	35650 17650 33900 17650
-Wire Wire Line
-	33900 17650 33900 15900
-Wire Wire Line
-	30600 17650 30600 16600
-Wire Wire Line
-	30600 17650 11450 17650
-Connection ~ 30600 17650
-Wire Wire Line
-	11450 17650 11450 21325
-Wire Wire Line
-	11450 21325 15250 21325
-Wire Wire Line
-	15250 21325 15250 20350
-Wire Wire Line
-	15250 21325 20400 21325
-Wire Wire Line
-	20400 21325 20400 20350
-Connection ~ 15250 21325
-Wire Wire Line
-	20400 21325 25000 21325
-Wire Wire Line
-	25550 21325 25550 20350
-Connection ~ 20400 21325
-Wire Wire Line
-	25150 19650 25000 19650
-Wire Wire Line
-	25000 19650 25000 21325
-Connection ~ 25000 21325
-Wire Wire Line
-	25000 21325 25550 21325
-Wire Wire Line
-	30600 21325 30600 20350
-Connection ~ 25550 21325
-Wire Wire Line
-	35650 20350 35650 21325
-Wire Wire Line
-	11100 21325 11450 21325
-Connection ~ 11450 21325
-Text Notes 10600 21125 0    130  ~ 26
+	30500 21375 30500 20500
+Connection ~ 25450 21375
+Text Notes 10575 21175 0    130  ~ 26
 EV250
 Wire Wire Line
-	12675 18450 15550 18450
+	12725 18475 15525 18475
 Wire Wire Line
-	36250 18450 36250 18500
+	36150 18475 36150 18650
 Wire Wire Line
-	35950 18500 35950 18450
-Connection ~ 35950 18450
+	35850 18475 36150 18475
 Wire Wire Line
-	35950 18450 36250 18450
+	26050 18475 30800 18475
 Wire Wire Line
-	31200 18500 31200 18450
+	25750 18475 26050 18475
 Wire Wire Line
-	30900 18500 30900 18450
-Connection ~ 30900 18450
+	20975 18475 25750 18475
 Wire Wire Line
-	26150 18500 26150 18450
-Connection ~ 26150 18450
+	20675 18475 20975 18475
 Wire Wire Line
-	26150 18450 30900 18450
+	15825 18475 20675 18475
 Wire Wire Line
-	25850 18500 25850 18450
-Connection ~ 25850 18450
+	15525 18475 15825 18475
 Wire Wire Line
-	25850 18450 26150 18450
+	13775 18225 13775 19325
 Wire Wire Line
-	21000 18500 21000 18450
-Connection ~ 21000 18450
+	13775 19325 15225 19325
 Wire Wire Line
-	21000 18450 25850 18450
+	15225 19325 15225 19550
 Wire Wire Line
-	20700 18500 20700 18450
-Connection ~ 20700 18450
+	29975 19750 29975 20250
+Connection ~ 29975 20250
 Wire Wire Line
-	20700 18450 21000 18450
+	29975 20250 30100 20250
 Wire Wire Line
-	15850 18500 15850 18450
-Connection ~ 15850 18450
+	27400 21100 33475 21100
+Connection ~ 30500 21375
+Connection ~ 33775 17700
+Connection ~ 31375 28350
+Connection ~ 31400 20900
 Wire Wire Line
-	15850 18450 20700 18450
+	33775 16050 35125 16050
 Wire Wire Line
-	15550 18500 15550 18450
-Connection ~ 15550 18450
+	31100 18475 35850 18475
 Wire Wire Line
-	15550 18450 15850 18450
+	30500 21375 35550 21375
 Wire Wire Line
-	13700 18175 13700 19275
+	31375 28350 36425 28350
 Wire Wire Line
-	13700 19275 15250 19275
+	31400 20900 36450 20900
 Wire Wire Line
-	15250 19275 15250 19400
+	30800 18475 31100 18475
 Wire Wire Line
-	13700 19275 13700 23000
+	30500 17700 33775 17700
 Wire Wire Line
-	13700 23000 15250 23000
+	12700 22200 15525 22200
 Wire Wire Line
-	15250 23000 15250 23150
-Connection ~ 13700 19275
+	15525 22200 15825 22200
 Wire Wire Line
-	13700 23000 13700 26750
+	15825 22200 20675 22200
 Wire Wire Line
-	13700 26750 15250 26750
-Connection ~ 13700 23000
+	20675 22200 20975 22200
 Wire Wire Line
-	15250 26750 15250 26850
+	30825 22200 31125 22200
 Wire Wire Line
-	17550 19275 16150 19275
+	23300 20225 25050 20225
 Wire Wire Line
-	16150 19275 16150 19400
+	21275 28025 22250 28025
 Wire Wire Line
-	17550 18175 17550 19275
+	26350 20900 31400 20900
 Wire Wire Line
-	17550 19275 17550 23000
+	25450 21375 30500 21375
 Wire Wire Line
-	17550 23000 16150 23000
+	21900 29025 21900 27700
 Wire Wire Line
-	16150 23000 16150 23150
-Connection ~ 17550 19275
+	30000 23925 29775 23925
 Wire Wire Line
-	17550 23000 17550 26750
+	29950 27175 29950 27650
+Connection ~ 29950 27650
 Wire Wire Line
-	17550 26750 16150 26750
+	34100 27200 34100 28550
 Wire Wire Line
-	16150 26750 16150 26850
-Connection ~ 17550 23000
+	34100 28550 27400 28550
 Wire Wire Line
-	18850 19275 20400 19275
+	27400 28550 27400 27200
 Wire Wire Line
-	20400 19275 20400 19400
+	15225 28775 20375 28775
 Wire Wire Line
-	18850 18175 18850 19275
-Wire Wire Line
-	18850 19275 18850 23000
-Wire Wire Line
-	18850 23000 20400 23000
-Wire Wire Line
-	20400 23000 20400 23150
-Connection ~ 18850 19275
-Wire Wire Line
-	18850 23000 18850 26750
-Wire Wire Line
-	18850 26750 20400 26750
-Wire Wire Line
-	20400 26750 20400 26850
-Connection ~ 18850 23000
-Wire Wire Line
-	22675 18175 22675 19275
-Wire Wire Line
-	22675 19275 21300 19275
-Wire Wire Line
-	21300 19275 21300 19400
-Wire Wire Line
-	22675 19275 22675 23000
-Wire Wire Line
-	22675 23000 21300 23000
-Wire Wire Line
-	21300 23000 21300 23150
-Connection ~ 22675 19275
-Wire Wire Line
-	22675 23000 22675 26750
-Wire Wire Line
-	22675 26750 21300 26750
-Wire Wire Line
-	21300 26750 21300 26850
-Connection ~ 22675 23000
-Wire Wire Line
-	23975 18175 23975 19275
-Wire Wire Line
-	23975 19275 25550 19275
-Wire Wire Line
-	25550 19275 25550 19400
-Wire Wire Line
-	23975 19275 23975 23000
-Wire Wire Line
-	23975 23000 25550 23000
-Wire Wire Line
-	25550 23000 25550 23150
-Connection ~ 23975 19275
-Connection ~ 23975 23000
-Wire Wire Line
-	23975 26750 25550 26750
-Wire Wire Line
-	25550 26750 25550 26850
-Wire Wire Line
-	23975 23000 23975 26750
-Wire Wire Line
-	27800 18175 27800 19275
-Wire Wire Line
-	27800 19275 26450 19275
-Wire Wire Line
-	26450 19275 26450 19400
-Wire Wire Line
-	27800 19275 27800 23000
-Wire Wire Line
-	27800 23000 26450 23000
-Wire Wire Line
-	26450 23000 26450 23150
-Connection ~ 27800 19275
-Wire Wire Line
-	27800 23000 27800 26750
-Wire Wire Line
-	27800 26750 26450 26750
-Wire Wire Line
-	26450 26750 26450 26850
-Connection ~ 27800 23000
-Wire Wire Line
-	29075 18175 29075 19275
-Wire Wire Line
-	29075 19275 30600 19275
-Wire Wire Line
-	30600 19275 30600 19400
-Wire Wire Line
-	29075 19275 29075 23000
-Wire Wire Line
-	29075 23000 30600 23000
-Wire Wire Line
-	30600 23000 30600 23150
-Connection ~ 29075 19275
-Wire Wire Line
-	29075 23000 29075 26750
-Wire Wire Line
-	29075 26750 30600 26750
-Wire Wire Line
-	30600 26750 30600 26850
-Connection ~ 29075 23000
-Wire Wire Line
-	32875 18175 32875 19275
-Wire Wire Line
-	32875 19275 31500 19275
-Wire Wire Line
-	31500 19275 31500 19400
-Wire Wire Line
-	32875 19275 32875 23000
-Wire Wire Line
-	32875 23000 31500 23000
-Wire Wire Line
-	31500 23000 31500 23150
-Connection ~ 32875 19275
-Wire Wire Line
-	32875 23000 32875 26750
-Wire Wire Line
-	32875 26750 31500 26750
-Wire Wire Line
-	31500 26750 31500 26850
-Connection ~ 32875 23000
-Wire Wire Line
-	35650 19275 35650 19400
-Wire Wire Line
-	35650 23000 35650 23150
-Wire Wire Line
-	35650 26750 35650 26850
-Wire Wire Line
-	38025 19275 36550 19275
-Wire Wire Line
-	36550 19275 36550 19400
-Wire Wire Line
-	38025 23000 36550 23000
-Wire Wire Line
-	36550 23000 36550 23150
-Wire Wire Line
-	38025 26750 36550 26750
-Wire Wire Line
-	36550 26750 36550 26850
-Wire Wire Line
-	21300 20350 21300 20600
-Wire Wire Line
-	21300 20600 22275 20600
-Wire Wire Line
-	22275 20600 22275 20100
-Wire Wire Line
-	22275 20100 23325 20100
-Wire Wire Line
-	26850 20100 28450 20100
-Wire Wire Line
-	28450 20100 28450 19675
-Wire Wire Line
-	28450 19675 30075 19675
-Wire Wire Line
-	30075 19675 30075 20100
-Connection ~ 30075 20100
-Wire Wire Line
-	30075 20100 30200 20100
-Wire Wire Line
-	26850 19650 27425 19650
-Wire Wire Line
-	27425 19650 27425 21050
-Wire Wire Line
-	27425 21050 33550 21050
-Wire Wire Line
-	33550 21050 33550 19650
-Wire Wire Line
-	35250 20100 34850 20100
-Wire Wire Line
-	34850 20100 34850 21525
-Wire Wire Line
-	34850 21525 21925 21525
-Wire Wire Line
-	21925 21525 21925 20100
-Wire Wire Line
-	21925 20100 21700 20100
-Wire Wire Line
-	34850 21525 35650 21525
-Connection ~ 34850 21525
-Connection ~ 34200 23000
-Wire Wire Line
-	34200 23000 34200 26750
-Connection ~ 34200 19275
-Wire Wire Line
-	34200 19275 34200 23000
-Wire Wire Line
-	34200 18175 34200 19275
-Connection ~ 31200 18450
-Connection ~ 30600 21325
-Connection ~ 33900 17650
-Connection ~ 31500 28325
-Connection ~ 31500 24600
-Connection ~ 31500 20850
-Connection ~ 31900 17500
-Wire Wire Line
-	33550 19650 35250 19650
-Wire Wire Line
-	33900 15900 35250 15900
-Wire Wire Line
-	34200 26750 35650 26750
-Wire Wire Line
-	34200 23000 35650 23000
-Wire Wire Line
-	34200 19275 35650 19275
-Wire Wire Line
-	31200 18450 35950 18450
-Wire Wire Line
-	30600 21325 35650 21325
-Wire Wire Line
-	31500 28325 36550 28325
-Wire Wire Line
-	31500 24600 36550 24600
-Wire Wire Line
-	31500 20850 36550 20850
-Wire Wire Line
-	38025 18150 38025 19275
-Wire Wire Line
-	30900 18450 31200 18450
-Wire Wire Line
-	30600 17650 33900 17650
-Connection ~ 38025 19275
-Wire Wire Line
-	38025 19275 38025 23000
-Connection ~ 38025 23000
-Wire Wire Line
-	38025 23000 38025 26750
-Wire Wire Line
-	12675 22150 15550 22150
-Wire Wire Line
-	15550 22150 15550 22250
-Wire Wire Line
-	15550 22150 15850 22150
-Wire Wire Line
-	15850 22150 15850 22250
-Connection ~ 15550 22150
-Wire Wire Line
-	15850 22150 20700 22150
-Wire Wire Line
-	20700 22150 20700 22250
-Connection ~ 15850 22150
-Wire Wire Line
-	20700 22150 21000 22150
-Wire Wire Line
-	21000 22150 21000 22250
-Connection ~ 20700 22150
-Wire Wire Line
-	21000 22150 25850 22150
-Wire Wire Line
-	25850 22150 25850 22250
-Connection ~ 21000 22150
-Wire Wire Line
-	25850 22150 26150 22150
-Wire Wire Line
-	26150 22150 26150 22250
-Connection ~ 25850 22150
-Wire Wire Line
-	26150 22150 30900 22150
-Connection ~ 26150 22150
-Wire Wire Line
-	30900 22150 30900 22250
-Wire Wire Line
-	30900 22150 31200 22150
-Wire Wire Line
-	31200 22150 31200 22250
-Connection ~ 30900 22150
-Wire Wire Line
-	31200 22150 35950 22150
-Connection ~ 31200 22150
-Wire Wire Line
-	35950 22150 35950 22250
-Wire Wire Line
-	35950 22150 36250 22150
-Wire Wire Line
-	36250 22150 36250 22250
-Connection ~ 35950 22150
-Wire Wire Line
-	26450 24600 31500 24600
-Wire Wire Line
-	23325 20375 23325 20100
-Connection ~ 23325 20100
-Wire Wire Line
-	23325 20100 25150 20100
-Wire Wire Line
-	14850 23850 14500 23850
-Wire Wire Line
-	14850 27550 14500 27550
-Wire Wire Line
-	20000 23850 19650 23850
-Wire Wire Line
-	20000 27550 19650 27550
-Wire Wire Line
-	30200 23850 30075 23850
-Wire Wire Line
-	30200 27550 30075 27550
-Wire Wire Line
-	23325 24100 23325 23850
-Wire Wire Line
-	21300 24100 21300 24250
-Wire Wire Line
-	21300 24250 22275 24250
-Wire Wire Line
-	22275 24250 22275 23850
-Wire Wire Line
-	22275 23850 23325 23850
-Connection ~ 23325 23850
-Wire Wire Line
-	23325 23850 25150 23850
-Wire Wire Line
-	21300 27800 21300 28000
-Wire Wire Line
-	21300 28000 22275 28000
-Wire Wire Line
-	22275 28000 22275 27550
-Wire Wire Line
-	22275 27550 23325 27550
-Connection ~ 23325 27550
-Wire Wire Line
-	23325 27550 25150 27550
-Wire Wire Line
-	36250 25875 36250 25950
-Wire Wire Line
-	12675 25875 15550 25875
-Wire Wire Line
-	35950 25950 35950 25875
-Connection ~ 35950 25875
-Wire Wire Line
-	35950 25875 36250 25875
-Wire Wire Line
-	31200 25950 31200 25875
-Connection ~ 31200 25875
-Wire Wire Line
-	31200 25875 35950 25875
-Wire Wire Line
-	30900 25950 30900 25875
-Connection ~ 30900 25875
-Wire Wire Line
-	30900 25875 31200 25875
-Wire Wire Line
-	26150 25875 26150 25950
-Connection ~ 26150 25875
-Wire Wire Line
-	26150 25875 30900 25875
-Wire Wire Line
-	25850 25950 25850 25875
-Connection ~ 25850 25875
-Wire Wire Line
-	25850 25875 26150 25875
-Wire Wire Line
-	21000 25950 21000 25875
-Connection ~ 21000 25875
-Wire Wire Line
-	21000 25875 25850 25875
-Wire Wire Line
-	20700 25950 20700 25875
-Connection ~ 20700 25875
-Wire Wire Line
-	20700 25875 21000 25875
-Wire Wire Line
-	15850 25950 15850 25875
-Connection ~ 15850 25875
-Wire Wire Line
-	15850 25875 20700 25875
-Wire Wire Line
-	15550 25950 15550 25875
-Connection ~ 15550 25875
-Wire Wire Line
-	15550 25875 15850 25875
-Text Notes 10600 24825 0    130  ~ 26
-EV250
-Wire Wire Line
-	11100 25025 11450 25025
-Wire Wire Line
-	15250 25025 15250 24100
-Wire Wire Line
-	15250 25025 20400 25025
-Wire Wire Line
-	20400 25025 20400 24100
-Connection ~ 15250 25025
-Wire Wire Line
-	20400 25025 25000 25025
-Wire Wire Line
-	25550 25025 25550 24100
-Connection ~ 20400 25025
-Wire Wire Line
-	25000 25025 25000 23400
-Wire Wire Line
-	25000 23400 25150 23400
-Connection ~ 25000 25025
-Wire Wire Line
-	25000 25025 25550 25025
-Wire Wire Line
-	25550 25025 30600 25025
-Wire Wire Line
-	30600 24100 30600 25025
-Connection ~ 25550 25025
-Wire Wire Line
-	30600 25025 35650 25025
-Wire Wire Line
-	35650 25025 35650 24100
-Connection ~ 30600 25025
-Wire Wire Line
-	26450 28325 31500 28325
-Wire Wire Line
-	35250 23400 33550 23400
-Wire Wire Line
-	26450 20850 31500 20850
-Wire Wire Line
-	25550 21325 30600 21325
-Wire Wire Line
-	33550 23400 33550 24775
-Wire Wire Line
-	33550 24775 27425 24775
-Wire Wire Line
-	27425 24775 27425 23400
-Wire Wire Line
-	27425 23400 26850 23400
-Wire Wire Line
-	37250 27100 36950 27100
-Wire Wire Line
-	37250 23400 36950 23400
-Wire Wire Line
-	34850 25275 35650 25275
-Wire Wire Line
-	35250 23850 34850 23850
-Wire Wire Line
-	34850 23850 34850 25275
-Wire Wire Line
-	34850 25275 21925 25275
-Wire Wire Line
-	21925 25275 21925 23850
-Wire Wire Line
-	21925 23850 21700 23850
-Connection ~ 34850 25275
-Wire Wire Line
-	35200 29000 35650 29000
-Wire Wire Line
-	35200 29000 35200 27550
-Wire Wire Line
-	35200 27550 35250 27550
-Wire Wire Line
-	35200 29000 21925 29000
-Wire Wire Line
-	21925 29000 21925 27550
-Wire Wire Line
-	21925 27550 21700 27550
-Connection ~ 35200 29000
-Wire Wire Line
-	26850 23850 28450 23850
-Wire Wire Line
-	28450 23850 28450 23425
-Wire Wire Line
-	28450 23425 30075 23425
-Wire Wire Line
-	30075 23425 30075 23850
-Connection ~ 30075 23850
-Wire Wire Line
-	30075 23850 29850 23850
-Wire Wire Line
-	26850 27550 28450 27550
-Wire Wire Line
-	28450 27550 28450 27150
-Wire Wire Line
-	28450 27150 30075 27150
-Wire Wire Line
-	30075 27150 30075 27550
-Connection ~ 30075 27550
-Wire Wire Line
-	30075 27550 29850 27550
-Wire Wire Line
-	35250 27100 33550 27100
-Wire Wire Line
-	33550 27100 33550 28525
-Wire Wire Line
-	33550 28525 27425 28525
-Wire Wire Line
-	27425 28525 27425 27100
-Wire Wire Line
-	27425 27100 26850 27100
-Wire Wire Line
-	11450 25025 11450 28750
-Wire Wire Line
-	11450 28750 15250 28750
-Wire Wire Line
-	15250 28750 15250 27800
-Connection ~ 11450 25025
-Wire Wire Line
-	11450 25025 15250 25025
-Wire Wire Line
-	25550 28750 25550 27800
-Connection ~ 15250 28750
-Wire Wire Line
-	25000 28750 25000 27100
-Wire Wire Line
-	25000 27100 25150 27100
-Wire Wire Line
-	15250 28750 20400 28750
-Connection ~ 25000 28750
-Wire Wire Line
-	25000 28750 25550 28750
-Wire Wire Line
-	25550 28750 30600 28750
-Wire Wire Line
-	30600 28750 30600 27800
-Connection ~ 25550 28750
-Wire Wire Line
-	30600 28750 35650 28750
-Wire Wire Line
-	35650 28750 35650 27800
-Connection ~ 30600 28750
-Wire Wire Line
-	20400 27800 20400 28750
-Connection ~ 20400 28750
-Wire Wire Line
-	20400 28750 25000 28750
-Wire Wire Line
-	21900 23400 21700 23400
-Wire Wire Line
-	21900 27100 21700 27100
-NoConn ~ 16550 27550
-NoConn ~ 16550 27100
-NoConn ~ 14850 27100
-NoConn ~ 16550 20100
-NoConn ~ 16550 19650
-NoConn ~ 14850 19650
-NoConn ~ 16550 23850
-NoConn ~ 16550 23400
-NoConn ~ 14850 23400
-NoConn ~ 30200 19650
-NoConn ~ 31900 19650
-NoConn ~ 31900 20100
-NoConn ~ 30200 23400
-NoConn ~ 31900 23400
-NoConn ~ 31900 23850
-NoConn ~ 30200 27100
-NoConn ~ 31900 27100
-NoConn ~ 31900 27550
+	30475 28775 35525 28775
+Connection ~ 30475 28775
+Connection ~ 20375 28775
+NoConn ~ 16525 20250
+NoConn ~ 16525 19800
+NoConn ~ 14825 19800
+NoConn ~ 30100 19800
+NoConn ~ 31800 19800
+NoConn ~ 31800 20250
 $Comp
 L AGC_DSKY:Relay-1010784 K22
 U 1 1 5DBC5A64
-P 41200 23625
-F 0 "K22" H 40975 23625 140 0000 L CNN
-F 1 "1010784" H 41200 23775 50  0001 C CNN
-F 2 "" H 40450 24000 50  0001 C CNN
-F 3 "" H 40450 24000 50  0001 C CNN
-	1    41200 23625
+P 41050 23675
+F 0 "K22" H 40825 23675 140 0000 L CNN
+F 1 "1010784" H 41050 23825 50  0001 C CNN
+F 2 "" H 40300 24050 50  0001 C CNN
+F 3 "" H 40300 24050 50  0001 C CNN
+	1    41050 23675
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR42
 U 1 1 5DC41737
-P 41050 22450
-F 0 "CR42" V 40875 22575 140 0000 L CNN
-F 1 "Diode" H 41050 22300 50  0001 C CNN
-F 2 "" H 41000 22275 50  0001 C CNN
-F 3 "" H 41000 22450 50  0001 C CNN
-	1    41050 22450
+P 40900 22600
+F 0 "CR42" V 40725 22725 140 0000 L CNN
+F 1 "Diode" H 40900 22450 50  0001 C CNN
+F 2 "" H 40850 22425 50  0001 C CNN
+F 3 "" H 40850 22600 50  0001 C CNN
+	1    40900 22600
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	42350 23400 42050 23400
+	42200 23450 41900 23450
 Wire Wire Line
-	42350 23850 42050 23850
+	42200 23900 41900 23900
 Wire Wire Line
-	31500 17500 31900 17500
+	39875 22925 40900 22925
 Wire Wire Line
-	40025 22875 41050 22875
+	39875 23450 40200 23450
 Wire Wire Line
-	40025 23400 40350 23400
+	40900 22800 40900 22925
+Connection ~ 40900 22925
 Wire Wire Line
-	41050 22650 41050 22875
-Connection ~ 41050 22875
+	40900 22925 40900 23200
 Wire Wire Line
-	41050 22875 41050 23150
+	41200 23200 41200 22200
 Wire Wire Line
-	41350 23150 41350 22150
+	41200 22200 40900 22200
 Wire Wire Line
-	41350 22150 41050 22150
+	40900 22200 40900 22400
 Wire Wire Line
-	41050 22150 41050 22250
-Wire Wire Line
-	41350 22150 43075 22150
-Connection ~ 41350 22150
-NoConn ~ 40350 23850
-NoConn ~ 40750 24100
-NoConn ~ 41650 24100
+	41200 22200 42925 22200
+Connection ~ 41200 22200
+NoConn ~ 40200 23900
+NoConn ~ 40600 24150
+NoConn ~ 41500 24150
 $Comp
 L AGC_DSKY:Relay-1010784 K21
 U 1 1 5E19BAAC
-P 41200 27325
-F 0 "K21" H 40975 27325 140 0000 L CNN
-F 1 "1010784" H 41200 27475 50  0001 C CNN
-F 2 "" H 40450 27700 50  0001 C CNN
-F 3 "" H 40450 27700 50  0001 C CNN
-	1    41200 27325
+P 41050 27425
+F 0 "K21" H 40825 27425 140 0000 L CNN
+F 1 "1010784" H 41050 27575 50  0001 C CNN
+F 2 "" H 40300 27800 50  0001 C CNN
+F 3 "" H 40300 27800 50  0001 C CNN
+	1    41050 27425
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR41
 U 1 1 5E19BAB2
-P 41050 26150
-F 0 "CR41" V 40875 26275 140 0000 L CNN
-F 1 "Diode" H 41050 26000 50  0001 C CNN
-F 2 "" H 41000 25975 50  0001 C CNN
-F 3 "" H 41000 26150 50  0001 C CNN
-	1    41050 26150
+P 40900 26250
+F 0 "CR41" V 40625 26400 140 0000 L CNN
+F 1 "Diode" H 40900 26100 50  0001 C CNN
+F 2 "" H 40850 26075 50  0001 C CNN
+F 3 "" H 40850 26250 50  0001 C CNN
+	1    40900 26250
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	42350 27100 42050 27100
+	42200 27200 41900 27200
 Wire Wire Line
-	42350 27550 42050 27550
+	42200 27650 41900 27650
 Wire Wire Line
-	40025 26575 41050 26575
+	39875 26675 40900 26675
 Wire Wire Line
-	40025 27100 40350 27100
+	39875 27200 40200 27200
 Wire Wire Line
-	41050 26350 41050 26575
-Connection ~ 41050 26575
+	40900 26450 40900 26675
+Connection ~ 40900 26675
 Wire Wire Line
-	41050 26575 41050 26850
+	40900 26675 40900 26950
 Wire Wire Line
-	41350 26850 41350 25850
+	41200 26950 41200 25950
 Wire Wire Line
-	41350 25850 41050 25850
+	41200 25950 40900 25950
 Wire Wire Line
-	41050 25850 41050 25950
+	40900 25950 40900 26050
 Wire Wire Line
-	40025 27550 40350 27550
+	39875 27650 40200 27650
 Wire Wire Line
-	40750 28075 40750 27800
+	40600 28175 40600 27900
 Wire Wire Line
-	41650 28075 41650 27800
+	41500 28175 41500 27900
 Wire Wire Line
-	43075 22150 43075 25850
+	42925 22200 42925 25950
 Wire Wire Line
-	43075 25850 41350 25850
-Connection ~ 43075 22150
+	42925 25950 41200 25950
+Connection ~ 42925 22200
 Wire Wire Line
-	43075 22150 43475 22150
-Connection ~ 41350 25850
-Text Notes 43450 21925 0    130  ~ 26
+	42925 22200 43325 22200
+Connection ~ 41200 25950
+Text Notes 43300 21975 0    130  ~ 26
 0VDC
 $Comp
 L AGC_DSKY:Transistor-NPN Q2
 U 1 1 5E49DE0A
-P 22575 10025
-F 0 "Q2" H 22300 9675 130 0000 C CNN
-F 1 "Transistor-NPN" H 22571 10464 130 0001 C CNN
-F 2 "" H 22575 10275 130 0001 C CNN
-F 3 "" H 22575 10275 130 0001 C CNN
-	1    22575 10025
+P 22625 10075
+F 0 "Q2" H 22350 9725 130 0000 C CNN
+F 1 "Transistor-NPN" H 22621 10514 130 0001 C CNN
+F 2 "" H 22625 10325 130 0001 C CNN
+F 3 "" H 22625 10325 130 0001 C CNN
+	1    22625 10075
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-NPN Q3
 U 1 1 5E55F005
-P 23925 10025
-F 0 "Q3" H 23650 9675 130 0000 C CNN
-F 1 "Transistor-PNP" H 23925 10590 130 0001 C CNN
-F 2 "" H 23925 9775 130 0001 C CNN
-F 3 "" H 23925 9775 130 0001 C CNN
-	1    23925 10025
+P 23975 10075
+F 0 "Q3" H 23700 9725 130 0000 C CNN
+F 1 "Transistor-PNP" H 23975 10640 130 0001 C CNN
+F 2 "" H 23975 9825 130 0001 C CNN
+F 3 "" H 23975 9825 130 0001 C CNN
+	1    23975 10075
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-PNP Q1
 U 1 1 5E5E0041
-P 21550 11925
-F 0 "Q1" H 21150 11675 130 0000 C CNN
-F 1 "Transistor-PNP" H 21550 12490 130 0001 C CNN
-F 2 "" H 21550 11675 130 0001 C CNN
-F 3 "" H 21550 11675 130 0001 C CNN
-	1    21550 11925
-	1    0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Transistor-NPN Q4
-U 1 1 5E662655
-P 28150 10400
-F 0 "Q4" H 28575 10225 130 0000 C CNN
-F 1 "Transistor-NPN" H 28150 10965 130 0001 C CNN
-F 2 "" H 28150 10650 130 0001 C CNN
-F 3 "" H 28150 10650 130 0001 C CNN
-	1    28150 10400
+P 21600 11975
+F 0 "Q1" H 21200 11725 130 0000 C CNN
+F 1 "Transistor-PNP" H 21600 12540 130 0001 C CNN
+F 2 "" H 21600 11725 130 0001 C CNN
+F 3 "" H 21600 11725 130 0001 C CNN
+	1    21600 11975
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-NPN Q5
 U 1 1 5E662AB5
-P 29350 9650
-F 0 "Q5" H 29775 9475 130 0000 C CNN
-F 1 "Transistor-NPN" H 29350 10215 130 0001 C CNN
-F 2 "" H 29350 9900 130 0001 C CNN
-F 3 "" H 29350 9900 130 0001 C CNN
-	1    29350 9650
+P 29400 9900
+F 0 "Q5" H 29825 9625 130 0000 C CNN
+F 1 "Transistor-NPN" H 29400 10465 130 0001 C CNN
+F 2 "" H 29400 10150 130 0001 C CNN
+F 3 "" H 29400 10150 130 0001 C CNN
+	1    29400 9900
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor-Polarized C1
 U 1 1 5E7AAA10
-P 17550 11000
-F 0 "C1" H 17707 11013 130 0000 L CNN
-F 1 "Capacitor-Polarized" H 17575 10450 130 0001 C CNN
-F 2 "" H 17550 11400 130 0001 C CNN
-F 3 "" H 17550 11400 130 0001 C CNN
-	1    17550 11000
+P 17600 11050
+F 0 "C1" H 17757 11063 130 0000 L CNN
+F 1 "Capacitor-Polarized" H 17625 10500 130 0001 C CNN
+F 2 "" H 17600 11450 130 0001 C CNN
+F 3 "" H 17600 11450 130 0001 C CNN
+	1    17600 11050
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor-Polarized C2
 U 1 1 5E7EB0D1
-P 18550 11000
-F 0 "C2" H 18950 11025 130 0000 R CNN
-F 1 "Capacitor-Polarized" H 18575 10450 130 0001 C CNN
-F 2 "" H 18550 11400 130 0001 C CNN
-F 3 "" H 18550 11400 130 0001 C CNN
-	1    18550 11000
+P 18600 11050
+F 0 "C2" H 19000 11075 130 0000 R CNN
+F 1 "Capacitor-Polarized" H 18625 10500 130 0001 C CNN
+F 2 "" H 18600 11450 130 0001 C CNN
+F 3 "" H 18600 11450 130 0001 C CNN
+	1    18600 11050
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor-Polarized C3
 U 1 1 5E7EB459
-P 21125 12450
-F 0 "C3" H 20975 12475 130 0000 R CNN
-F 1 "Capacitor-Polarized" H 21150 11900 130 0001 C CNN
-F 2 "" H 21125 12850 130 0001 C CNN
-F 3 "" H 21125 12850 130 0001 C CNN
-	1    21125 12450
+P 21175 12500
+F 0 "C3" H 21025 12525 130 0000 R CNN
+F 1 "Capacitor-Polarized" H 21200 11950 130 0001 C CNN
+F 2 "" H 21175 12900 130 0001 C CNN
+F 3 "" H 21175 12900 130 0001 C CNN
+	1    21175 12500
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	21250 11925 21125 11925
+	21300 11975 21175 11975
 Wire Wire Line
-	21125 11925 21125 12200
+	21175 11975 21175 12250
 Wire Notes Line width 12
-	29450 7425 28350 7425
+	29500 7475 28400 7475
 Wire Notes Line width 12
-	28350 7425 28350 4225
+	28400 7475 28400 4275
 Wire Notes Line width 12
-	28350 4225 29450 4225
-Text Notes 30800 4950 0    140  ~ 28
+	28400 4275 29500 4275
+Text Notes 30850 5000 0    140  ~ 28
 CGD1-6
 Wire Wire Line
-	29300 4850 29450 4850
+	29350 4900 29500 4900
 $Comp
 L AGC_DSKY:Diode CR51
 U 1 1 5ECC2D68
-P 20150 8300
-F 0 "CR51" H 20150 8525 140 0000 C CNN
-F 1 "Diode" H 20150 8150 50  0001 C CNN
-F 2 "" H 20100 8125 50  0001 C CNN
-F 3 "" H 20100 8300 50  0001 C CNN
-	1    20150 8300
+P 20200 8350
+F 0 "CR51" H 20200 8575 140 0000 C CNN
+F 1 "Diode" H 20200 8200 50  0001 C CNN
+F 2 "" H 20150 8175 50  0001 C CNN
+F 3 "" H 20150 8350 50  0001 C CNN
+	1    20200 8350
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	19950 8300 19650 8300
+	20000 8350 19700 8350
 $Comp
 L AGC_DSKY:Diode CR52
 U 1 1 5ED8A673
-P 20150 7525
-F 0 "CR52" H 20150 7750 140 0000 C CNN
-F 1 "Diode" H 20150 7375 50  0001 C CNN
-F 2 "" H 20100 7350 50  0001 C CNN
-F 3 "" H 20100 7525 50  0001 C CNN
-	1    20150 7525
+P 20200 7575
+F 0 "CR52" H 20200 7800 140 0000 C CNN
+F 1 "Diode" H 20200 7425 50  0001 C CNN
+F 2 "" H 20150 7400 50  0001 C CNN
+F 3 "" H 20150 7575 50  0001 C CNN
+	1    20200 7575
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	19950 7525 19650 7525
+	20000 7575 19700 7575
 $Comp
 L AGC_DSKY:Diode CR53
 U 1 1 5EDCD0A9
-P 20150 6775
-F 0 "CR53" H 20150 7000 140 0000 C CNN
-F 1 "Diode" H 20150 6625 50  0001 C CNN
-F 2 "" H 20100 6600 50  0001 C CNN
-F 3 "" H 20100 6775 50  0001 C CNN
-	1    20150 6775
+P 20200 6825
+F 0 "CR53" H 20200 7050 140 0000 C CNN
+F 1 "Diode" H 20200 6675 50  0001 C CNN
+F 2 "" H 20150 6650 50  0001 C CNN
+F 3 "" H 20150 6825 50  0001 C CNN
+	1    20200 6825
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	19950 6775 19650 6775
+	20000 6825 19700 6825
 $Comp
 L AGC_DSKY:Diode CR54
 U 1 1 5EE0FE5C
-P 20150 6050
-F 0 "CR54" H 20150 6275 140 0000 C CNN
-F 1 "Diode" H 20150 5900 50  0001 C CNN
-F 2 "" H 20100 5875 50  0001 C CNN
-F 3 "" H 20100 6050 50  0001 C CNN
-	1    20150 6050
+P 20200 6100
+F 0 "CR54" H 20200 6325 140 0000 C CNN
+F 1 "Diode" H 20200 5950 50  0001 C CNN
+F 2 "" H 20150 5925 50  0001 C CNN
+F 3 "" H 20150 6100 50  0001 C CNN
+	1    20200 6100
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	19950 6050 19650 6050
+	20000 6100 19700 6100
 $Comp
 L AGC_DSKY:Diode CR55
 U 1 1 5EE5281B
-P 20150 5300
-F 0 "CR55" H 20150 5525 140 0000 C CNN
-F 1 "Diode" H 20150 5150 50  0001 C CNN
-F 2 "" H 20100 5125 50  0001 C CNN
-F 3 "" H 20100 5300 50  0001 C CNN
-	1    20150 5300
+P 20200 5350
+F 0 "CR55" H 20200 5575 140 0000 C CNN
+F 1 "Diode" H 20200 5200 50  0001 C CNN
+F 2 "" H 20150 5175 50  0001 C CNN
+F 3 "" H 20150 5350 50  0001 C CNN
+	1    20200 5350
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	19950 5300 19650 5300
+	20000 5350 19700 5350
 $Comp
 L AGC_DSKY:Diode CR56
 U 1 1 5EE96572
-P 20150 4550
-F 0 "CR56" H 20150 4775 140 0000 C CNN
-F 1 "Diode" H 20150 4400 50  0001 C CNN
-F 2 "" H 20100 4375 50  0001 C CNN
-F 3 "" H 20100 4550 50  0001 C CNN
-	1    20150 4550
+P 20200 4600
+F 0 "CR56" H 20200 4825 140 0000 C CNN
+F 1 "Diode" H 20200 4450 50  0001 C CNN
+F 2 "" H 20150 4425 50  0001 C CNN
+F 3 "" H 20150 4600 50  0001 C CNN
+	1    20200 4600
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	19950 4550 19650 4550
+	20000 4600 19700 4600
 $Comp
 L AGC_DSKY:Diode CR57
 U 1 1 5EED9A2B
-P 20150 3800
-F 0 "CR57" H 20150 4025 140 0000 C CNN
-F 1 "Diode" H 20150 3650 50  0001 C CNN
-F 2 "" H 20100 3625 50  0001 C CNN
-F 3 "" H 20100 3800 50  0001 C CNN
-	1    20150 3800
+P 20200 3850
+F 0 "CR57" H 20200 4075 140 0000 C CNN
+F 1 "Diode" H 20200 3700 50  0001 C CNN
+F 2 "" H 20150 3675 50  0001 C CNN
+F 3 "" H 20150 3850 50  0001 C CNN
+	1    20200 3850
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	19950 3800 19650 3800
+	20000 3850 19700 3850
 $Comp
 L AGC_DSKY:Diode CR59
 U 1 1 5EF62C9A
-P 23725 8300
-F 0 "CR59" H 23725 8525 140 0000 C CNN
-F 1 "Diode" H 23725 8150 50  0001 C CNN
-F 2 "" H 23675 8125 50  0001 C CNN
-F 3 "" H 23675 8300 50  0001 C CNN
-	1    23725 8300
+P 23775 8350
+F 0 "CR59" H 23775 8575 140 0000 C CNN
+F 1 "Diode" H 23775 8200 50  0001 C CNN
+F 2 "" H 23725 8175 50  0001 C CNN
+F 3 "" H 23725 8350 50  0001 C CNN
+	1    23775 8350
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR60
 U 1 1 5EF62CA2
-P 23725 7525
-F 0 "CR60" H 23725 7750 140 0000 C CNN
-F 1 "Diode" H 23725 7375 50  0001 C CNN
-F 2 "" H 23675 7350 50  0001 C CNN
-F 3 "" H 23675 7525 50  0001 C CNN
-	1    23725 7525
+P 23775 7575
+F 0 "CR60" H 23775 7800 140 0000 C CNN
+F 1 "Diode" H 23775 7425 50  0001 C CNN
+F 2 "" H 23725 7400 50  0001 C CNN
+F 3 "" H 23725 7575 50  0001 C CNN
+	1    23775 7575
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR61
 U 1 1 5EF62CAA
-P 23725 6775
-F 0 "CR61" H 23725 7000 140 0000 C CNN
-F 1 "Diode" H 23725 6625 50  0001 C CNN
-F 2 "" H 23675 6600 50  0001 C CNN
-F 3 "" H 23675 6775 50  0001 C CNN
-	1    23725 6775
+P 23775 6825
+F 0 "CR61" H 23775 7050 140 0000 C CNN
+F 1 "Diode" H 23775 6675 50  0001 C CNN
+F 2 "" H 23725 6650 50  0001 C CNN
+F 3 "" H 23725 6825 50  0001 C CNN
+	1    23775 6825
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR62
 U 1 1 5EF62CB2
-P 23725 6050
-F 0 "CR62" H 23725 6275 140 0000 C CNN
-F 1 "Diode" H 23725 5900 50  0001 C CNN
-F 2 "" H 23675 5875 50  0001 C CNN
-F 3 "" H 23675 6050 50  0001 C CNN
-	1    23725 6050
+P 23775 6100
+F 0 "CR62" H 23775 6325 140 0000 C CNN
+F 1 "Diode" H 23775 5950 50  0001 C CNN
+F 2 "" H 23725 5925 50  0001 C CNN
+F 3 "" H 23725 6100 50  0001 C CNN
+	1    23775 6100
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR63
 U 1 1 5EF62CBA
-P 23725 5300
-F 0 "CR63" H 23725 5525 140 0000 C CNN
-F 1 "Diode" H 23725 5150 50  0001 C CNN
-F 2 "" H 23675 5125 50  0001 C CNN
-F 3 "" H 23675 5300 50  0001 C CNN
-	1    23725 5300
+P 23775 5350
+F 0 "CR63" H 23775 5575 140 0000 C CNN
+F 1 "Diode" H 23775 5200 50  0001 C CNN
+F 2 "" H 23725 5175 50  0001 C CNN
+F 3 "" H 23725 5350 50  0001 C CNN
+	1    23775 5350
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR64
 U 1 1 5EF62CC2
-P 23725 4550
-F 0 "CR64" H 23725 4775 140 0000 C CNN
-F 1 "Diode" H 23725 4400 50  0001 C CNN
-F 2 "" H 23675 4375 50  0001 C CNN
-F 3 "" H 23675 4550 50  0001 C CNN
-	1    23725 4550
+P 23775 4600
+F 0 "CR64" H 23775 4825 140 0000 C CNN
+F 1 "Diode" H 23775 4450 50  0001 C CNN
+F 2 "" H 23725 4425 50  0001 C CNN
+F 3 "" H 23725 4600 50  0001 C CNN
+	1    23775 4600
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR58
 U 1 1 5EF62CCA
-P 23725 3800
-F 0 "CR58" H 23725 4025 140 0000 C CNN
-F 1 "Diode" H 23725 3650 50  0001 C CNN
-F 2 "" H 23675 3625 50  0001 C CNN
-F 3 "" H 23675 3800 50  0001 C CNN
-	1    23725 3800
+P 23775 3850
+F 0 "CR58" H 23775 4075 140 0000 C CNN
+F 1 "Diode" H 23775 3700 50  0001 C CNN
+F 2 "" H 23725 3675 50  0001 C CNN
+F 3 "" H 23725 3850 50  0001 C CNN
+	1    23775 3850
 	1    0    0    1   
 $EndComp
 Wire Wire Line
-	23225 2800 23225 3800
+	23275 2850 23275 3850
 Wire Wire Line
-	23225 3800 23525 3800
+	23275 3850 23575 3850
 Wire Wire Line
-	20650 2800 20650 3800
+	20700 2850 20700 3850
 Wire Wire Line
-	20650 8300 20350 8300
+	20700 8350 20400 8350
 Wire Wire Line
-	20350 3800 20650 3800
-Connection ~ 20650 3800
+	20400 3850 20700 3850
+Connection ~ 20700 3850
 Wire Wire Line
-	20650 3800 20650 4550
+	20700 3850 20700 4600
 Wire Wire Line
-	20350 4550 20650 4550
-Connection ~ 20650 4550
+	20400 4600 20700 4600
+Connection ~ 20700 4600
 Wire Wire Line
-	20650 4550 20650 5300
+	20700 4600 20700 5350
 Wire Wire Line
-	20350 5300 20650 5300
-Connection ~ 20650 5300
+	20400 5350 20700 5350
+Connection ~ 20700 5350
 Wire Wire Line
-	20650 5300 20650 6050
+	20700 5350 20700 6100
 Wire Wire Line
-	20350 6050 20650 6050
-Connection ~ 20650 6050
+	20400 6100 20700 6100
+Connection ~ 20700 6100
 Wire Wire Line
-	20650 6050 20650 6775
+	20700 6100 20700 6825
 Wire Wire Line
-	20350 6775 20650 6775
-Connection ~ 20650 6775
+	20400 6825 20700 6825
+Connection ~ 20700 6825
 Wire Wire Line
-	20650 6775 20650 7525
+	20700 6825 20700 7575
 Wire Wire Line
-	20350 7525 20650 7525
-Connection ~ 20650 7525
+	20400 7575 20700 7575
+Connection ~ 20700 7575
 Wire Wire Line
-	20650 7525 20650 8300
+	20700 7575 20700 8350
 Wire Wire Line
-	23525 4550 23250 4550
+	23575 4600 23300 4600
 Wire Wire Line
-	23250 4550 23250 5300
+	23300 4600 23300 5350
 Wire Wire Line
-	23250 8300 23525 8300
+	23300 8350 23575 8350
 Wire Wire Line
-	23525 7525 23250 7525
-Connection ~ 23250 7525
+	23575 7575 23300 7575
+Connection ~ 23300 7575
 Wire Wire Line
-	23250 7525 23250 8300
+	23300 7575 23300 8350
 Wire Wire Line
-	23525 6775 23250 6775
-Connection ~ 23250 6775
+	23575 6825 23300 6825
+Connection ~ 23300 6825
 Wire Wire Line
-	23250 6775 23250 7525
+	23300 6825 23300 7575
 Wire Wire Line
-	23525 6050 23250 6050
-Connection ~ 23250 6050
+	23575 6100 23300 6100
+Connection ~ 23300 6100
 Wire Wire Line
-	23250 6050 23250 6775
+	23300 6100 23300 6825
 Wire Wire Line
-	23525 5300 23250 5300
-Connection ~ 23250 5300
+	23575 5350 23300 5350
+Connection ~ 23300 5350
 Wire Wire Line
-	23250 5300 23250 6050
+	23300 5350 23300 6100
 Wire Wire Line
-	23250 8300 23250 10650
+	23300 8350 23300 10700
 Wire Wire Line
-	23250 10650 23775 10650
+	23300 10700 23825 10700
 Wire Wire Line
-	23775 10650 23775 10275
-Connection ~ 23250 8300
-Text Notes 15900 9125 2    130  ~ 26
+	23825 10700 23825 10325
+Connection ~ 23300 8350
+Text Notes 15950 9175 2    130  ~ 26
 0VDC
 Wire Wire Line
-	16525 9050 17550 9050
-Text Notes 15725 13000 2    130  ~ 26
+	16575 9100 17600 9100
+Text Notes 15775 13050 2    130  ~ 26
 WD243
 $Comp
 L AGC_DSKY:Inductor L1
 U 1 1 5F58B8F7
-P 17000 12925
-F 0 "L1" H 17000 13163 130 0000 C CNN
-F 1 "Inductor" H 17000 12825 130 0001 C CNN
-F 2 "" H 16950 13125 130 0001 C CNN
-F 3 "" H 16950 13125 130 0001 C CNN
-	1    17000 12925
+P 17050 12975
+F 0 "L1" H 17050 13213 130 0000 C CNN
+F 1 "Inductor" H 17050 12875 130 0001 C CNN
+F 2 "" H 17000 13175 130 0001 C CNN
+F 3 "" H 17000 13175 130 0001 C CNN
+	1    17050 12975
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Inductor L2
 U 1 1 5F5DB198
-P 18075 12925
-F 0 "L2" H 18075 13163 130 0000 C CNN
-F 1 "Inductor" H 18075 12825 130 0001 C CNN
-F 2 "" H 18025 13125 130 0001 C CNN
-F 3 "" H 18025 13125 130 0001 C CNN
-	1    18075 12925
+P 18125 12975
+F 0 "L2" H 18125 13213 130 0000 C CNN
+F 1 "Inductor" H 18125 12875 130 0001 C CNN
+F 2 "" H 18075 13175 130 0001 C CNN
+F 3 "" H 18075 13175 130 0001 C CNN
+	1    18125 12975
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	16525 12925 16600 12925
+	16575 12975 16650 12975
 Wire Wire Line
-	17400 12925 17550 12925
+	17450 12975 17600 12975
 Wire Wire Line
-	44325 12925 44325 6850
-Wire Wire Line
-	44325 6850 40250 6850
-Wire Wire Line
-	38250 6850 38250 5550
+	38150 6900 38150 5600
 $Comp
 L AGC_DSKY:Transistor-PNP Q12
 U 1 1 5F80BC46
-P 38400 4475
-F 0 "Q12" H 38025 4175 130 0000 C CNN
-F 1 "~" H 38400 5040 130 0001 C CNN
-F 2 "" H 38400 4725 130 0001 C CNN
-F 3 "" H 38400 4725 130 0001 C CNN
-	1    38400 4475
+P 38300 4475
+F 0 "Q12" H 37925 4175 130 0000 C CNN
+F 1 "~" H 38300 5040 130 0001 C CNN
+F 2 "" H 38300 4725 130 0001 C CNN
+F 3 "" H 38300 4725 130 0001 C CNN
+	1    38300 4475
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor-Polarized C6
 U 1 1 5F8ADB05
-P 38700 5000
-F 0 "C6" V 38925 4950 130 0000 C CNN
-F 1 "Capacitor-Polarized" H 38725 4450 130 0001 C CNN
-F 2 "" H 38700 5400 130 0001 C CNN
-F 3 "" H 38700 5400 130 0001 C CNN
-	1    38700 5000
+P 38600 5050
+F 0 "C6" V 38900 4975 130 0000 C CNN
+F 1 "Capacitor-Polarized" H 38625 4500 130 0001 C CNN
+F 2 "" H 38600 5450 130 0001 C CNN
+F 3 "" H 38600 5450 130 0001 C CNN
+	1    38600 5050
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R21
 U 1 1 5F8FEBCB
-P 38725 5550
-F 0 "R21" H 38700 5725 130 0000 C CNN
-F 1 "Resistor" H 38725 5725 130 0001 C CNN
-F 2 "" H 38725 5550 130 0001 C CNN
-F 3 "" H 38725 5550 130 0001 C CNN
-	1    38725 5550
+P 38625 5600
+F 0 "R21" H 38600 5775 130 0000 C CNN
+F 1 "Resistor" H 38625 5775 130 0001 C CNN
+F 2 "" H 38625 5600 130 0001 C CNN
+F 3 "" H 38625 5600 130 0001 C CNN
+	1    38625 5600
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	38700 4475 39200 4475
+	38600 4475 39100 4475
 Wire Wire Line
-	38425 5000 38250 5000
-Connection ~ 38250 5000
+	38325 5050 38150 5050
+Connection ~ 38150 5050
 Wire Wire Line
-	38250 5000 38250 4725
+	38150 5050 38150 4725
 Wire Wire Line
-	38325 5550 38250 5550
-Connection ~ 38250 5550
+	38225 5600 38150 5600
+Connection ~ 38150 5600
 Wire Wire Line
-	38250 5550 38250 5000
+	38150 5600 38150 5050
 Wire Wire Line
-	39200 4475 39200 5000
+	39100 4475 39100 5050
 Wire Wire Line
-	39200 5550 39125 5550
+	39100 5600 39025 5600
 Wire Wire Line
-	38950 5000 39200 5000
-Connection ~ 39200 5000
+	38850 5050 39100 5050
+Connection ~ 39100 5050
 Wire Wire Line
-	39200 5000 39200 5550
+	39100 5050 39100 5600
 $Comp
 L AGC_DSKY:Resistor R22
 U 1 1 5FA97434
-P 39200 6100
-F 0 "R22" V 39175 6575 130 0000 R CNN
-F 1 "Resistor" H 39200 6275 130 0001 C CNN
-F 2 "" H 39200 6100 130 0001 C CNN
-F 3 "" H 39200 6100 130 0001 C CNN
-	1    39200 6100
+P 39100 6150
+F 0 "R22" V 39075 6725 130 0000 R CNN
+F 1 "Resistor" H 39100 6325 130 0001 C CNN
+F 2 "" H 39100 6150 130 0001 C CNN
+F 3 "" H 39100 6150 130 0001 C CNN
+	1    39100 6150
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	39200 7250 39200 6500
+	39100 7375 39100 6550
 Wire Wire Line
-	39200 5700 39200 5550
-Connection ~ 39200 5550
+	39100 5750 39100 5600
+Connection ~ 39100 5600
 Wire Wire Line
-	38250 4225 38250 3600
+	38150 4225 38150 3600
 Wire Wire Line
-	40250 6850 40250 5550
+	40150 6900 40150 5600
 $Comp
 L AGC_DSKY:Transistor-PNP Q13
 U 1 1 5FC8A29D
-P 40400 4475
-F 0 "Q13" H 40025 4175 130 0000 C CNN
-F 1 "~" H 40400 5040 130 0001 C CNN
-F 2 "" H 40400 4725 130 0001 C CNN
-F 3 "" H 40400 4725 130 0001 C CNN
-	1    40400 4475
+P 40300 4475
+F 0 "Q13" H 39925 4175 130 0000 C CNN
+F 1 "~" H 40300 5040 130 0001 C CNN
+F 2 "" H 40300 4725 130 0001 C CNN
+F 3 "" H 40300 4725 130 0001 C CNN
+	1    40300 4475
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor-Polarized C7
 U 1 1 5FC8A2A3
-P 40700 5000
-F 0 "C7" V 40925 4950 130 0000 C CNN
-F 1 "Capacitor-Polarized" H 40725 4450 130 0001 C CNN
-F 2 "" H 40700 5400 130 0001 C CNN
-F 3 "" H 40700 5400 130 0001 C CNN
-	1    40700 5000
+P 40600 5050
+F 0 "C7" V 40900 4975 130 0000 C CNN
+F 1 "Capacitor-Polarized" H 40625 4500 130 0001 C CNN
+F 2 "" H 40600 5450 130 0001 C CNN
+F 3 "" H 40600 5450 130 0001 C CNN
+	1    40600 5050
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R23
 U 1 1 5FC8A2A9
-P 40725 5550
-F 0 "R23" H 40700 5725 130 0000 C CNN
-F 1 "Resistor" H 40725 5725 130 0001 C CNN
-F 2 "" H 40725 5550 130 0001 C CNN
-F 3 "" H 40725 5550 130 0001 C CNN
-	1    40725 5550
+P 40625 5600
+F 0 "R23" H 40600 5775 130 0000 C CNN
+F 1 "Resistor" H 40625 5775 130 0001 C CNN
+F 2 "" H 40625 5600 130 0001 C CNN
+F 3 "" H 40625 5600 130 0001 C CNN
+	1    40625 5600
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	40700 4475 41200 4475
+	40600 4475 41100 4475
 Wire Wire Line
-	40425 5000 40250 5000
-Connection ~ 40250 5000
+	40325 5050 40150 5050
+Connection ~ 40150 5050
 Wire Wire Line
-	40250 5000 40250 4725
+	40150 5050 40150 4725
 Wire Wire Line
-	40325 5550 40250 5550
-Connection ~ 40250 5550
+	40225 5600 40150 5600
+Connection ~ 40150 5600
 Wire Wire Line
-	40250 5550 40250 5000
+	40150 5600 40150 5050
 Wire Wire Line
-	41200 4475 41200 5000
+	41100 4475 41100 5050
 Wire Wire Line
-	41200 5550 41125 5550
+	41100 5600 41025 5600
 Wire Wire Line
-	40950 5000 41200 5000
-Connection ~ 41200 5000
+	40850 5050 41100 5050
+Connection ~ 41100 5050
 Wire Wire Line
-	41200 5000 41200 5550
+	41100 5050 41100 5600
 $Comp
 L AGC_DSKY:Resistor R24
 U 1 1 5FC8A2BB
-P 41200 6100
-F 0 "R24" V 41175 6575 130 0000 R CNN
-F 1 "Resistor" H 41200 6275 130 0001 C CNN
-F 2 "" H 41200 6100 130 0001 C CNN
-F 3 "" H 41200 6100 130 0001 C CNN
-	1    41200 6100
+P 41100 6150
+F 0 "R24" V 41075 6725 130 0000 R CNN
+F 1 "Resistor" H 41100 6325 130 0001 C CNN
+F 2 "" H 41100 6150 130 0001 C CNN
+F 3 "" H 41100 6150 130 0001 C CNN
+	1    41100 6150
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	41200 5700 41200 5550
-Connection ~ 41200 5550
+	41100 5750 41100 5600
+Connection ~ 41100 5600
 Wire Wire Line
-	40250 4225 40250 3600
-Connection ~ 40250 6850
+	40150 4225 40150 3600
 Wire Wire Line
-	40250 6850 38250 6850
+	40150 6900 38150 6900
 Wire Wire Line
-	41200 7250 41200 6500
+	41100 7375 41100 6550
 Wire Notes Line
-	39500 7400 40900 7400
+	39400 7525 40800 7525
 Wire Notes Line
-	41500 7400 42250 7400
+	41400 7525 42150 7525
 Wire Notes Line
-	42225 3425 40550 3425
+	42100 3425 40450 3425
 Wire Notes Line
-	42250 3425 42250 7400
+	42100 3500 42100 7475
 Wire Notes Line
-	39950 3425 38575 3425
+	39825 3425 38450 3425
 Wire Notes Line
-	37700 3425 37700 7400
+	37600 3475 37600 7450
 Wire Notes Line
-	39750 7400 39750 3425
-Text Notes 37750 7350 0    130  ~ 26
+	39650 7450 39650 3475
+Text Notes 37650 7475 0    130  ~ 26
 009
-Text Notes 39800 7350 0    130  ~ 26
+Text Notes 39700 7475 0    130  ~ 26
 008
-Connection ~ 17550 9050
+Connection ~ 17600 9100
 Wire Wire Line
-	17550 9050 18550 9050
+	17600 9100 18600 9100
 Wire Wire Line
-	17550 10750 17550 9050
+	17600 10800 17600 9100
 Wire Wire Line
-	17550 11275 17550 12925
-Connection ~ 17550 12925
+	17600 11325 17600 12975
+Connection ~ 17600 12975
 Wire Wire Line
-	17550 12925 17675 12925
-Connection ~ 18550 9050
+	17600 12975 17725 12975
+Connection ~ 18600 9100
 Wire Wire Line
-	18550 9050 21700 9050
+	18600 9100 21750 9100
 Wire Wire Line
-	18550 10750 18550 9050
+	18600 10800 18600 9100
 Wire Wire Line
-	18550 11275 18550 12925
+	18600 11325 18600 12975
 Wire Wire Line
-	18475 12925 18550 12925
-Connection ~ 18550 12925
+	18525 12975 18600 12975
+Connection ~ 18600 12975
 Wire Wire Line
-	18550 12925 20600 12925
+	18600 12975 20650 12975
 $Comp
 L AGC_DSKY:Resistor R2
 U 1 1 6047FD82
-P 20600 12425
-F 0 "R2" V 20575 12350 130 0000 R CNN
-F 1 "Resistor" H 20600 12600 130 0001 C CNN
-F 2 "" H 20600 12425 130 0001 C CNN
-F 3 "" H 20600 12425 130 0001 C CNN
-	1    20600 12425
+P 20650 12475
+F 0 "R2" V 20625 12400 130 0000 R CNN
+F 1 "Resistor" H 20650 12650 130 0001 C CNN
+F 2 "" H 20650 12475 130 0001 C CNN
+F 3 "" H 20650 12475 130 0001 C CNN
+	1    20650 12475
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	21125 12725 21125 12925
-Connection ~ 21125 12925
+	21175 12775 21175 12975
+Connection ~ 21175 12975
 Wire Wire Line
-	21125 12925 21700 12925
+	21175 12975 21750 12975
 Wire Wire Line
-	20600 12825 20600 12925
-Connection ~ 20600 12925
+	20650 12875 20650 12975
+Connection ~ 20650 12975
 Wire Wire Line
-	20600 12925 21125 12925
+	20650 12975 21175 12975
 Wire Wire Line
-	20600 12025 20600 11925
+	20650 12075 20650 11975
 Wire Wire Line
-	20600 11925 21125 11925
-Connection ~ 21125 11925
+	20650 11975 21175 11975
+Connection ~ 21175 11975
 Wire Wire Line
-	21700 12175 21700 12925
-Connection ~ 21700 12925
+	21750 12225 21750 12975
+Connection ~ 21750 12975
 Wire Wire Line
-	21700 12925 22725 12925
+	21750 12975 22775 12975
 $Comp
 L AGC_DSKY:Resistor R1
 U 1 1 606AA98D
-P 19625 12425
-F 0 "R1" V 19625 12750 130 0000 R CNN
-F 1 "Resistor" H 19625 12600 130 0001 C CNN
-F 2 "" H 19625 12425 130 0001 C CNN
-F 3 "" H 19625 12425 130 0001 C CNN
-	1    19625 12425
+P 19675 12475
+F 0 "R1" V 19675 12800 130 0000 R CNN
+F 1 "Resistor" H 19675 12650 130 0001 C CNN
+F 2 "" H 19675 12475 130 0001 C CNN
+F 3 "" H 19675 12475 130 0001 C CNN
+	1    19675 12475
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	19625 12025 19625 11925
+	19675 12075 19675 11975
 Wire Wire Line
-	19625 11925 20600 11925
-Connection ~ 20600 11925
+	19675 11975 20650 11975
+Connection ~ 20650 11975
 Wire Wire Line
-	19625 12825 19625 13300
+	19675 12875 19675 13350
 Wire Wire Line
-	20400 13300 20400 10025
+	20450 13350 20450 10075
 Wire Wire Line
-	20400 10025 21700 10025
+	20450 10075 21750 10075
 $Comp
 L AGC_DSKY:Resistor R4
 U 1 1 607CB1EB
-P 21700 9550
-F 0 "R4" V 21625 9925 130 0000 R CNN
-F 1 "Resistor" H 21700 9725 130 0001 C CNN
-F 2 "" H 21700 9550 130 0001 C CNN
-F 3 "" H 21700 9550 130 0001 C CNN
-	1    21700 9550
+P 21750 9600
+F 0 "R4" V 21675 9975 130 0000 R CNN
+F 1 "Resistor" H 21750 9775 130 0001 C CNN
+F 2 "" H 21750 9600 130 0001 C CNN
+F 3 "" H 21750 9600 130 0001 C CNN
+	1    21750 9600
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R5
 U 1 1 607CB3B0
-P 21700 10425
-F 0 "R5" V 21700 10775 130 0000 R CNN
-F 1 "Resistor" H 21700 10600 130 0001 C CNN
-F 2 "" H 21700 10425 130 0001 C CNN
-F 3 "" H 21700 10425 130 0001 C CNN
-	1    21700 10425
+P 21750 10475
+F 0 "R5" V 21750 10825 130 0000 R CNN
+F 1 "Resistor" H 21750 10650 130 0001 C CNN
+F 2 "" H 21750 10475 130 0001 C CNN
+F 3 "" H 21750 10475 130 0001 C CNN
+	1    21750 10475
 	0    -1   -1   0   
 $EndComp
-Connection ~ 21700 10025
+Connection ~ 21750 10075
 Wire Wire Line
-	21700 10025 22275 10025
+	21750 10075 22325 10075
 Wire Wire Line
-	21700 9150 21700 9050
-Connection ~ 21700 9050
+	21750 9200 21750 9100
+Connection ~ 21750 9100
 Wire Wire Line
-	21700 9050 22725 9050
+	21750 9100 22775 9100
 Wire Wire Line
-	21700 9950 21700 10025
+	21750 10000 21750 10075
 Wire Wire Line
-	21700 11675 22175 11675
+	21750 11725 22225 11725
 Wire Wire Line
-	22175 11675 22175 13300
+	22225 11725 22225 13350
 Wire Wire Line
-	23675 13300 23675 11325
+	23725 13350 23725 11375
 Wire Wire Line
-	23675 11325 21700 11325
+	23725 11375 21750 11375
 Wire Wire Line
-	21700 11325 21700 10825
+	21750 11375 21750 10875
 $Comp
 L AGC_DSKY:Resistor R3
 U 1 1 609B5A9B
-P 22725 11875
-F 0 "R3" V 22725 11767 130 0000 R CNN
-F 1 "Resistor" H 22725 12050 130 0001 C CNN
-F 2 "" H 22725 11875 130 0001 C CNN
-F 3 "" H 22725 11875 130 0001 C CNN
-	1    22725 11875
+P 22775 11925
+F 0 "R3" V 22775 11817 130 0000 R CNN
+F 1 "Resistor" H 22775 12100 130 0001 C CNN
+F 2 "" H 22775 11925 130 0001 C CNN
+F 3 "" H 22775 11925 130 0001 C CNN
+	1    22775 11925
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	22725 10275 22725 10975
+	22775 10325 22775 11025
 Wire Wire Line
-	22725 12275 22725 12925
+	22775 12325 22775 12975
 Wire Wire Line
-	22725 12925 28300 12925
+	22775 12975 28550 12975
 Wire Wire Line
-	20650 8300 20650 10975
+	20700 8350 20700 11025
 Wire Wire Line
-	20650 10975 22725 10975
-Connection ~ 20650 8300
-Connection ~ 22725 10975
+	20700 11025 22775 11025
+Connection ~ 20700 8350
+Connection ~ 22775 11025
 Wire Wire Line
-	22725 10975 22725 11475
+	22775 11025 22775 11525
 $Comp
 L AGC_DSKY:Resistor R6
 U 1 1 60AE30E0
-P 23750 10975
-F 0 "R6" H 23775 10775 130 0000 C CNN
-F 1 "Resistor" H 23750 11150 130 0001 C CNN
-F 2 "" H 23750 10975 130 0001 C CNN
-F 3 "" H 23750 10975 130 0001 C CNN
-	1    23750 10975
+P 23800 11025
+F 0 "R6" H 23825 10825 130 0000 C CNN
+F 1 "Resistor" H 23800 11200 130 0001 C CNN
+F 2 "" H 23800 11025 130 0001 C CNN
+F 3 "" H 23800 11025 130 0001 C CNN
+	1    23800 11025
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	22725 10975 23350 10975
+	22775 11025 23400 11025
 Wire Wire Line
-	24225 10025 24750 10025
+	24275 10075 24800 10075
 Wire Wire Line
-	24750 10025 24750 10975
+	24800 10075 24800 11025
 Wire Wire Line
-	24750 10975 24150 10975
+	24800 11025 24200 11025
 $Comp
 L AGC_DSKY:Resistor R7
 U 1 1 60BB0C02
-P 24750 9500
-F 0 "R7" V 24750 9392 130 0000 R CNN
-F 1 "Resistor" H 24750 9675 130 0001 C CNN
-F 2 "" H 24750 9500 130 0001 C CNN
-F 3 "" H 24750 9500 130 0001 C CNN
-	1    24750 9500
+P 24800 9550
+F 0 "R7" V 24800 9442 130 0000 R CNN
+F 1 "Resistor" H 24800 9725 130 0001 C CNN
+F 2 "" H 24800 9550 130 0001 C CNN
+F 3 "" H 24800 9550 130 0001 C CNN
+	1    24800 9550
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	24750 9900 24750 10025
-Connection ~ 24750 10025
+	24800 9950 24800 10075
+Connection ~ 24800 10075
 Wire Wire Line
-	24750 9100 24750 9050
-Connection ~ 24750 9050
+	24800 9150 24800 9100
+Connection ~ 24800 9100
 Wire Wire Line
-	24750 9050 27525 9050
+	24800 9100 27525 9100
 $Comp
 L AGC_DSKY:Resistor R9
 U 1 1 60C8E059
-P 27525 9650
-F 0 "R9" V 27525 9542 130 0000 R CNN
-F 1 "Resistor" H 27525 9825 130 0001 C CNN
-F 2 "" H 27525 9650 130 0001 C CNN
-F 3 "" H 27525 9650 130 0001 C CNN
-	1    27525 9650
+P 27525 9700
+F 0 "R9" V 27525 9592 130 0000 R CNN
+F 1 "Resistor" H 27525 9875 130 0001 C CNN
+F 2 "" H 27525 9700 130 0001 C CNN
+F 3 "" H 27525 9700 130 0001 C CNN
+	1    27525 9700
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR44
 U 1 1 60C8E320
-P 27025 10400
-F 0 "CR44" H 27025 10158 140 0000 C CNN
-F 1 "Diode" H 27025 10250 50  0001 C CNN
-F 2 "" H 26975 10225 50  0001 C CNN
-F 3 "" H 26975 10400 50  0001 C CNN
-	1    27025 10400
+P 27075 10450
+F 0 "CR44" H 27075 10208 140 0000 C CNN
+F 1 "Diode" H 27075 10300 50  0001 C CNN
+F 2 "" H 27025 10275 50  0001 C CNN
+F 3 "" H 27025 10450 50  0001 C CNN
+	1    27075 10450
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R8
 U 1 1 60C8E57C
-P 26500 11075
-F 0 "R8" V 26500 10967 130 0000 R CNN
-F 1 "Resistor" H 26500 11250 130 0001 C CNN
-F 2 "" H 26500 11075 130 0001 C CNN
-F 3 "" H 26500 11075 130 0001 C CNN
-	1    26500 11075
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR43
-U 1 1 60CF598F
-P 28300 12400
-F 0 "CR43" V 28300 12271 140 0000 R CNN
-F 1 "Diode" H 28300 12250 50  0001 C CNN
-F 2 "" H 28250 12225 50  0001 C CNN
-F 3 "" H 28250 12400 50  0001 C CNN
-	1    28300 12400
+P 26550 11125
+F 0 "R8" V 26550 11017 130 0000 R CNN
+F 1 "Resistor" H 26550 11300 130 0001 C CNN
+F 2 "" H 26550 11125 130 0001 C CNN
+F 3 "" H 26550 11125 130 0001 C CNN
+	1    26550 11125
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	29050 9650 28300 9650
+	29100 9900 28550 9900
 Wire Wire Line
-	28300 9650 28300 10150
+	29550 10150 29550 11300
 Wire Wire Line
-	28300 10650 28300 11250
+	29550 11300 28550 11300
 Wire Wire Line
-	29500 9900 29500 11250
+	28100 10450 27525 10450
 Wire Wire Line
-	29500 11250 28300 11250
-Connection ~ 28300 11250
+	27525 10100 27525 10450
+Connection ~ 27525 10450
 Wire Wire Line
-	28300 11250 28300 12200
+	27525 10450 27275 10450
 Wire Wire Line
-	27850 10400 27525 10400
+	26875 10450 26550 10450
 Wire Wire Line
-	27525 10050 27525 10400
-Connection ~ 27525 10400
-Wire Wire Line
-	27525 10400 27225 10400
-Wire Wire Line
-	26825 10400 26500 10400
-Wire Wire Line
-	26500 10400 26500 10675
+	26550 10450 26550 10725
 $Comp
 L AGC_DSKY:Transistor-NPN Q6
 U 1 1 6103BBE6
-P 33100 10400
-F 0 "Q6" H 33525 10225 130 0000 C CNN
-F 1 "Transistor-NPN" H 33100 10965 130 0001 C CNN
-F 2 "" H 33100 10650 130 0001 C CNN
-F 3 "" H 33100 10650 130 0001 C CNN
-	1    33100 10400
+P 33150 10450
+F 0 "Q6" H 33575 10200 130 0000 C CNN
+F 1 "Transistor-NPN" H 33150 11015 130 0001 C CNN
+F 2 "" H 33150 10700 130 0001 C CNN
+F 3 "" H 33150 10700 130 0001 C CNN
+	1    33150 10450
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-NPN Q7
 U 1 1 6103BBEC
-P 34150 9650
-F 0 "Q7" H 34575 9475 130 0000 C CNN
-F 1 "Transistor-NPN" H 34150 10215 130 0001 C CNN
-F 2 "" H 34150 9900 130 0001 C CNN
-F 3 "" H 34150 9900 130 0001 C CNN
-	1    34150 9650
+P 34125 9900
+F 0 "Q7" H 34525 9600 130 0000 C CNN
+F 1 "Transistor-NPN" H 34125 10465 130 0001 C CNN
+F 2 "" H 34125 10150 130 0001 C CNN
+F 3 "" H 34125 10150 130 0001 C CNN
+	1    34125 9900
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R11
 U 1 1 6103BBF2
-P 32275 9650
-F 0 "R11" V 32275 9542 130 0000 R CNN
-F 1 "Resistor" H 32275 9825 130 0001 C CNN
-F 2 "" H 32275 9650 130 0001 C CNN
-F 3 "" H 32275 9650 130 0001 C CNN
-	1    32275 9650
+P 32275 9700
+F 0 "R11" V 32275 9592 130 0000 R CNN
+F 1 "Resistor" H 32275 9875 130 0001 C CNN
+F 2 "" H 32275 9700 130 0001 C CNN
+F 3 "" H 32275 9700 130 0001 C CNN
+	1    32275 9700
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR46
 U 1 1 6103BBF8
-P 31800 10400
-F 0 "CR46" H 31800 10158 140 0000 C CNN
-F 1 "Diode" H 31800 10250 50  0001 C CNN
-F 2 "" H 31750 10225 50  0001 C CNN
-F 3 "" H 31750 10400 50  0001 C CNN
-	1    31800 10400
+P 31800 10450
+F 0 "CR46" H 31800 10208 140 0000 C CNN
+F 1 "Diode" H 31800 10300 50  0001 C CNN
+F 2 "" H 31750 10275 50  0001 C CNN
+F 3 "" H 31750 10450 50  0001 C CNN
+	1    31800 10450
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R10
 U 1 1 6103BBFE
-P 31275 11075
-F 0 "R10" V 31275 10967 130 0000 R CNN
-F 1 "Resistor" H 31275 11250 130 0001 C CNN
-F 2 "" H 31275 11075 130 0001 C CNN
-F 3 "" H 31275 11075 130 0001 C CNN
-	1    31275 11075
+P 31275 11125
+F 0 "R10" V 31275 11017 130 0000 R CNN
+F 1 "Resistor" H 31275 11300 130 0001 C CNN
+F 2 "" H 31275 11125 130 0001 C CNN
+F 3 "" H 31275 11125 130 0001 C CNN
+	1    31275 11125
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR45
 U 1 1 6103BC04
-P 33250 12400
-F 0 "CR45" V 33250 12271 140 0000 R CNN
-F 1 "Diode" H 33250 12250 50  0001 C CNN
-F 2 "" H 33200 12225 50  0001 C CNN
-F 3 "" H 33200 12400 50  0001 C CNN
-	1    33250 12400
+P 33300 12450
+F 0 "CR45" V 33300 12321 140 0000 R CNN
+F 1 "Diode" H 33300 12300 50  0001 C CNN
+F 2 "" H 33250 12275 50  0001 C CNN
+F 3 "" H 33250 12450 50  0001 C CNN
+	1    33300 12450
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	33850 9650 33250 9650
+	33825 9900 33300 9900
 Wire Wire Line
-	33250 10650 33250 11250
+	33300 10700 33300 11300
 Wire Wire Line
-	34300 9900 34300 11250
+	34275 10150 34275 11300
 Wire Wire Line
-	34300 11250 33250 11250
-Connection ~ 33250 11250
+	34275 11300 33300 11300
+Connection ~ 33300 11300
 Wire Wire Line
-	33250 11250 33250 12200
+	33300 11300 33300 12250
 Wire Wire Line
-	32800 10400 32275 10400
+	32850 10450 32275 10450
 Wire Wire Line
-	32275 10050 32275 10400
-Connection ~ 32275 10400
+	32275 10100 32275 10450
+Connection ~ 32275 10450
 Wire Wire Line
-	32275 10400 32000 10400
+	32275 10450 32000 10450
 Wire Wire Line
-	31600 10400 31275 10400
+	31600 10450 31275 10450
 Wire Wire Line
-	31275 10400 31275 10675
+	31275 10450 31275 10725
 Wire Wire Line
-	29500 9400 29500 9050
-Connection ~ 29500 9050
+	29550 9650 29550 9100
+Connection ~ 29550 9100
 Wire Wire Line
-	29500 9050 32275 9050
+	29550 9100 32275 9100
 Wire Wire Line
-	27525 9250 27525 9050
+	27525 9300 27525 9100
 Wire Wire Line
-	26500 10400 25800 10400
+	26550 10450 25850 10450
 Wire Wire Line
-	25800 10400 25800 13300
-Connection ~ 26500 10400
+	25850 10450 25850 13350
+Connection ~ 26550 10450
 Wire Wire Line
-	26500 11475 26500 11900
+	26550 11525 26550 11850
 Wire Wire Line
-	26500 11900 27700 11900
+	26550 11850 27675 11850
 Wire Wire Line
-	27700 11900 27700 13300
+	27675 11850 27675 13350
 Wire Wire Line
-	27700 11900 31275 11900
+	27675 11850 31275 11850
 Wire Wire Line
-	31275 11900 31275 11475
+	31275 11850 31275 11525
 Wire Wire Line
-	34300 9400 34300 9050
-Connection ~ 34300 9050
+	34275 9650 34275 9100
 Wire Wire Line
-	32275 9250 32275 9050
+	32275 9300 32275 9100
 Wire Wire Line
-	28300 12600 28300 12925
+	33300 12650 33300 12975
+Connection ~ 27675 11850
+Connection ~ 32275 9100
+Connection ~ 27525 9100
 Wire Wire Line
-	28300 12925 33250 12925
+	29550 11300 29550 13350
+Connection ~ 29550 11300
 Wire Wire Line
-	33250 12600 33250 12925
-Connection ~ 33250 12925
+	30575 13350 30575 10450
 Wire Wire Line
-	33250 12925 36075 12925
-Connection ~ 27700 11900
-Connection ~ 28300 12925
-Connection ~ 32275 9050
-Connection ~ 27525 9050
+	30575 10450 31275 10450
+Connection ~ 31275 10450
 Wire Wire Line
-	29500 11250 29500 13300
-Connection ~ 29500 11250
-Wire Wire Line
-	30575 13300 30575 10400
-Wire Wire Line
-	30575 10400 31275 10400
-Connection ~ 31275 10400
-Wire Wire Line
-	34300 11250 34300 13300
-Connection ~ 34300 11250
+	34275 11300 34275 13350
+Connection ~ 34275 11300
 $Comp
 L AGC_DSKY:Diode CR48
 U 1 1 620093A7
-P 36075 9525
-F 0 "CR48" V 36075 9396 140 0000 R CNN
-F 1 "Diode" H 36075 9375 50  0001 C CNN
-F 2 "" H 36025 9350 50  0001 C CNN
-F 3 "" H 36025 9525 50  0001 C CNN
-	1    36075 9525
+P 35975 9575
+F 0 "CR48" V 36000 10296 140 0000 R CNN
+F 1 "Diode" H 35975 9425 50  0001 C CNN
+F 2 "" H 35925 9400 50  0001 C CNN
+F 3 "" H 35925 9575 50  0001 C CNN
+	1    35975 9575
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-PNP Q8
 U 1 1 620096A3
-P 36225 11425
-F 0 "Q8" H 36625 11150 130 0000 C CNN
-F 1 "Transistor-PNP" H 36225 11990 130 0001 C CNN
-F 2 "" H 36225 11175 130 0001 C CNN
-F 3 "" H 36225 11175 130 0001 C CNN
-	1    36225 11425
+P 36125 11475
+F 0 "Q8" H 36525 11200 130 0000 C CNN
+F 1 "Transistor-PNP" H 36125 12040 130 0001 C CNN
+F 2 "" H 36125 11225 130 0001 C CNN
+F 3 "" H 36125 11225 130 0001 C CNN
+	1    36125 11475
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R14
 U 1 1 621690F8
-P 37200 12125
-F 0 "R14" V 37200 12017 130 0000 R CNN
-F 1 "Resistor" H 37200 12300 130 0001 C CNN
-F 2 "" H 37200 12125 130 0001 C CNN
-F 3 "" H 37200 12125 130 0001 C CNN
-	1    37200 12125
+P 37100 12175
+F 0 "R14" V 37100 12067 130 0000 R CNN
+F 1 "Resistor" H 37100 12350 130 0001 C CNN
+F 2 "" H 37100 12175 130 0001 C CNN
+F 3 "" H 37100 12175 130 0001 C CNN
+	1    37100 12175
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor-Polarized C4
 U 1 1 6216942A
-P 36750 12125
-F 0 "C4" H 36539 12137 130 0000 R CNN
-F 1 "Capacitor-Polarized" H 36775 11575 130 0001 C CNN
-F 2 "" H 36750 12525 130 0001 C CNN
-F 3 "" H 36750 12525 130 0001 C CNN
-	1    36750 12125
+P 36650 12175
+F 0 "C4" H 36439 12187 130 0000 R CNN
+F 1 "Capacitor-Polarized" H 36675 11625 130 0001 C CNN
+F 2 "" H 36650 12575 130 0001 C CNN
+F 3 "" H 36650 12575 130 0001 C CNN
+	1    36650 12175
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R12
 U 1 1 622C8F2E
-P 37200 10700
-F 0 "R12" V 37225 11225 130 0000 R CNN
-F 1 "Resistor" H 37200 10875 130 0001 C CNN
-F 2 "" H 37200 10700 130 0001 C CNN
-F 3 "" H 37200 10700 130 0001 C CNN
-	1    37200 10700
+P 37100 10750
+F 0 "R12" V 37125 11275 130 0000 R CNN
+F 1 "Resistor" H 37100 10925 130 0001 C CNN
+F 2 "" H 37100 10750 130 0001 C CNN
+F 3 "" H 37100 10750 130 0001 C CNN
+	1    37100 10750
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R15
 U 1 1 622C9229
-P 37800 12125
-F 0 "R15" V 37800 12017 130 0000 R CNN
-F 1 "Resistor" H 37800 12300 130 0001 C CNN
-F 2 "" H 37800 12125 130 0001 C CNN
-F 3 "" H 37800 12125 130 0001 C CNN
-	1    37800 12125
+P 37700 12175
+F 0 "R15" V 37700 12067 130 0000 R CNN
+F 1 "Resistor" H 37700 12350 130 0001 C CNN
+F 2 "" H 37700 12175 130 0001 C CNN
+F 3 "" H 37700 12175 130 0001 C CNN
+	1    37700 12175
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R13
 U 1 1 622C922F
-P 37800 10700
-F 0 "R13" V 37800 10592 130 0000 R CNN
-F 1 "Resistor" H 37800 10875 130 0001 C CNN
-F 2 "" H 37800 10700 130 0001 C CNN
-F 3 "" H 37800 10700 130 0001 C CNN
-	1    37800 10700
+P 37700 10750
+F 0 "R13" V 37700 10642 130 0000 R CNN
+F 1 "Resistor" H 37700 10925 130 0001 C CNN
+F 2 "" H 37700 10750 130 0001 C CNN
+F 3 "" H 37700 10750 130 0001 C CNN
+	1    37700 10750
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-PNP Q9
 U 1 1 6233E4A2
-P 38350 11425
-F 0 "Q9" H 38725 11150 130 0000 C CNN
-F 1 "Transistor-PNP" H 38350 11990 130 0001 C CNN
-F 2 "" H 38350 11175 130 0001 C CNN
-F 3 "" H 38350 11175 130 0001 C CNN
-	1    38350 11425
+P 38250 11475
+F 0 "Q9" H 38625 11200 130 0000 C CNN
+F 1 "Transistor-PNP" H 38250 12040 130 0001 C CNN
+F 2 "" H 38250 11225 130 0001 C CNN
+F 3 "" H 38250 11225 130 0001 C CNN
+	1    38250 11475
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR47
 U 1 1 623B3A05
-P 38500 9525
-F 0 "CR47" V 38500 9396 140 0000 R CNN
-F 1 "Diode" H 38500 9375 50  0001 C CNN
-F 2 "" H 38450 9350 50  0001 C CNN
-F 3 "" H 38450 9525 50  0001 C CNN
-	1    38500 9525
+P 38400 9575
+F 0 "CR47" V 38400 9446 140 0000 R CNN
+F 1 "Diode" H 38400 9425 50  0001 C CNN
+F 2 "" H 38350 9400 50  0001 C CNN
+F 3 "" H 38350 9575 50  0001 C CNN
+	1    38400 9575
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	36075 9725 36075 10000
+	35975 9775 35975 10050
 Wire Wire Line
-	36075 10000 37800 10000
+	35975 10050 37700 10050
 Wire Wire Line
-	37800 10000 37800 10300
+	37700 10050 37700 10350
 Wire Wire Line
-	36525 11425 36750 11425
+	36425 11475 36650 11475
 Wire Wire Line
-	36750 11425 36750 11875
+	36650 11475 36650 11925
 Wire Wire Line
-	36750 11425 37200 11425
+	36650 11475 37100 11475
 Wire Wire Line
-	37200 11425 37200 11725
-Connection ~ 36750 11425
+	37100 11475 37100 11775
+Connection ~ 36650 11475
 Wire Wire Line
-	37200 11425 37200 11100
-Connection ~ 37200 11425
+	37100 11475 37100 11150
+Connection ~ 37100 11475
 Wire Wire Line
-	38050 11425 37800 11425
+	37950 11475 37700 11475
 Wire Wire Line
-	37800 11100 37800 11425
-Connection ~ 37800 11425
+	37700 11150 37700 11475
+Connection ~ 37700 11475
 Wire Wire Line
-	37800 11425 37800 11725
+	37700 11475 37700 11775
 Wire Wire Line
-	38500 11175 38500 10000
+	38400 11225 38400 10050
 $Comp
 L AGC_DSKY:Diode CR50
 U 1 1 6276CA2D
-P 41000 9525
-F 0 "CR50" V 41000 9396 140 0000 R CNN
-F 1 "Diode" H 41000 9375 50  0001 C CNN
-F 2 "" H 40950 9350 50  0001 C CNN
-F 3 "" H 40950 9525 50  0001 C CNN
-	1    41000 9525
+P 40800 9575
+F 0 "CR50" V 40800 9446 140 0000 R CNN
+F 1 "Diode" H 40800 9425 50  0001 C CNN
+F 2 "" H 40750 9400 50  0001 C CNN
+F 3 "" H 40750 9575 50  0001 C CNN
+	1    40800 9575
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-PNP Q10
 U 1 1 6276CA33
-P 41150 11425
-F 0 "Q10" H 41600 11175 130 0000 C CNN
-F 1 "Transistor-PNP" H 41150 11990 130 0001 C CNN
-F 2 "" H 41150 11175 130 0001 C CNN
-F 3 "" H 41150 11175 130 0001 C CNN
-	1    41150 11425
+P 40950 11475
+F 0 "Q10" H 41400 11225 130 0000 C CNN
+F 1 "Transistor-PNP" H 40950 12040 130 0001 C CNN
+F 2 "" H 40950 11225 130 0001 C CNN
+F 3 "" H 40950 11225 130 0001 C CNN
+	1    40950 11475
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R18
 U 1 1 6276CA39
-P 42125 12125
-F 0 "R18" V 42125 12017 130 0000 R CNN
-F 1 "Resistor" H 42125 12300 130 0001 C CNN
-F 2 "" H 42125 12125 130 0001 C CNN
-F 3 "" H 42125 12125 130 0001 C CNN
-	1    42125 12125
+P 41875 12175
+F 0 "R18" V 41875 12067 130 0000 R CNN
+F 1 "Resistor" H 41875 12350 130 0001 C CNN
+F 2 "" H 41875 12175 130 0001 C CNN
+F 3 "" H 41875 12175 130 0001 C CNN
+	1    41875 12175
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor-Polarized C5
 U 1 1 6276CA3F
-P 41675 12125
-F 0 "C5" H 41464 12137 130 0000 R CNN
-F 1 "Capacitor-Polarized" H 41700 11575 130 0001 C CNN
-F 2 "" H 41675 12525 130 0001 C CNN
-F 3 "" H 41675 12525 130 0001 C CNN
-	1    41675 12125
+P 41425 12175
+F 0 "C5" H 41214 12187 130 0000 R CNN
+F 1 "Capacitor-Polarized" H 41450 11625 130 0001 C CNN
+F 2 "" H 41425 12575 130 0001 C CNN
+F 3 "" H 41425 12575 130 0001 C CNN
+	1    41425 12175
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R16
 U 1 1 6276CA45
-P 42125 10700
-F 0 "R16" V 42125 11200 130 0000 R CNN
-F 1 "Resistor" H 42125 10875 130 0001 C CNN
-F 2 "" H 42125 10700 130 0001 C CNN
-F 3 "" H 42125 10700 130 0001 C CNN
-	1    42125 10700
+P 41875 10750
+F 0 "R16" V 41875 11250 130 0000 R CNN
+F 1 "Resistor" H 41875 10925 130 0001 C CNN
+F 2 "" H 41875 10750 130 0001 C CNN
+F 3 "" H 41875 10750 130 0001 C CNN
+	1    41875 10750
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R19
 U 1 1 6276CA4B
-P 42725 12125
-F 0 "R19" V 42725 12017 130 0000 R CNN
-F 1 "Resistor" H 42725 12300 130 0001 C CNN
-F 2 "" H 42725 12125 130 0001 C CNN
-F 3 "" H 42725 12125 130 0001 C CNN
-	1    42725 12125
+P 42475 12175
+F 0 "R19" V 42475 12067 130 0000 R CNN
+F 1 "Resistor" H 42475 12350 130 0001 C CNN
+F 2 "" H 42475 12175 130 0001 C CNN
+F 3 "" H 42475 12175 130 0001 C CNN
+	1    42475 12175
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Resistor R17
 U 1 1 6276CA51
-P 42725 10700
-F 0 "R17" V 42725 10592 130 0000 R CNN
-F 1 "Resistor" H 42725 10875 130 0001 C CNN
-F 2 "" H 42725 10700 130 0001 C CNN
-F 3 "" H 42725 10700 130 0001 C CNN
-	1    42725 10700
+P 42475 10750
+F 0 "R17" V 42475 10642 130 0000 R CNN
+F 1 "Resistor" H 42475 10925 130 0001 C CNN
+F 2 "" H 42475 10750 130 0001 C CNN
+F 3 "" H 42475 10750 130 0001 C CNN
+	1    42475 10750
 	0    -1   -1   0   
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-PNP Q11
 U 1 1 6276CA57
-P 43275 11425
-F 0 "Q11" H 43625 11075 130 0000 C CNN
-F 1 "Transistor-PNP" H 43275 11990 130 0001 C CNN
-F 2 "" H 43275 11175 130 0001 C CNN
-F 3 "" H 43275 11175 130 0001 C CNN
-	1    43275 11425
+P 43025 11475
+F 0 "Q11" H 43375 11125 130 0000 C CNN
+F 1 "Transistor-PNP" H 43025 12040 130 0001 C CNN
+F 2 "" H 43025 11225 130 0001 C CNN
+F 3 "" H 43025 11225 130 0001 C CNN
+	1    43025 11475
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:Diode CR49
 U 1 1 6276CA5D
-P 43425 9525
-F 0 "CR49" V 43425 9396 140 0000 R CNN
-F 1 "Diode" H 43425 9375 50  0001 C CNN
-F 2 "" H 43375 9350 50  0001 C CNN
-F 3 "" H 43375 9525 50  0001 C CNN
-	1    43425 9525
+P 43175 9575
+F 0 "CR49" V 43175 9446 140 0000 R CNN
+F 1 "Diode" H 43175 9425 50  0001 C CNN
+F 2 "" H 43125 9400 50  0001 C CNN
+F 3 "" H 43125 9575 50  0001 C CNN
+	1    43175 9575
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	41000 9725 41000 10000
+	40800 9775 40800 10050
 Wire Wire Line
-	41000 10000 42725 10000
+	42475 10050 42475 10350
 Wire Wire Line
-	42725 10000 42725 10300
+	41200 11475 41250 11475
 Wire Wire Line
-	41450 11425 41675 11425
+	41425 11475 41425 11925
 Wire Wire Line
-	41675 11425 41675 11875
+	41425 11475 41875 11475
 Wire Wire Line
-	41675 11425 42125 11425
+	41875 11475 41875 11775
+Connection ~ 41425 11475
 Wire Wire Line
-	42125 11425 42125 11725
-Connection ~ 41675 11425
+	41875 11475 41875 11150
+Connection ~ 41875 11475
 Wire Wire Line
-	42125 11425 42125 11100
-Connection ~ 42125 11425
+	42725 11475 42475 11475
 Wire Wire Line
-	42975 11425 42725 11425
+	42475 11150 42475 11475
+Connection ~ 42475 11475
 Wire Wire Line
-	42725 11100 42725 11425
-Connection ~ 42725 11425
+	42475 11475 42475 11775
 Wire Wire Line
-	42725 11425 42725 11725
+	43175 9100 43175 9375
 Wire Wire Line
-	43425 11175 43425 10000
+	35975 9375 35975 9100
+Connection ~ 35975 9100
 Wire Wire Line
-	43425 9050 43425 9325
+	35975 9100 38400 9100
 Wire Wire Line
-	34300 9050 36075 9050
+	38400 9375 38400 9100
+Connection ~ 38400 9100
 Wire Wire Line
-	36075 9325 36075 9050
-Connection ~ 36075 9050
+	38400 9100 40800 9100
 Wire Wire Line
-	36075 9050 38500 9050
+	37100 10350 37100 8625
 Wire Wire Line
-	38500 9325 38500 9050
-Connection ~ 38500 9050
+	35975 10050 35300 10050
 Wire Wire Line
-	38500 9050 41000 9050
+	35300 10050 35300 13350
+Connection ~ 35975 10050
 Wire Wire Line
-	37200 10300 37200 8575
+	35975 10050 35975 11225
 Wire Wire Line
-	36075 10000 35400 10000
+	35975 11725 35975 12975
+Connection ~ 35975 12975
 Wire Wire Line
-	35400 10000 35400 13300
-Connection ~ 36075 10000
+	36650 12450 36650 12975
 Wire Wire Line
-	36075 10000 36075 11175
+	35975 12975 36650 12975
+Connection ~ 36650 12975
 Wire Wire Line
-	36075 11675 36075 12925
-Connection ~ 36075 12925
+	36650 12975 37100 12975
 Wire Wire Line
-	36750 12400 36750 12925
+	37100 12575 37100 12975
+Connection ~ 37100 12975
 Wire Wire Line
-	36075 12925 36750 12925
-Connection ~ 36750 12925
+	37100 12975 37700 12975
 Wire Wire Line
-	36750 12925 37200 12925
+	37700 12575 37700 12975
+Connection ~ 37700 12975
+Connection ~ 38400 12975
 Wire Wire Line
-	37200 12525 37200 12925
-Connection ~ 37200 12925
+	38400 10050 39150 10050
 Wire Wire Line
-	37200 12925 37800 12925
+	39150 10050 39150 13350
+Connection ~ 38400 10050
 Wire Wire Line
-	37800 12525 37800 12925
-Connection ~ 37800 12925
+	38400 10050 38400 9775
 Wire Wire Line
-	37800 12925 38500 12925
+	40800 9100 40800 9375
 Wire Wire Line
-	38500 11675 38500 12925
-Connection ~ 38500 12925
+	41875 10350 41875 8625
 Wire Wire Line
-	38500 12925 41000 12925
+	40800 10050 40100 10050
 Wire Wire Line
-	38500 10000 39250 10000
+	40100 10050 40100 13350
 Wire Wire Line
-	39250 10000 39250 13300
-Connection ~ 38500 10000
+	40800 11225 40800 10050
 Wire Wire Line
-	38500 10000 38500 9725
+	41425 12450 41425 12975
+Connection ~ 41425 12975
 Wire Wire Line
-	41000 9050 41000 9325
-Connection ~ 41000 9050
+	41425 12975 41875 12975
 Wire Wire Line
-	41000 9050 43425 9050
+	41875 12575 41875 12975
+Connection ~ 41875 12975
 Wire Wire Line
-	42125 10300 42125 8575
+	41875 12975 42475 12975
 Wire Wire Line
-	41000 10000 40250 10000
+	42475 12575 42475 12975
+Connection ~ 42475 12975
 Wire Wire Line
-	40250 10000 40250 13300
-Connection ~ 41000 10000
+	42475 12975 43175 12975
 Wire Wire Line
-	41000 11175 41000 10000
-Wire Wire Line
-	41000 11675 41000 12925
-Connection ~ 41000 12925
-Wire Wire Line
-	41000 12925 41675 12925
-Wire Wire Line
-	41675 12400 41675 12925
-Connection ~ 41675 12925
-Wire Wire Line
-	41675 12925 42125 12925
-Wire Wire Line
-	42125 12525 42125 12925
-Connection ~ 42125 12925
-Wire Wire Line
-	42125 12925 42725 12925
-Wire Wire Line
-	42725 12525 42725 12925
-Connection ~ 42725 12925
-Wire Wire Line
-	42725 12925 43425 12925
-Wire Wire Line
-	43425 11675 43425 12925
-Connection ~ 43425 12925
-Wire Wire Line
-	43425 12925 44325 12925
-Wire Wire Line
-	43425 10000 43825 10000
-Wire Wire Line
-	43825 10000 43825 13300
-Connection ~ 43425 10000
-Wire Wire Line
-	43425 10000 43425 9725
+	43175 11725 43175 12975
+Connection ~ 43175 12975
+Connection ~ 43175 10050
 Wire Notes Line
-	16275 8850 16275 8675
+	16325 8900 16325 8725
 Wire Notes Line
-	16275 8675 25325 8675
+	16325 8725 25375 8725
 Wire Notes Line
-	22475 13525 23375 13525
+	22525 13575 23425 13575
 Wire Notes Line
-	21875 13525 20700 13525
+	21925 13575 20750 13575
 Wire Notes Line
-	20100 13525 19925 13525
+	20150 13575 19975 13575
 Wire Notes Line
-	19325 13525 16275 13525
+	19375 13575 16325 13575
 Wire Notes Line
-	16275 13525 16275 13100
+	16325 13575 16325 13150
 Wire Notes Line
-	16275 12750 16275 9225
-Text Notes 16375 13425 0    130  ~ 26
+	16325 12800 16325 9275
+Text Notes 16425 13475 0    130  ~ 26
 000
 Wire Notes Line
-	19125 8675 19125 13525
-Text Notes 19175 11675 0    130  ~ 26
+	19175 8725 19175 13575
+Text Notes 19225 11725 0    130  ~ 26
 002\n
 Wire Notes Line
-	19125 11450 22525 11450
+	19175 11500 22575 11500
 Wire Notes Line
-	22525 11450 22525 13525
-Connection ~ 22725 12925
-Text Notes 22575 13450 0    130  ~ 26
+	22575 11500 22575 13575
+Connection ~ 22775 12975
+Text Notes 22625 13500 0    130  ~ 26
 003
 Wire Notes Line
-	25325 8425 36875 8425
+	25375 8475 36800 8475
 Wire Notes Line
-	37525 8425 41800 8425
+	37425 8475 41700 8475
 Wire Notes Line
-	42450 8425 45175 8425
+	42200 8475 44925 8475
 Wire Notes Line
-	45175 8425 45175 13525
+	45025 8475 45025 13575
 Wire Notes Line
-	45175 13525 44125 13525
+	45025 13575 43975 13575
 Wire Notes Line
-	43525 13525 40550 13525
+	43350 13575 40375 13575
 Wire Notes Line
-	39925 13525 39550 13525
+	39800 13575 39425 13575
 Wire Notes Line
-	38950 13525 35700 13525
+	38850 13575 35600 13575
 Wire Notes Line
-	35100 13525 34600 13525
+	35000 13575 34500 13575
 Wire Notes Line
-	33975 13525 30875 13525
+	33950 13575 30850 13575
 Wire Notes Line
-	30275 13525 29800 13525
+	30300 13575 29825 13575
 Wire Notes Line
-	29200 13525 28025 13525
+	29200 13575 28025 13575
 Wire Notes Line
-	27400 13525 26100 13525
+	25375 8475 25375 13575
 Wire Notes Line
-	25325 8425 25325 13525
-Wire Notes Line
-	24000 13525 25500 13525
-Text Notes 26100 13450 0    130  ~ 26
+	24050 13575 25550 13575
+Text Notes 26150 13500 0    130  ~ 26
 004
 Wire Notes Line
-	30075 13525 30075 8425
-Text Notes 30825 13475 0    130  ~ 26
+	30075 13575 30075 8475
+Text Notes 30825 13525 0    130  ~ 26
 005
 Wire Notes Line
-	34875 13525 34875 8425
-Text Notes 35750 13475 0    130  ~ 26
+	34775 13575 34775 8475
+Text Notes 35650 13525 0    130  ~ 26
 006
 Wire Notes Line
-	39750 13525 39750 8425
-Text Notes 40600 13475 0    130  ~ 26
+	39600 13575 39600 8475
+Text Notes 40450 13525 0    130  ~ 26
 007
 Wire Notes Line
-	19475 8675 19475 8475
+	19525 8725 19525 8525
 Wire Notes Line
-	19475 8125 19475 7700
+	19525 8175 19525 7750
 Wire Notes Line
-	19475 7350 19475 6950
+	19525 7400 19525 7000
 Wire Notes Line
-	19475 6600 19475 6225
+	19525 6650 19525 6275
 Wire Notes Line
-	19475 5875 19475 5475
+	19525 5925 19525 5525
 Wire Notes Line
-	19475 4725 19475 5125
+	19525 4775 19525 5175
 Wire Notes Line
-	19475 4375 19475 3975
+	19525 4425 19525 4025
 Wire Notes Line
-	19475 3625 19475 2575
+	19525 3675 19525 2625
 Wire Notes Line
-	19475 2575 20350 2575
+	19525 2625 20400 2625
 Wire Notes Line
-	20950 2575 22900 2575
+	21000 2625 22950 2625
 Wire Notes Line
-	23525 2575 24475 2575
+	23575 2625 24525 2625
 Wire Notes Line
-	24475 2575 24475 3625
+	24525 2625 24525 3675
 Wire Notes Line
-	24475 3975 24475 4375
+	24525 4025 24525 4425
 Wire Notes Line
-	24475 4725 24475 5125
+	24525 4775 24525 5175
 Wire Notes Line
-	24475 5475 24475 5875
+	24525 5525 24525 5925
 Wire Notes Line
-	24475 6225 24475 6600
+	24525 6275 24525 6650
 Wire Notes Line
-	24475 6950 24475 7350
+	24525 7000 24525 7400
 Wire Notes Line
-	24475 7700 24475 8125
+	24525 7750 24525 8175
 Wire Notes Line
-	24475 8475 24475 8675
-Text Notes 24050 2775 0    130  ~ 26
+	24525 8525 24525 8725
+Text Notes 24100 2825 0    130  ~ 26
 011
 Wire Notes Line
-	22700 2575 22700 4200
+	22750 2625 22750 4250
 Wire Notes Line
-	22700 4200 24475 4200
-Text Notes 21075 8575 0    130  ~ 26
+	22750 4250 24525 4250
+Text Notes 21125 8625 0    130  ~ 26
 001
-Text Notes 20725 8625 0    130  ~ 26
+Text Notes 20775 8675 0    130  ~ 26
 X
-Text Notes 23000 8625 0    130  ~ 26
+Text Notes 23050 8675 0    130  ~ 26
 Y
-Text Notes 40575 925  0    265  ~ 53
-2005952
-Wire Notes Line style solid
-	40000 500  40000 1000
-Wire Notes Line style solid
-	40000 1000 42500 1000
-Wire Notes Line style solid
-	42500 1000 42500 500 
-Wire Notes Line style solid
-	40500 500  40500 1000
-Text Notes 50925 27925 1    265  ~ 53
-2005952
-Wire Notes Line style solid
-	50500 26000 51000 26000
-Wire Notes Line style solid
-	50500 28000 51000 28000
 Text Notes 47075 33100 2    250  ~ 50
 80230
-Text Notes 1860 9440 0    130  ~ 26
+Text Notes 2010 9390 0    130  ~ 26
 R25
-Text Notes 2600 3685 0    130  ~ 26
+Text Notes 2750 3635 0    130  ~ 26
 1006750-39
-Text Notes 2605 3935 0    130  ~ 26
+Text Notes 2755 3885 0    130  ~ 26
 1006750-56
-Text Notes 2615 6190 0    130  ~ 26
+Text Notes 2765 6140 0    130  ~ 26
 1006750-56
-Text Notes 2620 6425 0    130  ~ 26
-1006750-56
-Text Notes 2630 6680 0    130  ~ 26
+Text Notes 2770 6375 0    130  ~ 26
+1006750-63
+Text Notes 2780 6630 0    130  ~ 26
 1006750-39
-Text Notes 2630 6935 0    130  ~ 26
+Text Notes 2780 6885 0    130  ~ 26
 1006750-56
-Text Notes 2630 7190 0    130  ~ 26
+Text Notes 2780 7140 0    130  ~ 26
 1006750-56
-Text Notes 2630 7435 0    130  ~ 26
-1006750-56
-Text Notes 2635 7685 0    130  ~ 26
+Text Notes 2780 7385 0    130  ~ 26
+1006750-63
+Text Notes 2785 7635 0    130  ~ 26
 1006750-39
-Text Notes 2630 7930 0    130  ~ 26
+Text Notes 2780 7880 0    130  ~ 26
 1006750-56
-Text Notes 2635 8185 0    130  ~ 26
+Text Notes 2785 8135 0    130  ~ 26
 1006750-32
-Text Notes 2640 8435 0    130  ~ 26
+Text Notes 2790 8385 0    130  ~ 26
 1006750-39
-Text Notes 2620 8690 0    130  ~ 26
+Text Notes 2770 8640 0    130  ~ 26
 1006750-56
-Text Notes 2630 8935 0    130  ~ 26
+Text Notes 2780 8885 0    130  ~ 26
 1006750-39
-Text Notes 2615 9440 0    130  ~ 26
+Text Notes 2765 9390 0    130  ~ 26
 1006750-32
-Text Notes 5890 3690 0    130  ~ 26
+Text Notes 6040 3640 0    130  ~ 26
 2K
-Text Notes 5832 3942 0    130  ~ 26
+Text Notes 5982 3892 0    130  ~ 26
 10K
-Text Notes 5842 6182 0    130  ~ 26
+Text Notes 5992 6132 0    130  ~ 26
 10K
-Text Notes 5847 6437 0    130  ~ 26
-10K
-Text Notes 5895 6680 0    130  ~ 26
+Text Notes 5997 6387 0    130  ~ 26
+20K
+Text Notes 6045 6630 0    130  ~ 26
 2K
-Text Notes 5857 6932 0    130  ~ 26
+Text Notes 6007 6882 0    130  ~ 26
 10K
-Text Notes 5862 7187 0    130  ~ 26
+Text Notes 6012 7137 0    130  ~ 26
 10K
-Text Notes 5872 7427 0    130  ~ 26
-10K
-Text Notes 5920 7680 0    130  ~ 26
+Text Notes 6022 7377 0    130  ~ 26
+20K
+Text Notes 6070 7630 0    130  ~ 26
 2K
-Text Notes 5872 7942 0    130  ~ 26
+Text Notes 6022 7892 0    130  ~ 26
 10K
-Text Notes 5920 8185 0    130  ~ 26
+Text Notes 6070 8135 0    130  ~ 26
 1K
-Text Notes 5920 8425 0    130  ~ 26
+Text Notes 6070 8375 0    130  ~ 26
 2K
-Text Notes 5862 8682 0    130  ~ 26
+Text Notes 6012 8632 0    130  ~ 26
 10K
-Text Notes 5920 8930 0    130  ~ 26
+Text Notes 6070 8880 0    130  ~ 26
 2K
-Text Notes 5930 9425 0    130  ~ 26
+Text Notes 6080 9375 0    130  ~ 26
 1K
-Text Notes 30825 5950 0    140  ~ 28
+Text Notes 30875 6000 0    140  ~ 28
 SPARE
-Text Notes 30800 6950 0    140  ~ 28
+Text Notes 30850 7000 0    140  ~ 28
 SPARE
 Wire Notes Line
-	37925 3425 37700 3425
+	37825 3425 37600 3425
 Wire Notes Line
-	38900 7400 37700 7400
+	38800 7525 37600 7525
 $Comp
 L AGC_DSKY:Resistor-shortlead R20
 U 1 1 5D6BBD4F
-P 33250 9350
-F 0 "R20" V 33250 9242 130 0000 R CNN
-F 1 "Resistor" H 33250 9525 130 0001 C CNN
-F 2 "" H 33250 9350 130 0001 C CNN
-F 3 "" H 33250 9350 130 0001 C CNN
-	1    33250 9350
+P 33300 9500
+F 0 "R20" V 33300 9392 130 0000 R CNN
+F 1 "Resistor" H 33300 9675 130 0001 C CNN
+F 2 "" H 33300 9500 130 0001 C CNN
+F 3 "" H 33300 9500 130 0001 C CNN
+	1    33300 9500
 	0    -1   -1   0   
 $EndComp
-$Comp
-L AGC_DSKY:Resistor-shortlead R25
-U 1 1 5D748F40
-P 28300 9350
-F 0 "R25" V 28300 9458 130 0000 L CNN
-F 1 "Resistor-shortlead" H 28300 9525 130 0001 C CNN
-F 2 "" H 28300 9350 130 0001 C CNN
-F 3 "" H 28300 9350 130 0001 C CNN
-	1    28300 9350
-	0    1    1    0   
-$EndComp
-Text Notes 28300 31625 0    130  ~ 26
-Notes from the Virtual AGC Project:\na) This CAD drawing was transcribed manually from the original Apollo Program\n   drawing 2005952-, but is not itself original to the Apollo Program — RSB 2018.
+Text Notes 28300 31925 0    130  ~ 26
+Notes from the Virtual AGC Project:\na) This CAD drawing was adapted from the previously-transcribed original Project\n   Apollo drawing 2005952-, and then made to conform to original drawing\n   2005940A.  - RSB 2019
 Wire Wire Line
-	23775 9775 23775 9050
-Connection ~ 23775 9050
+	23825 9825 23825 9100
+Connection ~ 23825 9100
 Wire Wire Line
-	23775 9050 24750 9050
+	23825 9100 24800 9100
 Wire Wire Line
-	22725 9775 22725 9050
-Connection ~ 22725 9050
+	22775 9825 22775 9100
+Connection ~ 22775 9100
 Wire Wire Line
-	22725 9050 23775 9050
+	22775 9100 23825 9100
 $Bitmap
 Pos 28050 31225
 Scale 1.000000
@@ -5312,1454 +4216,2540 @@ $EndBitmap
 $Comp
 L AGC_DSKY:Node N1
 U 1 1 5D008372
-P 29450 4850
-F 0 "N1" H 29450 4950 50  0001 C CNN
-F 1 "Node" H 29450 5025 50  0001 C CNN
-F 2 "" H 29450 4850 50  0001 C CNN
-F 3 "" H 29450 4850 50  0001 C CNN
-	1    29450 4850
+P 29500 4900
+F 0 "N1" H 29500 5000 50  0001 C CNN
+F 1 "Node" H 29500 5075 50  0001 C CNN
+F 2 "" H 29500 4900 50  0001 C CNN
+F 3 "" H 29500 4900 50  0001 C CNN
+	1    29500 4900
 	1    0    0    -1  
 $EndComp
-Connection ~ 29450 4850
+Connection ~ 29500 4900
 Wire Wire Line
-	29450 4850 30200 4850
+	29500 4900 30250 4900
 $Comp
 L AGC_DSKY:Node N2
 U 1 1 5D008528
-P 29450 5850
-F 0 "N2" H 29450 5950 50  0001 C CNN
-F 1 "Node" H 29450 6025 50  0001 C CNN
-F 2 "" H 29450 5850 50  0001 C CNN
-F 3 "" H 29450 5850 50  0001 C CNN
-	1    29450 5850
+P 29500 5900
+F 0 "N2" H 29500 6000 50  0001 C CNN
+F 1 "Node" H 29500 6075 50  0001 C CNN
+F 2 "" H 29500 5900 50  0001 C CNN
+F 3 "" H 29500 5900 50  0001 C CNN
+	1    29500 5900
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Node N3
 U 1 1 5D00A18E
-P 29450 6850
-F 0 "N3" H 29450 6950 50  0001 C CNN
-F 1 "Node" H 29450 7025 50  0001 C CNN
-F 2 "" H 29450 6850 50  0001 C CNN
-F 3 "" H 29450 6850 50  0001 C CNN
-	1    29450 6850
+P 29500 6900
+F 0 "N3" H 29500 7000 50  0001 C CNN
+F 1 "Node" H 29500 7075 50  0001 C CNN
+F 2 "" H 29500 6900 50  0001 C CNN
+F 3 "" H 29500 6900 50  0001 C CNN
+	1    29500 6900
 	1    0    0    -1  
 $EndComp
 Wire Notes Line width 12
-	29450 4225 29450 4800
+	29500 4275 29500 4850
 Wire Notes Line width 12
-	29450 4925 29450 5775
+	29500 4975 29500 5825
 Wire Notes Line width 12
-	29450 5925 29450 6775
+	29500 5975 29500 6825
 Wire Notes Line width 12
-	29450 6925 29450 7425
+	29500 6975 29500 7475
 Wire Wire Line
-	30200 5850 29450 5850
+	30250 5900 29500 5900
 Wire Wire Line
-	30200 6850 29450 6850
+	30250 6900 29500 6900
 $Comp
 L AGC_DSKY:Ground-chassis G1
 U 1 1 5D71BB20
-P 29050 4850
-F 0 "G1" V 28925 5325 130 0000 L CNN
-F 1 "Ground-chassis" H 29050 5350 130 0001 C CNN
-F 2 "" H 29050 4850 130 0001 C CNN
-F 3 "" H 29050 4850 130 0001 C CNN
-	1    29050 4850
+P 29100 4900
+F 0 "G1" V 28975 5375 130 0000 L CNN
+F 1 "Ground-chassis" H 29100 5400 130 0001 C CNN
+F 2 "" H 29100 4900 130 0001 C CNN
+F 3 "" H 29100 4900 130 0001 C CNN
+	1    29100 4900
 	0    1    1    0   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 1 1 5C98FC0B
-P 42625 27550
-F 0 "J1" H 42625 27800 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 42675 27900 50  0001 C CNN
-F 2 "" H 42575 27725 50  0001 C CNN
-F 3 "" H 42575 27725 50  0001 C CNN
-	1    42625 27550
+P 42475 27650
+F 0 "J1" H 42475 27900 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 42525 28000 50  0001 C CNN
+F 2 "" H 42425 27825 50  0001 C CNN
+F 3 "" H 42425 27825 50  0001 C CNN
+	1    42475 27650
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 2 2 5C98FF58
-P 40750 28250
-F 0 "J1" H 40750 28500 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 40800 28600 50  0001 C CNN
-F 2 "" H 40700 28425 50  0001 C CNN
-F 3 "" H 40700 28425 50  0001 C CNN
-	2    40750 28250
+P 40600 28350
+F 0 "J1" H 40600 28600 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 40650 28700 50  0001 C CNN
+F 2 "" H 40550 28525 50  0001 C CNN
+F 3 "" H 40550 28525 50  0001 C CNN
+	2    40600 28350
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 7 1 5C990347
-P 39750 26575
-F 0 "J1" H 39750 26825 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 39800 26925 50  0001 C CNN
-F 2 "" H 39700 26750 50  0001 C CNN
-F 3 "" H 39700 26750 50  0001 C CNN
-	7    39750 26575
+P 39600 26675
+F 0 "J1" H 39600 26925 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 39650 27025 50  0001 C CNN
+F 2 "" H 39550 26850 50  0001 C CNN
+F 3 "" H 39550 26850 50  0001 C CNN
+	7    39600 26675
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 8 1 5C990588
-P 39750 27550
-F 0 "J1" H 39750 27800 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 39800 27900 50  0001 C CNN
-F 2 "" H 39700 27725 50  0001 C CNN
-F 3 "" H 39700 27725 50  0001 C CNN
-	8    39750 27550
+P 39600 27650
+F 0 "J1" H 39600 27900 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 39650 28000 50  0001 C CNN
+F 2 "" H 39550 27825 50  0001 C CNN
+F 3 "" H 39550 27825 50  0001 C CNN
+	8    39600 27650
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 10 2 5C9907D0
-P 41650 28250
-F 0 "J1" H 41650 28500 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 41700 28600 50  0001 C CNN
-F 2 "" H 41600 28425 50  0001 C CNN
-F 3 "" H 41600 28425 50  0001 C CNN
-	10   41650 28250
+P 41500 28350
+F 0 "J1" H 41500 28600 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 41550 28700 50  0001 C CNN
+F 2 "" H 41450 28525 50  0001 C CNN
+F 3 "" H 41450 28525 50  0001 C CNN
+	10   41500 28350
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 11 1 5C990BA3
-P 42625 27100
-F 0 "J1" H 42625 27350 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 42675 27450 50  0001 C CNN
-F 2 "" H 42575 27275 50  0001 C CNN
-F 3 "" H 42575 27275 50  0001 C CNN
-	11   42625 27100
+P 42475 27200
+F 0 "J1" H 42475 27450 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 42525 27550 50  0001 C CNN
+F 2 "" H 42425 27375 50  0001 C CNN
+F 3 "" H 42425 27375 50  0001 C CNN
+	11   42475 27200
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 12 1 5C991560
-P 39750 27100
-F 0 "J1" H 39750 27350 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 39800 27450 50  0001 C CNN
-F 2 "" H 39700 27275 50  0001 C CNN
-F 3 "" H 39700 27275 50  0001 C CNN
-	12   39750 27100
+P 39600 27200
+F 0 "J1" H 39600 27450 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 39650 27550 50  0001 C CNN
+F 2 "" H 39550 27375 50  0001 C CNN
+F 3 "" H 39550 27375 50  0001 C CNN
+	12   39600 27200
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 30 1 5C991818
-P 35925 29000
-F 0 "J1" H 35925 29250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 35975 29350 50  0001 C CNN
-F 2 "" H 35875 29175 50  0001 C CNN
-F 3 "" H 35875 29175 50  0001 C CNN
-	30   35925 29000
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_1 J1
-U 36 1 5C991DA0
-P 35925 25275
-F 0 "J1" H 35925 25525 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 35975 25625 50  0001 C CNN
-F 2 "" H 35875 25450 50  0001 C CNN
-F 3 "" H 35875 25450 50  0001 C CNN
-	36   35925 25275
+P 35800 29025
+F 0 "J1" H 35800 29275 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 35850 29375 50  0001 C CNN
+F 2 "" H 35750 29200 50  0001 C CNN
+F 3 "" H 35750 29200 50  0001 C CNN
+	30   35800 29025
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 41 1 5C99A683
-P 22175 27100
-F 0 "J1" H 22175 27350 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 22225 27450 50  0001 C CNN
-F 2 "" H 22125 27275 50  0001 C CNN
-F 3 "" H 22125 27275 50  0001 C CNN
-	41   22175 27100
+P 22250 27250
+F 0 "J1" H 22250 27500 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 22300 27600 50  0001 C CNN
+F 2 "" H 22200 27425 50  0001 C CNN
+F 3 "" H 22200 27425 50  0001 C CNN
+	41   22250 27250
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
-U 54 2 5C99AA24
-P 23325 24275
-F 0 "J1" H 23325 24525 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 23375 24625 50  0001 C CNN
-F 2 "" H 23275 24450 50  0001 C CNN
-F 3 "" H 23275 24450 50  0001 C CNN
-	54   23325 24275
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_1 J1
 U 55 2 5C99ADF7
-P 23325 28000
-F 0 "J1" H 23325 28250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 23375 28350 50  0001 C CNN
-F 2 "" H 23275 28175 50  0001 C CNN
-F 3 "" H 23275 28175 50  0001 C CNN
-	55   23325 28000
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_1 J1
-U 56 1 5C99B3EF
-P 29575 27550
-F 0 "J1" H 29575 27800 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 29625 27900 50  0001 C CNN
-F 2 "" H 29525 27725 50  0001 C CNN
-F 3 "" H 29525 27725 50  0001 C CNN
-	56   29575 27550
+P 23300 28025
+F 0 "J1" H 23300 28275 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 23350 28375 50  0001 C CNN
+F 2 "" H 23250 28200 50  0001 C CNN
+F 3 "" H 23250 28200 50  0001 C CNN
+	55   23300 28025
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 39 1 5C9A1452
-P 19375 27550
-F 0 "J1" H 19375 27800 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 19425 27900 50  0001 C CNN
-F 2 "" H 19325 27725 50  0001 C CNN
-F 3 "" H 19325 27725 50  0001 C CNN
-	39   19375 27550
+P 19350 27700
+F 0 "J1" H 19350 27950 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 19400 28050 50  0001 C CNN
+F 2 "" H 19300 27875 50  0001 C CNN
+F 3 "" H 19300 27875 50  0001 C CNN
+	39   19350 27700
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 22 1 5C9A187D
-P 14225 27550
-F 0 "J1" H 14225 27800 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 14275 27900 50  0001 C CNN
-F 2 "" H 14175 27725 50  0001 C CNN
-F 3 "" H 14175 27725 50  0001 C CNN
-	22   14225 27550
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_1 J1
-U 16 1 5C9A400B
-P 10825 25025
-F 0 "J1" H 10825 25275 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 10875 25375 50  0001 C CNN
-F 2 "" H 10775 25200 50  0001 C CNN
-F 3 "" H 10775 25200 50  0001 C CNN
-	16   10825 25025
+P 14200 27700
+F 0 "J1" H 14200 27950 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 14250 28050 50  0001 C CNN
+F 2 "" H 14150 27875 50  0001 C CNN
+F 3 "" H 14150 27875 50  0001 C CNN
+	22   14200 27700
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 13 1 5C9A7B68
-P 10825 21325
-F 0 "J1" H 10825 21575 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 10875 21675 50  0001 C CNN
-F 2 "" H 10775 21500 50  0001 C CNN
-F 3 "" H 10775 21500 50  0001 C CNN
-	13   10825 21325
+P 10800 21375
+F 0 "J1" H 10800 21625 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 10850 21725 50  0001 C CNN
+F 2 "" H 10750 21550 50  0001 C CNN
+F 3 "" H 10750 21550 50  0001 C CNN
+	13   10800 21375
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 17 1 5C9A7DBE
-P 14225 20100
-F 0 "J1" H 14225 20350 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 14275 20450 50  0001 C CNN
-F 2 "" H 14175 20275 50  0001 C CNN
-F 3 "" H 14175 20275 50  0001 C CNN
-	17   14225 20100
+P 14200 20250
+F 0 "J1" H 14200 20500 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 14250 20600 50  0001 C CNN
+F 2 "" H 14150 20425 50  0001 C CNN
+F 3 "" H 14150 20425 50  0001 C CNN
+	17   14200 20250
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 32 1 5C9A8061
-P 12400 23400
-F 0 "J1" H 12400 23650 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 12450 23750 50  0001 C CNN
-F 2 "" H 12350 23575 50  0001 C CNN
-F 3 "" H 12350 23575 50  0001 C CNN
-	32   12400 23400
+P 12350 23400
+F 0 "J1" H 12350 23650 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 12400 23750 50  0001 C CNN
+F 2 "" H 12300 23575 50  0001 C CNN
+F 3 "" H 12300 23575 50  0001 C CNN
+	32   12350 23400
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 24 1 5C9A8467
-P 14225 23850
-F 0 "J1" H 14225 24100 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 14275 24200 50  0001 C CNN
-F 2 "" H 14175 24025 50  0001 C CNN
-F 3 "" H 14175 24025 50  0001 C CNN
-	24   14225 23850
+P 14200 23925
+F 0 "J1" H 14200 24175 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 14250 24275 50  0001 C CNN
+F 2 "" H 14150 24100 50  0001 C CNN
+F 3 "" H 14150 24100 50  0001 C CNN
+	24   14200 23925
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 34 1 5C9B093D
-P 19375 20100
-F 0 "J1" H 19375 20350 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 19425 20450 50  0001 C CNN
-F 2 "" H 19325 20275 50  0001 C CNN
-F 3 "" H 19325 20275 50  0001 C CNN
-	34   19375 20100
+P 19350 20250
+F 0 "J1" H 19350 20500 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 19400 20600 50  0001 C CNN
+F 2 "" H 19300 20425 50  0001 C CNN
+F 3 "" H 19300 20425 50  0001 C CNN
+	34   19350 20250
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 40 1 5C9B0BA1
-P 19375 23850
-F 0 "J1" H 19375 24100 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 19425 24200 50  0001 C CNN
-F 2 "" H 19325 24025 50  0001 C CNN
-F 3 "" H 19325 24025 50  0001 C CNN
-	40   19375 23850
+P 19325 23925
+F 0 "J1" H 19325 24175 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 19375 24275 50  0001 C CNN
+F 2 "" H 19275 24100 50  0001 C CNN
+F 3 "" H 19275 24100 50  0001 C CNN
+	40   19325 23925
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 42 1 5C9B0DE9
-P 22175 23400
-F 0 "J1" H 22175 23650 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 22225 23750 50  0001 C CNN
-F 2 "" H 22125 23575 50  0001 C CNN
-F 3 "" H 22125 23575 50  0001 C CNN
-	42   22175 23400
+P 22275 23475
+F 0 "J1" H 22275 23725 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 22325 23825 50  0001 C CNN
+F 2 "" H 22225 23650 50  0001 C CNN
+F 3 "" H 22225 23650 50  0001 C CNN
+	42   22275 23475
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 43 1 5C9B1136
-P 22175 19650
-F 0 "J1" H 22175 19900 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 22225 20000 50  0001 C CNN
-F 2 "" H 22125 19825 50  0001 C CNN
-F 3 "" H 22125 19825 50  0001 C CNN
-	43   22175 19650
+P 22150 19800
+F 0 "J1" H 22150 20050 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 22200 20150 50  0001 C CNN
+F 2 "" H 22100 19975 50  0001 C CNN
+F 3 "" H 22100 19975 50  0001 C CNN
+	43   22150 19800
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 53 2 5C9B14C2
-P 23325 20550
-F 0 "J1" H 23325 20800 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 23375 20900 50  0001 C CNN
-F 2 "" H 23275 20725 50  0001 C CNN
-F 3 "" H 23275 20725 50  0001 C CNN
-	53   23325 20550
+P 23300 20600
+F 0 "J1" H 23300 20850 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 23350 20950 50  0001 C CNN
+F 2 "" H 23250 20775 50  0001 C CNN
+F 3 "" H 23250 20775 50  0001 C CNN
+	53   23300 20600
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 50 1 5C9B879B
-P 29600 20100
-F 0 "J1" H 29600 20350 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 29650 20450 50  0001 C CNN
-F 2 "" H 29550 20275 50  0001 C CNN
-F 3 "" H 29550 20275 50  0001 C CNN
-	50   29600 20100
+P 29500 20250
+F 0 "J1" H 29500 20500 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 29550 20600 50  0001 C CNN
+F 2 "" H 29450 20425 50  0001 C CNN
+F 3 "" H 29450 20425 50  0001 C CNN
+	50   29500 20250
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 49 1 5C9B89DC
-P 29575 23850
-F 0 "J1" H 29575 24100 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 29625 24200 50  0001 C CNN
-F 2 "" H 29525 24025 50  0001 C CNN
-F 3 "" H 29525 24025 50  0001 C CNN
-	49   29575 23850
+P 29500 23925
+F 0 "J1" H 29500 24175 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 29550 24275 50  0001 C CNN
+F 2 "" H 29450 24100 50  0001 C CNN
+F 3 "" H 29450 24100 50  0001 C CNN
+	49   29500 23925
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 29 1 5C9B8CA2
-P 35925 21525
-F 0 "J1" H 35925 21775 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 35975 21875 50  0001 C CNN
-F 2 "" H 35875 21700 50  0001 C CNN
-F 3 "" H 35875 21700 50  0001 C CNN
-	29   35925 21525
+P 35825 21575
+F 0 "J1" H 35825 21825 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 35875 21925 50  0001 C CNN
+F 2 "" H 35775 21750 50  0001 C CNN
+F 3 "" H 35775 21750 50  0001 C CNN
+	29   35825 21575
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 26 1 5C9BDBE3
-P 43750 22150
-F 0 "J1" H 43750 22400 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 43800 22500 50  0001 C CNN
-F 2 "" H 43700 22325 50  0001 C CNN
-F 3 "" H 43700 22325 50  0001 C CNN
-	26   43750 22150
+P 43600 22200
+F 0 "J1" H 43600 22450 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 43650 22550 50  0001 C CNN
+F 2 "" H 43550 22375 50  0001 C CNN
+F 3 "" H 43550 22375 50  0001 C CNN
+	26   43600 22200
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 6 1 5C9BDFB5
-P 42625 23400
-F 0 "J1" H 42625 23650 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 42675 23750 50  0001 C CNN
-F 2 "" H 42575 23575 50  0001 C CNN
-F 3 "" H 42575 23575 50  0001 C CNN
-	6    42625 23400
+P 42475 23450
+F 0 "J1" H 42475 23700 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 42525 23800 50  0001 C CNN
+F 2 "" H 42425 23625 50  0001 C CNN
+F 3 "" H 42425 23625 50  0001 C CNN
+	6    42475 23450
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 5 1 5C9BE302
-P 39750 23400
-F 0 "J1" H 39750 23650 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 39800 23750 50  0001 C CNN
-F 2 "" H 39700 23575 50  0001 C CNN
-F 3 "" H 39700 23575 50  0001 C CNN
-	5    39750 23400
+P 39600 23450
+F 0 "J1" H 39600 23700 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 39650 23800 50  0001 C CNN
+F 2 "" H 39550 23625 50  0001 C CNN
+F 3 "" H 39550 23625 50  0001 C CNN
+	5    39600 23450
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 4 1 5C9BE543
-P 39750 22875
-F 0 "J1" H 39750 23125 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 39800 23225 50  0001 C CNN
-F 2 "" H 39700 23050 50  0001 C CNN
-F 3 "" H 39700 23050 50  0001 C CNN
-	4    39750 22875
+P 39600 22925
+F 0 "J1" H 39600 23175 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 39650 23275 50  0001 C CNN
+F 2 "" H 39550 23100 50  0001 C CNN
+F 3 "" H 39550 23100 50  0001 C CNN
+	4    39600 22925
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 3 1 5C9BE784
-P 42625 23850
-F 0 "J1" H 42625 24100 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 42675 24200 50  0001 C CNN
-F 2 "" H 42575 24025 50  0001 C CNN
-F 3 "" H 42575 24025 50  0001 C CNN
-	3    42625 23850
+P 42475 23900
+F 0 "J1" H 42475 24150 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 42525 24250 50  0001 C CNN
+F 2 "" H 42425 24075 50  0001 C CNN
+F 3 "" H 42425 24075 50  0001 C CNN
+	3    42475 23900
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 45 1 5C9C971A
-P 24550 15900
-F 0 "J1" H 24550 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 24600 16250 50  0001 C CNN
-F 2 "" H 24500 16075 50  0001 C CNN
-F 3 "" H 24500 16075 50  0001 C CNN
-	45   24550 15900
+P 24425 16050
+F 0 "J1" H 24425 16300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 24475 16400 50  0001 C CNN
+F 2 "" H 24375 16225 50  0001 C CNN
+F 3 "" H 24375 16225 50  0001 C CNN
+	45   24425 16050
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 46 1 5C9C995B
-P 27425 16350
-F 0 "J1" H 27425 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 27475 16700 50  0001 C CNN
-F 2 "" H 27375 16525 50  0001 C CNN
-F 3 "" H 27375 16525 50  0001 C CNN
-	46   27425 16350
+P 27300 16500
+F 0 "J1" H 27300 16750 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 27350 16850 50  0001 C CNN
+F 2 "" H 27250 16675 50  0001 C CNN
+F 3 "" H 27250 16675 50  0001 C CNN
+	46   27300 16500
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 51 2 5C9C9CC4
-P 27800 18000
-F 0 "J1" H 27800 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 27850 18350 50  0001 C CNN
-F 2 "" H 27750 18175 50  0001 C CNN
-F 3 "" H 27750 18175 50  0001 C CNN
-	51   27800 18000
+P 27775 18050
+F 0 "J1" H 27775 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 27825 18400 50  0001 C CNN
+F 2 "" H 27725 18225 50  0001 C CNN
+F 3 "" H 27725 18225 50  0001 C CNN
+	51   27775 18050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 52 1 5C9C9F8B
-P 27425 15300
-F 0 "J1" H 27425 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 27475 15650 50  0001 C CNN
-F 2 "" H 27375 15475 50  0001 C CNN
-F 3 "" H 27375 15475 50  0001 C CNN
-	52   27425 15300
+P 27300 15525
+F 0 "J1" H 27300 15775 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 27350 15875 50  0001 C CNN
+F 2 "" H 27250 15700 50  0001 C CNN
+F 3 "" H 27250 15700 50  0001 C CNN
+	52   27300 15525
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 58 1 5C9CA2FB
-P 27425 15900
-F 0 "J1" H 27425 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 27475 16250 50  0001 C CNN
-F 2 "" H 27375 16075 50  0001 C CNN
-F 3 "" H 27375 16075 50  0001 C CNN
-	58   27425 15900
+P 27300 16050
+F 0 "J1" H 27300 16300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 27350 16400 50  0001 C CNN
+F 2 "" H 27250 16225 50  0001 C CNN
+F 3 "" H 27250 16225 50  0001 C CNN
+	58   27300 16050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 59 1 5C9CA648
-P 24550 15300
-F 0 "J1" H 24550 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 24600 15650 50  0001 C CNN
-F 2 "" H 24500 15475 50  0001 C CNN
-F 3 "" H 24500 15475 50  0001 C CNN
-	59   24550 15300
+P 24425 15525
+F 0 "J1" H 24425 15775 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 24475 15875 50  0001 C CNN
+F 2 "" H 24375 15700 50  0001 C CNN
+F 3 "" H 24375 15700 50  0001 C CNN
+	59   24425 15525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 60 1 5C9CA889
-P 24550 16350
-F 0 "J1" H 24550 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 24600 16700 50  0001 C CNN
-F 2 "" H 24500 16525 50  0001 C CNN
-F 3 "" H 24500 16525 50  0001 C CNN
-	60   24550 16350
+P 24425 16500
+F 0 "J1" H 24425 16750 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 24475 16850 50  0001 C CNN
+F 2 "" H 24375 16675 50  0001 C CNN
+F 3 "" H 24375 16675 50  0001 C CNN
+	60   24425 16500
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 61 2 5C9CAACA
-P 32875 18000
-F 0 "J1" H 32875 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 32925 18350 50  0001 C CNN
-F 2 "" H 32825 18175 50  0001 C CNN
-F 3 "" H 32825 18175 50  0001 C CNN
-	61   32875 18000
+P 32850 18050
+F 0 "J1" H 32850 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 32900 18400 50  0001 C CNN
+F 2 "" H 32800 18225 50  0001 C CNN
+F 3 "" H 32800 18225 50  0001 C CNN
+	61   32850 18050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 62 2 5C9CEA49
-P 23975 18000
-F 0 "J1" H 23975 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 24025 18350 50  0001 C CNN
-F 2 "" H 23925 18175 50  0001 C CNN
-F 3 "" H 23925 18175 50  0001 C CNN
-	62   23975 18000
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_1 J1
-U 44 2 5C9CED87
-P 18850 18000
-F 0 "J1" H 18850 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 18900 18350 50  0001 C CNN
-F 2 "" H 18800 18175 50  0001 C CNN
-F 3 "" H 18800 18175 50  0001 C CNN
-	44   18850 18000
+P 23950 18050
+F 0 "J1" H 23950 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 24000 18400 50  0001 C CNN
+F 2 "" H 23900 18225 50  0001 C CNN
+F 3 "" H 23900 18225 50  0001 C CNN
+	62   23950 18050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 37 1 5C9CF078
-P 17025 15900
-F 0 "J1" H 17025 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 17075 16250 50  0001 C CNN
-F 2 "" H 16975 16075 50  0001 C CNN
-F 3 "" H 16975 16075 50  0001 C CNN
-	37   17025 15900
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_1 J1
-U 35 2 5C9CF3CC
-P 22675 18000
-F 0 "J1" H 22675 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 22725 18350 50  0001 C CNN
-F 2 "" H 22625 18175 50  0001 C CNN
-F 3 "" H 22625 18175 50  0001 C CNN
-	35   22675 18000
+P 17025 16100
+F 0 "J1" H 17025 16350 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 17075 16450 50  0001 C CNN
+F 2 "" H 16975 16275 50  0001 C CNN
+F 3 "" H 16975 16275 50  0001 C CNN
+	37   17025 16100
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 33 1 5C9CF69A
-P 17025 15300
-F 0 "J1" H 17025 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 17075 15650 50  0001 C CNN
-F 2 "" H 16975 15475 50  0001 C CNN
-F 3 "" H 16975 15475 50  0001 C CNN
-	33   17025 15300
+P 17025 15500
+F 0 "J1" H 17025 15750 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 17075 15850 50  0001 C CNN
+F 2 "" H 16975 15675 50  0001 C CNN
+F 3 "" H 16975 15675 50  0001 C CNN
+	33   17025 15500
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 27 1 5C9CFA0A
-P 22275 17250
-F 0 "J1" H 22275 17500 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 22325 17600 50  0001 C CNN
-F 2 "" H 22225 17425 50  0001 C CNN
-F 3 "" H 22225 17425 50  0001 C CNN
-	27   22275 17250
+P 22225 17300
+F 0 "J1" H 22225 17550 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 22275 17650 50  0001 C CNN
+F 2 "" H 22175 17475 50  0001 C CNN
+F 3 "" H 22175 17475 50  0001 C CNN
+	27   22225 17300
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
-U 28 1 5C9CFD57
-P 19400 15300
-F 0 "J1" H 19400 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 19450 15650 50  0001 C CNN
-F 2 "" H 19350 15475 50  0001 C CNN
-F 3 "" H 19350 15475 50  0001 C CNN
-	28   19400 15300
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_1 J1
 U 25 1 5C9CFFA6
-P 17025 16350
-F 0 "J1" H 17025 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 17075 16700 50  0001 C CNN
-F 2 "" H 16975 16525 50  0001 C CNN
-F 3 "" H 16975 16525 50  0001 C CNN
-	25   17025 16350
+P 17025 16550
+F 0 "J1" H 17025 16800 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 17075 16900 50  0001 C CNN
+F 2 "" H 16975 16725 50  0001 C CNN
+F 3 "" H 16975 16725 50  0001 C CNN
+	25   17025 16550
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 21 1 5C9D0308
-P 22275 15900
-F 0 "J1" H 22275 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 22325 16250 50  0001 C CNN
-F 2 "" H 22225 16075 50  0001 C CNN
-F 3 "" H 22225 16075 50  0001 C CNN
-	21   22275 15900
+P 22225 16050
+F 0 "J1" H 22225 16300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 22275 16400 50  0001 C CNN
+F 2 "" H 22175 16225 50  0001 C CNN
+F 3 "" H 22175 16225 50  0001 C CNN
+	21   22225 16050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 20 1 5C9D07F1
-P 19400 15900
-F 0 "J1" H 19400 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 19450 16250 50  0001 C CNN
-F 2 "" H 19350 16075 50  0001 C CNN
-F 3 "" H 19350 16075 50  0001 C CNN
-	20   19400 15900
+P 19350 16050
+F 0 "J1" H 19350 16300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 19400 16400 50  0001 C CNN
+F 2 "" H 19300 16225 50  0001 C CNN
+F 3 "" H 19300 16225 50  0001 C CNN
+	20   19350 16050
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
-U 19 1 5C9D0A32
-P 22275 15300
-F 0 "J1" H 22275 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 22325 15650 50  0001 C CNN
-F 2 "" H 22225 15475 50  0001 C CNN
-F 3 "" H 22225 15475 50  0001 C CNN
-	19   22275 15300
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_1 J1
 U 18 1 5C9D0D9B
-P 19400 16350
-F 0 "J1" H 19400 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 19450 16700 50  0001 C CNN
-F 2 "" H 19350 16525 50  0001 C CNN
-F 3 "" H 19350 16525 50  0001 C CNN
-	18   19400 16350
+P 19350 16500
+F 0 "J1" H 19350 16750 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 19400 16850 50  0001 C CNN
+F 2 "" H 19300 16675 50  0001 C CNN
+F 3 "" H 19300 16675 50  0001 C CNN
+	18   19350 16500
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 15 1 5C9D152B
-P 22275 16350
-F 0 "J1" H 22275 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 22325 16700 50  0001 C CNN
-F 2 "" H 22225 16525 50  0001 C CNN
-F 3 "" H 22225 16525 50  0001 C CNN
-	15   22275 16350
+P 22225 16500
+F 0 "J1" H 22225 16750 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 22275 16850 50  0001 C CNN
+F 2 "" H 22175 16675 50  0001 C CNN
+F 3 "" H 22175 16675 50  0001 C CNN
+	15   22225 16500
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 14 2 5C9D1878
-P 17550 18000
-F 0 "J1" H 17550 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 17600 18350 50  0001 C CNN
-F 2 "" H 17500 18175 50  0001 C CNN
-F 3 "" H 17500 18175 50  0001 C CNN
-	14   17550 18000
+P 17600 18050
+F 0 "J1" H 17600 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 17650 18400 50  0001 C CNN
+F 2 "" H 17550 18225 50  0001 C CNN
+F 3 "" H 17550 18225 50  0001 C CNN
+	14   17600 18050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 9 1 5C9D5575
-P 11525 17300
-F 0 "J1" H 11525 17550 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 11575 17650 50  0001 C CNN
-F 2 "" H 11475 17475 50  0001 C CNN
-F 3 "" H 11475 17475 50  0001 C CNN
-	9    11525 17300
+P 11500 17350
+F 0 "J1" H 11500 17600 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 11550 17700 50  0001 C CNN
+F 2 "" H 11450 17525 50  0001 C CNN
+F 3 "" H 11450 17525 50  0001 C CNN
+	9    11500 17350
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 23 2 5C9D5811
-P 13700 18000
-F 0 "J1" H 13700 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 13750 18350 50  0001 C CNN
-F 2 "" H 13650 18175 50  0001 C CNN
-F 3 "" H 13650 18175 50  0001 C CNN
-	23   13700 18000
+P 13775 18050
+F 0 "J1" H 13775 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 13825 18400 50  0001 C CNN
+F 2 "" H 13725 18225 50  0001 C CNN
+F 3 "" H 13725 18225 50  0001 C CNN
+	23   13775 18050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 31 1 5C9D5B09
-P 14225 15900
-F 0 "J1" H 14225 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 14275 16250 50  0001 C CNN
-F 2 "" H 14175 16075 50  0001 C CNN
-F 3 "" H 14175 16075 50  0001 C CNN
-	31   14225 15900
+P 14225 16100
+F 0 "J1" H 14225 16350 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 14275 16450 50  0001 C CNN
+F 2 "" H 14175 16275 50  0001 C CNN
+F 3 "" H 14175 16275 50  0001 C CNN
+	31   14225 16100
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 38 1 5C9D5D74
-P 14225 16350
-F 0 "J1" H 14225 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 14275 16700 50  0001 C CNN
-F 2 "" H 14175 16525 50  0001 C CNN
-F 3 "" H 14175 16525 50  0001 C CNN
-	38   14225 16350
+P 14225 16550
+F 0 "J1" H 14225 16800 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 14275 16900 50  0001 C CNN
+F 2 "" H 14175 16725 50  0001 C CNN
+F 3 "" H 14175 16725 50  0001 C CNN
+	38   14225 16550
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 47 1 5C9D5FED
-P 12025 14600
-F 0 "J1" H 12025 14850 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 12075 14950 50  0001 C CNN
-F 2 "" H 11975 14775 50  0001 C CNN
-F 3 "" H 11975 14775 50  0001 C CNN
-	47   12025 14600
+P 12450 14750
+F 0 "J1" H 12450 15000 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 12500 15100 50  0001 C CNN
+F 2 "" H 12400 14925 50  0001 C CNN
+F 3 "" H 12400 14925 50  0001 C CNN
+	47   12450 14750
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 48 1 5C9D622E
-P 14225 15300
-F 0 "J1" H 14225 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 14275 15650 50  0001 C CNN
-F 2 "" H 14175 15475 50  0001 C CNN
-F 3 "" H 14175 15475 50  0001 C CNN
-	48   14225 15300
+P 14225 15500
+F 0 "J1" H 14225 15750 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 14275 15850 50  0001 C CNN
+F 2 "" H 14175 15675 50  0001 C CNN
+F 3 "" H 14175 15675 50  0001 C CNN
+	48   14225 15500
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_1 J1
 U 57 1 5C9D64A7
-P 12475 16850
-F 0 "J1" H 12475 17100 50  0001 C CNN
-F 1 "ConnectorD1_D6_1" H 12525 17200 50  0001 C CNN
-F 2 "" H 12425 17025 50  0001 C CNN
-F 3 "" H 12425 17025 50  0001 C CNN
-	57   12475 16850
+P 12425 17025
+F 0 "J1" H 12425 17275 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 12475 17375 50  0001 C CNN
+F 2 "" H 12375 17200 50  0001 C CNN
+F 3 "" H 12375 17200 50  0001 C CNN
+	57   12425 17025
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 27 2 5C9EA859
-P 42125 8400
-F 0 "J2" H 42125 8650 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 42125 8750 50  0001 C CNN
-F 2 "" H 42075 8575 50  0001 C CNN
-F 3 "" H 42075 8575 50  0001 C CNN
-	27   42125 8400
+P 41875 8450
+F 0 "J2" H 41875 8700 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 41875 8800 50  0001 C CNN
+F 2 "" H 41825 8625 50  0001 C CNN
+F 3 "" H 41825 8625 50  0001 C CNN
+	27   41875 8450
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 28 2 5C9EAB20
-P 37200 8400
-F 0 "J2" H 37200 8650 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 37200 8750 50  0001 C CNN
-F 2 "" H 37150 8575 50  0001 C CNN
-F 3 "" H 37150 8575 50  0001 C CNN
-	28   37200 8400
+P 37100 8450
+F 0 "J2" H 37100 8700 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 37100 8800 50  0001 C CNN
+F 2 "" H 37050 8625 50  0001 C CNN
+F 3 "" H 37050 8625 50  0001 C CNN
+	28   37100 8450
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 39 2 5C9EB045
-P 43825 13475
-F 0 "J2" H 43825 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 43825 13825 50  0001 C CNN
-F 2 "" H 43775 13650 50  0001 C CNN
-F 3 "" H 43775 13650 50  0001 C CNN
-	39   43825 13475
+P 43650 13525
+F 0 "J2" H 43650 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 43650 13875 50  0001 C CNN
+F 2 "" H 43600 13700 50  0001 C CNN
+F 3 "" H 43600 13700 50  0001 C CNN
+	39   43650 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 40 2 5C9EB418
-P 39250 13475
-F 0 "J2" H 39250 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 39250 13825 50  0001 C CNN
-F 2 "" H 39200 13650 50  0001 C CNN
-F 3 "" H 39200 13650 50  0001 C CNN
-	40   39250 13475
+P 39150 13525
+F 0 "J2" H 39150 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 39150 13875 50  0001 C CNN
+F 2 "" H 39100 13700 50  0001 C CNN
+F 3 "" H 39100 13700 50  0001 C CNN
+	40   39150 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 41 2 5C9EB7EB
-P 40250 13475
-F 0 "J2" H 40250 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 40250 13825 50  0001 C CNN
-F 2 "" H 40200 13650 50  0001 C CNN
-F 3 "" H 40200 13650 50  0001 C CNN
-	41   40250 13475
+P 40100 13525
+F 0 "J2" H 40100 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 40100 13875 50  0001 C CNN
+F 2 "" H 40050 13700 50  0001 C CNN
+F 3 "" H 40050 13700 50  0001 C CNN
+	41   40100 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 42 2 5C9EBBBE
-P 35400 13475
-F 0 "J2" H 35400 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 35400 13825 50  0001 C CNN
-F 2 "" H 35350 13650 50  0001 C CNN
-F 3 "" H 35350 13650 50  0001 C CNN
-	42   35400 13475
+P 35300 13525
+F 0 "J2" H 35300 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 35300 13875 50  0001 C CNN
+F 2 "" H 35250 13700 50  0001 C CNN
+F 3 "" H 35250 13700 50  0001 C CNN
+	42   35300 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 44 2 5C9EFCD6
-P 30575 13475
-F 0 "J2" H 30575 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 30575 13825 50  0001 C CNN
-F 2 "" H 30525 13650 50  0001 C CNN
-F 3 "" H 30525 13650 50  0001 C CNN
-	44   30575 13475
+P 30575 13525
+F 0 "J2" H 30575 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 30575 13875 50  0001 C CNN
+F 2 "" H 30525 13700 50  0001 C CNN
+F 3 "" H 30525 13700 50  0001 C CNN
+	44   30575 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 45 2 5C9F00A9
-P 25800 13475
-F 0 "J2" H 25800 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 25800 13825 50  0001 C CNN
-F 2 "" H 25750 13650 50  0001 C CNN
-F 3 "" H 25750 13650 50  0001 C CNN
-	45   25800 13475
+P 25850 13525
+F 0 "J2" H 25850 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 25850 13875 50  0001 C CNN
+F 2 "" H 25800 13700 50  0001 C CNN
+F 3 "" H 25800 13700 50  0001 C CNN
+	45   25850 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 51 2 5C9F049F
-P 34300 13475
-F 0 "J2" H 34300 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 34300 13825 50  0001 C CNN
-F 2 "" H 34250 13650 50  0001 C CNN
-F 3 "" H 34250 13650 50  0001 C CNN
-	51   34300 13475
+P 34275 13525
+F 0 "J2" H 34275 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 34275 13875 50  0001 C CNN
+F 2 "" H 34225 13700 50  0001 C CNN
+F 3 "" H 34225 13700 50  0001 C CNN
+	51   34275 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 52 2 5C9F0872
-P 29500 13475
-F 0 "J2" H 29500 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 29500 13825 50  0001 C CNN
-F 2 "" H 29450 13650 50  0001 C CNN
-F 3 "" H 29450 13650 50  0001 C CNN
-	52   29500 13475
+P 29550 13525
+F 0 "J2" H 29550 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 29550 13875 50  0001 C CNN
+F 2 "" H 29500 13700 50  0001 C CNN
+F 3 "" H 29500 13700 50  0001 C CNN
+	52   29550 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 58 2 5C9F0C68
-P 27700 13475
-F 0 "J2" H 27700 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 27700 13825 50  0001 C CNN
-F 2 "" H 27650 13650 50  0001 C CNN
-F 3 "" H 27650 13650 50  0001 C CNN
-	58   27700 13475
+P 27675 13525
+F 0 "J2" H 27675 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 27675 13875 50  0001 C CNN
+F 2 "" H 27625 13700 50  0001 C CNN
+F 3 "" H 27625 13700 50  0001 C CNN
+	58   27675 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 57 2 5C9F7013
-P 20400 13475
-F 0 "J2" H 20400 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 20400 13825 50  0001 C CNN
-F 2 "" H 20350 13650 50  0001 C CNN
-F 3 "" H 20350 13650 50  0001 C CNN
-	57   20400 13475
+P 20450 13525
+F 0 "J2" H 20450 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 20450 13875 50  0001 C CNN
+F 2 "" H 20400 13700 50  0001 C CNN
+F 3 "" H 20400 13700 50  0001 C CNN
+	57   20450 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 54 1 5CA02FDE
-P 24500 8300
-F 0 "J2" H 24500 8550 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 24500 8650 50  0001 C CNN
-F 2 "" H 24450 8475 50  0001 C CNN
-F 3 "" H 24450 8475 50  0001 C CNN
-	54   24500 8300
+P 24550 8350
+F 0 "J2" H 24550 8600 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 24550 8700 50  0001 C CNN
+F 2 "" H 24500 8525 50  0001 C CNN
+F 3 "" H 24500 8525 50  0001 C CNN
+	54   24550 8350
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 53 2 5CA0332B
-P 23675 13475
-F 0 "J2" H 23675 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 23675 13825 50  0001 C CNN
-F 2 "" H 23625 13650 50  0001 C CNN
-F 3 "" H 23625 13650 50  0001 C CNN
-	53   23675 13475
+P 23725 13525
+F 0 "J2" H 23725 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 23725 13875 50  0001 C CNN
+F 2 "" H 23675 13700 50  0001 C CNN
+F 3 "" H 23675 13700 50  0001 C CNN
+	53   23725 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 48 1 5CA0371A
-P 19375 8300
-F 0 "J2" H 19375 8550 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 19375 8650 50  0001 C CNN
-F 2 "" H 19325 8475 50  0001 C CNN
-F 3 "" H 19325 8475 50  0001 C CNN
-	48   19375 8300
+P 19425 8350
+F 0 "J2" H 19425 8600 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 19425 8700 50  0001 C CNN
+F 2 "" H 19375 8525 50  0001 C CNN
+F 3 "" H 19375 8525 50  0001 C CNN
+	48   19425 8350
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 30 2 5CA039D2
-P 22175 13475
-F 0 "J2" H 22175 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 22175 13825 50  0001 C CNN
-F 2 "" H 22125 13650 50  0001 C CNN
-F 3 "" H 22125 13650 50  0001 C CNN
-	30   22175 13475
+P 22225 13525
+F 0 "J2" H 22225 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 22225 13875 50  0001 C CNN
+F 2 "" H 22175 13700 50  0001 C CNN
+F 3 "" H 22175 13700 50  0001 C CNN
+	30   22225 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 29 2 5CA03DA5
-P 19625 13475
-F 0 "J2" H 19625 13725 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 19625 13825 50  0001 C CNN
-F 2 "" H 19575 13650 50  0001 C CNN
-F 3 "" H 19575 13650 50  0001 C CNN
-	29   19625 13475
+P 19675 13525
+F 0 "J2" H 19675 13775 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 19675 13875 50  0001 C CNN
+F 2 "" H 19625 13700 50  0001 C CNN
+F 3 "" H 19625 13700 50  0001 C CNN
+	29   19675 13525
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 43 1 5CA08129
-P 16250 9050
-F 0 "J2" H 16250 9300 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 16250 9400 50  0001 C CNN
-F 2 "" H 16200 9225 50  0001 C CNN
-F 3 "" H 16200 9225 50  0001 C CNN
-	43   16250 9050
+P 16300 9100
+F 0 "J2" H 16300 9350 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 16300 9450 50  0001 C CNN
+F 2 "" H 16250 9275 50  0001 C CNN
+F 3 "" H 16250 9275 50  0001 C CNN
+	43   16300 9100
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 50 1 5CA08394
-P 16250 12925
-F 0 "J2" H 16250 13175 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 16250 13275 50  0001 C CNN
-F 2 "" H 16200 13100 50  0001 C CNN
-F 3 "" H 16200 13100 50  0001 C CNN
-	50   16250 12925
+P 16300 12975
+F 0 "J2" H 16300 13225 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 16300 13325 50  0001 C CNN
+F 2 "" H 16250 13150 50  0001 C CNN
+F 3 "" H 16250 13150 50  0001 C CNN
+	50   16300 12975
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 5 1 5CA0C123
-P 12400 18450
-F 0 "J2" H 12400 18700 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 12400 18800 50  0001 C CNN
-F 2 "" H 12350 18625 50  0001 C CNN
-F 3 "" H 12350 18625 50  0001 C CNN
-	5    12400 18450
+P 12450 18475
+F 0 "J2" H 12450 18725 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 12450 18825 50  0001 C CNN
+F 2 "" H 12400 18650 50  0001 C CNN
+F 3 "" H 12400 18650 50  0001 C CNN
+	5    12450 18475
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 1 1 5CA1592D
-P 29600 15900
-F 0 "J2" H 29600 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 29600 16250 50  0001 C CNN
-F 2 "" H 29550 16075 50  0001 C CNN
-F 3 "" H 29550 16075 50  0001 C CNN
-	1    29600 15900
+P 29500 16050
+F 0 "J2" H 29500 16300 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 29500 16400 50  0001 C CNN
+F 2 "" H 29450 16225 50  0001 C CNN
+F 3 "" H 29450 16225 50  0001 C CNN
+	1    29500 16050
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 2 1 5CA15B6E
-P 27425 17000
-F 0 "J2" H 27425 17250 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 27425 17350 50  0001 C CNN
-F 2 "" H 27375 17175 50  0001 C CNN
-F 3 "" H 27375 17175 50  0001 C CNN
-	2    27425 17000
+P 27300 17225
+F 0 "J2" H 27300 17475 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 27300 17575 50  0001 C CNN
+F 2 "" H 27250 17400 50  0001 C CNN
+F 3 "" H 27250 17400 50  0001 C CNN
+	2    27300 17225
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 3 2 5CA15EBB
-P 29075 18000
-F 0 "J2" H 29075 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 29075 18350 50  0001 C CNN
-F 2 "" H 29025 18175 50  0001 C CNN
-F 3 "" H 29025 18175 50  0001 C CNN
-	3    29075 18000
+P 29050 18050
+F 0 "J2" H 29050 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 29050 18400 50  0001 C CNN
+F 2 "" H 29000 18225 50  0001 C CNN
+F 3 "" H 29000 18225 50  0001 C CNN
+	3    29050 18050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 7 1 5CA16197
-P 29625 14500
-F 0 "J2" H 29625 14750 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 29625 14850 50  0001 C CNN
-F 2 "" H 29575 14675 50  0001 C CNN
-F 3 "" H 29575 14675 50  0001 C CNN
-	7    29625 14500
+P 29525 14700
+F 0 "J2" H 29525 14950 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 29525 15050 50  0001 C CNN
+F 2 "" H 29475 14875 50  0001 C CNN
+F 3 "" H 29475 14875 50  0001 C CNN
+	7    29525 14700
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 8 1 5CA163D8
-P 29600 16350
-F 0 "J2" H 29600 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 29600 16700 50  0001 C CNN
-F 2 "" H 29550 16525 50  0001 C CNN
-F 3 "" H 29550 16525 50  0001 C CNN
-	8    29600 16350
+P 29500 16500
+F 0 "J2" H 29500 16750 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 29500 16850 50  0001 C CNN
+F 2 "" H 29450 16675 50  0001 C CNN
+F 3 "" H 29450 16675 50  0001 C CNN
+	8    29500 16500
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 10 1 5CA16620
-P 32475 15300
-F 0 "J2" H 32475 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 32475 15650 50  0001 C CNN
-F 2 "" H 32425 15475 50  0001 C CNN
-F 3 "" H 32425 15475 50  0001 C CNN
-	10   32475 15300
+P 32375 15500
+F 0 "J2" H 32375 15750 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 32375 15850 50  0001 C CNN
+F 2 "" H 32325 15675 50  0001 C CNN
+F 3 "" H 32325 15675 50  0001 C CNN
+	10   32375 15500
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 13 1 5CA1697B
-P 29600 15300
-F 0 "J2" H 29600 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 29600 15650 50  0001 C CNN
-F 2 "" H 29550 15475 50  0001 C CNN
-F 3 "" H 29550 15475 50  0001 C CNN
-	13   29600 15300
+P 29500 15500
+F 0 "J2" H 29500 15750 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 29500 15850 50  0001 C CNN
+F 2 "" H 29450 15675 50  0001 C CNN
+F 3 "" H 29450 15675 50  0001 C CNN
+	13   29500 15500
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 14 1 5CA16BCA
-P 32475 15900
-F 0 "J2" H 32475 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 32475 16250 50  0001 C CNN
-F 2 "" H 32425 16075 50  0001 C CNN
-F 3 "" H 32425 16075 50  0001 C CNN
-	14   32475 15900
+P 32375 16050
+F 0 "J2" H 32375 16300 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 32375 16400 50  0001 C CNN
+F 2 "" H 32325 16225 50  0001 C CNN
+F 3 "" H 32325 16225 50  0001 C CNN
+	14   32375 16050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 15 2 5CA16F17
-P 34200 18000
-F 0 "J2" H 34200 18250 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 34200 18350 50  0001 C CNN
-F 2 "" H 34150 18175 50  0001 C CNN
-F 3 "" H 34150 18175 50  0001 C CNN
-	15   34200 18000
+P 34125 18050
+F 0 "J2" H 34125 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 34125 18400 50  0001 C CNN
+F 2 "" H 34075 18225 50  0001 C CNN
+F 3 "" H 34075 18225 50  0001 C CNN
+	15   34125 18050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 16 1 5CA1B458
-P 37525 19650
-F 0 "J2" H 37525 19900 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 37525 20000 50  0001 C CNN
-F 2 "" H 37475 19825 50  0001 C CNN
-F 3 "" H 37475 19825 50  0001 C CNN
-	16   37525 19650
+P 37425 19750
+F 0 "J2" H 37425 20000 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 37425 20100 50  0001 C CNN
+F 2 "" H 37375 19925 50  0001 C CNN
+F 3 "" H 37375 19925 50  0001 C CNN
+	16   37425 19750
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 11 2 5CA1B807
-P 38025 17975
-F 0 "J2" H 38025 18225 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 38025 18325 50  0001 C CNN
-F 2 "" H 37975 18150 50  0001 C CNN
-F 3 "" H 37975 18150 50  0001 C CNN
-	11   38025 17975
+P 37900 18050
+F 0 "J2" H 37900 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 37900 18400 50  0001 C CNN
+F 2 "" H 37850 18225 50  0001 C CNN
+F 3 "" H 37850 18225 50  0001 C CNN
+	11   37900 18050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 12 1 5CA1BACE
-P 37525 16350
-F 0 "J2" H 37525 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 37525 16700 50  0001 C CNN
-F 2 "" H 37475 16525 50  0001 C CNN
-F 3 "" H 37475 16525 50  0001 C CNN
-	12   37525 16350
+P 37675 16500
+F 0 "J2" H 37675 16750 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 37675 16850 50  0001 C CNN
+F 2 "" H 37625 16675 50  0001 C CNN
+F 3 "" H 37625 16675 50  0001 C CNN
+	12   37675 16500
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 17 1 5CA1BE37
-P 34650 16350
-F 0 "J2" H 34650 16600 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 34650 16700 50  0001 C CNN
-F 2 "" H 34600 16525 50  0001 C CNN
-F 3 "" H 34600 16525 50  0001 C CNN
-	17   34650 16350
+P 34525 16500
+F 0 "J2" H 34525 16750 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 34525 16850 50  0001 C CNN
+F 2 "" H 34475 16675 50  0001 C CNN
+F 3 "" H 34475 16675 50  0001 C CNN
+	17   34525 16500
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 18 1 5CA1C078
-P 37525 15300
-F 0 "J2" H 37525 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 37525 15650 50  0001 C CNN
-F 2 "" H 37475 15475 50  0001 C CNN
-F 3 "" H 37475 15475 50  0001 C CNN
-	18   37525 15300
+P 37675 15500
+F 0 "J2" H 37675 15750 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 37675 15850 50  0001 C CNN
+F 2 "" H 37625 15675 50  0001 C CNN
+F 3 "" H 37625 15675 50  0001 C CNN
+	18   37675 15500
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 19 1 5CA1C3C5
-P 34650 15300
-F 0 "J2" H 34650 15550 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 34650 15650 50  0001 C CNN
-F 2 "" H 34600 15475 50  0001 C CNN
-F 3 "" H 34600 15475 50  0001 C CNN
-	19   34650 15300
+P 34525 15500
+F 0 "J2" H 34525 15750 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 34525 15850 50  0001 C CNN
+F 2 "" H 34475 15675 50  0001 C CNN
+F 3 "" H 34475 15675 50  0001 C CNN
+	19   34525 15500
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 20 1 5CA1C606
-P 37525 15900
-F 0 "J2" H 37525 16150 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 37525 16250 50  0001 C CNN
-F 2 "" H 37475 16075 50  0001 C CNN
-F 3 "" H 37475 16075 50  0001 C CNN
-	20   37525 15900
+P 37675 16050
+F 0 "J2" H 37675 16300 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 37675 16400 50  0001 C CNN
+F 2 "" H 37625 16225 50  0001 C CNN
+F 3 "" H 37625 16225 50  0001 C CNN
+	20   37675 16050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 26 1 5CA1C976
-P 34650 14500
-F 0 "J2" H 34650 14750 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 34650 14850 50  0001 C CNN
-F 2 "" H 34600 14675 50  0001 C CNN
-F 3 "" H 34600 14675 50  0001 C CNN
-	26   34650 14500
+P 34525 14700
+F 0 "J2" H 34525 14950 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 34525 15050 50  0001 C CNN
+F 2 "" H 34475 14875 50  0001 C CNN
+F 3 "" H 34475 14875 50  0001 C CNN
+	26   34525 14700
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 22 1 5CA249F2
-P 37525 23400
-F 0 "J2" H 37525 23650 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 37525 23750 50  0001 C CNN
-F 2 "" H 37475 23575 50  0001 C CNN
-F 3 "" H 37475 23575 50  0001 C CNN
-	22   37525 23400
+P 37425 23475
+F 0 "J2" H 37425 23725 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 37425 23825 50  0001 C CNN
+F 2 "" H 37375 23650 50  0001 C CNN
+F 3 "" H 37375 23650 50  0001 C CNN
+	22   37425 23475
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 4 1 5CA2B7F8
-P 12400 22150
-F 0 "J2" H 12400 22400 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 12400 22500 50  0001 C CNN
-F 2 "" H 12350 22325 50  0001 C CNN
-F 3 "" H 12350 22325 50  0001 C CNN
-	4    12400 22150
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorD1_D6_2 J2
-U 9 1 5CA2F2DD
-P 12400 25875
-F 0 "J2" H 12400 26125 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 12400 26225 50  0001 C CNN
-F 2 "" H 12350 26050 50  0001 C CNN
-F 3 "" H 12350 26050 50  0001 C CNN
-	9    12400 25875
+P 12425 22200
+F 0 "J2" H 12425 22450 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 12425 22550 50  0001 C CNN
+F 2 "" H 12375 22375 50  0001 C CNN
+F 3 "" H 12375 22375 50  0001 C CNN
+	4    12425 22200
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 21 1 5CA38CB1
-P 37525 27100
-F 0 "J2" H 37525 27350 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 37525 27450 50  0001 C CNN
-F 2 "" H 37475 27275 50  0001 C CNN
-F 3 "" H 37475 27275 50  0001 C CNN
-	21   37525 27100
+P 37400 27200
+F 0 "J2" H 37400 27450 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 37400 27550 50  0001 C CNN
+F 2 "" H 37350 27375 50  0001 C CNN
+F 3 "" H 37350 27375 50  0001 C CNN
+	21   37400 27200
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 25 2 5CA5A6BB
-P 38250 3425
-F 0 "J2" H 38250 3675 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 38250 3775 50  0001 C CNN
-F 2 "" H 38200 3600 50  0001 C CNN
-F 3 "" H 38200 3600 50  0001 C CNN
-	25   38250 3425
+P 38150 3425
+F 0 "J2" H 38150 3675 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 38150 3775 50  0001 C CNN
+F 2 "" H 38100 3600 50  0001 C CNN
+F 3 "" H 38100 3600 50  0001 C CNN
+	25   38150 3425
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 56 1 5CA5ABE6
-P 24500 6775
-F 0 "J2" H 24500 7025 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 24500 7125 50  0001 C CNN
-F 2 "" H 24450 6950 50  0001 C CNN
-F 3 "" H 24450 6950 50  0001 C CNN
-	56   24500 6775
+P 24550 6825
+F 0 "J2" H 24550 7075 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 24550 7175 50  0001 C CNN
+F 2 "" H 24500 7000 50  0001 C CNN
+F 3 "" H 24500 7000 50  0001 C CNN
+	56   24550 6825
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 62 1 5CA5BF0A
-P 24500 5300
-F 0 "J2" H 24500 5550 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 24500 5650 50  0001 C CNN
-F 2 "" H 24450 5475 50  0001 C CNN
-F 3 "" H 24450 5475 50  0001 C CNN
-	62   24500 5300
+P 24550 5350
+F 0 "J2" H 24550 5600 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 24550 5700 50  0001 C CNN
+F 2 "" H 24500 5525 50  0001 C CNN
+F 3 "" H 24500 5525 50  0001 C CNN
+	62   24550 5350
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 61 1 5CA5C257
-P 24500 3800
-F 0 "J2" H 24500 4050 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 24500 4150 50  0001 C CNN
-F 2 "" H 24450 3975 50  0001 C CNN
-F 3 "" H 24450 3975 50  0001 C CNN
-	61   24500 3800
+P 24550 3850
+F 0 "J2" H 24550 4100 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 24550 4200 50  0001 C CNN
+F 2 "" H 24500 4025 50  0001 C CNN
+F 3 "" H 24500 4025 50  0001 C CNN
+	61   24550 3850
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 60 1 5CA5C5A4
-P 24500 4550
-F 0 "J2" H 24500 4800 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 24500 4900 50  0001 C CNN
-F 2 "" H 24450 4725 50  0001 C CNN
-F 3 "" H 24450 4725 50  0001 C CNN
-	60   24500 4550
+P 24550 4600
+F 0 "J2" H 24550 4850 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 24550 4950 50  0001 C CNN
+F 2 "" H 24500 4775 50  0001 C CNN
+F 3 "" H 24500 4775 50  0001 C CNN
+	60   24550 4600
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 59 2 5CA5C8F1
-P 23225 2625
-F 0 "J2" H 23225 2875 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 23225 2975 50  0001 C CNN
-F 2 "" H 23175 2800 50  0001 C CNN
-F 3 "" H 23175 2800 50  0001 C CNN
-	59   23225 2625
+P 23275 2675
+F 0 "J2" H 23275 2925 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 23275 3025 50  0001 C CNN
+F 2 "" H 23225 2850 50  0001 C CNN
+F 3 "" H 23225 2850 50  0001 C CNN
+	59   23275 2675
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 55 1 5CA5CBCD
-P 24500 6050
-F 0 "J2" H 24500 6300 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 24500 6400 50  0001 C CNN
-F 2 "" H 24450 6225 50  0001 C CNN
-F 3 "" H 24450 6225 50  0001 C CNN
-	55   24500 6050
+P 24550 6100
+F 0 "J2" H 24550 6350 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 24550 6450 50  0001 C CNN
+F 2 "" H 24500 6275 50  0001 C CNN
+F 3 "" H 24500 6275 50  0001 C CNN
+	55   24550 6100
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 49 2 5CA5CF3D
-P 20650 2625
-F 0 "J2" H 20650 2875 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 20650 2975 50  0001 C CNN
-F 2 "" H 20600 2800 50  0001 C CNN
-F 3 "" H 20600 2800 50  0001 C CNN
-	49   20650 2625
+P 20700 2675
+F 0 "J2" H 20700 2925 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 20700 3025 50  0001 C CNN
+F 2 "" H 20650 2850 50  0001 C CNN
+F 3 "" H 20650 2850 50  0001 C CNN
+	49   20700 2675
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 47 1 5CA5F735
-P 24500 7525
-F 0 "J2" H 24500 7775 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 24500 7875 50  0001 C CNN
-F 2 "" H 24450 7700 50  0001 C CNN
-F 3 "" H 24450 7700 50  0001 C CNN
-	47   24500 7525
+P 24550 7575
+F 0 "J2" H 24550 7825 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 24550 7925 50  0001 C CNN
+F 2 "" H 24500 7750 50  0001 C CNN
+F 3 "" H 24500 7750 50  0001 C CNN
+	47   24550 7575
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 46 1 5CA5FA82
-P 19375 7525
-F 0 "J2" H 19375 7775 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 19375 7875 50  0001 C CNN
-F 2 "" H 19325 7700 50  0001 C CNN
-F 3 "" H 19325 7700 50  0001 C CNN
-	46   19375 7525
+P 19425 7575
+F 0 "J2" H 19425 7825 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 19425 7925 50  0001 C CNN
+F 2 "" H 19375 7750 50  0001 C CNN
+F 3 "" H 19375 7750 50  0001 C CNN
+	46   19425 7575
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 38 1 5CA5FCF4
-P 19375 4550
-F 0 "J2" H 19375 4800 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 19375 4900 50  0001 C CNN
-F 2 "" H 19325 4725 50  0001 C CNN
-F 3 "" H 19325 4725 50  0001 C CNN
-	38   19375 4550
+P 19425 4600
+F 0 "J2" H 19425 4850 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 19425 4950 50  0001 C CNN
+F 2 "" H 19375 4775 50  0001 C CNN
+F 3 "" H 19375 4775 50  0001 C CNN
+	38   19425 4600
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 37 1 5CA5FF35
-P 19375 5300
-F 0 "J2" H 19375 5550 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 19375 5650 50  0001 C CNN
-F 2 "" H 19325 5475 50  0001 C CNN
-F 3 "" H 19325 5475 50  0001 C CNN
-	37   19375 5300
+P 19425 5350
+F 0 "J2" H 19425 5600 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 19425 5700 50  0001 C CNN
+F 2 "" H 19375 5525 50  0001 C CNN
+F 3 "" H 19375 5525 50  0001 C CNN
+	37   19425 5350
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 36 1 5CA60176
-P 19375 6050
-F 0 "J2" H 19375 6300 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 19375 6400 50  0001 C CNN
-F 2 "" H 19325 6225 50  0001 C CNN
-F 3 "" H 19325 6225 50  0001 C CNN
-	36   19375 6050
+P 19425 6100
+F 0 "J2" H 19425 6350 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 19425 6450 50  0001 C CNN
+F 2 "" H 19375 6275 50  0001 C CNN
+F 3 "" H 19375 6275 50  0001 C CNN
+	36   19425 6100
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 35 1 5CA603B7
-P 19375 6775
-F 0 "J2" H 19375 7025 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 19375 7125 50  0001 C CNN
-F 2 "" H 19325 6950 50  0001 C CNN
-F 3 "" H 19325 6950 50  0001 C CNN
-	35   19375 6775
+P 19425 6825
+F 0 "J2" H 19425 7075 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 19425 7175 50  0001 C CNN
+F 2 "" H 19375 7000 50  0001 C CNN
+F 3 "" H 19375 7000 50  0001 C CNN
+	35   19425 6825
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 32 1 5CA60606
-P 19375 3800
-F 0 "J2" H 19375 4050 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 19375 4150 50  0001 C CNN
-F 2 "" H 19325 3975 50  0001 C CNN
-F 3 "" H 19325 3975 50  0001 C CNN
-	32   19375 3800
+P 19425 3850
+F 0 "J2" H 19425 4100 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 19425 4200 50  0001 C CNN
+F 2 "" H 19375 4025 50  0001 C CNN
+F 3 "" H 19375 4025 50  0001 C CNN
+	32   19425 3850
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 33 2 5CA6954A
-P 40250 3425
-F 0 "J2" H 40250 3675 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 40250 3775 50  0001 C CNN
-F 2 "" H 40200 3600 50  0001 C CNN
-F 3 "" H 40200 3600 50  0001 C CNN
-	33   40250 3425
+P 40150 3425
+F 0 "J2" H 40150 3675 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 40150 3775 50  0001 C CNN
+F 2 "" H 40100 3600 50  0001 C CNN
+F 3 "" H 40100 3600 50  0001 C CNN
+	33   40150 3425
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 24 2 5CA6D084
-P 41200 7425
-F 0 "J2" H 41200 7675 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 41200 7775 50  0001 C CNN
-F 2 "" H 41150 7600 50  0001 C CNN
-F 3 "" H 41150 7600 50  0001 C CNN
-	24   41200 7425
+P 41100 7550
+F 0 "J2" H 41100 7800 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 41100 7900 50  0001 C CNN
+F 2 "" H 41050 7725 50  0001 C CNN
+F 3 "" H 41050 7725 50  0001 C CNN
+	24   41100 7550
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 23 2 5CA6D457
-P 39200 7425
-F 0 "J2" H 39200 7675 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 39200 7775 50  0001 C CNN
-F 2 "" H 39150 7600 50  0001 C CNN
-F 3 "" H 39150 7600 50  0001 C CNN
-	23   39200 7425
+P 39100 7550
+F 0 "J2" H 39100 7800 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 39100 7900 50  0001 C CNN
+F 2 "" H 39050 7725 50  0001 C CNN
+F 3 "" H 39050 7725 50  0001 C CNN
+	23   39100 7550
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 6 1 5CA70A84
-P 30475 4850
-F 0 "J2" H 30475 5100 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 30475 5200 50  0001 C CNN
-F 2 "" H 30425 5025 50  0001 C CNN
-F 3 "" H 30425 5025 50  0001 C CNN
-	6    30475 4850
+P 30525 4900
+F 0 "J2" H 30525 5150 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 30525 5250 50  0001 C CNN
+F 2 "" H 30475 5075 50  0001 C CNN
+F 3 "" H 30475 5075 50  0001 C CNN
+	6    30525 4900
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 31 1 5CA70E79
-P 30475 5850
-F 0 "J2" H 30475 6100 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 30475 6200 50  0001 C CNN
-F 2 "" H 30425 6025 50  0001 C CNN
-F 3 "" H 30425 6025 50  0001 C CNN
-	31   30475 5850
+P 30525 5900
+F 0 "J2" H 30525 6150 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 30525 6250 50  0001 C CNN
+F 2 "" H 30475 6075 50  0001 C CNN
+F 3 "" H 30475 6075 50  0001 C CNN
+	31   30525 5900
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorD1_D6_2 J2
 U 34 1 5CA711D4
-P 30475 6850
-F 0 "J2" H 30475 7100 50  0001 C CNN
-F 1 "ConnectorD1_D6_2" H 30475 7200 50  0001 C CNN
-F 2 "" H 30425 7025 50  0001 C CNN
-F 3 "" H 30425 7025 50  0001 C CNN
-	34   30475 6850
+P 30525 6900
+F 0 "J2" H 30525 7150 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 30525 7250 50  0001 C CNN
+F 2 "" H 30475 7075 50  0001 C CNN
+F 3 "" H 30475 7075 50  0001 C CNN
+	34   30525 6900
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	23325 27550 23325 27825
+	23300 27650 23300 27850
 Wire Wire Line
-	23925 3800 24225 3800
+	23975 3850 24275 3850
 Wire Wire Line
-	23925 4550 24225 4550
+	23975 4600 24275 4600
 Wire Wire Line
-	23925 5300 24225 5300
+	23975 5350 24275 5350
 Wire Wire Line
-	23925 6050 24225 6050
+	23975 6100 24275 6100
 Wire Wire Line
-	23925 6775 24225 6775
+	23975 6825 24275 6825
 Wire Wire Line
-	23925 7525 24225 7525
+	23975 7575 24275 7575
 Wire Wire Line
-	23925 8300 24225 8300
+	23975 8350 24275 8350
 Wire Wire Line
-	27525 9050 28300 9050
-Connection ~ 28300 9650
-Connection ~ 28300 9050
+	33300 9900 33300 10200
+Wire Notes Line style solid
+	43460 985  43460 1270
+Wire Notes Line style solid
+	43460 1270 50500 1270
+Wire Notes Line style solid
+	43975 985  43975 1270
+Wire Notes Line style solid
+	44350 985  44350 1270
+Wire Notes Line style solid
+	47830 980  47830 1265
+Wire Notes Line style solid
+	48330 985  48330 1270
+Wire Notes Line style solid
+	48830 985  48830 1270
+Wire Notes Line style solid
+	49480 985  49480 1270
+Text Notes 44075 1225 0    140  ~ 28
+A  INITIAL RELEASE TDRR 32573
+$Comp
+L AGC_DSKY:Resistor-shortlead R25
+U 1 1 5D748F40
+P 28550 9500
+F 0 "R25" V 28550 9608 130 0000 L CNN
+F 1 "Resistor-shortlead" H 28550 9675 130 0001 C CNN
+F 2 "" H 28550 9500 130 0001 C CNN
+F 3 "" H 28550 9500 130 0001 C CNN
+	1    28550 9500
+	0    1    1    0   
+$EndComp
 Wire Wire Line
-	28300 9050 29500 9050
-Connection ~ 33250 9650
+	28550 12650 28550 12975
 Wire Wire Line
-	33250 9650 33250 10150
-Connection ~ 33250 9050
+	28550 11300 28550 12250
+Connection ~ 28550 11300
 Wire Wire Line
-	33250 9050 34300 9050
+	28550 10700 28550 11300
 Wire Wire Line
-	32275 9050 33250 9050
+	28550 9900 28550 10200
+$Comp
+L AGC_DSKY:Diode CR43
+U 1 1 60CF598F
+P 28550 12450
+F 0 "CR43" V 28550 12321 140 0000 R CNN
+F 1 "Diode" H 28550 12300 50  0001 C CNN
+F 2 "" H 28500 12275 50  0001 C CNN
+F 3 "" H 28500 12450 50  0001 C CNN
+	1    28550 12450
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q4
+U 1 1 5E662655
+P 28400 10450
+F 0 "Q4" H 28875 10225 130 0000 C CNN
+F 1 "Transistor-NPN" H 28400 11015 130 0001 C CNN
+F 2 "" H 28400 10700 130 0001 C CNN
+F 3 "" H 28400 10700 130 0001 C CNN
+	1    28400 10450
+	1    0    0    1   
+$EndComp
+Wire Wire Line
+	27525 9100 28550 9100
+Wire Wire Line
+	28550 9800 28550 9900
+Connection ~ 28550 9900
+Wire Wire Line
+	28550 9200 28550 9100
+Connection ~ 28550 9100
+Wire Wire Line
+	28550 9100 29550 9100
+Wire Notes Line
+	27375 13575 26150 13575
+Wire Wire Line
+	32275 9100 33300 9100
+Wire Wire Line
+	33300 9900 33300 9800
+Connection ~ 33300 9900
+Wire Wire Line
+	33300 9200 33300 9100
+Connection ~ 33300 9100
+Connection ~ 34275 9100
+Wire Wire Line
+	34275 9100 35975 9100
+Wire Wire Line
+	33300 12975 35975 12975
+Connection ~ 40800 9100
+Connection ~ 40800 10050
+Wire Wire Line
+	41300 11475 41425 11475
+Wire Wire Line
+	40750 10050 40800 10050
+Wire Wire Line
+	40750 9100 40800 9100
+Wire Wire Line
+	40800 10050 42475 10050
+Wire Wire Line
+	38400 11725 38400 12975
+Wire Wire Line
+	37700 12975 38400 12975
+Wire Wire Line
+	40800 12975 41425 12975
+Connection ~ 40800 12975
+Wire Wire Line
+	40800 11725 40800 12975
+Wire Wire Line
+	38400 12975 40800 12975
+Wire Wire Line
+	40800 9100 43175 9100
+Wire Wire Line
+	43175 10050 43175 9775
+Wire Wire Line
+	43175 11225 43175 10050
+Wire Wire Line
+	43175 10050 43650 10050
+Wire Wire Line
+	43650 13350 43650 10050
+Wire Wire Line
+	40150 6900 44150 6900
+Wire Wire Line
+	44150 6900 44150 12975
+Wire Wire Line
+	43175 12975 44150 12975
+Connection ~ 40150 6900
+$Comp
+L AGC_DSKY:ConnectorD1_D6_2 J2
+U 9 1 5CA2F2DD
+P 12375 25925
+F 0 "J2" H 12375 26175 50  0001 C CNN
+F 1 "ConnectorD1_D6_2" H 12375 26275 50  0001 C CNN
+F 2 "" H 12325 26100 50  0001 C CNN
+F 3 "" H 12325 26100 50  0001 C CNN
+	9    12375 25925
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD1_D6_1 J1
+U 16 1 5C9A400B
+P 10800 25075
+F 0 "J1" H 10800 25325 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 10850 25425 50  0001 C CNN
+F 2 "" H 10750 25250 50  0001 C CNN
+F 3 "" H 10750 25250 50  0001 C CNN
+	16   10800 25075
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD1_D6_1 J1
+U 54 2 5C99AA24
+P 23300 24325
+F 0 "J1" H 23300 24575 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 23350 24675 50  0001 C CNN
+F 2 "" H 23250 24500 50  0001 C CNN
+F 3 "" H 23250 24500 50  0001 C CNN
+	54   23300 24325
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD1_D6_1 J1
+U 36 1 5C991DA0
+P 35850 25325
+F 0 "J1" H 35850 25575 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 35900 25675 50  0001 C CNN
+F 2 "" H 35800 25500 50  0001 C CNN
+F 3 "" H 35800 25500 50  0001 C CNN
+	36   35850 25325
+	-1   0    0    1   
+$EndComp
+NoConn ~ 31775 27650
+NoConn ~ 31775 27200
+NoConn ~ 30075 27200
+NoConn ~ 31825 23925
+NoConn ~ 31825 23475
+NoConn ~ 30125 23475
+NoConn ~ 14825 23475
+NoConn ~ 16525 23475
+NoConn ~ 16525 23925
+NoConn ~ 14825 27250
+NoConn ~ 16525 27250
+NoConn ~ 16525 27700
+Wire Wire Line
+	21975 27250 21675 27250
+Wire Wire Line
+	22000 23475 21675 23475
+Wire Wire Line
+	20375 27950 20375 28775
+Wire Wire Line
+	35525 28775 35525 27900
+Wire Wire Line
+	30475 28775 30475 27900
+Wire Wire Line
+	11500 25075 15225 25075
+Wire Wire Line
+	15225 28775 15225 27950
+Wire Wire Line
+	35125 27200 34100 27200
+Wire Wire Line
+	21900 27700 21675 27700
+Wire Wire Line
+	34875 25325 35575 25325
+Wire Wire Line
+	37125 27200 36825 27200
+Wire Wire Line
+	33475 24825 27400 24825
+Wire Wire Line
+	33475 23475 33475 24825
+Wire Wire Line
+	35175 23475 33475 23475
+Connection ~ 30525 25075
+Wire Wire Line
+	30525 25075 35575 25075
+Connection ~ 20375 25075
+Connection ~ 15225 25075
+Wire Wire Line
+	15225 25075 20375 25075
+Text Notes 10575 24875 0    130  ~ 26
+EV250
+Wire Wire Line
+	15525 25925 15825 25925
+Connection ~ 15525 25925
+Wire Wire Line
+	15525 26150 15525 25925
+Wire Wire Line
+	15825 25925 20675 25925
+Connection ~ 15825 25925
+Wire Wire Line
+	15825 26150 15825 25925
+Wire Wire Line
+	20675 25925 20975 25925
+Connection ~ 20675 25925
+Wire Wire Line
+	20675 26150 20675 25925
+Connection ~ 20975 25925
+Wire Wire Line
+	20975 26150 20975 25925
+Wire Wire Line
+	30775 25925 31075 25925
+Connection ~ 30775 25925
+Wire Wire Line
+	30775 26150 30775 25925
+Wire Wire Line
+	31075 25925 35825 25925
+Connection ~ 31075 25925
+Wire Wire Line
+	31075 26150 31075 25925
+Wire Wire Line
+	35825 25925 36125 25925
+Connection ~ 35825 25925
+Wire Wire Line
+	35825 26150 35825 25925
+Wire Wire Line
+	12650 25925 15525 25925
+Wire Wire Line
+	36125 25925 36125 26150
+Wire Wire Line
+	21275 27950 21275 28025
+Wire Wire Line
+	22250 23925 23300 23925
+Wire Wire Line
+	22250 24300 22250 23925
+Wire Wire Line
+	21275 24300 22250 24300
+Wire Wire Line
+	21275 24175 21275 24300
+Wire Wire Line
+	30075 27650 29950 27650
+Wire Wire Line
+	30125 23925 30000 23925
+Wire Wire Line
+	19975 27700 19625 27700
+Wire Wire Line
+	19975 23925 19600 23925
+Wire Wire Line
+	14825 27700 14475 27700
+Wire Wire Line
+	14825 23925 14475 23925
+Wire Wire Line
+	31425 24650 36475 24650
+Connection ~ 31425 24650
+Wire Wire Line
+	37900 26800 36425 26800
+Wire Wire Line
+	29050 26750 30475 26750
+Wire Wire Line
+	22700 26800 21275 26800
+Wire Wire Line
+	18875 26800 20375 26800
+Wire Wire Line
+	17600 26800 16125 26800
+Wire Wire Line
+	13775 26750 15225 26750
+Wire Wire Line
+	36425 27900 36425 28350
+Wire Wire Line
+	37125 27650 36825 27650
+Wire Wire Line
+	31375 28350 31375 27900
+Wire Wire Line
+	19850 27250 19975 27250
+Wire Wire Line
+	16125 28350 16125 27950
+Wire Wire Line
+	36475 24650 37100 24650
+Connection ~ 36475 24650
+Connection ~ 16125 24650
+$Comp
+L AGC_DSKY:Relay-1006282 K10
+U 1 1 5B6F27CC
+P 36025 23700
+F 0 "K10" H 35825 23700 140 0000 L CNN
+F 1 "Relay-1006282" H 36025 23850 50  0001 C CNN
+F 2 "" H 35275 24075 50  0001 C CNN
+F 3 "" H 35275 24075 50  0001 C CNN
+	1    36025 23700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	35875 23225 35875 22800
+Wire Wire Line
+	36175 22800 36175 23225
+Wire Wire Line
+	31125 22800 31125 23225
+$Comp
+L AGC_DSKY:Relay-1006282 K9
+U 1 1 5B6F27B8
+P 30975 23700
+F 0 "K9" H 30825 23700 140 0000 L CNN
+F 1 "Relay-1006282" H 30975 23850 50  0001 C CNN
+F 2 "" H 30225 24075 50  0001 C CNN
+F 3 "" H 30225 24075 50  0001 C CNN
+	1    30975 23700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	30825 23225 30825 22800
+Wire Wire Line
+	20675 23225 20675 22800
+$Comp
+L AGC_DSKY:Relay-1006282 K7
+U 1 1 5B6F2790
+P 20825 23700
+F 0 "K7" H 20675 23700 140 0000 L CNN
+F 1 "Relay-1006282" H 20825 23850 50  0001 C CNN
+F 2 "" H 20075 24075 50  0001 C CNN
+F 3 "" H 20075 24075 50  0001 C CNN
+	1    20825 23700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	20975 22800 20975 23225
+$Comp
+L AGC_DSKY:Relay-1006282 K6
+U 1 1 5B6F277C
+P 15675 23700
+F 0 "K6" H 15525 23700 140 0000 L CNN
+F 1 "Relay-1006282" H 15675 23850 50  0001 C CNN
+F 2 "" H 14925 24075 50  0001 C CNN
+F 3 "" H 14925 24075 50  0001 C CNN
+	1    15675 23700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	15825 22800 15825 23225
+$Comp
+L AGC_DSKY:Relay-1006282 K5
+U 1 1 5B6EABB6
+P 35975 27425
+F 0 "K5" H 35825 27425 140 0000 L CNN
+F 1 "Relay-1006282" H 35975 27575 50  0001 C CNN
+F 2 "" H 35225 27800 50  0001 C CNN
+F 3 "" H 35225 27800 50  0001 C CNN
+	1    35975 27425
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	15525 23225 15525 22800
+$Comp
+L AGC_DSKY:Diode CR10
+U 1 1 5B6EABB0
+P 36125 26350
+F 0 "CR10" V 36300 26475 140 0000 L CNN
+F 1 "Diode" H 36125 26200 50  0001 C CNN
+F 2 "" H 36075 26175 50  0001 C CNN
+F 3 "" H 36075 26350 50  0001 C CNN
+	1    36125 26350
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR9
+U 1 1 5B6EABAA
+P 35825 26350
+F 0 "CR9" V 36000 25775 140 0000 L CNN
+F 1 "Diode" H 35825 26200 50  0001 C CNN
+F 2 "" H 35775 26175 50  0001 C CNN
+F 3 "" H 35775 26350 50  0001 C CNN
+	1    35825 26350
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Relay-1006282 K4
+U 1 1 5B6DBEE3
+P 30925 27425
+F 0 "K4" H 30775 27425 140 0000 L CNN
+F 1 "Relay-1006282" H 30925 27575 50  0001 C CNN
+F 2 "" H 30175 27800 50  0001 C CNN
+F 3 "" H 30175 27800 50  0001 C CNN
+	1    30925 27425
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR8
+U 1 1 5B6DBEDD
+P 31075 26350
+F 0 "CR8" V 31250 26475 140 0000 L CNN
+F 1 "Diode" H 31075 26200 50  0001 C CNN
+F 2 "" H 31025 26175 50  0001 C CNN
+F 3 "" H 31025 26350 50  0001 C CNN
+	1    31075 26350
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR7
+U 1 1 5B6DBED7
+P 30775 26350
+F 0 "CR7" V 30950 25775 140 0000 L CNN
+F 1 "Diode" H 30775 26200 50  0001 C CNN
+F 2 "" H 30725 26175 50  0001 C CNN
+F 3 "" H 30725 26350 50  0001 C CNN
+	1    30775 26350
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Relay-1006282 K2
+U 1 1 5B6CCEAA
+P 20825 27475
+F 0 "K2" H 20675 27475 140 0000 L CNN
+F 1 "Relay-1006282" H 20825 27625 50  0001 C CNN
+F 2 "" H 20075 27850 50  0001 C CNN
+F 3 "" H 20075 27850 50  0001 C CNN
+	1    20825 27475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR4
+U 1 1 5B6CCEA4
+P 20975 26350
+F 0 "CR4" V 21150 26475 140 0000 L CNN
+F 1 "Diode" H 20975 26200 50  0001 C CNN
+F 2 "" H 20925 26175 50  0001 C CNN
+F 3 "" H 20925 26350 50  0001 C CNN
+	1    20975 26350
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR3
+U 1 1 5B6CCE9E
+P 20675 26350
+F 0 "CR3" V 20850 25800 140 0000 L CNN
+F 1 "Diode" H 20675 26200 50  0001 C CNN
+F 2 "" H 20625 26175 50  0001 C CNN
+F 3 "" H 20625 26350 50  0001 C CNN
+	1    20675 26350
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Relay-1006282 K1
+U 1 1 5B6DAB5F
+P 15675 27475
+F 0 "K1" H 15525 27475 140 0000 L CNN
+F 1 "Relay-1006282" H 15675 27625 50  0001 C CNN
+F 2 "" H 14925 27850 50  0001 C CNN
+F 3 "" H 14925 27850 50  0001 C CNN
+	1    15675 27475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR2
+U 1 1 5B6C471E
+P 15825 26350
+F 0 "CR2" V 16000 26475 140 0000 L CNN
+F 1 "Diode" H 15825 26200 50  0001 C CNN
+F 2 "" H 15775 26175 50  0001 C CNN
+F 3 "" H 15775 26350 50  0001 C CNN
+	1    15825 26350
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR1
+U 1 1 5B6AE828
+P 15525 26350
+F 0 "CR1" V 15700 25850 140 0000 L CNN
+F 1 "Diode" H 15525 26200 50  0001 C CNN
+F 2 "" H 15475 26175 50  0001 C CNN
+F 3 "" H 15475 26350 50  0001 C CNN
+	1    15525 26350
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	36475 24175 36475 24650
+Wire Wire Line
+	35575 24175 35575 25075
+Wire Wire Line
+	35575 23025 35575 23225
+Wire Wire Line
+	36475 23025 37900 23025
+Wire Wire Line
+	36475 23025 36475 23225
+Wire Wire Line
+	36875 23925 37100 23925
+Wire Wire Line
+	37100 23925 37100 24650
+Wire Wire Line
+	35175 23925 34875 23925
+Wire Wire Line
+	34875 23925 34875 25325
+Wire Wire Line
+	36425 26800 36425 26950
+Wire Wire Line
+	36125 26550 36125 26950
+Wire Wire Line
+	35825 26550 35825 26950
+Wire Wire Line
+	31375 26750 31375 26950
+Wire Wire Line
+	31075 26550 31075 26950
+Wire Wire Line
+	30775 26550 30775 26950
+Wire Wire Line
+	30475 26750 30475 26950
+Wire Wire Line
+	21275 26800 21275 27000
+Wire Wire Line
+	20975 26550 20975 27000
+Wire Wire Line
+	20675 26550 20675 27000
+Wire Wire Line
+	20375 26800 20375 27000
+Wire Wire Line
+	16125 26800 16125 27000
+Wire Wire Line
+	15825 26550 15825 27000
+Wire Wire Line
+	15525 26550 15525 27000
+Wire Wire Line
+	15225 26750 15225 27000
+Wire Wire Line
+	34850 29025 21900 29025
+Wire Wire Line
+	34850 27650 35125 27650
+Wire Wire Line
+	34850 29025 34850 27650
+Connection ~ 34850 29025
+Wire Wire Line
+	34850 29025 35525 29025
+$Comp
+L AGC_DSKY:ConnectorD1_D6_1 J1
+U 56 1 5C99B3EF
+P 29500 27650
+F 0 "J1" H 29500 27900 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 29550 28000 50  0001 C CNN
+F 2 "" H 29450 27825 50  0001 C CNN
+F 3 "" H 29450 27825 50  0001 C CNN
+	56   29500 27650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	29775 27650 29950 27650
+Wire Wire Line
+	28425 27175 29950 27175
+Wire Wire Line
+	28425 27650 28425 27175
+Wire Wire Line
+	27400 27200 26750 27200
+Wire Wire Line
+	26750 27650 28425 27650
+Wire Wire Line
+	23300 27650 25050 27650
+Wire Wire Line
+	27775 26750 26350 26750
+Wire Wire Line
+	25750 26550 25750 26950
+Wire Wire Line
+	26350 26750 26350 26950
+Wire Wire Line
+	26050 26550 26050 26950
+Wire Wire Line
+	25450 26750 25450 26950
+Wire Wire Line
+	24900 27200 25050 27200
+Wire Wire Line
+	20375 28775 24900 28775
+Connection ~ 24900 28775
+Wire Wire Line
+	24900 28775 24900 27200
+Wire Wire Line
+	24900 28775 25450 28775
+Wire Wire Line
+	25450 28775 30475 28775
+Connection ~ 25450 28775
+Wire Wire Line
+	25450 28775 25450 27900
+Wire Wire Line
+	20975 25925 25750 25925
+Connection ~ 25750 25925
+Wire Wire Line
+	25750 26150 25750 25925
+Wire Wire Line
+	26050 25925 30775 25925
+Wire Wire Line
+	25750 25925 26050 25925
+Connection ~ 26050 25925
+Wire Wire Line
+	26050 25925 26050 26150
+Wire Wire Line
+	19850 28350 26350 28350
+Wire Wire Line
+	26350 28350 31375 28350
+Connection ~ 26350 28350
+Wire Wire Line
+	26350 28350 26350 27900
+$Comp
+L AGC_DSKY:Relay-1006282 K3
+U 1 1 5B6D483C
+P 25900 27425
+F 0 "K3" H 25750 27425 140 0000 L CNN
+F 1 "Relay-1006282" H 25900 27575 50  0001 C CNN
+F 2 "" H 25150 27800 50  0001 C CNN
+F 3 "" H 25150 27800 50  0001 C CNN
+	1    25900 27425
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR6
+U 1 1 5B6D4836
+P 26050 26350
+F 0 "CR6" V 26225 26475 140 0000 L CNN
+F 1 "Diode" H 26050 26200 50  0001 C CNN
+F 2 "" H 26000 26175 50  0001 C CNN
+F 3 "" H 26000 26350 50  0001 C CNN
+	1    26050 26350
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR5
+U 1 1 5B6D4830
+P 25750 26350
+F 0 "CR5" V 25925 25800 140 0000 L CNN
+F 1 "Diode" H 25750 26200 50  0001 C CNN
+F 2 "" H 25700 26175 50  0001 C CNN
+F 3 "" H 25700 26350 50  0001 C CNN
+	1    25750 26350
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	25450 26750 23950 26750
+Wire Wire Line
+	23300 27650 22250 27650
+Wire Wire Line
+	22250 27650 22250 28025
+Connection ~ 23300 27650
+Wire Wire Line
+	16125 28350 13275 28350
+Connection ~ 16125 28350
+Wire Wire Line
+	15225 28775 11500 28775
+Wire Wire Line
+	11500 25075 11500 28775
+Connection ~ 15225 28775
+Connection ~ 11500 25075
+Wire Wire Line
+	11075 25075 11500 25075
+Wire Wire Line
+	13275 24650 13275 28350
+Wire Wire Line
+	13275 17550 13275 20900
+Wire Wire Line
+	12625 23400 13275 23400
+Wire Wire Line
+	13275 20900 13275 23400
+Wire Wire Line
+	13275 24650 16125 24650
+Connection ~ 13275 24650
+Wire Wire Line
+	15225 24175 15225 25075
+Wire Wire Line
+	16125 24175 16125 24650
+Wire Wire Line
+	17600 23025 16125 23025
+Wire Wire Line
+	16125 23025 16125 23225
+Connection ~ 17600 23025
+Wire Wire Line
+	15225 23025 13775 23025
+Wire Wire Line
+	15225 23025 15225 23225
+Connection ~ 13775 23025
+Connection ~ 15525 22200
+Wire Wire Line
+	15525 22200 15525 22400
+Connection ~ 15825 22200
+Connection ~ 20675 22200
+Wire Wire Line
+	15825 22200 15825 22400
+Wire Wire Line
+	20675 22200 20675 22400
+Connection ~ 20975 22200
+Wire Wire Line
+	20975 22200 20975 22400
+Connection ~ 30825 22200
+Wire Wire Line
+	30825 22200 30825 22400
+Connection ~ 23300 23925
+Wire Wire Line
+	23300 23925 23300 24150
+Wire Wire Line
+	20375 24175 20375 25075
+Wire Wire Line
+	21675 23925 21900 23925
+Wire Wire Line
+	21900 23925 21900 25325
+Wire Wire Line
+	21275 23025 22700 23025
+Wire Wire Line
+	21275 23025 21275 23225
+Connection ~ 22700 23025
+Wire Wire Line
+	20375 23025 18875 23025
+Wire Wire Line
+	20375 23025 20375 23225
+Connection ~ 18875 23025
+Connection ~ 25750 22200
+Wire Wire Line
+	25750 22200 25750 22400
+Connection ~ 26050 22200
+Wire Wire Line
+	26050 22200 26050 22400
+Wire Wire Line
+	26750 23925 28425 23925
+Connection ~ 25450 25075
+Wire Wire Line
+	25450 25075 30525 25075
+Wire Wire Line
+	23300 23925 25050 23925
+Wire Wire Line
+	26350 24650 31425 24650
+Wire Wire Line
+	26050 22200 30825 22200
+Wire Wire Line
+	25750 22200 26050 22200
+Wire Wire Line
+	20975 22200 25750 22200
+Connection ~ 26350 24650
+Wire Wire Line
+	25750 23225 25750 22800
+$Comp
+L AGC_DSKY:Relay-1006282 K8
+U 1 1 5B6F27A4
+P 25900 23700
+F 0 "K8" H 25750 23700 140 0000 L CNN
+F 1 "Relay-1006282" H 25900 23850 50  0001 C CNN
+F 2 "" H 25150 24075 50  0001 C CNN
+F 3 "" H 25150 24075 50  0001 C CNN
+	1    25900 23700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	26050 22800 26050 23225
+$Comp
+L AGC_DSKY:Diode CR16
+U 1 1 5B6F279E
+P 26050 22600
+F 0 "CR16" V 26225 22725 140 0000 L CNN
+F 1 "Diode" H 26050 22450 50  0001 C CNN
+F 2 "" H 26000 22425 50  0001 C CNN
+F 3 "" H 26000 22600 50  0001 C CNN
+	1    26050 22600
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR15
+U 1 1 5B6F2798
+P 25750 22600
+F 0 "CR15" V 25925 21925 140 0000 L CNN
+F 1 "Diode" H 25750 22450 50  0001 C CNN
+F 2 "" H 25700 22425 50  0001 C CNN
+F 3 "" H 25700 22600 50  0001 C CNN
+	1    25750 22600
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	25450 24175 25450 25075
+Wire Wire Line
+	26350 24175 26350 24650
+Wire Wire Line
+	16125 24650 19850 24650
+Wire Wire Line
+	19975 23475 19850 23475
+Wire Wire Line
+	19850 23475 19850 24650
+Connection ~ 19850 24650
+Wire Wire Line
+	19850 24650 26350 24650
+Wire Wire Line
+	20375 25075 24950 25075
+Wire Wire Line
+	26350 23025 27775 23025
+Wire Wire Line
+	26350 23025 26350 23225
+Wire Wire Line
+	25450 23025 23950 23025
+Wire Wire Line
+	25450 23025 25450 23225
+Wire Wire Line
+	25050 23475 24950 23475
+Wire Wire Line
+	24950 23475 24950 25075
+Connection ~ 24950 25075
+Wire Wire Line
+	24950 25075 25450 25075
+Wire Wire Line
+	26750 23475 27400 23475
+Wire Wire Line
+	27400 23475 27400 24825
+Wire Wire Line
+	30000 23450 30000 23925
+Wire Wire Line
+	28425 23450 30000 23450
+Wire Wire Line
+	28425 23925 28425 23450
+Connection ~ 30000 23925
+Wire Wire Line
+	30525 24175 30525 25075
+Wire Wire Line
+	31425 24175 31425 24650
+Wire Wire Line
+	31125 22200 31125 22400
+Wire Wire Line
+	35875 22200 35875 22400
+Connection ~ 31125 22200
+Wire Wire Line
+	31125 22200 35875 22200
+Wire Wire Line
+	30525 23025 30525 23225
+Wire Wire Line
+	36875 23475 37150 23475
+Wire Wire Line
+	35875 22200 36175 22200
+Wire Wire Line
+	36175 22200 36175 22400
+Connection ~ 35875 22200
+Connection ~ 34875 25325
+Wire Wire Line
+	21900 25325 34875 25325
+Connection ~ 13275 23400
+Connection ~ 13775 19325
+Wire Wire Line
+	21275 20500 21275 20650
+Wire Wire Line
+	17600 23025 17600 26800
+Wire Wire Line
+	13775 23025 13775 26750
+Wire Wire Line
+	22700 23025 22700 26800
+Wire Wire Line
+	18875 23025 18875 26800
+Wire Wire Line
+	37900 23025 37900 26800
+Wire Wire Line
+	13275 23400 13275 24650
+Wire Wire Line
+	23950 23025 23950 26750
+Connection ~ 23950 23025
+Connection ~ 29050 23025
+Wire Wire Line
+	30525 23025 29050 23025
+Wire Wire Line
+	31425 23000 31425 23225
+Wire Wire Line
+	31425 23000 32850 23000
+Wire Wire Line
+	32850 26750 31375 26750
+Connection ~ 37900 23025
+Wire Wire Line
+	35550 20450 35550 21375
+Wire Wire Line
+	37100 20900 36450 20900
+Wire Wire Line
+	36850 20200 37100 20200
+Wire Wire Line
+	37100 20200 37100 20900
+Wire Wire Line
+	35150 20200 34850 20200
+Wire Wire Line
+	34850 20200 34850 21575
+Wire Wire Line
+	34850 21575 35550 21575
+Connection ~ 34850 21575
+Wire Wire Line
+	21900 21575 34850 21575
+Wire Wire Line
+	37900 18225 37900 19325
+Wire Wire Line
+	36450 19500 36450 19325
+Wire Wire Line
+	36450 19325 37900 19325
+Connection ~ 37900 19325
+Wire Wire Line
+	37900 19325 37900 23025
+Wire Wire Line
+	33475 21100 33475 19750
+Wire Wire Line
+	33475 19750 35150 19750
+Wire Wire Line
+	35550 19500 35550 19300
+Wire Wire Line
+	35550 19300 34125 19300
+Connection ~ 34125 19300
+Connection ~ 35850 18475
+Wire Wire Line
+	35850 18475 35850 18650
+Connection ~ 30800 18475
+Connection ~ 31100 18475
+Wire Wire Line
+	31100 18475 31100 18650
+Wire Wire Line
+	30800 18475 30800 18650
+Wire Wire Line
+	32850 18225 32850 19300
+Wire Wire Line
+	31400 19550 31400 19300
+Wire Wire Line
+	31400 19300 32850 19300
+Connection ~ 32850 19300
+Wire Wire Line
+	32850 19300 32850 23000
+Wire Wire Line
+	29050 18225 29050 19300
+Wire Wire Line
+	30500 19550 30500 19300
+Wire Wire Line
+	30500 19300 29050 19300
+Connection ~ 29050 19300
+Wire Wire Line
+	29050 19300 29050 23025
+Connection ~ 25750 18475
+Connection ~ 26050 18475
+Wire Wire Line
+	26050 18475 26050 18650
+Wire Wire Line
+	25750 18475 25750 18650
+Connection ~ 20675 18475
+Connection ~ 20975 18475
+Wire Wire Line
+	20975 18475 20975 18650
+Wire Wire Line
+	20675 18475 20675 18650
+$Comp
+L AGC_DSKY:Relay-1006282 K13
+U 1 1 5B6FB31F
+P 25900 20000
+F 0 "K13" H 25700 20000 140 0000 L CNN
+F 1 "Relay-1006282" H 25900 20150 50  0001 C CNN
+F 2 "" H 25150 20375 50  0001 C CNN
+F 3 "" H 25150 20375 50  0001 C CNN
+	1    25900 20000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	26350 20475 26350 20900
+Wire Wire Line
+	25450 20475 25450 21375
+Wire Wire Line
+	20375 21375 24925 21375
+Wire Wire Line
+	25050 19775 24925 19775
+Wire Wire Line
+	24925 19775 24925 21375
+Connection ~ 24925 21375
+Wire Wire Line
+	24925 21375 25450 21375
+Wire Wire Line
+	27775 18225 27775 19300
+Wire Wire Line
+	23950 18225 23950 19300
+Wire Wire Line
+	26750 19775 27400 19775
+Wire Wire Line
+	27400 19775 27400 21100
+Wire Wire Line
+	26350 19300 27775 19300
+Wire Wire Line
+	26350 19300 26350 19525
+Connection ~ 27775 19300
+Wire Wire Line
+	27775 19300 27775 23025
+Wire Wire Line
+	25450 19300 23950 19300
+Wire Wire Line
+	25450 19300 25450 19525
+Connection ~ 23950 19300
+Wire Wire Line
+	23950 19300 23950 23025
+Connection ~ 15525 18475
+Connection ~ 15825 18475
+Wire Wire Line
+	15825 18475 15825 18725
+Wire Wire Line
+	15525 18475 15525 18725
+Connection ~ 17600 19325
+Wire Wire Line
+	17600 19325 17600 23025
+Wire Wire Line
+	17600 18225 17600 19325
+Wire Wire Line
+	17600 19325 16125 19325
+$Comp
+L AGC_DSKY:ConnectorD1_D6_1 J1
+U 44 2 5C9CED87
+P 18875 18050
+F 0 "J1" H 18875 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 18925 18400 50  0001 C CNN
+F 2 "" H 18825 18225 50  0001 C CNN
+F 3 "" H 18825 18225 50  0001 C CNN
+	44   18875 18050
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	16125 20900 19850 20900
+Wire Wire Line
+	21275 19300 21275 19550
+Wire Wire Line
+	18875 18225 18875 19325
+Wire Wire Line
+	20375 19550 20375 19325
+Wire Wire Line
+	20375 19325 18875 19325
+Connection ~ 18875 19325
+Wire Wire Line
+	18875 19325 18875 23025
+Wire Wire Line
+	19975 19800 19850 19800
+Wire Wire Line
+	19850 19800 19850 20900
+Connection ~ 19850 20900
+Wire Wire Line
+	19850 20900 26350 20900
+Wire Wire Line
+	21675 20250 21900 20250
+Wire Wire Line
+	21900 20250 21900 21575
+Wire Wire Line
+	22300 20650 22300 20225
+Wire Wire Line
+	22300 20225 23300 20225
+Wire Wire Line
+	21275 20650 22300 20650
+$Comp
+L AGC_DSKY:ConnectorD1_D6_1 J1
+U 35 2 5C9CF3CC
+P 22700 18050
+F 0 "J1" H 22700 18300 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 22750 18400 50  0001 C CNN
+F 2 "" H 22650 18225 50  0001 C CNN
+F 3 "" H 22650 18225 50  0001 C CNN
+	35   22700 18050
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	22700 18225 22700 19300
+Wire Wire Line
+	22700 19300 22700 23025
+Wire Wire Line
+	21275 19300 22700 19300
+Connection ~ 22700 19300
+Wire Wire Line
+	13275 20900 16125 20900
+Wire Wire Line
+	13775 19325 13775 23025
+Wire Wire Line
+	16125 19325 16125 19550
+Connection ~ 11525 21375
+Wire Wire Line
+	11075 21375 11525 21375
+Connection ~ 16150 17025
+Wire Wire Line
+	16150 16800 16150 17025
+$Comp
+L AGC_DSKY:ConnectorD1_D6_1 J1
+U 19 1 5C9D0A32
+P 22225 15525
+F 0 "J1" H 22225 15775 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 22275 15875 50  0001 C CNN
+F 2 "" H 22175 15700 50  0001 C CNN
+F 3 "" H 22175 15700 50  0001 C CNN
+	19   22225 15525
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD1_D6_1 J1
+U 28 1 5C9CFD57
+P 19350 15525
+F 0 "J1" H 19350 15775 50  0001 C CNN
+F 1 "ConnectorD1_D6_1" H 19400 15875 50  0001 C CNN
+F 2 "" H 19300 15700 50  0001 C CNN
+F 3 "" H 19300 15700 50  0001 C CNN
+	28   19350 15525
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	20350 15525 20350 15800
+Wire Wire Line
+	19625 15525 20350 15525
+Wire Wire Line
+	21250 15800 21250 15525
+Wire Wire Line
+	21950 15525 21250 15525
+Connection ~ 32075 17550
+Wire Wire Line
+	31400 17550 32075 17550
+Wire Wire Line
+	31800 16500 32075 16500
+Connection ~ 15850 14750
+Wire Wire Line
+	15850 14750 20650 14750
+Wire Wire Line
+	15850 14750 15850 14950
+Wire Wire Line
+	15550 14750 15850 14750
+Text Notes 13283 31107 0    140  ~ 28
+1. ASSEMBLY DWG NO. 2003952\n2. ASSEMBLY DWG NO. 2003910\n3. ASSEMBLY DWG NO. 2003908
+Text Notes 1525 33250 0    140  ~ 28
+3.
+Text Notes 2025 33250 0    140  ~ 28
+RELAY TO BE EITHER 2004688-1 OR 2004688-2
+Wire Wire Line
+	29050 23025 29050 26750
+Wire Wire Line
+	27775 23025 27775 26750
+Wire Wire Line
+	32850 23000 32850 26750
+Wire Wire Line
+	35575 23025 34125 23025
+Wire Wire Line
+	34125 19300 34125 23025
+Wire Wire Line
+	35525 26750 34125 26750
+Wire Wire Line
+	34125 26750 34125 23025
+Wire Wire Line
+	35525 26750 35525 26950
+Connection ~ 34125 23025
+Connection ~ 32850 23000
+Connection ~ 13275 20900
+Connection ~ 27775 23025
+Wire Wire Line
+	23300 20225 23300 20425
+Connection ~ 23300 20225
+Wire Wire Line
+	28425 19750 29975 19750
+Wire Wire Line
+	28425 19750 28425 20225
+Wire Wire Line
+	28425 20225 26750 20225
+Wire Wire Line
+	15250 17350 20350 17350
+Wire Wire Line
+	11775 17350 15250 17350
+Connection ~ 15250 17350
+Connection ~ 33300 12975
+Connection ~ 28550 12975
+Wire Wire Line
+	28550 12975 33300 12975
+Wire Wire Line
+	34125 18225 34125 19300
+Text Notes 8545 26802 0    140  ~ 28
+3
+Text Notes 8521 27804 0    140  ~ 28
+2
+Text Notes 8539 26316 0    140  ~ 28
+6
+Wire Notes Line width 24 style solid
+	7919 27698 8367 27699
+Wire Notes Line width 24 style solid
+	8397 26709 7918 26709
+Wire Notes Line width 24 style solid
+	7923 26194 8371 26195
+Wire Notes Line width 33 style solid
+	4929 10320 4929 11295
+Text Notes 4832 10367 0    130  ~ 26
+↑
+Text Notes 4857 3617 0    130  ~ 26
+↑
+Text Notes 7107 3617 0    130  ~ 26
+↑
+Wire Wire Line
+	34125 9100 34275 9100
+Wire Wire Line
+	33300 9100 34275 9100
 $EndSCHEMATC

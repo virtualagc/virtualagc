@@ -16,12 +16,10 @@ Comment4 ""
 $EndDescr
 Wire Notes Line width 15 style solid
 	46010 33378 46774 33378
-Wire Notes Line style solid
-	46774 33378 46774 33380
 Text Notes 49394 33418 0    0    ~ 0
 1
 Text Notes 47944 33174 0    250  ~ 50
-2005952
+2005940
 Text Notes 46592 31766 0    300  ~ 60
 SCHEMATIC
 Text Notes 46480 32126 0    200  ~ 40
@@ -34,6 +32,24 @@ $Sheet
 S 23450 12450 5600 7975
 U 5C0028D2
 F0 "1" 140
-F1 "2005952--p1of1.sch" 140
+F1 "2005940A-p1of1.sch" 140
 $EndSheet
+Wire Notes Line style solid
+	49485 990  49485 1275
+Wire Notes Line style solid
+	44355 990  44355 1275
+Wire Notes Line style solid
+	43465 990  43465 1275
+Wire Notes Line style solid
+	47835 985  47835 1270
+Wire Notes Line style solid
+	48835 990  48835 1275
+Wire Notes Line style solid
+	43465 1275 50505 1275
+Wire Notes Line style solid
+	43980 990  43980 1275
+Wire Notes Line style solid
+	48335 990  48335 1275
+Text Notes 44080 1230 0    140  ~ 28
+A  INITIAL RELEASE TDRR 32573
 $EndSCHEMATC
