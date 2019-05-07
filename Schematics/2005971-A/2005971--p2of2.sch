@@ -127,21 +127,7 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	11100 7025 19125 7025
 Wire Notes Line style solid
-	19125 6550 19125 19025
-Wire Notes Line style solid
-	18100 19025 18100 6550
-Wire Notes Line style solid
-	17125 6550 17125 19025
-Wire Notes Line style solid
-	16075 19025 16075 6550
-Wire Notes Line style solid
 	11100 6550 19125 6550
-Wire Notes Line style solid
-	14100 6550 14100 19025
-Wire Notes Line style solid
-	12075 19025 12075 6550
-Wire Notes Line style solid
-	11100 6550 11100 19025
 Wire Notes Line style solid
 	11100 13175 19125 13175
 Wire Notes Line style solid
@@ -236,10 +222,6 @@ Wire Notes Line style solid
 	30150 17800 22100 17800
 Wire Notes Line style solid
 	30150 18050 22100 18050
-Wire Notes Line style solid
-	30150 18300 22100 18300
-Wire Notes Line style solid
-	30150 18550 22100 18550
 Wire Notes Line style solid
 	30150 18800 22100 18800
 Wire Notes Line style solid
@@ -748,8 +730,6 @@ Text Notes 18300 18500 0    130  ~ 26
 1/4W
 Text Notes 18300 18750 0    130  ~ 26
 1/4W
-Text Notes 18300 19000 0    130  ~ 26
-1/2W
 Text Notes 18425 15500 0    130  ~ 26
 3W
 Text Notes 18425 15750 0    130  ~ 26
@@ -781,7 +761,7 @@ Text Notes 17500 18500 0    130  ~ 26
 Text Notes 17500 18750 0    130  ~ 26
 2%
 Text Notes 17500 19000 0    130  ~ 26
-2%
+1%
 Text Notes 17500 15500 0    130  ~ 26
 1%
 Text Notes 17500 15750 0    130  ~ 26
@@ -794,10 +774,6 @@ Text Notes 17500 16750 0    130  ~ 26
 1%
 Text Notes 17500 17250 0    130  ~ 26
 1%
-Text Notes 14450 18750 0    130  ~ 26
-RESISTOR
-Text Notes 14450 19000 0    130  ~ 26
-RESISTOR
 Text Notes 16400 15500 0    130  ~ 26
 620
 Text Notes 16400 16000 0    130  ~ 26
@@ -805,7 +781,7 @@ Text Notes 16400 16000 0    130  ~ 26
 Text Notes 16400 17500 0    130  ~ 26
 200
 Text Notes 16400 18000 0    130  ~ 26
-200
+680
 Text Notes 16375 16250 0    130  ~ 26
 0.12
 Text Notes 16375 16500 0    130  ~ 26
@@ -821,17 +797,15 @@ Text Notes 16350 16750 0    130  ~ 26
 Text Notes 16350 17000 0    130  ~ 26
 3000
 Text Notes 16350 17750 0    130  ~ 26
-5100
+2.2K
 Text Notes 16350 18250 0    130  ~ 26
 2000
 Text Notes 16350 18500 0    130  ~ 26
 1000
-Text Notes 16350 19000 0    130  ~ 26
-1000
 Text Notes 16400 18750 0    130  ~ 26
 10K
 Text Notes 12350 18000 0    130  ~ 26
-1006750-15
+1006750-28
 Text Notes 12350 16000 0    130  ~ 26
 1006750-15
 Text Notes 12350 17500 0    130  ~ 26
@@ -853,15 +827,13 @@ Text Notes 12350 17000 0    130  ~ 26
 Text Notes 12350 17250 0    130  ~ 26
 1010389-23
 Text Notes 12350 17750 0    130  ~ 26
-1006750-49
+1006750-40
 Text Notes 12350 18250 0    130  ~ 26
 1006750-39
 Text Notes 12350 18500 0    130  ~ 26
 1006750-32
 Text Notes 12350 18750 0    130  ~ 26
 1006750-56
-Text Notes 12350 19000 0    130  ~ 26
-1006760-32
 Text Notes 11375 15250 0    130  ~ 26
 R33
 Text Notes 11375 15500 0    130  ~ 26
@@ -927,7 +899,7 @@ Text Notes 23525 8775 0    130  ~ 26
 Text Notes 23525 9025 0    130  ~ 26
 1006755-134
 Text Notes 23525 13275 0    130  ~ 26
-1006755-126
+1006755-14
 Text Notes 24400 9275 0    130  ~ 26
 -134
 Text Notes 24400 9525 0    130  ~ 26
@@ -946,8 +918,8 @@ Text Notes 24400 12525 0    130  ~ 26
 -134
 Text Notes 24400 12775 0    130  ~ 26
 -126
-Text Notes 24400 13025 0    130  ~ 26
--79
+Text Notes 23525 13025 0    130  ~ 26
+1006755-79
 Text Notes 24400 10275 0    130  ~ 26
 -89
 Text Notes 24400 10525 0    130  ~ 26
@@ -999,7 +971,7 @@ Text Notes 29425 12525 0    130  ~ 26
 Text Notes 29425 12775 0    130  ~ 26
 50V
 Text Notes 29425 13275 0    130  ~ 26
-50V
+10V
 Text Notes 29350 8275 0    130  ~ 26
 100V
 Text Notes 29350 8525 0    130  ~ 26
@@ -1040,8 +1012,8 @@ Text Notes 27350 11525 0    130  ~ 26
 47UF
 Text Notes 27300 12775 0    130  ~ 26
 4.7UF
-Text Notes 27300 13275 0    130  ~ 26
-4.7UF
+Text Notes 27275 13275 0    130  ~ 26
+100UF
 Text Notes 22350 7275 0    130  ~ 26
 C1
 Text Notes 22350 7525 0    130  ~ 26
@@ -1126,11 +1098,9 @@ Text Notes 22375 20025 0    130  ~ 26
 Q16
 Text Notes 22375 20275 0    130  ~ 26
 Q17
-Text Notes 22375 20525 0    130  ~ 26
-Q18
 Text Notes 25475 16275 0    130  ~ 26
 TRANSISTOR
-Text Notes 25475 20525 0    130  ~ 26
+Text Notes 25475 20275 0    130  ~ 26
 TRANSISTOR
 Text Notes 25425 21025 0    130  ~ 26
 RELAY
@@ -1140,40 +1110,6 @@ Text Notes 23375 21025 0    130  ~ 26
 1006304-002
 Text Notes 23375 16275 0    130  ~ 26
 1010376-3
-Text Notes 23375 16525 0    130  ~ 26
-2004004-003
-Text Notes 24250 16775 0    130  ~ 26
--003
-Text Notes 24250 17025 0    130  ~ 26
--004
-Text Notes 24250 17275 0    130  ~ 26
--003
-Text Notes 24250 17525 0    130  ~ 26
--003
-Text Notes 24250 17775 0    130  ~ 26
--004
-Text Notes 24250 18025 0    130  ~ 26
--003
-Text Notes 24250 18275 0    130  ~ 26
--002
-Text Notes 24250 18525 0    130  ~ 26
--002
-Text Notes 23375 18775 0    130  ~ 26
-2004004-002
-Text Notes 23375 19025 0    130  ~ 26
-1006317-001
-Text Notes 23375 19275 0    130  ~ 26
-2004004-001
-Text Notes 23375 19525 0    130  ~ 26
-1006363-001
-Text Notes 23375 19775 0    130  ~ 26
-2004004-001
-Text Notes 23375 20025 0    130  ~ 26
-2004004-001
-Text Notes 23375 20275 0    130  ~ 26
-2004004-001
-Text Notes 23375 20525 0    130  ~ 26
-1006363-001
 Text Notes 22375 22025 0    130  ~ 26
 L1
 Text Notes 22375 22275 0    130  ~ 26
@@ -1279,17 +1215,11 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	12650 10100 12650 14225
 Wire Notes Line style solid
-	14900 7350 14900 18450
-Wire Notes Line style solid
 	17575 7375 17575 9200
 Wire Notes Line style solid
 	17600 10125 17600 14225
 Wire Notes Line style solid
 	18575 7375 18575 14225
-Wire Notes Line style solid
-	23850 9125 23850 13000
-Wire Notes Line style solid
-	26075 7375 26075 12975
 Wire Notes Line style solid
 	27600 9125 27600 9700
 Wire Notes Line style solid
@@ -1297,15 +1227,9 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	28550 7375 28550 8225
 Wire Notes Line style solid
-	28550 9125 28550 12975
-Wire Notes Line style solid
 	29625 9125 29625 9725
 Wire Notes Line style solid
 	29650 10350 29650 11250
-Wire Notes Line style solid
-	23875 16600 23875 18425
-Wire Notes Line style solid
-	26100 16350 26100 20200
 Wire Notes Line style solid
 	25700 23850 25700 25725
 Wire Notes Line width 50 style solid
@@ -1315,29 +1239,17 @@ Wire Notes Line width 50 style solid
 Wire Notes Line width 50 style solid
 	25650 25525 25750 25525
 Wire Notes Line width 50 style solid
-	26050 20025 26100 20225
+	26025 19525 26075 19725
 Wire Notes Line width 50 style solid
-	26150 20025 26100 20225
+	26125 19525 26075 19725
 Wire Notes Line width 50 style solid
-	26050 20025 26150 20025
+	26025 19525 26125 19525
 Wire Notes Line width 50 style solid
-	23825 18275 23875 18475
+	26025 12525 26075 12725
 Wire Notes Line width 50 style solid
-	23925 18275 23875 18475
+	26125 12525 26075 12725
 Wire Notes Line width 50 style solid
-	23825 18275 23925 18275
-Wire Notes Line width 50 style solid
-	23800 12775 23850 12975
-Wire Notes Line width 50 style solid
-	23900 12775 23850 12975
-Wire Notes Line width 50 style solid
-	23800 12775 23900 12775
-Wire Notes Line width 50 style solid
-	26025 12775 26075 12975
-Wire Notes Line width 50 style solid
-	26125 12775 26075 12975
-Wire Notes Line width 50 style solid
-	26025 12775 26125 12775
+	26025 12525 26125 12525
 Wire Notes Line width 50 style solid
 	27575 11025 27625 11225
 Wire Notes Line width 50 style solid
@@ -1345,11 +1257,11 @@ Wire Notes Line width 50 style solid
 Wire Notes Line width 50 style solid
 	27575 11025 27675 11025
 Wire Notes Line width 50 style solid
-	28500 12775 28550 12975
+	28500 12525 28550 12725
 Wire Notes Line width 50 style solid
-	28600 12775 28550 12975
+	28600 12525 28550 12725
 Wire Notes Line width 50 style solid
-	28500 12775 28600 12775
+	28500 12525 28600 12525
 Wire Notes Line width 50 style solid
 	29600 11025 29650 11225
 Wire Notes Line width 50 style solid
@@ -1405,11 +1317,11 @@ Wire Notes Line width 50 style solid
 Wire Notes Line width 50 style solid
 	17525 8975 17625 8975
 Wire Notes Line width 50 style solid
-	14850 18250 14900 18450
+	14850 18975 14900 19175
 Wire Notes Line width 50 style solid
-	14950 18250 14900 18450
+	14950 18975 14900 19175
 Wire Notes Line width 50 style solid
-	14850 18250 14950 18250
+	14850 18975 14950 18975
 Wire Notes Line width 50 style solid
 	46775 66850 46725 66650
 Wire Notes Line width 50 style solid
@@ -1422,4 +1334,100 @@ Wire Notes Line width 50 style solid
 	16450 23175 16550 23175
 Wire Notes Line width 50 style solid
 	16550 23175 16500 22950
+Wire Notes Line style solid
+	11100 19275 19125 19275
+Wire Notes Line style solid
+	11100 19525 19125 19525
+Wire Notes Line style solid
+	12075 6550 12075 19525
+Wire Notes Line style solid
+	11100 6550 11100 19525
+Wire Notes Line style solid
+	14100 6550 14100 19525
+Wire Notes Line style solid
+	16075 6550 16075 19525
+Wire Notes Line style solid
+	17125 6550 17125 19525
+Wire Notes Line style solid
+	18100 6550 18100 19525
+Wire Notes Line style solid
+	19125 6550 19125 19525
+Text Notes 14500 19500 0    130  ~ 26
+RESISTOR
+Wire Notes Line style solid
+	14900 7350 14900 19175
+Text Notes 17500 19250 0    130  ~ 26
+2%
+Text Notes 17500 19500 0    130  ~ 26
+2%
+Text Notes 18300 19000 0    130  ~ 26
+1/4W
+Text Notes 18300 19250 0    130  ~ 26
+1/4W
+Text Notes 18300 19500 0    130  ~ 26
+1/4W
+Text Notes 16350 19250 0    130  ~ 26
+1000
+Text Notes 16400 19500 0    130  ~ 26
+200
+Text Notes 16425 19000 0    130  ~ 26
+5.0
+Text Notes 11375 19250 0    130  ~ 26
+R49
+Text Notes 11375 19500 0    130  ~ 26
+R50
+Text Notes 12350 19000 0    130  ~ 26
+1006788-4
+Text Notes 12350 19250 0    130  ~ 26
+1006760-32
+Text Notes 12350 19500 0    130  ~ 26
+1006750-15
+Wire Notes Line width 50 style solid
+	23800 12525 23900 12525
+Wire Notes Line width 50 style solid
+	23900 12525 23850 12725
+Wire Notes Line width 50 style solid
+	23800 12525 23850 12725
+Wire Notes Line style solid
+	28550 12725 28550 9100
+Wire Notes Line style solid
+	26075 12725 26075 7350
+Wire Notes Line style solid
+	23850 12700 23850 9100
+Text Notes 25575 13025 0    130  ~ 26
+CAPACITOR
+Text Notes 28375 13025 0    130  ~ 26
+10%
+Text Notes 25475 20025 0    130  ~ 26
+TRANSISTOR
+Wire Notes Line style solid
+	22100 18300 23125 18300
+Wire Notes Line style solid
+	22100 18550 23125 18550
+Wire Notes Line style solid
+	27125 18300 30150 18300
+Wire Notes Line style solid
+	27125 18550 30150 18550
+Text Notes 25350 18525 0    130  ~ 26
+SELECTION LIST
+Text Notes 23625 18550 0    130  ~ 26
+2004722
+Text Notes 23375 16525 0    130  ~ 26
+2004184-002
+Text Notes 23375 16775 0    130  ~ 26
+2004184-002
+Text Notes 23375 18025 0    130  ~ 26
+2004184-002
+Text Notes 23375 17525 0    130  ~ 26
+2004184-002
+Text Notes 23375 17275 0    130  ~ 26
+2004184-002
+Text Notes 23375 20275 0    130  ~ 26
+2004184-001
+Text Notes 23375 20025 0    130  ~ 26
+2004184-001
+Text Notes 23375 19775 0    130  ~ 26
+2004184-001
+Text Notes 23375 19275 0    130  ~ 26
+2004184-001
 $EndSCHEMATC
