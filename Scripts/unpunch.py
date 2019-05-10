@@ -8,7 +8,7 @@
 # been pre-converted to PNGs.  The steps I envisage for doing that
 # are:
 #	cd FolderOfScannedCardPDFs
-#	for n in *.PDF ; do pdfimages -png "$n" DestFolder_images/"$n"
+#	for n in *.PDF ; do pdfimages -png "$n" DestFolder_images/"$n" ; done
 #	cd DestFolder_images
 #	optipng *.png
 # (The destination folder is something_images because the _images 
