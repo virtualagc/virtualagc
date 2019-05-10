@@ -166,7 +166,7 @@ for n in dupList:
 		print("xreader '" + m["line"] + "' &")
 print("'")
 
-sys.stderr.write("<table><tbody>\n<tr>")
+sys.stderr.write("<table class=\"drawingIndex\"><tbody>\n<tr>")
 sys.stderr.write("<td><b>Link</b></td>")
 sys.stderr.write("<td><b>Drawing</b></td>")
 sys.stderr.write("<td><b>Rev</b></td>")
