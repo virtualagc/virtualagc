@@ -54,6 +54,7 @@ document.write(headerTemplate.replace("@TITLE@","yaDSKY").replace("@SUBTITLE@","
           <td style="vertical-align: top;">
             <h2><a name="What_is_a_DSKY_" id="What_is_a_DSKY_"></a><small><big>What
 is
+
                   a DSKY?</big><br>
               </small></h2>
             The DSKY is the "display/keyboard" (DSKY) used by the Apollo
@@ -67,14 +68,15 @@ is
             the movie <span style="font-style: italic;">Apollo 13</span>.
             In the HBO mini-series, <span style="font-style: italic;">From
 the
-              Earth to the Moon</span>, the DSKY appears so
-            prominently that it almost becomes another character
-            (dramatically speaking). For those of us who are familiar
-            with it from these sources, it is easy to think of the DSKY
-            itself as being the computer.&nbsp; However, the DSKY really
-            was quite independent from the AGC.&nbsp; From the
-            computer's standpoint, the DSKY was just another few i/o
-            channels, more or less, as in the block diagram below. </td>
+
+              Earth to the Moon</span>, the DSKY appears so prominently
+            that it almost becomes another character (dramatically
+            speaking). For those of us who are familiar with it from
+            these sources, it is easy to think of the DSKY itself as
+            being the computer.&nbsp; However, the DSKY really was quite
+            independent from the AGC.&nbsp; From the computer's
+            standpoint, the DSKY was just another few i/o channels, more
+            or less, as in the block diagram below. </td>
           <td style="vertical-align: top;">
             <h2><a href="AgcDskyCloseup.jpg"><img title="Photo courtesy
                   of Stephan Hotto. Taken at the Computer Historic
@@ -334,6 +336,7 @@ the
       hit-and-miss.&nbsp; I assume this is a normal property of the
       uplink—rather than a bug in <span style="font-weight: bold;">yaAGC</span>—but
 I
+
       don't really know.&nbsp;<br>
       <br>
     </div>
@@ -389,6 +392,7 @@ I
     possible to use the <a
       href="yaTelemetry.html#Scripted_operation_for_tutorials_museum">digital
 uplink
+
       facility</a> to automate various activities.<br>
     <h3><a name="Canned_Pre-recorded_Mission_Segments"></a> Canned,
       Pre-recorded Mission Segments</h3>
@@ -404,12 +408,14 @@ uplink
       <li>"Record" them using <b>yaDSKY2</b> (or <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY2.py">piDSKY2.py</a>).&nbsp;
 The
+
         recording process is described below.<br>
       </li>
       <li>Obtain a log of i/o-channel activity from a NASSP simulation,
         and convert that log to DSKY format using the program <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/convertNasspLog.py">convertNasspLog.py</a>.&nbsp;
 The
+
         ability for NASSP to log this data is new, and presumably
         neither documented nor widely available, so the details are TBD.<br>
       </li>
@@ -430,8 +436,7 @@ The
       pre-recorded scripts, each taking 15-16 minutes to run:<br>
     </p>
     <ul>
-      <li>An Apollo 8 launch
-        sequence.</li>
+      <li>An Apollo 8 launch sequence.</li>
       <li>An Apollo 11 launch sequence.</li>
       <li>An Apollo 11 lunar landing sequence.&nbsp; Note that since
         this is a recording of a simulated landing, and not a recording
@@ -473,9 +478,10 @@ The
     seconds.)&nbsp; DSKYs are always controlled by AGC "output channels"
     010, 011, 013, and 0163 as described on <a href="developer.html">our
 developer
-      page</a>; for informational purposes, <i>input</i>
-    channels that record keystrokes (outputs from the DSKY) are
-    generally included as well.<br>
+
+      page</a>; for informational purposes, <i>input</i> channels that
+    record keystrokes (outputs from the DSKY) are generally included as
+    well.<br>
     <br>
     To record a file from <b>yaDSKY2</b> (or piDSKY2.py) for later
     playback, you'd do this:<br>
@@ -779,13 +785,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/humanize
     upper-left quadrant of its panel.&nbsp; The trick is determining the
     textual legends for the indicators, and the colors of those
     indicators, on a mission by mission basis.&nbsp; The data for doing
-    so comes from <a href="ElectroMechanical.htm">the engineering
+    so comes from <a href="ElectroMechanical.html">the engineering
       drawings</a> for the DSKY, which can be summarized as follows:<br>
     <ul>
       <li>Apollo 7-8 CM, DSKY p/n <a
           href="http://www.ibiblio.org/apollo/2003994-031.html">2003994-031</a>
         → ALARM INDICATOR p/n <a
           href="http://www.ibiblio.org/apollo/SCDs/scd_1006387d.pdf">1006387</a>-002
+
         or -003<br>
       </li>
       <li>Apollo 9 CM, DSKY p/n <a
@@ -797,6 +804,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/humanize
           href="http://www.ibiblio.org/apollo/2003994-121.html">2003994-121</a>
         → ALARM INDICATOR p/n <a
           href="http://www.ibiblio.org/apollo/SCDs/scd_1006387d.pdf">1006387</a>-002
+
         or -003</li>
       <li>Apollo 5 LM, DSKY p/n <a
           href="http://www.ibiblio.org/apollo/2003985-051.html">2003985-051</a>
@@ -821,7 +829,7 @@ href="https://archive.org/stream/AgcApertureCardsBatch3Images#page/n0/mode/1up">
           href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a><br>
       </li>
       <li>Energized white:&nbsp; "aviation white" per <a
-href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
+          href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
       <li>Unenergized:&nbsp; ... inquiring minds would read the ALARM
         INDICATOR drawings ...<br>
       </li>
@@ -844,8 +852,7 @@ href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
                 <tr>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
-                    bgcolor="#ffffff"> UPLINK
-                    ACTY<br>
+                    bgcolor="#ffffff"> UPLINK ACTY<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
@@ -859,8 +866,7 @@ href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
                   </td>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
-                    bgcolor="#ffff00"> GIMBAL
-                    LOCK<br>
+                    bgcolor="#ffff00"> GIMBAL LOCK<br>
                   </td>
                 </tr>
                 <tr>
@@ -906,13 +912,12 @@ href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
                 <tr>
                   <td style="text-align: center; vertical-align:
                     middle;" bgcolor="#ffffff"> <span
-                      style="font-family:
-                      helvetica,arial,sans-serif;">KEY REL</span><br>
+                      style="font-family: helvetica,arial,sans-serif;">KEY
+                      REL</span><br>
                   </td>
                   <td style="font-family: helvetica,arial,sans-serif;
                     text-align: center; vertical-align: middle;"
-                    bgcolor="#ffffff"> OPR
-                    ERR<br>
+                    bgcolor="#ffffff"> OPR ERR<br>
                   </td>
                 </tr>
               </tbody>
@@ -932,8 +937,7 @@ href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
                 <tr>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
-                    bgcolor="#ffffff"> UPLINK
-                    ACTY<br>
+                    bgcolor="#ffffff"> UPLINK ACTY<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
@@ -947,8 +951,7 @@ href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
                   </td>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
-                    bgcolor="#ffff00"> GIMBAL
-                    LOCK<br>
+                    bgcolor="#ffff00"> GIMBAL LOCK<br>
                   </td>
                 </tr>
                 <tr>
@@ -1008,8 +1011,7 @@ href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
                 <tr>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
-                    bgcolor="#ffffff"> UPLINK
-                    ACTY<br>
+                    bgcolor="#ffffff"> UPLINK ACTY<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
@@ -1023,8 +1025,7 @@ href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
                   </td>
                   <td style="vertical-align: top; text-align: center;
                     font-family: helvetica,arial,sans-serif;"
-                    bgcolor="#ffff00"> GIMBAL
-                    LOCK<br>
+                    bgcolor="#ffff00"> GIMBAL LOCK<br>
                   </td>
                 </tr>
                 <tr>
@@ -1348,6 +1349,7 @@ href="Documents/MIL-C-25050A.pdf">MIL-C-25050</a></li>
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
