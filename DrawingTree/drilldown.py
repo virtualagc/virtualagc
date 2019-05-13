@@ -37,13 +37,13 @@ for line in f:
 	url = fields[0]
 	drawingNumber = fields[1]
 	revision = fields[2]
-	if len(revision) < 2:
-		revision = " " + revision
 	type = int(fields[3])
 	sheet = fields[4]
 	frame = fields[5]
 	title = fields[6]
 	if type != 1:
+		continue
+	if drawingNumber in drawings and len(revision) < len(drawings[drawingNumber]["revision"]):
 		continue
 	if drawingNumber in drawings and revision <= drawings[drawingNumber]["revision"]:
 		continue
@@ -154,7 +154,29 @@ def readFindTable(drawing, configuration):
 	return findTable
 
 # Now read the assembly-specific drawing.
-findTable = readFindTable(drawing, configuration)
+assemblies = {}
+assemblies[drawing] = readFindTable(drawing, configuration)
+
+# Descend recursively.
+def recurseFindTable(drawing):
+	global assemblies
+	for findNumber in assemblies[drawing]:
+		assembly = assemblies[drawing][findNumber]
+		drawings = assembly['DRAWING']
+		for d in drawings:
+			if d not in assemblies:
+				fields = d.split('-')
+				dd = fields[0]
+				if len(fields) > 1:
+					dc = fields[1]
+					if dc != "":
+						dc = '-' + dc
+				else:
+					dc = ""
+				assemblies[d] = readFindTable(dd, dc)
+recurseFindTable(drawing)
+for d in assemblies:
+	print(d, file=sys.stderr)
 
 # Write the html header.
 f = open("top.html", "r")
@@ -162,28 +184,34 @@ lines = f.readlines()
 f.close()
 sys.stdout.writelines(lines)
 
+findTable = assemblies[drawing]
 print("<script type=\"text/javascript\">")
 print("document.write(headerTemplate.replace(\"@TITLE@\",\"G&N Assembly Drill-down\").replace(\"@SUBTITLE@\",\"Assembly " + assemblyName + "\"))")
 print("</script>")
 
-print("<ul>")
-for n in range(0,200):
-	for c in ["", "A", "B", "C", "D"]:
-		key = str(n) + c
-		if key in findTable:
-			line = "<li>"
-			line += str(n) + ":  "
-			for n in range(0,len(findTable[key]['DRAWING'])):
-				if n > 0:
-					line += " or "
-				if findTable[key]["URL"][n] != "":
-					line += "<a href=\"" + findTable[key]["URL"][n] + "\">" + findTable[key]["DRAWING"][n] + "</a>"
-				else:
-					line += findTable[key]["DRAWING"][n]
-			line += " &mdash; " + findTable[key]["TITLE"]
-			line += "</li>"
-			print(line)
-print("</ul>")
+def makeHtml(findTable):
+	html = ""
+	html += "<ul>\n"
+	for n in range(0,200):
+		for c in ["", "A", "B", "C", "D"]:
+			key = str(n) + c
+			if key in findTable:
+				html += "<li>\n"
+				html += str(n) + ":  "
+				for n in range(0,len(findTable[key]['DRAWING'])):
+					if n > 0:
+						html += " or "
+					if findTable[key]["URL"][n] != "":
+						html += "<a href=\"" + findTable[key]["URL"][n] + "\">" + findTable[key]["DRAWING"][n] + "</a>"
+					else:
+						html += findTable[key]["DRAWING"][n]
+				html += " &mdash; " + findTable[key]["TITLE"]
+				html += "</li>\n"
+	html += "</ul>"
+	return html
+
+html = makeHtml(findTable)
+print(html)
 
 # Write the html footer.
 f = open("bottom.html", "r")
