@@ -53,10 +53,35 @@ f.close()
 #for key in drawings:
 #	print(key + " " + str(drawings[key]))
 
+# Get a list of all schematics transcribed to CAD.
+files = os.listdir("../Schematics")
+cads = []
+for f in files:
+	if len(f) in [8,9]:
+		if not f[:7].isdigit():
+			continue
+		if len(f) > 8 and f[7:] != "-A":
+			continue
+		if f[7] not in [ 'r', '-', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
+			continue
+		cads.append(f)
+cads.sort()
+cadDrawings = {}
+for d in cads:
+	if d[:7] not in cadDrawings:
+		cadDrawings[d[:7]] = [ "", "" ]
+	if d[7:] == 'r':
+		cadDrawings[d[:7]][1] = d
+	else:
+		cadDrawings[d[:7]][0] = d
+#for d in sorted(cadDrawings):
+#	print(str(d) + " " + str(cadDrawings[d]), file=sys.stderr)
+
 # Returns a dictionary with the contents of an assembly, or else an empty dictionary
 # if the find-table file wasn't found.
-def readFindTable(drawing, configuration):
-	findTable = {}
+standardKeys = [ "level", "drawing", "configuration", "assembly" ]
+def readFindTable(drawing, configuration, assembly, level):
+	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly }
 	# First need to read the current folder to for all files with names of the form
 	# 	drawing + rev + ".csv"
 	# to determine the one with the highest rev.
@@ -95,6 +120,7 @@ def readFindTable(drawing, configuration):
 	f = open(filename, "r")
 	first = True
 	find = 1
+	serializer = "A"
 	for line in f:
 		fields = line.strip("\n").split("\t")
 		if first:
@@ -125,6 +151,9 @@ def readFindTable(drawing, configuration):
 					currentFind = fields[n]
 					if currentFind == "":
 						break
+					if currentFind in findTable:
+						currentFind += serializer
+						serializer = chr(ord(serializer) + 1)
 				elif headings[n] in ["DRAWING", "QTY", "TITLE", "STRIKE"]:
 					if headings[n] == "DRAWING":
 						currentDrawing = fields[n].split(" or ")
@@ -146,7 +175,7 @@ def readFindTable(drawing, configuration):
 						row["URL"].append(drawings[fields[0]]["url"])
 					else:
 						row["URL"].append("")
-				if qtyTable or int(row["QTY"]) > 0:
+				if qtyTable or row["QTY"] != "":
 					findTable[currentFind] = row	
 	f.close()
 	
@@ -155,28 +184,49 @@ def readFindTable(drawing, configuration):
 
 # Now read the assembly-specific drawing.
 assemblies = {}
-assemblies[drawing] = readFindTable(drawing, configuration)
+assemblies[assemblyName] = readFindTable(drawing, configuration, assemblyName, 0)
 
 # Descend recursively.
-def recurseFindTable(drawing):
+maxLevel = 0
+def recurseFindTable(assemblyName, level):
 	global assemblies
-	for findNumber in assemblies[drawing]:
-		assembly = assemblies[drawing][findNumber]
+	global maxLevel
+	level += 1
+	for findNumber in assemblies[assemblyName]:
+		if findNumber in standardKeys:
+			continue
+		assembly = assemblies[assemblyName][findNumber]
 		drawings = assembly['DRAWING']
 		for d in drawings:
+			fields = d.split('-')
+			if not fields[0].isdigit():
+				continue
+			if len(fields) > 1 and not fields[1].isdigit():
+				continue
+			dd = int(fields[0])
+			if len(fields) > 1:
+				dc = fields[1]
+				if dc != "":
+					dc = '-' + dc
+			else:
+				dc = "0"
+			dc = int(dc)
 			if d not in assemblies:
-				fields = d.split('-')
-				dd = fields[0]
-				if len(fields) > 1:
-					dc = fields[1]
-					if dc != "":
-						dc = '-' + dc
-				else:
-					dc = ""
-				assemblies[d] = readFindTable(dd, dc)
-recurseFindTable(drawing)
-for d in assemblies:
-	print(d, file=sys.stderr)
+				a = readFindTable(dd, dc, d, level)
+				#if d == "2003994-011":
+				#	for f in sorted(a):
+				#		print('\n' + str(f) + " " + str(a[f]), file=sys.stderr)
+				if len(a.keys()) > len(standardKeys):
+					assemblies[d] = a
+					recurseFindTable(d, level)
+			else:
+				if level < assemblies[d]["level"]:
+					assemblies[d]["level"] = level
+			if d in assemblies and assemblies[d]["level"] > maxLevel:
+				maxLevel = assemblies[d]["level"]
+recurseFindTable(assemblyName, 0)
+#for d in sorted(assemblies):
+#	print(str(d) + " " + str(assemblies[d]["level"]), file=sys.stderr)
 
 # Write the html header.
 f = open("top.html", "r")
@@ -184,34 +234,91 @@ lines = f.readlines()
 f.close()
 sys.stdout.writelines(lines)
 
-findTable = assemblies[drawing]
+findTable = assemblies[assemblyName]
 print("<script type=\"text/javascript\">")
 print("document.write(headerTemplate.replace(\"@TITLE@\",\"G&N Assembly Drill-down\").replace(\"@SUBTITLE@\",\"Assembly " + assemblyName + "\"))")
 print("</script>")
+aname = assemblyName
+if str(drawing) in drawings:
+	aname = '<a href="' + drawings[str(drawing)]["url"] + '">' + assemblyName + "</a> &mdash; " + drawings[str(drawing)]["title"]
+print('<h1>' + aname + '</h1>')
 
+github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
+ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
 def makeHtml(findTable):
+	level = 0
 	html = ""
 	html += "<ul>\n"
-	for n in range(0,200):
-		for c in ["", "A", "B", "C", "D"]:
+	findNumbers = list(range(0, 200))
+	findNumbers.append("REF")
+	for n in findNumbers:
+		for c in ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"]:
 			key = str(n) + c
 			if key in findTable:
+				if key == "level":
+					level = findTable["level"]
+					continue
+				if key in standardKeys:
+					continue
 				html += "<li>\n"
 				html += str(n) + ":  "
-				for n in range(0,len(findTable[key]['DRAWING'])):
-					if n > 0:
+				expandedBelow = ""
+				seeAlso = ""
+				for nn in range(0,len(findTable[key]['DRAWING'])):
+					if nn > 0:
 						html += " or "
-					if findTable[key]["URL"][n] != "":
-						html += "<a href=\"" + findTable[key]["URL"][n] + "\">" + findTable[key]["DRAWING"][n] + "</a>"
+					thisDrawing = findTable[key]["DRAWING"][nn]
+					if findTable[key]["URL"][nn] != "":
+						html += "<a href=\"" + findTable[key]["URL"][nn] + "\">" + thisDrawing + "</a>"
 					else:
-						html += findTable[key]["DRAWING"][n]
-				html += " &mdash; " + findTable[key]["TITLE"]
+						html += thisDrawing
+					if thisDrawing in assemblies:
+						if expandedBelow == "":
+							expandedBelow = '.&nbsp;&nbsp;<a href="#' +  thisDrawing + '">Expanded in more detail below</a>'
+						else:
+							expandedBelow += ', and <a href="#' + thisDrawing + '">here</a>'
+					if thisDrawing[:7] in cadDrawings:
+						transcriptions = cadDrawings[thisDrawing[:7]]
+						for t in transcriptions:
+							if t != "":
+								if seeAlso == "":
+									seeAlso = '.&nbsp;&nbsp;See also: CAD transcription of drawing ' + t + \
+										' (<a href="' +  github + t + \
+										'">design files</a> or <a href="' + ibiblio + t + \
+										'">image files</a>)'
+								else:
+									seeAlso = ', or of ' + t + \
+										' (<a href="' +  github + t + \
+										'">design files</a> or <a href="' + ibiblio + t + \
+										'">image files</a>)'
+				html += " &mdash; " + findTable[key]["TITLE"] + expandedBelow + seeAlso + "."
 				html += "</li>\n"
 	html += "</ul>"
 	return html
 
 html = makeHtml(findTable)
 print(html)
+
+subassemblyOrders = ["Assemblies", "Subassemblies", "Sub-Subassemblies", "Deep Subassemblies" ]
+if maxLevel > 3:
+	maxLevel = 3
+for level in range(1, maxLevel + 1):
+	print('<br><hr style="width: 100%; height: 2px;"><br><h1>Expanded ' + subassemblyOrders[level] + '</h1>')
+	for d in sorted(assemblies):
+		if assemblies[d]["level"] != level:
+			continue
+		c = str(assemblies[d]["configuration"])
+		while len(c) > 0 and len(c) < 4:
+			c = c[:1] + "0" + c[1:]
+		aname0 = assemblies[d]["assembly"]
+		aname = aname0
+		dname = aname.split("-")[0]
+		if dname in drawings:
+			ref = '<a href="' + drawings[dname]["url"] + '">' + aname0 + '</a>'
+			aname = ref + " &mdash; " + drawings[dname]["title"]
+		print('<a name="' + aname0 + '"></a><h2>' + aname + '</h2>')
+		html = makeHtml(assemblies[d])
+		print(html)
 
 # Write the html footer.
 f = open("bottom.html", "r")
