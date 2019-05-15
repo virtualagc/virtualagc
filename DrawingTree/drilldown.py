@@ -260,6 +260,7 @@ def makeHtml(findTable):
 	findNumbers.append("REF")
 	for n in findNumbers:
 		for c in ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"]:
+			thisLine = ""
 			key = str(n) + c
 			if key in findTable:
 				if key == "level":
@@ -268,23 +269,23 @@ def makeHtml(findTable):
 				if key in standardKeys:
 					continue
 				if asTables:
-					html += "<tr>\n"
-					html += "<td>" + str(n) + "</td>"
+					thisLine += "<tr>\n"
+					thisLine += "<td>" + str(n) + "</td>"
 				else:
-					html += "<li>\n"
-					html += str(n) + ":  "
+					thisLine += "<li>\n"
+					thisLine += str(n) + ":  "
 				expandedBelow = ""
 				seeAlso = ""
 				if asTables:
-					html += "<td>"
+					thisLine += "<td>"
 				for nn in range(0,len(findTable[key]['DRAWING'])):
 					if nn > 0:
-						html += " or "
+						thisLine += " or "
 					thisDrawing = findTable[key]["DRAWING"][nn]
 					if findTable[key]["URL"][nn] != "":
-						html += "<a href=\"" + findTable[key]["URL"][nn] + "\">" + thisDrawing + "</a>"
+						thisLine += '<a class="normalDrawing" href=\"' + findTable[key]["URL"][nn] + "\">" + thisDrawing + "</a>"
 					else:
-						html += thisDrawing
+						thisLine += thisDrawing
 					if thisDrawing in assemblies:
 						if expandedBelow == "":
 							if not asTables:
@@ -309,9 +310,9 @@ def makeHtml(findTable):
 										'">design files</a> or <a href="' + ibiblio + t + \
 										'">image files</a>)'
 				if asTables:
-					html += "</td>"
+					thisLine += "</td>"
 				if asTables:
-					html += "<td>" + findTable[key]["TITLE"] + "</td>\n"
+					thisLine += "<td>" + findTable[key]["TITLE"] + "</td>\n"
 					note = ""
 					if expandedBelow != "":
 						note = expandedBelow + "."
@@ -320,11 +321,16 @@ def makeHtml(findTable):
 							note = seeAlso + "."
 						else:
 							note += "  " + seeAlso + "."
-					html += "<td>" + note + "</td>\n"
-					html += "</tr>\n"
+					thisLine += "<td>" + note + "</td>\n"
+					thisLine += "</tr>\n"
 				else:
-					html += " &mdash; " + findTable[key]["TITLE"] + expandedBelow + seeAlso + "."
-					html += "</li>\n"
+					thisLine += " &mdash; " + findTable[key]["TITLE"] + expandedBelow + seeAlso + "."
+					thisLine += "</li>\n"
+				if expandedBelow == "":
+					if "ASSEMBLY" in thisLine or "ASSY" in thisLine or "MODULE" in thisLine or "GROUP" in thisLine:
+						thisLine = thisLine.replace('class="normalDrawing"', 'class="earlyDrawing"')
+				html += thisLine
+						
 	if asTables:
 		html += "</tbody></table>"
 	else:
