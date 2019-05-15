@@ -79,9 +79,9 @@ for d in cads:
 
 # Returns a dictionary with the contents of an assembly, or else an empty dictionary
 # if the find-table file wasn't found.
-standardKeys = [ "level", "drawing", "configuration", "assembly" ]
+standardKeys = [ "level", "drawing", "configuration", "assembly", "parents" ]
 def readFindTable(drawing, configuration, assembly, level):
-	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly }
+	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly, "parents": [] }
 	# First need to read the current folder to for all files with names of the form
 	# 	drawing + rev + ".csv"
 	# to determine the one with the highest rev.
@@ -135,8 +135,8 @@ def readFindTable(drawing, configuration, assembly, level):
 				break
 			numConfigs = 0
 			for field in fields:
-				if field != ["FIND", "DRAWING", "QTY", "TITLE", "STRIKE"]:
-					numConfigs != 1
+				if field not in ["FIND", "DRAWING", "QTY", "TITLE", "STRIKE"]:
+					numConfigs += 1
 			#print(headings)
 		else:
 			row = {}
@@ -222,6 +222,8 @@ def recurseFindTable(assemblyName, level):
 			else:
 				if level < assemblies[d]["level"]:
 					assemblies[d]["level"] = level
+			if d in assemblies:
+				assemblies[d]["parents"].append(assemblyName)
 			if d in assemblies and assemblies[d]["level"] > maxLevel:
 				maxLevel = assemblies[d]["level"]
 recurseFindTable(assemblyName, 0)
@@ -234,6 +236,7 @@ lines = f.readlines()
 f.close()
 sys.stdout.writelines(lines)
 
+asTables = True
 findTable = assemblies[assemblyName]
 print("<script type=\"text/javascript\">")
 print("document.write(headerTemplate.replace(\"@TITLE@\",\"G&N Assembly Drill-down\").replace(\"@SUBTITLE@\",\"Assembly " + assemblyName + "\"))")
@@ -241,14 +244,18 @@ print("</script>")
 aname = assemblyName
 if str(drawing) in drawings:
 	aname = '<a href="' + drawings[str(drawing)]["url"] + '">' + assemblyName + "</a> &mdash; " + drawings[str(drawing)]["title"]
-print('<h1>' + aname + '</h1>')
+print('<br><a name="' + assemblyName + '"></a><h1>' + aname + '</h1>')
 
 github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
 ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
 def makeHtml(findTable):
 	level = 0
 	html = ""
-	html += "<ul>\n"
+	if asTables:
+		html += '<table class="drawingIndex"><tbody>\n'
+		html += '<tr><td><b>FIND</b></td><td><b>DRAWING</b></td><td><b>TITLE</b></td><td><b>NOTES</b></td></tr>\n'
+	else:
+		html += "<ul>\n"
 	findNumbers = list(range(0, 200))
 	findNumbers.append("REF")
 	for n in findNumbers:
@@ -260,10 +267,16 @@ def makeHtml(findTable):
 					continue
 				if key in standardKeys:
 					continue
-				html += "<li>\n"
-				html += str(n) + ":  "
+				if asTables:
+					html += "<tr>\n"
+					html += "<td>" + str(n) + "</td>"
+				else:
+					html += "<li>\n"
+					html += str(n) + ":  "
 				expandedBelow = ""
 				seeAlso = ""
+				if asTables:
+					html += "<td>"
 				for nn in range(0,len(findTable[key]['DRAWING'])):
 					if nn > 0:
 						html += " or "
@@ -274,7 +287,9 @@ def makeHtml(findTable):
 						html += thisDrawing
 					if thisDrawing in assemblies:
 						if expandedBelow == "":
-							expandedBelow = '.&nbsp;&nbsp;<a href="#' +  thisDrawing + '">Expanded in more detail below</a>'
+							if not asTables:
+								expandedBelow = '.&nbsp;&nbsp;'
+							expandedBelow += '<a href="#' +  thisDrawing + '">Expanded in more detail below</a>'
 						else:
 							expandedBelow += ', and <a href="#' + thisDrawing + '">here</a>'
 					if thisDrawing[:7] in cadDrawings:
@@ -282,18 +297,38 @@ def makeHtml(findTable):
 						for t in transcriptions:
 							if t != "":
 								if seeAlso == "":
-									seeAlso = '.&nbsp;&nbsp;See also: CAD transcription of drawing ' + t + \
+									if not asTables:
+										seeAlso = '.&nbsp;&nbsp;'
+									seeAlso += 'See also: CAD transcription of drawing ' + t + \
 										' (<a href="' +  github + t + \
 										'">design files</a> or <a href="' + ibiblio + t + \
 										'">image files</a>)'
 								else:
-									seeAlso = ', or of ' + t + \
+									seeAlso += ', or of ' + t + \
 										' (<a href="' +  github + t + \
 										'">design files</a> or <a href="' + ibiblio + t + \
 										'">image files</a>)'
-				html += " &mdash; " + findTable[key]["TITLE"] + expandedBelow + seeAlso + "."
-				html += "</li>\n"
-	html += "</ul>"
+				if asTables:
+					html += "</td>"
+				if asTables:
+					html += "<td>" + findTable[key]["TITLE"] + "</td>\n"
+					note = ""
+					if expandedBelow != "":
+						note = expandedBelow + "."
+					if seeAlso != "":
+						if note == "":
+							note = seeAlso + "."
+						else:
+							note += "  " + seeAlso + "."
+					html += "<td>" + note + "</td>\n"
+					html += "</tr>\n"
+				else:
+					html += " &mdash; " + findTable[key]["TITLE"] + expandedBelow + seeAlso + "."
+					html += "</li>\n"
+	if asTables:
+		html += "</tbody></table>"
+	else:
+		html += "</ul>"
 	return html
 
 html = makeHtml(findTable)
@@ -303,7 +338,7 @@ subassemblyOrders = ["Assemblies", "Subassemblies", "Sub-Subassemblies", "Deep S
 if maxLevel > 3:
 	maxLevel = 3
 for level in range(1, maxLevel + 1):
-	print('<br><hr style="width: 100%; height: 2px;"><br><h1>Expanded ' + subassemblyOrders[level] + '</h1>')
+	print('<br><br><hr style="width: 100%; height: 2px;"><br><h1>Expanded ' + subassemblyOrders[level] + '</h1>')
 	for d in sorted(assemblies):
 		if assemblies[d]["level"] != level:
 			continue
@@ -317,6 +352,14 @@ for level in range(1, maxLevel + 1):
 			ref = '<a href="' + drawings[dname]["url"] + '">' + aname0 + '</a>'
 			aname = ref + " &mdash; " + drawings[dname]["title"]
 		print('<a name="' + aname0 + '"></a><h2>' + aname + '</h2>')
+		if len(assemblies[d]["parents"]) > 0:
+			if len(assemblies[d]["parents"]) > 1:
+				print("<center><i>Reference assemblies:</i>")
+			else:
+				print("<center><i>Reference assembly:</i>")
+			for p in assemblies[d]["parents"]:
+				print(' <a href="#' + p + '">' + p + '</a>')
+			print("</center><br>")
 		html = makeHtml(assemblies[d])
 		print(html)
 
