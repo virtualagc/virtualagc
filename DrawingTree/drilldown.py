@@ -41,6 +41,8 @@ for line in f:
 	sheet = fields[4]
 	frame = fields[5]
 	title = fields[6]
+	if '""' in title:
+		title = title.replace('""', '"').strip('"')
 	if type != 1:
 		continue
 	if drawingNumber in drawings and len(revision) < len(drawings[drawingNumber]["revision"]):
@@ -241,6 +243,13 @@ findTable = assemblies[assemblyName]
 print("<script type=\"text/javascript\">")
 print("document.write(headerTemplate.replace(\"@TITLE@\",\"G&N Assembly Drill-down\").replace(\"@SUBTITLE@\",\"Assembly " + assemblyName + "\"))")
 print("</script>")
+
+# Write additional good that needs to go between the banner and the page content.
+f = open("middle.html", "r")
+lines = f.readlines()
+f.close()
+sys.stdout.writelines(lines)
+
 aname = assemblyName
 if str(drawing) in drawings:
 	aname = '<a href="' + drawings[str(drawing)]["url"] + '">' + assemblyName + "</a> &mdash; " + drawings[str(drawing)]["title"]
@@ -276,23 +285,35 @@ def makeHtml(findTable):
 					thisLine += str(n) + ":  "
 				expandedBelow = ""
 				seeAlso = ""
+				thisTitle = findTable[key]["TITLE"]
+				perhapsAssembly = False
+				if "ASSEMBLY" in thisTitle or "ASSY" in thisTitle or "GROUP" in thisTitle or " KIT" in thisTitle:
+					perhapsAssembly = True
 				if asTables:
 					thisLine += "<td>"
 				for nn in range(0,len(findTable[key]['DRAWING'])):
 					if nn > 0:
 						thisLine += " or "
 					thisDrawing = findTable[key]["DRAWING"][nn]
-					if findTable[key]["URL"][nn] != "":
-						thisLine += '<a class="normalDrawing" href=\"' + findTable[key]["URL"][nn] + "\">" + thisDrawing + "</a>"
-					else:
-						thisLine += thisDrawing
+					thisExpanded = False
+					cssClass = "normalDrawing"
 					if thisDrawing in assemblies:
+						thisExpanded = True
 						if expandedBelow == "":
 							if not asTables:
 								expandedBelow = '.&nbsp;&nbsp;'
 							expandedBelow += '<a href="#' +  thisDrawing + '">Expanded in more detail below</a>'
 						else:
 							expandedBelow += ', and <a href="#' + thisDrawing + '">here</a>'
+					if perhapsAssembly and not thisExpanded:
+						dfields = thisDrawing.split("-")
+						if len(dfields) == 1 or (len(dfields) == 2 and len(dfields[1]) == 3 and \
+						   dfields[1] != "001" and dfields[1][2] == "1" and dfields[1][0] in ["0", "1", "2" ]):
+							cssClass = "earlyDrawing"
+					if findTable[key]["URL"][nn] != "":
+						thisLine += '<a class="' + cssClass + '" href=\"' + findTable[key]["URL"][nn] + "\">" + thisDrawing + "</a>"
+					else:
+						thisLine += thisDrawing
 					if thisDrawing[:7] in cadDrawings:
 						transcriptions = cadDrawings[thisDrawing[:7]]
 						for t in transcriptions:
@@ -312,7 +333,7 @@ def makeHtml(findTable):
 				if asTables:
 					thisLine += "</td>"
 				if asTables:
-					thisLine += "<td>" + findTable[key]["TITLE"] + "</td>\n"
+					thisLine += "<td>" + thisTitle + "</td>\n"
 					note = ""
 					if expandedBelow != "":
 						note = expandedBelow + "."
@@ -324,11 +345,8 @@ def makeHtml(findTable):
 					thisLine += "<td>" + note + "</td>\n"
 					thisLine += "</tr>\n"
 				else:
-					thisLine += " &mdash; " + findTable[key]["TITLE"] + expandedBelow + seeAlso + "."
+					thisLine += " &mdash; " + thisTitle + expandedBelow + seeAlso + "."
 					thisLine += "</li>\n"
-				if expandedBelow == "":
-					if "ASSEMBLY" in thisLine or "ASSY" in thisLine or "MODULE" in thisLine or "GROUP" in thisLine:
-						thisLine = thisLine.replace('class="normalDrawing"', 'class="earlyDrawing"')
 				html += thisLine
 						
 	if asTables:
