@@ -142,9 +142,9 @@ for d in cads:
 
 # Returns a dictionary with the contents of an assembly, or else an empty dictionary
 # if the find-table file wasn't found.
-standardKeys = [ "level", "drawing", "configuration", "assembly", "parents" ]
+standardKeys = [ "level", "drawing", "configuration", "assembly", "parents", "exists", "empty" ]
 def readFindTable(drawing, configuration, assembly, level):
-	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly, "parents": [] }
+	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly, "parents": [], "exists": False, "empty": True }
 	# First need to read the current folder to for all files with names of the form
 	# 	drawing + rev + ".csv"
 	# to determine the one with the highest rev.
@@ -185,6 +185,8 @@ def readFindTable(drawing, configuration, assembly, level):
 	find = 1
 	serializer = "A"
 	for line in f:
+		if first and line.strip() == "":
+			break
 		fields = line.strip("\n").split("\t")
 		if first:
 			first = False
@@ -233,6 +235,7 @@ def readFindTable(drawing, configuration, assembly, level):
 					if not qtyTable or fields[n] == "X" or fields[n] == "AR" or (fields[n].isdigit() and int(fields[n]) > 0):
 						if not (not qtyTable and fields[n] == ""):
 							found = True
+							findTable["empty"] = False
 					if found:
 						rq = fields[n].split(",")
 						if len(rq) > 2:
@@ -256,6 +259,7 @@ def readFindTable(drawing, configuration, assembly, level):
 				if qtyTable or row["QTY"] != "":
 					findTable[currentFind] = row	
 	f.close()
+	findTable["exists"] = True
 	
 	# Yay!  All done.
 	return findTable
@@ -298,9 +302,10 @@ def recurseFindTable(assemblyName, level):
 				#if d == "2003994-011":
 				#	for f in sorted(a):
 				#		print('\n' + str(f) + " " + str(a[f]), file=sys.stderr)
-				if len(a.keys()) > len(standardKeys):
+				if a["exists"]:  
 					assemblies[d] = a
-					recurseFindTable(d, level)
+					if len(a.keys()) > len(standardKeys):
+						recurseFindTable(d, level)
 			else:
 				if level < assemblies[d]["level"]:
 					assemblies[d]["level"] = level
@@ -378,13 +383,16 @@ def makeHtml(findTable):
 					thisExpanded = False
 					cssClass = "normalDrawing"
 					if thisDrawing in assemblies:
-						thisExpanded = True
-						if expandedBelow == "":
-							if not asTables:
-								expandedBelow = '.&nbsp;&nbsp;'
-							expandedBelow += '<a href="#' +  thisDrawing + '">Expanded in more detail below</a>'
+						if assemblies[thisDrawing]["exists"] and assemblies[thisDrawing]["empty"]:
+							perhapsAssembly = False
 						else:
-							expandedBelow += ', and <a href="#' + thisDrawing + '">here</a>'
+							thisExpanded = True
+							if expandedBelow == "":
+								if not asTables:
+									expandedBelow = '.&nbsp;&nbsp;'
+								expandedBelow += '<a href="#' +  thisDrawing + '">Expanded in more detail</a>'
+							else:
+								expandedBelow += ', and <a href="#' + thisDrawing + '">here</a>'
 					if perhapsAssembly and not thisExpanded:
 						dfields = thisDrawing.split("-")
 						if len(dfields) == 1 or (len(dfields) == 2 and len(dfields[1]) == 3 and \
@@ -439,12 +447,13 @@ html = makeHtml(findTable)
 print(html)
 
 subassemblyOrders = ["Assemblies", "Subassemblies", "Sub-Subassemblies", "Deep Subassemblies" ]
-if maxLevel > 3:
-	maxLevel = 3
-for level in range(1, maxLevel + 1):
+assLevel = len(subassemblyOrders) - 1
+for level in range(1, assLevel + 1):
 	print('<br><br><hr style="width: 100%; height: 2px;"><br><h1>Expanded ' + subassemblyOrders[level] + '</h1>')
 	for d in sorted(assemblies):
-		if assemblies[d]["level"] != level:
+		if (level < assLevel and assemblies[d]["level"] != level) or (level == assLevel and assemblies[d]["level"] < assLevel):
+			continue
+		if assemblies[d]["empty"]:
 			continue
 		c = str(assemblies[d]["configuration"])
 		while len(c) > 0 and len(c) < 4:
@@ -461,7 +470,7 @@ for level in range(1, maxLevel + 1):
 				print("<center><i>Reference assemblies:</i>")
 			else:
 				print("<center><i>Reference assembly:</i>")
-			for p in assemblies[d]["parents"]:
+			for p in sorted(assemblies[d]["parents"]):
 				print(' <a href="#' + p + '">' + p + '</a>')
 			print("</center><br>")
 		html = makeHtml(assemblies[d])
