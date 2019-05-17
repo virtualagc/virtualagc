@@ -196,7 +196,8 @@ def readFindTable(drawing, configuration, assembly, level):
 			elif "DRAWING" not in headings and "QTY" in headings:
 				qtyTable = False
 			else:
-				print("Cannot distinguish table type from DRAWING/QTY columns.", file=sys.stderr)
+				print("Cannot distinguish table type (" + assembly + ") from DRAWING/QTY columns.", file=sys.stderr)
+				print(headings, file=sys.stderr)
 				break
 			numConfigs = 0
 			for field in fields:
@@ -465,6 +466,8 @@ for level in range(1, assLevel + 1):
 			ref = '<a href="' + drawings[dname]["url"] + '">' + aname0 + '</a>'
 			aname = ref + " &mdash; " + drawings[dname]["title"]
 		print('<a name="' + aname0 + '"></a><h2>' + aname + '</h2>')
+		if dname not in drawings:
+			print("<center><b>Note:</b> No copy of drawing " + dname + " is available, so this listing of its FIND table is partially speculative.</center><br>")
 		if len(assemblies[d]["parents"]) > 0:
 			if len(assemblies[d]["parents"]) > 1:
 				print("<center><i>Reference assemblies:</i>")
