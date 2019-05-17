@@ -3,10 +3,71 @@
 # (from an assembly in the Apollo G&N system), and combine
 # its find-table file (SOMETHING.csv) with the obligatory 
 # drawings.csv file, producing a drawing drilldown from it.  
-# The output in TBD format.
+# The usage is:
+#	./drilldown.py ASSEMBLY >ASSEMBLY.html
+# where ASSEMBLY is something like 6015000-071 (drawing number
+# plus configuration dash number) or else just a drawing number
+# (without revision code in either case).  Additionally, the
+# file
+#	drilldown.json
+# is produced by this operation.  It has all of the same info that's
+# in the HTML, plus quantities, except that the JSON doesn't provide
+# any info about CAD transcriptions of the engineering drawings. 
+#
+# It's probably just as easy to look at the JSON itself, properly 
+# formatted of course, to see what it provides, as opposed to my 
+# giving a long explanation about it, but there are a couple of 
+# points worth making.  What's in the JSON is a key/value dictionary,
+# with the keys being the assemblies.  Thus, the top-level assembly
+# will have the key ASSEMBLY, but all of the assemblies referenced
+# by ASSEMBLY will be there, along with all those referenced by the 
+# subassemblies, and so on.  The values for each of those assembly
+# keys will also be key/value dictionaries, such as "parents" (which is
+# a list of all assemblies using that assembly), but most of the keys
+# will be the "FIND" numbers from the find tables in the drawings.
+# The values for the FIND-number keys will themselves be dictionaries
+# that describe the cell of the FIND-table that corresponds to that
+# specific FIND-number row and the specific configuration-number column
+# implied by the particular assembly.  The important characteristics of the
+# cell are the keys
+#	QTY		The quantity count.  Sometimes these may be "AR"
+#			(for "as required") or "X" (for reference materials
+#			like the schematic diagram, which aren't anything
+#			used to actually build the assembly).
+#	DRAWING		The subassembly or component associated with that
+#			cell.  This is actually an array, though usually
+#			only with one element in it, because any given cell
+#			could actually call out several alternative 
+#			subassemblies or components.  If a particular
+#			entry is not present elsewhere in the JSON, it 
+#			means either that it was a component (rather than 
+#			an assembly), or else the FIND-table needed for the
+#			drilldown has not yet been turned into a .csv file,
+#			or that we don't have a revision of the drawing that's
+#			new enough to contain the sought-after dash number.
+#			It sometimes happens that as description of how to
+#			determine the part number appears rather than the 
+#			part number itself, such as "SEE NOTE 13".
+#	TITLE		The title of the drawing associated with the assembly.
+#			These come directly from the title blocks of the 
+#			scanned drawings, where possible, but come from the
+#			FIND tables if we don't actually have the scanned
+#			drawing.
+#	URL		An array of URLs associated with the DRAWING array.
+#			These point to the scanned engineering drawings.
+#			If a URL is blank, it means we don't have a scan
+#			of the drawing.  URLs are provided even if the
+#			particular configuration dash-number being sought
+#			is not present in the scanned drawing, usually due
+#			to the drawing being too early a revision.
+#	CELL		This is simply the contents of the FIND-table cell,
+#			as-is.  It usually looks like a QTY or DRAWING, but
+#			is not always.  It's really just present for debuggin
+#			purposes, so use it for anything else at your peril!
 
 import sys
 import os
+import json
 
 if len(sys.argv) > 1:
 	assemblyName = sys.argv[1]
@@ -145,6 +206,8 @@ def readFindTable(drawing, configuration, assembly, level):
 			found = False
 			titleField = -1
 			currentDrawing = []
+			currentQty = 0
+			rowQty = 0
 			if "FIND" not in headings:
 				currentFind = str(find) 
 				find += 1
@@ -157,17 +220,30 @@ def readFindTable(drawing, configuration, assembly, level):
 						currentFind += serializer
 						serializer = chr(ord(serializer) + 1)
 				elif headings[n] in ["DRAWING", "QTY", "TITLE", "STRIKE"]:
+					if headings[n] == "QTY":
+						rowQty = fields[n]
 					if headings[n] == "DRAWING":
 						currentDrawing = fields[n].split(" or ")
 					row[headings[n]] = fields[n]
 				elif int(headings[n]) == configuration or (numConfigs == 1 and configuration in [0, -11]):
-					row[headings[n]] = fields[n]
+					row["CELL"] = fields[n]
+					currentQty = rowQty
+					if qtyTable:
+						currentQty = fields[n]
 					if not qtyTable or fields[n] == "X" or fields[n] == "AR" or (fields[n].isdigit() and int(fields[n]) > 0):
 						if not (not qtyTable and fields[n] == ""):
 							found = True
+					if found:
+						rq = fields[n].split(",")
+						if len(rq) > 2:
+							continue
+						elif len(rq) == 2:
+							fields[n] = rq[0]
+							currentQty = rq[1]
 					if not qtyTable:
 						currentDrawing = fields[n].split(" or ")
 			row["DRAWING"] = currentDrawing
+			row["QTY"] = currentQty
 			if found and ("STRIKE" not in headings or row["STRIKE"] == "") and currentFind != "":
 				row["URL"] = []
 				for d in currentDrawing:
@@ -187,6 +263,10 @@ def readFindTable(drawing, configuration, assembly, level):
 # Now read the assembly-specific drawing.
 assemblies = {}
 assemblies[assemblyName] = readFindTable(drawing, configuration, assemblyName, 0)
+
+#print(assemblyName, file=sys.stderr)
+#for p in sorted(assemblies[assemblyName]):
+#	print("  " + p + " " + str(assemblies[assemblyName][p]), file=sys.stderr)
 
 # Descend recursively.
 maxLevel = 0
@@ -393,3 +473,8 @@ lines = f.readlines()
 f.close()
 sys.stdout.writelines(lines)
 
+# Also, write a JSON object.
+jsonString = json.dumps(assemblies)
+f = open("drilldown-" + assemblyName + ".json", "w")
+f.write(jsonString)
+f.close()

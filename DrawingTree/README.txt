@@ -54,6 +54,11 @@ by the presence of the DRAWING/QTY columns:
 	DRAWING present, QTY absent:	The quantities are listed in the cells.
 	DRAWING absent, QTY present:	The drawing-numbers are listed in the cells.
 
+It is also theoretically possible to have a case (though I haven't seen one 
+yet) which is a hybrid, and some cells need to specify both the drawing number
+and the quantity.  In that case, the cell is formatted as "DRAWING,QTY"
+(with no spaces around the comma).
+
 Wherever possible, the post-processing software takes drawing/assembly titles
 from the drawings.csv file.  However, it is still advisable to have the TITLE
 column, in case the corresponding drawing happens to be missing from the collection
@@ -61,7 +66,10 @@ and thus to be missing from drawings.csv.
 
 In some cases, the DRAWING column (or the drawing numbers listed in the cells)
 may have several equally-valid alternatives, in which case that are separated
-by " or ".  For example, "DRAWING1 or DRAWING2 or DRAWING3".
+by " or ".  For example, "DRAWING1 or DRAWING2 or DRAWING3".  In cases where
+the cell needs to specify both the drawing and quantity, this would instead be
+"DRAWING1 or DRAWING2 or DRAWING3,QTY".  I.e., the same quantity applies whatever
+the number of alternative drawings.
 
 Sometimes, the part number is formed by some complicated rule which is difficult
 to specify properly in this kind of format, such as "Look up in table X of
