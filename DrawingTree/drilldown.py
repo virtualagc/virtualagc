@@ -89,6 +89,9 @@ else:
 	print("No assembly specified on command line.", file=sys.stderr)
 	sys.exit(1)
 	
+def dbg(str, msg):
+	if str == "0-0":
+		print(msg, file=sys.stderr)
 
 # First step: read drawings.csv and keep it in a dictionary.
 drawings = { }
@@ -205,6 +208,7 @@ def readFindTable(drawing, configuration, assembly, level):
 					numConfigs += 1
 			#print(headings)
 		else:
+			findTable["empty"] = False
 			row = {}
 			found = False
 			titleField = -1
@@ -226,7 +230,8 @@ def readFindTable(drawing, configuration, assembly, level):
 					if headings[n] == "QTY":
 						rowQty = fields[n]
 					if headings[n] == "DRAWING":
-						currentDrawing = fields[n].split(" or ")
+						drawingField = (fields[n].split(" THRU "))[0]
+						currentDrawing = drawingField.split(" or ")
 					row[headings[n]] = fields[n]
 				elif int(headings[n]) == configuration or (numConfigs == 1 and configuration in [0, -11]):
 					row["CELL"] = fields[n]
@@ -236,7 +241,6 @@ def readFindTable(drawing, configuration, assembly, level):
 					if not qtyTable or fields[n] == "X" or fields[n] == "AR" or (fields[n].isdigit() and int(fields[n]) > 0):
 						if not (not qtyTable and fields[n] == ""):
 							found = True
-							findTable["empty"] = False
 					if found:
 						rq = fields[n].split(",")
 						if len(rq) > 2:
@@ -304,8 +308,10 @@ def recurseFindTable(assemblyName, level):
 				#	for f in sorted(a):
 				#		print('\n' + str(f) + " " + str(a[f]), file=sys.stderr)
 				if a["exists"]:  
-					assemblies[d] = a
-					if len(a.keys()) > len(standardKeys):
+					if a["exists"] and a["empty"]:
+						assemblies[d] =a
+					elif len(a.keys()) > len(standardKeys):
+						assemblies[d] = a
 						recurseFindTable(d, level)
 			else:
 				if level < assemblies[d]["level"]:
@@ -372,9 +378,10 @@ def makeHtml(findTable):
 				expandedBelow = ""
 				seeAlso = ""
 				thisTitle = findTable[key]["TITLE"]
-				perhapsAssembly = False
+				markAsAssembly = False
 				if "ASSEMBLY" in thisTitle or "ASSY" in thisTitle or "GROUP" in thisTitle or " KIT" in thisTitle:
-					perhapsAssembly = True
+					markAsAssembly = True
+				perhapsAssembly = markAsAssembly
 				if asTables:
 					thisLine += "<td>"
 				for nn in range(0,len(findTable[key]['DRAWING'])):
@@ -394,6 +401,10 @@ def makeHtml(findTable):
 								expandedBelow += '<a href="#' +  thisDrawing + '">Expanded in more detail</a>'
 							else:
 								expandedBelow += ', and <a href="#' + thisDrawing + '">here</a>'
+					dbg(thisDrawing, str(findTable[key]))
+					dbg(thisDrawing, str(thisDrawing in assemblies))
+					dbg(thisDrawing, perhapsAssembly)
+					dbg(thisDrawing, thisExpanded)
 					if perhapsAssembly and not thisExpanded:
 						dfields = thisDrawing.split("-")
 						if len(dfields) == 1 or (len(dfields) == 2 and len(dfields[1]) == 3 and \
@@ -421,6 +432,8 @@ def makeHtml(findTable):
 										'">image files</a>)'
 				if asTables:
 					thisLine += "</td>"
+				if markAsAssembly:
+					thisTitle = "<b>" + thisTitle + "</b>"
 				if asTables:
 					thisLine += "<td>" + thisTitle + "</td>\n"
 					note = ""
