@@ -145,9 +145,10 @@ for d in cads:
 
 # Returns a dictionary with the contents of an assembly, or else an empty dictionary
 # if the find-table file wasn't found.
-standardKeys = [ "level", "drawing", "configuration", "assembly", "parents", "exists", "empty" ]
+standardKeys = [ "level", "drawing", "configuration", "assembly", "parents", "exists", "empty", "subbedFor" ]
 def readFindTable(drawing, configuration, assembly, level):
-	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly, "parents": [], "exists": False, "empty": True }
+	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly, "parents": [], 
+			"exists": False, "empty": True, "subbedFor": [] }
 	# First need to read the current folder to for all files with names of the form
 	# 	drawing + rev + ".csv"
 	# to determine the one with the highest rev.
@@ -269,9 +270,47 @@ def readFindTable(drawing, configuration, assembly, level):
 	# Yay!  All done.
 	return findTable
 
+# Similar to readFindTable(), but if it doesn't find the specific desired configuration
+# dash number, tries other dash numbers as well.  The returned findTable isn't affected
+# by any of the latter, but if the guessed dash numbers are found, the associated 
+# substitute find table is stored in 'assemblies' anyway.
+subbedFrom = {}
+def readFindTableWithSubbing(drawing, configuration, assembly, level):
+	findTable = readFindTable(drawing, configuration, assembly, level)
+	c = configuration
+	subbedFindTable = {}
+	for key in findTable:
+		subbedFindTable[key] = 0
+	subbedFindTable["exists"] = findTable["exists"]
+	subbedFindTable["empty"] = findTable["empty"]
+	tabulated = False
+	if str(drawing) in drawings:
+		if "TABULATED" in drawings[str(drawing)]["title"]:
+			tabulated = True
+	while level > 0 and subbedFindTable["exists"] and not subbedFindTable["empty"] and \
+			len(subbedFindTable.keys()) == len(standardKeys) and \
+			not tabulated and c % 10 == 9 and c < -11:
+		c += 10
+		a = str(drawing) + "-" + "{:0>3d}".format(-c)
+		if a in assemblies:
+			subbedFrom[assembly] = a
+			if assembly not in assemblies[a]["subbedFor"]:
+				assemblies[a]["subbedFor"].append(assembly)
+			if level < assemblies[a]["level"]:
+				assemblies[a]["level"] = level
+			break
+		else:
+			subbedFindTable = readFindTable(drawing, c, a, level)
+			if len(subbedFindTable.keys()) > len(standardKeys):
+				subbedFrom[assembly] = a
+				subbedFindTable["subbedFor"].append(assembly)
+				assemblies[a] = subbedFindTable
+				break
+	return findTable
+
 # Now read the assembly-specific drawing.
 assemblies = {}
-assemblies[assemblyName] = readFindTable(drawing, configuration, assemblyName, 0)
+assemblies[assemblyName] = readFindTableWithSubbing(drawing, configuration, assemblyName, 0)
 
 #print(assemblyName, file=sys.stderr)
 #for p in sorted(assemblies[assemblyName]):
@@ -303,7 +342,7 @@ def recurseFindTable(assemblyName, level):
 				dc = "0"
 			dc = int(dc)
 			if d not in assemblies:
-				a = readFindTable(dd, dc, d, level)
+				a = readFindTableWithSubbing(dd, dc, d, level)
 				#if d == "2003994-011":
 				#	for f in sorted(a):
 				#		print('\n' + str(f) + " " + str(a[f]), file=sys.stderr)
@@ -313,13 +352,21 @@ def recurseFindTable(assemblyName, level):
 					elif len(a.keys()) > len(standardKeys):
 						assemblies[d] = a
 						recurseFindTable(d, level)
+					elif d in subbedFrom:
+						dd = subbedFrom[d]
+						recurseFindTable(dd, level)
 			else:
 				if level < assemblies[d]["level"]:
 					assemblies[d]["level"] = level
 			if d in assemblies:
 				assemblies[d]["parents"].append(assemblyName)
-			if d in assemblies and assemblies[d]["level"] > maxLevel:
-				maxLevel = assemblies[d]["level"]
+				if assemblies[d]["level"] > maxLevel:
+					maxLevel = assemblies[d]["level"]
+			elif d in subbedFrom:
+				dd = subbedFrom[d]
+				assemblies[dd]["parents"].append(assemblyName)
+				if assemblies[dd]["level"] > maxLevel:
+					maxLevel = assemblies[dd]["level"]
 recurseFindTable(assemblyName, 0)
 #for d in sorted(assemblies):
 #	print(str(d) + " " + str(assemblies[d]["level"]), file=sys.stderr)
@@ -398,9 +445,17 @@ def makeHtml(findTable):
 							if expandedBelow == "":
 								if not asTables:
 									expandedBelow = '.&nbsp;&nbsp;'
-								expandedBelow += '<a href="#' +  thisDrawing + '">Expanded in more detail</a>'
+								expandedBelow += 'Expanded in more detail: <a href="#' +  thisDrawing + '">' + thisDrawing + '</a>'
 							else:
-								expandedBelow += ', and <a href="#' + thisDrawing + '">here</a>'
+								expandedBelow += ', and <a href="#' + thisDrawing + '">' + thisDrawing + '</a>'
+					elif thisDrawing in subbedFrom:
+							sub = subbedFrom[thisDrawing]
+							if expandedBelow == "":
+								if not asTables:
+									expandedBelow = '.&nbsp;&nbsp;'
+								expandedBelow += 'Expanded in more detail: by <a href="#' +  sub + '"><font color="red">substitute ' + sub + '</font></a>'
+							else:
+								expandedBelow += ', and by <a href="#' + sub + '"><font color="red">substitute ' + sub + '</font></a>'						
 					dbg(thisDrawing, str(findTable[key]))
 					dbg(thisDrawing, str(thisDrawing in assemblies))
 					dbg(thisDrawing, perhapsAssembly)
@@ -489,6 +544,12 @@ for level in range(1, assLevel + 1):
 			for p in sorted(assemblies[d]["parents"]):
 				print(' <a href="#' + p + '">' + p + '</a>')
 			print("</center><br>")
+		if len(assemblies[d]["subbedFor"]) > 0:
+			print('<center><font color = "red"><b>Warning:</b>  For some reference assemblies, a ')
+			print('different, unavailable configuration is required: ')
+			for p in sorted(assemblies[d]["subbedFor"]):
+				print(' ' + p)
+			print('</font></center><br>')
 		html = makeHtml(assemblies[d])
 		print(html)
 
