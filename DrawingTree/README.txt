@@ -77,8 +77,26 @@ drawing Y, using table Z".  Therefore, the drawing number sometimes cannot
 necessarily be generated automatically by software and is simply left as a 
 textual description of the rule.
 
-The post-processing software is drilldown.py, so look in its source code for
-additional documentation.
+The post-processing software is a Python 3 program, drilldown.py, so look in 
+its source code for additional documentation.  Basically, you 'cd' into this 
+directory and do
+
+	./drilldown.py ASSEMBLYNAME >OUTPUT.html
+			or possibly
+	python3 ./drilldown.py ASSEMBLYNAME > OUPUT.html
+
+where ASSEMBLYNAME.csv is one of the existing FIND-table files.  The OUTPUT.html
+file is constructed in such a way that it can be browse directly from this
+directory or else can be used on the Virtual AGC website, though the formatting
+differs in the two cases.  (In other words, it can be used both by me, for 
+updating stuff on the website, and by downstream users, for generating locally
+browsable drilldowns of whatever assembly they need.)  This process also creates 
+a file,
+
+	drilldown-ASSEMBLYNAME.json
+
+which is a machine-readable form of the data in the OUTPUT.html file, except that
+it additionaly contains quantity data for each FIND number.
 
 Finally, in terms of how to produce the file drawings.csv, I used to have
 a fairly manually-intensive method here that involved cut-and-pasting from
