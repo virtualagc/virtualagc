@@ -9,7 +9,7 @@
 # plus configuration dash number) or else just a drawing number
 # (without revision code in either case).  Additionally, the
 # file
-#	drilldown.json
+#	drilldown-ASSEMBLY.json
 # is produced by this operation.  It has all of the same info that's
 # in the HTML, plus quantities, except that the JSON doesn't provide
 # any info about CAD transcriptions of the engineering drawings. 
@@ -231,6 +231,8 @@ def readFindTable(drawing, configuration, assembly, level):
 					if headings[n] == "QTY":
 						rowQty = fields[n]
 					if headings[n] == "DRAWING":
+						if fields[n][:1] == "'":
+							fields[n] = fields[n][1:]
 						drawingField = (fields[n].split(" THRU "))[0]
 						currentDrawing = drawingField.split(" or ")
 					row[headings[n]] = fields[n]
