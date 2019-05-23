@@ -44,7 +44,10 @@ then
 	done
 	
 	# Block I CM
-	# ... TBD ...
+	for a in 000 `seq -w 11 10 121`
+	do
+		drilldown 1014999-$a
+	done
 
 else
 
