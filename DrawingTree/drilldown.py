@@ -205,7 +205,7 @@ def readFindTable(drawing, configuration, assembly, level):
 				break
 			numConfigs = 0
 			for field in fields:
-				if field not in ["FIND", "DRAWING", "QTY", "TITLE", "STRIKE"]:
+				if field not in ["FIND", "DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
 					numConfigs += 1
 			#print(headings)
 		else:
@@ -227,7 +227,7 @@ def readFindTable(drawing, configuration, assembly, level):
 					if currentFind in findTable:
 						currentFind += serializer
 						serializer = chr(ord(serializer) + 1)
-				elif headings[n] in ["DRAWING", "QTY", "TITLE", "STRIKE"]:
+				elif headings[n] in ["DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
 					if headings[n] == "QTY":
 						rowQty = fields[n]
 					if headings[n] == "DRAWING":
@@ -494,6 +494,8 @@ def makeHtml(findTable):
 				if asTables:
 					thisLine += "<td>" + thisTitle + "</td>\n"
 					note = ""
+					if "NOTE" in findTable[key]:
+						note = findTable[key]["NOTE"] + "  "
 					if expandedBelow != "":
 						note = expandedBelow + "."
 					if seeAlso != "":
