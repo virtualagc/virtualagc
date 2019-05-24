@@ -62,12 +62,15 @@
 #			to the drawing being too early a revision.
 #	CELL		This is simply the contents of the FIND-table cell,
 #			as-is.  It usually looks like a QTY or DRAWING, but
-#			is not always.  It's really just present for debuggin
+#			is not always.  It's really just present for debugging
 #			purposes, so use it for anything else at your peril!
 
 import sys
 import os
 import json
+
+github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
+ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
 
 if len(sys.argv) > 1:
 	assemblyName = sys.argv[1]
@@ -396,8 +399,6 @@ if str(drawing) in drawings:
 	aname = '<a href="' + drawings[str(drawing)]["url"] + '">' + assemblyName + "</a> &mdash; " + drawings[str(drawing)]["title"]
 print('<br><a name="' + assemblyName + '"></a><h1>' + aname + '</h1>')
 
-github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
-ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
 def makeHtml(findTable):
 	level = 0
 	html = ""
