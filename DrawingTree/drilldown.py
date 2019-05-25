@@ -373,6 +373,26 @@ def recurseFindTable(assemblyName, level):
 				if assemblies[dd]["level"] > maxLevel:
 					maxLevel = assemblies[dd]["level"]
 recurseFindTable(assemblyName, 0)
+# While recurseFindTable() attempts to set the "level" keys of the assemblies,
+# I realize belatedly that it can't reliably do this in the simplistic way
+# I imagined, and deep sub-assemblies may be assigned larger level values than
+# they ought to (if more than one level is possible).  Rather than try to fix
+# it in recurseFindTable(), it's simply easier to do a final brute-force 
+# assignment at the end.  The idea of the brute-force assignment is simply to
+# check each assembly against its parents, and to keep doing passes until no
+# changes have occurred.
+changed = True
+while changed:
+	changed = False
+	for a in assemblies:
+		assembly = assemblies[a]
+		level = assembly["level"]
+		for p in assembly["parents"]:
+			levelp = assemblies[p]["level"] + 1
+			if level > levelp:
+				changed = True
+				level = levelp
+				assembly["level"] = levelp
 #for d in sorted(assemblies):
 #	print(str(d) + " " + str(assemblies[d]["level"]), file=sys.stderr)
 

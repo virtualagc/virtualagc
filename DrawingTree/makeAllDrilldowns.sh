@@ -18,6 +18,8 @@ function drilldown {
 	then
 		echo No change in $assembly
 	else
+		#meld temp.html $dest/$assembly.html
+		#exit
 		cp -a temp.html $dest/$assembly.html
 	fi
 }
@@ -28,16 +30,16 @@ then
 	# LEM
 	for a in `seq -w 21 10 181`
 	do
-		if [[ $a != 101 && $a != 041 ]]
+		if [[ $a != 041 ]]
 		then
 			drilldown 6014999-$a
 		fi
 	done
 	
 	# Block II CM
-	for a in `seq -w 11 10 231`
+	for a in `seq -w 11 10 221`
 	do
-		if [[ $a != 041 ]]
+		if [[ $a != 031 ]]
 		then
 			drilldown 2014999-$a
 		fi
