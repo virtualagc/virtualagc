@@ -146,6 +146,47 @@ for d in cads:
 #for d in sorted(cadDrawings):
 #	print(str(d) + " " + str(cadDrawings[d]), file=sys.stderr)
 
+# Splits an assembly name (like 1234567-011) or part name (like 1234567-001 or
+# MS1234-567 or NAS1234C567) into its constituent part number and dash number
+# (like ["1234567","011"] or ["NAS1234","C567"].  It's equivalent to returning
+# a.split("-") normally, but it takes into account that some MS and NAS specs
+# have a modifying letter like "A" or "C" following the base part number,
+# rather than a hyphen, and that the "A" or "C" (or whatever) isn't part of
+# the base number.  Or to put it differently, if we have a drawing for 
+# MS1234, we don't want the burden of creating identical drawings for 
+# MS1234A, MS1234C, and so on.
+def splitPartNumber(assembly):
+	fields = assembly.split()
+	if len(fields) == 0:
+		return [""]
+	#if len(fields) > 1:
+	#	print(fields, file=sys.stderr)
+	a = fields[0]
+	n = 0
+	found = False
+	for n in range(0, len(a)):
+		if a[n].isdigit():
+			found = True
+			break
+	if not found:
+		return [a]
+	found = False
+	for m in range(n, len(a)):
+		if not a[m].isdigit():
+			found = True
+			break
+	if not found:
+		return [a]
+	start = a[:m]
+	if a[m] == "-":
+		m += 1
+	return [start, a[m:]]
+#print(splitPartNumber("1234567-011"))
+#print(splitPartNumber("MS1234-567"))
+#print(splitPartNumber("NAS1234C567"))
+#print(splitPartNumber("NAS1234C-567D"))
+#sys.exit(0)
+
 # Returns a dictionary with the contents of an assembly, or else an empty dictionary
 # if the find-table file wasn't found.
 standardKeys = [ "level", "drawing", "configuration", "assembly", "parents", "exists", "empty", "subbedFor" ]
@@ -261,7 +302,8 @@ def readFindTable(drawing, configuration, assembly, level):
 			if found and ("STRIKE" not in headings or row["STRIKE"] == "") and currentFind != "":
 				row["URL"] = []
 				for d in currentDrawing:
-					fields = d.split("-")
+					fields = splitPartNumber(d)
+					#dbg(d, str(fields))
 					if fields[0] in drawings:
 						row["TITLE"] = drawings[fields[0]]["title"]
 						row["URL"].append(drawings[fields[0]]["url"])
@@ -333,7 +375,7 @@ def recurseFindTable(assemblyName, level):
 		assembly = assemblies[assemblyName][findNumber]
 		drawings = assembly['DRAWING']
 		for d in drawings:
-			fields = d.split('-')
+			fields = splitPartNumber(d)
 			if not fields[0].isdigit():
 				continue
 			if len(fields) > 1 and not fields[1].isdigit():
@@ -450,7 +492,8 @@ def makeHtml(findTable):
 				thisTitle = findTable[key]["TITLE"]
 				markAsAssembly = False
 				if "ASSEMBLY" in thisTitle or "ASSY" in thisTitle or "GROUP" in thisTitle or " KIT" in thisTitle:
-					markAsAssembly = True
+					if "SCHEMATIC" not in thisTitle:
+						markAsAssembly = True
 				perhapsAssembly = markAsAssembly
 				if asTables:
 					thisLine += "<td>"
@@ -458,6 +501,7 @@ def makeHtml(findTable):
 					if nn > 0:
 						thisLine += " or "
 					thisDrawing = findTable[key]["DRAWING"][nn]
+					thisURL = findTable[key]["URL"][nn]
 					thisExpanded = False
 					cssClass = "normalDrawing"
 					if thisDrawing in assemblies:
@@ -479,18 +523,25 @@ def makeHtml(findTable):
 								expandedBelow += 'Expanded in more detail: by <a href="#' +  sub + '"><font color="red">substitute ' + sub + '</font></a>'
 							else:
 								expandedBelow += ', and by <a href="#' + sub + '"><font color="red">substitute ' + sub + '</font></a>'						
-					dbg(thisDrawing, str(findTable[key]))
-					dbg(thisDrawing, str(thisDrawing in assemblies))
-					dbg(thisDrawing, perhapsAssembly)
-					dbg(thisDrawing, thisExpanded)
 					if perhapsAssembly and not thisExpanded:
-						dfields = thisDrawing.split("-")
+						dfields = splitPartNumber(thisDrawing)
 						if len(dfields) == 1 or (len(dfields) == 2 and len(dfields[1]) == 3 and \
 						   dfields[1] != "001" and dfields[1][2] == "1" and dfields[1][0] in ["0", "1", "2" ]):
 							cssClass = "earlyDrawing"
-					if findTable[key]["URL"][nn] != "":
-						thisLine += '<a class="' + cssClass + '" href=\"' + findTable[key]["URL"][nn] + "\">" + thisDrawing + "</a>"
+					if "Documents/assist.dla.mil/" == thisURL[:25]:
+						# Some MS and NAS part numbers have been assigned substitute
+						# URLs (upstream from this script).  What the following code
+						# tries to do is to detect that and flag it so that the 
+						# link can be displayed in red. 
+						if thisURL[25:-5] not in thisDrawing:
+							cssClass = "earlyDrawing"
+					#dbg(thisDrawing, str(findTable[key]))
+					#dbg(thisDrawing, str(nn))
+					if thisURL != "":
+						#dbg(thisDrawing, "A")
+						thisLine += '<a class="' + cssClass + '" href=\"' + thisURL + "\">" + thisDrawing + "</a>"
 					else:
+						#dbg(thisDrawing, "B")
 						thisLine += thisDrawing
 					if thisDrawing[:7] in cadDrawings:
 						transcriptions = cadDrawings[thisDrawing[:7]]
@@ -554,7 +605,7 @@ for level in range(1, assLevel + 1):
 			c = c[:1] + "0" + c[1:]
 		aname0 = assemblies[d]["assembly"]
 		aname = aname0
-		dname = aname.split("-")[0]
+		dname = splitPartNumber(aname)[0]
 		if dname in drawings:
 			ref = '<a href="' + drawings[dname]["url"] + '">' + aname0 + '</a>'
 			aname = ref + " &mdash; " + drawings[dname]["title"]
