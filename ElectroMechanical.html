@@ -134,8 +134,13 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Page").repla
               white-space: normal; word-spacing: 0px;
               -webkit-text-stroke-width: 0px; text-decoration-style:
               initial; text-decoration-color: initial; display: inline !
-              important; float: none;"></span><a
-              href="TipueSearch.html">Go
+              important; float: none;"></span><a href="TipueSearch.html">Go
+
+
+
+
+
+
 
 
 
@@ -297,9 +302,21 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Page").repla
 
 
 
+
+
+
+
+
+
                 drawings</a><br>
             </td>
             <td valign="top"><a href="AgcDrawingIndex.html">Miscellaneous
+
+
+
+
+
+
 
 
 
@@ -343,11 +360,16 @@ document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Page").repla
     </h2>
     <h1> </h1>
     <p> </p>
-    In this section, the engineering drawings are provided on a mission
-    by mission basis.&nbsp; Each mission had either one or two G&amp;N
-    (Guidance &amp; Navigation) systems installed:&nbsp; one for the CM
-    and/or one for the LM.&nbsp; Each G&amp;N system is identified by a
-    numerical assembly number (<a
+    In this section, the engineering drawings are provided on a
+    mission-by-mission basis.&nbsp; I expect to be acquiring drawings to
+    help fill in gaps in the drawing hierarchy at least through the end
+    of 2020, though the collection will necessarily still be incomplete
+    even when that process has come to an end.<br>
+    <br>
+    Each mission had either one or two G&amp;N (Guidance &amp;
+    Navigation) systems installed:&nbsp; one for the CM and/or one for
+    the LM.&nbsp; Each G&amp;N system is identified by a numerical
+    assembly number (<a
 href="https://archive.org/stream/AgcApertureCardsBatch10Images#page/n234/mode/2up">1014999</a>
     for Block I CM, <a
 href="https://archive.org/stream/AgcApertureCardsBatch4Images#page/n197/mode/2up">2014999</a>
@@ -355,12 +377,13 @@ href="https://archive.org/stream/AgcApertureCardsBatch4Images#page/n197/mode/2up
 href="https://archive.org/stream/AgcApertureCardsBatch20190219Images#page/n79/mode/1uphttps://archive.org/stream/AgcApertureCardsBatch20190219Images#page/n79/mode/1up">6014999</a>
     for LM) plus a 3-digit configuration number (-000, -021, -031, ... ,
     -221) that changed from one mission to the next.&nbsp; For example,
-    the Apollo 11 LM had G&amp;N system 6014999-091.&nbsp; Note, by the way, that we're presenting these assemblies
-    entirely from a NASA perspective; changes were made to the G&amp;N
-    system configurations <i>after</i> MIT/IL delivered them to NASA,
-    and there's a completely different set of drawings (1015000,
-    2015000, 6015000) that describe the G&amp;N system configurations at
-    the time they were shipped to NASA. <br>
+    the Apollo 11 LM had G&amp;N system 6014999-091.&nbsp; Note, by the
+    way, that we're presenting these assemblies entirely from a NASA
+    perspective; changes were made to the G&amp;N system configurations
+    <i>after</i> MIT/IL delivered them to NASA, and there's a completely
+    different set of drawings (1015000, 2015000, 6015000) that describe
+    the G&amp;N system configurations at the time they were shipped to
+    NASA. <br>
     <br>
     Such a G&amp;N system is represented by a set of engineering
     drawings. Given the drawings of the G&amp;N system, you can then
@@ -368,33 +391,6 @@ href="https://archive.org/stream/AgcApertureCardsBatch20190219Images#page/n79/mo
     etc.), any of the drawings of the sub-assemblies of the
     sub-assemblies, and so on.<br>
     <br>
-    At present there's a slight complication, because I'm in the process
-    of transitioning from an older way of presenting this
-    assembly-hierarchy data to a newer, improved method.&nbsp; Because
-    this is a work in progress at the moment, each of the ways is
-    superior to the other in <i>some</i> respect, making me reluctant
-    to rely entirely on either one.&nbsp; Therefore, while this
-    transition is in progress, I'll continue providing both the older
-    and the newer presentations.&nbsp; The older method will be
-    discontinued when the newer method has matured sufficiently.<br>
-    <h3>The Newer View of the Assembly Hierarchy</h3>
-    <p>This newer presentation method has a number of advantages over
-      the older method (see next section), in that it is complete with
-      respect to the G&amp;N system components supported and in terms of
-      the parts in each assembly ... or at least, "complete" to the
-      extent that we have copies of the required drawing!&nbsp; The
-      older method, in contrast, limits itself to just the AGC and DSKY,
-      and just their "major" components.&nbsp; Morever, in a limited
-      sense it attempts to provided suggested substitutions when a
-      drawing is too out-of-date to support a desired configuration,
-      while at the same time making it clear that it is just a
-      substitution and not the correct drawing.<br>
-    </p>
-    <p>On the negative side, this newer method is still in
-      development.&nbsp; The Block I material in particular is still
-      very incomplete, and the Block II material has not been checked
-      very thoroughly.<br>
-    </p>
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
@@ -457,8 +453,7 @@ href="https://archive.org/stream/AgcApertureCardsBatch20190219Images#page/n79/mo
         <tr>
           <td valign="middle" nowrap="nowrap" align="center"><a
               href="1014999-061.html">1014999-061</a></td>
-          <td valign="middle" nowrap="nowrap">20<br>
-          </td>
+          <td valign="middle" nowrap="nowrap">20existed </td>
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap" align="center"><a
@@ -754,6 +749,12 @@ href="https://archive.org/stream/AgcApertureCardsBatch20190219Images#page/n79/mo
     if you have any need whatever to do so!&nbsp; To generate such a
     JSON file, you will need to locally clone <a
       href="https://github.com/virtualagc/virtualagc/tree/schematics">the
+
+
+
+
+
+
       "schematics" branch of our GitHub software repository</a>.&nbsp;
     You will also need to have Python 3 installed.&nbsp; You generate
     the JSON for a given <tt><i>ASSEMBLY</i></tt> from a command line
@@ -792,804 +793,43 @@ href="https://archive.org/stream/AgcApertureCardsBatch20190219Images#page/n79/mo
     existing JSON for 6014999-091 and -071, respectively, so
     drilldownCompare.py lets you take a bit of a shortcut:<br>
     <blockquote><tt>drilldownCompare.py 6014999-091 6014999-071 </tt><tt>2003993-031
+
+
+
+
+
+
         2003993-051<br>
       </tt></blockquote>
     In doing this, you would find out that subassembly 2003983-021 had
     changed to 2003983-041, etc.&nbsp; The general syntax is<br>
     <blockquote><tt>drilldownCompare.py <i>ASSEMBLY1 ASSEMBLY2</i> [<i>SUBASSEMBLY1
-          SUBASSEMBLY2</i>]</tt><br>
-    </blockquote>
-    <h3>The Older View of the Assembly Hierarchy</h3>
-    <p>This older presentation method is likely have less errors in it
-      than the newer method (see the preceding section), but is much
-      less complete both in terms of the supported assemblies and in
-      terms of the coverage of the parts in any given assembly.&nbsp; It
-      will no longer be improved, and will be discontinued at some
-      point.<br>
-    </p>
-    <td8 colspan="1" valign="middle" nowrap="nowrap" align="center"> </td8>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
-      <tbody>
-        <tr>
-          <th valign="bottom" nowrap="nowrap" align="center">G&amp;N
-            System<br>
-            Configuration<br>
-          </th>
-          <th valign="bottom" nowrap="nowrap" align="left">G&amp;N
-            System Number<br>
-            (Spacecraft, Mission)<br>
-          </th>
-          <th valign="bottom" nowrap="nowrap" align="center">AGC<br>
-          </th>
-          <th valign="bottom" nowrap="nowrap" align="center">Nav DSKY<br>
-          </th>
-          <th valign="bottom" nowrap="nowrap" align="center">Main DSKY<br>
-          </th>
-        </tr>
-        <tr align="center">
-          <td colspan="6" valign="top"><i>Block I CM Systems (</i><i><a
-href="https://archive.org/stream/AgcApertureCardsBatch10Images#page/n234/mode/1up">Installation
-list
 
 
 
 
 
 
+          SUBASSEMBLY2</i>]<br>
+      </tt></blockquote>
+    <div align="left"><b>Note:</b> The rather complete assembly
+      drill-down and the software tools described above were preceded by
+      a set of manually-crafted partial drilldowns of just the AGC and
+      DSKY, and of just their "major" assemblies and components.&nbsp;
+      The last time at which those manual drilldowns were available on
+      the website was at <a
+href="https://github.com/virtualagc/virtualagc/tree/4d29078e68a6b423c719512118a1d1815947667a">this
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                1014999</a></i><i>)</i><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-000<br>
-          </td>
-          <td valign="middle" nowrap="nowrap">5<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003186-MD2.html">1003186 MD2</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003458-MD1.html">1003458 MD1</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003459-MD2.html">1003459 MD2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-011<br>
-          </td>
-          <td valign="middle" nowrap="nowrap">6<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003469-011-MD1.html">1003469-011 MD1</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003458-MD1.html">1003458 MD1</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center">1003495-011
-            <sup><a href="#Notes">[1]</a></sup><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-021<br>
-          </td>
-          <td valign="middle" nowrap="nowrap">7<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003700-011.html">1003700-011</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003524-MD1.html">1003524 MD1</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center">1003553-011
-            <sup><a href="#Notes">[1]</a></sup> </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-031<br>
-          </td>
-          <td valign="middle" nowrap="nowrap">8<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003700-011.html">1003700-011</a> </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003524-MD1.html">1003524 MD1</a></td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003540-MD1.html">1003540 MD1</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">n/a<br>
-          </td>
-          <td valign="middle">n/a<br>
-          </td>
-          <td valign="middle" align="center">n/a<br>
-          </td>
-          <td valign="middle" align="center">n/a<br>
-          </td>
-          <td valign="middle" align="center"><a href="1003707-031.html">1003707-031</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-041</td>
-          <td valign="middle" nowrap="nowrap">12<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003700-071.html">1003700-071</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center">1003706-051
-            <sup><a href="#Notes">[2]</a></sup> </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003563-051.html">1003563-051</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-051<br>
-          </td>
-          <td valign="middle" nowrap="nowrap">17 (CSM-011, AS-202)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003565-011.html">1003565<i>-</i>011</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003570-011.html">1003570-011</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center">1003564-021
-            <sup><a href="#Notes">[3]</a></sup><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-061</td>
-          <td valign="middle" nowrap="nowrap">20<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003565-031.html">1003565-031</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003570-021.html">1003570-021</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center">1003564-011
-            <sup><a href="#Notes">[3]</a></sup> </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-071</td>
-          <td valign="middle" nowrap="nowrap">109<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003700-051.html">1003700-051</a> </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003706-031.html">1003706-031</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003563-031.html">1003563-031</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-081</td>
-          <td valign="middle" nowrap="nowrap">110 (Qualification system)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003565-041.html">1003565-041</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center">1003577-021
-            <sup><a href="#Notes">[2]</a></sup></td>
-          <td valign="middle" nowrap="nowrap" align="center">1003563-041
-            <sup><a href="#Notes">[3]</a></sup></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-091</td>
-          <td valign="middle" nowrap="nowrap">111 (Qualification system)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003700-051.html">1003700-051</a> </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003706-031.html">1003706-031</a><br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003563-031.html">1003563-031</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-101</td>
-          <td valign="middle" nowrap="nowrap">121<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003700-051.html">1003700-051</a> </td>
-          <td valign="middle" nowrap="nowrap" align="center">1003706-051
-            <sup><a href="#Notes">[2]</a></sup></td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003563-051.html">1003563-051</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-111</td>
-          <td valign="middle" nowrap="nowrap">122 (CMO-17, Apollo 4)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003700-051.html">1003700-051</a></td>
-          <td valign="middle" nowrap="nowrap" align="center">1003706-051
-            <sup><a href="#Notes">[2]</a></sup></td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003563-051.html">1003563-051</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-121</td>
-          <td valign="middle" nowrap="nowrap">123 (CMO-20, Apollo 6)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003700-071.html">1003700-071</a></td>
-          <td valign="middle" nowrap="nowrap" align="center">1003706-051
-            <sup><a href="#Notes">[2]</a></sup></td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="1003563-051.html">1003563-051</a></td>
-        </tr>
-        <tr align="center">
-          <td colspan="6" valign="top"><i>Block II CM Systems (</i><i><a
-href="https://archive.org/stream/AgcApertureCardsBatch4Images#page/n197/mode/1up">Installation
-list
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                2014999</a></i><i>)</i></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-011<br>
-          </td>
-          <td valign="middle" nowrap="nowrap">201<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003100-021.html">2003100-021</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003985-051.html">2003985-051</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-021</td>
-          <td valign="middle" nowrap="nowrap">202 (CSM-098, 2TV-1)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003100-061.html">2003100-061</a> </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003950-061.html">2003950-061</a> </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-041</td>
-          <td valign="middle" nowrap="nowrap">204 (CSM-101, Apollo 7)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-051.html">2003993-051</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-031.html">2003994-031</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-051</td>
-          <td valign="middle" nowrap="nowrap">205 (CSM-116, Skylab 2)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-111</a> <sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-061</td>
-          <td valign="middle" nowrap="nowrap">206 (CSM-106, Apollo 10)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-041.html">2003993-041</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-071</td>
-          <td valign="middle" nowrap="nowrap">207 <br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003200-031.html">2003200-031</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-011.html">2003994-011</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-081</td>
-          <td valign="middle" nowrap="nowrap">208 (CSM-103, Apollo 8)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-031</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-031.html">2003994-031</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-091</td>
-          <td valign="middle" nowrap="nowrap">209 (CSM-104, Apollo 9)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-031</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-051.html">2003994-051</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-101</td>
-          <td valign="middle" nowrap="nowrap">210 (CSM-107, Apollo 11)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-031</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-111</td>
-          <td valign="middle" nowrap="nowrap">211 (CSM-108, Apollo 12)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-031</a></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-121</td>
-          <td valign="middle" nowrap="nowrap">212 (CSM-109, Apollo 13)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-061</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-131</td>
-          <td valign="middle" nowrap="nowrap">213 (CSM-119, Skylab <br>
-            Rescue / ASTP Backup)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-031</a></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-141</td>
-          <td valign="middle" nowrap="nowrap">214 (CSM-110, Apollo 14)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-111</a> <sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-151</td>
-          <td valign="middle" nowrap="nowrap">215 (CSM-111, ASTP)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-111</a> <sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-161</td>
-          <td valign="middle" nowrap="nowrap">216 (CSM-113, Apollo 16)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-071</a>&nbsp;<sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-171</td>
-          <td valign="middle" nowrap="nowrap">217 (CSM-112, Apollo 15)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-111</a> <sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-181</td>
-          <td valign="middle" nowrap="nowrap">218 (CSM-114, Apollo 17)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-041.html">2003993-081</a> <sup><a
-                href="#Notes">[5]</a></sup> </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-191</td>
-          <td valign="middle" nowrap="nowrap">219 (CSM-115)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-051.html">2003993-051</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-201</td>
-          <td valign="middle" nowrap="nowrap">220 (CSM-115A)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-061</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-211</td>
-          <td valign="middle" nowrap="nowrap">221 (CSM-117, Skylab 3)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-111</a> <sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-221</td>
-          <td valign="middle" nowrap="nowrap">222 (CSM-118, Skylab 4)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-051.html">2003993-091</a> <sup><a
-                href="#Notes">[5]</a></sup> </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr align="center">
-          <td colspan="6" valign="top"><i>LM Systems (</i><i><a
-                href="http://www.ibiblio.org/apollo/TipueSearch.html?q=%226014999DP%22">Installation
-list
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                6014999</a></i><i>)</i><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-011<br>
-          </td>
-          <td valign="middle" nowrap="nowrap">601<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003100-021.html">2003100-021</a><br>
-          </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003985-051.html">2003985-051</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-021</td>
-          <td valign="middle" nowrap="nowrap">602 (LTA-8)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003100-071.html">2003100-071</a></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003985-081.html">2003985-081</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-031</td>
-          <td valign="middle" nowrap="nowrap">603 (LM-1, Apollo 5)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-011.html">2003993-011</a></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-021.html">2003994-021</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-041</td>
-          <td valign="middle" nowrap="nowrap">604 (Qualification system)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003200-011.html">2003200-011</a></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003950-011.html">2003950-011</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-051</td>
-          <td valign="middle" nowrap="nowrap">605 (LM-3, Apollo 9)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-071</a>&nbsp;<sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-031.html">2003994-031</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-061</td>
-          <td valign="middle" nowrap="nowrap">606 (LM-4, Apollo 10)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-071</a>&nbsp;<sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-121.html">2003994-121</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-071</td>
-          <td valign="middle" nowrap="nowrap">607 (LM-6, Apollo 12)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-051.html">2003993-091</a> <sup><a
-                href="#Notes">[5]</a></sup> </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-081<br>
-          </td>
-          <td valign="middle" nowrap="nowrap">608 (LM-2)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003200-041.html">2003200-041</a></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-041.html">2003994-041</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-091</td>
-          <td valign="middle" nowrap="nowrap">609 (LM-5, Apollo 11)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-071</a>&nbsp;<sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-101</td>
-          <td valign="middle" nowrap="nowrap">610 (LM-7, Apollo 13)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-071</a>&nbsp;<sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a> </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-111</td>
-          <td valign="middle" nowrap="nowrap">611 (LM-8, Apollo 14)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-071</a>&nbsp;<sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a> </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-121</td>
-          <td valign="middle" nowrap="nowrap">612 (LM-15)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-031.html">2003993-071</a>&nbsp;<sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-131</td>
-          <td valign="middle" nowrap="nowrap">613 (LM-9)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-051.html">2003993-091</a> <sup><a
-                href="#Notes">[5]</a></sup> </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a> </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-141</td>
-          <td valign="middle" nowrap="nowrap">614 (LM-10, Apollo 15)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-051.html">2003993-091</a> <sup><a
-                href="#Notes">[5]</a></sup> </td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a> </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-151</td>
-          <td valign="middle" nowrap="nowrap">615 (LM-11, Apollo 16)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-111</a> <sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-161</td>
-          <td valign="middle" nowrap="nowrap">616 (LM-12, Apollo 17)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"><a
-              href="2003993-061.html">2003993-111</a> <sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a></td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">-171</td>
-          <td valign="middle">617 (LM-13)<br>
-          </td>
-          <td valign="middle" align="center"><a href="2003993-061.html">2003993-111</a>
-            <sup><a href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" align="center"><a
-              href="2003994-091.html">2003994-091</a> </td>
-        </tr>
-        <tr>
-          <td valign="middle" nowrap="nowrap" align="center">-181</td>
-          <td valign="middle" nowrap="nowrap">618 (LM-14)<br>
-          </td>
-          <td valign="middle" nowrap="nowrap" align="center"> <a
-              href="2003993-061.html">2003993-111</a> <sup><a
-                href="#Notes">[5]</a></sup></td>
-          <td colspan="2" valign="middle" nowrap="nowrap" align="center"><a
-              href="2003994-091.html">2003994-091</a> </td>
-        </tr>
-        <tr align="center">
-          <td colspan="6" valign="top"><i><a name="Notes"></a>Notes</i></td>
-        </tr>
-        <tr>
-          <td colspan="7" valign="top"><b></b>
-            <blockquote>[1] The drawing isn't presently available.<br>
-              <br>
-              [2] The latest available revision of the drawing doesn't
-              include the configuration implied by the dash number.<br>
-              <br>
-              [3] The part is a modification of another part, according
-              to instructions given by a separate drawing that <br>
-              isn't presently available.<br>
-              <br>
-              [4] Addition of CDU support to this table is a work in
-              progress, and is presently very incomplete.<br>
-              <br>
-              [5] The latest available revision of drawing <a
-href="https://archive.org/stream/apertureCardBox459NARASW_images/apertureCardBox459NARASW#page/n946/mode/1up">2003993</a>
-              ("T") ends at dash number -061, and therefore we cannot<br>
-              provide drawing drilldowns for 2003993-071, -081, -091,
-              -111 if we work only from that drawing.&nbsp; However, <br>
-              those dash numbers do not differ <i>internally</i> from
-              dash numbers 2003993-031, -041, -051, and -061,
-              respectively.&nbsp; <br>
-              The difference, namely ECP 815, is that a small "restart
-              monitor" module was plugged externally into the test <br>
-              connector of the missing dash numbers.&nbsp; Nor do we
-              presently have many drawings for the restart monitor, <br>
-              although there is a <a
-href="http://www.ibiblio.org/apollo/klabs/history/agc_schematics_block2/logic/77.jpg">schematic</a>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              Given that the differences are external to the AGC proper,
-              in the table above<br>
-              I've elected to provide links to the available dash
-              numbers in the positions where the missing dash numbers<br>
-              are called out.<br>
-            </blockquote>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        commit of the software repository</a>.&nbsp; It is still
+      possible to view the manual drilldowns, but to do so you should
+      should clone the repository (at the commit linked above) onto your
+      local system and browse ElectroMechanical.html locally.<br>
+    </div>
+    <blockquote> </blockquote>
     <h1><a name="References"></a>References</h1>
     <p>The official AGC/DSKY electro-mechanical drawings available to us
       at the present time are these:</p>
@@ -1632,6 +872,12 @@ href="http://www.ibiblio.org/apollo/klabs/history/agc_schematics_block2/logic/77
           manual ND-1021042 volume 2</a>.&nbsp; Or, the full resolution
         scan (<a
           href="https://archive.org/stream/acelectroniclmma00acel_0">volume
+
+
+
+
+
+
 
 
 
@@ -1712,10 +958,22 @@ Or,
 
 
 
+
+
+
+
+
+
         the full-resolution scans (<a
           href="https://archive.org/stream/apollocommandmodacel">volume
           1</a> and <a
           href="https://archive.org/stream/apollocommandmodacel_0">volume
+
+
+
+
+
+
 
 
 
@@ -1838,8 +1096,20 @@ Electronics
 
 
 
+
+
+
+
+
+
           Final Report on Contract NAS9-497</a> and tables 7-IV and 7-VI
         of the <a href="Documents/R-700-Volume-3-2nd-copy.pdf">Instrumentation
+
+
+
+
+
+
 
 
 
@@ -1925,6 +1195,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/18/mode/1up">Table
 
 
 
+
+
+
+
+
+
           in AC Electronics manual ND-1021041</a> can be used to obtain
         drawing numbers for what we believe are AGC 1003700 and DSKYs
         1003706 and 1003707.<br>
@@ -1944,6 +1220,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-
     <ul>
       <li><a href="Documents/assist.dla.mil/MIL-D-70327.pdf">MIL-D-70327</a></li>
       <li><a href="Documents/assist.dla.mil/MIL-D-70327-AMENDMENT-1.pdf">Amendment
+
+
+
+
+
+
 
 
 
@@ -2078,8 +1360,20 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-
 
 
 
+
+
+
+
+
+
         branch of our GitHub repository</a>.&nbsp; Also they are
       typically rendered as PNG images as well, and <a href="KiCad/">provided
+
+
+
+
+
+
 
 
 
@@ -2216,6 +1510,12 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
           file</a>.</li>
     </ul>
     <p>Though no help in transcription is really needed, help in
@@ -2303,6 +1603,12 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
         it should be named 1234567A.stp.&nbsp; If it is a <i>modified</i>
         transcription, then the name would be something like 1234567A-<i>ExtraDescriptionOfChanges</i>.stp.&nbsp;
 (I'd
+
+
+
+
+
+
 
 
 
@@ -2545,12 +1851,24 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Scaler B</a>. <a
                   href="https://archive.org/stream/apollocommandmodacel#page/113/mode/1up"><br>
                 </a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/127/mode/1up">Figure
 4-65,
+
+
+
+
+
+
 
 
 
@@ -2629,10 +1947,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register A Single Bit Position</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/179/mode/1up">Figure
 4-101,
+
+
+
+
+
+
 
 
 
@@ -2711,10 +2041,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register Q</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/183/mode/1up">Figure
 4-103,
+
+
+
+
+
+
 
 
 
@@ -2793,6 +2135,12 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register LP</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/187/mode/1up">Figure
@@ -2834,10 +2182,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register B</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/191/mode/1up">Figure
 4-106,
+
+
+
+
+
+
 
 
 
@@ -2918,10 +2278,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Registers S and SQ</a> (page 2)</li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/195/mode/1up">Figure
 4-107,
+
+
+
+
+
+
 
 
 
@@ -3000,10 +2372,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register G Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/201/mode/1up">Figure
 4-110,
+
+
+
+
+
+
 
 
 
@@ -3082,10 +2466,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Adder (X and Y) Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/211/mode/1up">Figure
 4-113,
+
+
+
+
+
+
 
 
 
@@ -3164,10 +2560,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Parity Logic</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/223/mode/1up">Figure
 4-117,
+
+
+
+
+
+
 
 
 
@@ -3246,10 +2654,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register IN 2</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/229/mode/1up">Figure
 4-119,
+
+
+
+
+
+
 
 
 
@@ -3328,10 +2748,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register OUT 0</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/235/mode/1up">Figure
 4-121,
+
+
+
+
+
+
 
 
 
@@ -3410,10 +2842,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register OUT 3</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/243/mode/1up">Figure
 4-124,
+
+
+
+
+
+
 
 
 
@@ -3492,10 +2936,22 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/README.md">README
 
 
 
+
+
+
+
+
+
                   Register OUT 2</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -3584,10 +3040,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Read, Write, and Clear Timing Signals</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/177/mode/1up">Figure
 4-100,
+
+
+
+
+
+
 
 
 
@@ -3666,10 +3134,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register G Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/215/mode/1up">Figure
 4-114,
+
+
+
+
+
+
 
 
 
@@ -3748,6 +3228,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Parity Logic</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/249/mode/1up">Figure
@@ -3789,10 +3275,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Alarm Circuits</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -3881,10 +3379,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register A</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/181/mode/1up">Figure
 4-102,
+
+
+
+
+
+
 
 
 
@@ -3963,10 +3473,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register Z</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/185/mode/1up">Figure
 4-104,
+
+
+
+
+
+
 
 
 
@@ -4045,10 +3567,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register B</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/191/mode/1up">Figure
 4-106,
+
+
+
+
+
+
 
 
 
@@ -4127,10 +3661,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register G Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/205/mode/1up">Figure
 4-111,
+
+
+
+
+
+
 
 
 
@@ -4209,6 +3755,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register OUT 4</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/300/mode/1up">Figure
@@ -4250,10 +3802,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Counter Service Gates</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -4342,10 +3906,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Downlink Telemetry Parallel to Serial Converter</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/247/mode/1up">Figure
 4-126,
+
+
+
+
+
+
 
 
 
@@ -4424,6 +4000,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Interface Module A19</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/271/mode/1up">Figure
@@ -4465,10 +4047,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Interface Module A39</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/391/mode/1up">Figure
 4-182,
+
+
+
+
+
+
 
 
 
@@ -4555,10 +4149,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/391/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Downlink Telemetry Parallel to Serial Converter</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/273/mode/1up">Figure
 4-137,
+
+
+
+
+
+
 
 
 
@@ -4637,10 +4243,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/391/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Interface Module A40</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -4727,11 +4345,23 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Time Pulse Generator</a><br>
               </li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/135/mode/1up">Figure
 4-68,
+
+
+
+
+
+
 
 
 
@@ -4810,10 +4440,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register Q Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/138/mode/1up">Figure
 4-70,
+
+
+
+
+
+
 
 
 
@@ -4892,10 +4534,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register LP Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/141/mode/1up">Figure
 4-72,
+
+
+
+
+
+
 
 
 
@@ -4974,10 +4628,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register B Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/145/mode/1up">Figure
 4-74,
+
+
+
+
+
+
 
 
 
@@ -5056,10 +4722,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Adder (Registers X and Y) Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/149/mode/1up">Figure
 4-76,
+
+
+
+
+
+
 
 
 
@@ -5138,10 +4816,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Addressable Registers Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/152/mode/1up">Figure
 4-78,
+
+
+
+
+
+
 
 
 
@@ -5220,10 +4910,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulse WOVI/</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/154/mode/1up">Figure
 4-83,
+
+
+
+
+
+
 
 
 
@@ -5302,10 +5004,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulses RB1 and RB2</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/158/mode/1up">Figure
 4-87,
+
+
+
+
+
+
 
 
 
@@ -5384,10 +5098,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulse RIC</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/163/mode/1up">Figure
 4-91,
+
+
+
+
+
+
 
 
 
@@ -5466,10 +5192,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulse TOV/</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/215/mode/1up">Figure
 4-114,
+
+
+
+
+
+
 
 
 
@@ -5548,6 +5286,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Address Generator (Counter Priority)</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/307/mode/1up">Figure
@@ -5589,10 +5333,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Address Generator (Interrupt Priority)</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -5681,10 +5437,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register A Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/137/mode/1up">Figure
 4-69,
+
+
+
+
+
+
 
 
 
@@ -5763,10 +5531,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register Z Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/139/mode/1up">Figure
 4-71,
+
+
+
+
+
+
 
 
 
@@ -5845,10 +5625,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register B Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/145/mode/1up">Figure
 4-74,
+
+
+
+
+
+
 
 
 
@@ -5927,10 +5719,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Adder (Registers X and Y) Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/149/mode/1up">Figure
 4-76,
+
+
+
+
+
+
 
 
 
@@ -6009,10 +5813,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Addressable Registers Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/155/mode/1up">Figure
 4-84,
+
+
+
+
+
+
 
 
 
@@ -6091,10 +5907,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulses RB1 and RB2</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/158/mode/1up">Figure
 4-87,
+
+
+
+
+
+
 
 
 
@@ -6173,10 +6001,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register G Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/205/mode/1up">Figure
 4-111,
+
+
+
+
+
+
 
 
 
@@ -6255,10 +6095,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Scaler Fail Alarm Circuits</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/300/mode/1up">Figure
 4-144,
+
+
+
+
+
+
 
 
 
@@ -6337,10 +6189,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/363/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Inhibit Gates</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -6427,10 +6291,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Instruction Decoder</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/164/mode/1up">Figure
 4-92,
+
+
+
+
+
+
 
 
 
@@ -6509,6 +6385,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Branch Flip-Flops</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/300/mode/1up">Figure
@@ -6550,10 +6432,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Counter Service Gates</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -6640,10 +6534,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Sequence Generator Interrupt Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/135/mode/1up">Figure
 4-68,
+
+
+
+
+
+
 
 
 
@@ -6722,10 +6628,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register Z Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/139/mode/1up">Figure
 4-71,
+
+
+
+
+
+
 
 
 
@@ -6804,10 +6722,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register B Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/145/mode/1up">Figure
 4-74,
+
+
+
+
+
+
 
 
 
@@ -6886,10 +6816,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Adder (Registers X and Y) Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/149/mode/1up">Figure
 4-76,
+
+
+
+
+
+
 
 
 
@@ -6968,10 +6910,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Addressable Registers Control Pulses</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/152/mode/1up">Figure
 4-79,
+
+
+
+
+
+
 
 
 
@@ -7050,10 +7004,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulses WOVC/ and WOVR/</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/153/mode/1up">Figure
 4-81,
+
+
+
+
+
+
 
 
 
@@ -7132,10 +7098,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulses KRPT/, RRPA, and RSCT</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/154/mode/1up">Figure
 4-83,
+
+
+
+
+
+
 
 
 
@@ -7214,10 +7192,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulses RB1 and RB2</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/157/mode/1up">Figure
 4-86,
+
+
+
+
+
+
 
 
 
@@ -7296,10 +7286,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulses TSGN/, TSGN2/, and TSGN3/</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/159/mode/1up">Figure
 4-88,
+
+
+
+
+
+
 
 
 
@@ -7378,10 +7380,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulse CTR</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/163/mode/1up">Figure
 4-90,
+
+
+
+
+
+
 
 
 
@@ -7460,10 +7474,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulse RB14</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/197/mode/1up">Figure
 4-108,
+
+
+
+
+
+
 
 
 
@@ -7542,10 +7568,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Parity Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/243/mode/1up">Figure
 4-124,
+
+
+
+
+
+
 
 
 
@@ -7624,10 +7662,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Address Generator (Interrupt Priority)</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -7714,10 +7764,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Sequence Generator Interrupt Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/131/mode/1up">Figure
 4-66,
+
+
+
+
+
+
 
 
 
@@ -7796,6 +7858,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Brach Flip-Flops</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/165/mode/1up">Figure
@@ -7837,10 +7905,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Branch Flip-Flops</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/191/mode/1up">Figure
 4-106,
+
+
+
+
+
+
 
 
 
@@ -7921,10 +8001,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Registers S and SQ</a> (page 2)</li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -8011,10 +8103,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Time Pulse Generator</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -8103,10 +8207,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Adder (X and Y) Service</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/305/mode/1up">Figure
 4-146,
+
+
+
+
+
+
 
 
 
@@ -8185,6 +8301,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/353/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Bank Register</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/359/mode/1up">Figure
@@ -8226,10 +8348,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/359/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Bank Selector Gates</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -8316,11 +8450,23 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Binary Dividers</a><br>
               </li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/103/mode/1up">Figure
 4-57,
+
+
+
+
+
+
 
 
 
@@ -8401,6 +8547,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Start-Stop Logic</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/295/mode/1up">Figure
@@ -8442,10 +8594,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Display and Load Logic</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -8534,10 +8698,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register OUT 1</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/249/mode/1up">Figure
 4-127,
+
+
+
+
+
+
 
 
 
@@ -8616,10 +8792,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Counter Priority Control</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/361/mode/1up">Figure
 4-168,
+
+
+
+
+
+
 
 
 
@@ -8698,10 +8886,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/363/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Inhibit Gates</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -8788,10 +8988,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Counter Priority Control</a> (page 1)</li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/285/mode/1up">Figure
 4-140,
+
+
+
+
+
+
 
 
 
@@ -8870,10 +9082,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Counter Priority Control</a> (page 3)</li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -8960,10 +9184,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   G Generator</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/215/mode/1up">Figure
 4-114,
+
+
+
+
+
+
 
 
 
@@ -9042,10 +9278,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Alarm Circuits</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/283/mode/1up">Figure
 4-140,
+
+
+
+
+
+
 
 
 
@@ -9124,10 +9372,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Address Generator (Counter Priority)</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/292/mode/1up">Figure
 4-142,
+
+
+
+
+
+
 
 
 
@@ -9206,10 +9466,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Display and Load Logic</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -9296,10 +9568,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   (sheet 1), Scaler A</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/109/mode/1up">Figure
 4-59
+
+
+
+
+
+
 
 
 
@@ -9378,6 +9662,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/321/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Memory Cycle Timing - Erasable</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/351/mode/1up">Figure
@@ -9419,10 +9709,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/351/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Memory Cycle Timing, Fixed</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -9511,10 +9813,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Counter Service Gates</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/325/mode/1up">Figure
 4-155,
+
+
+
+
+
+
 
 
 
@@ -9593,6 +9907,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/327/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Address Decoder</a> (page 2)</li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/364/mode/1up">Figure
@@ -9634,10 +9954,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/364/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Strand Gates</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -9724,10 +10056,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Rate Control Logic</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/259/mode/1up">Figure
 4-131,
+
+
+
+
+
+
 
 
 
@@ -9806,10 +10150,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Rate 2 Control</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/263/mode/1up">Figure
 4-133,
+
+
+
+
+
+
 
 
 
@@ -9888,6 +10244,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Continuous Pulse Control</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/283/mode/1up">Figure
@@ -9929,10 +10291,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Counter Priority Control</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -10019,12 +10393,24 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Control Pulse CTR</a>. <a
                   href="https://archive.org/stream/apollocommandmodacel#page/161/mode/1up"><br>
                 </a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/165/mode/1up">Figure
 4-95,
+
+
+
+
+
+
 
 
 
@@ -10103,10 +10489,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register IN 0</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/249/mode/1up">Figure
 4-127,
+
+
+
+
+
+
 
 
 
@@ -10185,10 +10583,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Counter Priority Control</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/305/mode/1up">Figure
 4-146,
+
+
+
+
+
+
 
 
 
@@ -10267,10 +10677,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Address Generator (Interrupt Priority)</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -10357,10 +10779,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Registers S and SQ</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/227/mode/1up">Figure
 4-118,
+
+
+
+
+
+
 
 
 
@@ -10439,10 +10873,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register IN 3</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/233/mode/1up">Figure
 4-120,
+
+
+
+
+
+
 
 
 
@@ -10521,10 +10967,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register OUT 1</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/245/mode/1up">Figure
 4-125,
+
+
+
+
+
+
 
 
 
@@ -10603,6 +11061,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Downlink Telemetry Bit Sync Counter</a></li>
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/255/mode/1up">Figure
@@ -10644,10 +11108,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Register OUT 2</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figure
 4-181,
+
+
+
+
+
+
 
 
 
@@ -10747,6 +11223,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/383/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   +3 Volt Power Supply</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/385/mode/1up">Figure
@@ -10788,10 +11270,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/385/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   +13 Volt Power Supply</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/387/mode/1up">Figure
 4-180,
+
+
+
+
+
+
 
 
 
@@ -10878,6 +11372,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/381/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Primary Power Filter</a> </li>
             </ul>
           </td>
@@ -10890,6 +11390,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/381/mode/1up">Figur
               <li><a
                   href="https://archive.org/stream/apollocommandmodacel#page/93/mode/1up">Figure
 4-52,
+
+
+
+
+
+
 
 
 
@@ -10976,10 +11482,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/321/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Memory Cycle Timing - Erasable</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/329/mode/1up">Figure
 4-156,
+
+
+
+
+
+
 
 
 
@@ -11058,10 +11576,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/387/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Standby Circuit</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/391/mode/1up">Figure
 4-182,
+
+
+
+
+
+
 
 
 
@@ -11148,6 +11678,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/329/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Selection Switches and Drivers</a></li>
             </ul>
           </td>
@@ -11160,6 +11696,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/329/mode/1up">Figur
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/329/mode/1up">Figure
 4-156,
+
+
+
+
+
+
 
 
 
@@ -11248,10 +11790,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/329/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Selection Switches and Drivers</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/333/mode/1up">Figure
 4-157,
+
+
+
+
+
+
 
 
 
@@ -11338,10 +11892,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/383/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   +3 Volt Power Supply</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/385/mode/1up">Figure
 4-179,
+
+
+
+
+
+
 
 
 
@@ -11420,6 +11986,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/391/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Power Supply Failure Detection Circuits</a></li>
             </ul>
           </td>
@@ -11433,6 +12005,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/391/mode/1up">Figur
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/335/mode/1up">Figure
 4-158,
+
+
+
+
+
+
 
 
 
@@ -11521,10 +12099,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/365/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Rope and Strand Selectors</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/369/mode/1up">Figure
 4-172,
+
+
+
+
+
+
 
 
 
@@ -11603,10 +12193,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/371/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Fixed Memory Set Drivers and Return Circuits</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/373/mode/1up">Figure
 4-174,
+
+
+
+
+
+
 
 
 
@@ -11685,6 +12287,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/377/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Sense Amplifier and Voltage Source</a></li>
             </ul>
           </td>
@@ -11698,6 +12306,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/377/mode/1up">Figur
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/377/mode/1up">Figure
 4-175,
+
+
+
+
+
+
 
 
 
@@ -11790,10 +12404,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/338/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Strobe Driver</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/365/mode/1up">Figure
 4-171,
+
+
+
+
+
+
 
 
 
@@ -11880,10 +12506,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/365/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Scaler Fail Alarm Circuits</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/365/mode/1up">Figure
 4-171,
+
+
+
+
+
+
 
 
 
@@ -11962,10 +12600,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/389/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Power Supply Filter Circuits</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/391/mode/1up">Figure
 4-182,
+
+
+
+
+
+
 
 
 
@@ -12052,6 +12702,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/369/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Fixed Memory Inhibit Drivers and Return Circuits</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/371/mode/1up">Figure
@@ -12093,10 +12749,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/371/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Fixed Memory Set Drivers and Return Circuits</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/373/mode/1up">Figure
 4-174,
+
+
+
+
+
+
 
 
 
@@ -12212,11 +12880,23 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/509/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Relay Matrix Display Connections</a> (page 2).&nbsp; <br>
               </li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/521/mode/1up">Figure
 4-239,
+
+
+
+
+
+
 
 
 
@@ -12295,10 +12975,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/523/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Relay Matrix, AGC Navigation Panel DSKY</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/525/mode/1up">Figure
 4-241,
+
+
+
+
+
+
 
 
 
@@ -12342,6 +13034,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/525/mode/1up">Figur
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/529/mode/1up">Figure
 4-243,
+
+
+
+
+
+
 
 
 
@@ -12428,6 +13126,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/499/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Decoder, AGC Main Panel DSKY</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/501/mode/1up">Figure
@@ -12469,10 +13173,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/501/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Relay Matrix, AGC Main Panel DSKY</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/509/mode/1up">Figure
 4-233,
+
+
+
+
+
+
 
 
 
@@ -12552,11 +13268,23 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/511/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   G and N System and Spacecraft Relay Functions, AGC
                   Main Panel DSKY</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/513/mode/1up">Figure
 4-235,
+
+
+
+
+
+
 
 
 
@@ -12643,10 +13371,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/507/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Relay Matrix Display Connections</a> (page 1)</li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/509/mode/1up">Figure
 4-233,
+
+
+
+
+
+
 
 
 
@@ -12725,10 +13465,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/523/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Relay Matrix, AGC Navigation Panel DSKY</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/525/mode/1up">Figure
 4-241,
+
+
+
+
+
+
 
 
 
@@ -12771,6 +13523,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/525/mode/1up">Figur
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/529/mode/1up">Figure
 4-243,
+
+
+
+
+
+
 
 
 
@@ -12857,10 +13615,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/501/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Relay Matrix, AGC Main Panel DSKY</a></li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/507/mode/1up">Figure
 4-233,
+
+
+
+
+
+
 
 
 
@@ -12939,10 +13709,22 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/509/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Relay Matrix Display Connections</a> (page 2)</li>
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/511/mode/1up">Figure
 4-234,
+
+
+
+
+
+
 
 
 
@@ -12985,6 +13767,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/511/mode/1up">Figur
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/513/mode/1up">Figure
 4-235,
+
+
+
+
+
+
 
 
 
@@ -13071,6 +13859,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/516/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   Power Supply, AGC Main Panel DSKY</a>. </li>
             </ul>
           </td>
@@ -13083,6 +13877,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/516/mode/1up">Figur
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/516/mode/1up">Figure
 4-236,
+
+
+
+
+
+
 
 
 
@@ -13170,6 +13970,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/519/mode/1up">Figur
 
 
 
+
+
+
+
+
+
                   AGC Navigation Panel DSKY, Schematic Diagram</a></li>
             </ul>
           </td>
@@ -13182,6 +13988,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/519/mode/1up">Figur
               <li><a
 href="https://archive.org/stream/apollocommandmodacel_0#page/495/mode/1up">Figure
 4-229,
+
+
+
+
+
+
 
 
 
@@ -13254,6 +14066,12 @@ href="https://archive.org/stream/apollocommandmodacel_0#page/495/mode/1up">Figur
     <p>Besides <a href="#Sources_of_Information">the reference sources</a>
       mentioned earlier, <a href="Documents/apollolunarexcuracel_1.pdf">AC
 Electronics
+
+
+
+
+
+
 
 
 
@@ -14468,6 +15286,12 @@ our
 
 
 
+
+
+
+
+
+
       GitHub repository</a>.&nbsp; If you have corrections or additions
     to this table, I believe you can edit the table directly in GitHub,
     though your changes won't go live unless we approve them.<br>
@@ -14894,6 +15718,12 @@ Signal
 
 
 
+
+
+
+
+
+
         Wiring Diagrams and the Block I AGC</h1>
       <p><img src="NOR-TO-47.jpg" alt="" width="147" height="132"
           align="left"><img src="NOR-TO-47-diag.jpg" alt="" width="464"
@@ -15231,10 +16061,16 @@ Commons
 
 
 
+
+
+
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-05-24.<br>
+          2019-05-27.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
