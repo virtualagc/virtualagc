@@ -214,11 +214,11 @@ parser.feed(sys.stdin.read())
 # the "unchanged title" test.  I'm sorry to hardcode them, but I'm tired
 # of seeing the warning messages and haven't been able to think of a better way to
 # handle them.
-ignore = [ 1004218, 1004219, 1004227, 1004283, 1004536, 1004646, 1005009, 1005011,
-	1005799, 1006350, 1006351, 1006800, 1006814, 1006818, 1006819, 1008944,
-	1010865, 2003081, 2003082, 2003121, 2003955, 2003972, 2004120,
-	2004121, 2004122, 2004123, 2004124, 2004125, 2004685, 2005029, 2005036,
-	2005944, 2005954, 2007172, 2010760 ] 
+ignore = [ '1004218', '1004219', '1004227', '1004283', '1004536', '1004646', '1005009', '1005011',
+	'1005799', '1006350', '1006351', '1006800', '1006814', '1006818', '1006819', '1008944',
+	'1010865', '2003081', '2003082', '2003121', '2003955', '2003972', '2004120',
+	'2004121', '2004122', '2004123', '2004124', '2004125', '2004685', '2005029', '2005036',
+	'2005944', '2005954', '2007172', '2010760' ] 
 digits = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
 lastDrawing = ["", "", ""]
 lastTitle = ["", "", ""]
@@ -234,7 +234,7 @@ for key, value in sorted(parser.allData.iteritems()):
 		type = 0
 	elif drawing == lastDrawing[type] and title != lastTitle[type]:
 		prefix = "*** CHECK ME (changed title) *** "
-	elif drawing != lastDrawing[type] and title == lastTitle[type] and int(drawing) not in ignore:
+	elif drawing != lastDrawing[type] and title == lastTitle[type] and drawing not in ignore:
 		prefix = "*** CHECK ME (unchanged title) *** "
 	if any(c.islower() for c in title):
 		prefix = prefix + " *** CHECK ME (lower-case title) *** "
