@@ -532,8 +532,10 @@ def makeHtml(findTable):
 						# Some MS and NAS part numbers have been assigned substitute
 						# URLs (upstream from this script).  What the following code
 						# tries to do is to detect that and flag it so that the 
-						# link can be displayed in red. 
-						if thisURL[25:-5] not in thisDrawing:
+						# link can be displayed in red. In some such URLs I've found
+						# it necessary to replace hyphens with underlines, so that
+						# has to be undone before the check.
+						if thisURL[25:-5].replace("_", "-") not in thisDrawing:
 							cssClass = "earlyDrawing"
 					#dbg(thisDrawing, str(findTable[key]))
 					#dbg(thisDrawing, str(nn))
