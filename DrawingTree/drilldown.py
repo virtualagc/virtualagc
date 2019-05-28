@@ -285,7 +285,13 @@ def readFindTable(drawing, configuration, assembly, level):
 					currentQty = rowQty
 					if qtyTable:
 						currentQty = fields[n]
-					if not qtyTable or fields[n] == "X" or fields[n] == "AR" or (fields[n].isdigit() and int(fields[n]) > 0):
+					isFraction = False
+					fracFields = fields[n].split(".")
+					if len(fracFields) == 1 and fracFields[0].isdigit():
+						isFraction = True
+					elif len(fracFields) == 2 and fracFields[0].isdigit() and fracFields[1].isdigit():
+						isFraction = True
+					if not qtyTable or fields[n] == "X" or fields[n] == "AR" or (isFraction and float(fields[n]) > 0):
 						if not (not qtyTable and fields[n] == ""):
 							found = True
 					if found:
