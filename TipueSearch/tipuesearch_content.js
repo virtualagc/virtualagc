@@ -15477,6 +15477,7 @@ var tipuesearch = {"pages": [
 	{"title":"MS24693J-1-1-1" ,"text":"SCREW, MACHINE, FLAT COUNTERSUNK HEAD, 100°, CROSS RECESSED, UNC-2A AND UNF-2A" ,"url":"Documents/assist.dla.mil/MS24693J.pdf"},
 	{"title":"MS24693K-1-1-1" ,"text":"SCREW, MACHINE, FLAT COUNTERSUNK HEAD, 100°, CROSS RECESSED, UNC-2A AND UNF-2A" ,"url":"Documents/assist.dla.mil/MS24693K.pdf"},
 	{"title":"MS25281K-1-1-1" ,"text":"CLAMP, LOOP, PLASTIC, WIRE SUPPORT" ,"url":"Documents/assist.dla.mil/MS25281K.pdf"},
+	{"title":"MS27197B-1-1-1" ,"text":"SEAL PLAIN, RUBBER (HOT RESISTANT 400°F) MOLD IN GROOVE" ,"url":"Documents/assist.dla.mil/MS27197B.pdf"},
 	{"title":"MS28775E-1-1-1" ,"text":"PACKING, PREFORMED, HYDRAULIC, +275°F (\"O\" RING)" ,"url":"Documents/assist.dla.mil/MS28775E.pdf"},
 	{"title":"MS35200--1-1-1" ,"text":"SCREW, MACHINE-FLAT COUNTERSUNK HEAD, 82°,CROSS-RECESSED, CORROSION-RESISTANT STEEL, UNC-2A" ,"url":"Documents/assist.dla.mil/MS51959D.pdf"},
 	{"title":"MS35201--1-1-1" ,"text":"SCREW, MACHINE, FLAT COUNTERSUNK HEAD, CROSS-RECESSED, CORROSION RESISTING STEEL, PASSIVATED, NF-21 - UNF-2A" ,"url":"Documents/assist.dla.mil/MS51960D.pdf"},
