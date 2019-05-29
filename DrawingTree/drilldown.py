@@ -276,6 +276,7 @@ def readFindTable(drawing, configuration, assembly, level):
 						if fields[n][:1] == "'":
 							fields[n] = fields[n][1:]
 						rowQty = fields[n]
+						currentQty = rowQty
 					if headings[n] == "DRAWING":
 						if fields[n][:1] == "'":
 							fields[n] = fields[n][1:]
@@ -491,7 +492,7 @@ def makeHtml(findTable):
 					continue
 				if asTables:
 					thisLine += "<tr>\n"
-					thisLine += "<td>" + str(n) + "</td><td>" + findTable[key]["QTY"] + "</td>"
+					thisLine += "<td>" + str(n) + "</td><td>" + str(findTable[key]["QTY"]) + "</td>"
 				else:
 					thisLine += "<li>\n"
 					thisLine += str(n) + ":  "
