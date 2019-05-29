@@ -232,94 +232,97 @@ def readFindTable(drawing, configuration, assembly, level):
 	first = True
 	find = 1
 	serializer = "A"
-	for line in f:
-		if first and line.strip() == "":
-			break
-		fields = line.strip("\n").split("\t")
-		if first:
-			first = False
-			headings = fields
-			if "DRAWING" in headings and "QTY" not in headings:
-				qtyTable = True
-			elif "DRAWING" not in headings and "QTY" in headings:
-				qtyTable = False
-			else:
-				print("Cannot distinguish table type (" + assembly + ") from DRAWING/QTY columns.", file=sys.stderr)
-				print(headings, file=sys.stderr)
+	try:
+		for line in f:
+			if first and line.strip() == "":
 				break
-			numConfigs = 0
-			for field in fields:
-				if field not in ["FIND", "DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
-					numConfigs += 1
-			#print(headings)
-		else:
-			findTable["empty"] = False
-			row = {}
-			found = False
-			titleField = -1
-			currentDrawing = []
-			currentQty = 0
-			rowQty = 0
-			if "FIND" not in headings:
-				currentFind = str(find) 
-				find += 1
-			for n in range(0,len(headings)):
-				if headings[n] == "FIND":
-					currentFind = fields[n]
-					if currentFind == "":
-						break
-					if currentFind in findTable:
-						currentFind += serializer
-						serializer = chr(ord(serializer) + 1)
-				elif headings[n] in ["DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
-					if headings[n] == "QTY":
-						if fields[n][:1] == "'":
-							fields[n] = fields[n][1:]
-						rowQty = fields[n]
+			fields = line.strip("\n").split("\t")
+			if first:
+				first = False
+				headings = fields
+				if "DRAWING" in headings and "QTY" not in headings:
+					qtyTable = True
+				elif "DRAWING" not in headings and "QTY" in headings:
+					qtyTable = False
+				else:
+					print("Cannot distinguish table type (" + assembly + ") from DRAWING/QTY columns.", file=sys.stderr)
+					print(headings, file=sys.stderr)
+					break
+				numConfigs = 0
+				for field in fields:
+					if field not in ["FIND", "DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
+						numConfigs += 1
+				#print(headings)
+			else:
+				findTable["empty"] = False
+				row = {}
+				found = False
+				titleField = -1
+				currentDrawing = []
+				currentQty = 0
+				rowQty = 0
+				if "FIND" not in headings:
+					currentFind = str(find) 
+					find += 1
+				for n in range(0,len(headings)):
+					if headings[n] == "FIND":
+						currentFind = fields[n]
+						if currentFind == "":
+							break
+						if currentFind in findTable:
+							currentFind += serializer
+							serializer = chr(ord(serializer) + 1)
+					elif headings[n] in ["DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
+						if headings[n] == "QTY":
+							if fields[n][:1] == "'":
+								fields[n] = fields[n][1:]
+							rowQty = fields[n]
+							currentQty = rowQty
+						if headings[n] == "DRAWING":
+							if fields[n][:1] == "'":
+								fields[n] = fields[n][1:]
+							drawingField = (fields[n].split(" THRU "))[0]
+							currentDrawing = drawingField.split(" or ")
+						row[headings[n]] = fields[n]
+					elif int(headings[n]) == configuration or (numConfigs == 1 and configuration in [0, -11]):
+						row["CELL"] = fields[n]
 						currentQty = rowQty
-					if headings[n] == "DRAWING":
-						if fields[n][:1] == "'":
-							fields[n] = fields[n][1:]
-						drawingField = (fields[n].split(" THRU "))[0]
-						currentDrawing = drawingField.split(" or ")
-					row[headings[n]] = fields[n]
-				elif int(headings[n]) == configuration or (numConfigs == 1 and configuration in [0, -11]):
-					row["CELL"] = fields[n]
-					currentQty = rowQty
-					if qtyTable:
-						currentQty = fields[n]
-					isFraction = False
-					fracFields = fields[n].split(".")
-					if len(fracFields) == 1 and fracFields[0].isdigit():
-						isFraction = True
-					elif len(fracFields) == 2 and fracFields[0].isdigit() and fracFields[1].isdigit():
-						isFraction = True
-					if not qtyTable or fields[n] == "X" or fields[n] == "AR" or (isFraction and float(fields[n]) > 0):
-						if not (not qtyTable and fields[n] == ""):
-							found = True
-					if found:
-						rq = fields[n].split(",")
-						if len(rq) > 2:
-							continue
-						elif len(rq) == 2:
-							fields[n] = rq[0]
-							currentQty = rq[1]
-					if not qtyTable:
-						currentDrawing = fields[n].split(" or ")
-			row["DRAWING"] = currentDrawing
-			row["QTY"] = currentQty
-			if found and ("STRIKE" not in headings or row["STRIKE"] == "") and currentFind != "":
-				row["URL"] = []
-				for d in currentDrawing:
-					fields = splitPartNumber(d)
-					#dbg(d, str(fields))
-					if fields[0] in drawings:
-						row["TITLE"] = drawings[fields[0]]["title"]
-						row["URL"].append(drawings[fields[0]]["url"])
-					else:
-						row["URL"].append("")
-				if qtyTable or row["QTY"] != "":
-					findTable[currentFind] = row	
+						if qtyTable:
+							currentQty = fields[n]
+						isFraction = False
+						fracFields = fields[n].split(".")
+						if len(fracFields) == 1 and fracFields[0].isdigit():
+							isFraction = True
+						elif len(fracFields) == 2 and fracFields[0].isdigit() and fracFields[1].isdigit():
+							isFraction = True
+						if not qtyTable or fields[n] == "X" or fields[n] == "AR" or (isFraction and float(fields[n]) > 0):
+							if not (not qtyTable and fields[n] == ""):
+								found = True
+						if found:
+							rq = fields[n].split(",")
+							if len(rq) > 2:
+								continue
+							elif len(rq) == 2:
+								fields[n] = rq[0]
+								currentQty = rq[1]
+						if not qtyTable:
+							currentDrawing = fields[n].split(" or ")
+				row["DRAWING"] = currentDrawing
+				row["QTY"] = currentQty
+				if found and ("STRIKE" not in headings or row["STRIKE"] == "") and currentFind != "":
+					row["URL"] = []
+					for d in currentDrawing:
+						fields = splitPartNumber(d)
+						#dbg(d, str(fields))
+						if fields[0] in drawings:
+							row["TITLE"] = drawings[fields[0]]["title"]
+							row["URL"].append(drawings[fields[0]]["url"])
+						else:
+							row["URL"].append("")
+					if qtyTable or row["QTY"] != "":
+						findTable[currentFind] = row
+	except:
+		print("Error in " + assembly, file=sys.stderr)	
 	f.close()
 	findTable["exists"] = True
 	
