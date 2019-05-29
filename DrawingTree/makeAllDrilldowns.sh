@@ -57,7 +57,7 @@ then
 		else
 		 	mv temp.js TipueSearch/tipuesearch_content.js
 		fi
-		move temp.csv $current/drawings.csv
+		mv temp.csv $current/drawings.csv
 	fi
 	cd $current
 
