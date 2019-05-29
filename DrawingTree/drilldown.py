@@ -273,6 +273,8 @@ def readFindTable(drawing, configuration, assembly, level):
 						serializer = chr(ord(serializer) + 1)
 				elif headings[n] in ["DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
 					if headings[n] == "QTY":
+						if fields[n][:1] == "'":
+							fields[n] = fields[n][1:]
 						rowQty = fields[n]
 					if headings[n] == "DRAWING":
 						if fields[n][:1] == "'":
@@ -472,7 +474,7 @@ def makeHtml(findTable):
 	html = ""
 	if asTables:
 		html += '<table class="drawingIndex"><tbody>\n'
-		html += '<tr><td><b>FIND</b></td><td><b>DRAWING</b></td><td><b>TITLE</b></td><td><b>NOTES</b></td></tr>\n'
+		html += '<tr><td><b>FIND</b></td><td><b>QTY</b></td><td><b>DRAWING</b></td><td><b>TITLE</b></td><td><b>NOTES</b></td></tr>\n'
 	else:
 		html += "<ul>\n"
 	findNumbers = list(range(0, 200))
@@ -489,7 +491,7 @@ def makeHtml(findTable):
 					continue
 				if asTables:
 					thisLine += "<tr>\n"
-					thisLine += "<td>" + str(n) + "</td>"
+					thisLine += "<td>" + str(n) + "</td><td>" + findTable[key]["QTY"] + "</td>"
 				else:
 					thisLine += "<li>\n"
 					thisLine += str(n) + ":  "
