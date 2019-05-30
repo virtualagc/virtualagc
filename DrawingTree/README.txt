@@ -46,6 +46,38 @@ Other possible column headings are:
 	"TITLE"		The titles of the drawings/assemblies in the rows.
 	"STRIKE"	If non-empty (say, "X") indicates a struck-out row.
 			(I.e., discard the row.)
+	"NOTE"		Text present in this field will be added to the
+			similarly named column in the HTML drilldown files.
+
+Sometimes it is helpful to create an empty .csv file for a drawing which
+drilldown.py might otherwise interpret as an assembly, but which isn't
+actually an assembly.  (Specifically, if the title of the drawing contains
+the string "ASSEMBLY" or "ASSY".)
+
+If a .csv file has been proofed, by which I mean that the drawing numbers
+and quantities have been proofed --- proofing of the titles doesn't seem too
+important, since most of them will be replaced by the titles from drawings.csv
+anyway --- it is useful to annotate the .csv file with an extra line in 
+which 
+	TITLE			=	PROOFED
+	FIND			=	REF
+	STRIKE			=	X
+	all proofed columns 	=	X (or if QTY, 0)
+Since such lines are "struck out", they are ignored by drilldown.py and thus
+don't affect the HTML or JSON produced.  However, they're useful in keeping
+track of what has been accomplished.  Besides that, you can have a systematic
+process for proofing all unproofed files with a command like the following,
+that finds every unproofed file and successively opens them in LibreOffice Calc:
+
+	cd DrawingTree
+	for n in `grep --ignore-case --files-without-match PROOFED *.csv`
+	do 
+		# Make sure to ignore empty files.
+		if [[ `stat -c%s $n` -gt 1 ]]
+		then 
+			libreoffice --calc $n
+		fi
+	done
 
 There are find-tables in the drawings of two essentially different types,
 and the post-processing software handles both types, which it distinguishes
@@ -77,10 +109,19 @@ drawing Y, using table Z".  Therefore, the drawing number sometimes cannot
 necessarily be generated automatically by software and is simply left as a 
 textual description of the rule.
 
-The post-processing software is a Python 3 program, drilldown.py, so look in 
-its source code for additional documentation.  Basically, you 'cd' into this 
-directory and do
+At its simplest, the post-processing to create drawing indexes and drilldown
+files is this:
 
+	cd DrawingTree
+	./makeAllDrilldowns.sh
+
+This is based on a couple of Python 3 programs, DrawingTree/drilldown.py, and
+(in the gh-pages branch) Scripts/AgcDrawingIndex.py, so you can look in their
+source code for additional documentation.  
+
+For drilldown.py, basically:
+
+	cd DrawingTree
 	./drilldown.py ASSEMBLYNAME >OUTPUT.html
 			or possibly
 	python3 ./drilldown.py ASSEMBLYNAME > OUPUT.html
@@ -98,14 +139,14 @@ a file,
 which is a machine-readable form of the data in the OUTPUT.html file, except that
 it additionaly contains quantity data for each FIND number.
 
-Finally, in terms of how to produce the file drawings.csv, I used to have
+As for how to produce the file drawings.csv, I used to have
 a fairly manually-intensive method here that involved cut-and-pasting from
 a bunch of web-pages, importing into LibreOffice Calc, exporting stuff,
 running scripts on it, reimporting into Calc, and so on.  Fortunately, 
 there's now just a couple of Python scripts to run to cut through all that
-nonsense:
+nonsense, so makeAllDrilldowns.sh does it something like this:
 
-	'cd' into the VirtualAGC hd-pages repo branch
+	'cd' into the VirtualAGC gh-pages repo branch
 	cat AgcDrawingIndex*.html | AgcDrawingIndex.py >drawings.csv
 	MakeTipueSearch.py <drawings.csv >TipueSearch/tipuesearch_content.js
 	move drawings.csv into the DrawingTree/ folder of the VirtualAGC schematics repo branch
