@@ -501,7 +501,7 @@ def makeHtml(findTable):
 					thisLine += str(n) + ":  "
 				expandedBelow = ""
 				seeAlso = ""
-				thisTitle = findTable[key]["TITLE"]
+				thisTitle = findTable[key]["TITLE"].replace("&", " & ").replace("  ", " ")
 				markAsAssembly = False
 				if "ASSEMBLY" in thisTitle or "ASSY" in thisTitle or "GROUP" in thisTitle or " KIT" in thisTitle:
 					if "SCHEMATIC" not in thisTitle:
