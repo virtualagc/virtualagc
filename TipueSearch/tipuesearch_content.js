@@ -15446,6 +15446,8 @@ var tipuesearch = {"pages": [
 	{"title":"JDC18080A-1-5-1" ,"text":"STRAIGHTENING OF PIN CONTACTS" ,"url":"https://archive.org/stream/AgcApertureCardsBatch10Images#page/n268/mode/1up"},
 	{"title":"JDC18080A-1-9-1" ,"text":"STRAIGHTENING OF PIN CONTACTS" ,"url":"https://archive.org/stream/AgcApertureCardsBatch10Images#page/n269/mode/1up"},
 	{"title":"JDC18083A-1-1-1" ,"text":"CLEANING OF CONNECTORS AND COMPONENTS" ,"url":"https://archive.org/stream/AgcApertureCardsBatch10Images#page/n270/mode/1up"},
+	{"title":"MIL-I-15126F-1-1-1" ,"text":"INSULATION TAPE, ELECTRICAL, PRESSURE SENSITIVE ADHESIVE AND PRESSURE SENSITIVE THERMOSETTING ADHESIVE" ,"url":"Documents/assist.dla.mil/MIL_I_15126F.pdf"},
+	{"title":"MIL-I-23594C-1-1-1" ,"text":"INSULATION TAPE, ELECTRICAL, HIGH TEMPERATURE, POLYTETRAFLOUROETHYLENE, PRESSURE-SENSITIVE" ,"url":"Documents/assist.dla.mil/MIL_I_23594C.pdf"},
 	{"title":"MIL-I-631D-1-1-1" ,"text":"INSULATION, ELECTRICAL, SYNTHETIC - RESIN COMPOSITION, NONRIGID" ,"url":"Documents/assist.dla.mil/MIL_I_631D.pdf"},
 	{"title":"MIL-P-18177C-1-1-1" ,"text":"PLASTIC SHEET, LAMINATED, THERMOSETTING, GLASS FIBER BASE, EPOXY-RESIN" ,"url":"Documents/assist.dla.mil/MIL_P_18177C.pdf"},
 	{"title":"MIL-T-713E-1-1-1" ,"text":"TWINE, FIBROUS: IMPREGNATED, LACING AND TYING" ,"url":"Documents/assist.dla.mil/MIL_T_713E.pdf"},
