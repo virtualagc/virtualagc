@@ -70,7 +70,7 @@ process for proofing all unproofed files with a command like the following,
 that finds every unproofed file and successively opens them in LibreOffice Calc:
 
 	cd DrawingTree
-	for n in `grep --ignore-case --files-without-match PROOFED *.csv`
+	for n in `grep --ignore-case --files-without-match -P '\tPROOFED\t' *.csv`
 	do 
 		# Make sure to ignore empty files.
 		if [[ `stat -c%s $n` -gt 1 ]]
