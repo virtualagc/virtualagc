@@ -85,6 +85,18 @@ then
 		drilldown 1014999-$a
 	done
 
+	# Finally, here are AGC/DSKY assemblies that were actually
+	# flown on missions.  They're all included in the G&N systems
+	# created above, but I want them separately for the website,
+	# since I think it will be less confusing.
+	for a in \
+		1003564-021 1003565-011 1003700-{051,071} \
+		1003563-051 1003570-011 1003706-031 \
+		2003993-{011,031,051,061,071,081,091,111} \
+		2003994-{011,031,051,091,121}
+	do
+		drilldown $a
+	done
 else
 
 	while [[ "$1" != "" ]]
