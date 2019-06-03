@@ -232,12 +232,19 @@ def readFindTable(drawing, configuration, assembly, level):
 	first = True
 	find = 1
 	serializer = "A"
+	progress = "pre " + filename + " " + str(f) + " "
+	#print(progress, file=sys.stderr)
 	try:
+		progress = "start " + filename + " "
 		for line in f:
+			#print(line, file=sys.stderr)
+			progress = "read \"" + line.strip() + "\" "
+			#print(progress, file=sys.stderr)
 			if first and line.strip() == "":
 				break
 			fields = line.strip("\n").split("\t")
 			if first:
+				progress += "A"
 				first = False
 				headings = fields
 				if "DRAWING" in headings and "QTY" not in headings:
@@ -253,7 +260,9 @@ def readFindTable(drawing, configuration, assembly, level):
 					if field not in ["FIND", "DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
 						numConfigs += 1
 				#print(headings)
+				progress += "B"
 			else:
+				progress += "C"
 				findTable["empty"] = False
 				row = {}
 				found = False
@@ -261,6 +270,7 @@ def readFindTable(drawing, configuration, assembly, level):
 				currentDrawing = []
 				currentQty = 0
 				rowQty = 0
+				progress += "D"
 				if "FIND" not in headings:
 					currentFind = str(find) 
 					find += 1
@@ -307,6 +317,7 @@ def readFindTable(drawing, configuration, assembly, level):
 								currentQty = rq[1]
 						if not qtyTable:
 							currentDrawing = fields[n].split(" or ")
+				progress += "E"
 				row["DRAWING"] = currentDrawing
 				row["QTY"] = currentQty
 				if found and ("STRIKE" not in headings or row["STRIKE"] == "") and currentFind != "":
@@ -321,8 +332,10 @@ def readFindTable(drawing, configuration, assembly, level):
 							row["URL"].append("")
 					if qtyTable or row["QTY"] != "":
 						findTable[currentFind] = row
+				progress += "F"
 	except:
 		print("Error in " + assembly, file=sys.stderr)	
+		print(progress, file=sys.stderr)
 	f.close()
 	findTable["exists"] = True
 	
