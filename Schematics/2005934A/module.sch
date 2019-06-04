@@ -17,7 +17,7 @@ $EndDescr
 Text Notes 39650 31700 0    250  ~ 50
 SCHEMATIC,
 Text Notes 40875 33100 0    250  ~ 50
-2005104
+2005934
 Text Notes 38250 33100 0    250  ~ 50
 80230
 Text Notes 38500 32050 0    200  ~ 40
@@ -58,26 +58,6 @@ Text Notes 40325 33400 0    140  ~ 28
 _____
 Wire Notes Line style solid
 	40550 33425 40650 33325
-Wire Notes Line style solid
-	37965 920  37965 2050
-Wire Notes Line style solid
-	37975 2050 43500 2050
-Wire Notes Line style solid
-	37975 1475 43500 1475
-Wire Notes Line style solid
-	42465 920  42465 2050
-Wire Notes Line style solid
-	41800 920  41800 2050
-Wire Notes Line style solid
-	38465 920  38465 2050
-Text Notes 38125 1300 0    140  ~ 28
-A
-Text Notes 38125 1850 0    140  ~ 28
-B
-Text Notes 38550 1425 0    140  ~ 28
-REVISED PER TDRR 29079\nDR     CHK      APPD
-Text Notes 38550 2000 0    140  ~ 28
-REVISED PER TDRR 29821\nDR     CHK      APPD
 Text Notes 700  2275 0    140  ~ 28
 CKT NO.    40001 THRU 40008\n            40009 THRU 40016
 Wire Notes Line
@@ -3834,8 +3814,8 @@ Wire Wire Line
 	15875 12950 16225 12950
 Wire Wire Line
 	16225 12375 16225 12950
-Text Notes 20075 32775 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing is a transcription of the original Apollo Program drawing\n   2005104B but differs from the original drawing in ways required to faithfully\n   reproduce electrical behavior.  A separate drawing has been created to \n   reproduce the visual appearance (but not the electrical behavior). — RSB 2018\n2. In the original drawing, circuits 40020, 21, 27, and 28 each indicate connection\n   to signals 40029A and 40030A, without indicating the specific backplane-\n   connector pin used, out of the several available carrying those signals.  In this\n   drawing, all of the relevant connector pins have been tied together. — RSB 2018
+Text Notes 20025 33000 0    140  ~ 28
+Notes from the Virtual AGC Project:\na) This CAD drawing is adapted from a prior transcription of the original Project\n   Apollo drawing 2005104B but differs from the original drawing in ways required\n   to faithfully reproduce electrical behavior.  A separate CAD drawing has been\n   created to reproduce the original visual appearance (but not the electrical\n   behavior). — RSB 2019\nb) In the original drawing, circuits 40020, 21, 27, and 28 each indicate connection\n   to signals 40029A and 40030A, without indicating the specific backplane-\n   connector pin used, out of the several available carrying those signals.  In this\n   drawing, all of the relevant connector pins have been tied together. — RSB 2019
 Text GLabel 8850 14600 0    140  UnSpc ~ 28
 40305A_280A
 Text GLabel 8875 15475 0    140  UnSpc ~ 28
@@ -4754,48 +4734,62 @@ Wire Wire Line
 	7350 30525 7775 30525
 Wire Wire Line
 	14500 9800 14500 10850
-Text Notes 20100 30400 0    140  ~ 28
+Wire Notes Line style solid
+	37965 910  37965 1180
+Wire Notes Line style solid
+	37965 1180 43500 1180
+Wire Notes Line style solid
+	38465 910  38465 1180
+Wire Notes Line style solid
+	42465 910  42465 1180
+Wire Notes Line style solid
+	41795 910  41795 1180
+Text Notes 38150 1145 0    140  ~ 28
+A
+Text Notes 38575 1145 0    140  ~ 28
+INITIAL RELEASE TDRR 32559
+Text Notes 20050 30325 0    140  ~ 28
 1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS\n   PRESCRIBED BY MIL-D-70327\n2. UNLESS OTHERWISE SPECIFIED:\n       A. RESISTOR VALUES ARE EXPRESSED IN OHMS\n       B. CAPACITOR VALUES ARE EXPRESSED IN MICROFARADS\n3. THE VALUE OF R5,R18,R29, TO BE SELECTED AT FINAL TEST.\n   PART TO BE SELECTED FROM CHART A\n4. TOP SIGNAL NAME AND CIRCUIT NO. APPLY IN POSITION B9\n   BOTTOM SIGNAL NAME AND CIRCUIT NO. APPLY IN POSITION B10\n   OR AS SHOWN IN CHART.
-Text Notes 19575 27925 0    140  ~ 28
+Text Notes 19675 27900 0    140  ~ 28
 NOTES:
 $Comp
 L AGC_DSKY:ConnectorB8-200 J?
-U 8 1 5D0BB54A
-P 26200 24500
-AR Path="/5B8E7731/5D0BB54A" Ref="J?"  Part="16" 
-AR Path="/5B8E7732/5D0BB54A" Ref="J?"  Part="16" 
-AR Path="/5D0BB54A" Ref="J2"  Part="8" 
-F 0 "J2" H 26199 24813 140 0001 C CNN
-F 1 "ConnectorB8-200" H 26199 24913 140 0001 C CNN
-F 2 "" H 26199 24663 140 0001 C CNN
-F 3 "" H 26199 24663 140 0001 C CNN
-F 4 "40031B" H 25400 24601 140 0000 C CNB "Caption"
-F 5 "40032B" H 25400 24401 140 0000 C CNB "Caption2"
-	8    26200 24500
+U 8 1 5D0640A0
+P 25800 24525
+AR Path="/5B8E7731/5D0640A0" Ref="J?"  Part="4" 
+AR Path="/5B8E7732/5D0640A0" Ref="J?"  Part="4" 
+AR Path="/5D0640A0" Ref="J2"  Part="8" 
+F 0 "J2" H 25799 24838 140 0001 C CNN
+F 1 "ConnectorB8-200" H 25799 24938 140 0001 C CNN
+F 2 "" H 25799 24688 140 0001 C CNN
+F 3 "" H 25799 24688 140 0001 C CNN
+F 4 "40031B" H 25000 24626 140 0000 C CNB "Caption"
+F 5 "40032B" H 25000 24426 140 0000 C CNB "Caption2"
+	8    25800 24525
 	1    0    0    -1  
 $EndComp
-Text GLabel 27150 24500 2    140  UnSpc ~ 28
+Text GLabel 26750 24525 2    140  UnSpc ~ 28
 PIN208
 Wire Wire Line
-	26475 24500 27150 24500
+	26075 24525 26750 24525
 $Comp
 L AGC_DSKY:ConnectorB8-200 J?
-U 51 1 5D0BEA04
-P 26200 25000
-AR Path="/5B8E7731/5D0BEA04" Ref="J?"  Part="16" 
-AR Path="/5B8E7732/5D0BEA04" Ref="J?"  Part="16" 
-AR Path="/5D0BEA04" Ref="J2"  Part="51" 
-F 0 "J2" H 26199 25313 140 0001 C CNN
-F 1 "ConnectorB8-200" H 26199 25413 140 0001 C CNN
-F 2 "" H 26199 25163 140 0001 C CNN
-F 3 "" H 26199 25163 140 0001 C CNN
-F 4 "40031B" H 25400 25101 140 0000 C CNB "Caption"
-F 5 "40032B" H 25400 24901 140 0000 C CNB "Caption2"
-	51   26200 25000
+U 51 1 5D0676DC
+P 25800 25075
+AR Path="/5B8E7731/5D0676DC" Ref="J?"  Part="4" 
+AR Path="/5B8E7732/5D0676DC" Ref="J?"  Part="4" 
+AR Path="/5D0676DC" Ref="J2"  Part="51" 
+F 0 "J2" H 25799 25388 140 0001 C CNN
+F 1 "ConnectorB8-200" H 25799 25488 140 0001 C CNN
+F 2 "" H 25799 25238 140 0001 C CNN
+F 3 "" H 25799 25238 140 0001 C CNN
+F 4 "40031B" H 25000 25176 140 0000 C CNB "Caption"
+F 5 "40032B" H 25000 24976 140 0000 C CNB "Caption2"
+	51   25800 25075
 	1    0    0    -1  
 $EndComp
-Text GLabel 27150 25000 2    140  UnSpc ~ 28
+Text GLabel 26750 25075 2    140  UnSpc ~ 28
 PIN251
 Wire Wire Line
-	26475 25000 27150 25000
+	26075 25075 26750 25075
 $EndSCHEMATC

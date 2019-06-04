@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:errors-cache
+LIBS:original-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 1 1
+Sheet 2 3
 Title ""
 Date ""
 Rev ""
@@ -293,7 +293,7 @@ CKT NO. 40079\n         40080
 Text Notes 750  14100 0    140  ~ 28
 CKT NO. 40251 THRU 40278\n(SEE TABLE FOR MODULE ASG)
 Text Notes 1425 28400 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This drawing was transcribed from the original Apollo Program drawing\n   2005104B, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing contained much of its connectivity information in a \n   descriptive form, rather than in the form of constructs usable in CAD.  Therefore,\n   the original drawing was transcribed into two separate CAD drawings, one of \n   which (the present drawing) preserves much of the appearance of the original but\n   is NOT ELECTRICALLY VALID WHEN PROCESSED AS A CAD FILE.  The other CAD \n   drawing is electrically valid but preserves less of the visual appearance of the \n   original. — RSB 2018
+Notes from the Virtual AGC Project:\na) This drawing was transcribed from the original Apollo Program drawing\n   2005104B, but does not itself date from the Apollo period. — RSB 2018\nb) The original drawing contained much of its connectivity information in a \n   descriptive form, rather than in the form of constructs usable in CAD.  Therefore,\n   the original drawing was transcribed into two separate CAD drawings, one of \n   which (the present drawing) preserves much of the appearance of the original but\n   is NOT ELECTRICALLY VALID WHEN PROCESSED AS A CAD FILE.  The other CAD \n   drawing is electrically valid but preserves less of the visual appearance of the \n   original. — RSB 2018
 $Bitmap
 Pos 1125 26225
 Scale 1.000000
@@ -1964,10 +1964,10 @@ F 3 "" H 20325 5050 130 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Transistor-PNP Q3
+L AGC_DSKY:Transistor-PNP Q5
 U 1 1 5E5259DF
 P 16925 4800
-F 0 "Q3" H 17350 5325 130 0000 C CNN
+F 0 "Q5" H 17350 5325 130 0000 C CNN
 F 1 "Transistor-PNP" H 16925 5365 130 0001 C CNN
 F 2 "" H 16925 4550 130 0001 C CNN
 F 3 "" H 16925 4550 130 0001 C CNN

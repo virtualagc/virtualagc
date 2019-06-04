@@ -17,7 +17,7 @@ $EndDescr
 Text Notes 39675 31730 0    250  ~ 50
 SCHEMATIC,
 Text Notes 40900 33130 0    250  ~ 50
-2005104
+2005934
 Text Notes 38275 33130 0    250  ~ 50
 80230
 Text Notes 38525 32080 0    200  ~ 40
@@ -58,26 +58,6 @@ Text Notes 40350 33430 0    140  ~ 28
 _____
 Wire Notes Line style solid
 	40575 33455 40675 33355
-Wire Notes Line style solid
-	37965 925  37965 2055
-Wire Notes Line style solid
-	37975 2055 43500 2055
-Wire Notes Line style solid
-	37975 1480 43500 1480
-Wire Notes Line style solid
-	42465 925  42465 2055
-Wire Notes Line style solid
-	41800 925  41800 2055
-Wire Notes Line style solid
-	38465 925  38465 2055
-Text Notes 38125 1305 0    140  ~ 28
-A
-Text Notes 38125 1855 0    140  ~ 28
-B
-Text Notes 38550 1430 0    140  ~ 28
-REVISED PER TDRR 29079\nDR     CHK      APPD
-Text Notes 38550 2005 0    140  ~ 28
-REVISED PER TDRR 29821\nDR     CHK      APPD
 Wire Notes Line style solid
 	8075 7875 15575 7875
 Wire Notes Line style solid
@@ -686,8 +666,6 @@ Text Notes 10225 18100 0    130  ~ 26
 -
 Text Notes 10225 18350 0    130  ~ 26
 -
-Text Notes 10225 18600 0    130  ~ 26
--
 Text Notes 10225 18850 0    130  ~ 26
 -
 Text Notes 10225 19100 0    130  ~ 26
@@ -1123,9 +1101,9 @@ CR32
 Text Notes 19200 21825 0    130  ~ 26
 CR33
 Text Notes 20225 19325 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 20225 21825 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 22400 19325 0    130  ~ 26
 DIODE
 Text Notes 22400 21825 0    130  ~ 26
@@ -1147,45 +1125,45 @@ Wire Notes Line style solid
 Text Notes 22450 8325 0    130  ~ 26
 DIODE
 Text Notes 20200 8325 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 20200 13575 0    130  ~ 26
-2004103-001
+2004183-001
 Wire Notes Line style solid
 	20650 13300 20650 8425
 Text Notes 20225 14325 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 14575 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 14825 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 15075 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 15575 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 15325 0    130  ~ 26
-2004004-002
+2004004-006
 Text Notes 20225 15825 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 16075 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 16325 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 16575 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 16825 0    130  ~ 26
 2004004-002
 Text Notes 20225 17075 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 17325 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 17575 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 17825 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 18325 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 18575 0    130  ~ 26
-2004004-001
+2004184-001
 Text Notes 20225 18075 0    130  ~ 26
 2004004-002
 Wire Notes Line style solid
@@ -1558,4 +1536,18 @@ Wire Notes Line width 60 style solid
 	19675 32213 19775 32213
 Wire Notes Line width 60 style solid
 	19775 32213 19725 32338
+Wire Notes Line style solid
+	38465 910  38465 1170
+Wire Notes Line style solid
+	41795 910  41795 1170
+Wire Notes Line style solid
+	42465 905  42465 1165
+Text Notes 38155 1145 0    140  ~ 28
+A
+Text Notes 38600 1145 0    140  ~ 28
+INITIAL RELEASE TDRR 32559
+Wire Notes Line style solid
+	37965 1170 43500 1170
+Wire Notes Line style solid
+	37965 910  37965 1170
 $EndSCHEMATC
