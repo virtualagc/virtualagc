@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:original-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 3
+Sheet 1 16
 Title ""
 Date ""
 Rev ""
@@ -17,7 +17,7 @@ $EndDescr
 Text Notes 39669 31724 0    250  ~ 50
 SCHEMATIC,
 Text Notes 40894 33124 0    250  ~ 50
-2005100
+2005942
 Text Notes 38269 33124 0    250  ~ 50
 80230
 Text Notes 39100 32125 0    200  ~ 40
@@ -36,12 +36,10 @@ Text Notes 34125 31775 0    140  ~ 28
 ___
 Text Notes 33125 31775 0    140  ~ 28
 ___
-Text Notes 40344 33424 0    140  ~ 28
+Text Notes 40344 33374 0    140  ~ 28
 _____
 Wire Notes Line style solid
-	40569 33449 40669 33349
-Text Notes 38819 33474 0    140  ~ 28
-NONE
+	40569 33399 40669 33299
 Wire Notes Line style solid
 	34019 32949 34144 32774
 Wire Notes Line style solid
@@ -52,688 +50,18 @@ Wire Notes Line style solid
 	34269 31799 34344 31699
 Wire Notes Line style solid
 	35244 31799 35319 31699
-Text Notes 42400 33450 0    140  ~ 28
-1     2
 Wire Notes Line style solid
-	37965 921  37965 3175
+	37965 921  37965 1175
 Wire Notes Line style solid
-	37965 3175 43500 3175
+	37965 1175 43500 1175
 Wire Notes Line style solid
-	42487 921  42487 3175
+	42487 921  42487 1175
 Wire Notes Line style solid
-	37965 2680 43500 2680
+	38456 921  38456 1175
 Wire Notes Line style solid
-	37965 2180 43500 2180
-Wire Notes Line style solid
-	37965 1529 43500 1529
-Wire Notes Line style solid
-	38456 921  38456 3175
-Wire Notes Line style solid
-	41800 921  41800 3175
-Text Notes 38121 1324 0    140  ~ 28
-A
-Text Notes 38105 1970 0    140  ~ 28
-B
-Text Notes 38124 2519 0    140  ~ 28
-C
-Text Notes 38133 3050 0    140  ~ 28
-D
-Text Notes 38525 1450 0    140  ~ 28
-REVISED PER TDRR 27079\nDR        CHK      APPD
-Text Notes 38525 2100 0    140  ~ 28
-REVISED PER TDRR 28162\nDR        CHK      APPD
-Text Notes 38525 2650 0    140  ~ 28
-REVISED PER TDRR 29079\nDR        CHK      APPD
-Text Notes 38525 3150 0    140  ~ 28
-REVISED PER TDRR 30864\nDR        CHK      APPD
+	41800 921  41800 1175
 Text Notes 35100 31775 0    140  ~ 28
 ___
-Wire Notes Line style solid
-	2950 21350 20425 21350
-Wire Notes Line style solid
-	2950 21600 20425 21600
-Wire Notes Line style solid
-	2950 21850 20425 21850
-Wire Notes Line style solid
-	2950 22100 20425 22100
-Wire Notes Line style solid
-	2950 22350 20425 22350
-Wire Notes Line style solid
-	2950 22600 20425 22600
-Wire Notes Line style solid
-	2950 22850 20425 22850
-Wire Notes Line style solid
-	2950 23100 20425 23100
-Wire Notes Line style solid
-	2950 23350 20425 23350
-Wire Notes Line style solid
-	2950 23600 20425 23600
-Wire Notes Line style solid
-	2950 23850 20425 23850
-Wire Notes Line style solid
-	2950 24100 20425 24100
-Wire Notes Line style solid
-	2950 24350 20425 24350
-Wire Notes Line style solid
-	2950 24600 20425 24600
-Wire Notes Line style solid
-	2950 24850 20425 24850
-Wire Notes Line style solid
-	2950 25100 20425 25100
-Wire Notes Line style solid
-	2950 25350 20425 25350
-Wire Notes Line style solid
-	2950 25600 20425 25600
-Wire Notes Line style solid
-	2950 25850 20425 25850
-Wire Notes Line style solid
-	2950 26100 20425 26100
-Wire Notes Line style solid
-	2950 26350 20425 26350
-Wire Notes Line style solid
-	2950 26600 20425 26600
-Wire Notes Line style solid
-	2950 26850 20425 26850
-Wire Notes Line style solid
-	2950 27350 20425 27350
-Wire Notes Line style solid
-	2950 27850 20425 27850
-Wire Notes Line style solid
-	2950 28100 26375 28100
-Wire Notes Line style solid
-	2950 28350 26375 28350
-Wire Notes Line style solid
-	2950 28600 26375 28600
-Wire Notes Line style solid
-	2950 28850 26375 28850
-Wire Notes Line style solid
-	2950 29100 26375 29100
-Wire Notes Line style solid
-	2950 29350 26375 29350
-Wire Notes Line style solid
-	2950 29600 26375 29600
-Wire Notes Line style solid
-	2950 29850 2950 20500
-Wire Notes Line style solid
-	2950 20500 20400 20500
-Wire Notes Line style solid
-	20425 20500 20425 29850
-Wire Notes Line style solid
-	10400 20925 20400 20925
-Wire Notes Line style solid
-	4950 20500 4950 29850
-Wire Notes Line style solid
-	7700 29850 7700 20500
-Wire Notes Line style solid
-	9050 20500 9050 29850
-Wire Notes Line style solid
-	10400 20500 10400 29850
-Wire Notes Line style solid
-	11425 20925 11425 29850
-Wire Notes Line style solid
-	12400 29850 12400 20500
-Wire Notes Line style solid
-	13400 20925 13400 29850
-Wire Notes Line style solid
-	14400 29850 14400 20500
-Wire Notes Line style solid
-	15425 20925 15425 29850
-Wire Notes Line style solid
-	16400 29850 16400 20500
-Wire Notes Line style solid
-	17400 20925 17400 29850
-Wire Notes Line style solid
-	18400 29850 18400 20500
-Wire Notes Line style solid
-	19400 20925 19400 29850
-Wire Notes Line style solid
-	26375 27100 26375 29850
-Wire Notes Line style solid
-	2950 27100 26375 27100
-Wire Notes Line style solid
-	2950 27600 26375 27600
-Wire Notes Line style solid
-	21425 27625 21425 29850
-Wire Notes Line style solid
-	22375 27100 22375 29850
-Wire Notes Line style solid
-	23400 27600 23400 29850
-Wire Notes Line style solid
-	24375 27100 24375 29850
-Wire Notes Line style solid
-	25375 27600 25375 29850
-Wire Notes Line style solid
-	2950 29850 26375 29850
-Text Notes 8325 21575 0    130  ~ 26
-1
-Text Notes 8325 21825 0    130  ~ 26
-2
-Text Notes 8325 22075 0    130  ~ 26
-3
-Text Notes 8325 22325 0    130  ~ 26
-4
-Text Notes 8325 22575 0    130  ~ 26
-5
-Text Notes 8325 22825 0    130  ~ 26
-6
-Text Notes 8325 23075 0    130  ~ 26
-7
-Text Notes 8325 23325 0    130  ~ 26
-8
-Text Notes 8325 23825 0    130  ~ 26
-1
-Text Notes 8325 24075 0    130  ~ 26
-2
-Text Notes 8325 24325 0    130  ~ 26
-3
-Text Notes 8325 24575 0    130  ~ 26
-4
-Text Notes 8325 24825 0    130  ~ 26
-5
-Text Notes 8325 25075 0    130  ~ 26
-6
-Text Notes 8325 25325 0    130  ~ 26
-7
-Text Notes 8325 25575 0    130  ~ 26
-8
-Text Notes 8325 26075 0    130  ~ 26
-1
-Text Notes 8325 26325 0    130  ~ 26
-1
-Text Notes 8325 26575 0    130  ~ 26
-2
-Text Notes 8325 26825 0    130  ~ 26
-2
-Text Notes 8325 27075 0    130  ~ 26
-3
-Text Notes 8325 27325 0    130  ~ 26
-3
-Text Notes 8325 28325 0    130  ~ 26
-1
-Text Notes 8325 28575 0    130  ~ 26
-2
-Text Notes 8325 28825 0    130  ~ 26
-3
-Text Notes 8325 29075 0    130  ~ 26
-1
-Text Notes 8325 29325 0    130  ~ 26
-2
-Text Notes 8325 29575 0    130  ~ 26
-3
-Text Notes 9175 21575 0    130  ~ 26
-40311
-Text Notes 9175 21825 0    130  ~ 26
-40312
-Text Notes 9175 22075 0    130  ~ 26
-40313
-Text Notes 9175 22325 0    130  ~ 26
-40314
-Text Notes 9175 22575 0    130  ~ 26
-40315
-Text Notes 9175 22825 0    130  ~ 26
-40316
-Text Notes 9175 23075 0    130  ~ 26
-40317
-Text Notes 9175 23325 0    130  ~ 26
-40318
-Text Notes 9175 23825 0    130  ~ 26
-40321
-Text Notes 9175 24075 0    130  ~ 26
-40322
-Text Notes 9175 24325 0    130  ~ 26
-40323
-Text Notes 9175 24575 0    130  ~ 26
-40324
-Text Notes 9175 24825 0    130  ~ 26
-40325
-Text Notes 9175 25075 0    130  ~ 26
-40326
-Text Notes 9175 25325 0    130  ~ 26
-40327
-Text Notes 9175 25575 0    130  ~ 26
-40328
-Text Notes 3375 21000 0    130  ~ 26
-POSITION
-Text Notes 3800 21575 0    130  ~ 26
-B16
-Text Notes 5225 20875 0    130  ~ 26
-NOMINAL OUTPUT PIN
-Text Notes 5850 21175 0    130  ~ 26
-CURRENT
-Text Notes 5800 21575 0    130  ~ 26
-225mA
-Text Notes 5775 23075 0    130  ~ 26
-225mA
-Text Notes 3800 23325 0    130  ~ 26
-B16
-Wire Notes Line style solid
-	4000 21675 4000 23050
-Wire Notes Line style solid
-	6100 21675 6100 22800
-Text Notes 5775 23325 0    130  ~ 26
-300mA
-Text Notes 7775 21250 0    130  ~ 26
-COMPONENT\n  PREFIX\n  (ASSY)
-Text Notes 10575 21250 0    130  ~ 26
-SIGNAL
-Text Notes 12550 21250 0    130  ~ 26
-SIGNAL
-Text Notes 11550 21250 0    130  ~ 26
-PIN NO.
-Text Notes 13525 21250 0    130  ~ 26
-PIN NO.
-Text Notes 15525 21250 0    130  ~ 26
-PIN NO.
-Text Notes 14575 21250 0    130  ~ 26
-SIGNAL
-Text Notes 16550 21250 0    130  ~ 26
-SIGNAL
-Text Notes 18550 21250 0    130  ~ 26
-SIGNAL
-Text Notes 17525 21250 0    130  ~ 26
-PIN NO.
-Text Notes 19525 21250 0    130  ~ 26
-PIN NO.
-Text Notes 19300 20850 0    180  ~ 36
-E
-Text Notes 17300 20850 0    180  ~ 36
-D
-Text Notes 15300 20850 0    180  ~ 36
-C
-Text Notes 13300 20850 0    180  ~ 36
-B
-Text Notes 11325 20850 0    180  ~ 36
-A
-Text Notes 9175 21250 0    180  ~ 36
-CIRCUIT\n  NO.
-Text Notes 15675 21575 0    130  ~ 26
-267
-Text Notes 15675 21825 0    130  ~ 26
-267
-Text Notes 15675 22075 0    130  ~ 26
-267
-Text Notes 15675 22325 0    130  ~ 26
-267
-Text Notes 15675 22575 0    130  ~ 26
-256
-Text Notes 15675 22825 0    130  ~ 26
-256
-Text Notes 15675 23075 0    130  ~ 26
-256
-Text Notes 15675 23325 0    130  ~ 26
-256
-Text Notes 15675 23825 0    130  ~ 26
-267
-Text Notes 15675 24075 0    130  ~ 26
-267
-Text Notes 15675 24325 0    130  ~ 26
-267
-Text Notes 15675 24575 0    130  ~ 26
-267
-Text Notes 15675 24825 0    130  ~ 26
-256
-Text Notes 15675 25075 0    130  ~ 26
-256
-Text Notes 15675 25325 0    130  ~ 26
-256
-Text Notes 15675 25575 0    130  ~ 26
-256
-Text Notes 19625 26075 0    130  ~ 26
-227
-Text Notes 19625 26325 0    130  ~ 26
-227
-Text Notes 19625 26575 0    130  ~ 26
-123
-Text Notes 19625 26825 0    130  ~ 26
-123
-Text Notes 19625 27075 0    130  ~ 26
-108
-Text Notes 19625 27325 0    130  ~ 26
-108
-Text Notes 21325 27500 0    180  ~ 36
-F
-Text Notes 23250 27500 0    180  ~ 36
-G
-Text Notes 25275 27500 0    180  ~ 36
-H
-Text Notes 25625 28325 0    130  ~ 26
-202
-Text Notes 25625 28575 0    130  ~ 26
-203
-Text Notes 25625 28825 0    130  ~ 26
-204
-Text Notes 25625 29075 0    130  ~ 26
-202
-Text Notes 25625 29325 0    130  ~ 26
-203
-Text Notes 25625 29575 0    130  ~ 26
-204
-Text Notes 24475 28325 0    130  ~ 26
-BPLSWX
-Text Notes 24475 28575 0    130  ~ 26
-BPLSWY
-Text Notes 24475 28825 0    130  ~ 26
-BPLSWZ
-Text Notes 24475 29075 0    130  ~ 26
-BPLSWF
-Text Notes 24475 29325 0    130  ~ 26
-BPLSWG
-Text Notes 24475 29575 0    130  ~ 26
-BPLSWH
-Text Notes 23675 28325 0    130  ~ 26
-101
-Text Notes 23675 29575 0    130  ~ 26
-101
-Text Notes 22625 28325 0    130  ~ 26
-0VDC
-Text Notes 22625 29575 0    130  ~ 26
-0VDC
-Text Notes 21675 28325 0    130  ~ 26
-102
-Text Notes 21675 29575 0    130  ~ 26
-102
-Text Notes 20525 28325 0    130  ~ 26
-BPLSSW
-Text Notes 20525 29575 0    130  ~ 26
-BPLSSW
-Text Notes 20575 27975 0    130  ~ 26
-SIGNAL
-Text Notes 22550 27975 0    130  ~ 26
-SIGNAL
-Text Notes 24525 27975 0    130  ~ 26
-SIGNAL
-Text Notes 21500 27975 0    130  ~ 26
-PIN NO.
-Text Notes 23500 27975 0    130  ~ 26
-PIN NO.
-Text Notes 25475 27975 0    130  ~ 26
-PIN NO.
-Wire Notes Line style solid
-	23875 28400 23875 29300
-Wire Notes Line style solid
-	22875 28400 22875 29300
-Wire Notes Line style solid
-	21850 28400 21850 29300
-Wire Notes Line style solid
-	20900 28400 20900 29300
-Text Notes 18500 26075 0    130  ~ 26
-XSETAB
-Text Notes 18500 26325 0    130  ~ 26
-XSETCD
-Text Notes 18500 26575 0    130  ~ 26
-XRSTAN
-Text Notes 18500 26825 0    130  ~ 26
-XRSTBN
-Text Notes 18500 27075 0    130  ~ 26
-XRSTCN
-Text Notes 18500 27325 0    130  ~ 26
-XRSTDN
-Text Notes 17650 26075 0    130  ~ 26
-125
-Text Notes 17650 26325 0    130  ~ 26
-125
-Text Notes 17650 26575 0    130  ~ 26
-224
-Text Notes 17650 26825 0    130  ~ 26
-224
-Text Notes 17650 27075 0    130  ~ 26
-212
-Text Notes 17650 27325 0    130  ~ 26
-212
-Text Notes 16575 26075 0    130  ~ 26
-SETAB
-Text Notes 16575 26325 0    130  ~ 26
-SETCD
-Text Notes 16525 26575 0    130  ~ 26
-RESETA
-Text Notes 16525 26825 0    130  ~ 26
-RESETB
-Text Notes 16525 27075 0    130  ~ 26
-RESETC
-Text Notes 16525 27325 0    130  ~ 26
-RESETD
-Text Notes 14500 25575 0    130  ~ 26
-+4MY2
-Text Notes 14500 24825 0    130  ~ 26
-+4MY2
-Text Notes 14500 24575 0    130  ~ 26
-+4MY1
-Text Notes 14500 23825 0    130  ~ 26
-+4MY1
-Text Notes 14500 23325 0    130  ~ 26
-+4MX2
-Text Notes 14500 22575 0    130  ~ 26
-+4MX2
-Text Notes 14500 22325 0    130  ~ 26
-+4MX1
-Text Notes 14500 21575 0    130  ~ 26
-+4MX1
-Text Notes 13700 21575 0    130  ~ 26
-168
-Text Notes 13700 21825 0    130  ~ 26
-268
-Text Notes 13700 22075 0    130  ~ 26
-162
-Text Notes 13700 22325 0    130  ~ 26
-262
-Text Notes 13700 22575 0    130  ~ 26
-157
-Text Notes 13700 22825 0    130  ~ 26
-257
-Wire Notes Line style solid
-	14925 21650 14925 22050
-Wire Notes Line style solid
-	14925 22650 14925 23050
-Wire Notes Line style solid
-	14925 23900 14925 24300
-Wire Notes Line style solid
-	14925 24900 14925 25300
-Text Notes 13700 23075 0    130  ~ 26
-152
-Text Notes 13700 23325 0    130  ~ 26
-250
-Text Notes 13700 23825 0    130  ~ 26
-168
-Text Notes 13700 24075 0    130  ~ 26
-268
-Text Notes 13700 24325 0    130  ~ 26
-162
-Text Notes 13700 24575 0    130  ~ 26
-262
-Text Notes 13700 24825 0    130  ~ 26
-157
-Text Notes 13700 25075 0    130  ~ 26
-257
-Text Notes 13700 25325 0    130  ~ 26
-152
-Text Notes 13700 25575 0    130  ~ 26
-250
-Text Notes 12550 21575 0    130  ~ 26
-X01FN
-Text Notes 12550 21825 0    130  ~ 26
-X01CN
-Text Notes 12550 22075 0    130  ~ 26
-X02FN
-Text Notes 12550 22325 0    130  ~ 26
-X02CN
-Text Notes 12550 22575 0    130  ~ 26
-X03FN
-Text Notes 12525 22825 0    130  ~ 26
-X03CN
-Text Notes 12550 23075 0    130  ~ 26
-X04FN
-Text Notes 12550 23325 0    130  ~ 26
-XPFN
-Text Notes 12550 23825 0    130  ~ 26
-X05FN
-Text Notes 12550 24075 0    130  ~ 26
-X05CN
-Text Notes 12550 24325 0    130  ~ 26
-X06FN
-Text Notes 12550 24575 0    130  ~ 26
-X06CN
-Text Notes 12550 24825 0    130  ~ 26
-X07FN
-Text Notes 12550 25075 0    130  ~ 26
-X07CN
-Text Notes 12550 25325 0    130  ~ 26
-X04CN
-Text Notes 12550 25575 0    130  ~ 26
-XPCN
-Text Notes 11700 21575 0    130  ~ 26
-269
-Text Notes 11700 21825 0    130  ~ 26
-167
-Text Notes 11700 22075 0    130  ~ 26
-263
-Text Notes 11700 22325 0    130  ~ 26
-160
-Text Notes 11700 22575 0    130  ~ 26
-258
-Text Notes 11700 22825 0    130  ~ 26
-156
-Text Notes 11700 23075 0    130  ~ 26
-251
-Text Notes 11700 23325 0    130  ~ 26
-151
-Text Notes 11700 23825 0    130  ~ 26
-269
-Text Notes 11700 24075 0    130  ~ 26
-167
-Text Notes 11700 24325 0    130  ~ 26
-263
-Text Notes 11700 24575 0    130  ~ 26
-160
-Text Notes 11700 24825 0    130  ~ 26
-258
-Text Notes 11700 25075 0    130  ~ 26
-156
-Text Notes 11700 25325 0    130  ~ 26
-251
-Text Notes 11700 25575 0    130  ~ 26
-151
-Text Notes 10625 21575 0    130  ~ 26
-IL01
-Text Notes 10625 21825 0    130  ~ 26
-IL01/
-Text Notes 10625 22075 0    130  ~ 26
-IL02
-Text Notes 10625 22325 0    130  ~ 26
-IL02/
-Text Notes 10650 22575 0    130  ~ 26
-IL03
-Text Notes 10650 22825 0    130  ~ 26
-IL03/
-Text Notes 10650 23075 0    130  ~ 26
-IL04
-Text Notes 10650 23325 0    130  ~ 26
-ILP
-Text Notes 10650 23825 0    130  ~ 26
-IL05
-Text Notes 10650 24075 0    130  ~ 26
-IL05/
-Text Notes 10650 24325 0    130  ~ 26
-IL06
-Text Notes 10650 24575 0    130  ~ 26
-IL06/
-Text Notes 10650 24825 0    130  ~ 26
-IL07
-Text Notes 10650 25075 0    130  ~ 26
-IL07/
-Text Notes 10650 25325 0    130  ~ 26
-IL04/
-Text Notes 10650 25575 0    130  ~ 26
-ILP/
-Text Notes 9125 26075 0    130  ~ 26
-40361
-Text Notes 9125 26325 0    130  ~ 26
-4036
-Text Notes 9125 26575 0    130  ~ 26
-4036
-Text Notes 9125 26825 0    130  ~ 26
-4036
-Text Notes 9125 27075 0    130  ~ 26
-4036
-Text Notes 9125 27325 0    130  ~ 26
-4036
-Text Notes 9625 26325 0    130  ~ 26
-3
-Text Notes 9625 26575 0    130  ~ 26
-2
-Text Notes 9625 26825 0    130  ~ 26
-4
-Text Notes 9625 27075 0    130  ~ 26
-7
-Text Notes 9625 27325 0    130  ~ 26
-8
-Text Notes 9125 28325 0    130  ~ 26
-405
-Text Notes 9125 28575 0    130  ~ 26
-405
-Text Notes 9125 28825 0    130  ~ 26
-405
-Text Notes 9125 29075 0    130  ~ 26
-405
-Text Notes 9125 29325 0    130  ~ 26
-405
-Text Notes 9125 29575 0    130  ~ 26
-405
-Text Notes 9500 28325 0    130  ~ 26
-18
-Text Notes 9500 28575 0    130  ~ 26
-20
-Text Notes 9500 28825 0    130  ~ 26
-22
-Text Notes 9500 29075 0    130  ~ 26
-19
-Text Notes 9500 29325 0    130  ~ 26
-21
-Text Notes 9500 29575 0    130  ~ 26
-23
-Text Notes 5775 23825 0    130  ~ 26
-225mA
-Text Notes 5775 25325 0    130  ~ 26
-225mA
-Text Notes 5775 25575 0    130  ~ 26
-300mA
-Text Notes 5775 26075 0    130  ~ 26
-450mA
-Text Notes 5775 27325 0    130  ~ 26
-450mA
-Wire Notes Line style solid
-	6100 26150 6100 27050
-Wire Notes Line style solid
-	6075 23900 6075 25050
-Wire Notes Line style solid
-	3975 23900 3975 25300
-Text Notes 3800 23825 0    130  ~ 26
-B17
-Text Notes 3800 25575 0    130  ~ 26
-B17
-Text Notes 3800 26325 0    130  ~ 26
-B17
-Text Notes 3800 26825 0    130  ~ 26
-B17
-Text Notes 3800 27325 0    130  ~ 26
-B17
-Text Notes 3800 26075 0    130  ~ 26
-B16
-Text Notes 3800 26575 0    130  ~ 26
-B16
-Text Notes 3800 27075 0    130  ~ 26
-B16
-Text Notes 3825 28325 0    130  ~ 26
-B16
-Text Notes 3825 28825 0    130  ~ 26
-B16
-Text Notes 3825 28575 0    130  ~ 26
-B16
-Text Notes 3825 29075 0    130  ~ 26
-B17
-Text Notes 3825 29325 0    130  ~ 26
-B17
-Text Notes 3825 29575 0    130  ~ 26
-B17
 Text Notes 35425 28450 0    130  ~ 26
 REF DWG:
 Text Notes 35650 28925 0    130  ~ 26
@@ -741,9 +69,9 @@ ROPE DRIVER MODULE B16-B17 ASSY\nDWG NO. 2003140
 Text Notes 950  30200 0    130  ~ 26
 NOTES:
 Text Notes 1675 31850 0    130  ~ 26
-1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS PRESCRIBED BY MIL-D-70327\n2. UNLESS OTHERWISE SPECIFIED, RESISTOR VALUES ARE IN OHMS\n3. THE VALUE OF THE FOLLOWING COMPONENTS TO BE DETERMINED AT ELECTRICAL\n   TEST  R29, R36, R37, R50, AND R51  TO BE SELECTED FROM APPROPRIATE CHART\n4. TOP SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B16,\n   BOTTOM SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B17\n   SEE CHARTS
+1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS PRESCRIBED BY MIL-D-1000\n2. UNLESS OTHERWISE SPECIFIED, RESISTOR VALUES ARE IN OHMS\n3. THE VALUE OF THE FOLLOWING COMPONENTS TO BE DETERMINED AT ELECTRICAL\n   TEST  R29, R36, R37, R50, R51, L2 & L3  TO BE SELECTED FROM APPROPRIATE CHART\n4. TOP SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B16,\n   BOTTOM SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B17\n   SEE CHARTS
 Text Notes 20175 33100 0    130  ~ 26
-Notes from the Virtual AGC Project:\na) This CAD drawing was transcribed from the original Apollo Program drawing 2005100D,\n   but does not itself date from the Apollo era.  — RSB 2018\nb) This CAD drawing is intended to capture the visual appearance of the original drawing,\n   but does not provide a valid electrical design for it.  A separate drawing has been created\n   to instead capture the intended electrical characteristics of the circuit. — RSB 2018
+Notes from the Virtual AGC Project:\na) This CAD drawing was adapted from the previously-transcribed original Project Apollo\n   drawing 2005100D.  — RSB 2019\nb) This CAD drawing is intended to capture the electrical properties of the original drawing,\n   but is not a visually accurate representation of it.  A separate drawing has been created\n   to instead capture the visual appearance of the original drawing. — RSB 2019
 $Bitmap
 Pos 19900 32000
 Scale 1.000000
@@ -1615,8 +943,6 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	22100 21325 22100 25875
 Wire Notes Line style solid
-	22100 25875 33400 25875
-Wire Notes Line style solid
 	33400 27675 43475 27675
 Wire Notes Line style solid
 	33400 21325 33400 27675
@@ -1625,7 +951,7 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	27900 25875 27900 13275
 Wire Notes Line style solid
-	550  19975 27900 19975
+	18950 19975 27900 19975
 Wire Notes Line style solid
 	35725 21325 35725 17975
 Wire Notes Line style solid
@@ -1640,241 +966,9 @@ Wire Notes Line style solid
 	37525 13275 37525 600 
 Wire Notes Line style solid
 	37525 7075 43475 7075
-Wire Notes Line width 60 style solid
-	4000 23038 3950 22913
-Wire Notes Line width 60 style solid
-	3950 22913 4050 22913
-Wire Notes Line width 60 style solid
-	4050 22913 4000 23038
-Wire Notes Line width 60 style solid
-	3975 25288 3925 25163
-Wire Notes Line width 60 style solid
-	3925 25163 4025 25163
-Wire Notes Line width 60 style solid
-	4025 25163 3975 25288
-Wire Notes Line width 60 style solid
-	6100 27038 6050 26913
-Wire Notes Line width 60 style solid
-	6050 26913 6150 26913
-Wire Notes Line width 60 style solid
-	6150 26913 6100 27038
-Wire Notes Line width 60 style solid
-	6075 25038 6025 24913
-Wire Notes Line width 60 style solid
-	6025 24913 6125 24913
-Wire Notes Line width 60 style solid
-	6125 24913 6075 25038
-Wire Notes Line width 60 style solid
-	6100 22788 6050 22663
-Wire Notes Line width 60 style solid
-	6050 22663 6150 22663
-Wire Notes Line width 60 style solid
-	6150 22663 6100 22788
-Wire Notes Line width 60 style solid
-	14925 25288 14875 25163
-Wire Notes Line width 60 style solid
-	14875 25163 14975 25163
-Wire Notes Line width 60 style solid
-	14975 25163 14925 25288
-Wire Notes Line width 60 style solid
-	14925 24912 14975 25037
-Wire Notes Line width 60 style solid
-	14975 25037 14875 25037
-Wire Notes Line width 60 style solid
-	14875 25037 14925 24912
-Wire Notes Line width 60 style solid
-	14925 23912 14975 24037
-Wire Notes Line width 60 style solid
-	14975 24037 14875 24037
-Wire Notes Line width 60 style solid
-	14875 24037 14925 23912
-Wire Notes Line width 60 style solid
-	14925 21662 14975 21787
-Wire Notes Line width 60 style solid
-	14975 21787 14875 21787
-Wire Notes Line width 60 style solid
-	14875 21787 14925 21662
-Wire Notes Line width 60 style solid
-	14925 22038 14875 21913
-Wire Notes Line width 60 style solid
-	14875 21913 14975 21913
-Wire Notes Line width 60 style solid
-	14975 21913 14925 22038
-Wire Notes Line width 60 style solid
-	14925 23038 14875 22913
-Wire Notes Line width 60 style solid
-	14875 22913 14975 22913
-Wire Notes Line width 60 style solid
-	14975 22913 14925 23038
-Wire Notes Line width 60 style solid
-	14925 24288 14875 24163
-Wire Notes Line width 60 style solid
-	14875 24163 14975 24163
-Wire Notes Line width 60 style solid
-	14975 24163 14925 24288
-Wire Notes Line width 60 style solid
-	14925 22662 14975 22787
-Wire Notes Line width 60 style solid
-	14975 22787 14875 22787
-Wire Notes Line width 60 style solid
-	14875 22787 14925 22662
-Wire Notes Line width 60 style solid
-	20900 29288 20850 29163
-Wire Notes Line width 60 style solid
-	20850 29163 20950 29163
-Wire Notes Line width 60 style solid
-	20950 29163 20900 29288
-Wire Notes Line width 60 style solid
-	21850 29288 21800 29163
-Wire Notes Line width 60 style solid
-	21800 29163 21900 29163
-Wire Notes Line width 60 style solid
-	21900 29163 21850 29288
-Wire Notes Line width 60 style solid
-	22875 29288 22825 29163
-Wire Notes Line width 60 style solid
-	22825 29163 22925 29163
-Wire Notes Line width 60 style solid
-	22925 29163 22875 29288
-Wire Notes Line width 60 style solid
-	23875 29288 23825 29163
-Wire Notes Line width 60 style solid
-	23825 29163 23925 29163
-Wire Notes Line width 60 style solid
-	23925 29163 23875 29288
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 30850 5875
-F 0 "X?" H 30850 6200 140 0001 C CNN
-F 1 "Node2" H 30850 6300 140 0001 C CNN
-F 2 "" H 30850 6350 140 0001 C CNN
-F 3 "" H 30850 6350 140 0001 C CNN
-F 4 "BPLMX2" H 30600 5800 140 0000 R CNB "Caption"
-F 5 "BPLMY2" H 30600 6050 140 0000 R CNB "Caption2"
-	1    30850 5875
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 30825 2150
-F 0 "X?" H 30825 2475 140 0001 C CNN
-F 1 "Node2" H 30825 2575 140 0001 C CNN
-F 2 "" H 30825 2625 140 0001 C CNN
-F 3 "" H 30825 2625 140 0001 C CNN
-F 4 "BPLMX1" H 30500 2075 140 0000 R CNB "Caption"
-F 5 "BPLMY1" H 30500 2325 140 0000 R CNB "Caption2"
-	1    30825 2150
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 22350 18000
-F 0 "X?" H 22350 18325 140 0001 C CNN
-F 1 "Node2" H 22350 18425 140 0001 C CNN
-F 2 "" H 22350 18475 140 0001 C CNN
-F 3 "" H 22350 18475 140 0001 C CNN
-F 4 "40365A" H 22100 17950 140 0000 R CNB "Caption"
-F 5 "40366A" H 22125 18175 140 0000 R CNB "Caption2"
-	1    22350 18000
-	1    0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 20750 15575
-F 0 "X?" H 20750 15900 140 0001 C CNN
-F 1 "Node2" H 20750 16000 140 0001 C CNN
-F 2 "" H 20750 16050 140 0001 C CNN
-F 3 "" H 20750 16050 140 0001 C CNN
-F 4 "BPLIZ1" V 20250 15975 140 0000 R CNB "Caption"
-F 5 "BPLIZ2" V 20500 16000 140 0000 R CNB "Caption2"
-	1    20750 15575
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 18375 9475
-F 0 "X?" H 18375 9800 140 0001 C CNN
-F 1 "Node2" H 18375 9900 140 0001 C CNN
-F 2 "" H 18375 9950 140 0001 C CNN
-F 3 "" H 18375 9950 140 0001 C CNN
-F 4 "BPLMX3" H 18000 9350 140 0000 R CNB "Caption"
-F 5 "BPMY3" H 18000 9575 140 0000 R CNB "Caption2"
-	1    18375 9475
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 18400 5925
-F 0 "X?" H 18400 6250 140 0001 C CNN
-F 1 "Node2" H 18400 6350 140 0001 C CNN
-F 2 "" H 18400 6400 140 0001 C CNN
-F 3 "" H 18400 6400 140 0001 C CNN
-F 4 "BPLMX2" H 18100 5775 140 0000 R CNB "Caption"
-F 5 "BPLMY2" H 18100 6025 140 0000 R CNB "Caption2"
-	1    18400 5925
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 18375 2150
-F 0 "X?" H 18375 2475 140 0001 C CNN
-F 1 "Node2" H 18375 2575 140 0001 C CNN
-F 2 "" H 18375 2625 140 0001 C CNN
-F 3 "" H 18375 2625 140 0001 C CNN
-F 4 "BPLMX1" H 17950 2075 140 0000 R CNB "Caption"
-F 5 "BPLMY1" H 17975 2350 140 0000 R CNB "Caption2"
-	1    18375 2150
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 3475 17425
-F 0 "X?" H 3475 17750 140 0001 C CNN
-F 1 "Node2" H 3475 17850 140 0001 C CNN
-F 2 "" H 3475 17900 140 0001 C CNN
-F 3 "" H 3475 17900 140 0001 C CNN
-F 4 "40365A" H 3200 17600 140 0000 R CNB "Caption"
-F 5 "40366A" H 3225 17325 140 0000 R CNB "Caption2"
-	1    3475 17425
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 9950 14600
-F 0 "X?" H 9950 14925 140 0001 C CNN
-F 1 "Node2" H 9950 15025 140 0001 C CNN
-F 2 "" H 9950 15075 140 0001 C CNN
-F 3 "" H 9950 15075 140 0001 C CNN
-F 4 "BPLIZ1" V 9425 15000 140 0000 R CNB "Caption"
-F 5 "BPLIZ2" V 9650 15000 140 0000 R CNB "Caption2"
-	1    9950 14600
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 1775 14575
-F 0 "X?" H 1775 14900 140 0001 C CNN
-F 1 "Node2" H 1775 15000 140 0001 C CNN
-F 2 "" H 1775 15050 140 0001 C CNN
-F 3 "" H 1775 15050 140 0001 C CNN
-F 4 "BPLIZ1" V 1275 14875 140 0000 R CNB "Caption"
-F 5 "BPLIZ2" V 1500 14850 140 0000 R CNB "Caption2"
-	1    1775 14575
-	0    1    1    0   
-$EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 65 1 5BE59A23
+U 65 1 5C5430B4
 P 29725 14525
 F 0 "J1" H 29725 14850 140 0001 C CNN
 F 1 "ConnectorB8-100" H 29725 14950 140 0001 C CNN
@@ -1887,33 +981,7 @@ F 5 "BPLSSW" H 28825 14475 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 64 1 5BE59A23
-P 6025 2175
-F 0 "J1" H 6025 2500 140 0001 C CNN
-F 1 "ConnectorB8-100" H 6025 2600 140 0001 C CNN
-F 2 "" H 6025 2650 140 0001 C CNN
-F 3 "" H 6025 2650 140 0001 C CNN
-F 4 "BPLMX1" H 5150 2250 140 0000 C BNB "Caption"
-F 5 "BPLMY1" H 5150 2150 140 0000 C TNB "Caption2"
-	64   6025 2175
-	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 34650 22100
-F 0 "X?" H 34650 22425 140 0001 C CNN
-F 1 "Node2" H 34650 22525 140 0001 C CNN
-F 2 "" H 34650 22575 140 0001 C CNN
-F 3 "" H 34650 22575 140 0001 C CNN
-F 4 "BPLIZ1" V 34150 22550 140 0000 R CNB "Caption"
-F 5 "BPLIZ2" V 34375 22550 140 0000 R CNB "Caption2"
-	1    34650 22100
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-100 J1
-U 69 1 5BE59A23
+U 69 1 5C5430DB
 P 25250 20375
 F 0 "J1" H 25250 20700 140 0001 C CNN
 F 1 "ConnectorB8-100" H 25250 20800 140 0001 C CNN
@@ -1925,34 +993,8 @@ F 5 "CGB17" H 24375 20300 140 0000 C TNB "Caption2"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 41450 19450
-F 0 "X?" H 41450 19775 140 0001 C CNN
-F 1 "Node2" H 41450 19875 140 0001 C CNN
-F 2 "" H 41450 19925 140 0001 C CNN
-F 3 "" H 41450 19925 140 0001 C CNN
-F 4 "BPLIZ1" H 41300 19100 140 0000 R CNB "Caption"
-F 5 "BPLIZ2" H 41300 19325 140 0000 R CNB "Caption2"
-	1    41450 19450
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 39725 14475
-F 0 "X?" H 39725 14800 140 0001 C CNN
-F 1 "Node2" H 39725 14900 140 0001 C CNN
-F 2 "" H 39725 14950 140 0001 C CNN
-F 3 "" H 39725 14950 140 0001 C CNN
-F 4 "BPLMX2" H 38975 14350 140 0000 R CNB "Caption"
-F 5 "BPLMY2" H 38975 14600 140 0000 R CNB "Caption2"
-	1    39725 14475
-	-1   0    0    1   
-$EndComp
-$Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 40 1 5BE59A23
+U 40 1 5C5430DA
 P 37675 19450
 F 0 "J2" H 37675 19775 140 0001 C CNN
 F 1 "ConnectorB8-200" H 37675 19875 140 0001 C CNN
@@ -1965,7 +1007,7 @@ F 5 "BPLSSW" H 36700 19425 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 41 2 5BE59A23
+U 41 2 5C5430D9
 P 35650 12500
 F 0 "J2" H 35650 12825 140 0001 C CNN
 F 1 "ConnectorB8-200" H 35650 12925 140 0001 C CNN
@@ -1978,7 +1020,7 @@ F 5 "SETCTN" H 36375 12450 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 42 2 5BE59A23
+U 42 2 5C5430D8
 P 32500 12500
 F 0 "J2" H 32500 12825 140 0001 C CNN
 F 1 "ConnectorB8-200" H 32500 12925 140 0001 C CNN
@@ -1991,7 +1033,7 @@ F 5 "RSTTAD" H 33175 12450 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 43 2 5BE59A23
+U 43 2 5C5430D7
 P 29400 12500
 F 0 "J2" H 29400 12825 140 0001 C CNN
 F 1 "ConnectorB8-200" H 29400 12925 140 0001 C CNN
@@ -2004,7 +1046,7 @@ F 5 "RSTTBD" H 30100 12425 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 5 1 5BE59A23
+U 5 1 5C5430D6
 P 43075 26925
 F 0 "J2" H 43075 27250 140 0001 C CNN
 F 1 "ConnectorB8-200" H 43075 27350 140 0001 C CNN
@@ -2017,7 +1059,7 @@ F 5 "0VDC" H 43075 26425 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 6 2 5BE59A23
+U 6 2 5C5430D5
 P 41125 22600
 F 0 "J2" H 41125 22925 140 0001 C CNN
 F 1 "ConnectorB8-200" H 41125 23025 140 0001 C CNN
@@ -2030,7 +1072,7 @@ F 5 "CLROPS" H 41425 22375 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 7 2 5BE59A23
+U 7 2 5C5430D4
 P 42675 22600
 F 0 "J2" H 42675 22925 140 0001 C CNN
 F 1 "ConnectorB8-200" H 42675 23025 140 0001 C CNN
@@ -2043,20 +1085,20 @@ F 5 "CLROPT" H 42675 22375 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 11 1 5BE59A23
-P 1375 10250
-F 0 "J1" H 1375 10575 140 0001 C CNN
-F 1 "ConnectorB8-100" H 1375 10675 140 0001 C CNN
-F 2 "" H 1375 10725 140 0001 C CNN
-F 3 "" H 1375 10725 140 0001 C CNN
-F 4 "0VDC" H 1375 10475 140 0001 C BNB "Caption"
-F 5 "0VDC" H 1375 10025 140 0001 C TNB "Caption2"
-	11   1375 10250
+U 11 1 5C5430D3
+P 22575 29750
+F 0 "J1" H 22575 30075 140 0001 C CNN
+F 1 "ConnectorB8-100" H 22575 30175 140 0001 C CNN
+F 2 "" H 22575 30225 140 0001 C CNN
+F 3 "" H 22575 30225 140 0001 C CNN
+F 4 "0VDC" H 22575 29975 140 0001 C BNB "Caption"
+F 5 "0VDC" H 22575 29525 140 0001 C TNB "Caption2"
+	11   22575 29750
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 13 1 5BE59A23
+U 13 1 5C5430D2
 P 24725 7400
 F 0 "J1" H 24725 7725 140 0001 C CNN
 F 1 "ConnectorB8-100" H 24725 7825 140 0001 C CNN
@@ -2068,7 +1110,7 @@ F 4 "(NC)" H 24725 7625 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 14 2 5BE59A23
+U 14 2 5C5430C6
 P 17675 4725
 F 0 "J1" H 17675 5050 140 0001 C CNN
 F 1 "ConnectorB8-100" H 17675 5150 140 0001 C CNN
@@ -2081,7 +1123,7 @@ F 5 "S05FD" H 18375 4700 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 15 2 5BE59A23
+U 15 2 5C5430D0
 P 19650 4725
 F 0 "J1" H 19650 5050 140 0001 C CNN
 F 1 "ConnectorB8-100" H 19650 5150 140 0001 C CNN
@@ -2094,7 +1136,7 @@ F 5 "S05CD" H 20300 4700 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 16 2 5BE59A23
+U 16 2 5C5430CF
 P 21675 4700
 F 0 "J1" H 21675 5025 140 0001 C CNN
 F 1 "ConnectorB8-100" H 21675 5125 140 0001 C CNN
@@ -2107,7 +1149,7 @@ F 5 "S06FD" H 22325 4675 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 17 2 5BE59A23
+U 17 2 5C5430CE
 P 23600 4700
 F 0 "J1" H 23600 5025 140 0001 C CNN
 F 1 "ConnectorB8-100" H 23600 5125 140 0001 C CNN
@@ -2120,7 +1162,7 @@ F 5 "S06CD" H 24275 4675 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 18 1 5BE59A23
+U 18 1 5C5430CD
 P 13475 11100
 F 0 "J1" H 13475 11425 140 0001 C CNN
 F 1 "ConnectorB8-100" H 13475 11525 140 0001 C CNN
@@ -2132,7 +1174,7 @@ F 4 "(NC)" H 13500 10700 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 19 2 5BE59A23
+U 19 2 5C5430CC
 P 17050 12550
 F 0 "J1" H 17050 12875 140 0001 C CNN
 F 1 "ConnectorB8-100" H 17050 12975 140 0001 C CNN
@@ -2145,7 +1187,7 @@ F 5 "RSTSBD" H 17750 12450 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 19 2 5BE59A23
+U 19 2 5C5430CB
 P 15575 12550
 F 0 "J2" H 15575 12875 140 0001 C CNN
 F 1 "ConnectorB8-200" H 15575 12975 140 0001 C CNN
@@ -2158,20 +1200,20 @@ F 5 "XRSTBN" H 16275 12450 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 18 1 5BE59A23
-P 1375 9125
-F 0 "J2" H 1375 9450 140 0001 C CNN
-F 1 "ConnectorB8-200" H 1375 9550 140 0001 C CNN
-F 2 "" H 1375 9600 140 0001 C CNN
-F 3 "" H 1375 9600 140 0001 C CNN
-F 4 "0VDC" H 1225 9550 140 0000 C BNB "Caption"
-F 5 "0VDC" H 1225 9500 140 0000 C TNB "Caption2"
-	18   1375 9125
+U 18 1 5C5430CA
+P 22575 28550
+F 0 "J2" H 22575 28875 140 0001 C CNN
+F 1 "ConnectorB8-200" H 22575 28975 140 0001 C CNN
+F 2 "" H 22575 29025 140 0001 C CNN
+F 3 "" H 22575 29025 140 0001 C CNN
+F 4 "0VDC" H 22425 28975 140 0000 C BNB "Caption"
+F 5 "0VDC" H 22425 28925 140 0000 C TNB "Caption2"
+	18   22575 28550
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 13 1 5BE59A23
+U 13 1 5C5430C9
 P 13400 6150
 F 0 "J2" H 13400 6475 140 0001 C CNN
 F 1 "ConnectorB8-200" H 13400 6575 140 0001 C CNN
@@ -2184,7 +1226,7 @@ F 5 "RPS" H 13325 5650 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 17 2 5BE59A23
+U 17 2 5C5430C8
 P 23600 8375
 F 0 "J2" H 23600 8700 140 0001 C CNN
 F 1 "ConnectorB8-200" H 23600 8800 140 0001 C CNN
@@ -2197,7 +1239,7 @@ F 5 "SPCD" H 24200 8350 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 16 2 5BE59A23
+U 16 2 5C5430C7
 P 21650 8400
 F 0 "J2" H 21650 8725 140 0001 C CNN
 F 1 "ConnectorB8-200" H 21650 8825 140 0001 C CNN
@@ -2210,7 +1252,7 @@ F 5 "SPFD" H 22250 8375 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 15 2 5BE59A23
+U 15 2 5C5430E8
 P 19650 8400
 F 0 "J2" H 19650 8725 140 0001 C CNN
 F 1 "ConnectorB8-200" H 19650 8825 140 0001 C CNN
@@ -2223,7 +1265,7 @@ F 5 "S07CD" H 20325 8375 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 14 2 5BE59A23
+U 14 2 5C5430DC
 P 17675 8400
 F 0 "J2" H 17675 8725 140 0001 C CNN
 F 1 "ConnectorB8-200" H 17675 8825 140 0001 C CNN
@@ -2236,7 +1278,7 @@ F 5 "S07FD" H 18350 8375 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 3 1 5BE59A23
+U 3 1 5C5430E9
 P 42450 9025
 F 0 "J1" H 42450 9350 140 0001 C CNN
 F 1 "ConnectorB8-100" H 42450 9450 140 0001 C CNN
@@ -2249,7 +1291,7 @@ F 5 "0VDC" H 41825 8900 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 2 1 5BE59A23
+U 2 1 5C5430EA
 P 38000 8600
 F 0 "J1" H 38000 8925 140 0001 C CNN
 F 1 "ConnectorB8-100" H 38000 9025 140 0001 C CNN
@@ -2262,7 +1304,7 @@ F 5 "BPLSSW" H 38025 8150 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 4 1 5BE59A23
+U 4 1 5C5430EB
 P 33950 23850
 F 0 "J1" H 33950 24175 140 0001 C CNN
 F 1 "ConnectorB8-100" H 33950 24275 140 0001 C CNN
@@ -2275,20 +1317,7 @@ F 5 "CLROPE" H 33950 24250 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 25 1 5BE59A23
-P 9175 17200
-F 0 "J2" H 9175 17525 140 0001 C CNN
-F 1 "ConnectorB8-200" H 9175 17625 140 0001 C CNN
-F 2 "" H 9175 17675 140 0001 C CNN
-F 3 "" H 9175 17675 140 0001 C CNN
-F 4 "40365A" H 8725 16800 140 0000 C BNB "Caption"
-F 5 "40366A" H 8700 16750 140 0000 C TNB "Caption2"
-	25   9175 17200
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J2
-U 22 1 5BE59A23
+U 22 1 5C5430EC
 P 24750 3675
 F 0 "J2" H 24750 4000 140 0001 C CNN
 F 1 "ConnectorB8-200" H 24750 4100 140 0001 C CNN
@@ -2313,7 +1342,7 @@ F 5 "XRSTAN" H 19325 12450 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 21 2 5BE59A23
+U 21 2 5C5430EF
 P 21775 12550
 F 0 "J2" H 21775 12875 140 0001 C CNN
 F 1 "ConnectorB8-200" H 21775 12975 140 0001 C CNN
@@ -2326,7 +1355,7 @@ F 5 "XSETCD" H 22475 12475 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 28 2 5BE59A23
+U 28 2 5C5430EE
 P 10900 12550
 F 0 "J2" H 10900 12875 140 0001 C CNN
 F 1 "ConnectorB8-200" H 10900 12975 140 0001 C CNN
@@ -2339,7 +1368,7 @@ F 5 "SETCRN" H 11650 12500 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 29 2 5BE59A23
+U 29 2 5C5430E7
 P 7800 12550
 F 0 "J2" H 7800 12875 140 0001 C CNN
 F 1 "ConnectorB8-200" H 7800 12975 140 0001 C CNN
@@ -2352,7 +1381,7 @@ F 5 "RSTRAD" H 8500 12525 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 38 1 5BE59A23
+U 38 1 5C5430ED
 P 25650 23775
 F 0 "J1" H 25650 24100 140 0001 C CNN
 F 1 "ConnectorB8-100" H 25650 24200 140 0001 C CNN
@@ -2365,7 +1394,7 @@ F 5 "CLROPT" H 25725 24150 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 39 1 5BE59A23
+U 39 1 5C5430E6
 P 12400 3675
 F 0 "J1" H 12400 4000 140 0001 C CNN
 F 1 "ConnectorB8-100" H 12400 4100 140 0001 C CNN
@@ -2377,7 +1406,7 @@ F 4 "(NC)" H 12400 3900 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 36 2 5BE59A23
+U 36 2 5C5430E5
 P 5325 8400
 F 0 "J1" H 5325 8725 140 0001 C CNN
 F 1 "ConnectorB8-100" H 5325 8825 140 0001 C CNN
@@ -2390,7 +1419,7 @@ F 5 "R07FD" H 6000 8375 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 37 1 5BE59A23
+U 37 1 5C5430E4
 P 1050 6125
 F 0 "J1" H 1050 6450 140 0001 C CNN
 F 1 "ConnectorB8-100" H 1050 6550 140 0001 C CNN
@@ -2403,7 +1432,7 @@ F 5 "RPR" H 1075 6525 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 34 2 5BE59A23
+U 34 2 5C5430E3
 P 7275 8400
 F 0 "J1" H 7275 8725 140 0001 C CNN
 F 1 "ConnectorB8-100" H 7275 8825 140 0001 C CNN
@@ -2416,7 +1445,7 @@ F 5 "R07CD" H 7950 8375 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 35 1 5BE59A23
+U 35 1 5C5430E2
 P 23475 21875
 F 0 "J1" H 23475 22200 140 0001 C CNN
 F 1 "ConnectorB8-100" H 23475 22300 140 0001 C CNN
@@ -2429,7 +1458,7 @@ F 5 "BPLSWG" H 22725 21825 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 32 2 5BE59A23
+U 32 2 5C5430E1
 P 11250 8400
 F 0 "J1" H 11250 8725 140 0001 C CNN
 F 1 "ConnectorB8-100" H 11250 8825 140 0001 C CNN
@@ -2442,7 +1471,7 @@ F 5 "RPCD" H 11875 8375 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 33 2 5BE59A23
+U 33 2 5C5430E0
 P 9300 8400
 F 0 "J1" H 9300 8725 140 0001 C CNN
 F 1 "ConnectorB8-100" H 9300 8825 140 0001 C CNN
@@ -2455,7 +1484,7 @@ F 5 "RPFD" H 9925 8425 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 30 2 5BE59A23
+U 30 2 5C5430DF
 P 3225 12550
 F 0 "J1" H 3225 12875 140 0001 C CNN
 F 1 "ConnectorB8-100" H 3225 12975 140 0001 C CNN
@@ -2468,7 +1497,7 @@ F 5 "XRSTBN" H 3950 12525 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 31 1 5BE59A23
+U 31 1 5C5430DE
 P 23450 23800
 F 0 "J1" H 23450 24125 140 0001 C CNN
 F 1 "ConnectorB8-100" H 23450 24225 140 0001 C CNN
@@ -2481,20 +1510,7 @@ F 5 "CLROPS" H 23550 24175 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 31 1 5BE59A23
-P 5925 9450
-F 0 "J2" H 5925 9775 140 0001 C CNN
-F 1 "ConnectorB8-200" H 5925 9875 140 0001 C CNN
-F 2 "" H 5925 9925 140 0001 C CNN
-F 3 "" H 5925 9925 140 0001 C CNN
-F 4 "BPLMX3" H 5050 9550 140 0000 C BNB "Caption"
-F 5 "BPLMY3" H 5050 9450 140 0000 C TNB "Caption2"
-	31   5925 9450
-	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J2
-U 30 2 5BE59A23
+U 30 2 5C5430D1
 P 4700 12550
 F 0 "J2" H 4700 12875 140 0001 C CNN
 F 1 "ConnectorB8-200" H 4700 12975 140 0001 C CNN
@@ -2507,7 +1523,7 @@ F 5 "RSTRBD" H 5400 12550 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 33 2 5BE59A23
+U 33 2 5C5430DD
 P 9325 4725
 F 0 "J2" H 9325 5050 140 0001 C CNN
 F 1 "ConnectorB8-200" H 9325 5150 140 0001 C CNN
@@ -2520,7 +1536,7 @@ F 5 "R06FD" H 10050 4650 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 32 2 5BE59A23
+U 32 2 5C5430A0
 P 11275 4725
 F 0 "J2" H 11275 5050 140 0001 C CNN
 F 1 "ConnectorB8-200" H 11275 5150 140 0001 C CNN
@@ -2533,20 +1549,20 @@ F 5 "R06CD" H 11950 4650 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 35 1 5BE59A23
-P 1375 9875
-F 0 "J2" H 1375 10200 140 0001 C CNN
-F 1 "ConnectorB8-200" H 1375 10300 140 0001 C CNN
-F 2 "" H 1375 10350 140 0001 C CNN
-F 3 "" H 1375 10350 140 0001 C CNN
-F 4 "0VDC" H 1375 10100 140 0001 C BNB "Caption"
-F 5 "0VDC" H 1375 9650 140 0001 C TNB "Caption2"
-	35   1375 9875
+U 35 1 5C5430B1
+P 22575 29350
+F 0 "J2" H 22575 29675 140 0001 C CNN
+F 1 "ConnectorB8-200" H 22575 29775 140 0001 C CNN
+F 2 "" H 22575 29825 140 0001 C CNN
+F 3 "" H 22575 29825 140 0001 C CNN
+F 4 "0VDC" H 22575 29575 140 0001 C BNB "Caption"
+F 5 "0VDC" H 22575 29125 140 0001 C TNB "Caption2"
+	35   22575 29350
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 34 2 5BE59A23
+U 34 2 5C5430B0
 P 7300 4725
 F 0 "J2" H 7300 5050 140 0001 C CNN
 F 1 "ConnectorB8-200" H 7300 5150 140 0001 C CNN
@@ -2559,7 +1575,7 @@ F 5 "R05CD" H 8025 4650 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 37 1 5BE59A23
+U 37 1 5C5430AF
 P 12450 7425
 F 0 "J2" H 12450 7750 140 0001 C CNN
 F 1 "ConnectorB8-200" H 12450 7850 140 0001 C CNN
@@ -2571,7 +1587,7 @@ F 4 "(NC)" H 12450 7650 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 36 2 5BE59A23
+U 36 2 5C5430AE
 P 5325 4725
 F 0 "J2" H 5325 5050 140 0001 C CNN
 F 1 "ConnectorB8-200" H 5325 5150 140 0001 C CNN
@@ -2584,7 +1600,7 @@ F 5 "R05FD" H 6050 4650 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 39 1 5BE59A23
+U 39 1 5C5430AD
 P 29750 18850
 F 0 "J2" H 29750 19175 140 0001 C CNN
 F 1 "ConnectorB8-200" H 29750 19275 140 0001 C CNN
@@ -2597,7 +1613,7 @@ F 5 "BPLSSW" H 28775 18825 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 38 1 5BE59A23
+U 38 1 5C5430AC
 P 25750 11050
 F 0 "J2" H 25750 11375 140 0001 C CNN
 F 1 "ConnectorB8-200" H 25750 11475 140 0001 C CNN
@@ -2609,7 +1625,7 @@ F 4 "(NC)" H 25775 10600 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 29 2 5BE59A23
+U 29 2 5C5430AB
 P 6275 12550
 F 0 "J1" H 6275 12875 140 0001 C CNN
 F 1 "ConnectorB8-100" H 6275 12975 140 0001 C CNN
@@ -2622,7 +1638,7 @@ F 5 "XRSTAN" H 7000 12525 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 28 2 5BE59A23
+U 28 2 5C5430AA
 P 9425 12550
 F 0 "J1" H 9425 12875 140 0001 C CNN
 F 1 "ConnectorB8-100" H 9425 12975 140 0001 C CNN
@@ -2635,7 +1651,7 @@ F 5 "XSETCD" H 10100 12500 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 21 2 5BE59A23
+U 21 2 5C5430A9
 P 23275 12550
 F 0 "J1" H 23275 12875 140 0001 C CNN
 F 1 "ConnectorB8-100" H 23275 12975 140 0001 C CNN
@@ -2648,7 +1664,7 @@ F 5 "SETCSN" H 24025 12500 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 20 2 5BE59A23
+U 20 2 5C5430A8
 P 20150 12575
 F 0 "J1" H 20150 12900 140 0001 C CNN
 F 1 "ConnectorB8-100" H 20150 13000 140 0001 C CNN
@@ -2661,7 +1677,7 @@ F 5 "RSTSAD" H 20850 12525 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 27 1 5BE59A23
+U 27 1 5C5430A7
 P 1350 11100
 F 0 "J1" H 1350 11425 140 0001 C CNN
 F 1 "ConnectorB8-100" H 1350 11525 140 0001 C CNN
@@ -2672,21 +1688,8 @@ F 4 "(NC)" H 1375 10675 140 0000 C BNB "Caption"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 35300 25025
-F 0 "X?" H 35300 25350 140 0001 C CNN
-F 1 "Node2" H 35300 25450 140 0001 C CNN
-F 2 "" H 35300 25500 140 0001 C CNN
-F 3 "" H 35300 25500 140 0001 C CNN
-F 4 "40365A" H 34825 24900 140 0000 R CNB "Caption"
-F 5 "40366A" H 34825 25150 140 0000 R CNB "Caption2"
-	1    35300 25025
-	1    0    0    1   
-$EndComp
-$Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 44 1 5BE59A23
+U 44 1 5C5430A6
 P 26725 17000
 F 0 "J2" H 26725 17325 140 0001 C CNN
 F 1 "ConnectorB8-200" H 26725 17425 140 0001 C CNN
@@ -2699,7 +1702,7 @@ F 5 "40332A" H 26800 17425 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 45 2 5BE59A23
+U 45 2 5C5430A5
 P 35950 4650
 F 0 "J2" H 35950 4975 140 0001 C CNN
 F 1 "ConnectorB8-200" H 35950 5075 140 0001 C CNN
@@ -2712,7 +1715,7 @@ F 5 "T06CD" H 36625 4575 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 46 2 5BE59A23
+U 46 2 5C5430A4
 P 34025 4650
 F 0 "J2" H 34025 4975 140 0001 C CNN
 F 1 "ConnectorB8-200" H 34025 5075 140 0001 C CNN
@@ -2725,7 +1728,7 @@ F 5 "T06FD" H 34675 4575 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 47 2 5BE59A23
+U 47 2 5C5430A3
 P 32000 4675
 F 0 "J2" H 32000 5000 140 0001 C CNN
 F 1 "ConnectorB8-200" H 32000 5100 140 0001 C CNN
@@ -2737,60 +1740,8 @@ F 5 "T05CD" H 32650 4600 140 0000 C TNB "Caption2"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 38575 10300
-F 0 "X?" H 38575 10625 140 0001 C CNN
-F 1 "Node2" H 38575 10725 140 0001 C CNN
-F 2 "" H 38575 10775 140 0001 C CNN
-F 3 "" H 38575 10775 140 0001 C CNN
-F 4 "40365A" H 38450 10325 140 0000 R CNB "Caption"
-F 5 "40366A" H 38475 10575 140 0000 R CNB "Caption2"
-	1    38575 10300
-	1    0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 33025 18850
-F 0 "X?" H 33025 19175 140 0001 C CNN
-F 1 "Node2" H 33025 19275 140 0001 C CNN
-F 2 "" H 33025 19325 140 0001 C CNN
-F 3 "" H 33025 19325 140 0001 C CNN
-F 4 "BPLMX3" H 32325 18750 140 0000 R CNB "Caption"
-F 5 "BPLMY3" H 32350 18950 140 0000 R CNB "Caption2"
-	1    33025 18850
-	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 32875 14525
-F 0 "X?" H 32875 14850 140 0001 C CNN
-F 1 "Node2" H 32875 14950 140 0001 C CNN
-F 2 "" H 32875 15000 140 0001 C CNN
-F 3 "" H 32875 15000 140 0001 C CNN
-F 4 "BPLMX1" H 32100 14450 140 0000 R CNB "Caption"
-F 5 "BPLMY1" H 32100 14675 140 0000 R CNB "Caption2"
-	1    32875 14525
-	-1   0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:Node2 X?
-U 1 1 5BE59A23
-P 30800 9400
-F 0 "X?" H 30800 9725 140 0001 C CNN
-F 1 "Node2" H 30800 9825 140 0001 C CNN
-F 2 "" H 30800 9875 140 0001 C CNN
-F 3 "" H 30800 9875 140 0001 C CNN
-F 4 "BPLMX3" H 30550 9275 140 0000 R CNB "Caption"
-F 5 "BPLMY3" H 30525 9525 140 0000 R CNB "Caption2"
-	1    30800 9400
-	-1   0    0    1   
-$EndComp
-$Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 48 2 5BE59A23
+U 48 2 5C5430A2
 P 30025 4675
 F 0 "J2" H 30025 5000 140 0001 C CNN
 F 1 "ConnectorB8-200" H 30025 5100 140 0001 C CNN
@@ -2803,7 +1754,7 @@ F 5 "T05FD" H 30675 4625 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 49 1 5BE59A23
+U 49 1 5C5430A1
 P 19925 17000
 F 0 "J2" H 19925 17325 140 0001 C CNN
 F 1 "ConnectorB8-200" H 19925 17425 140 0001 C CNN
@@ -2816,7 +1767,7 @@ F 5 "IHENV" H 19700 16500 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 54 1 5BE59A23
+U 54 1 5C54309F
 P 36450 14475
 F 0 "J1" H 36450 14800 140 0001 C CNN
 F 1 "ConnectorB8-100" H 36450 14900 140 0001 C CNN
@@ -2829,20 +1780,20 @@ F 5 "BPLSSW" H 35475 14400 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 53 1 5BE59A23
-P 5925 5925
-F 0 "J1" H 5925 6250 140 0001 C CNN
-F 1 "ConnectorB8-100" H 5925 6350 140 0001 C CNN
-F 2 "" H 5925 6400 140 0001 C CNN
-F 3 "" H 5925 6400 140 0001 C CNN
-F 4 "BPLMX2" H 5100 6050 140 0000 C BNB "Caption"
-F 5 "BPLMY2" H 5100 5950 140 0000 C TNB "Caption2"
-	53   5925 5925
+U 53 1 5C5430BD
+P 39925 13850
+F 0 "J1" H 39925 14175 140 0001 C CNN
+F 1 "ConnectorB8-100" H 39925 14275 140 0001 C CNN
+F 2 "" H 39925 14325 140 0001 C CNN
+F 3 "" H 39925 14325 140 0001 C CNN
+F 4 "BPLMX2" H 39100 13975 140 0000 C BNB "Caption"
+F 5 "BPLMY2" H 39100 13875 140 0000 C TNB "Caption2"
+	53   39925 13850
 	-1   0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 56 1 5BE59A23
+U 56 1 5C5430C5
 P 40075 15425
 F 0 "J2" H 40075 15750 140 0001 C CNN
 F 1 "ConnectorB8-200" H 40075 15850 140 0001 C CNN
@@ -2855,7 +1806,7 @@ F 5 "+4MY2" H 39300 15425 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 55 1 5BE59A23
+U 55 1 5C5430C4
 P 36450 15425
 F 0 "J2" H 36450 15750 140 0001 C CNN
 F 1 "ConnectorB8-200" H 36450 15850 140 0001 C CNN
@@ -2868,7 +1819,7 @@ F 5 "+4SW" H 35450 15275 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 54 1 5BE59A23
+U 54 1 5C5430C3
 P 40075 16350
 F 0 "J2" H 40075 16675 140 0001 C CNN
 F 1 "ConnectorB8-200" H 40075 16775 140 0001 C CNN
@@ -2881,7 +1832,7 @@ F 5 "0VDC" H 39400 16225 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 52 1 5BE59A23
+U 52 1 5C5430C2
 P 36975 7375
 F 0 "J2" H 36975 7700 140 0001 C CNN
 F 1 "ConnectorB8-200" H 36975 7800 140 0001 C CNN
@@ -2893,20 +1844,20 @@ F 4 "(NC)" H 36975 7600 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 59 1 5BE59A23
-P 1375 9500
-F 0 "J2" H 1375 9825 140 0001 C CNN
-F 1 "ConnectorB8-200" H 1375 9925 140 0001 C CNN
-F 2 "" H 1375 9975 140 0001 C CNN
-F 3 "" H 1375 9975 140 0001 C CNN
-F 4 "0VDC" H 1375 9725 140 0001 C BNB "Caption"
-F 5 "0VDC" H 1375 9275 140 0001 C TNB "Caption2"
-	59   1375 9500
+U 59 1 5C5430C1
+P 22575 28950
+F 0 "J2" H 22575 29275 140 0001 C CNN
+F 1 "ConnectorB8-200" H 22575 29375 140 0001 C CNN
+F 2 "" H 22575 29425 140 0001 C CNN
+F 3 "" H 22575 29425 140 0001 C CNN
+F 4 "0VDC" H 22575 29175 140 0001 C BNB "Caption"
+F 5 "0VDC" H 22575 28725 140 0001 C TNB "Caption2"
+	59   22575 28950
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 49 1 5BE59A23
+U 49 1 5C5430C0
 P 37050 3650
 F 0 "J1" H 37050 3975 140 0001 C CNN
 F 1 "ConnectorB8-100" H 37050 4075 140 0001 C CNN
@@ -2918,7 +1869,7 @@ F 4 "(NC)" H 37050 3875 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 48 2 5BE59A23
+U 48 2 5C5430BF
 P 30025 8350
 F 0 "J1" H 30025 8675 140 0001 C CNN
 F 1 "ConnectorB8-100" H 30025 8775 140 0001 C CNN
@@ -2931,7 +1882,7 @@ F 5 "T07FD" H 30650 8300 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 47 2 5BE59A23
+U 47 2 5C5430BE
 P 31975 8325
 F 0 "J1" H 31975 8650 140 0001 C CNN
 F 1 "ConnectorB8-100" H 31975 8750 140 0001 C CNN
@@ -2944,7 +1895,7 @@ F 5 "T07CD" H 32625 8250 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 46 2 5BE59A23
+U 46 2 5C5430B3
 P 33975 8325
 F 0 "J1" H 33975 8650 140 0001 C CNN
 F 1 "ConnectorB8-100" H 33975 8750 140 0001 C CNN
@@ -2957,7 +1908,7 @@ F 5 "TPFD" H 34575 8275 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 45 2 5BE59A23
+U 45 2 5C5430BC
 P 35975 8325
 F 0 "J1" H 35975 8650 140 0001 C CNN
 F 1 "ConnectorB8-100" H 35975 8750 140 0001 C CNN
@@ -2970,7 +1921,7 @@ F 5 "TPCD" H 36575 8275 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 44 1 5BE59A23
+U 44 1 5C5430BB
 P 25750 6100
 F 0 "J1" H 25750 6425 140 0001 C CNN
 F 1 "ConnectorB8-100" H 25750 6525 140 0001 C CNN
@@ -2983,7 +1934,7 @@ F 5 "RPT" H 25725 5600 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 43 2 5BE59A23
+U 43 2 5C5430BA
 P 27925 12525
 F 0 "J1" H 27925 12850 140 0001 C CNN
 F 1 "ConnectorB8-100" H 27925 12950 140 0001 C CNN
@@ -2996,7 +1947,7 @@ F 5 "XRSTBN" H 28625 12475 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 42 2 5BE59A23
+U 42 2 5C5430B9
 P 31000 12500
 F 0 "J1" H 31000 12825 140 0001 C CNN
 F 1 "ConnectorB8-100" H 31000 12925 140 0001 C CNN
@@ -3009,7 +1960,7 @@ F 5 "XRSTAN" H 31725 12450 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 41 2 5BE59A23
+U 41 2 5C5430B8
 P 34150 12500
 F 0 "J1" H 34150 12825 140 0001 C CNN
 F 1 "ConnectorB8-100" H 34150 12925 140 0001 C CNN
@@ -3022,7 +1973,7 @@ F 5 "XSETCD" H 34875 12450 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 40 1 5BE59A23
+U 40 1 5C5430B7
 P 25650 21875
 F 0 "J1" H 25650 22200 140 0001 C CNN
 F 1 "ConnectorB8-100" H 25650 22300 140 0001 C CNN
@@ -3035,20 +1986,7 @@ F 5 "BPLSWH" H 24925 21850 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 60 2 5BE59A23
-P 3875 13900
-F 0 "J2" H 3875 14225 140 0001 C CNN
-F 1 "ConnectorB8-200" H 3875 14325 140 0001 C CNN
-F 2 "" H 3875 14375 140 0001 C CNN
-F 3 "" H 3875 14375 140 0001 C CNN
-F 4 "40331A" H 4625 13725 140 0000 C TNB "Caption"
-F 5 "40332A" H 4625 13975 140 0000 C TNB "Caption2"
-	60   3875 13900
-	1    0    0    1   
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J2
-U 66 1 5BE59A23
+U 66 1 5C5430B6
 P 29800 15450
 F 0 "J2" H 29800 15775 140 0001 C CNN
 F 1 "ConnectorB8-200" H 29800 15875 140 0001 C CNN
@@ -3061,7 +1999,7 @@ F 5 "+4SW" H 28600 15300 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 67 1 5BE59A23
+U 67 1 5C5430B5
 P 33275 15450
 F 0 "J2" H 33275 15775 140 0001 C CNN
 F 1 "ConnectorB8-200" H 33275 15875 140 0001 C CNN
@@ -3074,7 +2012,7 @@ F 5 "+4MY1" H 32600 15550 140 0000 C TNB "Caption2"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 65 1 5BE59A23
+U 65 1 5C5430B2
 P 33275 16375
 F 0 "J2" H 33275 16700 140 0001 C CNN
 F 1 "ConnectorB8-200" H 33275 16800 140 0001 C CNN
@@ -3084,370 +2022,6 @@ F 4 "0VDC" H 32550 16325 140 0000 C BNB "Caption"
 F 5 "0VDC" H 32575 16250 140 0000 C TNB "Caption2"
 	65   33275 16375
 	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 18 1 5BFB9C05
-P 13500 9125
-F 0 "J?" H 13500 9450 140 0001 C CNN
-F 1 "ConnectorB8-200" H 13500 9550 140 0001 C CNN
-F 2 "" H 13500 9600 140 0001 C CNN
-F 3 "" H 13500 9600 140 0001 C CNN
-F 4 "0VDC" H 13450 9550 140 0000 C BNB "Caption"
-F 5 "0VDC" H 13450 9525 140 0000 C TNB "Caption2"
-	18   13500 9125
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 59 1 5BFBDB60
-P 13500 9500
-F 0 "J?" H 13500 9825 140 0001 C CNN
-F 1 "ConnectorB8-200" H 13500 9925 140 0001 C CNN
-F 2 "" H 13500 9975 140 0001 C CNN
-F 3 "" H 13500 9975 140 0001 C CNN
-F 4 "0VDC" H 13500 9725 140 0001 C BNB "Caption"
-F 5 "0VDC" H 13500 9275 140 0001 C TNB "Caption2"
-	59   13500 9500
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 35 1 5BFC2631
-P 13500 9875
-F 0 "J?" H 13500 10200 140 0001 C CNN
-F 1 "ConnectorB8-200" H 13500 10300 140 0001 C CNN
-F 2 "" H 13500 10350 140 0001 C CNN
-F 3 "" H 13500 10350 140 0001 C CNN
-F 4 "0VDC" H 13500 10100 140 0001 C BNB "Caption"
-F 5 "0VDC" H 13500 9650 140 0001 C TNB "Caption2"
-	35   13500 9875
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-100 J?
-U 11 1 5BFC6F15
-P 13500 10250
-F 0 "J?" H 13500 10575 140 0001 C CNN
-F 1 "ConnectorB8-100" H 13500 10675 140 0001 C CNN
-F 2 "" H 13500 10725 140 0001 C CNN
-F 3 "" H 13500 10725 140 0001 C CNN
-F 4 "0VDC" H 13500 10475 140 0001 C BNB "Caption"
-F 5 "0VDC" H 13500 10025 140 0001 C TNB "Caption2"
-	11   13500 10250
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 18 1 5BFCB331
-P 41575 19775
-F 0 "J?" H 41575 20100 140 0001 C CNN
-F 1 "ConnectorB8-200" H 41575 20200 140 0001 C CNN
-F 2 "" H 41575 20250 140 0001 C CNN
-F 3 "" H 41575 20250 140 0001 C CNN
-F 4 "0VDC" H 42300 19250 140 0000 C BNB "Caption"
-F 5 "0VDC" H 42300 19150 140 0000 C TNB "Caption2"
-	18   41575 19775
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 59 1 5BFCEDC4
-P 41575 20150
-F 0 "J?" H 41575 20475 140 0001 C CNN
-F 1 "ConnectorB8-200" H 41575 20575 140 0001 C CNN
-F 2 "" H 41575 20625 140 0001 C CNN
-F 3 "" H 41575 20625 140 0001 C CNN
-F 4 "0VDC" H 41575 20375 140 0001 C BNB "Caption"
-F 5 "0VDC" H 41575 19925 140 0001 C TNB "Caption2"
-	59   41575 20150
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 35 1 5BFD37FD
-P 41575 20525
-F 0 "J?" H 41575 20850 140 0001 C CNN
-F 1 "ConnectorB8-200" H 41575 20950 140 0001 C CNN
-F 2 "" H 41575 21000 140 0001 C CNN
-F 3 "" H 41575 21000 140 0001 C CNN
-F 4 "0VDC" H 41575 20750 140 0001 C BNB "Caption"
-F 5 "0VDC" H 41575 20300 140 0001 C TNB "Caption2"
-	35   41575 20525
-	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-100 J?
-U 11 1 5BFD7C19
-P 41575 20900
-F 0 "J?" H 41575 21225 140 0001 C CNN
-F 1 "ConnectorB8-100" H 41575 21325 140 0001 C CNN
-F 2 "" H 41575 21375 140 0001 C CNN
-F 3 "" H 41575 21375 140 0001 C CNN
-F 4 "0VDC" H 41575 21125 140 0001 C BNB "Caption"
-F 5 "0VDC" H 41575 20675 140 0001 C TNB "Caption2"
-	11   41575 20900
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 18 1 5BFF61AE
-P 12575 18175
-F 0 "J?" H 12575 18500 140 0001 C CNN
-F 1 "ConnectorB8-200" H 12575 18600 140 0001 C CNN
-F 2 "" H 12575 18650 140 0001 C CNN
-F 3 "" H 12575 18650 140 0001 C CNN
-F 4 "0VDC" H 11925 18100 140 0000 C BNB "Caption"
-F 5 "0VDC" H 11925 17875 140 0000 C TNB "Caption2"
-	18   12575 18175
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 59 1 5BFF98E3
-P 12575 18550
-F 0 "J?" H 12575 18875 140 0001 C CNN
-F 1 "ConnectorB8-200" H 12575 18975 140 0001 C CNN
-F 2 "" H 12575 19025 140 0001 C CNN
-F 3 "" H 12575 19025 140 0001 C CNN
-F 4 "0VDC" H 12575 18775 140 0001 C BNB "Caption"
-F 5 "0VDC" H 12575 18325 140 0001 C TNB "Caption2"
-	59   12575 18550
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 35 1 5BFFCFD9
-P 12575 18925
-F 0 "J?" H 12575 19250 140 0001 C CNN
-F 1 "ConnectorB8-200" H 12575 19350 140 0001 C CNN
-F 2 "" H 12575 19400 140 0001 C CNN
-F 3 "" H 12575 19400 140 0001 C CNN
-F 4 "0VDC" H 12575 19150 140 0001 C BNB "Caption"
-F 5 "0VDC" H 12575 18700 140 0001 C TNB "Caption2"
-	35   12575 18925
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-100 J?
-U 11 1 5C00041E
-P 12575 19300
-F 0 "J?" H 12575 19625 140 0001 C CNN
-F 1 "ConnectorB8-100" H 12575 19725 140 0001 C CNN
-F 2 "" H 12575 19775 140 0001 C CNN
-F 3 "" H 12575 19775 140 0001 C CNN
-F 4 "0VDC" H 12575 19525 140 0001 C BNB "Caption"
-F 5 "0VDC" H 12575 19075 140 0001 C TNB "Caption2"
-	11   12575 19300
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 18 1 5C0C6C31
-P 25775 9100
-F 0 "J?" H 25775 9425 140 0001 C CNN
-F 1 "ConnectorB8-200" H 25775 9525 140 0001 C CNN
-F 2 "" H 25775 9575 140 0001 C CNN
-F 3 "" H 25775 9575 140 0001 C CNN
-F 4 "0VDC" H 25675 9575 140 0000 C BNB "Caption"
-F 5 "0VDC" H 25675 9525 140 0000 C TNB "Caption2"
-	18   25775 9100
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 59 1 5C0CA084
-P 25775 9475
-F 0 "J?" H 25775 9800 140 0001 C CNN
-F 1 "ConnectorB8-200" H 25775 9900 140 0001 C CNN
-F 2 "" H 25775 9950 140 0001 C CNN
-F 3 "" H 25775 9950 140 0001 C CNN
-F 4 "0VDC" H 25775 9700 140 0001 C BNB "Caption"
-F 5 "0VDC" H 25775 9250 140 0001 C TNB "Caption2"
-	59   25775 9475
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 35 1 5C0CE227
-P 25775 9850
-F 0 "J?" H 25775 10175 140 0001 C CNN
-F 1 "ConnectorB8-200" H 25775 10275 140 0001 C CNN
-F 2 "" H 25775 10325 140 0001 C CNN
-F 3 "" H 25775 10325 140 0001 C CNN
-F 4 "0VDC" H 25775 10075 140 0001 C BNB "Caption"
-F 5 "0VDC" H 25775 9625 140 0001 C TNB "Caption2"
-	35   25775 9850
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-100 J?
-U 11 1 5C0D2627
-P 25775 10225
-F 0 "J?" H 25775 10550 140 0001 C CNN
-F 1 "ConnectorB8-100" H 25775 10650 140 0001 C CNN
-F 2 "" H 25775 10700 140 0001 C CNN
-F 3 "" H 25775 10700 140 0001 C CNN
-F 4 "0VDC" H 25775 10450 140 0001 C BNB "Caption"
-F 5 "0VDC" H 25775 10000 140 0001 C TNB "Caption2"
-	11   25775 10225
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 18 1 5C150E30
-P 33100 19725
-F 0 "J?" H 33100 20050 140 0001 C CNN
-F 1 "ConnectorB8-200" H 33100 20150 140 0001 C CNN
-F 2 "" H 33100 20200 140 0001 C CNN
-F 3 "" H 33100 20200 140 0001 C CNN
-F 4 "0VDC" H 32425 19625 140 0000 C BNB "Caption"
-F 5 "0VDC" H 32425 19500 140 0000 C TNB "Caption2"
-	18   33100 19725
-	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 59 1 5C156F04
-P 33100 20100
-F 0 "J?" H 33100 20425 140 0001 C CNN
-F 1 "ConnectorB8-200" H 33100 20525 140 0001 C CNN
-F 2 "" H 33100 20575 140 0001 C CNN
-F 3 "" H 33100 20575 140 0001 C CNN
-F 4 "0VDC" H 33100 20325 140 0001 C BNB "Caption"
-F 5 "0VDC" H 33100 19875 140 0001 C TNB "Caption2"
-	59   33100 20100
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 35 1 5C159FE4
-P 33100 20475
-F 0 "J?" H 33100 20800 140 0001 C CNN
-F 1 "ConnectorB8-200" H 33100 20900 140 0001 C CNN
-F 2 "" H 33100 20950 140 0001 C CNN
-F 3 "" H 33100 20950 140 0001 C CNN
-F 4 "0VDC" H 33100 20700 140 0001 C BNB "Caption"
-F 5 "0VDC" H 33100 20250 140 0001 C TNB "Caption2"
-	35   33100 20475
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-100 J?
-U 11 1 5C15CE59
-P 33100 20850
-F 0 "J?" H 33100 21175 140 0001 C CNN
-F 1 "ConnectorB8-100" H 33100 21275 140 0001 C CNN
-F 2 "" H 33100 21325 140 0001 C CNN
-F 3 "" H 33100 21325 140 0001 C CNN
-F 4 "0VDC" H 33100 21075 140 0001 C BNB "Caption"
-F 5 "0VDC" H 33100 20625 140 0001 C TNB "Caption2"
-	11   33100 20850
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 18 2 5C15FB87
-P 25325 18550
-F 0 "J?" H 25325 18875 140 0001 C CNN
-F 1 "ConnectorB8-200" H 25325 18975 140 0001 C CNN
-F 2 "" H 25325 19025 140 0001 C CNN
-F 3 "" H 25325 19025 140 0001 C CNN
-F 4 "0VDC" H 26000 18550 140 0000 C BNB "Caption"
-F 5 "0VDC" H 26000 18500 140 0000 C TNB "Caption2"
-	18   25325 18550
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 59 1 5C1628CA
-P 25325 18925
-F 0 "J?" H 25325 19250 140 0001 C CNN
-F 1 "ConnectorB8-200" H 25325 19350 140 0001 C CNN
-F 2 "" H 25325 19400 140 0001 C CNN
-F 3 "" H 25325 19400 140 0001 C CNN
-F 4 "0VDC" H 25325 19150 140 0001 C BNB "Caption"
-F 5 "0VDC" H 25325 18700 140 0001 C TNB "Caption2"
-	59   25325 18925
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 35 1 5C165E5D
-P 25325 19300
-F 0 "J?" H 25325 19625 140 0001 C CNN
-F 1 "ConnectorB8-200" H 25325 19725 140 0001 C CNN
-F 2 "" H 25325 19775 140 0001 C CNN
-F 3 "" H 25325 19775 140 0001 C CNN
-F 4 "0VDC" H 25325 19525 140 0001 C BNB "Caption"
-F 5 "0VDC" H 25325 19075 140 0001 C TNB "Caption2"
-	35   25325 19300
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-100 J?
-U 11 1 5C169278
-P 25325 19675
-F 0 "J?" H 25325 20000 140 0001 C CNN
-F 1 "ConnectorB8-100" H 25325 20100 140 0001 C CNN
-F 2 "" H 25325 20150 140 0001 C CNN
-F 3 "" H 25325 20150 140 0001 C CNN
-F 4 "0VDC" H 25325 19900 140 0001 C BNB "Caption"
-F 5 "0VDC" H 25325 19450 140 0001 C TNB "Caption2"
-	11   25325 19675
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 18 1 5C27348F
-P 36575 26100
-F 0 "J?" H 36575 26425 140 0001 C CNN
-F 1 "ConnectorB8-200" H 36575 26525 140 0001 C CNN
-F 2 "" H 36575 26575 140 0001 C CNN
-F 3 "" H 36575 26575 140 0001 C CNN
-F 4 "0VDC" H 35925 26025 140 0000 C BNB "Caption"
-F 5 "0VDC" H 35900 25875 140 0000 C TNB "Caption2"
-	18   36575 26100
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 59 1 5C278A68
-P 36575 26475
-F 0 "J?" H 36575 26800 140 0001 C CNN
-F 1 "ConnectorB8-200" H 36575 26900 140 0001 C CNN
-F 2 "" H 36575 26950 140 0001 C CNN
-F 3 "" H 36575 26950 140 0001 C CNN
-F 4 "0VDC" H 36575 26700 140 0001 C BNB "Caption"
-F 5 "0VDC" H 36575 26250 140 0001 C TNB "Caption2"
-	59   36575 26475
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J?
-U 35 1 5C27C5C4
-P 36575 26850
-F 0 "J?" H 36575 27175 140 0001 C CNN
-F 1 "ConnectorB8-200" H 36575 27275 140 0001 C CNN
-F 2 "" H 36575 27325 140 0001 C CNN
-F 3 "" H 36575 27325 140 0001 C CNN
-F 4 "0VDC" H 36575 27075 140 0001 C BNB "Caption"
-F 5 "0VDC" H 36575 26625 140 0001 C TNB "Caption2"
-	35   36575 26850
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-100 J?
-U 11 1 5C280AB0
-P 36575 27225
-F 0 "J?" H 36575 27550 140 0001 C CNN
-F 1 "ConnectorB8-100" H 36575 27650 140 0001 C CNN
-F 2 "" H 36575 27700 140 0001 C CNN
-F 3 "" H 36575 27700 140 0001 C CNN
-F 4 "0VDC" H 36575 27450 140 0001 C BNB "Caption"
-F 5 "0VDC" H 36575 27000 140 0001 C TNB "Caption2"
-	11   36575 27225
-	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Transistor-NPN Q2
@@ -3498,7 +2072,7 @@ L AGC_DSKY:Resistor R1
 U 1 1 5C2BB375
 P 1850 6125
 F 0 "R1" H 1875 5850 130 0000 C CNN
-F 1 "500" H 1800 5625 130 0000 C CNN
+F 1 "1500" H 1800 5625 130 0000 C CNN
 F 2 "" H 1850 6125 130 0001 C CNN
 F 3 "" H 1850 6125 130 0001 C CNN
 	1    1850 6125
@@ -4042,7 +2616,7 @@ $Comp
 L AGC_DSKY:Transistor-PNP Q9
 U 1 1 5C30A314
 P 27825 6100
-F 0 "Q9" H 28325 6275 130 0000 C CNN
+F 0 "Q9" H 28275 6450 130 0000 C CNN
 F 1 "Transistor-PNP" H 27825 6665 130 0001 C CNN
 F 2 "" H 27825 5850 130 0001 C CNN
 F 3 "" H 27825 5850 130 0001 C CNN
@@ -4249,415 +2823,6 @@ F 3 "" H 41125 10700 130 0001 C CNN
 $EndComp
 Text Notes 37900 7800 0    140  ~ 28
 CIRCUIT NO. 40365\n             40366
-$Comp
-L AGC_DSKY:Transistor-NPN Q13
-U 1 1 5C31ADF7
-P 3725 16050
-F 0 "Q13" H 3125 15725 130 0000 C CNN
-F 1 "Transistor-NPN" H 3725 16615 130 0001 C CNN
-F 2 "" H 3725 16300 130 0001 C CNN
-F 3 "" H 3725 16300 130 0001 C CNN
-	1    3725 16050
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Transistor-NPN Q14
-U 1 1 5C31B6D0
-P 6050 15275
-F 0 "Q14" H 6725 15575 130 0000 C CNN
-F 1 "Transistor-NPN" H 6050 15840 130 0001 C CNN
-F 2 "" H 6050 15525 130 0001 C CNN
-F 3 "" H 6050 15525 130 0001 C CNN
-	1    6050 15275
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R26
-U 1 1 5C31BE15
-P 1775 15300
-F 0 "R26" V 1950 15675 130 0000 C CNN
-F 1 "5100" V 1700 15675 130 0000 C CNN
-F 2 "" H 1775 15300 130 0001 C CNN
-F 3 "" H 1775 15300 130 0001 C CNN
-	1    1775 15300
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R27
-U 1 1 5C31C27E
-P 2475 16050
-F 0 "R27" H 2475 16475 130 0000 C CNN
-F 1 "200" H 2525 16250 130 0000 C CNN
-F 2 "" H 2475 16050 130 0001 C CNN
-F 3 "" H 2475 16050 130 0001 C CNN
-	1    2475 16050
-	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R28
-U 1 1 5C31C64D
-P 3875 14675
-F 0 "R28" V 4050 15075 130 0000 C CNN
-F 1 "390" V 3800 15050 130 0000 C CNN
-F 2 "" H 3875 14675 130 0001 C CNN
-F 3 "" H 3875 14675 130 0001 C CNN
-	1    3875 14675
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R29
-U 1 1 5C31D2A6
-P 6200 16275
-F 0 "R29" V 6375 16675 130 0000 C CNN
-F 1 "NOM" V 6125 16650 130 0000 C CNN
-F 2 "" H 6200 16275 130 0001 C CNN
-F 3 "" H 6200 16275 130 0001 C CNN
-	1    6200 16275
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR45
-U 1 1 5C31D7F7
-P 4900 16500
-F 0 "CR45" V 4900 16050 140 0000 C CNN
-F 1 "Diode" H 4900 16350 50  0001 C CNN
-F 2 "" H 4850 16325 50  0001 C CNN
-F 3 "" H 4850 16500 50  0001 C CNN
-	1    4900 16500
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR35
-U 1 1 5C31DEB9
-P 4900 16050
-F 0 "CR35" V 4925 15650 140 0000 C CNN
-F 1 "Diode" H 4900 15900 50  0001 C CNN
-F 2 "" H 4850 15875 50  0001 C CNN
-F 3 "" H 4850 16050 50  0001 C CNN
-	1    4900 16050
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR36
-U 1 1 5C31E63C
-P 4900 16950
-F 0 "CR36" V 4925 16550 140 0000 C CNN
-F 1 "Diode" H 4900 16800 50  0001 C CNN
-F 2 "" H 4850 16775 50  0001 C CNN
-F 3 "" H 4850 16950 50  0001 C CNN
-	1    4900 16950
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Inductor L1
-U 1 1 5C31EBF8
-P 6200 17125
-F 0 "L1" V 6050 17475 130 0000 C CNN
-F 1 "2.2UH" V 6300 17575 130 0000 C CNN
-F 2 "" H 6150 17325 130 0001 C CNN
-F 3 "" H 6150 17325 130 0001 C CNN
-	1    6200 17125
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:OvalBody2 X?
-U 1 1 5C31FBB5
-P 1075 16050
-F 0 "X?" H 1125 15750 140 0001 C CNN
-F 1 "OvalBody2" H 1075 16350 140 0001 C CNN
-F 2 "" H 1075 16050 140 0001 C CNN
-F 3 "" H 1075 16050 140 0001 C CNN
-F 4 "A" H 1000 15675 140 0000 C CNB "Caption"
-	1    1075 16050
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:OvalBody2 X?
-U 1 1 5C3203A2
-P 7000 17625
-F 0 "X?" H 7050 17325 140 0001 C CNN
-F 1 "OvalBody2" H 7000 17925 140 0001 C CNN
-F 2 "" H 7000 17625 140 0001 C CNN
-F 3 "" H 7000 17625 140 0001 C CNN
-F 4 "C" H 7450 17625 140 0000 C CNB "Caption"
-	1    7000 17625
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:OvalBody2 X?
-U 1 1 5C320AD2
-P 6200 13900
-F 0 "X?" H 6250 13600 140 0001 C CNN
-F 1 "OvalBody2" H 6200 14200 140 0001 C CNN
-F 2 "" H 6200 13900 140 0001 C CNN
-F 3 "" H 6200 13900 140 0001 C CNN
-F 4 "B" H 6650 13900 140 0000 C CNB "Caption"
-	1    6200 13900
-	1    0    0    -1  
-$EndComp
-Text Notes 1175 19300 0    140  ~ 28
-CIRCUIT NUMBERS  40311 THRU 40318\n                    40321 THRU 40328
-$Comp
-L AGC_DSKY:OvalBody2 X?
-U 1 1 5C33DB96
-P 9150 16025
-F 0 "X?" H 9200 15725 140 0001 C CNN
-F 1 "OvalBody2" H 9150 16325 140 0001 C CNN
-F 2 "" H 9150 16025 140 0001 C CNN
-F 3 "" H 9150 16025 140 0001 C CNN
-F 4 "D" H 9150 15650 140 0000 C CNB "Caption"
-	1    9150 16025
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:OvalBody2 X?
-U 1 1 5C33E27C
-P 17850 14375
-F 0 "X?" H 17900 14075 140 0001 C CNN
-F 1 "OvalBody2" H 17850 14675 140 0001 C CNN
-F 2 "" H 17850 14375 140 0001 C CNN
-F 3 "" H 17850 14375 140 0001 C CNN
-F 4 "E" H 17825 14800 140 0000 C CNB "Caption"
-	1    17850 14375
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R30
-U 1 1 5C33EA3A
-P 9950 15425
-F 0 "R30" V 10125 15800 130 0000 C CNN
-F 1 "5100" V 9850 15850 130 0000 C CNN
-F 2 "" H 9950 15425 130 0001 C CNN
-F 3 "" H 9950 15425 130 0001 C CNN
-	1    9950 15425
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R31
-U 1 1 5C342BAA
-P 10800 16025
-F 0 "R31" H 10800 15775 130 0000 C CNN
-F 1 "200" H 10775 15575 130 0000 C CNN
-F 2 "" H 10800 16025 130 0001 C CNN
-F 3 "" H 10800 16025 130 0001 C CNN
-	1    10800 16025
-	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R33
-U 1 1 5C343194
-P 13000 14650
-F 0 "R33" V 12975 14275 130 0000 C CNN
-F 1 "5100" V 12750 14250 130 0000 C CNN
-F 2 "" H 13000 14650 130 0001 C CNN
-F 3 "" H 13000 14650 130 0001 C CNN
-	1    13000 14650
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R32
-U 1 1 5C343853
-P 12550 15300
-F 0 "R32" H 12575 15125 130 0000 C CNN
-F 1 "1000" H 12525 14900 130 0000 C CNN
-F 2 "" H 12550 15300 130 0001 C CNN
-F 3 "" H 12550 15300 130 0001 C CNN
-	1    12550 15300
-	-1   0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Transistor-NPN Q15
-U 1 1 5C343D13
-P 11875 16025
-F 0 "Q15" H 12475 16075 130 0000 C CNN
-F 1 "Transistor-NPN" H 11875 16590 130 0001 C CNN
-F 2 "" H 11875 16275 130 0001 C CNN
-F 3 "" H 11875 16275 130 0001 C CNN
-	1    11875 16025
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Transistor-NPN Q17
-U 1 1 5C34446D
-P 16225 16875
-F 0 "Q17" H 16800 16875 130 0000 C CNN
-F 1 "Transistor-NPN" H 16225 17440 130 0001 C CNN
-F 2 "" H 16225 17125 130 0001 C CNN
-F 3 "" H 16225 17125 130 0001 C CNN
-	1    16225 16875
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Transistor-NPN Q18
-U 1 1 5C344EA3
-P 17725 16025
-F 0 "Q18" H 18300 16025 130 0000 C CNN
-F 1 "Transistor-NPN" H 17725 16590 130 0001 C CNN
-F 2 "" H 17725 16275 130 0001 C CNN
-F 3 "" H 17725 16275 130 0001 C CNN
-	1    17725 16025
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Transistor-PNP Q16
-U 1 1 5C34554D
-P 14800 15300
-F 0 "Q16" H 15375 15350 130 0000 C CNN
-F 1 "Transistor-PNP" H 14800 15865 130 0001 C CNN
-F 2 "" H 14800 15050 130 0001 C CNN
-F 3 "" H 14800 15050 130 0001 C CNN
-	1    14800 15300
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR38
-U 1 1 5C3459E6
-P 13775 15050
-F 0 "CR38" V 14050 14575 140 0000 C CNN
-F 1 "Diode" H 13775 14900 50  0001 C CNN
-F 2 "" H 13725 14875 50  0001 C CNN
-F 3 "" H 13725 15050 50  0001 C CNN
-	1    13775 15050
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR47
-U 1 1 5C3467E4
-P 13775 14600
-F 0 "CR47" V 13875 14125 140 0000 C CNN
-F 1 "Diode" H 13775 14450 50  0001 C CNN
-F 2 "" H 13725 14425 50  0001 C CNN
-F 3 "" H 13725 14600 50  0001 C CNN
-	1    13775 14600
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR37
-U 1 1 5C346CB5
-P 13775 14150
-F 0 "CR37" V 13725 13675 140 0000 C CNN
-F 1 "Diode" H 13775 14000 50  0001 C CNN
-F 2 "" H 13725 13975 50  0001 C CNN
-F 3 "" H 13725 14150 50  0001 C CNN
-	1    13775 14150
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR45
-U 1 1 5C346FDB
-P 14925 17900
-F 0 "CR45" V 14875 17375 140 0000 C CNN
-F 1 "Diode" H 14925 17750 50  0001 C CNN
-F 2 "" H 14875 17725 50  0001 C CNN
-F 3 "" H 14875 17900 50  0001 C CNN
-	1    14925 17900
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR39
-U 1 1 5C347F9A
-P 14925 17450
-F 0 "CR39" V 14825 16900 140 0000 C CNN
-F 1 "Diode" H 14925 17300 50  0001 C CNN
-F 2 "" H 14875 17275 50  0001 C CNN
-F 3 "" H 14875 17450 50  0001 C CNN
-	1    14925 17450
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR46
-U 1 1 5C348381
-P 14925 18350
-F 0 "CR46" V 14975 17825 140 0000 C CNN
-F 1 "Diode" H 14925 18200 50  0001 C CNN
-F 2 "" H 14875 18175 50  0001 C CNN
-F 3 "" H 14875 18350 50  0001 C CNN
-	1    14925 18350
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Diode CR40
-U 1 1 5C348795
-P 14925 18800
-F 0 "CR40" V 15050 18300 140 0000 C CNN
-F 1 "Diode" H 14925 18650 50  0001 C CNN
-F 2 "" H 14875 18625 50  0001 C CNN
-F 3 "" H 14875 18800 50  0001 C CNN
-	1    14925 18800
-	0    -1   -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R34
-U 1 1 5C348A78
-P 13025 17575
-F 0 "R34" V 13200 17950 130 0000 C CNN
-F 1 "5100" V 12950 17950 130 0000 C CNN
-F 2 "" H 13025 17575 130 0001 C CNN
-F 3 "" H 13025 17575 130 0001 C CNN
-	1    13025 17575
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R36
-U 1 1 5C3493A4
-P 16375 17875
-F 0 "R36" V 16550 18275 130 0000 C CNN
-F 1 "NOM" V 16300 18250 130 0000 C CNN
-F 2 "" H 16375 17875 130 0001 C CNN
-F 3 "" H 16375 17875 130 0001 C CNN
-	1    16375 17875
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R37
-U 1 1 5C34D0E6
-P 17875 17250
-F 0 "R37" V 18050 17650 130 0000 C CNN
-F 1 "NOM" V 17800 17625 130 0000 C CNN
-F 2 "" H 17875 17250 130 0001 C CNN
-F 3 "" H 17875 17250 130 0001 C CNN
-	1    17875 17250
-	0    1    -1   0   
-$EndComp
-$Comp
-L AGC_DSKY:Inductor L2
-U 1 1 5C34D658
-P 16375 18725
-F 0 "L2" V 16175 19050 130 0000 C CNN
-F 1 "3.9UH" V 16425 19175 130 0000 C CNN
-F 2 "" H 16325 18925 130 0001 C CNN
-F 3 "" H 16325 18925 130 0001 C CNN
-	1    16375 18725
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Inductor L3
-U 1 1 5C34DDB9
-P 17875 18200
-F 0 "L3" V 17675 18575 130 0000 C CNN
-F 1 "3.9UH" V 17925 18650 130 0000 C CNN
-F 2 "" H 17825 18400 130 0001 C CNN
-F 3 "" H 17825 18400 130 0001 C CNN
-	1    17875 18200
-	0    1    1    0   
-$EndComp
-$Comp
-L AGC_DSKY:Resistor R35
-U 1 1 5C35A3D5
-P 14950 14525
-F 0 "R35" V 15000 14850 130 0000 C CNN
-F 1 "27" V 14800 14825 130 0000 C CNN
-F 2 "" H 14950 14525 130 0001 C CNN
-F 3 "" H 14950 14525 130 0001 C CNN
-	1    14950 14525
-	0    1    -1   0   
-$EndComp
-Text Notes 8550 19050 0    140  ~ 28
-CIRCUIT NUMBERS
-Text Notes 9025 19575 0    140  ~ 28
-40361, 40362, 40367\n40363, 40364, 40368
-Text Notes 12950 19875 0    140  ~ 28
-NOMINAL CURRENT 450 mA EACH OUTPUT
 $Comp
 L AGC_DSKY:Resistor R38
 U 1 1 5C3602EC
@@ -4948,64 +3113,6 @@ F 3 "" H 40475 20925 130 0001 C CNN
 	1    40475 20525
 	0    -1   -1   0   
 $EndComp
-$Comp
-L AGC_DSKY:Inductor L9
-U 1 1 5C376F18
-P 30725 22700
-F 0 "L9" H 30700 23250 130 0000 C CNN
-F 1 "8.2UH" H 30700 22975 130 0000 C CNN
-F 2 "" H 30675 22900 130 0001 C CNN
-F 3 "" H 30675 22900 130 0001 C CNN
-	1    30725 22700
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:Capacitor-Polarized C7
-U 1 1 5C3774D2
-P 31675 23325
-F 0 "C7" H 32075 23450 130 0000 C CNN
-F 1 "6.8UF" H 32175 23200 130 0000 C CNN
-F 2 "" H 31675 23725 130 0001 C CNN
-F 3 "" H 31675 23725 130 0001 C CNN
-	1    31675 23325
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:OvalBody2 X?
-U 1 1 5C377C18
-P 31675 24150
-F 0 "X?" H 31725 23850 140 0001 C CNN
-F 1 "OvalBody2" H 31675 24450 140 0001 C CNN
-F 2 "" H 31675 24150 140 0001 C CNN
-F 3 "" H 31675 24150 140 0001 C CNN
-F 4 "G" H 31675 23775 140 0000 C CNB "Caption"
-	1    31675 24150
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:OvalBody2 X?
-U 1 1 5C378659
-P 32550 22675
-F 0 "X?" H 32600 22375 140 0001 C CNN
-F 1 "OvalBody2" H 32550 22975 140 0001 C CNN
-F 2 "" H 32550 22675 140 0001 C CNN
-F 3 "" H 32550 22675 140 0001 C CNN
-F 4 "H" H 32550 23025 140 0000 C CNB "Caption"
-	1    32550 22675
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:OvalBody2 X?
-U 1 1 5C378D03
-P 29775 22700
-F 0 "X?" H 29825 22400 140 0001 C CNN
-F 1 "OvalBody2" H 29775 23000 140 0001 C CNN
-F 2 "" H 29775 22700 140 0001 C CNN
-F 3 "" H 29775 22700 140 0001 C CNN
-F 4 "F" H 29775 23050 140 0000 C CNB "Caption"
-	1    29775 22700
-	1    0    0    -1  
-$EndComp
 Text Notes 28475 17175 0    140  ~ 28
 CIRCUIT NUMBERS
 Text Notes 35125 17175 0    140  ~ 28
@@ -5015,8 +3122,6 @@ CIRCUIT NUMBERS
 Text Notes 28300 20625 0    140  ~ 28
 CIRCUIT NUMBERS
 Text Notes 22200 25425 0    140  ~ 28
-CIRCUIT NUMBERS
-Text Notes 28050 25100 0    140  ~ 28
 CIRCUIT NUMBERS
 Text Notes 33500 26925 0    140  ~ 28
 CIRCUIT NUMBERS
@@ -5034,8 +3139,6 @@ Text Notes 22700 25850 0    140  ~ 28
 40524\n40525
 Text Notes 33800 27375 0    140  ~ 28
 40369\n40370
-Text Notes 28500 25575 0    140  ~ 28
-40518, 40520, 40522\n40519, 40521, 40523
 $Comp
 L AGC_DSKY:Resistor R44
 U 1 1 5C386241
@@ -5151,7 +3254,7 @@ L AGC_DSKY:Resistor R47
 U 1 1 5C38AF82
 P 37625 22275
 F 0 "R47" V 37875 21950 130 0000 C CNN
-F 1 "5100" V 37675 21925 130 0000 C CNN
+F 1 "200" V 37675 21925 130 0000 C CNN
 F 2 "" H 37625 22275 130 0001 C CNN
 F 3 "" H 37625 22275 130 0001 C CNN
 	1    37625 22275
@@ -5290,10 +3393,6 @@ F 3 "" H 39650 25250 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	5750 2175 5325 2175
-Wire Wire Line
-	5325 2175 5325 2450
-Wire Wire Line
 	2350 4725 2350 4425
 Wire Wire Line
 	2350 2450 5325 2450
@@ -5324,7 +3423,7 @@ Connection ~ 3275 6750
 Wire Wire Line
 	3275 6750 3275 7050
 Wire Wire Line
-	5325 6475 5325 5925
+	5325 6500 5325 5925
 Wire Wire Line
 	5325 5925 5650 5925
 Wire Wire Line
@@ -5479,7 +3578,7 @@ Wire Wire Line
 Wire Wire Line
 	17675 2825 17675 2475
 Wire Wire Line
-	17675 2150 18300 2150
+	17675 2150 17275 2150
 Wire Wire Line
 	14700 4725 14700 4450
 Wire Wire Line
@@ -5583,8 +3682,6 @@ Wire Wire Line
 Wire Wire Line
 	17650 10125 17650 9475
 Wire Wire Line
-	17650 9475 18300 9475
-Wire Wire Line
 	17650 10625 17650 11100
 Wire Wire Line
 	17650 11100 17050 11100
@@ -5653,8 +3750,6 @@ Wire Wire Line
 	23275 11100 23275 11275
 Connection ~ 20150 11100
 Wire Wire Line
-	23275 11700 23275 11900
-Wire Wire Line
 	22800 11900 23275 11900
 Connection ~ 23275 11900
 Wire Wire Line
@@ -5677,9 +3772,9 @@ Wire Wire Line
 Wire Wire Line
 	32000 4225 32000 4500
 Wire Wire Line
-	30750 2150 30025 2150
+	29675 2075 30025 2075
 Wire Wire Line
-	30025 2150 30025 2425
+	30025 2075 30025 2425
 Wire Wire Line
 	27050 4775 27050 4450
 Wire Wire Line
@@ -5851,10 +3946,6 @@ Wire Wire Line
 Wire Wire Line
 	34150 11850 34150 12325
 Wire Wire Line
-	38275 8600 38775 8600
-Wire Wire Line
-	38775 8600 38775 9025
-Wire Wire Line
 	38775 9025 39000 9025
 Wire Wire Line
 	39800 9025 40350 9025
@@ -5885,7 +3976,7 @@ Wire Wire Line
 	38375 14800 38375 14475
 Connection ~ 38375 14475
 Wire Wire Line
-	38375 14475 39650 14475
+	38375 14475 39200 14475
 Wire Wire Line
 	38375 15325 38375 15425
 Wire Wire Line
@@ -5896,7 +3987,7 @@ Wire Wire Line
 	38375 15425 38375 15650
 Connection ~ 38375 15425
 Wire Wire Line
-	38375 15425 39800 15425
+	38375 15425 39425 15425
 Wire Wire Line
 	38375 16175 38375 16350
 Wire Wire Line
@@ -5906,12 +3997,12 @@ Wire Wire Line
 Wire Wire Line
 	31650 14525 31100 14525
 Wire Wire Line
-	31650 14525 32800 14525
+	31650 14525 32500 14525
 Connection ~ 31650 14525
 Wire Wire Line
 	31650 15325 31650 15450
 Wire Wire Line
-	31650 15450 33000 15450
+	31650 15450 32675 15450
 Wire Wire Line
 	31650 15600 31650 15450
 Connection ~ 31650 15450
@@ -5957,8 +4048,6 @@ Wire Wire Line
 	25325 14450 25325 16125
 Connection ~ 20750 15875
 Wire Wire Line
-	20750 15875 20750 15650
-Wire Wire Line
 	22900 14600 22900 14450
 Connection ~ 22900 14450
 Wire Wire Line
@@ -5984,186 +4073,11 @@ Wire Wire Line
 Wire Wire Line
 	25325 17150 25325 17000
 Wire Wire Line
-	26450 17000 25325 17000
+	26450 17000 26125 17000
 Connection ~ 25325 17000
 Wire Wire Line
 	25325 17000 25325 16625
-Wire Wire Line
-	25325 18175 25325 18375
 Connection ~ 25325 18175
-Wire Wire Line
-	17875 15775 17875 15050
-Wire Wire Line
-	17875 16275 17875 16850
-Wire Wire Line
-	17875 17650 17875 17800
-Wire Wire Line
-	17875 18600 17875 19200
-Wire Wire Line
-	17875 19200 16375 19200
-Wire Wire Line
-	13025 19200 13025 18175
-Wire Wire Line
-	12850 18175 13025 18175
-Connection ~ 13025 18175
-Wire Wire Line
-	13025 18175 13025 17975
-Wire Wire Line
-	13025 17175 13025 16875
-Wire Wire Line
-	13025 16875 14450 16875
-Wire Wire Line
-	16375 16625 16375 15050
-Wire Wire Line
-	16375 15050 17875 15050
-Connection ~ 17875 15050
-Wire Wire Line
-	17875 15050 17875 14550
-Wire Wire Line
-	16375 17475 16375 17125
-Wire Wire Line
-	16375 18325 16375 18275
-Wire Wire Line
-	16375 19125 16375 19200
-Connection ~ 16375 19200
-Wire Wire Line
-	16375 19200 14925 19200
-Wire Wire Line
-	14925 19000 14925 19200
-Connection ~ 14925 19200
-Wire Wire Line
-	14925 19200 13025 19200
-Wire Wire Line
-	14925 18600 14925 18550
-Wire Wire Line
-	14925 18150 14925 18100
-Wire Wire Line
-	14925 17700 14925 17650
-Wire Wire Line
-	14925 17250 14925 16875
-Connection ~ 14925 16875
-Wire Wire Line
-	14925 16875 15500 16875
-Wire Wire Line
-	15500 16875 15500 16025
-Wire Wire Line
-	15500 16025 17425 16025
-Connection ~ 15500 16875
-Wire Wire Line
-	15500 16875 15925 16875
-Wire Wire Line
-	14450 16875 14450 16025
-Wire Wire Line
-	14450 16025 14950 16025
-Wire Wire Line
-	14950 16025 14950 15550
-Connection ~ 14450 16875
-Wire Wire Line
-	14450 16875 14925 16875
-Wire Wire Line
-	14950 15050 14950 14925
-Wire Wire Line
-	14500 15300 13775 15300
-Wire Wire Line
-	13775 15250 13775 15300
-Connection ~ 13775 15300
-Wire Wire Line
-	13775 15300 13000 15300
-Wire Wire Line
-	13775 14850 13775 14800
-Wire Wire Line
-	13775 14350 13775 14400
-Wire Wire Line
-	14950 14125 14950 13950
-Wire Wire Line
-	14950 13950 13775 13950
-Wire Wire Line
-	13775 13950 13000 13950
-Wire Wire Line
-	13000 13950 13000 14250
-Connection ~ 13775 13950
-Wire Wire Line
-	13000 15050 13000 15300
-Connection ~ 13000 15300
-Wire Wire Line
-	13000 15300 12950 15300
-Wire Wire Line
-	12150 15300 12025 15300
-Wire Wire Line
-	12025 15300 12025 15775
-Wire Wire Line
-	12025 16275 12025 17200
-Wire Wire Line
-	12025 17200 9450 17200
-Wire Wire Line
-	11575 16025 11200 16025
-Wire Wire Line
-	10400 16025 9950 16025
-Wire Wire Line
-	9950 15825 9950 16025
-Connection ~ 9950 16025
-Wire Wire Line
-	9950 16025 9425 16025
-Wire Wire Line
-	9950 15025 9950 14875
-Wire Wire Line
-	9950 14875 11450 14875
-Wire Wire Line
-	11450 14875 11450 13950
-Wire Wire Line
-	11450 13950 13000 13950
-Connection ~ 9950 14875
-Wire Wire Line
-	9950 14875 9950 14675
-Connection ~ 13000 13950
-Wire Wire Line
-	2075 16050 1775 16050
-Wire Wire Line
-	1775 15700 1775 16050
-Connection ~ 1775 16050
-Wire Wire Line
-	1775 16050 1350 16050
-Wire Wire Line
-	1775 14900 1775 14650
-Wire Wire Line
-	3875 15075 3875 15275
-Wire Wire Line
-	2875 16050 3425 16050
-Wire Wire Line
-	3875 16300 3875 17425
-Wire Wire Line
-	3875 17425 3550 17425
-Wire Wire Line
-	3875 14275 3875 14075
-Wire Wire Line
-	5750 15275 4900 15275
-Connection ~ 3875 15275
-Wire Wire Line
-	3875 15275 3875 15800
-Wire Wire Line
-	4900 15850 4900 15275
-Connection ~ 4900 15275
-Wire Wire Line
-	4900 15275 3875 15275
-Wire Wire Line
-	4900 16250 4900 16300
-Wire Wire Line
-	4900 16700 4900 16750
-Wire Wire Line
-	4900 17150 4900 17625
-Wire Wire Line
-	4900 17625 6200 17625
-Wire Wire Line
-	6200 15025 6200 14075
-Wire Wire Line
-	6200 15525 6200 15875
-Wire Wire Line
-	6200 16675 6200 16725
-Wire Wire Line
-	6200 17525 6200 17625
-Connection ~ 6200 17625
-Wire Wire Line
-	6200 17625 6725 17625
 Wire Wire Line
 	25525 20375 26875 20375
 Wire Wire Line
@@ -6194,22 +4108,7 @@ Wire Wire Line
 	31650 19075 31650 18850
 Connection ~ 31650 18850
 Wire Wire Line
-	31650 18850 32950 18850
-Wire Wire Line
-	31650 19600 31650 19725
-Wire Wire Line
-	31650 19725 32825 19725
-Wire Wire Line
-	30325 22700 30050 22700
-Wire Wire Line
-	31125 22700 31675 22700
-Wire Wire Line
-	31675 23050 31675 22700
-Connection ~ 31675 22700
-Wire Wire Line
-	31675 22700 32275 22700
-Wire Wire Line
-	31675 23575 31675 23975
+	31650 18850 32400 18850
 Wire Wire Line
 	38725 19450 37950 19450
 Wire Wire Line
@@ -6243,8 +4142,6 @@ Wire Wire Line
 Wire Wire Line
 	37625 21650 37625 21875
 Connection ~ 34650 22375
-Wire Wire Line
-	34650 22375 34650 22175
 Wire Wire Line
 	37625 22675 37625 23075
 Wire Wire Line
@@ -6333,16 +4230,956 @@ Wire Wire Line
 Wire Wire Line
 	42675 26925 42800 26925
 Wire Wire Line
-	42000 26325 42000 26725
-Wire Wire Line
 	42000 26725 42675 26725
 Connection ~ 42675 26725
 Wire Wire Line
 	42675 26725 42675 26925
 Wire Notes Line style solid
-	8225 13275 8225 19975
-Wire Notes Line style solid
 	18950 19975 18950 13300
+$Sheet
+S 25050 26625 2850 4300
+U 5B8E7732
+F0 "BOM" 140
+F1 "BOM.sch" 140
+$EndSheet
+$Sheet
+S 4975 14075 1750 1950
+U 5B8E7733
+F0 "40311_21" 140
+F1 "A.sch" 140
+F2 "BPLIZ1_2" I L 4975 14325 140
+F3 "A" I L 4975 15275 140
+F4 "40365A_6A" I L 4975 15750 140
+F5 "40331A_2A" I L 4975 14800 140
+F6 "B" O R 6725 14325 140
+F7 "C" I R 6725 15275 140
+$EndSheet
+$Sheet
+S 13300 24750 1675 1950
+U 5B8E7734
+F0 "40361_63" 140
+F1 "B.sch" 140
+F2 "E" O R 14975 25950 140
+F3 "0VDC" I L 13300 25950 140
+F4 "D" I L 13300 25475 140
+F5 "40365A_6A" I L 13300 26425 140
+F6 "BPLIZ1_2" I L 13300 25000 140
+$EndSheet
+$Sheet
+S 3800 24900 850  975 
+U 5B8E7735
+F0 "40518_19" 140
+F1 "C.sch" 140
+F2 "F" I L 3800 25150 140
+F3 "G" I L 3800 25625 140
+F4 "H" O R 4650 25375 140
+$EndSheet
+Text GLabel 1650 9125 0    140  Input ~ 28
+0VDC
+Text GLabel 23625 29150 2    140  Output ~ 28
+0VDC
+Wire Wire Line
+	22850 28550 23225 28550
+Wire Wire Line
+	23225 28550 23225 28950
+Wire Wire Line
+	23225 29750 22850 29750
+Wire Wire Line
+	22850 29350 23225 29350
+Connection ~ 23225 29350
+Wire Wire Line
+	23225 29350 23225 29750
+Wire Wire Line
+	22850 28950 23225 28950
+Connection ~ 23225 28950
+Wire Wire Line
+	23225 28950 23225 29150
+Wire Wire Line
+	23625 29150 23225 29150
+Connection ~ 23225 29150
+Wire Wire Line
+	23225 29150 23225 29350
+Text GLabel 13775 9125 0    140  Input ~ 28
+0VDC
+Text GLabel 26050 9100 0    140  Input ~ 28
+0VDC
+Text GLabel 24975 18700 0    140  Input ~ 28
+0VDC
+Wire Wire Line
+	24975 18700 25325 18700
+Wire Wire Line
+	25325 18175 25325 18700
+Text GLabel 31550 20200 0    140  Input ~ 28
+0VDC
+Wire Wire Line
+	31550 20200 31650 20200
+Wire Wire Line
+	31650 19600 31650 20200
+Text GLabel 41175 21000 0    140  Input ~ 28
+0VDC
+Wire Wire Line
+	41175 21000 41300 21000
+Wire Wire Line
+	41300 21000 41300 20525
+Text GLabel 36850 26100 0    140  Input ~ 28
+0VDC
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 64 1 5F06F293
+P 33075 13975
+F 0 "J1" H 33075 14300 140 0001 C CNN
+F 1 "ConnectorB8-100" H 33075 14400 140 0001 C CNN
+F 2 "" H 33075 14450 140 0001 C CNN
+F 3 "" H 33075 14450 140 0001 C CNN
+F 4 "BPLMX1" H 32200 14050 140 0000 C BNB "Caption"
+F 5 "BPLMY1" H 32200 13950 140 0000 C TNB "Caption2"
+	64   33075 13975
+	-1   0    0    -1  
+$EndComp
+Text GLabel 32800 14525 2    140  Output ~ 28
+BPLMX1_Y1
+Wire Wire Line
+	32800 13975 32500 13975
+Wire Wire Line
+	32500 13975 32500 14525
+Connection ~ 32500 14525
+Wire Wire Line
+	32500 14525 32800 14525
+Text GLabel 5100 1950 0    140  Input ~ 28
+BPLMX1_Y1
+Wire Wire Line
+	5100 1950 5325 1950
+Wire Wire Line
+	5325 1950 5325 2450
+Text GLabel 17275 2150 0    140  Input ~ 28
+BPLMX1_Y1
+Text GLabel 29675 2075 0    140  Input ~ 28
+BPLMX1_Y1
+Text GLabel 32950 18850 2    140  Output ~ 28
+BPLMX3_Y3
+Text GLabel 18325 9475 2    140  Input ~ 28
+BPLMX3_Y3
+Text GLabel 5650 9450 2    140  Input ~ 28
+BPLMX3_Y3
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 31 1 5F28E215
+P 33175 18375
+F 0 "J2" H 33175 18700 140 0001 C CNN
+F 1 "ConnectorB8-200" H 33175 18800 140 0001 C CNN
+F 2 "" H 33175 18850 140 0001 C CNN
+F 3 "" H 33175 18850 140 0001 C CNN
+F 4 "BPLMX3" H 32300 18475 140 0000 C BNB "Caption"
+F 5 "BPLMY3" H 32300 18375 140 0000 C TNB "Caption2"
+	31   33175 18375
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	32900 18375 32400 18375
+Wire Wire Line
+	32400 18375 32400 18850
+Connection ~ 32400 18850
+Wire Wire Line
+	32400 18850 32950 18850
+Text GLabel 30725 9400 2    140  Input ~ 28
+BPLMX3_Y3
+Wire Wire Line
+	38775 8600 38775 9025
+Wire Wire Line
+	38275 8600 38775 8600
+Text GLabel 5650 5925 2    140  Input ~ 28
+BPLMX2_Y2
+Text GLabel 39650 14475 2    140  Output ~ 28
+BPLMX2_Y2
+Wire Wire Line
+	39650 13850 39200 13850
+Wire Wire Line
+	39200 13850 39200 14475
+Connection ~ 39200 14475
+Wire Wire Line
+	39200 14475 39650 14475
+Text GLabel 18325 5925 2    140  Input ~ 28
+BPLMX2_Y2
+Text GLabel 30775 5875 2    140  Input ~ 28
+BPLMX2_Y2
+Text GLabel 26325 17500 2    140  Output ~ 28
+40331A_2A
+Wire Wire Line
+	26325 17500 26125 17500
+Wire Wire Line
+	26125 17500 26125 17000
+Connection ~ 26125 17000
+Wire Wire Line
+	26125 17000 25325 17000
+Text GLabel 41375 19450 2    140  Output ~ 28
+BPLIZ1_2
+Text GLabel 34575 22100 0    140  Input ~ 28
+BPLIZ1_2
+Wire Wire Line
+	34575 22100 34650 22100
+Wire Wire Line
+	34650 22100 34650 22375
+Text GLabel 20600 15575 0    140  Input ~ 28
+BPLIZ1_2
+Wire Wire Line
+	20600 15575 20750 15575
+Wire Wire Line
+	20750 15575 20750 15875
+Text GLabel 38950 10875 2    140  Output ~ 28
+40365A_6A
+Wire Wire Line
+	38650 10300 38650 10875
+Wire Wire Line
+	38650 10875 38950 10875
+Text GLabel 22425 18000 0    140  Input ~ 28
+40365A_6A
+Text GLabel 35375 25025 0    140  Input ~ 28
+40365A_6A
+Wire Notes Line style solid
+	27900 25875 22100 25875
+Wire Wire Line
+	2475 25150 3350 25150
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 1 1 5F713C78
+P 2200 25625
+F 0 "J1" H 2200 25950 140 0001 C CNN
+F 1 "ConnectorB8-100" H 2200 26050 140 0001 C CNN
+F 2 "" H 2200 25800 140 0001 C CNN
+F 3 "" H 2200 25800 140 0001 C CNN
+F 4 "0VDC" H 1475 25675 140 0000 C BNB "Caption"
+F 5 "0VDC" H 1475 25550 140 0000 C CNB "Caption2"
+	1    2200 25625
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3800 25625 3150 25625
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 2 1 5F764570
+P 5450 25375
+F 0 "J2" H 5450 25700 140 0001 C CNN
+F 1 "ConnectorB8-200" H 5450 25800 140 0001 C CNN
+F 2 "" H 5450 25550 140 0001 C CNN
+F 3 "" H 5450 25550 140 0001 C CNN
+F 4 "BPLSWX" H 4650 25425 140 0000 C BNB "Caption"
+F 5 "BPLSWF" H 4650 25300 140 0000 C CNB "Caption2"
+	2    5450 25375
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	5175 25375 4650 25375
+$Sheet
+S 3800 26525 850  975 
+U 5F7B6DBB
+F0 "40520_21" 140
+F1 "C.sch" 140
+F2 "F" I L 3800 26775 140
+F3 "G" I L 3800 27250 140
+F4 "H" O R 4650 27000 140
+$EndSheet
+Wire Wire Line
+	3350 26775 3800 26775
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 3 1 5F7B6DDD
+P 5450 27000
+F 0 "J2" H 5450 27325 140 0001 C CNN
+F 1 "ConnectorB8-200" H 5450 27425 140 0001 C CNN
+F 2 "" H 5450 27175 140 0001 C CNN
+F 3 "" H 5450 27175 140 0001 C CNN
+F 4 "BPLSWY" H 4650 27050 140 0000 C BNB "Caption"
+F 5 "BPLSWG" H 4650 26925 140 0000 C CNB "Caption2"
+	3    5450 27000
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	5175 27000 4650 27000
+Wire Wire Line
+	3350 26775 3350 25150
+Connection ~ 3350 25150
+Wire Wire Line
+	3350 25150 3800 25150
+Wire Wire Line
+	3150 27250 3150 25625
+Wire Wire Line
+	3150 27250 3800 27250
+Connection ~ 3150 25625
+Wire Wire Line
+	3150 25625 2475 25625
+$Sheet
+S 3800 28150 850  975 
+U 5F8B4769
+F0 "40522_23" 140
+F1 "C.sch" 140
+F2 "F" I L 3800 28400 140
+F3 "G" I L 3800 28875 140
+F4 "H" O R 4650 28625 140
+$EndSheet
+Wire Wire Line
+	3350 28400 3800 28400
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 4 1 5F8B4772
+P 5450 28625
+F 0 "J2" H 5450 28950 140 0001 C CNN
+F 1 "ConnectorB8-200" H 5450 29050 140 0001 C CNN
+F 2 "" H 5450 28800 140 0001 C CNN
+F 3 "" H 5450 28800 140 0001 C CNN
+F 4 "BPLSWZ" H 4650 28675 140 0000 C BNB "Caption"
+F 5 "BPLSWH" H 4650 28550 140 0000 C CNB "Caption2"
+	4    5450 28625
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	5175 28625 4650 28625
+Wire Wire Line
+	3350 28400 3350 26775
+Wire Wire Line
+	3150 28875 3150 27250
+Wire Wire Line
+	3150 28875 3800 28875
+Connection ~ 3150 27250
+Connection ~ 3350 26775
+Text GLabel 12725 25000 0    140  Input ~ 28
+BPLIZ1_2
+Text GLabel 12700 25950 0    140  Input ~ 28
+0VDC
+Text GLabel 12700 26425 0    140  Input ~ 28
+40365A_66A
+Wire Wire Line
+	12700 26425 13300 26425
+Wire Wire Line
+	12700 25950 13300 25950
+Wire Wire Line
+	12725 25000 13300 25000
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 25 1 5F9FF7D2
+P 12450 25475
+F 0 "J1" H 12450 25800 140 0001 C CNN
+F 1 "ConnectorB8-100" H 12450 25900 140 0001 C CNN
+F 2 "" H 12450 25650 140 0001 C CNN
+F 3 "" H 12450 25650 140 0001 C CNN
+F 4 "SETAB" H 11750 25500 140 0000 C BNB "Caption"
+F 5 "SETCD" H 11750 25375 140 0000 C CNB "Caption2"
+	25   12450 25475
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	12725 25475 13300 25475
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 27 1 5FA2F8EA
+P 15975 25950
+F 0 "J2" H 15975 26275 140 0001 C CNN
+F 1 "ConnectorB8-200" H 15975 26375 140 0001 C CNN
+F 2 "" H 15975 26125 140 0001 C CNN
+F 3 "" H 15975 26125 140 0001 C CNN
+F 4 "XSETAB" H 15225 26000 140 0000 C BNB "Caption"
+F 5 "XSETCD" H 15225 25875 140 0000 C CNB "Caption2"
+	27   15975 25950
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	14975 25950 15700 25950
+$Sheet
+S 13300 27350 1675 1950
+U 5FB0DC18
+F0 "40362_64" 140
+F1 "B.sch" 140
+F2 "E" O R 14975 28550 140
+F3 "0VDC" I L 13300 28550 140
+F4 "D" I L 13300 28075 140
+F5 "40365A_6A" I L 13300 29025 140
+F6 "BPLIZ1_2" I L 13300 27600 140
+$EndSheet
+Text GLabel 12725 27600 0    140  Input ~ 28
+BPLIZ1_2
+Text GLabel 12700 28550 0    140  Input ~ 28
+0VDC
+Text GLabel 12700 29025 0    140  Input ~ 28
+40365A_66A
+Wire Wire Line
+	12700 29025 13300 29025
+Wire Wire Line
+	12700 28550 13300 28550
+Wire Wire Line
+	12725 27600 13300 27600
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 24 1 5FB0DC26
+P 12450 28075
+F 0 "J2" H 12450 28400 140 0001 C CNN
+F 1 "ConnectorB8-200" H 12450 28500 140 0001 C CNN
+F 2 "" H 12450 28250 140 0001 C CNN
+F 3 "" H 12450 28250 140 0001 C CNN
+F 4 "RESETA" H 11750 28100 140 0000 C BNB "Caption"
+F 5 "RESETB" H 11750 27975 140 0000 C CNB "Caption2"
+	24   12450 28075
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	12725 28075 13300 28075
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 23 1 5FB0DC33
+P 15975 28550
+F 0 "J1" H 15975 28875 140 0001 C CNN
+F 1 "ConnectorB8-100" H 15975 28975 140 0001 C CNN
+F 2 "" H 15975 28725 140 0001 C CNN
+F 3 "" H 15975 28725 140 0001 C CNN
+F 4 "XRSTAN" H 15225 28600 140 0000 C BNB "Caption"
+F 5 "XRSTBN" H 15225 28475 140 0000 C CNB "Caption2"
+	23   15975 28550
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	14975 28550 15700 28550
+$Sheet
+S 13300 29975 1675 1950
+U 5FB43397
+F0 "40367_68" 140
+F1 "B.sch" 140
+F2 "E" O R 14975 31175 140
+F3 "0VDC" I L 13300 31175 140
+F4 "D" I L 13300 30700 140
+F5 "40365A_6A" I L 13300 31650 140
+F6 "BPLIZ1_2" I L 13300 30225 140
+$EndSheet
+Text GLabel 12725 30225 0    140  Input ~ 28
+BPLIZ1_2
+Text GLabel 12700 31175 0    140  Input ~ 28
+0VDC
+Text GLabel 12700 31650 0    140  Input ~ 28
+40365A_66A
+Wire Wire Line
+	12700 31650 13300 31650
+Wire Wire Line
+	12700 31175 13300 31175
+Wire Wire Line
+	12725 30225 13300 30225
+Wire Wire Line
+	12725 30700 13300 30700
+Wire Wire Line
+	14975 31175 15700 31175
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 12 1 5BE94206
+P 12450 30700
+F 0 "J2" H 12450 31025 140 0001 C CNN
+F 1 "ConnectorB8-200" H 12450 31125 140 0001 C CNN
+F 2 "" H 12450 30875 140 0001 C CNN
+F 3 "" H 12450 30875 140 0001 C CNN
+F 4 "RESETC" H 11750 30725 140 0000 C BNB "Caption"
+F 5 "RESETD" H 11750 30600 140 0000 C CNB "Caption2"
+	12   12450 30700
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 8 1 5BE97A0B
+P 15975 31175
+F 0 "J1" H 15975 31500 140 0001 C CNN
+F 1 "ConnectorB8-100" H 15975 31600 140 0001 C CNN
+F 2 "" H 15975 31350 140 0001 C CNN
+F 3 "" H 15975 31350 140 0001 C CNN
+F 4 "XRSTCN" H 15225 31225 140 0000 C BNB "Caption"
+F 5 "XRSTDN" H 15225 31100 140 0000 C CNB "Caption2"
+	8    15975 31175
+	-1   0    0    -1  
+$EndComp
+Text GLabel 4425 14325 0    140  Input ~ 0
+BPLIZ1_2
+Text GLabel 4425 14800 0    140  Input ~ 0
+40331A_2A
+Text GLabel 4425 15750 0    140  Input ~ 0
+40365A_6A
+Wire Wire Line
+	4425 14325 4975 14325
+Wire Wire Line
+	4425 14800 4975 14800
+Wire Wire Line
+	4425 15750 4975 15750
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 69 1 5BFDBB87
+P 4150 15275
+F 0 "J2" H 4150 15600 140 0001 C CNN
+F 1 "ConnectorB8-200" H 4150 15700 140 0001 C CNN
+F 2 "" H 4150 15450 140 0001 C CNN
+F 3 "" H 4150 15450 140 0001 C CNN
+F 4 "IL01" H 3600 15300 140 0000 C BNB "Caption"
+F 5 "IL05" H 3600 15175 140 0000 C CNB "Caption2"
+	69   4150 15275
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4425 15275 4975 15275
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 62 1 5C046742
+P 7550 16900
+F 0 "J1" H 7550 17225 140 0001 C CNN
+F 1 "ConnectorB8-100" H 7550 17325 140 0001 C CNN
+F 2 "" H 7550 17075 140 0001 C CNN
+F 3 "" H 7550 17075 140 0001 C CNN
+F 4 "X02FN" H 6875 16950 140 0000 C BNB "Caption"
+F 5 "X06FN" H 6875 16825 140 0000 C CNB "Caption2"
+	62   7550 16900
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	6725 14325 7275 14325
+$Sheet
+S 4975 16650 1750 1950
+U 5C1A6548
+F0 "40313_23" 140
+F1 "A.sch" 140
+F2 "BPLIZ1_2" I L 4975 16900 140
+F3 "A" I L 4975 17850 140
+F4 "40365A_6A" I L 4975 18325 140
+F5 "40331A_2A" I L 4975 17375 140
+F6 "B" O R 6725 16900 140
+F7 "C" I R 6725 17850 140
+$EndSheet
+Text GLabel 4425 16900 0    140  Input ~ 0
+BPLIZ1_2
+Text GLabel 4425 17375 0    140  Input ~ 0
+40331A_2A
+Text GLabel 4425 18325 0    140  Input ~ 0
+40365A_6A
+Wire Wire Line
+	4425 16900 4975 16900
+Wire Wire Line
+	4425 17375 4975 17375
+Wire Wire Line
+	4425 18325 4975 18325
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 63 1 5C1A6556
+P 4150 17850
+F 0 "J2" H 4150 18175 140 0001 C CNN
+F 1 "ConnectorB8-200" H 4150 18275 140 0001 C CNN
+F 2 "" H 4150 18025 140 0001 C CNN
+F 3 "" H 4150 18025 140 0001 C CNN
+F 4 "IL02" H 3600 17875 140 0000 C BNB "Caption"
+F 5 "IL06" H 3600 17750 140 0000 C CNB "Caption2"
+	63   4150 17850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4425 17850 4975 17850
+Wire Wire Line
+	6725 17850 7275 17850
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 68 1 5C1A6570
+P 7550 14325
+F 0 "J1" H 7550 14650 140 0001 C CNN
+F 1 "ConnectorB8-100" H 7550 14750 140 0001 C CNN
+F 2 "" H 7550 14500 140 0001 C CNN
+F 3 "" H 7550 14500 140 0001 C CNN
+F 4 "X01FN" H 6875 14375 140 0000 C BNB "Caption"
+F 5 "X05FN" H 6875 14250 140 0000 C CNB "Caption2"
+	68   7550 14325
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	6725 16900 7275 16900
+$Sheet
+S 4975 19225 1750 1950
+U 5C1E275D
+F0 "40315_25" 140
+F1 "A.sch" 140
+F2 "BPLIZ1_2" I L 4975 19475 140
+F3 "A" I L 4975 20425 140
+F4 "40365A_6A" I L 4975 20900 140
+F5 "40331A_2A" I L 4975 19950 140
+F6 "B" O R 6725 19475 140
+F7 "C" I R 6725 20425 140
+$EndSheet
+Text GLabel 4425 19475 0    140  Input ~ 0
+BPLIZ1_2
+Text GLabel 4425 19950 0    140  Input ~ 0
+40331A_2A
+Text GLabel 4425 20900 0    140  Input ~ 0
+40365A_6A
+Wire Wire Line
+	4425 19475 4975 19475
+Wire Wire Line
+	4425 19950 4975 19950
+Wire Wire Line
+	4425 20900 4975 20900
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 58 1 5C1E276B
+P 4150 20425
+F 0 "J2" H 4150 20750 140 0001 C CNN
+F 1 "ConnectorB8-200" H 4150 20850 140 0001 C CNN
+F 2 "" H 4150 20600 140 0001 C CNN
+F 3 "" H 4150 20600 140 0001 C CNN
+F 4 "IL03" H 3600 20450 140 0000 C BNB "Caption"
+F 5 "IL07" H 3600 20325 140 0000 C CNB "Caption2"
+	58   4150 20425
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4425 20425 4975 20425
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 57 1 5C1E2785
+P 7550 19475
+F 0 "J1" H 7550 19800 140 0001 C CNN
+F 1 "ConnectorB8-100" H 7550 19900 140 0001 C CNN
+F 2 "" H 7550 19650 140 0001 C CNN
+F 3 "" H 7550 19650 140 0001 C CNN
+F 4 "X03FN" H 6875 19525 140 0000 C BNB "Caption"
+F 5 "X07FN" H 6875 19400 140 0000 C CNB "Caption2"
+	57   7550 19475
+	-1   0    0    -1  
+$EndComp
+$Sheet
+S 4975 21775 1750 1950
+U 5C21D813
+F0 "40317_27" 140
+F1 "A.sch" 140
+F2 "BPLIZ1_2" I L 4975 22025 140
+F3 "A" I L 4975 22975 140
+F4 "40365A_6A" I L 4975 23450 140
+F5 "40331A_2A" I L 4975 22500 140
+F6 "B" O R 6725 22025 140
+F7 "C" I R 6725 22975 140
+$EndSheet
+Text GLabel 4425 22025 0    140  Input ~ 0
+BPLIZ1_2
+Text GLabel 4425 22500 0    140  Input ~ 0
+40331A_2A
+Text GLabel 4425 23450 0    140  Input ~ 0
+40365A_6A
+Wire Wire Line
+	4425 22025 4975 22025
+Wire Wire Line
+	4425 22500 4975 22500
+Wire Wire Line
+	4425 23450 4975 23450
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 51 1 5C21D821
+P 4150 22975
+F 0 "J2" H 4150 23300 140 0001 C CNN
+F 1 "ConnectorB8-200" H 4150 23400 140 0001 C CNN
+F 2 "" H 4150 23150 140 0001 C CNN
+F 3 "" H 4150 23150 140 0001 C CNN
+F 4 "IL04" H 3600 23000 140 0000 C BNB "Caption"
+F 5 "IL04/" H 3525 22875 140 0000 C CNB "Caption2"
+	51   4150 22975
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4425 22975 4975 22975
+Wire Wire Line
+	6725 22975 7275 22975
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 52 1 5C21D83B
+P 7550 22025
+F 0 "J1" H 7550 22350 140 0001 C CNN
+F 1 "ConnectorB8-100" H 7550 22450 140 0001 C CNN
+F 2 "" H 7550 22200 140 0001 C CNN
+F 3 "" H 7550 22200 140 0001 C CNN
+F 4 "X04FN" H 6875 22075 140 0000 C BNB "Caption"
+F 5 "X04CN" H 6875 21950 140 0000 C CNB "Caption2"
+	52   7550 22025
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	6725 22025 7275 22025
+$Sheet
+S 11775 14075 1750 1950
+U 5C3EA18C
+F0 "40312_22" 140
+F1 "A.sch" 140
+F2 "BPLIZ1_2" I L 11775 14325 140
+F3 "A" I L 11775 15275 140
+F4 "40365A_6A" I L 11775 15750 140
+F5 "40331A_2A" I L 11775 14800 140
+F6 "B" O R 13525 14325 140
+F7 "C" I R 13525 15275 140
+$EndSheet
+Text GLabel 11225 14325 0    140  Input ~ 0
+BPLIZ1_2
+Text GLabel 11225 14800 0    140  Input ~ 0
+40331A_2A
+Text GLabel 11225 15750 0    140  Input ~ 0
+40365A_6A
+Wire Wire Line
+	11225 14325 11775 14325
+Wire Wire Line
+	11225 14800 11775 14800
+Wire Wire Line
+	11225 15750 11775 15750
+Wire Wire Line
+	11225 15275 11775 15275
+Wire Wire Line
+	13525 14325 14075 14325
+$Sheet
+S 11775 16650 1750 1950
+U 5C3EA1C1
+F0 "40314_24" 140
+F1 "A.sch" 140
+F2 "BPLIZ1_2" I L 11775 16900 140
+F3 "A" I L 11775 17850 140
+F4 "40365A_6A" I L 11775 18325 140
+F5 "40331A_2A" I L 11775 17375 140
+F6 "B" O R 13525 16900 140
+F7 "C" I R 13525 17850 140
+$EndSheet
+Text GLabel 11225 16900 0    140  Input ~ 0
+BPLIZ1_2
+Text GLabel 11225 17375 0    140  Input ~ 0
+40331A_2A
+Text GLabel 11225 18325 0    140  Input ~ 0
+40365A_6A
+Wire Wire Line
+	11225 16900 11775 16900
+Wire Wire Line
+	11225 17375 11775 17375
+Wire Wire Line
+	11225 18325 11775 18325
+Wire Wire Line
+	11225 17850 11775 17850
+Wire Wire Line
+	13525 17850 14050 17850
+Wire Wire Line
+	13525 16900 14075 16900
+$Sheet
+S 11775 19225 1750 1950
+U 5C3EA1EA
+F0 "40316_26" 140
+F1 "A.sch" 140
+F2 "BPLIZ1_2" I L 11775 19475 140
+F3 "A" I L 11775 20425 140
+F4 "40365A_6A" I L 11775 20900 140
+F5 "40331A_2A" I L 11775 19950 140
+F6 "B" O R 13525 19475 140
+F7 "C" I R 13525 20425 140
+$EndSheet
+Text GLabel 11225 19475 0    140  Input ~ 0
+BPLIZ1_2
+Text GLabel 11225 19950 0    140  Input ~ 0
+40331A_2A
+Text GLabel 11225 20900 0    140  Input ~ 0
+40365A_6A
+Wire Wire Line
+	11225 19475 11775 19475
+Wire Wire Line
+	11225 19950 11775 19950
+Wire Wire Line
+	11225 20900 11775 20900
+Wire Wire Line
+	11225 20425 11775 20425
+$Sheet
+S 11775 21775 1750 1950
+U 5C3EA21F
+F0 "40318_28" 140
+F1 "A.sch" 140
+F2 "BPLIZ1_2" I L 11775 22025 140
+F3 "A" I L 11775 22975 140
+F4 "40365A_6A" I L 11775 23450 140
+F5 "40331A_2A" I L 11775 22500 140
+F6 "B" O R 13525 22025 140
+F7 "C" I R 13525 22975 140
+$EndSheet
+Text GLabel 11225 22025 0    140  Input ~ 0
+BPLIZ1_2
+Text GLabel 11225 22500 0    140  Input ~ 0
+40331A_2A
+Text GLabel 11225 23450 0    140  Input ~ 0
+40365A_6A
+Wire Wire Line
+	11225 22025 11775 22025
+Wire Wire Line
+	11225 22500 11775 22500
+Wire Wire Line
+	11225 23450 11775 23450
+Wire Wire Line
+	11225 22975 11775 22975
+Wire Wire Line
+	13525 22975 14050 22975
+Wire Wire Line
+	13525 22025 14075 22025
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 67 1 5C449B5E
+P 10950 15275
+F 0 "J1" H 10950 15600 140 0001 C CNN
+F 1 "ConnectorB8-100" H 10950 15700 140 0001 C CNN
+F 2 "" H 10950 15450 140 0001 C CNN
+F 3 "" H 10950 15450 140 0001 C CNN
+F 4 "IL01/" H 10275 15325 140 0000 C BNB "Caption"
+F 5 "IL05/" H 10275 15200 140 0000 C CNB "Caption2"
+	67   10950 15275
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 60 1 5C44E726
+P 10950 17850
+F 0 "J1" H 10950 18175 140 0001 C CNN
+F 1 "ConnectorB8-100" H 10950 18275 140 0001 C CNN
+F 2 "" H 10950 18025 140 0001 C CNN
+F 3 "" H 10950 18025 140 0001 C CNN
+F 4 "IL02/" H 10275 17900 140 0000 C BNB "Caption"
+F 5 "IL06/" H 10275 17775 140 0000 C CNB "Caption2"
+	60   10950 17850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 56 1 5C452DD9
+P 10950 20425
+F 0 "J1" H 10950 20750 140 0001 C CNN
+F 1 "ConnectorB8-100" H 10950 20850 140 0001 C CNN
+F 2 "" H 10950 20600 140 0001 C CNN
+F 3 "" H 10950 20600 140 0001 C CNN
+F 4 "IL03/" H 10275 20475 140 0000 C BNB "Caption"
+F 5 "IL07/" H 10275 20350 140 0000 C CNB "Caption2"
+	56   10950 20425
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorB8-100 J1
+U 51 1 5C4563DA
+P 10950 22975
+F 0 "J1" H 10950 23300 140 0001 C CNN
+F 1 "ConnectorB8-100" H 10950 23400 140 0001 C CNN
+F 2 "" H 10950 23150 140 0001 C CNN
+F 3 "" H 10950 23150 140 0001 C CNN
+F 4 "ILP" H 10275 23025 140 0000 C BNB "Caption"
+F 5 "ILP/" H 10275 22900 140 0000 C CNB "Caption2"
+	51   10950 22975
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6725 19475 7275 19475
+Wire Wire Line
+	13525 19475 14075 19475
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 68 1 5C5264C6
+P 14350 14325
+F 0 "J2" H 14350 14650 140 0001 C CNN
+F 1 "ConnectorB8-200" H 14350 14750 140 0001 C CNN
+F 2 "" H 14350 14500 140 0001 C CNN
+F 3 "" H 14350 14500 140 0001 C CNN
+F 4 "X01CN" H 13675 14350 140 0000 C BNB "Caption"
+F 5 "X05CN" H 13675 14225 140 0000 C CNB "Caption2"
+	68   14350 14325
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 62 1 5C528B81
+P 14350 16900
+F 0 "J2" H 14350 17225 140 0001 C CNN
+F 1 "ConnectorB8-200" H 14350 17325 140 0001 C CNN
+F 2 "" H 14350 17075 140 0001 C CNN
+F 3 "" H 14350 17075 140 0001 C CNN
+F 4 "X02CN" H 13675 16925 140 0000 C BNB "Caption"
+F 5 "X06CN" H 13675 16800 140 0000 C CNB "Caption2"
+	62   14350 16900
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 57 1 5C530882
+P 14350 19475
+F 0 "J2" H 14350 19800 140 0001 C CNN
+F 1 "ConnectorB8-200" H 14350 19900 140 0001 C CNN
+F 2 "" H 14350 19650 140 0001 C CNN
+F 3 "" H 14350 19650 140 0001 C CNN
+F 4 "X03CN" H 13675 19500 140 0000 C BNB "Caption"
+F 5 "X07CN" H 13675 19375 140 0000 C CNB "Caption2"
+	57   14350 19475
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorB8-200 J2
+U 50 1 5C53617F
+P 14350 22025
+F 0 "J2" H 14350 22350 140 0001 C CNN
+F 1 "ConnectorB8-200" H 14350 22450 140 0001 C CNN
+F 2 "" H 14350 22200 140 0001 C CNN
+F 3 "" H 14350 22200 140 0001 C CNN
+F 4 "XPFN" H 13675 22050 140 0000 C BNB "Caption"
+F 5 "XPCN" H 13675 21925 140 0000 C CNB "Caption2"
+	50   14350 22025
+	-1   0    0    -1  
+$EndComp
+Text GLabel 39800 15875 2    140  Output ~ 28
++4MX2_Y2
+Text GLabel 33000 15900 2    140  Output ~ 28
++4MX1_Y1
+Wire Wire Line
+	39800 15875 39425 15875
+Wire Wire Line
+	39425 15875 39425 15425
+Connection ~ 39425 15425
+Wire Wire Line
+	39425 15425 39800 15425
+Wire Wire Line
+	33000 15900 32675 15900
+Wire Wire Line
+	32675 15900 32675 15450
+Connection ~ 32675 15450
+Wire Wire Line
+	32675 15450 33000 15450
+Wire Wire Line
+	6725 15275 7275 15275
+Text GLabel 7275 15275 2    140  Input ~ 28
++4MX1_Y1
+Text GLabel 7275 17850 2    140  Input ~ 28
++4MX1_Y1
+Wire Wire Line
+	13525 15275 14075 15275
+Text GLabel 14075 15275 2    140  Input ~ 28
++4MX1_Y1
+Text GLabel 14050 17850 2    140  Input ~ 28
++4MX1_Y1
+Wire Wire Line
+	6725 20425 7275 20425
+Wire Wire Line
+	13525 20425 14075 20425
+Text GLabel 7275 20425 2    140  Input ~ 28
++4MX2_Y2
+Text GLabel 7275 22975 2    140  Input ~ 28
++4MX2_Y2
+Text GLabel 14075 20425 2    140  Input ~ 28
++4MX2_Y2
+Text GLabel 14050 22975 2    140  Input ~ 28
++4MX2_Y2
+Text GLabel 2475 25150 0    140  Input ~ 28
+BPLSSW
+Text GLabel 39025 8125 2    140  Output ~ 28
+BPLSSW
+Wire Wire Line
+	39025 8125 38775 8125
+Wire Wire Line
+	38775 8125 38775 8600
+Connection ~ 38775 8600
+Wire Wire Line
+	23275 11675 23275 11900
 Wire Wire Line
 	30300 14525 30000 14525
+Wire Wire Line
+	17650 9475 18325 9475
+Wire Wire Line
+	42000 26300 42000 26725
+Text Notes 38844 33374 0    140  ~ 28
+_____
+Wire Notes Line style solid
+	39069 33399 39169 33299
+Text Notes 38100 1150 0    140  ~ 28
+-   RELEASED PER TDRR 32347
 $EndSCHEMATC

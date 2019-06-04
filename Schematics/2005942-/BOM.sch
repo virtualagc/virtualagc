@@ -1,10 +1,10 @@
 EESchema Schematic File Version 5
-LIBS:original-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 2 16
 Title ""
 Date ""
 Rev ""
@@ -14,80 +14,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Wire Notes Line style solid
-	37958 923  37958 3177
-Wire Notes Line style solid
-	37958 3177 43493 3177
-Wire Notes Line style solid
-	42480 923  42480 3177
-Wire Notes Line style solid
-	37958 2682 43493 2682
-Wire Notes Line style solid
-	37958 2182 43493 2182
-Wire Notes Line style solid
-	37958 1531 43493 1531
-Wire Notes Line style solid
-	38449 923  38449 3177
-Wire Notes Line style solid
-	41793 923  41793 3177
-Text Notes 38114 1326 0    140  ~ 28
-A
-Text Notes 38098 1972 0    140  ~ 28
-B
-Text Notes 38117 2521 0    140  ~ 28
-C
-Text Notes 38126 3052 0    140  ~ 28
-D
-Text Notes 38518 1452 0    140  ~ 28
-REVISED PER TDRR 27079\nDR        CHK      APPD
-Text Notes 38518 2102 0    140  ~ 28
-REVISED PER TDRR 28162\nDR        CHK      APPD
-Text Notes 38518 2652 0    140  ~ 28
-REVISED PER TDRR 29079\nDR        CHK      APPD
-Text Notes 38518 3152 0    140  ~ 28
-REVISED PER TDRR 30864\nDR        CHK      APPD
-Text Notes 39668 31724 0    250  ~ 50
-SCHEMATIC,
-Text Notes 40893 33124 0    250  ~ 50
-2005100
-Text Notes 38268 33124 0    250  ~ 50
-80230
-Text Notes 39099 32125 0    200  ~ 40
-ROPE DRIVER MODULE
-Text Notes 39899 32400 0    140  ~ 28
-B16 — B17
-Text Notes 33424 32325 0    140  ~ 28
-____________
-Text Notes 33449 32900 0    140  ~ 28
-____________
-Text Notes 33449 33375 0    140  ~ 28
-____________
-Wire Notes Line style solid
-	34018 33424 34143 33249
-Text Notes 34124 31775 0    140  ~ 28
-___
-Text Notes 33124 31775 0    140  ~ 28
-___
-Text Notes 40343 33424 0    140  ~ 28
-_____
-Wire Notes Line style solid
-	40568 33449 40668 33349
-Text Notes 38818 33474 0    140  ~ 28
-NONE
-Wire Notes Line style solid
-	34018 32949 34143 32774
-Wire Notes Line style solid
-	34018 32374 34143 32199
-Wire Notes Line style solid
-	33243 31799 33318 31699
-Wire Notes Line style solid
-	34268 31799 34343 31699
-Wire Notes Line style solid
-	35243 31799 35318 31699
-Text Notes 42399 33450 0    140  ~ 28
-2     2
-Text Notes 35099 31775 0    140  ~ 28
-___
 Wire Notes Line style solid
 	11400 1200 14425 1200
 Wire Notes Line style solid
@@ -1795,7 +1721,7 @@ Text Notes 9375 18975 0    130  ~ 26
 Text Notes 9375 19225 0    130  ~ 26
 32
 Text Notes 9375 19475 0    130  ~ 26
-49
+15
 Text Notes 9375 19725 0    130  ~ 26
 49
 Wire Notes Line style solid
@@ -1901,7 +1827,7 @@ Text Notes 12025 18975 0    130  ~ 26
 Text Notes 12000 19225 0    130  ~ 26
 1000
 Text Notes 12000 19475 0    130  ~ 26
-5100
+200
 Text Notes 12000 19725 0    130  ~ 26
 5100
 Text Notes 13000 7975 0    130  ~ 26
@@ -2092,10 +2018,6 @@ Text Notes 8200 28225 0    130  ~ 26
 1010406
 Text Notes 9200 24950 0    130  ~ 26
 -
-Text Notes 9200 25200 0    130  ~ 26
--
-Text Notes 9200 25450 0    130  ~ 26
--
 Text Notes 9200 25700 0    130  ~ 26
 -
 Text Notes 9200 25950 0    130  ~ 26
@@ -2116,10 +2038,6 @@ Text Notes 9200 28225 0    130  ~ 26
 -
 Text Notes 9475 24975 0    130  ~ 26
 10
-Text Notes 9475 25225 0    130  ~ 26
-11
-Text Notes 9475 25475 0    130  ~ 26
-11
 Text Notes 9475 25725 0    130  ~ 26
 7
 Text Notes 9475 25975 0    130  ~ 26
@@ -2144,10 +2062,6 @@ Text Notes 10050 28225 0    130  ~ 26
 INDUCTOR
 Text Notes 11850 24975 0    130  ~ 26
 2.2UH
-Text Notes 11850 25225 0    130  ~ 26
-3.9UH
-Text Notes 11850 25475 0    130  ~ 26
-3.9UH
 Text Notes 11850 25725 0    130  ~ 26
 8.2UH
 Text Notes 11850 27725 0    130  ~ 26
@@ -2161,7 +2075,7 @@ Wire Notes Line style solid
 Wire Notes Line style solid
 	10525 27900 10525 25075
 Wire Notes Line style solid
-	8600 27900 8600 25050
+	8600 27900 8600 25800
 Text Notes 12925 28725 0    130  ~ 26
 ±2%
 Text Notes 12925 29475 0    130  ~ 26
@@ -2523,7 +2437,81 @@ Text Notes 22300 25250 0    130  ~ 26
 Text Notes 22300 25475 0    130  ~ 26
 001
 Wire Notes Line style solid
+	37958 918  37958 1247
+Wire Notes Line style solid
+	37958 1247 43493 1247
+Wire Notes Line style solid
+	42480 918  42480 1247
+Wire Notes Line style solid
+	38449 918  38449 1247
+Wire Notes Line style solid
+	41793 918  41793 1247
+Text Notes 39633 31729 0    250  ~ 50
+SCHEMATIC,
+Text Notes 40858 33129 0    250  ~ 50
+2005942
+Text Notes 38233 33129 0    250  ~ 50
+80230
+Text Notes 39064 32130 0    200  ~ 40
+ROPE DRIVER MODULE
+Text Notes 39864 32405 0    140  ~ 28
+B16 — B17
+Text Notes 33389 32330 0    140  ~ 28
+____________
+Text Notes 33414 32905 0    140  ~ 28
+____________
+Text Notes 33414 33380 0    140  ~ 28
+____________
+Wire Notes Line style solid
+	33983 33429 34108 33254
+Text Notes 34089 31780 0    140  ~ 28
+___
+Text Notes 33089 31780 0    140  ~ 28
+___
+Text Notes 40308 33379 0    140  ~ 28
+_____
+Wire Notes Line style solid
+	40533 33404 40633 33304
+Wire Notes Line style solid
+	33983 32954 34108 32779
+Wire Notes Line style solid
+	33983 32379 34108 32204
+Wire Notes Line style solid
+	33208 31804 33283 31704
+Wire Notes Line style solid
+	34233 31804 34308 31704
+Wire Notes Line style solid
+	35208 31804 35283 31704
+Text Notes 42364 33455 0    140  ~ 28
+2     2
+Text Notes 35064 31780 0    140  ~ 28
+___
+Text Notes 38080 1165 0    140  ~ 28
+-   RELEASED PER TDRR 32347
+Wire Notes Line style solid
 	3650 2225 3650 11975
-Text Notes 13750 20475 0    130  ~ 26
+Text Notes 13775 20475 0    130  ~ 26
 1/4W
+Wire Notes Line width 20 style solid
+	20075 17900 27325 17900
+Wire Notes Line width 20 style solid
+	20075 17850 27325 17850
+Wire Notes Line width 20 style solid
+	20075 18150 27325 18150
+Wire Notes Line width 20 style solid
+	20075 18100 27325 18100
+Text Notes 8225 25725 0    130  ~ 26
+1010406
+Text Notes 8200 25225 0    130  ~ 26
+SEE NOTE 3
+Text Notes 8200 25475 0    130  ~ 26
+SEE NOTE 4
+Text Notes 11750 25225 0    130  ~ 26
+NOMINAL
+Text Notes 11750 25475 0    130  ~ 26
+NOMINAL
+Text Notes 38819 33374 0    140  ~ 28
+_____
+Wire Notes Line style solid
+	39044 33399 39144 33299
 $EndSCHEMATC

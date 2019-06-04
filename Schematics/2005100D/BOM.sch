@@ -2520,4 +2520,8 @@ Text Notes 22300 25250 0    130  ~ 26
 001
 Text Notes 22300 25475 0    130  ~ 26
 001
+Wire Notes Line style solid
+	3625 2225 3625 11975
+Text Notes 13750 20475 0    130  ~ 26
+1/4W
 $EndSCHEMATC
