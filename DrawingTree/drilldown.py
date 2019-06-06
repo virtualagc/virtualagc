@@ -232,6 +232,7 @@ def readFindTable(drawing, configuration, assembly, level):
 	first = True
 	find = 1
 	serializer = "A"
+	titleIndex = -1
 	progress = "pre " + filename + " " + str(f) + " "
 	#print(progress, file=sys.stderr)
 	try:
@@ -256,12 +257,15 @@ def readFindTable(drawing, configuration, assembly, level):
 					print(headings, file=sys.stderr)
 					break
 				numConfigs = 0
+				titleIndex = fields.index("TITLE")
 				for field in fields:
 					if field not in ["FIND", "DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
 						numConfigs += 1
 				#print(headings)
 				progress += "B"
 			else:
+				if fields[titleIndex] == "PROOFED":
+					continue
 				progress += "C"
 				findTable["empty"] = False
 				row = {}
@@ -486,7 +490,10 @@ if str(drawing) in drawings:
 	aname = '<a href="' + drawings[str(drawing)]["url"] + '">' + assemblyName + "</a> &mdash; " + drawings[str(drawing)]["title"]
 print('<br><a name="' + assemblyName + '"></a><h1>' + aname + '</h1>')
 
+warnMS = {}
+warnFIND = {}
 def makeHtml(findTable):
+	global warnMS, warnFIND
 	level = 0
 	html = ""
 	if asTables:
@@ -527,6 +534,11 @@ def makeHtml(findTable):
 						thisLine += " or "
 					thisDrawing = findTable[key]["DRAWING"][nn]
 					thisURL = findTable[key]["URL"][nn]
+					if thisURL == "" and (thisDrawing[:2] in ["MS", "AN", "QQ"] or thisDrawing[:3] in ["MIL", "DOD", "FED", "MMM"]):
+						if thisDrawing in warnMS:
+							warnMS[thisDrawing] += 1
+						else:
+							warnMS[thisDrawing] = 1
 					thisExpanded = False
 					cssClass = "normalDrawing"
 					if thisDrawing in assemblies:
@@ -553,6 +565,11 @@ def makeHtml(findTable):
 						if len(dfields) == 1 or (len(dfields) == 2 and len(dfields[1]) == 3 and \
 						   dfields[1] != "001" and dfields[1][2] == "1" and dfields[1][0] in ["0", "1", "2" ]):
 							cssClass = "earlyDrawing"
+					if perhapsAssembly and thisURL != "" and thisDrawing[-4:] != "-001" and thisDrawing not in assemblies and thisDrawing not in subbedFrom:
+						if thisDrawing in warnFIND:
+							warnFIND[thisDrawing] += 1
+						else:
+							warnFIND[thisDrawing] = 1
 					if "Documents/assist.dla.mil/" == thisURL[:25]:
 						# Some MS and NAS part numbers have been assigned substitute
 						# URLs (upstream from this script).  What the following code
@@ -588,7 +605,7 @@ def makeHtml(findTable):
 										'">image files</a>)'
 				if asTables:
 					thisLine += "</td>"
-				if markAsAssembly:
+				if markAsAssembly or expandedBelow != "":
 					thisTitle = "<b>" + thisTitle + "</b>"
 				if asTables:
 					thisLine += "<td>" + thisTitle + "</td>\n"
@@ -667,3 +684,13 @@ jsonString = json.dumps(assemblies)
 f = open("drilldown-" + assemblyName + ".json", "w")
 f.write(jsonString)
 f.close()
+
+# Print warnings.
+if len(warnMS) > 0:
+	print("Missing mil-specs: ", file=sys.stderr)
+	for w in sorted(warnMS):
+		print("\t" + w + ": " + str(warnMS[w]), file=sys.stderr)
+if len(warnFIND) > 0:
+	print("Possible missing FIND.csv: ", file=sys.stderr)
+	for w in sorted(warnFIND):
+		print("\t" + w + ": " + str(warnFIND[w]), file=sys.stderr)
