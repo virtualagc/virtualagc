@@ -190,6 +190,7 @@ def splitPartNumber(assembly):
 # Returns a dictionary with the contents of an assembly, or else an empty dictionary
 # if the find-table file wasn't found.
 standardKeys = [ "level", "drawing", "configuration", "assembly", "parents", "exists", "empty", "subbedFor" ]
+findTables = []
 def readFindTable(drawing, configuration, assembly, level):
 	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly, "parents": [], 
 			"exists": False, "empty": True, "subbedFor": [] }
@@ -342,6 +343,8 @@ def readFindTable(drawing, configuration, assembly, level):
 		print(progress, file=sys.stderr)
 	f.close()
 	findTable["exists"] = True
+	if str(drawing) not in findTables:
+		findTables.append(str(drawing))
 	
 	# Yay!  All done.
 	return findTable
@@ -351,6 +354,7 @@ def readFindTable(drawing, configuration, assembly, level):
 # by any of the latter, but if the guessed dash numbers are found, the associated 
 # substitute find table is stored in 'assemblies' anyway.
 subbedFrom = {}
+tabulatedList = []
 def readFindTableWithSubbing(drawing, configuration, assembly, level):
 	findTable = readFindTable(drawing, configuration, assembly, level)
 	c = configuration
@@ -363,6 +367,8 @@ def readFindTableWithSubbing(drawing, configuration, assembly, level):
 	if str(drawing) in drawings:
 		if "TABULATED" in drawings[str(drawing)]["title"]:
 			tabulated = True
+			if assembly not in tabulatedList:
+				tabulatedList.append(assembly)
 	while level > 0 and subbedFindTable["exists"] and not subbedFindTable["empty"] and \
 			len(subbedFindTable.keys()) == len(standardKeys) and \
 			not tabulated and c % 10 == 9 and c < -11:
@@ -560,12 +566,16 @@ def makeHtml(findTable):
 								expandedBelow += 'Expanded in more detail: by <a href="#' +  sub + '"><font color="red">substitute ' + sub + '</font></a>'
 							else:
 								expandedBelow += ', and by <a href="#' + sub + '"><font color="red">substitute ' + sub + '</font></a>'						
+					dfields = splitPartNumber(thisDrawing)
+					#print(str(findTable["drawing"]) + " " + dfields[0], file=sys.stderr)
 					if perhapsAssembly and not thisExpanded:
-						dfields = splitPartNumber(thisDrawing)
 						if len(dfields) == 1 or (len(dfields) == 2 and len(dfields[1]) == 3 and \
 						   dfields[1] != "001" and dfields[1][2] == "1" and dfields[1][0] in ["0", "1", "2" ]):
 							cssClass = "earlyDrawing"
-					if perhapsAssembly and thisURL != "" and thisDrawing[-4:] != "-001" and thisDrawing not in assemblies and thisDrawing not in subbedFrom:
+					#if perhapsAssembly and thisURL != "" and thisDrawing[-4:] != "-001" and \
+					#		thisDrawing not in assemblies and thisDrawing not in subbedFrom and \
+					#		thisDrawing not in tabulatedList and dfields[0] not in findTables:
+					if perhapsAssembly and thisURL != "" and dfields[0] not in findTables:
 						if thisDrawing in warnFIND:
 							warnFIND[thisDrawing] += 1
 						else:
@@ -689,8 +699,8 @@ f.close()
 if len(warnMS) > 0:
 	print("Missing mil-specs: ", file=sys.stderr)
 	for w in sorted(warnMS):
-		print("\t" + w + ": " + str(warnMS[w]), file=sys.stderr)
+		print("\t" + w, file=sys.stderr)
 if len(warnFIND) > 0:
 	print("Possible missing FIND.csv: ", file=sys.stderr)
 	for w in sorted(warnFIND):
-		print("\t" + w + ": " + str(warnFIND[w]), file=sys.stderr)
+		print("\t" + w, file=sys.stderr)
