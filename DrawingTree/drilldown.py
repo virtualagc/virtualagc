@@ -280,6 +280,8 @@ def readFindTable(drawing, configuration, assembly, level):
 					currentFind = str(find) 
 					find += 1
 				for n in range(0,len(headings)):
+					if fields[n][:1] == "'":
+						fields[n] = fields[n][1:]
 					if headings[n] == "FIND":
 						currentFind = fields[n]
 						if currentFind == "":
@@ -289,13 +291,9 @@ def readFindTable(drawing, configuration, assembly, level):
 							serializer = chr(ord(serializer) + 1)
 					elif headings[n] in ["DRAWING", "QTY", "TITLE", "STRIKE", "NOTE"]:
 						if headings[n] == "QTY":
-							if fields[n][:1] == "'":
-								fields[n] = fields[n][1:]
 							rowQty = fields[n]
 							currentQty = rowQty
 						if headings[n] == "DRAWING":
-							if fields[n][:1] == "'":
-								fields[n] = fields[n][1:]
 							drawingField = (fields[n].split(" THRU "))[0]
 							currentDrawing = drawingField.split(" or ")
 						row[headings[n]] = fields[n]
@@ -548,7 +546,9 @@ def makeHtml(findTable):
 					thisExpanded = False
 					cssClass = "normalDrawing"
 					if thisDrawing in assemblies:
-						if assemblies[thisDrawing]["exists"] and assemblies[thisDrawing]["empty"]:
+						if findTable is assemblies[thisDrawing]:
+							perhapsAssembly = False
+						elif assemblies[thisDrawing]["exists"] and assemblies[thisDrawing]["empty"]:
 							perhapsAssembly = False
 						else:
 							thisExpanded = True
