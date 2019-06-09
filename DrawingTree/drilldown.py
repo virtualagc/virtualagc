@@ -550,6 +550,10 @@ def makeHtml(findTable):
 					if nn > 0:
 						thisLine += " or "
 					thisDrawing = findTable[key]["DRAWING"][nn]
+					dfields = splitPartNumber(thisDrawing)
+					if dfields[0].isdigit() and int(dfields[0]) in components:
+						markAsAssembly = False
+						perhapsAssembly = False
 					thisURL = findTable[key]["URL"][nn]
 					if thisURL == "" and (thisDrawing[:2] in ["MS", "AN", "QQ"] or thisDrawing[:3] in ["MIL", "DOD", "FED", "MMM"]):
 						if thisDrawing in warnMS:
@@ -579,7 +583,6 @@ def makeHtml(findTable):
 								expandedBelow += 'Expanded in more detail: by <a href="#' +  sub + '"><font color="red">substitute ' + sub + '</font></a>'
 							else:
 								expandedBelow += ', and by <a href="#' + sub + '"><font color="red">substitute ' + sub + '</font></a>'						
-					dfields = splitPartNumber(thisDrawing)
 					#print(str(findTable["drawing"]) + " " + dfields[0], file=sys.stderr)
 					if perhapsAssembly and not thisExpanded:
 						if len(dfields) == 1 or (len(dfields) == 2 and len(dfields[1]) == 3 and \
