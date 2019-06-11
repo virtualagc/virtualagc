@@ -223,7 +223,7 @@ digits = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
 lastDrawing = ["", "", ""]
 lastTitle = ["", "", ""]
 for key, value in sorted(parser.allData.iteritems()):
-	drawing = value["drawing"]
+	drawing = value["drawing"].replace("-", "_")
 	type = int(value["type"])
 	title = value["title"]
 	sheet = value["sheet"]

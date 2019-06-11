@@ -98,6 +98,7 @@ def dbg(str, msg):
 
 # First step: read drawings.csv and keep it in a dictionary.
 drawings = { }
+drawingNumbers = []
 f = open('drawings.csv', 'r')
 for line in f:
 	fields = line.strip().split("\t")
@@ -117,6 +118,8 @@ for line in f:
 	if drawingNumber in drawings and revision <= drawings[drawingNumber]["revision"]:
 		continue
 	drawings[drawingNumber] = { "revision": revision.strip(), "url": url, "title": title }
+	if drawingNumber not in drawingNumbers:
+		drawingNumbers.append(drawingNumber)
 f.close()
 
 #for key in drawings:
@@ -202,8 +205,11 @@ def splitPartNumber(assembly):
 # Returns a dictionary with the contents of an assembly, or else an empty dictionary
 # if the find-table file wasn't found.
 standardKeys = [ "level", "drawing", "configuration", "assembly", "parents", "exists", "empty", "subbedFor" ]
-findTables = []
+findTables = [] # Every FIND table or component we actually locate.
+findTablesAttempted = [] # Every FIND table we *attempt* to locate.
 def readFindTable(drawing, configuration, assembly, level):
+	if drawing not in findTablesAttempted:
+		findTablesAttempted.append(str(drawing))
 	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly, "parents": [], 
 			"exists": False, "empty": True, "subbedFor": [] }
 	if drawing not in components:
@@ -717,6 +723,13 @@ if len(warnMS) > 0:
 	for w in sorted(warnMS):
 		print("\t" + w, file=sys.stderr)
 if len(warnFIND) > 0:
-	print("Possible missing FIND.csv: ", file=sys.stderr)
+	print("Possible assembly without FIND.csv: ", file=sys.stderr)
 	for w in sorted(warnFIND):
 		print("\t" + w, file=sys.stderr)
+noFinds = list(set(findTablesAttempted) - set(findTables))
+if len(noFinds):
+	print("Existing drawings without FIND.csv or entry in components.csv: ", file=sys.stderr)
+	for w in sorted(noFinds):
+		if w in drawingNumbers:
+			print("\t" + w, file=sys.stderr)
+	
