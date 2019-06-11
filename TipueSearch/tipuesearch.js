@@ -12,9 +12,14 @@ I can make these changes because I understand the pattern of data that's being f
 						without having to increase the size of the downloaded content .js.  Similarly, modified
 						how URLs are displayed.
 2019-04-18	Accounted for 2-character revision codes, I hope.  (No way to test right now.)
+2019-06-11	The title formatting mentioned on 2019-04-16 only works properly for MIT drawing numbers:
+						i.e., pure digits followed by "-", "A", ..., "AA", etc.  Various other types which we've
+						been getting (mainly MIL and GAEC docs) don't have numbers that follow that pattern, so
+						I've had to modify the formatter for those special cases, and may have to modify it in the
+						future for other special cases as well.
 */
 
-
+var milspec = ["DOD", "MIL", "MMM", "FED", "QQ"]; /* RSB */
 (function($) {
 
      $.fn.tipuesearch = function(options) {
@@ -386,24 +391,61 @@ I can make these changes because I understand the pattern of data that's being f
                                         
                                         /* 
                                          * Fix up the search title to be a bit nicer. What's being fed in is 
-                                         * NNNNNNNR-T-S-F, and that's a bit too terse ... but I don't want to 
-                                         * modified the .js that's feeding in this content, because the file
-                                         * is quite big already.
+                                         * NR-T-S-F, and that's a bit too terse ... but I don't want to 
+                                         * modify the .js that's feeding in this content, because the file
+                                         * is quite big already. Also, in place of simple strings of digits N
+                                         * as the drawing number, the following special cases (MIL, GAEC, and 
+                                         * others) also need to be handled:
+                                         * 		JDCn
+                                         * 		LDWn-n
+                                         * 		MIL-c-n			(c string of uppercase letters)
+                                         * 		MMM-c-n
+                                         * 		DOD-c-n
+                                         * 		FED-c-n
+                                         * 		QQ-c-n
+                                         * 		RIB n				(with a space between RIB and n)
                                          */
                                         var title;
-										var drawingFields;
-										var splitAt = 8;
-										if (found[i].title[splitAt] != "-")
-											splitAt = 9;
-										title = found[i].title.substring(0, splitAt);
+																				var drawingFields;
+																				var dfStart;
+																				/*
+																				var splitAt = 8;
+																				if (found[i].title[splitAt] != "-")
+																					splitAt = 9;
+																				title = found[i].title.substring(0, splitAt);
                                         drawingFields = found[i].title.substring(splitAt + 1).split("-");
-                                        if (drawingFields[0] == "1")
+																				*/
+                                        drawingFields = found[i].title.split("-");
+                                        dfStart = 1
+                                        if (drawingFields[0].substring(0, 3) == "LDW") {
+                                        	drawingFields[0] = drawingFields[0] + "-" + drawingFields[1]
+                                        	dfStart = 2
+                                   			} else if (milspec.includes(drawingFields[0])) {
+                                        	drawingFields[0] = drawingFields[0] + "-" + drawingFields[1] + "-" + drawingFields[2]
+                                        	dfStart = 3
+                                   			}
+                                        if (drawingFields[dfStart] == "")	{ /* Rev "-"? */
+                                        	drawingFields[0] += "-"
+                                        	dfStart += 1
+                                        }
+                                        title = drawingFields[0]
+                                        var maybeRev = title.charAt(title.length - 2)
+                                        if (maybeRev >= "A" && maybeRev <= "Z") {
+                                        	rev = title.slice(-2)
+                                        	title = title.substring(0, title.length - 2)
+                                        } else {
+                                        	rev = title.slice(-1)
+                                        	title = title.substring(0, title.length - 1)
+                                        }
+                                        title += " rev \"" + rev + "\""
+                                        /*drawingFields.splice(0, 1)*/
+                                        if (drawingFields[dfStart] == "1")
                                         	title += ", drawing";
-                                        else if (drawingFields[0] == "2")
+                                        else if (drawingFields[dfStart] == "2")
                                         	title += ", test requirements";
                                         else
-                                        	title += ", type " + drawingFields[0];
-                                        title += ", sheet " + drawingFields[1] + ", frame " + drawingFields[2]
+                                        	title += ", type " + drawingFields[dfStart];
+                                        title += ", sheet " + drawingFields[dfStart + 1] + ", frame " + drawingFields[dfStart + 2]
                                         
                                         /* Output the pepped up title. */
                                         out += '<div class="tipue_search_content_title"><a href="' + found[i].url + '"' + tipue_search_w + '>' +  title + '</a></div>';
