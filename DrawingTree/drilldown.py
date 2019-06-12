@@ -515,6 +515,7 @@ print('<br><a name="' + assemblyName + '"></a><h1>' + aname + '</h1>')
 
 warnMS = {}
 warnFIND = {}
+refs = []
 def makeHtml(findTable):
 	global warnMS, warnFIND
 	level = 0
@@ -536,9 +537,10 @@ def makeHtml(findTable):
 					continue
 				if key in standardKeys:
 					continue
+				qty = str(findTable[key]["QTY"])
 				if asTables:
 					thisLine += "<tr>\n"
-					thisLine += "<td>" + str(n) + "</td><td>" + str(findTable[key]["QTY"]) + "</td>"
+					thisLine += "<td>" + str(n) + "</td><td>" + qty + "</td>"
 				else:
 					thisLine += "<li>\n"
 					thisLine += str(n) + ":  "
@@ -546,9 +548,12 @@ def makeHtml(findTable):
 				seeAlso = ""
 				thisTitle = findTable[key]["TITLE"].replace("&", " & ").replace("  ", " ")
 				markAsAssembly = False
-				if "ASSEMBLY" in thisTitle or "ASSY" in thisTitle or "GROUP" in thisTitle or " KIT" in thisTitle:
-					if "SCHEMATIC" not in thisTitle:
+				ref = False
+				if qty != "" and qty.isdigit() and int(qty) > 0:
+					if "ASSEMBLY" in thisTitle or "ASSY" in thisTitle or "GROUP" in thisTitle or " KIT" in thisTitle:
 						markAsAssembly = True
+				else:
+					ref = True
 				perhapsAssembly = markAsAssembly
 				if asTables:
 					thisLine += "<td>"
@@ -560,6 +565,10 @@ def makeHtml(findTable):
 					if dfields[0].isdigit() and int(dfields[0]) in components:
 						markAsAssembly = False
 						perhapsAssembly = False
+					#if dfields[0] == "1006161":
+					#	print("Warning: 1006161 " + str(perhapsAssembly), file=sys.stderr)
+					if ref and dfields[0] not in refs:
+						refs.append(dfields[0])
 					thisURL = findTable[key]["URL"][nn]
 					if thisURL == "" and (thisDrawing[:2] in ["MS", "AN", "QQ"] or thisDrawing[:3] in ["MIL", "DOD", "FED", "MMM"]):
 						if thisDrawing in warnMS:
@@ -730,6 +739,6 @@ noFinds = list(set(findTablesAttempted) - set(findTables))
 if len(noFinds):
 	print("Existing drawings without FIND.csv or entry in components.csv: ", file=sys.stderr)
 	for w in sorted(noFinds):
-		if w in drawingNumbers:
+		if w in drawingNumbers and w not in refs:
 			print("\t" + w, file=sys.stderr)
 	
