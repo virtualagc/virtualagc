@@ -17270,6 +17270,7 @@ var tipuesearch = {"pages": [
 	{"title":"AN1046063-1-1-1" ,"text":"BOLD - CRES HEX HEAD, .190-32" ,"url":"Documents/assist.dla.mil/AN104606C.pdf"},
 	{"title":"AN1046083-1-1-1" ,"text":"BOLD - CRES HEX HEAD, .190-32" ,"url":"Documents/assist.dla.mil/AN104608C.pdf"},
 	{"title":"AN1226912-1-1-1" ,"text":"PIN - DOWEL, STEEL" ,"url":"Documents/assist.dla.mil/AN122691B.pdf"},
+	{"title":"AN1226922-1-1-1" ,"text":"PIN - DOWEL, STEEL" ,"url":"Documents/assist.dla.mil/AN122692B.pdf"},
 	{"title":"AN3636-1-1-1" ,"text":"NUT, SELF-LOCKING, 550°F" ,"url":"Documents/assist.dla.mil/AN363F.pdf"},
 	{"title":"AN365--1-1-1" ,"text":"NUT, SELF LOCKING, 250°F" ,"url":"Documents/assist.dla.mil/MS20365C.pdf"},
 	{"title":"AN5657-1-1-1" ,"text":"SETSCREW-HEXAGON AND FLUTED SOCKET, HEADLESS" ,"url":"Documents/assist.dla.mil/AN565G.pdf"},
