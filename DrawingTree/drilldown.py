@@ -417,7 +417,12 @@ assemblies[assemblyName] = readFindTableWithSubbing(drawing, configuration, asse
 
 # Descend recursively.
 maxLevel = 0
+recursed = []
 def recurseFindTable(assemblyName, level):
+	#print(str(level) + ": " + assemblyName, file=sys.stderr)
+	if assemblyName in recursed:
+		return
+	recursed.append(assemblyName)
 	global assemblies
 	global maxLevel
 	level += 1
@@ -516,6 +521,7 @@ print('<br><a name="' + assemblyName + '"></a><h1>' + aname + '</h1>')
 warnMS = {}
 warnFIND = {}
 refs = []
+knownProblems = [ "2008332", "2010774", "2014622", "2014641", "2014642", "2014643", "2014644", "2014645", "2014646", "2014647", "2014648" ]
 def makeHtml(findTable):
 	global warnMS, warnFIND
 	level = 0
@@ -740,5 +746,8 @@ if len(noFinds):
 	print("Existing drawings without FIND.csv or entry in components.csv: ", file=sys.stderr)
 	for w in sorted(noFinds):
 		if w in drawingNumbers and w not in refs:
-			print("\t" + w, file=sys.stderr)
+			star = ""
+			if w in knownProblems:
+				star = " *"
+			print("\t" + w + star, file=sys.stderr)
 	
