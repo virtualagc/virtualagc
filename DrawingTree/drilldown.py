@@ -69,6 +69,16 @@ import sys
 import os
 import json
 
+# This is a list of drawings for which warning messages are printed that
+# have known problems that I (presently) don't know how to work around.
+# Being in the list (or not) doesn't affect their processing in any way,
+# but causes their warnings to be printed with a "*" next to them, so that
+# I know not to trouble myself with them.  Most of them I'll hopefully be
+# able to fix eventually, so that they'll go away completely, be I don't
+# want to have to worry about them every darn time I regenerate the 
+# drilldowns.
+knownProblems = [ "2008332", "2010774", "2014622", "2014641", "2014642", "2014643", "2014644", "2014645", "2014646", "2014647", "2014648", "MIL-A-25457" ]
+
 github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
 ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
 
@@ -521,7 +531,6 @@ print('<br><a name="' + assemblyName + '"></a><h1>' + aname + '</h1>')
 warnMS = {}
 warnFIND = {}
 refs = []
-knownProblems = [ "2008332", "2010774", "2014622", "2014641", "2014642", "2014643", "2014644", "2014645", "2014646", "2014647", "2014648" ]
 def makeHtml(findTable):
 	global warnMS, warnFIND
 	level = 0
