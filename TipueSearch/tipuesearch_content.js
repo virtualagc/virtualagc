@@ -1,4 +1,4 @@
-var tipuesearch = {"pages": [
+var tipuesearch = {"date": "2019-06-14", "pages": [
 	{"title":"1000000AE-1-1-1" ,"text":"APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX" ,"url":"https://archive.org/stream/AgcApertureCardsBatch7Images#page/n0/mode/1up"},
 	{"title":"1000000AG-1-0-1" ,"text":"APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX" ,"url":"https://archive.org/stream/AgcApertureCardsBatch7Images#page/n1/mode/1up"},
 	{"title":"1000000AG-1-3-1" ,"text":"APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX" ,"url":"https://archive.org/stream/AgcApertureCardsBatch6Images#page/n0/mode/1up"},
