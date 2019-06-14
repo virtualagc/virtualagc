@@ -736,11 +736,18 @@ f.close()
 if len(warnMS) > 0:
 	print("Missing mil-specs: ", file=sys.stderr)
 	for w in sorted(warnMS):
-		print("\t" + w, file=sys.stderr)
+		star = ""
+		if w in knownProblems:
+			star = " *"
+		print("Warning (M): " + w + star, file=sys.stderr)
 if len(warnFIND) > 0:
 	print("Possible assembly without FIND.csv: ", file=sys.stderr)
 	for w in sorted(warnFIND):
-		print("\t" + w, file=sys.stderr)
+		if w not in refs:
+			star = ""
+			if w in knownProblems:
+				star = " *"
+			print("Warning (A): " + w + star, file=sys.stderr)
 noFinds = list(set(findTablesAttempted) - set(findTables))
 if len(noFinds):
 	print("Existing drawings without FIND.csv or entry in components.csv: ", file=sys.stderr)
@@ -749,5 +756,5 @@ if len(noFinds):
 			star = ""
 			if w in knownProblems:
 				star = " *"
-			print("\t" + w + star, file=sys.stderr)
+			print("Warning (F): " + w + star, file=sys.stderr)
 	
