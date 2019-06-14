@@ -417,9 +417,18 @@ var milspec = ["DOD", "MIL", "MMM", "FED", "QQ"]; /* RSB */
 																				*/
                                         drawingFields = found[i].title.split("-");
                                         dfStart = 1
-                                        if (drawingFields[0].substring(0, 3) == "LDW") {
+                                        isSK = false
+                                        if (drawingFields[0].substring(0, 3) == "LDW" || drawingFields[0].substring(0, 3) == "LIS") {
                                         	drawingFields[0] = drawingFields[0] + "-" + drawingFields[1]
                                         	dfStart = 2
+                                        } else if (drawingFields[0].substring(0,2) == "SK") {
+                                        	isSK = true
+                                        	drawingFields[0] = drawingFields[0] + "-" + drawingFields[1]
+                                        	dfStart = 2
+                                        	if (!isNaN(drawingFields[2])) {
+                                        		drawingFields[0] = drawingFields[0] + "-" + drawingFields[2]
+                                        		dfStart = 3
+                                        	}
                                    			} else if (milspec.includes(drawingFields[0])) {
                                         	drawingFields[0] = drawingFields[0] + "-" + drawingFields[1] + "-" + drawingFields[2]
                                         	dfStart = 3
@@ -429,13 +438,18 @@ var milspec = ["DOD", "MIL", "MMM", "FED", "QQ"]; /* RSB */
                                         	dfStart += 1
                                         }
                                         title = drawingFields[0]
-                                        var maybeRev = title.charAt(title.length - 2)
-                                        if (maybeRev >= "A" && maybeRev <= "Z") {
-                                        	rev = title.slice(-2)
-                                        	title = title.substring(0, title.length - 2)
+                                        if (isSK) {
+                                        	rev = title.slice(-6)
+                                        	title = title.substring(0, title.length - 6)
                                         } else {
-                                        	rev = title.slice(-1)
-                                        	title = title.substring(0, title.length - 1)
+	                                        var maybeRev = title.charAt(title.length - 2)
+	                                        if (maybeRev >= "A" && maybeRev <= "Z") {
+	                                        	rev = title.slice(-2)
+	                                        	title = title.substring(0, title.length - 2)
+	                                        } else {
+	                                        	rev = title.slice(-1)
+	                                        	title = title.substring(0, title.length - 1)
+	                                        }
                                         }
                                         title += " rev \"" + rev + "\""
                                         /*drawingFields.splice(0, 1)*/
