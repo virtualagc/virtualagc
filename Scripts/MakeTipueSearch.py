@@ -6,12 +6,16 @@
 #	MakeTipueSearch.py <drawings.csv >tipuesearch_content.js
 
 import sys
+import datetime
+
+now = datetime.datetime.now()
+date = "%04d-%02d-%02d" % (now.year, now.month, now.day)
 
 # Read the entire input file.
 lines = sys.stdin.readlines()
 
 titles = {}
-print('var tipuesearch = {"pages": [')
+print('var tipuesearch = {"date": "' + date + '", "pages": [')
 
 for n in range(0, len(lines)):
 	line = lines[n]
