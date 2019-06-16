@@ -37,9 +37,21 @@ document.write(headerTemplate.replace("@TITLE@","The Restoration").replace("@SUB
       <li><a href="#The_Restoration">The Restoration</a></li>
       <ul>
         <li><a href="#The_Process">The Process</a></li>
-        <li><a href="#The_Problems">The Problems</a></li>
-        <li><a href="#The_Workarounds">The Workarounds</a><br>
+        <li><a href="#The_Monitor">The Monitor</a></li>
+        <li><a href="#The_Core_Rope_Simulator">The Core Rope Simulator</a><br>
         </li>
+        <li><a href="#The_Problems">The Problems</a></li>
+        <li><a href="#The_Workarounds">The Workarounds</a></li>
+        <ul>
+          <li><a href="#The_Connector_Pins">The Connector Pins</a></li>
+          <li><a href="#The_Scaler_Module_A1">The Scaler Module, A1</a></li>
+          <li><a href="#The_Alarm_Module_B8">The Alarm Module, B8</a></li>
+          <li><a href="#The_Current-Switch_Module_B11">The
+              Current-Switch Module, B11</a><br>
+          </li>
+          <li><a href="#The_Erasable-Memory_Module_B12">The
+              Erasable-Memory Module, B12</a></li>
+        </ul>
       </ul>
       <li><a href="#Core_Ropes">Core Ropes</a><br>
       </li>
@@ -90,6 +102,8 @@ document.write(headerTemplate.replace("@TITLE@","The Restoration").replace("@SUB
                 src="restorationJimmieAndCharlie-small.jpg" width="746"
                 height="497" border="2"></a><br>
             <div align="center"><i><i>Charlie Duke (center) and </i>Jimmie
+
+
                 Loocke (right) at SpaceFest IX.</i><br>
             </div>
           </td>
@@ -180,12 +194,7 @@ document.write(headerTemplate.replace("@TITLE@","The Restoration").replace("@SUB
         modules containing the AGC's software.&nbsp; Instead the
         restoration team has a rope simulator box, which as the name
         implies, is a way of providing the AGC with easily-changeable
-        software without installing physical rope modules in it.&nbsp;
-        (Besides, the rope simulator box itself contains parts
-        manufactured after LTA-8 testing had occurred, so in the
-        unlikely event that a rope simulator box had been used in LTA-8
-        vacuum testing, it couldn't have been <i>this</i> rope
-        simulator box, as-is.)<br>
+        software without installing physical rope modules in it.<br>
       </li>
       <li> Some (indeed, most) circuit modules have not been "potted" —
         i.e., not filled up with sealant.&nbsp; Not everyone agrees with
@@ -199,6 +208,12 @@ document.write(headerTemplate.replace("@TITLE@","The Restoration").replace("@SUB
         than in AGC 2003100.<br>
       </li>
     </ul>
+    <p>Incidentally, if that all sounded like gibberish to you, you
+      might find it valuable to look over <a
+        href="ElectroMechanical.html#Basic_Partitioning_of_the_AGC">my
+        explanation of the basic facts about the AGC's internal
+        structure</a> before continuing.<br>
+    </p>
     <p>In other respects, though, the AGC is exactly as we would
       expect.&nbsp; Thus, a more accurate statement would be that this
       AGC was originally used in LTA-8 vacuum testing, but that a number
@@ -283,33 +298,106 @@ document.write(headerTemplate.replace("@TITLE@","The Restoration").replace("@SUB
     <p>By "engineering drawings", of course, I mean the mechanical
       drawings and the electrical schematics.&nbsp; Other pertinent
       facts about G&amp;N system #602 are that it would have used DSKY
-      model 2003985-081 (whose drawings are also at the link just given)
-      and that the AGC would have been loaded with the AURORA software,
-      if the core rope modules had been present when Jimmie found the
-      AGC.&nbsp; That's not a tragedy, though, because we <i>have</i> a
-      copy of AURORA 12, and it can be run in the restoration AGC using
-      the core rope simulator.&nbsp; If you're interested, you can view
-      AURORA 12 in a variety of forms, including <a
-        href="listings/Aurora12/MAIN.agc.html">a pretty-printed
-        transcription to source code</a>, or even run it in our AGC
-      simulation software.&nbsp; Whether this is the <i>exact</i>
-      revision of the software for the restoration AGC is unclear —
-      i.e., was it AURORA 12 vs AURORA 11 or some other revision of
-      AURORA —, because the documentation available to us doesn't extend
-      to that level of detail.&nbsp; But AURORA 12 is a software
-      revision that would undoubtedly have functioned adequately in
-      LTA-8.&nbsp; And it's the only AURORA we have.&nbsp; A significant
-      fact about AURORA is that it includes a full suite of self-test
-      software ... the <i>last</i> AGC software version to do so, since
-      in later versions the self-test was greatly curtailed in order to
-      save precious memory.&nbsp; Thus AURORA was typically the software
-      used during Project Apollo itself to check out the AGC.<br>
+      model 2003985-081 (whose drawings are included in <a
+        href="6014999-021.html#2003985-081">the G&amp;N engineering
+        drawings)</a> and that the AGC would have been loaded with the
+      AURORA software if the core rope modules had been present when
+      Jimmie found the AGC.&nbsp; That's not a tragedy, though, because
+      we <i>have</i> a copy of AURORA 12, and it can be run in the
+      restoration AGC using the core rope simulator.&nbsp; If you're
+      interested, you can view AURORA 12 in a variety of forms,
+      including <a href="listings/Aurora12/MAIN.agc.html">a
+        pretty-printed transcription to source code</a>, or even run it
+      in our AGC simulation software.&nbsp; <br>
     </p>
-    <p>Which isn't meant to imply that AURORA is the <i>only</i>
-      software the restoration AGC can run.&nbsp; In fact, it should be
-      capable of running essentially any of the Block II AGC software we
-      have on our <a href="Luminary.html">LUMINARY</a> or <a
-        href="Colossus.html">COLOSSUS</a> pages.<br>
+    <p>Whether 12 is the <i>exact</i> revision of the AURORA software
+      for the restoration AGC isn't clear from the documentation
+      available to us.&nbsp; In particular, our printout of AURORA 12
+      doesn't have indicate a software part number as such printouts
+      normally would, whereas the G&amp;N engineering drawings clearly
+      indicate that we need software p/n "2021101-011".&nbsp; But AURORA
+      12 is a software revision that would undoubtedly have functioned
+      adequately in LTA-8.&nbsp; And it's the only AURORA we have.&nbsp;
+      A significant fact about AURORA is that it includes a full suite
+      of self-test software ... the <i>last</i> AGC software version to
+      do so, since in later versions the self-test was greatly curtailed
+      in order to save precious memory.&nbsp; Thus AURORA was typically
+      the software used during Project Apollo itself to check out the
+      AGC.</p>
+    <p>As it so often seems to happen, the restoration team has actually
+      independently come up with a forensic analysis that verifies that
+      the software really <i>was</i> AURORA, but that it was <i>not</i>
+      AURORA <i>12</i>.&nbsp; How, you may wonder, could they possibly
+      have done that, considering that the AURORA software would have
+      resided in the core ropes, and that the core ropes were not
+      present?&nbsp; Well ... cleverly <img src="smiley.png" alt=""
+        width="16" height="16">, so it's actually worth hearing
+      about.&nbsp; The first thing to note is that the core ropes
+      weren't the only type of memory in the AGC.&nbsp; The core ropes
+      were manufactured in such a way that they contained fixed patterns
+      of data — i.e., the program itself — which couldn't be changed by
+      the AGC itself.&nbsp; But the AGC also contained erasable memory,
+      which it could both write to and read from.&nbsp; Different
+      versions of the AGC software inevitably ended up having different
+      patterns of erasable memory usage, so if you know exactly what to
+      look for in erasable memory, you could treat the patterns in
+      erasable memory as a kind of "fingerprint" to determine which
+      program had been stored in the core ropes the very last time the
+      AGC had been in operation ... and assuming, of course, that the
+      erasable-memory module had not been swapped with some other
+      AGC!&nbsp; (Which, unfortunately, we do not know.)&nbsp; Perhaps
+      most importantly, the restoration team stored the entire contents
+      of the erasable memory module before they did anything that could
+      possibly change the contents of memory, so they were in position
+      to use this fingerprint information!<br>
+    </p>
+    <p><img
+        src="file:///home/rburkey/git/virtualagc-web/restorationDSPTAB.png"
+        alt="" width="252" height="292" align="right">The specific
+      pattern in erasable memory that the the team looked at is the
+      so-called <tt>DSPTAB</tt>.&nbsp; It doesn't really matter what <tt>DSPTAB</tt>
+      is, for the purpose of this explanation, but in case you're
+      interested, it happens to to be an 11-word table in which <a
+        href="listings/PINBALL_GAME_BUTTONS_AND_LIGHTS.agc.html">the <tt>PINBALL
+
+          GAME BUTTONS AND LIGHTS</tt> subprogram</a> keeps track of
+      what is stored in all of the DSKY's internal relays, so that it
+      knows not to waste time writing to those relays if the values
+      haven't changed.&nbsp; The important thing to us at the moment,
+      though, is that of all the many AGC software versions we know,
+      only AURORA locates <tt>DSPTAB</tt> specifically at address 0307
+      (octal) in erasable memory.&nbsp; And since the contents of <tt>DSPTAB</tt>
+      are themselves DSKY-relay values, there should only be certain
+      recognizable patterns stored in it.<br>
+    </p>
+    <p>And indeed, that's what the team found:&nbsp; Stored at address
+      0307 in erasable memory was a set of relay patterns.&nbsp; The
+      image at right is a screenshot of a (simulated) DSKY into whose
+      relays the <tt>DSPTAB</tt> table is loaded.&nbsp;&nbsp; In other
+      words, what you see is the very last thing the DSKY displayed the
+      very last time the restoration AGC had been run back in the
+      1960's.&nbsp; A ghost of the past!<br>
+    </p>
+    <p>In fact, the forensic analysis of the contents of erasable memory
+      was much harder than I've made it sound, because <a
+        href="#The_Problems">as we'll see later</a>, the erasable memory
+      module is actually broken ... a matter which gave the team a lot
+      of heartache before managing to work around the problem.<br>
+    </p>
+    <p>But as I mentioned, the software was not AURORA <i>12</i>.&nbsp;
+      This is known because while <tt>DSPTAB</tt> is in the right
+      place, other data is slightly out of place.&nbsp; Specifically,
+      something called the "phase table" is one word higher in memory
+      than it ought to be for AURORA 12.&nbsp; There is some reason to
+      believe that the software may have been AURORA 88, though the
+      reasoning (as I understand it anyway) becomes rather rarefied, and
+      I won't trouble you with it.<br>
+    </p>
+    <p>All the talk above about AURORA isn't meant to imply that AURORA
+      is the <i>only</i> software the restoration AGC can run.&nbsp; In
+      fact, it should be capable of running essentially any of the Block
+      II AGC software we have on our <a href="Luminary.html">LUMINARY</a>
+      or <a href="Colossus.html">COLOSSUS</a> pages.<br>
     </p>
     <p>The restoration team has made an ongoing series of videos about
       their activity, thus gaining a measure of recognition both in the
@@ -320,7 +408,9 @@ document.write(headerTemplate.replace("@TITLE@","The Restoration").replace("@SUB
     <center><iframe src="https://www.youtube.com/embed/2KSahAoOLdU"
         allow="accelerometer; autoplay; encrypted-media; gyroscope;
         picture-in-picture" allowfullscreen="" width="1280" height="720"
-        frameborder="0">&amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;gt;
+        frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+
+
 
 
       </iframe></center>
@@ -337,7 +427,11 @@ document.write(headerTemplate.replace("@TITLE@","The Restoration").replace("@SUB
 
 
 
+
+
           Future Generations: Preserving the Apollo Guidance Computer</a>",
+
+
 
 
 
@@ -357,9 +451,13 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
 
 
 
+
+
           Apollo Guidance Computer</a>", by Carl Claunch.&nbsp; The link
         is just to part 1, but once there you'll also find parts 2-5,
         and probably eventually others.</li>
+      <li>TBD<br>
+      </li>
     </ul>
     <h1><a name="The_Team"></a>The Restoration Team</h1>
     <div align="center"><img alt="" src="restorationTeam.jpg"
@@ -405,31 +503,39 @@ href="file:///home/rburkey/git/virtualagc-web/restorationWireWrapping.jpg"><img
         tightly around the posts using a special tool.&nbsp; The image
         at near right, from Wikipedia, shows this generically.&nbsp; The
         image at far right shows it in a <i>very small</i> portion of
-        the restoration AGC.&nbsp; (Click to enlarge).&nbsp; Undoubtedly
-        this sounds pretty wacky and unreliable if you're new to the
-        technique, but back in the day, I recall reading technical
-        articles claiming that wirewrapped connections were actually <i>more</i>
-        reliable than soldered ones.&nbsp; Not that I ever really
-        believed it ... but regardless of whether it's true or not,
-        that's the way the AGC backplane is made.&nbsp; I have a pretty
-        good idea that this inspection step must have been done by the
-        restoration team, since Mike created a database of all the
-        backplane connections, and <a
-          href="http://apolloguidance.computer/2003100_071/pins">a nifty
-          online backplane viewer</a> to go with it.</li>
-      <li>I would have inserted just the power-supply modules, A30 and
-        A31, and applied external power, to see that the proper internal
-        voltages were being generated.&nbsp; Maybe I would even have put
-        some dummy loads on them to make sure they could supply the
-        proper current.&nbsp; Roughly speaking, the power-supply modules
-        are supposed to accept +28 VDC from the spacecraft, and produce
-        +4VDC and +14VDC for internal consumption in the AGC.&nbsp; This
-        step, I think, the restoration team skipped and came back to
-        later.<br>
+        the backplane of the restoration AGC.&nbsp; (Click to
+        enlarge).&nbsp; Undoubtedly this sounds pretty wacky and
+        unreliable if you're new to the technique, but back in the day,
+        I recall reading technical articles claiming that wirewrapped
+        connections were actually <i>more</i> reliable than soldered
+        ones.&nbsp; Not that I ever really believed it ... but
+        regardless of whether it's true or not, that's the way the AGC
+        backplane is made.&nbsp; I have a pretty good idea that this
+        inspection step must have been done by the restoration team,
+        since Mike created a database of all the backplane connections,
+        and <a href="http://apolloguidance.computer/2003100_071/pins">a
+          nifty online backplane viewer</a> to go with it.&nbsp; What
+        those do is to let you look at exactly how every connector pin
+        on the backplane hooks up to every other backplane connector pin
+        ... a real convenience, when look at the pictures above and
+        think about just what a mess it would be to have to trace where
+        the individual wires went!<br>
+      </li>
+      <li>I would then have inserted just the power-supply modules, A30
+        and A31, and applied external power, to see that the proper
+        internal voltages were being generated.&nbsp; Maybe I would even
+        have put some dummy loads on them to make sure they could supply
+        the proper current.&nbsp; Roughly speaking, the power-supply
+        modules are supposed to accept +28 VDC from the spacecraft, and
+        produce +4VDC and +14VDC for internal consumption in the
+        AGC.&nbsp; This step, I think, the restoration team skipped and
+        came back to later.<br>
       </li>
       <li>Then I would probably have added the oscillator module, B7, to
         see if it could produce the proper 2.048 MHz clock signal. <a
 href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-part.html">According
+
+
           to Carl Claunch's blog</a>, this is in fact the next thing
         they did.&nbsp; The reason they could do that without testing
         the power supply first is, of course, that they were capable of
@@ -455,6 +561,14 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
       blow-by-blow, however, I'd recommend following through on Carl's
       blog.<br>
     </p>
+    <h2><a name="The_Monitor"></a>The Monitor<br>
+    </h2>
+    <p>TBD<br>
+    </p>
+    <h2><a name="The_Core_Rope_Simulator"></a>The Core Rope Simulator<br>
+    </h2>
+    <p>TBD<br>
+    </p>
     <h2><a name="The_Problems"></a>The Problems<br>
     </h2>
     <p>What the team found as they proceeded was that things were not
@@ -475,9 +589,9 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
       you.&nbsp; The unpleasant side-effect, of course, is that you end
       up with broken circuit modules in the restoration AGC.<br>
     </p>
-    <p>The team basically encountered only four problems as they
-      followed this path, and only three of those had anything to do
-      with actual circuit breakage.<br>
+    <p>The team basically encountered only a few problems as they
+      followed this path, and one of those had nothing to do with actual
+      circuit breakage.<br>
     </p>
     <ul>
       <li>The connector pins.&nbsp; The team had a need to plug various
@@ -485,11 +599,10 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
         simulator, a custom monitoring device (mimicking the original
         Ground Support Equipment), and so on.&nbsp; But the AGC
         connectors into which these things needed to be plugged required
-        mating connectors — indeed, connector-pin and -receptacle <i>sizes</i>
-        — that were no longer being manufactured.&nbsp; Of course, the
-        temptation is to just find something that's close enough, and
-        shove it in anyway.&nbsp; But that's not something you really do
-        with an irreplaceable collector's item.<br>
+        mating connectors that were no longer being manufactured.&nbsp;
+        Of course, the temptation is to just find something that's close
+        enough, and shove it in anyway.&nbsp; But that's not something
+        you really do with an irreplaceable collector's item.<br>
       </li>
       <li>The scaler module, A1.&nbsp; The scalar module's function is
         pretty simple:&nbsp; It accepts a 102.4 KHz clock from the AGC
@@ -511,16 +624,20 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
         wasn't working quite right, and the module was sometimes (but
         not always) detecting that the +4VDC or +14VDC was out of the
         allowed range.</li>
+      <li>The current-switch module, B11.&nbsp; TBD<br>
+      </li>
       <li>The erasable-memory module, B12. This module provides what
         we'd today call the computer's "RAM".&nbsp; In other words, it's
         that portion of the computer's memory that can both be <i>written
+
+
           to</i> and <i>read from</i>.&nbsp; Like all of the memory in
         the AGC, the erasable module is based on ferrite-core
         technology.&nbsp; Each bit of memory is implemented with a
         ferrite core:&nbsp; a tiny, doughnut-shaped metal piece, with
         wires sewn (literally!) through the central hole.&nbsp; By
         passing current through some of these wires, the core can either
-        be magnetized UP (bit=1) or DOWN (bit=2), and by using other of
+        be magnetized UP (bit=1) or DOWN (bit=0), and by using other of
         the wires, the value stored in the core can be read back by the
         CPU.&nbsp; Recall that the memory of the AGC is arranged in
         16-bit "words", of which 15 bits hold data, and the 16th is a
@@ -528,12 +645,266 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
         Unfortunately, the team found that one of the wires (namely the
         "inhibit" signal) sewn through every bit-16 core was broken. The
         result is that one of the erasable memory bits, bit 16 is always
-        stuck at 1 and can't be turned to 0.<br>
-      </li>
+        stuck at 1 and can't be turned to 0.</li>
+    </ul>
+    <table cellspacing="2" cellpadding="2" align="center">
+      <tbody>
+        <tr>
+          <td valign="top" align="center"><a
+              href="restorationErasable.png"><img
+                src="restorationErasable-small.png" title="Click to
+                enlarge" alt="" width="296" height="327" border="2"></a><br>
+            <i>Erasable memory as it's supposed<br>
+              to be.&nbsp; (Click to enlarge.)<br>
+            </i></td>
+          <td valign="top" align="center"><a
+              href="restorationErasableBroken.png"><img
+                src="restorationErasableBroken-small.png" title="Click
+                to enlarge." alt="" width="296" height="327" border="2"></a><br>
+            <i>Erasable memory with a broken<br>
+              <tt>INHIBIT</tt> line.&nbsp; (Click to enlarge.)<br>
+            </i></td>
+        </tr>
+      </tbody>
+    </table>
+    <ul>
     </ul>
     <h2><a name="The_Workarounds"></a>The Workarounds</h2>
+    <h3><a name="The_Connector_Pins"></a>The Connector Pins</h3>
+    <a href="restorationModuleBottom.jpg"><img
+        src="restorationModuleBottom-small.jpg" title="Click to
+        enlarge." alt="" width="373" height="249" border="2"
+        align="right"></a>It may seem curious to you that I say the
+    connector <i>pins</i> used in the AGC were no longer available nor
+    being manufactured.&nbsp; Why don't I just say that the <i>connectors</i>
+    are no longer available? <br>
+    <br>
+    That's because there were very few off-the-shelf connectors actually
+    used in the AGC.&nbsp; Internally to the AGC, most of them were
+    custom-made <i>headers</i> (as the engineering drawings refer to
+    them).&nbsp; Consider, for example, the photo at the right, which
+    shows the underside of a circuit module and the electrical pins by
+    which it plugs into the backplane.&nbsp; The underside of the module
+    is a metal plate into which hundreds of holes have been drilled, and
+    into which an equal number of electrical pins have been
+    inserted.&nbsp; The plate plus the pins is what's referred to as a
+    "header".&nbsp; You can see this construction technique clearly if
+    you click the image to enlarge it.&nbsp; The advantage of the
+    technique, from the standpoint of the AGC designers was, I suppose,
+    is that you can arrange the pins in any physical configuration you
+    like, so it's much more flexible than if you had to work with
+    off-the-shelf connectors.&nbsp; Besides, you can use the exact
+    number of pins you want, and not be forced to stick with just
+    standard-sized connectors, thus saving weight.&nbsp; And so
+    on.&nbsp; <br>
+    <br>
+    The downside to the team, 50 years later?&nbsp; No pins ... no
+    header ... no nada!<br>
+    <br>
+    This was apparently a source of great frustration to the restoration
+    team for months, until a couple of things came together to end up
+    solving the problem.&nbsp; At first, even the <i>specifications</i>
+    for these pins, manufactured by Malco, were unavailable.&nbsp; But
+    it turns out that the specifications were eventually found, and you
+    can see them here:<br>
+    <ul>
+      <li><a href="SCDs/scd_1006781l.pdf">Drawing 1006781L</a>:&nbsp;
+        CONTACT, WRAPOST, FEMALE, MINIATURE, SPECIFICATION CONTROL
+        DRAWING</li>
+      <li><a href="SCDs/scd_1006782y.pdf">Drawing 1006782Y</a>:&nbsp;
+        CONTACT, WRAPOST, MALE, MINIATURE, SPECIFICATION CONTROL DRAWING<br>
+      </li>
+    </ul>
+    Next, it turns out that one of the core restoration team, Marc
+    Verdiell, actually works for <a href="https://www.samtec.com/">Samtec</a>.&nbsp;
+
+    Samtec is a major manufacturer of connectors, and indeed, back when
+    I used to design electronics, practically every header I specified
+    was from Samtec.&nbsp; Samtec apparently agreed to
+    custom-manufacture hundreds of these Malco pins from the
+    specifications, just for the restoration team's efforts.&nbsp; Check
+    out a couple of the team's videos related to this:<br>
+    <ul>
+      <li>Part 8:&nbsp; "<a href="https://youtu.be/ThOXgcOOA1M">A
+          Blinkenlight AGC! (and help from Samtec on the way)</a>"</li>
+      <li>Part 11:&nbsp; "<a href="https://youtu.be/is1b6mqzxFA">Samtec
+          manufactures NASA-spec contacts for our AGC</a>"<br>
+      </li>
+    </ul>
+    Voila!&nbsp; Connector problem solved!<br>
+    <h3><a name="The_Scaler_Module_A1"></a>The Scaler Module, A1<br>
+    </h3>
+    Fortunately, circuit module A1, the "scaler", is one of the unpotted
+    ones, so the team was able to poke around inside it with multimeters
+    to see what was happening.<br>
+    <br>
+    <div align="center"><a href="restorationA1.jpg"><img
+          src="restorationA1-small.jpg" title="Click to enlarge" alt=""
+          width="733" height="159" border="2"></a><br>
+    </div>
+    <br>
+    I believe the photo above (click to enlarge) is of module A1, though
+    the stickers on the chips don't correspond with what I would
+    expect.&nbsp; Frankly, it doesn't matter, since all of the so-called
+    "logic flow" modules (A1, A2, A3, ...) look exactly the same, and
+    there's no easy way to tell them apart visually.&nbsp; They differ
+    only in the wires printed on the circuit boards, which you can't
+    see, and the arrangement of the chips is always the same.&nbsp; You
+    have to look at the electrical schematics to actually appreciate the
+    great differences from one logic-flow module to the next.&nbsp;
+    Module A1 takes this one step farther, and even the top and bottom
+    sides of the modules have almost identical circuit schematics!<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" align="center">
+      <tbody>
+        <tr>
+          <td valign="top" align="center"><a
+              href="restorationSchematicA1-1.jpg"><img
+                src="restorationSchematicA1-1-small.jpg" title="Click to
+                enlarge" alt="" width="623" height="480" border="2"></a><br>
+            <i>Scaler module A1 electrical schematic, top side.&nbsp;
+              (Click to enlarge.)</i><br>
+          </td>
+          <td valign="top"><a href="restorationSchematicA1-2.jpg"><img
+                src="restorationSchematicA1-2-small.jpg" title="Click to
+                enlarge" alt="" width="623" height="480" border="2"></a><br>
+            <i>Scaler module A1 electrical schematic, bottom side.&nbsp;
+              (Click to enlarge.)</i><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    Being able to poke around inside of the module, the team was quickly
+    able to determine that there was a short circuit, probably caused by
+    some stray bit of conductive material that had floated around and
+    gotten stuck in the wrong place.<br>
+    <br>
+    They employed a fix that should be familiar to anybody familiar with
+    the character called The Fonz on the old TV show <i>Happy Days</i>
+    ... namely, they thumped it!&nbsp; Presumably the conductive
+    particle was thus dislodged and went elsewhere, wherever it is that
+    conductive particles go after we've lost interest in them.&nbsp; The
+    module then began to work properly an continued to do so
+    subsequently.<br>
+    <br>
+    Scaler problem solved!<br>
+    <h3><a name="The_Alarm_Module_B8"></a>The Alarm Module, B8</h3>
+    I don't know much about the restoration AGC's alarm module.&nbsp;
+    Potted?&nbsp; Unpotted?&nbsp; It's TBD!&nbsp; All I have to show you
+    is the module's spine, with its big, red <b><font color="#cc0000">NON-FLYABLE</font></b>
+    warning.&nbsp; Do you think that might have something to do with why
+    it doesn't work?<br>
+    <br>
+    <div align="center"><img src="restorationAlarmB8.jpg" alt=""
+        width="780" height="90"><br>
+    </div>
+    <br>
+    In the alarm module, as mentioned before, the problem is that its
+    voltage-out-of-range detection circuitry is intermittent ...
+    sometimes it shows the power-supply voltage as out-of-range, and
+    sometimes not.&nbsp; However, the behavior appears to be
+    characterized by whatever it does at power-up.&nbsp; In other words,
+    if it detects a voltage failure at power-up, it will continue to do
+    so until powered down.&nbsp; Conversely, if it doesn't detect a
+    voltage failure at power-up, it won't detect one subsequently
+    either.<br>
+    <br>
+    So the question is:&nbsp; does this problem even really need to be
+    fixed?&nbsp; Wouldn't it just be acceptable to cycle power on the
+    AGC if the problem showed up?&nbsp; Just like a "blue screen of
+    death", for those familiar with the Microsoft Windows operating
+    system.<br>
+    <br>
+    And that appears to be what the team decided to do.&nbsp; No fix,
+    but an easy workaround!<br>
+    <h3><a name="The_Current-Switch_Module_B11"></a>The Current-Switch
+      Module, B11</h3>
     <p>TBD<br>
     </p>
+    <h3> </h3>
+    <h3><a name="The_Erasable-Memory_Module_B12"></a>The Erasable-Memory
+      Module, B12</h3>
+    <p>Which finally brings us to the elephant in the room, the problem
+      that seems to have caused the most frustration for the longest
+      period of time:&nbsp; The dreaded broken erasable-memory module,
+      B12!<br>
+    </p>
+    <p>Though not a part of the restoration team, I can feel the
+      frustration myself.&nbsp; For one thing, while you can't actually
+      do much with the AGC without a working erasable memory — after
+      all, software's <i>raison d'être</i> is basically to manipulate
+      the contents of memory, so if you can't do that, what can you do?
+      —&nbsp; you nevertheless <i>can</i> do enough to convince
+      yourself that the AGC would be almost completely operational if
+      only the memory were there.&nbsp; Like Moses gazing across the
+      River Jordan, you can see the Promised Land, but can't actually go
+      there!&nbsp; You see, internally to the AGC, even getting the
+      point where the first program instruction would be executed is a
+      very complex operation that the AGC can execute flawlessly without
+      memory, and which exercises almost every part of the CPU's
+      circuitry.&nbsp; You can even execute the first few instructions,
+      and can demonstrate that they work correctly other than their
+      affect on the broken 16th memory bit.<br>
+    </p>
+    <p>Another frustrating part is that the erasable-memory module is
+      one of the few <i>potted</i> modules, so that even if you can
+      determine more-or-less where the broken wire is, you can't get to
+      it to repair the break!&nbsp; That's not just because it's a
+      collector's item and you don't want to rip it apart, but also
+      because you cannot physically remove the potting material without
+      destroying the circuit.<br>
+    </p>
+    <p>At first, the team had the idea that if they could determine <i>precisely</i>
+      where the <tt>INHIBIT</tt> wire was broken, then perhaps they
+      could drill a small hole in the potting material to get access to
+      it, and then perform some kind of microsurgery through the tiny
+      hole to fix it.&nbsp; (This is the point where I had my sole
+      involvement, in digging up the mechanical drawings for the
+      physical configuration of the module, the specs for the potting
+      material and so on.)&nbsp; Rather than relying on my lame
+      descriptions, I'd recommend actually watching the team's video of
+      their attempt to find the break, and why they concluded that the
+      microsurgery idea couldn't work.<br>
+    </p>
+    <p align="center"><iframe
+        src="https://www.youtube.com/embed/uyxQmb2u6Hk"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope;
+        picture-in-picture" allowfullscreen="" width="1105" height="622"
+        frameborder="0">&lt;br&gt; </iframe></p>
+    Given that microsurgery was unworkable, another idea was that
+    perhaps a completely new erasable-memory module could be made, and
+    would be used to simply replace the broken module.&nbsp; That is an
+    idea that would obviously work, though it would obviously reduce the
+    authenticity somewhat, and would be quite a bit of effort.<br>
+    <br>
+    The idea eventually settled upon, though, as I understand it, was to
+    exploit the existence of the parity bit to replace the missing 16th
+    bit.&nbsp; As you may recall, the AGC memory, including the erasable
+    memory, consists <i>logically</i> of 15-bit words — i.e., the
+    software has access to 15 bits of every word of memory — but that <i>physically</i>
+    there's a 16th bit, the "parity" bit.&nbsp; The parity bit is used
+    by the AGC for detecting memory faults, by which I mean words of
+    memory which have become corrupted.&nbsp; But regardless of how the
+    AGC's CPU wants to use the parity data, from the standpoint of the
+    erasable-memory module, the parity bit is simply a data bit just
+    like any other data bit.&nbsp; Thus all it takes to use the parity
+    bit in place of the broken data bit is to swap the connections for
+    them on the backplane.&nbsp; Recall that the backplane is entirely
+    wirewrapped, so changing such connections around is rather easy to
+    do.&nbsp; Or at least, much easier to do than fixing the erasable
+    memory module.&nbsp; Then later, presumably after the whole
+    restoration process had finished up and the restoration AGC wants to
+    return to being just another collector's item, the backplane
+    connections would be restored to how they were originally ...
+    broken, but corresponding to the the documentation!<br>
+    <br>
+    When I say that swapping the connections for the parity bit and the
+    broken data bit are "all" that would be required, that's an
+    oversimplification.&nbsp; Now all of the data bits would be fine,
+    but the parity bit would be broken, so the AGC would continually be
+    detecting memory faults ... or at least, detecting parity faults in
+    roughly half the memory accesses.&nbsp; Dealing with this is TBD.<br>
     <h1><a name="Core_Ropes"></a>Core Ropes</h1>
     TBD<br>
     <br>
@@ -559,10 +930,12 @@ Commons
 
 
 
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-06-15.<br>
+          2019-06-16.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
