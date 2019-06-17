@@ -172,6 +172,7 @@
 #				the yaYUL bug related to it that was expressing itself in 
 #				Mac OS X has been fixed.
 #		2018-10-12 RSB	Added the Validation-hardware-simulation target.
+#		2019-06-17 RSB	Added RETREAD50.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -417,6 +418,7 @@ MISSIONS = Validation Zerlina56 Luminary131 Colossus249 Comanche055
 MISSIONS += Luminary099 Artemis072 Colossus237
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
+MISSIONS += Retread50
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif

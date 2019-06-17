@@ -232,6 +232,9 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
 	    { "RETREAD 44 (LM)", "Retread44/MAIN.agc.html",
 		"Click this to select the RETREAD 44 (earliest non-mission LM) software.",
 		ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread44", "LM0.ini" },
+	    { "RETREAD 50 (LM)", "Retread50/MAIN.agc.html",
+		"Click this to select the RETREAD 50 software.",
+		ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread50", "LM0.ini" },
 	    { "AURORA 12 (LM)", "Aurora12/MAIN.agc.html",
 		"Click this to select the AURORA 12 (early non-mission LM) software.  This is the last AGC version with full testing capabilities.",
 		ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
@@ -712,6 +715,7 @@ EVT_RADIOBUTTON(ID_SKYLABCMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SOYUZCMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_VALIDATIONBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_RETREAD44BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_RETREAD50BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AURORA12BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUNBURST37BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_ZERLINA56BUTTON, VirtualAGC::ConsistencyEvent)
