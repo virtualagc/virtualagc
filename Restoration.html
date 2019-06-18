@@ -118,6 +118,7 @@ document.write(headerTemplate.replace("@TITLE@","The Restoration").replace("@SUB
 
 
 
+
                 Loocke (right) at SpaceFest IX.</i><br>
             </div>
           </td>
@@ -325,6 +326,7 @@ href="https://ia800609.us.archive.org/BookReader/BookReaderImages.php?zip=/1/ite
 
 
 
+
         3-IJ of document ND-1021042</a> tells us additionally that:<br>
     </p>
     <ul>
@@ -382,35 +384,35 @@ href="https://ia800609.us.archive.org/BookReader/BookReaderImages.php?zip=/1/ite
 
 
 
+
         was</i> installed in the AGC the last time it had rope modules
       are two different questions!<br>
     </p>
     <p>As it turns out, we're pretty sure that some revision of AURORA
       was indeed the last set of ropes installed, but which don't know
-      which AURORA revision other than that it was <i>not</i> AURORA
-      12.&nbsp; That's a pretty sweeping statement, considering that we
-      don't have the original rope modules!&nbsp; How could anybody know
-      for sure?&nbsp; Well, the conclusion comes from a clever forensic
-      analysis by the restoration team, which goes something like
-      this:&nbsp; The first thing to note is that the core ropes weren't
-      the <i>only</i> type of memory in the AGC.&nbsp; The core ropes,
-      by definition, are manufactured in such a way that they contain
-      fixed patterns of data — i.e., the program itself — which couldn't
-      be changed by the AGC itself.&nbsp; But the AGC also contained
-      erasable memory, which it could both write to and read from.&nbsp;
-      Different versions of the AGC software in the core ropes
-      inevitably ended up having different patterns of erasable memory
-      usage when the software ran, so if you knew exactly what to look
-      for in erasable memory, you could treat the patterns in erasable
-      memory as a kind of "fingerprint" to determine which program had
-      been stored in the core ropes the very last time the AGC had been
-      in operation.&nbsp; (Assuming of course that the erasable memory
-      module hadn't been swapped out from a different AGC in the
-      meantime!)&nbsp; Perhaps most importantly, the restoration team
-      stored the entire contents of the erasable memory module before
-      they did anything that could possibly change the contents of
-      memory, so they were in position to use this fingerprint
-      information!<br>
+      which AURORA revision.&nbsp; That's a pretty sweeping statement,
+      considering that we don't have the original rope modules!&nbsp;
+      How could anybody know for sure?&nbsp; Well, the conclusion comes
+      from a clever forensic analysis by the restoration team, which
+      goes something like this:&nbsp; The first thing to note is that
+      the core ropes weren't the <i>only</i> type of memory in the
+      AGC.&nbsp; The core ropes, by definition, are manufactured in such
+      a way that they contain fixed patterns of data — i.e., the program
+      itself — which couldn't be changed by the AGC itself.&nbsp; But
+      the AGC also contained erasable memory, which it could both write
+      to and read from.&nbsp; Different versions of the AGC software in
+      the core ropes inevitably ended up having different patterns of
+      erasable memory usage when the software ran, so if you knew
+      exactly what to look for in erasable memory, you could treat the
+      patterns in erasable memory as a kind of "fingerprint" to
+      determine which program had been stored in the core ropes the very
+      last time the AGC had been in operation.&nbsp; (Assuming of course
+      that the erasable memory module hadn't been swapped out from a
+      different AGC in the meantime!)&nbsp; Perhaps most importantly,
+      the restoration team stored the entire contents of the erasable
+      memory module before they did anything that could possibly change
+      the contents of memory, so they were in position to use this
+      fingerprint information!<br>
     </p>
     <p><img src="restorationDSPTAB.png" alt="" width="252" height="292"
         align="right">The specific pattern in erasable memory that the
@@ -419,6 +421,7 @@ href="https://ia800609.us.archive.org/BookReader/BookReaderImages.php?zip=/1/ite
       this explanation, but in case you're interested, it happens to to
       be an 11-word table in which <a
         href="listings/Aurora12/PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html">the
+
 
 
 
@@ -451,27 +454,18 @@ href="https://ia800609.us.archive.org/BookReader/BookReaderImages.php?zip=/1/ite
       module is actually broken ... a matter which gave the team a lot
       of heartache before managing to work around the problem.<br>
     </p>
-    <p>As for why it could not have been AURORA 12 — other than the fact
-      that we think no rope modules were ever made for AURORA 12 —, we
-      know this for sure because while <tt>DSPTAB</tt> is in the right
-      place in erasable memory, other data is slightly out of
-      place.&nbsp; Specifically, something called the "phase table" is
-      one word higher in memory than it ought to be for AURORA 12.&nbsp;
-      <br>
-    </p>
-    <p>Finally, one fun tidbit about the erasable memory is that Nik
-      Beug (not a restoration team member) had the opportunity to dig
-      through the dump of the erasable-memory module, and found that one
-      of the erasable-memory locations, <tt>LATITUDE</tt>, decoded to
-      29.553223°N±0.02°.&nbsp; The value should correspond to the last
-      place the AGC had been run, assuming it had a functioning Inertial
-      Measurement Unit (IMU).&nbsp; The latitude of Johnson Space
-      Center, according to Google Maps, is 29.559560°N.&nbsp;
-      Unfortunately, the ±0.02° uncertainty (due to <tt>LATITUDE</tt>
-      being stored as a single-precision floating-point number rather
-      than a double-precision one) is too large to allow pinpointing the
-      exact building. &nbsp;<img alt="" src="smiley.png" width="16"
-        height="16"> </p>
+    Finally, one fun tidbit about the erasable memory is that Nik Beug
+    (not a restoration team member) had the opportunity to dig through
+    the dump of the erasable-memory module, and found that one of the
+    erasable-memory locations, <tt>LATITUDE</tt>, decoded to
+    29.553223°N±0.02°.&nbsp; The value should correspond to the last
+    place the AGC had been run, assuming it had a functioning Inertial
+    Measurement Unit (IMU).&nbsp; The latitude of Johnson Space Center,
+    according to Google Maps, is 29.559560°N.&nbsp; Unfortunately, the
+    ±0.02° uncertainty (due to <tt>LATITUDE</tt> being stored as a
+    single-precision floating-point number rather than a
+    double-precision one) is too large to allow pinpointing the exact
+    building. &nbsp;<img alt="" src="smiley.png" width="16" height="16">
     <p>By the way, all the talk above about AURORA isn't meant to imply
       that AURORA is the <i>only</i> software the restoration AGC can
       run.&nbsp; In fact, it should be capable of running essentially
@@ -490,7 +484,8 @@ href="https://ia800609.us.archive.org/BookReader/BookReaderImages.php?zip=/1/ite
     <center><iframe src="https://www.youtube.com/embed/2KSahAoOLdU"
         allow="accelerometer; autoplay; encrypted-media; gyroscope;
         picture-in-picture" allowfullscreen="" width="1280" height="720"
-        frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+        frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+
 
 
 
@@ -510,6 +505,7 @@ href="https://ia800609.us.archive.org/BookReader/BookReaderImages.php?zip=/1/ite
     <ul>
       <li>"<a
           href="https://www.livingspace.earth/home/2018/8/for-future-generations">For
+
 
 
 
@@ -549,9 +545,11 @@ href="https://ia800609.us.archive.org/BookReader/BookReaderImages.php?zip=/1/ite
 
 
 
+
         by John Gould.</li>
       <li>"<a
 href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-part.html">Restoring
+
 
 
 
@@ -699,6 +697,7 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
 
 
 
+
         Claunch's blog</a>.<br>
     </p>
     <h2><a name="The_Monitor"></a>The Monitor<br>
@@ -769,6 +768,7 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
       <li>The erasable-memory module, B12. This module provides what
         we'd today call the computer's "RAM".&nbsp; In other words, it's
         that portion of the computer's memory that can both be <i>written
+
 
 
 
@@ -866,6 +866,7 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
     </ul>
     Next, it turns out that one of the core restoration team, Marc
     Verdiell, actually works for <a href="https://www.samtec.com/">Samtec</a>.&nbsp;
+
 
 
 
@@ -975,6 +976,7 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
 
 
 
+
     Once the entire AGC is loaded up with all its modules, the problem
     basically goes away!&nbsp; Which is not to say that the module works
     perfectly, for there are still conditions which can trigger the
@@ -1041,7 +1043,8 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
         src="https://www.youtube.com/embed/uyxQmb2u6Hk"
         allow="accelerometer; autoplay; encrypted-media; gyroscope;
         picture-in-picture" allowfullscreen="" width="1105" height="622"
-        frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+        frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+
 
 
 
@@ -1280,6 +1283,7 @@ href="http://rescue1130.blogspot.com/2018/11/restoring-apollo-guidance-computer-
         href="Luminary.html#Retread50">our LUMINARY page</a> and in <a
 href="https://github.com/virtualagc/virtualagc/tree/master/Retread50">our
 
+
         GitHub software repository</a> for your delectation.<br>
     </p>
     <h2><a name="Other_Museums__Collectors"></a>Other Museums &amp;
@@ -1306,6 +1310,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/Retread50">our
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
 
 
 
