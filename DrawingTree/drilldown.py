@@ -77,7 +77,9 @@ import json
 # able to fix eventually, so that they'll go away completely, be I don't
 # want to have to worry about them every darn time I regenerate the 
 # drilldowns.
-knownProblems = [ "2008332", "2010774", "2014622", "2014641", "2014642", "2014643", "2014644", "2014645", "2014646", "2014647", "2014648", "MIL-A-25457" ]
+knownProblems = [ "2008332", "2010774", "2014622", "2014641", "2014642", "2014643", \
+		  "2014644", "2014645", "2014646", "2014647", "2014648", "MIL-A-25457", \
+		  "2014682", "2014758", "2014767", "2014779", "2014781", "2014794" ]
 
 github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
 ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
