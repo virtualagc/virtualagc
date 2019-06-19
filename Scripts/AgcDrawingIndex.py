@@ -32,8 +32,8 @@
 #
 #	Titles which contain lower-case characters.
 #
-#	A document type other than 1 (01) or 2 (02).  I don't know if there are
-#	other possible document types, but if so I've not encountered them yet.
+#	A document type other than 1 (01) or 2 (02) or 3 (03).  I don't know if 
+#	there are other possible document types, but if so I've not encountered them yet.
 #
 #	Sheet numbers or frame numbers with non-alphabetical characters in them.
 #	(A final character of 'A' is allowed for sheet numbers, since there are
