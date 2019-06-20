@@ -73,13 +73,8 @@ import json
 # have known problems that I (presently) don't know how to work around.
 # Being in the list (or not) doesn't affect their processing in any way,
 # but causes their warnings to be printed with a "*" next to them, so that
-# I know not to trouble myself with them.  Most of them I'll hopefully be
-# able to fix eventually, so that they'll go away completely, be I don't
-# want to have to worry about them every darn time I regenerate the 
-# drilldowns.
-knownProblems = [ "2008332", "2010774", "2014622", "2014641", "2014642", "2014643", \
-		  "2014644", "2014645", "2014646", "2014647", "2014648", "MIL-A-25457", \
-		  "2014682", "2014758", "2014767", "2014779", "2014781", "2014794" ]
+# I know not to trouble myself with them unnecessarily. 
+knownProblems = [ "2008332", "MIL-A-25457", "MIL-T-23594" ]
 
 github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
 ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
@@ -751,28 +746,34 @@ f.write(jsonString)
 f.close()
 
 # Print warnings.
+noFinds = list(set(findTablesAttempted) - set(findTables))
 if len(warnMS) > 0:
 	print("Missing mil-specs: ", file=sys.stderr)
 	for w in sorted(warnMS):
+		fields = w.split()
 		star = ""
-		if w in knownProblems:
+		if fields[0] in knownProblems:
 			star = " *"
-		print("Warning (M): " + w + star, file=sys.stderr)
+		print("Warning (M): " + fields[0] + star, file=sys.stderr)
 if len(warnFIND) > 0:
 	print("Possible assembly without FIND.csv: ", file=sys.stderr)
 	for w in sorted(warnFIND):
-		if w not in refs:
+		fields = w.split()
+		if fields[0] not in refs:
+			find = ""
+			if fields[0] in noFinds:
+				find = ",F"
 			star = ""
-			if w in knownProblems:
+			if fields[0] in knownProblems:
 				star = " *"
-			print("Warning (A): " + w + star, file=sys.stderr)
-noFinds = list(set(findTablesAttempted) - set(findTables))
+			print("Warning (A" + find + "): " + fields[0] + star, file=sys.stderr)
 if len(noFinds):
 	print("Existing drawings without FIND.csv or entry in components.csv: ", file=sys.stderr)
 	for w in sorted(noFinds):
-		if w in drawingNumbers and w not in refs:
+		if w in drawingNumbers and w not in refs and w not in warnFIND:
+			fields = w.split()
 			star = ""
-			if w in knownProblems:
+			if fields[0] in knownProblems:
 				star = " *"
-			print("Warning (F): " + w + star, file=sys.stderr)
+			print("Warning (F): " + fields[0] + star, file=sys.stderr)
 	
