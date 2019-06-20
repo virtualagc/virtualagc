@@ -1,4 +1,4 @@
-var tipuesearch = {"date": "2019-06-19", "pages": [
+var tipuesearch = {"date": "2019-06-20", "pages": [
 	{"title":"1000000AE-1-1-1" ,"text":"APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX" ,"url":"https://archive.org/stream/AgcApertureCardsBatch7Images#page/n0/mode/1up"},
 	{"title":"1000000AG-1-0-1" ,"text":"APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX" ,"url":"https://archive.org/stream/AgcApertureCardsBatch7Images#page/n1/mode/1up"},
 	{"title":"1000000AG-1-3-1" ,"text":"APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX" ,"url":"https://archive.org/stream/AgcApertureCardsBatch6Images#page/n0/mode/1up"},
@@ -19524,6 +19524,7 @@ var tipuesearch = {"date": "2019-06-19", "pages": [
 	{"title":"MS171432C-1-1-1" ,"text":"PIN - SPRING, CORROSION RESISTANT STEEL" ,"url":"Documents/assist.dla.mil/MS171432C.pdf"},
 	{"title":"MS171433C-1-1-1" ,"text":"PIN - SPRING, CORROSION RESISTANT STEEL" ,"url":"Documents/assist.dla.mil/MS171433C.pdf"},
 	{"title":"MS171434C-1-1-1" ,"text":"PIN - SPRING, CORROSION RESISTANT STEEL" ,"url":"Documents/assist.dla.mil/MS171434C.pdf"},
+	{"title":"MS17182E-1-1-1" ,"text":"TERMINAL, LUG, CRIMP STYLE, COPPER, INSULATED (SERVO COMPONENTS) TYPE II, CLASS 1, FOR 125 DEGREES C TOTAL CONDUCTOR TEMPERATURE" ,"url":"Documents/assist.dla.mil/MS17182E.pdf"},
 	{"title":"MS18035--1-1-1" ,"text":"STRAP, CABLE, IDENTIFICATION ADJUSTABLE, PLASTIC, TYPE 2, CLASS 2" ,"url":"Documents/assist.dla.mil/MS3368F.pdf"},
 	{"title":"MS20341C-1-1-1" ,"text":"NUT, PLAIN, HEXAGON, ELECTRICAL" ,"url":"Documents/assist.dla.mil/MS20341C.pdf"},
 	{"title":"MS20364C-1-1-1" ,"text":"NUT, SELF LOCKING, THIN, 250°F" ,"url":"Documents/assist.dla.mil/MS21083H.pdf"},
