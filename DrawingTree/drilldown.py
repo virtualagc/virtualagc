@@ -153,6 +153,13 @@ f.close()
 files = os.listdir("../Schematics")
 cads = []
 for f in files:
+	if f[:1] not in ["1", "2"]:
+		continue
+	if not os.path.isdir("../Schematics/" + f):
+		continue
+	if os.system("git ls-files --error-unmatch ../Schematics/" + f + "/module.pro 2>/dev/null 1>/dev/null"):
+		print("Schematic directory " + f + " present but not tracked in git.", file=sys.stderr)
+		continue
 	if len(f) in [8,9]:
 		if not f[:7].isdigit():
 			continue
