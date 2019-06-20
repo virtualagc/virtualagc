@@ -158,7 +158,7 @@ for f in files:
 	if not os.path.isdir("../Schematics/" + f):
 		continue
 	if os.system("git ls-files --error-unmatch ../Schematics/" + f + "/module.pro 2>/dev/null 1>/dev/null"):
-		print("Schematic directory " + f + " present but not tracked in git.", file=sys.stderr)
+		print("CAD directory " + f + " is present but not tracked in git, so any electrical schematics in it are ignored.", file=sys.stderr)
 		continue
 	if len(f) in [8,9]:
 		if not f[:7].isdigit():
