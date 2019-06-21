@@ -124,6 +124,7 @@ bit = False
 dupej = False
 norLength = 5
 norSuffix = ""
+full71 = False
 
 # Read the input file.
 for line in sys.stdin:
@@ -198,6 +199,9 @@ for line in sys.stdin:
 		originY = float(fields[2]) + ySpacing / 2.0
 		nextX = 0
 		nextY = 0
+		continue
+	if type == "full71" and numFields == 1:
+		full71 = True
 		continue
 
 	posX = 25 * int(40 * (originX + xSpacing * nextX))
@@ -538,19 +542,31 @@ for line in sys.stdin:
 			unit = pinNum % 100
 		elif pinNum >= 101 and pinNum <= 171:
 			refd = "J1"
-			symbol = "ConnectorA1-100"
+			if full71:
+				symbol = "Connector-100"
+			else:
+				symbol = "ConnectorA1-100"
 			unit = pinNum % 100
 		elif pinNum >= 201 and pinNum <= 271:
 			refd = "J2"
-			symbol = "ConnectorA1-200"
+			if full71:
+				symbol = "Connector-200"
+			else:
+				symbol = "ConnectorA1-200"
 			unit = pinNum % 100
 		elif pinNum >= 301 and pinNum <= 371:
 			refd = "J3"
-			symbol = "ConnectorA1-300"
+			if full71:
+				symbol = "Connector-300"
+			else:
+				symbol = "ConnectorA1-300"
 			unit = pinNum % 100
 		elif pinNum >= 401 and pinNum <= 471:
 			refd = "J4"
-			symbol = "ConnectorA1-400"
+			if full71:
+				symbol = "Connector-400"
+			else:
+				symbol = "ConnectorA1-400"
 			unit = pinNum % 100
 		else:
 			print >>sys.stderr, "Illegal pin number: " + line
