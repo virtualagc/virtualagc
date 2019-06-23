@@ -48,6 +48,8 @@
 #				keep nd1021041 around for that, just in case.
 #		2019-01-12	Added "bit".
 #		2019-01-16	Added "dupej".
+#		2019-06-22 RSB	Various tweaks related to CDU ... options 
+#				full71, GP=, noloc.
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -125,6 +127,8 @@ dupej = False
 norLength = 5
 norSuffix = ""
 full71 = False
+gatePrefix = ""
+noloc = "0000"
 
 # Read the input file.
 for line in sys.stdin:
@@ -202,6 +206,12 @@ for line in sys.stdin:
 		continue
 	if type == "full71" and numFields == 1:
 		full71 = True
+		continue
+	if type == "GP=" and numFields == 2:
+		gatePrefix = fields[1]
+		continue
+	if type == "noloc" and numFields == 1:
+		noloc = "0001"
 		continue
 
 	posX = 25 * int(40 * (originX + xSpacing * nextX))
@@ -316,9 +326,16 @@ for line in sys.stdin:
 		gateNumber += 1
 		numFields = 6
 	
-	if type in nors and numFields == 6 and fields[1].isdigit() and fields[2].isdigit() and not moduleA52:
+	if type in nors and numFields == 6 and fields[2].isdigit() and not moduleA52:
 		gate = fields[1]
-		if len(gate) != 5 or not gate.isdigit():
+		isGate = True
+		if len(gate) < 5 and len(gate) + len(gatePrefix) == 5:
+			gate = gatePrefix + gate
+		if gatePrefix != gate[:len(gatePrefix)]:
+			isGate = False
+		if not gate[len(gatePrefix):].isdigit():
+			isGate = False
+		if len(gate) != 5 or not isGate:
 			print >>sys.stderr, "Incorrectly numbered gate: " + line
 			wereErrors = True
 			continue
@@ -745,7 +762,7 @@ for id in objects:
 				sys.stdout.write("F 6 \"" + aObject["marking"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location3\"\n")
 			else:
 				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
-				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"Location2\"\n")
+				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " " + noloc + " C CNB \"Location2\"\n")
 			sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
 			if aMirror:
 				sys.stdout.write("\t1    0    0    1  \n")
@@ -774,7 +791,7 @@ for id in objects:
 				sys.stdout.write("F 6 \"" + bObject["marking"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location3\"\n")
 			else:
 				sys.stdout.write("F 4 \"" + bObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
-				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"Location2\"\n")
+				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " " + noloc + " C CNB \"Location2\"\n")
 			sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
 			if bMirror:
 				sys.stdout.write("\t1    0    0    1  \n")
