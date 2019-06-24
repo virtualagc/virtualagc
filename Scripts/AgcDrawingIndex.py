@@ -251,6 +251,26 @@ for key, value in sorted(parser.allData.iteritems()):
 	lastDrawing[type] = drawing
 	lastTitle[type] = title
 
+# Let's do a little bit of compression on the output.  The URLs for archive.org (which are
+# _most_ of them by far) are quite long but mostly follow a simple pattern of
+#	PREFIX/PAGENUMBER/mode/1up
+# There are only a few possible PREFIX values, and it's just the PAGENUMBER which changes
+# all the time.  So we store the prefixes and just replace them with a (short!) pattern that
+# can be replaced by the search engine.  
+prefixesMode1Up = []
+for key, value in sorted(parser.allData.iteritems()):
+	url = value["url"]
+	if url[-9:] == "/mode/1up":
+		n = url.find("#page/n")
+		if n >= 0:
+			n += 7
+			prefix = url[:n]
+			if prefix not in prefixesMode1Up:
+				prefixesMode1Up.append(prefix)
+				print prefix
+			i = prefixesMode1Up.index(prefix)
+			value["url"] = "@" + str(i) + "@" + url[n:-9]
+
 # Finally, output the drawings.csv file.
 for key, value in sorted(parser.allData.iteritems()):
 	print value["url"] + "\t" + value["drawing"] + "\t" + value["revision"] + \

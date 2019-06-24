@@ -15,11 +15,31 @@ date = "%04d-%02d-%02d" % (now.year, now.month, now.day)
 lines = sys.stdin.readlines()
 
 titles = {}
-print('var tipuesearch = {"date": "' + date + '", "pages": [')
+print('var tipuesearch = {"date": "' + date + '",')
 
+# Pick off all of the URL prefixes.
+prefixesMode1Up = []
 for n in range(0, len(lines)):
 	line = lines[n]
 	fields = line.strip("\n").split("\t")
+	if len(fields) != 1:
+		break
+	prefixesMode1Up.append(fields[0])
+print('"prefixes": [')
+for n in range(0, len(prefixesMode1Up)):
+	prefix = '"' + prefixesMode1Up[n] + '"'
+	if n < len(prefixesMode1Up) - 1:
+		prefix += ","
+	print(prefix)
+print('],')
+
+# Now do the actual conversion.
+print('"pages": [')
+for n in range(0, len(lines)):
+	line = lines[n]
+	fields = line.strip("\n").split("\t")
+	if len(fields) == 1:
+		continue
 	url = fields[0]
 	number = fields[1]
 	revision = fields[2]

@@ -17,12 +17,58 @@ There are two types of files:
 
 drawings.csv is a single file containing, basically, a dump of all 
 the drawing index tables from the Virtual AGC website files 
-AgcDrawingIndexXXXXXX.html, merged and sorted.  It has the fields
+AgcDrawingIndexXXXXXX.html, merged and sorted.  It basically has
+the fields
 
 	URL DRAWINGNUMBER REV DOCTYPE SHEETNUM FRAMENUM TITLE NOTES
 
 Sorting uses the keys from fields 2 (DRAWINGNUMBER) through
 6 (SHEETNUM), in that order.
+
+However, there is one complication in the format of drawings.csv,
+in that if implemented straightforwardly as described above, the 
+URLs end up taking about 40% of the file, while actually contributing
+much less than that in terms of information.  The biggest offenders
+are archive.org URLs of the form
+
+	...#page/nN/mode/1up
+	
+where N is an integer.  As a space-saving measure, URLs not matching
+this pattern are used as is, but URLs matching the pattern are 
+significantly altered and shortened.  In such URLs, the suffix "/mode/1up" 
+is stripped away.  Moreover, the unique values of for the prefixes "...#page/n"
+are stored at the very beginning of the file (one prefix per line),
+while the individual URLs are instead prefixed by "@P@", where
+P is the index (0, 1, 2, ...) into the list of unique prefixes.
+For example, at the moment I'm writing this, drawings.csv looks 
+like the following:
+
+	https://archive.org/stream/AgcApertureCardsBatch7Images#page/n
+	https://archive.org/stream/AgcApertureCardsBatch6Images#page/n
+	https://archive.org/stream/AgcApertureCardsBatchStewart#page/n
+	.
+	.
+	.
+	@0@0	1000000	AE	1	1	1	APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX	
+	@0@1	1000000	AG	1	0	1	APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX	
+	@1@0	1000000	AG	1	3	1	APOLLO GUIDANCE&NAVIGATION SYSTEMS INDEX	
+	.
+	.
+	.
+	
+The three URLs shown have to be translated by downstream software as:
+
+	@0@0 -> https://archive.org/stream/AgcApertureCardsBatch7Images#page/n0/mode/1up
+	@0@1 -> https://archive.org/stream/AgcApertureCardsBatch7Images#page/n1/mode/1up
+	@1@0 -> https://archive.org/stream/AgcApertureCardsBatch6Images#page/n0/mode/1up
+
+This "compression" of the URLs is not meant to affect the end drilldown
+HTML files produced, but does affect the search engine (specifically the
+search engine's tipuesearch_content.js file), since the entire motification
+for the compression is to reduce the bandwidth and memory of the search 
+engine.  The search engine thus performs the URL translation to achieve
+the full URL only at the time it displays search results, and at all other
+times maintains only the shortened versions of the URLs.
 
 There is a separate DRAWINGNUMBERPLUSREF.csv file for each drawing 
 relevant to this effort of expanding the drawing trees ... i.e., for each

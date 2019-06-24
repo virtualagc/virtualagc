@@ -106,10 +106,17 @@ def dbg(str, msg):
 # First step: read drawings.csv and keep it in a dictionary.
 drawings = { }
 drawingNumbers = []
+prefixesMode1Up = []
 f = open('drawings.csv', 'r')
 for line in f:
 	fields = line.strip().split("\t")
+	if len(fields) == 1:
+		prefixesMode1Up.append(fields[0])
+		continue
 	url = fields[0]
+	if url[:1] == "@":
+		ufields = url.split("@")
+		url = prefixesMode1Up[int(ufields[1])] + ufields[2] + "/mode/1up"
 	drawingNumber = fields[1]
 	revision = fields[2]
 	type = int(fields[3])
