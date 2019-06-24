@@ -17,6 +17,10 @@ I can make these changes because I understand the pattern of data that's being f
 						been getting (mainly MIL and GAEC docs) don't have numbers that follow that pattern, so
 						I've had to modify the formatter for those special cases, and may have to modify it in the
 						future for other special cases as well.
+2019-06-24	I've realized that the URLs are taking up a substantial amount of space (nearly 40% of it),
+						and yet follow simple patterns that should cause them to use up very little of the space.
+						Consequently, I've now fixed it so that the URLs are constructed at search-result-display
+						time instead.
 */
 
 var milspec = ["DOD", "MIL", "MMM", "FED", "QQ"]; /* RSB */
@@ -460,6 +464,14 @@ var milspec = ["DOD", "MIL", "MMM", "FED", "QQ"]; /* RSB */
                                         else
                                         	title += ", type " + drawingFields[dfStart];
                                         title += ", sheet " + drawingFields[dfStart + 1] + ", frame " + drawingFields[dfStart + 2]
+                                        
+                                        /* Reconstruct the URL if necessary. */
+                                        var url = found[i].url
+                                        if (url.substring(0,1) == "@") {
+                                        	ufields = url.split("@")
+                                        	url = tipuesearch.prefixes[parseInt(ufields[1])] + ufields[2] + "/mode/1up"
+                                        	found[i].url = url
+                                        }
                                         
                                         /* Output the pepped up title. */
                                         out += '<div class="tipue_search_content_title"><a href="' + found[i].url + '"' + tipue_search_w + '>' +  title + '</a></div>';
