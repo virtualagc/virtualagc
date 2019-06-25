@@ -50,6 +50,7 @@
 #		2019-01-16	Added "dupej".
 #		2019-06-22 RSB	Various tweaks related to CDU ... options 
 #				full71, GP=, noloc.
+#		2019-06-25 RSB	Added N1,N3,N4,X1,X3,X4.
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -107,8 +108,15 @@ gatesFound = {}
 
 nors = { 
 	"N": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" },
+	"N1": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" },
+	"N2": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" },
+	"N3": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" },
+	"N4": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" },
 	"X": { "library": "D3NOR-FAP-0VDCA-expander", "refdPrefix": "U1" }, 
-	"N2": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" }
+	"X1": { "library": "D3NOR-FAP-0VDCA-expander", "refdPrefix": "U1" }, 
+	"X2": { "library": "D3NOR-FAP-0VDCA-expander", "refdPrefix": "U1" }, 
+	"X3": { "library": "D3NOR-FAP-0VDCA-expander", "refdPrefix": "U1" }, 
+	"X4": { "library": "D3NOR-FAP-0VDCA-expander", "refdPrefix": "U1" } 
 }
 aPins = ["A", "B", "C", "_"]
 bPins = ["D", "E", "F", "_"]
@@ -186,17 +194,41 @@ for line in sys.stdin:
 		nors["N"]["library"] = fields[1]
 		nors["N"]["refdPrefix"] = fields[2]
 		continue
+	if type == "N1=" and numFields == 3:
+		nors["N1"]["library"] = fields[1]
+		nors["N1"]["refdPrefix"] = fields[2]
+		continue
 	if type == "N2=" and numFields == 3:
 		nors["N2"]["library"] = fields[1]
 		nors["N2"]["refdPrefix"] = fields[2]
+		continue
+	if type == "N3=" and numFields == 3:
+		nors["N3"]["library"] = fields[1]
+		nors["N3"]["refdPrefix"] = fields[2]
+		continue
+	if type == "N4=" and numFields == 3:
+		nors["N4"]["library"] = fields[1]
+		nors["N4"]["refdPrefix"] = fields[2]
 		continue
 	if type == "X=" and numFields == 3:
 		nors["X"]["library"] = fields[1]
 		nors["X"]["refdPrefix"] = fields[2]
 		continue
+	if type == "X1=" and numFields == 3:
+		nors["X1"]["library"] = fields[1]
+		nors["X1"]["refdPrefix"] = fields[2]
+		continue
 	if type == "X2=" and numFields == 3:
 		nors["X2"]["library"] = fields[1]
 		nors["X2"]["refdPrefix"] = fields[2]
+		continue
+	if type == "X3=" and numFields == 3:
+		nors["X3"]["library"] = fields[1]
+		nors["X3"]["refdPrefix"] = fields[2]
+		continue
+	if type == "X4=" and numFields == 3:
+		nors["X4"]["library"] = fields[1]
+		nors["X4"]["refdPrefix"] = fields[2]
 		continue
 	if type == "L" and numFields == 3:
 		originX = float(fields[1]) + xSpacing / 2.0
