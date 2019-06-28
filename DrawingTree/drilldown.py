@@ -348,15 +348,19 @@ def readFindTable(drawing, configuration, assembly, level):
 								isFraction = True
 							elif len(fracFields) == 2 and fracFields[0].isdigit() and fracFields[1].isdigit():
 								isFraction = True
-							if not qtyTable or fields[n] == "X" or fields[n] == "AR" or (isFraction and float(fields[n]) > 0):
+							rq = fields[n].split(",")
+							isX = (fields[n] == "X")
+							if not isX and len(rq) == 2 and rq[1] == "X":
+								isX = True
+							if not qtyTable or isX or fields[n] == "AR" or (isFraction and float(fields[n]) > 0):
 								if not (not qtyTable and fields[n] == ""):
 									found = True
 							if found:
-								rq = fields[n].split(",")
 								if len(rq) > 2:
 									continue
 								elif len(rq) == 2:
 									fields[n] = rq[0]
+									currentDrawing = [ rq[0] ]
 									currentQty = rq[1]
 							if not qtyTable:
 								currentDrawing = fields[n].split(" or ")
