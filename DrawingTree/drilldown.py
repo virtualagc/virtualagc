@@ -74,7 +74,7 @@ import json
 # Being in the list (or not) doesn't affect their processing in any way,
 # but causes their warnings to be printed with a "*" next to them, so that
 # I know not to trouble myself with them unnecessarily. 
-knownProblems = [ "2008332", "MIL-A-25457", "MIL-T-23594" ]
+knownProblems = [ "2008332", "MIL-A-25457", "MIL-I-8660", "MIL-I-15125", "MIL-L-4343", "MIL-T-23594" ]
 
 github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
 ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
