@@ -1,4 +1,4 @@
-update=Thu 06 Sep 2018 07:50:57 AM CDT
+update=Wed 03 Jul 2019 08:07:19 AM CDT
 version=1
 last_client=kicad
 [general]
@@ -37,7 +37,13 @@ PageLayoutDescrFile=schematicTemplate.kicad_wks
 PlotDirectoryName=../temp/
 SubpartIdSeparator=0
 SubpartFirstId=65
-NetFmtName=
+NetFmtName=Pcbnew
 SpiceAjustPassiveValues=0
 LabSize=140
+ERC_WriteFile=0
 ERC_TestSimilarLabels=1
+ERC_CheckUniqueGlobalLabels=1
+ERC_CheckBusDriverConflicts=1
+ERC_CheckBusEntryConflicts=1
+ERC_CheckBusToBusConflicts=1
+ERC_CheckBusToNetConflicts=1

@@ -58,10 +58,10 @@ Text Notes 35650 28925 0    130  ~ 26
 ROPE DRIVER MODULE B16-B17 ASSY\nDWG NO. 2003140
 Text Notes 950  30200 0    130  ~ 26
 NOTES:
-Text Notes 1675 31850 0    130  ~ 26
-1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS PRESCRIBED BY MIL-D-1000\n2. UNLESS OTHERWISE SPECIFIED, RESISTOR VALUES ARE IN OHMS\n3. THE VALUE OF THE FOLLOWING COMPONENTS TO BE DETERMINED AT ELECTRICAL\n   TEST  R29, R36, R37, R50, R51, L2 & L3  TO BE SELECTED FROM APPROPRIATE CHART\n4. TOP SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B16,\n   BOTTOM SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B17\n   SEE CHARTS
+Text Notes 1740 31985 0    130  ~ 26
+1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS PRESCRIBED BY MIL-D-70327\n2. UNLESS OTHERWISE SPECIFIED, RESISTOR VALUES ARE IN OHMS\n3. THE VALUE OF THE FOLLOWING COMPONENTS TO BE DETERMINED AT ELECTRICAL\n   TEST  R29, R36, R37, R50, AND R51 TO BE SELECTED FROM APPROPRIATE CHART\n4. TOP SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B16,\n   BOTTOM SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B17\n   SEE CHARTS\n5. THE VALUE OF THE FOLLOWING COMPONENTS TO BE DETERMINED AT ELECTRICAL TEST\n   L2 & L3 TO BE SELECTED FROM APPROPRIATE CHART
 Text Notes 20175 33100 0    130  ~ 26
-Notes from the Virtual AGC Project:\na) This CAD drawing was adapted from the previously-transcribed original Project Apollo\n   drawing 2005100D.  — RSB 2019\nb) This CAD drawing is intended to capture the electrical properties of the original drawing,\n   but is not a visually accurate representation of it.  A separate drawing has been created\n   to instead capture the visual appearance of the original drawing. — RSB 2019
+Notes from the Virtual AGC Project:\na) This CAD drawing was adapted from the previously-transcribed original Project Apollo\n   drawing 2005942-.  — RSB 2019\nb) This CAD drawing is intended to capture the electrical properties of the original drawing,\n   but is not a visually accurate representation of it.  A separate drawing has been created\n   to instead capture the visual appearance of the original drawing. — RSB 2019
 $Bitmap
 Pos 19900 32000
 Scale 1.000000

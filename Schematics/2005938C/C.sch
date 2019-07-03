@@ -17,7 +17,7 @@ $EndDescr
 Text Notes 39669 31724 0    250  ~ 50
 SCHEMATIC,
 Text Notes 40894 33124 0    250  ~ 50
-2005942
+2005938
 Text Notes 38269 33124 0    250  ~ 50
 80230
 Text Notes 39100 32125 0    200  ~ 40
@@ -91,7 +91,7 @@ P 30725 22700
 AR Path="/5B8E7735/5C376F18" Ref="1L9"  Part="1" 
 AR Path="/5F7B6DBB/5C376F18" Ref="2L9"  Part="1" 
 AR Path="/5F8B4769/5C376F18" Ref="3L9"  Part="1" 
-F 0 "3L9" H 30925 23250 50  0000 C CNN
+F 0 "1L9" H 30925 23250 50  0000 C CNN
 F 1 "8.2UH" H 30700 22975 130 0000 C CNN
 F 2 "" H 30675 22900 130 0001 C CNN
 F 3 "" H 30675 22900 130 0001 C CNN
@@ -106,7 +106,7 @@ P 31675 23325
 AR Path="/5B8E7735/5C3774D2" Ref="1C7"  Part="1" 
 AR Path="/5F7B6DBB/5C3774D2" Ref="2C7"  Part="1" 
 AR Path="/5F8B4769/5C3774D2" Ref="3C7"  Part="1" 
-F 0 "3C7" H 32300 23450 50  0000 C CNN
+F 0 "1C7" H 32300 23450 50  0000 C CNN
 F 1 "6.8UF" H 32175 23200 130 0000 C CNN
 F 2 "" H 31675 23725 130 0001 C CNN
 F 3 "" H 31675 23725 130 0001 C CNN
@@ -141,20 +141,32 @@ Wire Wire Line
 	31675 23575 31675 24150
 Text HLabel 32275 22700 2    140  Output ~ 28
 H
-Wire Notes Line style solid
-	37965 896  37965 1150
-Wire Notes Line style solid
-	37965 1150 43500 1150
-Wire Notes Line style solid
-	42487 896  42487 1150
-Wire Notes Line style solid
-	38456 896  38456 1150
-Wire Notes Line style solid
-	41800 896  41800 1150
-Text Notes 38100 1125 0    140  ~ 28
--   RELEASED PER TDRR 32347
 Text Notes 38844 33374 0    140  ~ 28
 _____
 Wire Notes Line style solid
 	39069 33399 39169 33299
+Wire Notes Line style solid
+	37970 905  37970 2219
+Wire Notes Line style solid
+	37970 2219 43505 2219
+Wire Notes Line style solid
+	42492 905  42492 2219
+Wire Notes Line style solid
+	38461 905  38461 2219
+Wire Notes Line style solid
+	41805 905  41805 2219
+Wire Notes Line style solid
+	37972 1707 43502 1707
+Wire Notes Line style solid
+	37972 1202 43502 1202
+Text Notes 38102 1162 0    140  ~ 28
+A   INITIAL RELEASE TDRR 32559
+Text Notes 38102 1567 0    140  ~ 28
+B
+Text Notes 38102 2067 0    140  ~ 28
+C
+Text Notes 38512 1682 0    140  ~ 28
+CHANGED PER TDRR 32951\nDR           CHK
+Text Notes 38487 2187 0    140  ~ 28
+CHANGED PER TDRR 33495\nDR           CHK
 $EndSCHEMATC
