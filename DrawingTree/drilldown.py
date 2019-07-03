@@ -225,14 +225,14 @@ def splitPartNumber(assembly):
 
 # Returns a dictionary with the contents of an assembly, or else an empty dictionary
 # if the find-table file wasn't found.
-standardKeys = [ "level", "drawing", "configuration", "assembly", "parents", "exists", "empty", "subbedFor" ]
+standardKeys = [ "level", "drawing", "title", "configuration", "assembly", "parents", "exists", "empty", "subbedFor" ]
 findTables = [] # Every FIND table or component we actually locate.
 findTablesAttempted = [] # Every FIND table we *attempt* to locate.
-def readFindTable(drawing, configuration, assembly, level):
+def readFindTable(drawing, configuration, assembly, level, title):
 	if drawing not in findTablesAttempted:
 		findTablesAttempted.append(str(drawing))
-	findTable = { "level": level, "drawing": drawing, "configuration": configuration, "assembly": assembly, "parents": [], 
-			"exists": False, "empty": True, "subbedFor": [] }
+	findTable = { "level": level, "drawing": drawing, "title": title, "configuration": configuration, 
+			"assembly": assembly, "parents": [], "exists": False, "empty": True, "subbedFor": [] }
 	if drawing not in components:
 		# First need to read the current folder to for all files with names of the form
 		# 	drawing + rev + ".csv"
@@ -397,8 +397,8 @@ def readFindTable(drawing, configuration, assembly, level):
 # substitute find table is stored in 'assemblies' anyway.
 subbedFrom = {}
 tabulatedList = []
-def readFindTableWithSubbing(drawing, configuration, assembly, level):
-	findTable = readFindTable(drawing, configuration, assembly, level)
+def readFindTableWithSubbing(drawing, configuration, assembly, level, title):
+	findTable = readFindTable(drawing, configuration, assembly, level, title)
 	c = configuration
 	subbedFindTable = {}
 	for key in findTable:
@@ -424,7 +424,7 @@ def readFindTableWithSubbing(drawing, configuration, assembly, level):
 				assemblies[a]["level"] = level
 			break
 		else:
-			subbedFindTable = readFindTable(drawing, c, a, level)
+			subbedFindTable = readFindTable(drawing, c, a, level, title)
 			if len(subbedFindTable.keys()) > len(standardKeys):
 				subbedFrom[assembly] = a
 				subbedFindTable["subbedFor"].append(assembly)
@@ -434,7 +434,7 @@ def readFindTableWithSubbing(drawing, configuration, assembly, level):
 
 # Now read the assembly-specific drawing.
 assemblies = {}
-assemblies[assemblyName] = readFindTableWithSubbing(drawing, configuration, assemblyName, 0)
+assemblies[assemblyName] = readFindTableWithSubbing(drawing, configuration, assemblyName, 0, "")
 
 #print(assemblyName, file=sys.stderr)
 #for p in sorted(assemblies[assemblyName]):
@@ -456,6 +456,7 @@ def recurseFindTable(assemblyName, level):
 			continue
 		assembly = assemblies[assemblyName][findNumber]
 		drawings = assembly['DRAWING']
+		title = assembly['TITLE']
 		for d in drawings:
 			fields = splitPartNumber(d)
 			if not fields[0].isdigit():
@@ -471,7 +472,7 @@ def recurseFindTable(assemblyName, level):
 				dc = "0"
 			dc = int(dc)
 			if d not in assemblies:
-				a = readFindTableWithSubbing(dd, dc, d, level)
+				a = readFindTableWithSubbing(dd, dc, d, level, title)
 				#if d == "2003994-011":
 				#	for f in sorted(a):
 				#		print('\n' + str(f) + " " + str(a[f]), file=sys.stderr)
@@ -719,7 +720,7 @@ for level in range(1, assLevel + 1):
 		while len(c) > 0 and len(c) < 4:
 			c = c[:1] + "0" + c[1:]
 		aname0 = assemblies[d]["assembly"]
-		aname = aname0
+		aname = aname0 + " &mdash; " + assemblies[d]["title"]
 		dname = splitPartNumber(aname)[0]
 		if dname in drawings:
 			ref = '<a href="' + drawings[dname]["url"] + '">' + aname0 + '</a>'
