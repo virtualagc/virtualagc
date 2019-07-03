@@ -14,38 +14,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Wire Notes Line style solid
-	27965 920  27965 2650
-Wire Notes Line style solid
-	33500 2175 27965 2175
-Wire Notes Line style solid
-	28464 921  28464 2649
-Wire Notes Line style solid
-	31799 919  31799 2648
-Wire Notes Line style solid
-	32465 920  32465 2649
-Wire Notes Line style solid
-	27965 2650 33500 2650
-Wire Notes Line style solid
-	33510 1716 27975 1716
-Wire Notes Line style solid
-	33506 1438 27971 1438
-Wire Notes Line style solid
-	33502 1169 27967 1169
-Text Notes 28125 1150 0    140  ~ 28
-A   REVISED PER TDRR 18681
-Text Notes 28100 1425 0    140  ~ 28
-B   REVISED PER TDRR 19761
-Text Notes 28100 1700 0    140  ~ 28
-C   REVISED PER TDRR 23218
-Text Notes 28100 2050 0    140  ~ 28
-D
-Text Notes 28125 2500 0    140  ~ 28
-E
-Text Notes 28550 2150 0    130  ~ 26
-REVISED PER TDRR 23956\nDR              CHK
-Text Notes 28525 2625 0    130  ~ 26
-REVISED PER TDRR 23956\nDR              CHK
 Text Notes 29750 19775 0    250  ~ 50
 SCHEMATIC
 Text Notes 29325 20150 0    200  ~ 40
@@ -53,7 +21,7 @@ CLOCK OSCILLATOR
 Text Notes 30125 20375 0    140  ~ 28
 MODULE NO. B7
 Text Notes 31000 21125 0    225  ~ 45
-2005003
+2005930
 Text Notes 28325 21100 0    225  ~ 45
 80230
 Text Notes 32400 21450 0    140  ~ 28
@@ -792,76 +760,10 @@ Text Notes 16200 7600 0    130  ~ 26
 -83
 Text Notes 16200 8100 0    130  ~ 26
 -84
-Wire Notes Line style solid
-	19900 1925 22900 1925
-Wire Notes Line style solid
-	19900 2175 22900 2175
-Wire Notes Line style solid
-	19900 2425 22900 2425
-Wire Notes Line style solid
-	19900 2550 22900 2550
-Wire Notes Line style solid
-	19900 2800 22900 2800
-Wire Notes Line style solid
-	19900 3050 22900 3050
-Wire Notes Line style solid
-	19900 3300 22900 3300
-Wire Notes Line style solid
-	19900 1925 19900 3300
-Wire Notes Line style solid
-	21875 2175 21875 3300
-Wire Notes Line style solid
-	22900 1925 22900 3300
-Text Notes 20200 2775 0    130  ~ 26
-1006712-1
-Text Notes 20200 3025 0    130  ~ 26
-1006712-2
-Text Notes 20200 3275 0    130  ~ 26
-1006712-3
-Text Notes 21075 2150 0    130  ~ 26
-RT2
-Text Notes 20425 2400 0    130  ~ 26
-DASH NO.
-Text Notes 21875 2400 0    130  ~ 26
-OHMS±2%
 Text Notes 13100 2500 0    130  ~ 26
 OHMS±2%
 Text Notes 16925 2450 0    130  ~ 26
 OHMS±2%
-Text Notes 22175 2775 0    130  ~ 26
-500
-Text Notes 22100 3025 0    130  ~ 26
-1000
-Text Notes 22100 3275 0    130  ~ 26
-5000
-Wire Notes Line style solid
-	22625 3375 23025 2975
-Wire Notes Line style solid
-	22300 3375 23000 2675
-Wire Notes Line style solid
-	22000 3375 23025 2350
-Wire Notes Line style solid
-	21675 3400 23025 2050
-Wire Notes Line style solid
-	21350 3400 22900 1825
-Wire Notes Line style solid
-	21075 3375 22600 1825
-Wire Notes Line style solid
-	20750 3425 22300 1850
-Wire Notes Line style solid
-	20450 3400 22000 1825
-Wire Notes Line style solid
-	20150 3400 21700 1825
-Wire Notes Line style solid
-	19850 3375 21350 1875
-Wire Notes Line style solid
-	20975 1900 19850 3025
-Wire Notes Line style solid
-	19850 2700 20675 1875
-Wire Notes Line style solid
-	20400 1900 19850 2425
-Wire Notes Line style solid
-	19850 2200 20175 1875
 Wire Notes Line style solid
 	18550 4675 27500 4675
 Wire Notes Line style solid
@@ -2020,4 +1922,18 @@ Wire Notes Line width 60 style solid
 	15650 7688 15750 7688
 Wire Notes Line width 60 style solid
 	15750 7688 15700 7813
+Wire Notes Line style solid
+	28465 910  28465 1155
+Wire Notes Line style solid
+	27965 910  27965 1155
+Wire Notes Line style solid
+	33502 1159 27967 1159
+Text Notes 28125 1140 0    140  ~ 28
+A   INITIAL RELEASE TDRR 32559
+Wire Notes Line style solid
+	32465 910  32465 1155
+Wire Notes Line style solid
+	31795 910  31795 1155
+Text Notes 28800 21475 0    140  ~ 28
+NONE
 $EndSCHEMATC

@@ -51,7 +51,7 @@ $Comp
 L AGC_DSKY:Capacitor C1
 U 1 1 5BDBB8C7
 P 8025 6075
-F 0 "C1" V 8250 6075 130 0000 C CNN
+F 0 "C1" V 8250 5975 130 0000 C CNN
 F 1 "Capacitor" H 8575 5875 130 0001 C CNN
 F 2 "" H 8025 6475 130 0001 C CNN
 F 3 "" H 8025 6475 130 0001 C CNN
@@ -423,14 +423,14 @@ F 3 "" H 6500 5600 130 0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L AGC_DSKY:Diode CR2
+L AGC_DSKY:Capacitor-variable CR2
 U 1 1 5BDD0C60
-P 7575 5650
-F 0 "CR2" V 7350 5925 140 0000 C CNN
-F 1 "Diode" H 7575 5500 50  0001 C CNN
-F 2 "" H 7525 5475 50  0001 C CNN
-F 3 "" H 7525 5650 50  0001 C CNN
-	1    7575 5650
+P 7575 5600
+F 0 "CR2" V 7225 5325 140 0000 C CNN
+F 1 "Diode" H 7575 5450 50  0001 C CNN
+F 2 "" H 7525 5425 50  0001 C CNN
+F 3 "" H 7525 5600 50  0001 C CNN
+	1    7575 5600
 	0    1    1    0   
 $EndComp
 $Comp
@@ -712,7 +712,7 @@ Wire Wire Line
 Wire Wire Line
 	7750 6075 7575 6075
 Wire Wire Line
-	7575 5850 7575 6075
+	7575 5800 7575 6075
 Connection ~ 7575 6075
 Wire Wire Line
 	7575 6075 7575 7425
@@ -720,7 +720,7 @@ Wire Wire Line
 	8575 5100 8375 5100
 Connection ~ 7575 5100
 Wire Wire Line
-	7575 5100 7575 5450
+	7575 5100 7575 5400
 Wire Wire Line
 	8375 5250 8375 5100
 Connection ~ 8375 5100
@@ -999,10 +999,10 @@ Wire Notes Line
 	22725 8825 22725 2050
 Wire Notes Line
 	22725 2050 2450 2050
-Text Notes 1575 15800 0    140  ~ 28
+Text Notes 1575 15800 0    160  ~ 32
 NOTES:
-Text Notes 1875 18200 0    140  ~ 28
-1. INTERPRET DRAWING IN ACCORDANCE WITH\n   STANDARDS PRESCRIBED BY MIL-D-70327\n2. RESISTOR VALUES ARE EXPRESSED IN OHMS UNLESS\n   OTHERWISE SPECIFIED\n3. THE VALUE OF THE FOLLOWING COMPONENTS TO BE\n   DETERMINED AT UNIT TEST : C2,R2,R3,R4,R6,R7,R8,R9,R10 AND R15\n   SEE TABLES ON SHEETS 2 AND 3 PART NO.1006750 ±2% OR\n   1010733 ±1%\n5. WHEN VALUE OF R6 R8 R9 OR R10 IS\n   NO COMPONENTS WILL BE USED
+Text Notes 1800 18500 0    160  ~ 32
+1. INTERPRET DRAWING IN ACCORDANCE WITH\n   STANDARDS PRESCRIBED BY MIL-D-70327\n2. RESISTOR VALUES ARE EXPRESSED IN OHMS UNLESS\n   OTHERWISE SPECIFIED\n3. THE VALUE OF THE FOLLOWING COMPONENTS TO BE\n   DETERMINED AT UNIT TEST: C2,R2,R3,R4,R6,R7,R8,R9,R10 AND R15\n   SEE TABLES ON SHEETS 2 AND 3 PART NO.1006750 ±2% OR\n   1010733 ±1%\n5. WHEN VALUE OF R6 R8 R9 OR R10 IS\n   NO COMPONENTS WILL BE USED
 Wire Notes Line style solid
 	11050 10250 18175 10250
 Wire Notes Line style solid
@@ -1272,37 +1272,11 @@ Q3
 Text Notes 11375 18225 0    130  ~ 26
 Q4
 Wire Notes Line style solid
-	27965 920  27965 2650
+	27965 910  27965 1155
 Wire Notes Line style solid
-	33500 2175 27965 2175
-Wire Notes Line style solid
-	28464 921  28464 2649
-Wire Notes Line style solid
-	31799 919  31799 2648
-Wire Notes Line style solid
-	32465 920  32465 2649
-Wire Notes Line style solid
-	27965 2650 33500 2650
-Wire Notes Line style solid
-	33510 1716 27975 1716
-Wire Notes Line style solid
-	33506 1438 27971 1438
-Wire Notes Line style solid
-	33502 1169 27967 1169
-Text Notes 28125 1150 0    140  ~ 28
-A   REVISED PER TDRR 18681
-Text Notes 28100 1425 0    140  ~ 28
-B   REVISED PER TDRR 19761
-Text Notes 28100 1700 0    140  ~ 28
-C   REVISED PER TDRR 23218
-Text Notes 28100 2050 0    140  ~ 28
-D
-Text Notes 28125 2500 0    140  ~ 28
-E
-Text Notes 28550 2150 0    130  ~ 26
-REVISED PER TDRR 23956\nDR              CHK
-Text Notes 28525 2625 0    130  ~ 26
-REVISED PER TDRR 23956\nDR              CHK
+	33502 1159 27967 1159
+Text Notes 28125 1140 0    140  ~ 28
+A   INITIAL RELEASE TDRR 32559
 Text Notes 11075 10150 0    130  ~ 26
 REF DES
 Text Notes 12250 10150 0    130  ~ 26
@@ -1355,7 +1329,7 @@ Text Notes 13675 10475 0    130  ~ 26
 CAPACITOR
 Text Notes 15025 10475 0    130  ~ 26
 1200UUF
-Text Notes 15025 10750 0    130  ~ 26
+Text Notes 15025 10725 0    130  ~ 26
 NOMINAL
 Text Notes 15025 10975 0    130  ~ 26
 1000UUF
@@ -1420,15 +1394,15 @@ Text Notes 12050 13725 0    130  ~ 26
 Text Notes 12050 13975 0    130  ~ 26
 1006700-1
 Text Notes 12050 14225 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 12050 14475 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 12050 14725 0    130  ~ 26
-2004103-001
+2004183-001
 Text Notes 13600 13725 0    130  ~ 26
 ZENER
 Text Notes 13600 13975 0    130  ~ 26
-DIODE
+VAR. CAP.
 Text Notes 13600 14225 0    130  ~ 26
 DIODE
 Text Notes 13600 14475 0    130  ~ 26
@@ -1504,13 +1478,13 @@ Text Notes 15200 16475 0    130  ~ 26
 Text Notes 15325 16725 0    130  ~ 26
 5K
 Text Notes 12050 17475 0    130  ~ 26
-2004004-005
+2004184-005
 Text Notes 12050 17725 0    130  ~ 26
-2004004-005
+2004184-005
 Text Notes 12050 17975 0    130  ~ 26
-2004004-005
+2004184-005
 Text Notes 12050 18225 0    130  ~ 26
-2004004-005
+2004184-005
 Text Notes 23750 10725 0    130  ~ 26
 ±2%
 Text Notes 23750 11475 0    130  ~ 26
@@ -1609,7 +1583,7 @@ Text Notes 19850 12000 0    130  ~ 26
 1006750
 Text Notes 19850 12500 0    130  ~ 26
 1010733
-Text Notes 19650 13000 0    130  ~ 26
+Text Notes 19650 12975 0    130  ~ 26
 1006750-84
 Text Notes 20525 13225 0    130  ~ 26
 -84
@@ -1728,14 +1702,14 @@ CLOCK OSCILLATOR
 Text Notes 30125 20375 0    140  ~ 28
 MODULE NO. B7
 Text Notes 31000 21125 0    225  ~ 45
-2005003
+2005930
 Text Notes 28325 21100 0    225  ~ 45
 80230
 Text Notes 32400 21450 0    140  ~ 28
 1     3
 Wire Wire Line
 	9225 5100 9175 5100
-Text Notes 6225 18050 0    400  ~ 0
+Text Notes 6725 18350 0    500  ~ 0
 ∞
 $Comp
 L AGC_DSKY:ConnectorB7-600 J6
@@ -1923,7 +1897,7 @@ Connection ~ 3025 9225
 Wire Wire Line
 	11100 7175 11100 7225
 Text Notes 1900 21150 0    140  ~ 28
-Notes from the Virtual AGC Project:\na) This CAD drawing was manually transcribed from the original Apollo Program\n   document, but is not itself original to the Apollo Program. — RSB 2018\nb) The original drawing did not supply reference designators for the connector to\n   the AGC backplane.  On this drawing, 4 connectors (J1, J3, J5, J6) have been used;\n   the oval pad numbered "xyy" would be pin yy of connector Jx. — RSB 2018
+Notes from the Virtual AGC Project:\na) This CAD drawing was adapted from the previously-transcribed original Project\n   Apollo drawing 2005003E. — RSB 2019\nb) The original drawing did not supply reference designators for the connector to\n   the AGC backplane.  On this drawing, 4 connectors (J1, J3, J5, J6) have been used;\n   the oval pad numbered "xyy" would be pin yy of connector Jx. — RSB 2019
 $Bitmap
 Pos 1600 19975
 Scale 1.000000
@@ -2788,4 +2762,12 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
+Wire Notes Line style solid
+	28465 910  28465 1155
+Wire Notes Line style solid
+	31795 910  31795 1155
+Wire Notes Line style solid
+	32465 910  32465 1155
+Text Notes 28825 21475 0    140  ~ 28
+NONE
 $EndSCHEMATC
