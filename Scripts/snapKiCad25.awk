@@ -4,7 +4,9 @@
 # All of the KiCad schematics I've created for the AGC/DSKY schematics
 # are on a 25-mil grid.  Unfortunately, I've run into a case where 
 # I have a schematic in which everything is off-grid.  It was a bug
-# in autoplaceKiCad.py that put them there.  At any rate, there doesn't
+# in autoplaceKiCad.py that put them there.  But it can also happen if
+# you just accidentally set the gridsize wrong and don't notice it 
+# until too late.  At any rate, there doesn't
 # seem to be anything in KiCad itself that allows me to snap everything
 # back onto the grid.  So here's a tools for that.  It takes a .sch
 # file on stdin and outputs the snapped version of that on stdout.
