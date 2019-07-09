@@ -42,8 +42,8 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
       <li><a href="#LVDC_Assembly_Language">LVDC Assembly Language</a><br>
       </li>
       <li><big><a href="#yaLVDC_the_LVDC_CPU_Emulation"><small><small><big><small><big><span
-                        style="font-weight: bold;">yaLVDC</span>,
-                      the LVDC CPU Emulation</big></small></big></small></small></a></big></li>
+                        style="font-weight: bold;">yaLVDC</span>, the
+                      LVDC CPU Emulation</big></small></big></small></small></a></big></li>
       <li><a href="#yaLVDCASM_the_LVDC_Cross-Assembler"><span
             style="font-weight: bold;">yaASM</span>, the LVDC
           Cross-Assembler</a></li>
@@ -59,11 +59,12 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         src="lvdc_upper-small.jpg" style="border: 2px solid ; width:
         288px; height: 165px;" align="right" height="165" width="288"></a>The
 Launch
-    Vehicle Digital Computer (LVDC) was a computer that resided
-    in the Instrument Unit (IU) that perched above the Saturn IVB that
-    was the second stage in a Saturn IB rocket and the third stage in a
-    Saturn V rocket.&nbsp; The LVDC was a completely separate computer
-    system from the AGC, with a different architecture, different
+
+    Vehicle Digital Computer (LVDC) was a computer that resided in the
+    Instrument Unit (IU) that perched above the Saturn IVB that was the
+    second stage in a Saturn IB rocket and the third stage in a Saturn V
+    rocket.&nbsp; The LVDC was a completely separate computer system
+    from the AGC, with a different architecture, different
     instruction-set, and different runtime software.&nbsp; The purpose
     of the LVDC was to precisely control the Saturn from shortly before
     liftoff until the point at which the Saturn was discarded by the
@@ -153,14 +154,15 @@ Launch
     </table>
     <br>
     <br>
-    The LVDC was developed by IBM, rather than by the MIT Instrumention
-    Lab that developed the AGC, so there was no overlap in development
-    personnel between the LVDC and AGC systems.&nbsp; Furthermore, there
-    was almost no overlap in engineering technique, other than that both
-    groups of necessity were generally constrained by the technology
-    available at the time.&nbsp; For example, both needed to use memory
-    based on ferrite-core technology.&nbsp; Moreover, there was no
-    interaction between the LVDC and AGC systems.<br>
+    The LVDC was developed by IBM Federal Systems Division, rather than
+    by the MIT Instrumentation Lab that developed the AGC, so there was
+    no overlap in development personnel between the LVDC and AGC
+    systems.&nbsp; Furthermore, there was almost no overlap in
+    engineering technique, other than that both groups of necessity were
+    generally constrained by the technology available at the time.&nbsp;
+    For example, both needed to use memory based on ferrite-core
+    technology.&nbsp; Moreover, there was no interaction between the
+    LVDC and AGC systems.<br>
     <br>
     Actually, there was some interaction between the development groups,
     in the sense that at some point in 1963 or before the idea arose
@@ -180,6 +182,7 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
       Devices</h2>
     As with any of the other computer systems we cover here at Virtual
     AGC, the LVDC does not stand alone and do its computing in a
@@ -218,7 +221,7 @@ Launch
       <li>The Control-EDS Rate Gyros.</li>
       <li>The Control Accelerometers (Saturn IB only).</li>
       <li>The propulsion engine actuators.</li>
-      <li>The auxilary propulsion system.&nbsp; This was a set of 6
+      <li>The auxiliary propulsion system.&nbsp; This was a set of 6
         nozzles mounted on the aft end of the S-IVB stage which were
         used to provide attitude control in coasting (non-burn)
         periods.&nbsp; I believe that it may also have provided roll
@@ -303,21 +306,21 @@ Launch
               astronauts on the DSKY.<br>
             </p>
             <p>I actually have an interesting graphic of the monitoring
-              process to show you.&nbsp; Even though we do not have any
-              of the original LVDC software at the present time, and
-              thus cannot simulate the operation of the LVDC in a
-              digital sense, a fellow named Riley Rainey has used the
-              equations defining the IU to model the physical behavior
-              of the rocket and the spacecraft's IMU, allowing Virtual
-              AGC to monitor the launch behavior on a simulated
+              process to show you.&nbsp; Even though we do not have the
+              original LVDC "flight program" software at the present
+              time, and thus cannot simulate the operation of the LVDC
+              in a digital sense, a fellow named Riley Rainey has used
+              the equations defining the IU to model the physical
+              behavior of the rocket and the spacecraft's IMU, allowing
+              Virtual AGC to monitor the launch behavior on a simulated
               DSKY.&nbsp; Here's a short movie he has created of that
               simulation.&nbsp; It's admittedly a little fuzzy, since I
               blew it up by about 2×, but perhaps we'll be able to get a
               better one sometime in the future:</p>
             <div align="center"> <a
                 href="RileyRainey/ApolloA%202009-08-05%2022-43-27-68-1200x800-20.mp4"><img
-                  alt="Riley Rainey's simulation video" title="Click
-                  to play video" src="playRiley.jpg" border="2"
+                  alt="Riley Rainey's simulation video" title="Click to
+                  play video" src="playRiley.jpg" border="2"
                   height="200" width="300"></a> </div>
             <br>
             Of course, at the left in the video, you can see the
@@ -346,7 +349,11 @@ Launch
     These may be of assistance if you're an enthusiast, but I cannot
     provide any of them for you, for legal reasons.&nbsp; Specifically,
     you can go to <a href="http://arc.aiaa.org/">the AIAA's website</a>,
-    and search for "LVDC".<br>
+    and search for "LVDC".&nbsp; Or as another example, via the IEEE's
+    website, you can get an article about the "<a
+      href="https://ieeexplore.ieee.org/abstract/document/5388320">Interactive
+      Saturn Flight Program Simulator</a>", as pointed out to me by one
+    of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
         id="Evolution_of_the_Flight_Software"></a>Evolution of the
       Flight Software</h2>
@@ -363,9 +370,52 @@ Launch
       </li>
       <li>Which revisions of the flight software were used in which
         missions.</li>
-      <li>... Nor, most importantly, any of the actual flight program
-        source code.</li>
+      <li>The flight program's source code.<br>
+      </li>
     </ul>
+    <p>For many years, the final item on the list above used to read,
+      "nor, most importantly, any of the actual flight program source
+      code".&nbsp; I can no longer say that, because I can tell you that
+      at least one revision of the flight program, from 1967, does still
+      exist ... or at least that significant portions of it still exist
+      as of July 2019 when I'm writing this sentence.&nbsp; How or where
+      it exists, I cannot say, nor whether we'll ever be able to get a
+      complete listing.&nbsp; My only information is from an anonymous
+      source, and is quite limited.&nbsp; But my informant does provide
+      the following snapshots of several pages from an assembly listing
+      of the program (click to enlarge):<br>
+    </p>
+    <div align="center"><a href="LVDC-1967/LVDC-1967-273.jpg"><img
+          alt="" title="Click to enlarge"
+          src="LVDC-1967/small-LVDC-1967-273.jpg" border="2"
+          height="240" width="320"></a>&nbsp; <a
+        href="LVDC-1967/LVDC-1967-274.jpg"><img alt="" title="Click to
+          enlarge" src="LVDC-1967/small-LVDC-1967-274.jpg" border="2"
+          height="240" width="320"></a>&nbsp; <a
+        href="LVDC-1967/LVDC-1967-275.jpg"><img alt="" title="Click to
+          enlarge" src="LVDC-1967/small-LVDC-1967-275.jpg" border="2"
+          height="240" width="320"></a>&nbsp; <a
+        href="LVDC-1967/LVDC-1967-276.jpg"><img alt="" title="Click to
+          enlarge" src="LVDC-1967/small-LVDC-1967-276.jpg" border="2"
+          height="240" width="320"></a><br>
+      <br>
+      <a href="LVDC-1967/LVDC-1967-278.jpg"><img alt="" title="Click to
+          enlarge" src="LVDC-1967/small-LVDC-1967-278.jpg" border="2"
+          height="240" width="320"></a>&nbsp; <a
+        href="LVDC-1967/small-LVDC-1969-279.jpg"><img alt=""
+          title="Click to enlarge"
+          src="LVDC-1967/small-LVDC-1969-279.jpg" border="2"
+          height="240" width="320"></a>&nbsp; <a
+        href="LVDC-1967/LVDC-1969-280.jpg"><img alt="" title="Click to
+          enlarge" src="LVDC-1967/small-LVDC-1969-280.jpg" border="2"
+          height="240" width="320"></a><br>
+    </div>
+    <p>The pages show a few auxiliary subroutines for computing the
+      sine, cosine, arctangent, and spare root functions, and
+      unfortunately not any guidance functionality as such.&nbsp; But it
+      is real LVDC software, of which we presently have no other true
+      samples.<br>
+    </p>
     <p>However ... each of the flown Saturns is associated with a report
       known as its "launch vehicle flight evaluation report", and <a
         href="links.html#lvfea">these reports are available for <i>most</i>
@@ -444,6 +494,7 @@ Launch
     striking similarities as well that point to a family resemblance.<br>
     <h2><a name="Architecture_of_the_LVDC" id="Architecture_of_the_LVDC"></a>Architecture
 of
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -469,6 +520,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
         is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp;
@@ -481,21 +533,21 @@ This
       <li>1 February 1966:&nbsp; "<a
 href="Documents/TM-X-53384-TheAstrionicsSystemOfSaturnLaunchVehicles-Decher.pdf">The
 Astrionics
-          System of Saturn Launch Vehicles</a>" by Rudolf
-        Decher.</li>
+
+          System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
-          System Handbook, Saturn Launch Vehicles</a>,
-        chapters 11 and 15.</li>
+
+          System Handbook, Saturn Launch Vehicles</a>, chapters 11 and
+        15.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
           href="Documents/MSFC-MAN-503-SaturnFlightManual-SA503.pdf">
           Saturn Flight Manual, SA-503</a>, chapter VII, particularly
         data on interrupts and i/o.</li>
       <li>30 September 1972:&nbsp; <a
           href="Documents/MSFC-MAN-206-SkylabSaturnIBFlightManual.pdf"><span
-            style="font-style: italic;">Skylab Saturn IB Flight
-            Manual</span></a>, chapter VI, again for data on interrupts
-        and i/o.</li>
+            style="font-style: italic;">Skylab Saturn IB Flight Manual</span></a>,
+        chapter VI, again for data on interrupts and i/o.</li>
     </ol>
     Among these, it would be fair to state that reference #3 was used
     primarily, and the others were used to cross-check or to provide
@@ -656,6 +708,7 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
     sure—stores a HOP Register code loaded at reset.<br>
     <h3><a name="Layout_of_Memory_Words" id="Layout_of_Memory_Words"></a>Layout
 of
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -704,12 +757,13 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
-    the "residual sector" can only be used for addressing
-    memory, and there's no way to access instructions in it unless it
-    happens to be the currently-selected instruction sector as explained
-    in the paragraph that follows.&nbsp; In essence, the "residual
-    sector" is good for storing global variables whilst the
-    currently-selected data sector is good for storing local variables.<br>
+
+    the "residual sector" can only be used for addressing memory, and
+    there's no way to access instructions in it unless it happens to be
+    the currently-selected instruction sector as explained in the
+    paragraph that follows.&nbsp; In essence, the "residual sector" is
+    good for storing global variables whilst the currently-selected data
+    sector is good for storing local variables.<br>
     <br>
     Memory-sector selection and the "residual sector" become clearer
     when contemplating the HOP Register mentioned earlier:<br>
@@ -918,10 +972,10 @@ Incidentally,
             (more accurately, 4 computer cycles) following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
-            the result will remain in the P-Q register until
-            the next <span style="font-family: Courier
-              New,Courier,monospace;">MPH</span>, <span
-              style="font-family: Courier New,Courier,monospace;">MPY</span>,
+
+            the result will remain in the P-Q register until the next <span
+              style="font-family: Courier New,Courier,monospace;">MPH</span>,
+            <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
             or <span style="font-family: Courier
               New,Courier,monospace;">DIV</span>.&nbsp;</td>
         </tr>
@@ -1038,10 +1092,10 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
-            the result will remain in the P-Q register until
-            the next <span style="font-family: Courier
-              New,Courier,monospace;">MPH</span>, <span
-              style="font-family: Courier New,Courier,monospace;">MPY</span>,
+
+            the result will remain in the P-Q register until the next <span
+              style="font-family: Courier New,Courier,monospace;">MPH</span>,
+            <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
             or <span style="font-family: Courier
               New,Courier,monospace;">DIV</span>.<br>
           </td>
@@ -1483,6 +1537,7 @@ However,
                     A9<br>
                   </th>
                   <th style="vertical-align: top; font-weight: bold;">Data
+
                     Sector<br>
                   </th>
                 </tr>
@@ -1624,6 +1679,7 @@ However,
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
             the i/o port<br>
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Comments<br>
@@ -1675,10 +1731,10 @@ of
           </td>
           <td><br>
           </td>
-          <td rowspan="19" style="vertical-align: middle;">For
-            all of these operations, it is also possible to use main
-            memory or residual memory as the Data Source.&nbsp; For main
-            memory, use A9,A8=0,1 and for residual memory use A9,A8=1,1.<br>
+          <td rowspan="19" style="vertical-align: middle;">For all of
+            these operations, it is also possible to use main memory or
+            residual memory as the Data Source.&nbsp; For main memory,
+            use A9,A8=0,1 and for residual memory use A9,A8=1,1.<br>
             <br>
             The selection of the specific address offset within memory
             of the Data Source word in this case is TBD.<br>
@@ -2938,6 +2994,7 @@ of
       </tbody>
     </table>
     <h3><a name="Subroutine_Linkage" id="Subroutine_Linkage"></a>Subroutine
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -2953,8 +3010,9 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
-    those special addresses work.&nbsp; So a typical subroutine
-    linkage would look like this:<br>
+
+    those special addresses work.&nbsp; So a typical subroutine linkage
+    would look like this:<br>
     <br>
     <div style="margin-left: 80px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp;&nbsp;&nbsp;
@@ -3110,6 +3168,7 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
               System Handbook, Saturn Launch Vehicles</a>.</td>
         </tr>
         <tr>
@@ -3245,8 +3304,8 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
           </td>
           <td rowspan="2">Probably.<br>
           </td>
-          <td rowspan="2">The switch-selector interrupt and
-            the minor-loop interrupt <span style="font-style: italic;">are</span>
+          <td rowspan="2">The switch-selector interrupt and the
+            minor-loop interrupt <span style="font-style: italic;">are</span>
             generated internally by the LVDC/LVDA.<br>
           </td>
         </tr>
@@ -3265,6 +3324,7 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
     <br>
     <h2><a name="LVDC_Assembly_Language" id="LVDC_Assembly_Language"></a>LVDC
 Assembly
+
       Language</h2>
     <table summary="" style="text-align: left; width: 70%; margin-left:
       auto; margin-right: auto;" cellpadding="2" cellspacing="2"
@@ -3280,7 +3340,8 @@ Assembly
               Mindless Primitive" within even more interesting.<br>
             </small>
             <div style="text-align: right;"> <small>—G. D. Garduno
-                (2007), on the movie <i>Forbidden Planet</i></small> </div>
+                (2007), commenting on the movie <i>Forbidden Planet</i></small>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -3301,32 +3362,28 @@ Assembly
               even more interesting.<br>
             </small>
             <div style="text-align: right;"> <small>—Ron Burkey (2009),
-                on LVDC assembly language</small> </div>
+                commenting on LVDC assembly language</small> </div>
           </td>
         </tr>
       </tbody>
     </table>
     <br>
-    As the second quote above alludes, not a single scrap of LVDC
-    assembly language has been left behind by its developers ... or at
-    least, not in any place where we've so far been able to find
-    it.&nbsp; And I refer here not merely to the flight software, but to
-    any code sample at all!&nbsp; So even though we know what all of the
-    assembly-language opcodes do and what their mnemonics are, and even
-    though we understand the architecture of the computer, we have no
-    idea what the syntax of the assembly language was.&nbsp; For
-    example, there must have been some pseudo-ops that allowed assembly
-    of constants into memory locations.&nbsp; There must have been some
-    other pseudo-ops to set the program origin and to select memory
-    modules or memory pages.&nbsp; <span style="font-style: italic;">Must</span>
-    have been, yes, but we have no clue what they were like.<br>
+    As it turns out, the second of these two analogous "quotes" goes a
+    bit too far.&nbsp; It alludes to the fact that not a single scrap of
+    LVDC assembly language had been left behind by its developers.&nbsp;
+    But about 10 years after I wrote that hopefully slightly-humorous
+    passage, we did indeed manage to get our hands on a precious few
+    pages of a 1967 version of the LVDC flight program, <a
+      href="#Evolution_of_the_Flight_Software">as we've already
+      mentioned above</a>. &nbsp; At the moment I'm writing this, there
+    has been too little time to evaluate those scraps of source code and
+    to compare them with our previous conceptions of it.<br>
     <br>
-    Well, I exaggerate.&nbsp; Like the Krel, with their triangular
-    doorways and what-not, some indirect traces of LVDC syntax still
-    remain.&nbsp; And those indirect traces come from ... drumroll,
-    please! ... the MIT Instrumentation Labs, which had no involvement
-    whatever in the development of the LVDC and indeed was somewhat at
-    odds with IBM over it.&nbsp;<br>
+    The descriptions of LVDC assembly language that follow were instead
+    written on the basis of LVDC source code written not by IBM Federal
+    Systems Division, but rather by the MIT Instrumentation Laboratory,
+    which had no involvement whatever in the development of the LVDC and
+    indeed was somewhat at odds with IBM over it.&nbsp;<br>
     <br>
     How it came about was this.&nbsp; When IBM proposed that the LVDC be
     used in place of the AGC in the CM and LM, in 1963, it produced a
@@ -3342,11 +3399,10 @@ Assembly
     language, as written by the Instrumentation Labs personnel rather
     than by IBM.&nbsp;<br>
     <br>
-    Whether it's good LVDC code or bad, or whether it even has the
-    appropriate syntax, who knows?&nbsp; But it's all we have, so here
-    are is what it looked like.&nbsp; The '#' characters indicate the
-    beginnings of comments; the comments were added by me, and weren't
-    present in the samples originally.<br>
+    Whether it's good LVDC code or bad, who knows?&nbsp; But here's what
+    it looked like.&nbsp; The '#' characters indicate the beginnings of
+    comments; the comments were added by me, and weren't present in the
+    samples originally.<br>
     <br>
     <table summary="" style="text-align: left; margin-left: auto;
       margin-right: auto;" cellpadding="2" cellspacing="2" border="1">
@@ -3359,6 +3415,7 @@ Assembly
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
                 A<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 ADD&nbsp;&nbsp;&nbsp;&nbsp; B<br>
@@ -3713,8 +3770,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         by the assembler, and it may have translated to "<span
           style="font-family: Courier New,Courier,monospace;">ADD ZERO</span>",
 where
-        ZERO is a label for some memory location that contains the
-        value 0.</li>
+
+        ZERO is a label for some memory location that contains the value
+        0.</li>
       <li>There may have been a <span style="font-family: Courier
           New,Courier,monospace;">DEC</span> pseudo-op for assembling
         decimal numbers into memory.&nbsp; <span style="font-family:
@@ -3799,6 +3857,7 @@ where
           <li>Source code for the software run by the test &amp;
             checkout computers, as opposed to the LVDC itself.</li>
           <li>Any documents missing from the <a href="links.html#LVDC">Document
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -3807,28 +3866,14 @@ where
         Part of our purpose here is to pay homage to the original LVDC
         developers, including the developers of "the FORTRAN program"
         and the test &amp; checkout software.&nbsp; Well, we haven't
-        made much progress on the homage front.&nbsp;&nbsp; So if you
-        know any of the developers or their relatives or friends, please
-        have them contact me.&nbsp; The anecdotes of a developer would
-        be interesting, even if no notes or documents had been
-        retained.&nbsp; A lot of the information on this page that
-        doesn't come directly from the surviving documentation is
-        largely due to conversations with Barry Silverman, who has made
-        a significant effort to find and talk to original LVDC
-        developers.<br>
-        <br>
-        I was, however, able to talk to Luke Talley, who as I understand
-        it was the IBM'er in charge of Apollo guidance &amp; navigation
-        at Marshall Space Flight Center in Huntsville, Alabama, which
-        was where Wernher von Braun and his team worked.&nbsp; Luke
-        asserted that the "entire" LVDC program was coded by James
-        William Meadlock, "Jim", who later went on to found Intergraph
-        Corporation.&nbsp; Luke's assertion cannot be entirely correct,
-        since James apparently founded Intergraph in February 1969 ...
-        after Apollo 8 and prior to Apollo 9.&nbsp; Thus changes to the
-        LVDC code after Apollo 8 were presumably made by someone other
-        than James himself.&nbsp; Nevertheless, Jim Meadlock would
-        certainly be a person of interest in this story.<br>
+        made much progress on the homage front.&nbsp;&nbsp; I have a
+        handful of names, though too few yet to really form any picture
+        as to who did what.&nbsp; Hopefully be able to flesh this out
+        somewhat as time progresses and to provide that info here.&nbsp;
+        A lot of the information on this page that doesn't come directly
+        from the surviving documentation is largely due to conversations
+        with Barry Silverman, who has made a significant effort to find
+        and talk to original LVDC developers.<br>
       </div>
     </div>
     <br>
@@ -3844,6 +3889,7 @@ where
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
