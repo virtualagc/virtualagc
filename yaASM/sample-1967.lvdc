@@ -13,6 +13,12 @@
 ## Page images: www.ibiblio.org/apollo/LVDC-1967/*.jpg
 ## Mod history: 2019-07-09 RSB	Transcribed from page images.
 
+## The following two lines were not present in the original scans,
+## and have been added to conform to the requirements of the 
+## assembler program, yaASM.
+	DATA	2-14-0-000
+	CODE	4-04-1-004
+
 ## Page 273
 
 #************************************************************************
@@ -100,12 +106,6 @@ AUATAN	STO	777
 	
 ## Page 275
 
-## The following two lines were not present in the original scans,
-## and have been added to conform to the requirements of the 
-## assembler program, yaASM.
-	DATA	2-14-0-000
-	CODE	4-04-1-004
-
 #************************************************************************
 #*                                                                      *
 #*                      SINE AND COSINE ROUTINE                         *
@@ -138,11 +138,16 @@ AUSC1	ADD	KPLUS			# B0    1/2
 AUSC2	STO	UTEMP1			# B0    - (1 + Z)
 AUSC3	CLA	777
 	STO	UTEMP3
-	CALL	SCPOLY,UTEMP1		# COMPUTE SIN
+## RSB 2019 -- The following line is commented out because CALL
+## is not actually an instruction per se.  The line expands to
+## CLA/HOP lines following it.
+#	CALL	SCPOLY,UTEMP1		# COMPUTE SIN
 	CLA	UTEMP1
 	HOP*	SCPOLY
 	CLA	UTEMP1
-	CALL	SCPOLY,UTEMP2		# COMPUTE COS
+## RSB 2019 -- The following line is commented out because it is
+## precisely equivalent to the CLA/HOP lines following it.
+#	CALL	SCPOLY,UTEMP2		# COMPUTE COS
 	CLA	UTEMP2
 	HOP*	SCPOLY
 	STO	775
@@ -269,3 +274,28 @@ MMSET	STO	777
 	ADD	=001			# )INCREMENT A ADDRESS IN PRODUCT DFW
 	STO	UTEMP4			# )
 	TRA	UVDOT1			# GO FORM DOT PRODUCT
+
+## RSB, 2019:  The stuff that follows is the definition of constants and 
+## variables used in the source code above.  All of them are in a 
+## portion of memory that does not appear in the sample pages of code
+## we currently have, and thus I have reengineered this section.
+
+	CODE	2-14-0-017
+KPLUS
+KZERO	OCT	0
+
+	CODE	2-14-0-174
+UTEMP1
+UTEMP2
+UTEMP3
+
+	CODE	2-14-0-210
+UTEMP4
+UTEMP5
+UTEMP6
+UTEMP7
+
+	CODE	2-14-0-314
+UTDIV1
+
+
