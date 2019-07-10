@@ -138,18 +138,9 @@ AUSC1	ADD	KPLUS			# B0    1/2
 AUSC2	STO	UTEMP1			# B0    - (1 + Z)
 AUSC3	CLA	777
 	STO	UTEMP3
-## RSB 2019 -- The following line is commented out because CALL
-## is not actually an instruction per se.  The line expands to
-## CLA/HOP lines following it.
-#	CALL	SCPOLY,UTEMP1		# COMPUTE SIN
-	CLA	UTEMP1
-	HOP*	SCPOLY
-	CLA	UTEMP1
-## RSB 2019 -- The following line is commented out because it is
-## precisely equivalent to the CLA/HOP lines following it.
-#	CALL	SCPOLY,UTEMP2		# COMPUTE COS
-	CLA	UTEMP2
-	HOP*	SCPOLY
+	CALL	SCPOLY,UTEMP1		# COMPUTE SIN
+	STO	UTEMP1
+	CALL	SCPOLY,UTEMP2		# COMPUTE COS
 	STO	775
 	CLA	UTEMP1
 	HOP	UTEMP3
@@ -207,7 +198,7 @@ UD1	EXM	2,1,0			#  DELAY 2 CYCLES
 	ADD	775			#  RESULT OF DIVISION
 	HOP	777			# RETURN
 	
-# Page 279
+## Page 279
 
 #************************************************************************
 #*                                                                      *
@@ -264,7 +255,7 @@ MM1	HOP*	MMSET
 	CLA	UTEMP4			# )
 	ADD	=07500004		# )RESET A ADDRESS, INCREMENT B ADDRESS
 	STO	UTEMP4			# )           IN PRODUCT DFW
-# Page 280
+## Page 280
 	CLA	UTEMP7			#     )
 	ADD	=001			#     )INCREMENT A ADDRESS IN STORE DFW
 	STO	UTEMP7			#     )
