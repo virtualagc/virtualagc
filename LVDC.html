@@ -71,6 +71,11 @@ Launch
 
 
 
+
+
+
+
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -193,6 +198,11 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
+
+
+
 
 
 
@@ -383,6 +393,11 @@ Launch
 
 
 
+
+
+
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -460,6 +475,9 @@ Launch
           enlarge" alt="" border="2" height="240" width="320"></a><a
         href="LVDC-1967/LVDC-1967-327.jpg"><br>
       </a></div>
+    <p>There's some additional <a href="#ANATOMY">description later of
+        the anatomy of these assembly listings</a>.<br>
+    </p>
     <p>The middle group of pages shows a few auxiliary subroutines for
       computing the sine, cosine, arctangent, and spare root functions,
       plus a 3×3 matrix-multiply routine, and unfortunately does not
@@ -468,6 +486,11 @@ Launch
       samples.&nbsp; Note that these are some of the very algorithms
       described in section 13 of <a
         href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
+
+
+
+
+
 
 
 
@@ -573,6 +596,11 @@ of
 
 
 
+
+
+
+
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -609,6 +637,11 @@ This
 
 
 
+
+
+
+
+
         is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp; <br>
@@ -627,9 +660,19 @@ Astrionics
 
 
 
+
+
+
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
+
+
+
 
 
 
@@ -823,6 +866,11 @@ of
 
 
 
+
+
+
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -871,6 +919,11 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
+
+
+
+
 
 
 
@@ -1107,6 +1160,11 @@ However,
 
 
 
+
+
+
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -1226,6 +1284,11 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
+
+
+
 
 
 
@@ -1392,6 +1455,11 @@ However,
             special, as described in <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">the
 
+
+
+
+
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>0775 (octal) stores into the Product-Quotient register
@@ -1444,8 +1512,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 </b><b><tt>STO 776</tt></b><b> or </b><b><tt>STO 777</tt></b><b>
                   to save the HOP constant for the return address.&nbsp;
                   Conversely, the instruction for returning from the
-                  subroutine or interrupt is a matching </b><b></b><b><tt>HOP
-
+                  subroutine or interrupt is a matching </b><b><tt>HOP
                     776</tt></b><b> or </b><b><tt>HOP</tt></b><b><tt>
                     777</tt></b><b> instruction.</b><br>
               </p>
@@ -1744,6 +1811,11 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -1885,6 +1957,11 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
+
+
+
+
 
 
 
@@ -3221,6 +3298,11 @@ of
 
 
 
+
+
+
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -3236,6 +3318,11 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
+
+
+
+
 
 
 
@@ -3365,11 +3452,9 @@ Only
       href="Documents/MSFC-MAN-503-SaturnFlightManual-SA503.pdf"> Saturn
       Flight Manual, SA-503</a> p. 7-21, respectively), and if one
     accounts for the differences in language between the two documents,
-    the interrupts are almost entirely the same.<a
-      href="Documents/MSFC-MAN-206-SkylabSaturnIBFlightManual.pdf"></a>
-    I've marked the ones in <span style="color: rgb(255, 0, 0);">red</span>
-    that seem different to me, as well as any other points of particular
-    difficulty for me.<br>
+    the interrupts are almost entirely the same. I've marked the ones in
+    <span style="color: rgb(255, 0, 0);">red</span> that seem different
+    to me, as well as any other points of particular difficulty for me.<br>
     <br>
     <table summary="" style="text-align: left; margin-left: auto;
       margin-right: auto;" cellpadding="2" cellspacing="2" border="1">
@@ -3404,6 +3489,11 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
+
+
+
 
 
 
@@ -3589,6 +3679,11 @@ Assembly
 
 
 
+
+
+
+
+
       Language</h2>
     <table summary="" style="text-align: left; width: 70%; margin-left:
       auto; margin-right: auto;" cellpadding="2" cellspacing="2"
@@ -3640,6 +3735,11 @@ Assembly
       href="#MIT_Instrumentation_Laboratory_vs_IBM">the next section</a>)!&nbsp;
 
 
+
+
+
+
+
     But about 10 years after I wrote that hopefully slightly-humorous
     passage, we did indeed manage to get our hands on a precious few
     pages of a 1967 version of the LVDC flight program, <a
@@ -3668,7 +3768,17 @@ Assembly
     be treated as a comment, and doesn't require any '*' prefix.<br>
     <br>
     <i>Character set</i>:&nbsp; Upper-case alphabetic, numeric, and some
-    punctuation.<br>
+    punctuation.&nbsp; This isn't really any great surprise, of course,
+    if you reflect that all of the source code was supplied to the
+    computer on computer punch cards, and that the character sets
+    supported by keypunch machines did not include lower-case characters
+    anyway.&nbsp; Douglas Jones has written a fun <a
+      href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
+
+
+      of punch cards</a>, if you're interested in that kind of thing.<br>
     <br>
     <i>Symbols</i> (names of variables, constants, subroutines,
     ...):&nbsp; 6 characters or less, alphanumeric, with the leading
@@ -3703,24 +3813,28 @@ Assembly
       <li>Columns 1-6:&nbsp; Optional symbol, supplying a name for the
         memory location of the current line of code.&nbsp; The original
         coders apparently called these "left-hand symbols".</li>
-      <li>Columns 8-11:&nbsp; The name of the CPU instruction (or <tt>CALL</tt>).&nbsp;
+      <li>Columns 8-15:&nbsp; The name of the CPU instruction (or <tt>CALL</tt>).&nbsp;
+
+
+
+
+
 
         Notice that this is <i>not</i> aligned with what is sometimes
         thought of as the default position of a "tab stop", which would
         have been at column 9.</li>
-      <li>Columns 12-:&nbsp; The CPU instruction's operand. The width of
-        this field is variable, but it never seems to contain
-        spaces.&nbsp; I'll talk more about these operands below.<br>
+      <li>Columns 16-28:&nbsp; The CPU instruction's operand. I'll talk
+        more about these operands below.<br>
       </li>
-      <li>Remainder:&nbsp; Optional comment.&nbsp; Often, even if there
-        is no substantive comment, it seems to conclude with a 6-digit
-        sequence number which is a multiple of 10, aligned at the far
-        right.&nbsp; Whether the sequence number is generated
-        automatically by the assembler in printouts, or whether it
-        physically appeared on the original computer-punch cards, I
-        don't know, but I suspect the latter.&nbsp; The sequence number
-        doesn't seem to appear on blank lines, nor on <tt>CLA</tt>/<tt>HOP*</tt>
-        lines expanded from the <tt>CALL</tt> macro.</li>
+      <li>29-75:&nbsp; Comment, possibly blank.&nbsp;&nbsp;</li>
+      <li>75-80:&nbsp; Sequence number, consisting of 6 decimal
+        digits.&nbsp; The sequence numbers are unique, and in increasing
+        order from one line to the next.&nbsp; All the examples I've
+        seen are multiples of 10, though I'm sure that it's possible to
+        have sequence numbers in between as well.&nbsp; In the assembly
+        listing, the sequence number doesn't seem to appear on blank
+        lines, nor on <tt>CLA</tt>/<tt>HOP*</tt> lines expanded from
+        the <tt>CALL</tt> macro.</li>
     </ul>
     <p><i>Instruction operands</i>:&nbsp; Operand formats differ for
       some CPU instruction types, but most of them require a variable (a
@@ -3794,6 +3908,11 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>i</i>,<i>j</i>,<i>k</i></tt>",
+
+
+
+
+
 
         where <tt><i>i</i></tt>, <tt><i>j</i></tt>, and <tt><i>k</i></tt>
         are all small integers.&nbsp; I cannot be sure, but referring to
@@ -3933,7 +4052,121 @@ Assembly
         </tr>
       </tbody>
     </table>
-    <p><br>
+    <p><a name="ANATOMY"></a><i><br>
+        Anatomy of the assembly listing</i>:&nbsp; Most of what's in the
+      assembly listings should be obvious from the descriptions above,
+      but there are a few things that it might be helpful to have some
+      additional explanation for.&nbsp; So here are my own inferences on
+      the subject.&nbsp; First, consider a "normal" section of the
+      listing, containing code, comments, etc., as opposed to report
+      tables generated by the assembler, to which I've added some markup
+      (in green) for explanatory purposes:<br>
+    </p>
+    <div align="center"><img alt="" src="LVDC-1967/anatomyCode.jpg"
+        height="310" width="1005"> </div>
+    <ul>
+      <li>Columns IM, IS, S, LOC, DM, and DS:&nbsp; These columns are
+        generated by the assembler and represent <a
+          href="#Layout_of_Memory_Words">the fields of the HOP constant</a>
+        associated with the line of code, from the viewpoint of the
+        assembler.&nbsp; (The only HOP fields missing are DUPIN and
+        DUPDN, which I suppose would be global settings affecting all
+        memory, as opposed to varying on a line by line basis.)&nbsp; In
+        particular, the IM and IS fields give the memory module and
+        sector in which the line of code appears, and LOC gives the
+        offset into the memory sector of the word in which the code for
+        the instruction is stored.</li>
+      <li>Columns A8-A1, A9, and OP:&nbsp; These columns are also
+        generated by the assembler, and represent <a
+          href="#Layout_of_Memory_Words">fields of the assembled
+          instruction</a> associated with the line of code.&nbsp; In
+        particular, OP is the octal value of the particular CPU
+        instruction, <a href="#CPU_Instructions">as tabulated earlier</a>.<br>
+      </li>
+      <li>Column CONSTANT:&nbsp; Yet another field generated by the
+        assembler.&nbsp; Most lines don't have it, but it appears
+        whenever the operand of the instruction is the address of a
+        numerical constant stored at some other place in memory, but for
+        which the assembler knows the value.&nbsp; For example, both of
+        the lines in the sample above are the same, 342452244, because
+        both of them relate to a <tt>HOP* SCPOLY</tt>
+        instruction.&nbsp; As I've already explained above, what the
+        assembler does with a line of code like this is to find the <tt>SCPOLY</tt>
+        routine (which conveniently for us, actually appears in sample
+        above as well), figures out its HOP constant, allocates a word
+        of memory, stores the HOP constant at that location, and then
+        embeds the address of that location into the instruction.&nbsp;
+        You can actually see all that happening in the sample.&nbsp; The
+        HOP constant itself corresponds to the values IM=4, IS=04, S=1,
+        LOC=124, DM=2, DS=14 at the line of code <tt>SCPOLY STO 777</tt>.&nbsp;
+
+
+        I know it's probably tough to do those conversions in your head,
+        so a handy python script (<a
+href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
+        is available that can do it for you; and in fact, if you feed
+        342452244 into unHOP.py, the expected values of IM, IS, S, etc.,
+        pop out.&nbsp; (You also get the extra info that DUPIN=1 and
+        DUPDN=1 ... more on which below.)&nbsp; Moreover, if you look at
+        the lines where the constant appears, namely the lines reading
+        <meta http-equiv="content-type" content="text/html;
+          charset=UTF-8">
+        <tt>HOP* SCPOLY</tt>, and you look at the assembled code, you'll
+        see that the address at which the HOP constant is stored must be
+        DM=2, DS=14, LOC=342.</li>
+      <li>Column EXPANSION:&nbsp; The final field generated by the
+        assembler.&nbsp; It contains the character '+' for instructions
+        which have been expanded from the <tt>CALL</tt> macro, but is
+        blank otherwise.&nbsp; Whether there are other things that can
+        appear there, I can't say.</li>
+      <li>Columns LEFT-HAND SYMBOL, INSTRUCTION, OPERAND, COMMENT,
+        SEQUENCE:&nbsp; I've covered these above, and suspect that they
+        may come directly from the punch cards, unchanged.</li>
+    </ul>
+    <p>An interesting factoid you can deduce from the sample information
+      just given is that this flight program was used on an LVDC
+      configured for <u>DUPLEX</u> mode.&nbsp; We know this because
+      we've just seen that DUPIN and DUPDN are 1; in SIMPLEX mode they
+      would have been 0.&nbsp; Recall that there are two possible memory
+      configurations, "SIMPLEX" and "DUPLEX".&nbsp; In DUPLEX mode, half
+      of the memory is used to precisely mirror the other half, thus
+      even though the same number of memory modules might be available
+      in one as in the other, only half as much memory is actually
+      accessible to the software in DUPLEX mode as in SIMPLEX
+      mode.&nbsp; Perhaps that's why the S (syllable) field is always 1
+      in the sample code shown.&nbsp; Recall that memory words (26 bits)
+      comprise two 13 bit syllables each.&nbsp; Since instructions
+      assemble to just a single syllable (4-bit OP + 1-bit A9 + 8-bit
+      A8-1), you'd expect the S field to toggle from 0 to 1 and back
+      again as you went from one line of code to the next.&nbsp; In
+      SIMPLEX mode, they probably would, but they do not in this
+      particular flight program because syllable 1 is redundant to
+      syllable 0.<br>
+    </p>
+    <p>On the other hand ... 26-bit constants like HOP constants still
+      seem to use up both syllables of the memory they're stored at, so
+      perhaps there's something I'm not grasping about usage of SIMPLEX
+      vs DUPLEX.<br>
+    </p>
+    <p>The only other pages of the assembly listing we currently have
+      are from the SEGMENT CROSS REFERENCE table, which is something
+      generated by the assembler:<br>
+    </p>
+    <div align="center"><img alt="" src="LVDC-1967/anatomyXref.jpg"
+        height="74" width="1328"><br>
+    </div>
+    <p>What this does is list each symbol in the program, tell you where
+      it appears in memory, and they tells you how to find all <i>uses</i>
+      of that symbol in the code.&nbsp; It should be pretty obvious to
+      you that in this example, the symbol <tt>UTEMP1</tt> is in memory
+      module 2, sector 17, at address 174.&nbsp; It may or may not be
+      obvious that where the symbol is used is at the SEQUENCE numbers
+      085370, 116640, etc.&nbsp; Alas, we do not have the page of the
+      assembly listing on which <tt>UTEMP1</tt> is allocated, but we do
+      have several examples of where it is used.&nbsp; For example, if
+      you look at the sample code I've marked up in green just a bit
+      above, you can see it used at SEQUENCE number 117600, just as
+      expected.<br>
     </p>
     <h2><a name="MIT_Instrumentation_Laboratory_vs_IBM"></a>MIT
       Instrumentation Laboratory vs IBM Federal Systems Division</h2>
@@ -3980,6 +4213,11 @@ Assembly
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
 
 
 
@@ -4319,13 +4557,27 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
     <div style="text-align: center;">
       <div style="text-align: left;"> The inclusion of this section is
         an act of pure optimism.&nbsp; Since we do not have access to
-        any existing copy of the flight software, we have little use for
-        a CPU simulation.<br>
+        any existing full copy of the flight software, we have little
+        use for a CPU simulation.<br>
         <br>
         <div style="text-align: center;"> <img style="width: 770px;
             height: 236px;" alt="" src="Saturn-GuidanceEquations.jpg"
             height="236" width="770"><br>
         </div>
+        <br>
+        An important thing to understand, in terms of simulation, is
+        that the LVDC was not fast enough to keep up with the real-time
+        calculations needed to directly control the rocket.&nbsp; The
+        results would have been too stair-steppy, too choppy.&nbsp; 25
+        outputs per second isn't enough!&nbsp; What happened instead is
+        that a separate unit — the LVD<i>A</i> — was needed to accept
+        the digital outputs from the LVDC and turn them into
+        smoothly-changing controls for the rocket. And when I say
+        smoothly-changing, I mean both smoothly in <i>time</i> as well
+        as in terms of electrical properties. Thus any decent simulation
+        would require simulation of not only the LVDC but also of the
+        LVDA, the latter of which is currently outside the scope of
+        what's being provided here.<br>
         <br>
         An interesting aspect of the LVDC is that since it is
         essentially a "black box" that outputs real-time control signals
@@ -4344,7 +4596,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         higher degree of realism from my personal viewpoint would be to
         try and implement the guidance equations in LVDC assembly
         language, so that it could be run in <span style="font-weight:
-          bold;">yaLVDC</span>.<br>
+          bold;">yaLVDC</span>, and I think the NASSP project would like
+        to do that if we're every capable of obliging them.<br>
         <br>
       </div>
     </div>
@@ -4352,11 +4605,18 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         id="yaLVDCASM_the_LVDC_Cross-Assembler"></a>yaASM, the LVDC
       Cross-Assembler</h2>
     Because of the tremendous similarity between the LVDC and <a
-      href="Gemini.html">Gemini OBC</a> computers, the Gemini OBC
-    assembler <a href="Gemini.html#yaOBCASM_the_OBC_Cross-Assembler"><span
-        style="font-weight: bold;">yaASM</span></a> is used for both
-    assembly languages.&nbsp; When assembling LVDC code, the
-    command-line switch "--lvdc" is added.<br>
+      href="Gemini.html">Gemini OBC</a> computers, my intention was
+    originally to use the Gemini OBC assembler <a
+      href="Gemini.html#yaOBCASM_the_OBC_Cross-Assembler"><span
+        style="font-weight: bold;">yaASM</span></a> for both assembly
+    languages.&nbsp; When assembling LVDC code, the command-line switch
+    "--lvdc" is added.&nbsp; However, I never had any actual LVDC code
+    to test it with when I made those changes to yaASM.&nbsp; Now that I
+    have some actual LVDC source code, I've exploring a cleaner
+    replacement for it that doesn't try to span the OBC world.&nbsp; The
+    executive summary, though, is that as of right now (July 2019) we
+    have no working assembler for LVDC code.&nbsp; Hopefully coming Real
+    Soon Now.<br>
     <div style="text-align: center;">
       <div style="text-align: left;">
         <h2><a name="Plea_for_Data" id="Plea_for_Data"></a>Plea for Data</h2>
@@ -4375,12 +4635,18 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
             <li>Test &amp; checkout software.</li>
             <li>Even sample code.</li>
           </ul>
-          <li>The source code of "the FORTRAN program" from which the
-            LVDC assembly-language was created.</li>
+          <li>The source code of "the FORTRAN program", if there really
+            is such a thing, from which the LVDC assembly-language was
+            manually coded.</li>
           <li>Manuals explaning the syntax of LVDC assembly-language.</li>
           <li>Source code for the software run by the test &amp;
             checkout computers, as opposed to the LVDC itself.</li>
           <li>Any documents missing from the <a href="links.html#LVDC">Document
+
+
+
+
+
 
 
 
@@ -4434,10 +4700,15 @@ Commons
 
 
 
+
+
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-07-11.<br>
+          2019-07-12.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
