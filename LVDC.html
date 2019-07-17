@@ -90,6 +90,7 @@ Launch
 
 
 
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -212,6 +213,7 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
 
 
 
@@ -440,6 +442,7 @@ Launch
 
 
 
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -524,6 +527,7 @@ Launch
 
 
 
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -560,6 +564,7 @@ Launch
     listing, you must apply to me personally (email address at the
     bottom of the page), and provide <a
 href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identification-when-applying-a-job">proof
+
 
 
 
@@ -744,6 +749,7 @@ of
 
 
 
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -770,6 +776,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
 
 
 
@@ -837,9 +844,11 @@ Astrionics
 
 
 
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -1071,6 +1080,7 @@ of
 
 
 
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1119,6 +1129,7 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
 
 
 
@@ -1393,6 +1404,7 @@ However,
 
 
 
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -1512,6 +1524,7 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -1699,6 +1712,7 @@ However,
             "residual sector".&nbsp; The following addresses are
             special, as described in <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">the
+
 
 
 
@@ -2091,6 +2105,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2232,6 +2247,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
 
 
 
@@ -3606,6 +3622,7 @@ of
 
 
 
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -3621,6 +3638,7 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
 
 
 
@@ -3806,6 +3824,7 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -4030,6 +4049,7 @@ Assembly
 
 
 
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -4051,8 +4071,9 @@ Assembly
     <br>
     <i>Code comments</i>:&nbsp; Full-line comments seem to be prefixed
     by the character '*' in column 1.&nbsp; Anything left over at the
-    end of a line after the beginning of a line has been parsed seems to
-    be treated as a comment, and doesn't require any '*' prefix.<br>
+    end of a line after the beginning of a line has been correctly
+    parsed seems to be treated as a comment, and doesn't require any '*'
+    prefix.<br>
     <br>
     <i>Character set</i>:&nbsp; Upper-case alphabetic, numeric, and some
     punctuation.&nbsp; This isn't really any great surprise, of course,
@@ -4062,6 +4083,7 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
 
 
 
@@ -4093,22 +4115,25 @@ Assembly
     stored in read-only memory which had to be <i>manufactured</i>
     rather than simply written to.&nbsp; So installing the software in
     the LVDC was a far less painful, less expensive, much quicker
-    process than installing software in the AGC.)<br>
+    process than installing software in the AGC.&nbsp; In the case of
+    the AS-206RAM program listing, the assembler helpfully reports that
+    the punch tape is 432 feet long.)<br>
     <br>
     <i>Symbols</i> (names of variables, constants, subroutines,
     ...):&nbsp; 6 characters or less, alphanumeric, with the leading
-    character alphabetic.&nbsp; They may also contain the character ".".<br>
+    character alphabetic.&nbsp; They may also contain the character ".",
+    though not in the leading position.<br>
     <br>
     <i>The </i><i><tt>CALL</tt></i><i> macro</i>:&nbsp; <tt>CALL</tt>
     is used as in source code as if it were a CPU instruction, but it is
-    not.&nbsp; There are several variants.&nbsp; They act like macros
-    (see below), but seem to be hard-coded into the assembler rather
-    than being defined in the source code by the general macro facility.<br>
+    not.&nbsp; There are both 2-argument and 2-argument variants.&nbsp;
+    They act like macros (see below), but seem to be hard-coded into the
+    assembler rather than being defined in the source code by the
+    general macro facility.<br>
     <br>
     The 2-argument version calls a subroutine having a single input
     argument.&nbsp; An "instruction" of the form "<tt>CALL <i>ARG1</i>,<i>ARG2</i></tt>"
-    is otherwise ignored but is replaced by a pair of actual
-    instructions, <br>
+    is replaced by a pair of actual instructions, <br>
     <blockquote><tt>CLA <i>ARG2</i></tt><br>
       <tt>HOP* <i>ARG1<br>
         </i></tt></blockquote>
@@ -4135,15 +4160,15 @@ Assembly
         ARG1, ARG2, and so on ...<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ENDMAC<br>
       </tt></blockquote>
-    Subsequently, <tt>NAME</tt> can be used as if it were an
+    Subsequently, <i><tt>NAME</tt></i> can be used as if it were an
     instruction name or pseudo-op.<br>
     <br>
     In the examples I've seen, <tt>ARG1</tt>, <tt>ARG2</tt>, and so on
     are literal.&nbsp; Whether that's a requirement of the assembler or
     whether whoever wrote the macros I saw just happened to use the
     parameter names <tt>ARG1</tt>, ..., I can't say.&nbsp; Thus the
-    CALL macro mentioned above <i>could</i> have been defined (although
-    it does not seem to have been) as:<br>
+    <tt> CALL</tt> macro mentioned above <i>could</i> have been defined
+    (although it does not seem to have been) as:<br>
     <blockquote><tt>CALL&nbsp;&nbsp;&nbsp; MACRO&nbsp;&nbsp;&nbsp;
         ARG1,ARG2<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; CLA&nbsp;&nbsp;&nbsp;
@@ -4157,12 +4182,16 @@ Assembly
     containing a decimal point.&nbsp; Allows suffixes like "<tt>E</tt><tt><i>n</i></tt>"
     for powers of 10, "<tt>B<i>n</i></tt>" for binary scaling, or both.)<br>
     <br>
-    <i>Format of an instruction line</i>:<br>
+    <i>Format of an instruction line</i>:&nbsp; Since I inferred the
+    latter from the assembly listing, I can't guarantee that the
+    punch-card format is as shown, even though the correct number of
+    columns is used:<br>
     <ul>
       <li>Columns 1-6:&nbsp; Optional symbol, supplying a name for the
         memory location of the current line of code.&nbsp; The original
         coders apparently called these "left-hand symbols".</li>
       <li>Columns 8-15:&nbsp; The name of the CPU instruction (or <tt>CALL</tt>).&nbsp;
+
 
 
 
@@ -4191,13 +4220,13 @@ Assembly
       </li>
       <li>29-75:&nbsp; Comment, possibly blank.&nbsp;&nbsp;</li>
       <li>75-80:&nbsp; Sequence number, consisting of 6 decimal
-        digits.&nbsp; The sequence numbers are unique, and in increasing
-        order from one line to the next.&nbsp; However, there are a few
-        lines apparently having no sequence number, such as the first
-        ten lines on p. 67 of the AS-206RAM listing.&nbsp; Given that
-        fact, I think the cards were processed in the order they were
-        encountered, rather than being rearranged internally to the
-        assembler in sequence-number order.</li>
+        digits.&nbsp; The sequence numbers should be unique, and are in
+        increasing order from one line to the next.&nbsp; However, there
+        are a few lines apparently having no sequence number, such as
+        the first ten lines on p. 67 of the AS-206RAM listing.&nbsp;
+        Given that fact, I think the cards were processed in the order
+        they were encountered, rather than being rearranged internally
+        to the assembler in sequence-number order.</li>
     </ul>
     <p><i>Instruction operands</i>:&nbsp; Operand formats differ for
       some CPU instruction types, but most of them require a variable (a
@@ -4237,24 +4266,36 @@ Assembly
         line), and the fully resolved expression will appear marked with
         a "+" character as if it were a macro expansion ... which it
         probably is.&nbsp; For example, if <tt>(4*CBSTNO+1)</tt>
-        resolves to 57, then the expanded instruction would be <tt>CBTAB+57</tt>.
+        resolves to 57, then the expanded instruction would be <tt>CBTAB+57</tt>.&nbsp;
+        Note that such expressions, depending on what they contain, may
+        resolve <i>either</i> to an address in memory, or else to a
+        constant value.&nbsp; In the latter case, the numerical constant
+        is treated like the constants described in the following item.<br>
       </li>
-      <li>The character '=' prefixed to a literal numerical
-        constant.&nbsp; It looks to me as if the assembler does
-        something similar here to that it does for <tt>HOP*</tt> (see
-        above):&nbsp; It allocates an unnamed variable in the current
-        DM/DS, stores the value of the constant at that variable, and
-        then uses the location of the new-created variable as the
-        operand.&nbsp; I don't know if the assembler implements any kind
-        of reusability for these unnamed variables.<br>
+      <li>The character <tt>=</tt>, prefixed to a literal numerical
+        constant.&nbsp; Here the assembler does something similar here
+        to that it does for <tt>HOP*</tt> (see above):&nbsp; It
+        allocates an <i>unnamed</i> variable in the current DM/DS,
+        stores the value of the constant at that variable, and then uses
+        the location of the new-created variable as the operand.&nbsp;
+        Each numerically-unique constant is stored only once as a
+        variable and is reused everywhere that requires it.&nbsp; For
+        example, in the AS-206RAM LVDC assembly listing, <tt>=1B18</tt>
+        is an operand in the lines with sequence numbers 051570 and
+        051910, while <tt>=00000004</tt> is used at 051950 and 053380,
+        but they both evaluate to the same numerical value and thus
+        reference the same memory location (2-06-076).<br>
       </li>
     </ol>
     <p>Except for the <tt>HOP</tt>/<tt>HOP*</tt> instructions, the
       other CPU instructions that transfer program control target a
       location in the current IM/IS rather than a variable in the DM/DS,
-      and thus require a different type of operand.&nbsp; Those
-      instructiona (<tt>TRA</tt>, <tt>TNZ</tt>, <tt>TMI</tt>) thus
-      have operands in one of the following two formats:<br>
+      and thus require a different type of operand.&nbsp; (Though as
+      mentioned in the CPU-instruction table earlier, <tt>TRA*</tt> is
+      actually a synonym for <tt>HOP</tt>, and not really a <tt>TRA</tt>
+      instruction.)&nbsp; Those instructions (<tt>TRA</tt>, <tt>TNZ</tt>,
+      <tt>TMI</tt>) thus have operands in one of the following two
+      formats:<br>
     </p>
     <ul>
       <li>The symbolic name of a code location in the current IM/IS.</li>
@@ -4273,6 +4314,7 @@ Assembly
         latter two shorthand instructions take either "<tt>0</tt>", "<tt>1</tt>",
 
 
+
         or "<tt>2</tt>" as the operand.&nbsp; The latter two thus
         represent logical right or left shifts by 1 or 2
         positions.&nbsp; With "<tt>0</tt>" as the operand, as a special
@@ -4281,6 +4323,7 @@ Assembly
         operand.&nbsp; <b>Note:</b>&nbsp; In the AS-206RAM listing,
         there is a curiosity at various places, such as an <tt>SHL 7</tt>
         instruction at sequence number 055640, and&nbsp;similarly an <tt>SHL
+
           4</tt> at 056210<tt></tt>.&nbsp; These are impossible
         according to the documentation of <tt>SHF</tt>, and in fact the
         assembler assembles both as <tt>SHL 2</tt> instructions.&nbsp;
@@ -4299,6 +4342,7 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>i</i>,<i>j</i>,<i>k</i></tt>",
+
 
 
 
@@ -4341,29 +4385,13 @@ Assembly
       <li>I believe the <tt>PIO</tt> instruction accepts only literal
         octal constants.</li>
     </ul>
-    <p><i>Shorthand for </i><tt>HOP</tt> <i>instruction</i>:&nbsp; I
-      think that a line (card) containing <i>only</i> an octal HOP
-      constant in the same format as displayed in the assembly listing,<br>
-    </p>
-    <blockquote><tt><i>hopconstant</i></tt><br>
-    </blockquote>
-    may be treated by the assembler as synonymous with<br>
-    <blockquote>
-      <blockquote><tt>HOP =<i>hopconstant</i></tt><br>
-      </blockquote>
-    </blockquote>
-    There is a line with no sequence number between 044700 and 044710
-    that seems to do exactly that.&nbsp; This may be an unintended
-    feature, since the line is tagged in a way that may indicate an
-    assembler error.<br>
-    <p><i>Parentheses in operands</i>:&nbsp; It appears to me that in
-      general, whenever paired parentheses are found in an operand, <tt>(<i>expression</i>)</tt>,
-      the internal content of the parentheses is an arithmetical
-      expression involving only literal numbers and macro
-      constants.&nbsp; More generally, I would infer that the assembler
-      had a leading preprocessor pass, and that the preprocessor pass
-      expanded all such expressions, as well as expanding all macros. <br>
-    </p>
+    <i>Parentheses in operands</i>:&nbsp; It appears to me that in
+    general, whenever paired parentheses are found in an operand, <tt>(<i>expression</i>)</tt>,
+    the internal content of the parentheses is an arithmetical
+    expression involving only literal numbers and macro constants.&nbsp;
+    More generally, I would infer that the assembler had a leading
+    preprocessor pass, and that the preprocessor pass expanded all such
+    expressions, as well as expanding all macros. <br>
     <p><i>Conditional assembly</i>:&nbsp; Code can be conditionally
       retained or discarded by the preprocessor the basis of a test,
       with the syntax<br>
@@ -4375,11 +4403,12 @@ Assembly
         </tt></p>
     </blockquote>
     Here, <tt><i>macroconstant</i></tt> would be a symbol defined with
-    an EQU pseudo-op as described below.<br>
+    an <tt>EQU</tt> pseudo-op as described below.<br>
     <ul>
     </ul>
-    <p><i>Pseudo-ops</i>:&nbsp; The following table shows the pseudo-ops
-      I've seen so far, and what I've been able to guess about them:<br>
+    <p><i>Pseudo-ops</i>:&nbsp; The following table shows every type of
+      pseudo-op I've encountered in the AS-206RAM program listing, and
+      what I've been able to guess about them:<br>
     </p>
     <table cellpadding="2" cellspacing="2" border="1" width="100%">
       <tbody>
@@ -4689,19 +4718,54 @@ Assembly
         038680 <br>
         038820<br>
       </tt></blockquote>
-    <p>Memory-sector overflows:&nbsp; The assembler attempts to prevent
-      sector overflows — i.e., linear sequences of code that proceed
-      past the end of a memory sector — by automatically inserting <tt>HOP</tt>
-      instructions to the next memory sector in the middle of such
-      sequences, or else inserting <tt>TRA</tt> instructions to the
-      beginning of the current sector but the opposite syllable.&nbsp;
-      If it succeeds, then the fix may be transparent.&nbsp; For
-      whatever reason, it sometimes fails in doing so, in which case the
-      executable is broken at that point.&nbsp; Regardless of whether it
-      succeeds or fails, the problem point is marked with a <tt>*</tt>
-      in column 1 of the assembly listing.&nbsp; Such overflows, some
-      successfully fixed automatically and some not, are found at the
-      following places in the AS-206RAM listing:<br>
+    <p>Syllable shifts in the program flow:&nbsp; Recall that each
+      26-bit word of memory (not including the parity bit) consists of
+      two 13-bit syllables, referred to as syllable 0 and syllable
+      1.&nbsp; Each CPU instruction assembles to a single 13-bit value,
+      and thus fits precisely within a single syllable, and any word in
+      memory can simultaneously hold two separate instructions.&nbsp;
+      When the CPU executes code in a given memory sector, it first
+      sequences through all of the instructions in syllable 0,
+      apparently skipping the final address 377, and then begins
+      sequencing through all of the instructions in syllable 1.&nbsp;
+      Thus no special provision is needed by the code or the assembler
+      for transitioning from syllable 0 to syllable 1 at the end of a
+      memory sector.&nbsp; (Unless, for example, there are nearby
+      instructions like <tt>TRA</tt>, <tt>TMI</tt>, or <tt>TNZ</tt>
+      that require their target addresses to be in the same syllable
+      group as the instruction itself.)&nbsp; <br>
+    </p>
+    <p>In reaching the end of a memory sector for syllable 1, on the
+      other hand, the CPU does <i>not</i> automatically switch to
+      syllable one of the next higher memory sector.&nbsp; As a
+      convenience to the programmer, the assembler handles this
+      situation by transparently inserting an extra <tt>HOP</tt> or <tt>TRA</tt>
+      instruction, whichever is suitable, targeting some other syllable
+      of some other memory sector.&nbsp; Usually that "other" memory
+      sector is simply the next higher one in the memory module, or to
+      the first sector in the next memory module.&nbsp; But sometimes
+      it's some other sector, and I'm not clear how that decision is
+      made.&nbsp; Nor it is always clear to me yet why the assembler
+      doesn't always wait until the final syllable in the memory sector
+      before doing so.&nbsp; <br>
+    </p>
+    <p>An example is near sequence number 050170 in the AS-206RAM
+      program listing.&nbsp; The assembler automatically inserts a <tt>HOP</tt>
+      at address 0-12-1-374 (i.e., module 0, sector 12, location 374,
+      syllable 1) that transfers control to address 0-13-0-000.&nbsp;
+      Thus addresses 0-12-1-375 through 377 are skipped past.&nbsp; One
+      might argue that the assembler has skipped those values because it
+      has previously stored something there already, but as it happens,
+      the octal memory table at the end of the program listing tells us
+      that those syllables are in fact unused.&nbsp; Well ... I'm sure
+      the answer will present itself in time.<br>
+    </p>
+    <p>But regardless, those points at which a sector change is
+      performed due to reaching the end of the sector, regardless of
+      whether or not the assembler inserts any <tt>HOP</tt> or <tt>TRA</tt>
+      instructions, is marked with a <tt>*</tt> in column 1 of the
+      assembly listing.&nbsp; They are found at the following places in
+      the AS-206RAM listing:<br>
     </p>
     <blockquote>
       <p><tt>044700 047910 050170 052790 054910 057850 062640 065020
@@ -4798,6 +4862,7 @@ Assembly
 
 
 
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
@@ -4843,20 +4908,41 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP
     <p>Finally, the octal listing of the program simply shows what
       appears at each memory location in the modules, as either a single
       26-bit octal word or as two 13-bit syllables.&nbsp; So you can see
-      there what each instruction and each pseudo-op assembles to in
-      octal form.&nbsp; One puzzle I don't understand, however, is the
-      question of SIMPLEX vs DUPLEX memory configurations.&nbsp; Recall
-      that there are two possible memory configurations, "SIMPLEX" and
+      in the octal table what each instruction and each pseudo-op
+      assembles to in octal form.&nbsp; In each of the numbered columns
+      of the table, syllable 1 of the memory word is on the left and
+      syllable 0 is on the right.&nbsp; For example, referring to the
+      image below, in module 2, sector 00, location 0201 (or 2-00-0201
+      for short), syllable 1 has the value 10170 and syllable 0 has the
+      value 00174.&nbsp; It's important to understand the alignment of
+      these 13-bit values within the 5-digit octal (15-bit) values shown
+      in the table.&nbsp; Specifically, they are aligned to the <i>left</i>,
+      at the most-significant bits, and the two least-significant bits
+      are 0.&nbsp; This is the opposite alignment of what most people
+      would expect in the current day-and-age, so the values in the
+      octal table in many cases would look more like what would be
+      expected if they were divided by 4:&nbsp; 10170 → 02036 and 00174
+      → 00037.&nbsp; Similar considerations apply if you try to see how
+      any given word looks from its two syllables, or vice-versa:&nbsp;
+      You can't simply stick the octal digits of the two syllables
+      side-by-side.<br>
+    </p>
+    <div align="center"><img alt="" src="anatomyOctal.jpg" height="134"
+        width="1114"><br>
+    </div>
+    <p>One puzzle I don't understand, however, is the question of
+      SIMPLEX vs DUPLEX memory configurations.&nbsp; Recall that there
+      are two possible memory configurations, "SIMPLEX" and
       "DUPLEX".&nbsp; In DUPLEX mode, half of the memory is used to
       precisely mirror the other half, thus even though the same number
       of memory modules might be available in one as in the other, only
       half as much memory is actually accessible to the software in
-      DUPLEX mode as in SIMPLEX mode.&nbsp; The octal listing clearly
-      shows that the two syllables of any given memory word generally
-      are not identical, implying a SIMPLEX configuration.&nbsp; On the
-      other hand, in the HOP constants we decoded above, we invariably
-      found that the DUPIN and DUPDN bits are 1, implying DUPLEX
-      mode.&nbsp;&nbsp; So obviously I'm confused about something. <br>
+      DUPLEX mode as in SIMPLEX mode.&nbsp; The two syllables of any
+      given memory word generally are <i>not</i> identical, implying a
+      SIMPLEX configuration.&nbsp; On the other hand, in the HOP
+      constants we decoded above, we invariably found that the DUPIN and
+      DUPDN bits are 1, implying DUPLEX mode.&nbsp;&nbsp; So obviously
+      I'm confused about something. <br>
     </p>
     <p> </p>
     <h2><a name="MIT_Instrumentation_Laboratory_vs_IBM"></a>MIT
@@ -4902,6 +4988,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -5375,6 +5462,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -5404,6 +5492,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
 
 
 
