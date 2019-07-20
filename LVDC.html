@@ -92,6 +92,8 @@ Launch
 
 
 
+
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -214,6 +216,8 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
 
 
 
@@ -446,6 +450,8 @@ Launch
 
 
 
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -523,6 +529,8 @@ Launch
     by the assembler.&nbsp; Unfortunately, the status of the assembly
     process for it found 41 warnings and 7 errors — meaning that there
     were problems in the source code and that the assembly process <i>failed</i>.&nbsp;
+
+
 
 
 
@@ -750,6 +758,8 @@ of
 
 
 
+
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -776,6 +786,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
+
 
 
 
@@ -847,9 +859,13 @@ Astrionics
 
 
 
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -1085,6 +1101,8 @@ of
 
 
 
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1133,6 +1151,8 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
+
 
 
 
@@ -1411,6 +1431,8 @@ However,
 
 
 
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -1530,6 +1552,8 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
 
 
 
@@ -1719,6 +1743,8 @@ However,
             "residual sector".&nbsp; The following addresses are
             special, as described in <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">the
+
+
 
 
 
@@ -2115,6 +2141,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2256,6 +2284,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
+
 
 
 
@@ -3634,6 +3664,8 @@ of
 
 
 
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -3649,6 +3681,8 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
+
 
 
 
@@ -3836,6 +3870,8 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -4064,6 +4100,8 @@ Assembly
 
 
 
+
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -4097,6 +4135,8 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
 
 
 
@@ -4228,6 +4268,8 @@ Assembly
 
 
 
+
+
         Notice that this is <i>not</i> aligned with what is sometimes
         thought of as the default position of a "tab stop", which would
         have been at column 9.</li>
@@ -4284,6 +4326,8 @@ Assembly
         probably is.&nbsp; For example, if <tt>(4*CBSTNO+1)</tt>
         resolves to 57, then the expanded instruction would be <tt>CBTAB+57</tt>.&nbsp;
 
+
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -4333,6 +4377,8 @@ Assembly
 
 
 
+
+
         or "<tt>2</tt>" as the operand.&nbsp; The latter two thus
         represent logical right or left shifts by 1 or 2
         positions.&nbsp; With "<tt>0</tt>" as the operand, as a special
@@ -4341,6 +4387,8 @@ Assembly
         operand.&nbsp; <b>Note:</b>&nbsp; In the AS-206RAM listing,
         there is a curiosity at various places, such as an <tt>SHL 7</tt>
         instruction at sequence number 055640, and&nbsp;similarly an <tt>SHL
+
+
 
 
           4</tt> at 056210<tt></tt>.&nbsp; These are impossible
@@ -4361,6 +4409,8 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>i</i>,<i>j</i>,<i>k</i></tt>",
+
+
 
 
 
@@ -4513,7 +4563,80 @@ Assembly
             can involve decimal numbers, other macro constants, and the
             operations +, -, *, or /.&nbsp; The lines are evaluated in a
             single pass, so macro constants used in expressions need to
-            have been defined at an earlier sequence number.<br>
+            have been defined at an earlier sequence number.&nbsp; For
+            example,<br>
+            <blockquote><tt>PI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                EQU&nbsp;&nbsp;&nbsp; (3.1415927)</tt><br>
+            </blockquote>
+            Note that when macro constants are <i>used</i>, they are
+            also always within arithmetical expressions that are
+            enclosed in parentheses, <tt>(<i>expression</i>)</tt>, such
+            as:<br>
+            <blockquote><tt>PI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                DEC&nbsp;&nbsp;&nbsp; (PI)B0<br>
+                PI3&nbsp;&nbsp;&nbsp;&nbsp; DEC&nbsp;&nbsp;&nbsp;
+                (3*PI)B0<br>
+              </tt></blockquote>
+            These examples also illustrate the important point that the
+            namespace used for these macro constants is distinct from
+            the namespace used for left-hand symbols naming variables or
+            blocks of code.&nbsp; There are indeed symbols that have
+            this double usage.&nbsp; For example, in the AS-206RAM
+            program, "<tt>GEPLON EQU (15)</tt>" is at line 006600, while
+            "<tt>GEPLON DEC (GEPLON)B10</tt>" is at line 016820.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>FORM <i>a,b,</i>...</tt><br>
+          </td>
+          <td valign="middle">This pseudo-op defines to the assembler
+            (without generating any actual code) the name of a macro
+            that, when used, will pack a pattern of bit-fields into a
+            single word-size constant.&nbsp; In the <tt>FORM</tt>
+            statement itself, the field-widths are decimal, whereas when
+            the macro is used, the values of the fields are octal.&nbsp;
+            An example may make all this clearer:<br>
+            <blockquote><tt>MYPAT&nbsp;&nbsp;&nbsp;
+                FORM&nbsp;&nbsp;&nbsp;&nbsp; 2,3,4,5,6</tt><tt><br>
+              </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                .</tt><tt><br>
+              </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                .</tt><tt><br>
+              </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                .</tt><tt><br>
+              </tt><tt>MYCON&nbsp;&nbsp;&nbsp; MYPAT&nbsp;&nbsp;&nbsp;
+                1,2,3,4,5<br>
+              </tt></blockquote>
+            The first of these lines defines a macro, <tt>MYPAT</tt>,
+            which can pack 2-bit, 3-bit, 4-bit, 5-bit, and 6-bit fields
+            into a single 20-bit field.&nbsp; Since the LVDC word-size
+            is actually 26 bits, the unused 6 bits of the compiled
+            constant will all be 0.&nbsp; Confusingly, the way the
+            assembler <i>displays</i> word-size constants, the
+            least-significant bit is always 0 (because it's the physical
+            position in which parity is stored), so the constant is
+            actually aligned at bit 27 and appears as exactly 9 octal
+            digits.&nbsp; Because of this, in other words, it will
+            really appear that there are 7 unused bits assigned the
+            value 0.<br>
+            <br>
+            The second of these lines uses the macro.&nbsp; It compiles
+            such a constant and stores it at a the memory location <tt>MYCON</tt>.&nbsp;
+            The 2-bit field will have the (binary) value 01, the 3-bit
+            field will have the value 010, and so on, so the actual
+            value of <tt>MYCON</tt>, in binary, as displayed by the
+            assembler, will be<br>
+            <blockquote><tt>01 010 0011 00100 000101&nbsp;&nbsp; 000000
+                0</tt><br>
+            </blockquote>
+            or octal 243101200.<br>
+            <br>
+            The LVDC flight program AS-206RAM defines three such macros,
+            <tt>SS</tt>, <tt>SSFORM</tt>, and <tt>SSLAD</tt>, on page
+            45.<br>
           </td>
         </tr>
         <tr>
@@ -4548,11 +4671,10 @@ Assembly
         <tr>
           <td valign="top"><tt>MAT</tt><br>
           </td>
-          <td valign="top">I think this does the same thing as <tt>VEC</tt>
-            in practical terms.&nbsp; I think the difference is that it
-            may imply that the words following it form the row of a
-            matrix. <br>
-          </td>
+          <td valign="top">I think this may force alignment on a
+            020-word (octal, or 16 decimal) boundary, and may have
+            something to do with the succeeding words logically forming
+            a matrix.&nbsp; </td>
         </tr>
         <tr>
           <td valign="middle"><tt>OCT <i>number</i></tt><br>
@@ -4576,26 +4698,6 @@ Assembly
             before an other <tt>ORGDD</tt> is encountered, the assembly
             will flag it as a memory overrun error.<br>
           </td>
-        </tr>
-        <tr>
-          <td valign="top"><tt>SS <i>a,b,c,d,e,f,g,h,i,j</i></tt><tt><br>
-            </tt></td>
-          <td colspan="1" rowspan="3" valign="middle">These pseudo-ops
-            are used form "switch selector" tables.&nbsp; There is some
-            description of these on p. 45 of the AS-206RAM assembly
-            listing, but I'm still unclear on what any of it
-            means.&nbsp; The&nbsp; action of each of the three is to
-            form a constant, and store that constant in the word at the
-            current location.<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top"><tt>SSFORM <i>a,b,c,d,e</i></tt><tt><br>
-            </tt></td>
-        </tr>
-        <tr>
-          <td valign="top"><tt>SSLAD <i>a,b,c,d,e,f,j</i></tt><tt><br>
-            </tt></td>
         </tr>
         <tr>
           <td valign="middle"><tt>SYN <i>symbol</i></tt><br>
@@ -4645,11 +4747,11 @@ Assembly
           <td valign="middle">I think this may force alignment on a
             4-word boundary, and may have something to do with the
             succeeding words logically forming a vector.&nbsp; It does
-            not allocate any memory.&nbsp; It <i>may</i> be unwilling
-            to align exactly at a boundary that's an exact multiple of
-            0100, thus skipping past it, going to the next-higher
-            address n*0100+010, and flagging the line with an assembler
-            warning.<br>
+            not allocate any memory.&nbsp; It <i>may</i> (I'm unsure!)
+            be unwilling to align exactly at a boundary that's an exact
+            multiple of 0100, thus skipping past it, going to the
+            next-higher address n*0100+010, and flagging the line with
+            an assembler warning.<br>
           </td>
         </tr>
       </tbody>
@@ -4884,6 +4986,8 @@ Assembly
 
 
 
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
@@ -5009,6 +5113,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -5486,6 +5592,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -5515,6 +5623,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
+
 
 
 
