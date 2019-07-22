@@ -1,5 +1,5 @@
 /*
-  Copyright 2003 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003,2019 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC. 
 
@@ -19,7 +19,17 @@
 
   Filename:     ParseBLOCK.c
   Purpose:      Assembles the BLOCK pseudo-op.
-  Mode:         04/25/03 RSB.  Began.
+  Mode:         04/25/03 RSB   	Began.
+		07/22/19 RSB	There was an error (or at least a confusion)
+				in the way "BLOCK 0" was being parsed,
+				which is hopefully fixed.  As it happens,
+				"BLOCK 0" is never used in the original
+				AGC code.  The fix is in response to GitHub
+				issue #1072, but it does not fix #1072,
+				which I don't think is conceptually fixable.
+				At any rate, all existing code assembles
+				word-for-word identically to the way it
+				assembled before.
 */
 
 #include "yaYUL.h"
@@ -32,7 +42,7 @@
 int 
 ParseBLOCK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-  int Value, i;
+  int Value, used, i;
   
   if (InRecord->Extend && !InRecord->IndexValid)
     {
@@ -53,10 +63,11 @@ ParseBLOCK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     {
       if (Value == 0 || Value == 2 || Value == 3)
         {
-          Value = GetBankCount(Value) + Value * 02000;
+	  //fprintf(stderr, "BLOCK %d, %d\n", Value, GetBankCount(Value));
+          used = GetBankCount(Value) + Value * 02000;
           OutRecord->ProgramCounter = (const Address_t) { 0 };
           OutRecord->ProgramCounter.Address = 1;
-          OutRecord->ProgramCounter.SReg = Value;
+          OutRecord->ProgramCounter.SReg = used;
 
           if (Value == 0)
               OutRecord->ProgramCounter.Erasable = 1;
@@ -64,7 +75,7 @@ ParseBLOCK(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
               OutRecord->ProgramCounter.Fixed = 1;  
 
           OutRecord->ProgramCounter.Unbanked = 1;
-          OutRecord->ProgramCounter.Value = Value;
+          OutRecord->ProgramCounter.Value = used;
 
           if (Value == 0)
               OutRecord->EBank.current = OutRecord->ProgramCounter;
