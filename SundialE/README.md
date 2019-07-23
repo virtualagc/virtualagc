@@ -12,8 +12,8 @@ On the available information -- and admitting that there may be AGC units not co
 
 * From CSM-098, "2VT-1"
 * AGC p/n 2003100-061
-* Software SUNDIAL D, 2021104-041
+* Software SUNDIAL E, 2021104-041
 
-The only known discrepancy is that the fixed-memory modules listed are known to be from SUNDIAL assembly 2021104-051, SUNDIAL E.  However, SUNDIAL D and SUNDIAL E actually have identical core-rope contents, and it is therefore possible that SUNDIAL D fixed-memory modules were swapped with SUNDIAL E modules at some point, without affecting functionality in any way.
+The discrepancy is that the fixed-memory modules listed are known to be from SUNDIAL assembly 2021104-051.  However, both the 2021104-041 and -51 modules contain SUNDIAL E software, so if the modules were exchanged at some point it wouldn't have affected functionality in any way.
 
 
