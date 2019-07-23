@@ -173,6 +173,7 @@
 #				Mac OS X has been fixed.
 #		2018-10-12 RSB	Added the Validation-hardware-simulation target.
 #		2019-06-17 RSB	Added RETREAD50.
+#		2019-07-23 RSB	Added SUNDIALE.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -191,7 +192,7 @@
 # certain changes that *may* allow building with clang rather than gcc.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2017-06-19\\\"
+NVER:=\\\"2017-07-23\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -418,7 +419,7 @@ MISSIONS = Validation Zerlina56 Luminary131 Colossus249 Comanche055
 MISSIONS += Luminary099 Artemis072 Colossus237
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
-MISSIONS += Retread50
+MISSIONS += Retread50 SundialE
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif

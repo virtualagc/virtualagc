@@ -93,6 +93,8 @@
 #		2017-12-11 RSB	Added yaDSKY2/*.canned files.
 
 APP=VirtualAGC
+# *** BEWARE! ***  The MISSIONS variable is normally inherited from the 
+# top-level Makefile, so don't assume you can add missions here!
 ifndef MISSIONS
 MISSIONS=Colossus249 Luminary131 Artemis072 Validation FP6 FP8 Comanche055
 MISSIONS+=Luminary099 Colossus237 Validation Solarium055 Aurora12 Sunburst120

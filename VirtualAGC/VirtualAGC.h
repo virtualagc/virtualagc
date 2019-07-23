@@ -46,6 +46,7 @@
  *	        2017-03-24 RSB  Added a SUPERJOB mission type.
  *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
  *          	2019-06-17 RSB	Added Retread50 button.
+ *          	2019-07-23 RSB	Added a SundialE button.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -119,6 +120,7 @@ enum
   ID_APOLLO4CMBUTTON,
   ID_APOLLO5LMBUTTON,
   ID_APOLLO6CMBUTTON,
+  ID_SUNDIALECMBUTTON,
   ID_APOLLO7CMBUTTON,
   ID_APOLLO8CMBUTTON,
   ID_APOLLO9CMBUTTON,
