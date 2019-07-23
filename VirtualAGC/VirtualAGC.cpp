@@ -169,7 +169,7 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
 		"Click this to select the unmanned Apollo 6 Block 1 CM mission, running software SOLARIUM 55.",
 		ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055", "CM0.ini" },
 	    { "2TV-1 Command Module", "SundialE/MAIN.agc.html",
-		"Click this to select the 2TV-1 mission, running software Sundial D/E.",
+		"Click this to select the 2TV-1 mission, running software Sundial E.",
 		ENABLED, CM, BLOCK2, PERIPHERALS, "SundialE", "CM.ini" },
 	    { "Apollo 7 Command Module", "",
 		"Click this to select the Apollo 7 mission.", DISABLED, CM,
