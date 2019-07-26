@@ -95,6 +95,8 @@ Launch
 
 
 
+
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -214,6 +216,8 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
 
 
 
@@ -452,6 +456,8 @@ Launch
 
 
 
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -492,6 +498,8 @@ Launch
     revision of the flight program is available to us.&nbsp; It is an
     engineering revision of the software, from 1967, designated
     "AS-206RAM LVDC FLIGHT PROGRAM".&nbsp; If you were to Google this (<b>don't
+
+
       do it!</b>), you may unnecessarily excite yourself by noting that
     Saturn IB launch vehicle AS-206 was used for the Skylab 2 mission
     (Conrad/Weitz/Kerwin).&nbsp; You may then be chagrined to realize
@@ -530,6 +538,8 @@ Launch
     by the assembler.&nbsp; Unfortunately, the status of the assembly
     process for it found 41 warnings and 7 errors — meaning that there
     were problems in the source code and that the assembly process <i>failed</i>.&nbsp;
+
+
 
 
 
@@ -590,9 +600,9 @@ href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identificati
     themselves to me personally and be notarized.&nbsp; Yikes!<br>
     <br>
     Anyone who can give me a competent legal opinion about whether or
-    not the LVDC source code is restricted as I fear, or who can outline
-    the hoops I'd need to jump through to get an official ruling on the
-    matter, <i>please</i> do so!<br>
+    not the LVDC source code is restricted, or who can outline the hoops
+    I'd need to jump through to get an official ruling on the matter, <i>please</i>
+    do so!<br>
     <ul>
     </ul>
     With all that unpleasantness out of the way, it doesn't seem to me
@@ -656,16 +666,11 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
       desired.&nbsp; The two images at the top show an area of the
       program where some constants are defined, while the two at the
       bottom show a portion of the assembly listing's cross-reference
-      table.&nbsp; The snapshots are a bit tricky to read, so for at
-      least the middle group of pages you can alternately look at my
-      first attempt of <a
-href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/sample-1967.lvdc">a
-        transcription to pure source code</a>.&nbsp; The actual LVDC
-      syntax doesn't quite match what I had imagined and thus what the
-      assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>)
-      supports right now, especially in the area of constant/variable
-      allocation.&nbsp; It may be quite a while before any trial
-      assemblies of the partial code can be performed.<br>
+      table.&nbsp; The actual LVDC syntax doesn't quite match what I had
+      imagined when I wrote the OBC/LVDC assembler (<a
+        href="#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>), so it
+      may be quite a while before the assembler can be reworked or
+      replaced with one that can assemble this code.<br>
     </p>
     <p>Additionally, each of the flown Saturns is associated with a
       report known as its "launch vehicle flight evaluation report", and
@@ -764,6 +769,8 @@ of
 
 
 
+
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -790,6 +797,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
+
 
 
 
@@ -867,9 +876,13 @@ Astrionics
 
 
 
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -1113,6 +1126,8 @@ of
 
 
 
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1162,6 +1177,8 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
+
 
 
 
@@ -1446,6 +1463,8 @@ However,
 
 
 
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -1565,6 +1584,8 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
 
 
 
@@ -1757,6 +1778,8 @@ However,
             "residual sector".&nbsp; The following addresses are
             special, as described in <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">the
+
+
 
 
 
@@ -2159,6 +2182,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2300,6 +2325,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
+
 
 
 
@@ -3684,6 +3711,8 @@ of
 
 
 
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -3699,6 +3728,8 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
+
 
 
 
@@ -3884,6 +3915,8 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -4118,6 +4151,8 @@ Assembly
 
 
 
+
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -4151,6 +4186,8 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
 
 
 
@@ -4288,6 +4325,8 @@ Assembly
 
 
 
+
+
         Notice that this is <i>not</i> aligned with what is sometimes
         thought of as the default position of a "tab stop", which would
         have been at column 9.</li>
@@ -4347,6 +4386,8 @@ Assembly
 
 
 
+
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -4399,6 +4440,8 @@ Assembly
 
 
 
+
+
         or "<tt>2</tt>" as the operand.&nbsp; The latter two thus
         represent logical right or left shifts by 1 or 2
         positions.&nbsp; With "<tt>0</tt>" as the operand, as a special
@@ -4407,6 +4450,8 @@ Assembly
         operand.&nbsp; <b>Note:</b>&nbsp; In the AS-206RAM listing,
         there is a curiosity at various places, such as an <tt>SHL 7</tt>
         instruction at sequence number 055640, and&nbsp;similarly an <tt>SHL
+
+
 
 
 
@@ -4430,6 +4475,8 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>i</i>,<i>j</i>,<i>k</i></tt>",
+
+
 
 
 
@@ -4647,6 +4694,8 @@ Assembly
             <br>
             The second of these lines uses the macro.&nbsp; It compiles
             such a constant and stores it at a the memory location <tt>MYCON</tt>.&nbsp;
+
+
 
             The 2-bit field will have the (binary) value 01, the 3-bit
             field will have the value 010, and so on, so the actual
@@ -5012,6 +5061,8 @@ Assembly
 
 
 
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
@@ -5137,6 +5188,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -5616,6 +5669,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -5680,10 +5735,12 @@ Commons
 
 
 
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-07-24.<br>
+          2019-07-26.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
