@@ -7,7 +7,7 @@
 ##              Apollo Guidance Computer (AGC) for Apollo 10. The code has
 ##              been recreated from a copy of Luminary revsion 069, using
 ##              changes present in Luminary 099 which were described in
-##              Luminary memos 73 and 75. The code has been adapted such
+##              Luminary memos 75 and 78. The code has been adapted such
 ##              that the resulting bugger words exactly match those specified
 ##              for LUM69 revision 2 in NASA drawing 2021152B, which gives
 ##              relatively high confidence that the reconstruction is correct.
