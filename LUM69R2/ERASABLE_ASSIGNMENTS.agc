@@ -1,32 +1,23 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    ERASABLE_ASSIGNMENTS.agc
-## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release
-##              of the flight software for the Lunar Module's (LM) Apollo
-##              Guidance Computer (AGC) for Apollo 10. The actual flown
-##              version was Luminary 69 revision 2, which included a
-##              newer lunar gravity model and only affected module 2.
-##              This file is intended to be a faithful transcription, except
-##              that the code format has been changed to conform to the
-##              requirements of the yaYUL assembler rather than the
-##              original YUL assembler.
+## Purpose:     A section of LUM69 revision 2.
+##              It is part of the reconstructed source code for the flown
+##              version of the flight software for the Lunar Module's (LM)
+##              Apollo Guidance Computer (AGC) for Apollo 10. The code has
+##              been recreated from a copy of Luminary revsion 069, using
+##              changes present in Luminary 099 which were described in
+##              Luminary memos 73 and 75. The code has been adapted such
+##              that the resulting bugger words exactly match those specified
+##              for LUM69 revision 2 in NASA drawing 2021152B, which gives
+##              relatively high confidence that the reconstruction is correct.
 ## Reference:   pp. 106-167
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2016-12-13 MAS  Created from Luminary 99.
-##              2017-01-05 HG   Transcribed
-##              2017-01-06 HG   Fix operand JBREG* -> JBRFG*
-##                                          JAPEG* -> JAPFG* 
-##                                          TITOT2 -> T1TOT2
-##                                          TABLTFF-> TABLTTF
-##              2017-01-08 HG   fix operand modifier JBRFG* +1 -> JBRFG* +2
-##              2017-01-16 HG   uncomment LMPOS and LMVEL
-##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
-##				and fixed errors found.
-##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
-##		2017-08-11 RSB	Comment-text fixes identified from AP11ROPE.
+## Mod history: 2019-07-27 MAS  Created from Luminary 69.
+##              2019-07-27 MAS  Added E3J22R2M and E32C31RM padload erasables
+##                              for LUM69 rev 2.
 
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
