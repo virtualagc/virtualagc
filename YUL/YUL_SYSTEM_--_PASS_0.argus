@@ -263,7 +263,7 @@ P0146              FIELD AND SHIFT MASKS FOR PASS 0.
 
  0172   B,B2B11    OCT          2002
  0173   B,C7T8     OCT          -7777
- 0174   B3TT43     EQUALS       C7T8
+ 0174   B37T48     EQUALS       C7T8
  0175   B,BIT12    OCT          0001
  0176   B,C5T8     OCT          -7777 7777
 
@@ -571,7 +571,7 @@ P0454   ALPHABETIC CONSTANTS -- FIRST OF 7 PAGES.
  0461   BLPSN MSG  ALF,3        PROG/SUB NAME IS BLANK.
  0462   CONPN MSG  ALF,5        CONFLICT WITH EXISTING PROG/SUB NAME.
 
- 0463   TSFRO MSG  ALF,3        TRANSFERRED ASSEMBLY NEE
+ 0463   TSFRD MSG  ALF,3        TRANSFERRED ASSEMBLY NEE
  0464              ALF,4        DS SUBDIRECTOR SPECIFYING SOURCE
  0465   XIN WRSIZ  ALF,4        DISCFILE NAME VOID OR TOO LONG
  0466   XIN TERMS  ALF,5        DISCFILE NAME CONTAINS TERMINATOR CHARS.
@@ -848,7 +848,7 @@ P0630              EQUIVALENCES.
  06452  THOUSAND   EQUALS       BIT 36
  06454  DEC 10000  EQUALS       BIT 32
  0646   Y COLUMN 1 EQUALS       DIFUL MSG
- 0647   W REVISION EQUALS       DR UMA MSG +1
+ 0647   W REVISON  EQUALS       DR UMA MSG +1
 
  0649   W VERSION  EQUALS       VRSNS MSG
  0650   END THR    EQUALS       14342
@@ -1306,7 +1306,7 @@ P1070              ROUTINE TO RESPOND TO REQUESTS FOR ASSEMBLY OR REVISION OF A 
  1106              TS           L DIRECTY     Z,X1          FIND COMP      C    SEEK COMPUTER NAME IN DIRECTORY.
  1108              S, YUL TYPER UNRCO MSG     AMTF +4       TYP ABORT           CUSS AND EXIT IF NOT THERE.
 
- 1110   KNWN COMP  TX           Z,X0          -             L COMP NUM          ADDRESS OF COMPUTER NAME FOR PARP CALLS.
+ 1110   KNWN COMP  TX           Z,X0          -             L COMP NAM          ADDRESS OF COMPUTER NAME FOR PARP CALLS.
  1112              LA, P1T3AV   ONES          0,1           CAN ASSE            BRANCH IF PASSES 1-3 AVAILABLE FOR IT.
  1114              S, YUL TYPER NASSY MSG     AMTF +4       TYP ABORT
 
@@ -1318,7 +1318,7 @@ P1070              ROUTINE TO RESPOND TO REQUESTS FOR ASSEMBLY OR REVISION OF A 
  1125              SSL, ONE     3,1           23            OK NOUN -3     C    IS BEING CHANGED.
  1127              DA           COMMON        ONE           COMMON              INCREMENT OLD REVN, ASK FOR MATCH.
  1129              NA, B36T37   3,1           ONES          OK NOUN +1          BACK TO KNOWN PSR IF NOT CONTROLLED SUB.
- 1131              SS           W REVISION    CAC12         CONSU MSG +4
+ 1131              SS           W REVISON     CAC12         CONSU MSG +4
  1132              S, MON TYPER CONSU MSG     SPRAMR +40    TYP ABORT           CUSS ATTEMPT TO REVISE CONTROLLED SUBRO.
 
  1134   NO REVISE  S, MON TYPER NR FRZ MSG    SPRAMR +40    TYP ABORT           REPLACES REVISION, ABOVE, IF FROZE TAPE.
@@ -1752,7 +1752,7 @@ R1587   CARD "CREATE BACKUP".
  1595              S, MON TYPER ASCBU MSG     SPRAMR +24    -                   "ASA TO CREATE BACKUP;"
  1597              S, MON TYPER ACA OTHE      SPRA +16      C,+3                "ACA OTHERWISE"
  1599              STOP                                     -              S
- 1600              S, MON TYPER RIGHT HD      SPRAMR +8     ACCEPT +1           "(SIGH)"
+ 1600              S, MON TYPER RIGHT HO      SPRAMR +8     ACCEPT +1           "(SIGH)"
  1602              TS           -             -             C,-1           C    ARA OR DON A CREATES BACKUP.
  1604              NA, CHAR8    1,0           ZERO          C,+2
  1605              TS, CHAR8    ONE           1,0           C,+3                BYPASS LABEL AND REVERT IF MONDAY MORN.
@@ -1827,7 +1827,7 @@ R1682   THE WORD "AUTHORIZED", SO THAT THERE WILL BE A RECORD (ON THE CONSOLE TY
  1684   CONTROL    TS           W CONTROL     TASK MSG      TASK OBJC           ANALYZE REST OF DIRECTOR CARD.
  1686              SWS, C1T7    TASK MSG +1   A,1,L         TASK MSG +1
  1687              SWS, CHAR8   TASK MSG +2   A,1,L         TASK MSG +1
- 1688              SWS, CIT7    TASK MSG +2   A,1,L         TASK MSG +2         NORMALIZE TASK MESSAGE.
+ 1688              SWS, C1T7    TASK MSG +2   A,1,L         TASK MSG +2         NORMALIZE TASK MESSAGE.
  1690              TS, BIT 36   ONES          SWITCH        CON DECON           SET UP FOR REDUNDANCY TEST.
 
  1692   DECONTR    TS           W DECONTR     TASK MSG      TASK OBJC           ANALYZE REST OF DIRECTOR CARD.
