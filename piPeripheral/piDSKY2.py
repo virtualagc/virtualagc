@@ -223,7 +223,13 @@ cli.add_argument("--playback", help="Play back recorded i/o-channel data from se
 cli.add_argument("--lamptest", help="Perform a lamp test and then exit.")
 cli.add_argument("--manual", help="Manually control the display.")
 cli.add_argument("--gunmetal", help="Use gunmetal versions of mounting posts and horizontal separator.")
+cli.add_argument("--backlights", help="Turn on key backlights at startup.")
 args = cli.parse_args()
+
+if args.backlights:
+	useBacklights = True
+else:
+	useBacklights = False
 
 if args.manual:
 	os.system('clear')
@@ -285,6 +291,7 @@ if args.record:
 	recordingFile = open(homeDir + "/Desktop/piDSKY2-recorded.canned", "w", 1)
 
 if args.playback:
+	useBacklights = False
 	lastPlaybackTime = time.time()
 	playbackEvents = []
 	currentPlaybackIndex = 0
@@ -853,25 +860,25 @@ lampStatuses = {
 	"ALT" : { "isLit" : False, "cliParameter" : "C", "spiParameters" : [ { "register":6, "mask":0x07 } ] },
 	"NO DAP" : { "isLit" : False, "cliParameter" : "F", "spiParameters" : [ { "register":7, "mask":0x70 } ] },
 	"VEL" : { "isLit" : False, "cliParameter" : "E", "spiParameters" : [ { "register":7, "mask":0x07 } ] },
-	"VERB KEY" : { "isLit" : True, "cliParameter" : "G", "spiParameters" : [ { "register":1, "mask":0x08 } ] },
-	"NOUN KEY" : { "isLit" : True, "cliParameter" : "H", "spiParameters" : [ { "register":1, "mask":0x80 } ] },
-	"+ KEY" : { "isLit" : True, "cliParameter" : "I", "spiParameters" : [ { "register":2, "mask":0x08 } ] },
-	"- KEY" : { "isLit" : True, "cliParameter" : "J", "spiParameters" : [ { "register":2, "mask":0x80 } ] },
-	"0 KEY" : { "isLit" : True, "cliParameter" : "K", "spiParameters" : [ { "register":3, "mask":0x08 } ] },
-	"7 KEY" : { "isLit" : True, "cliParameter" : "L", "spiParameters" : [ { "register":3, "mask":0x80 } ] },
-	"4 KEY" : { "isLit" : True, "cliParameter" : "M", "spiParameters" : [ { "register":4, "mask":0x08 } ] },
-	"1 KEY" : { "isLit" : True, "cliParameter" : "N", "spiParameters" : [ { "register":4, "mask":0x80 } ] },
-	"8 KEY" : { "isLit" : True, "cliParameter" : "O", "spiParameters" : [ { "register":5, "mask":0x08 } ] },
-	"5 KEY" : { "isLit" : True, "cliParameter" : "P", "spiParameters" : [ { "register":5, "mask":0x80 } ] },
-	"2 KEY" : { "isLit" : True, "cliParameter" : "Q", "spiParameters" : [ { "register":6, "mask":0x08 } ] },
-	"9 KEY" : { "isLit" : True, "cliParameter" : "R", "spiParameters" : [ { "register":6, "mask":0x80 } ] },
-	"6 KEY" : { "isLit" : True, "cliParameter" : "S", "spiParameters" : [ { "register":7, "mask":0x08 } ] },
-	"3 KEY" : { "isLit" : True, "cliParameter" : "T", "spiParameters" : [ { "register":7, "mask":0x80 } ] },
-	"CLR KEY" : { "isLit" : True, "cliParameter" : "U", "spiParameters" : [ { "register":8, "mask":0x40 } ] },
-	"PRO KEY" : { "isLit" : True, "cliParameter" : "V", "spiParameters" : [ { "register":8, "mask":0x20 } ] },
-	"KEY REL KEY" : { "isLit" : True, "cliParameter" : "W", "spiParameters" : [ { "register":8, "mask":0x10 } ] },
-	"ENTR KEY" : { "isLit" : True, "cliParameter" : "X", "spiParameters" : [ { "register":8, "mask":0x08 } ] },
-	"RSET KEY" : { "isLit" : True, "cliParameter" : "Y", "spiParameters" : [ { "register":8, "mask":0x04 } ] },
+	"VERB KEY" : { "isLit" : !useBacklights, "cliParameter" : "G", "spiParameters" : [ { "register":1, "mask":0x08 } ] },
+	"NOUN KEY" : { "isLit" : !useBacklights, "cliParameter" : "H", "spiParameters" : [ { "register":1, "mask":0x80 } ] },
+	"+ KEY" : { "isLit" : !useBacklights, "cliParameter" : "I", "spiParameters" : [ { "register":2, "mask":0x08 } ] },
+	"- KEY" : { "isLit" : !useBacklights, "cliParameter" : "J", "spiParameters" : [ { "register":2, "mask":0x80 } ] },
+	"0 KEY" : { "isLit" : !useBacklights, "cliParameter" : "K", "spiParameters" : [ { "register":3, "mask":0x08 } ] },
+	"7 KEY" : { "isLit" : !useBacklights, "cliParameter" : "L", "spiParameters" : [ { "register":3, "mask":0x80 } ] },
+	"4 KEY" : { "isLit" : !useBacklights, "cliParameter" : "M", "spiParameters" : [ { "register":4, "mask":0x08 } ] },
+	"1 KEY" : { "isLit" : !useBacklights, "cliParameter" : "N", "spiParameters" : [ { "register":4, "mask":0x80 } ] },
+	"8 KEY" : { "isLit" : !useBacklights, "cliParameter" : "O", "spiParameters" : [ { "register":5, "mask":0x08 } ] },
+	"5 KEY" : { "isLit" : !useBacklights, "cliParameter" : "P", "spiParameters" : [ { "register":5, "mask":0x80 } ] },
+	"2 KEY" : { "isLit" : !useBacklights, "cliParameter" : "Q", "spiParameters" : [ { "register":6, "mask":0x08 } ] },
+	"9 KEY" : { "isLit" : !useBacklights, "cliParameter" : "R", "spiParameters" : [ { "register":6, "mask":0x80 } ] },
+	"6 KEY" : { "isLit" : !useBacklights, "cliParameter" : "S", "spiParameters" : [ { "register":7, "mask":0x08 } ] },
+	"3 KEY" : { "isLit" : !useBacklights, "cliParameter" : "T", "spiParameters" : [ { "register":7, "mask":0x80 } ] },
+	"CLR KEY" : { "isLit" : !useBacklights, "cliParameter" : "U", "spiParameters" : [ { "register":8, "mask":0x40 } ] },
+	"PRO KEY" : { "isLit" : !useBacklights, "cliParameter" : "V", "spiParameters" : [ { "register":8, "mask":0x20 } ] },
+	"KEY REL KEY" : { "isLit" : !useBacklights, "cliParameter" : "W", "spiParameters" : [ { "register":8, "mask":0x10 } ] },
+	"ENTR KEY" : { "isLit" : !useBacklights, "cliParameter" : "X", "spiParameters" : [ { "register":8, "mask":0x08 } ] },
+	"RSET KEY" : { "isLit" : !useBacklights, "cliParameter" : "Y", "spiParameters" : [ { "register":8, "mask":0x04 } ] },
 	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "Z", "spiParameters" : [ { "register":8, "mask":0x02 } ] },
 	"TBD1" : { "isLit" : False, "cliParameter" : "a", "spiParameters" : [ { "register":8, "mask":0x01 } ] },
 	"TBD2" : { "isLit" : False, "cliParameter" : "b", "spiParameters" : [ { "register":8, "mask":0x80 } ] }
@@ -959,6 +966,17 @@ def updateLamps():
 def updateLampStatusesAndLamps(key, value):
 	#sys.stderr.write("BL " + key + " " + oct(value) + "\n")
 	updateLampStatuses(key, value)
+	updateLamps()
+
+def backlightOn():
+	for key in lampStatuses:
+		if key[-3:] == "KEY":
+			updateLampStatuses(key, True)
+	updateLamps()
+def backlightOff():
+	for key in lampStatuses:
+		if key[-3:] == "KEY":
+			updateLampStatuses(key, False)
 	updateLamps()
 
 def everythingOff():
@@ -1597,6 +1615,9 @@ if args.playback:
 	pass
 else:	
 	connectToAGC()
+
+if useBacklights:
+	backlightOn()
 
 ###################################################################################
 # Event loop.  Just check periodically for output from yaAGC (in which case the

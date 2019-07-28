@@ -34,6 +34,7 @@
 #				poking of NEWJOB to appease the night
 #				watchman and rupt lock alarms. Validation
 #				should now work without alarms inhibited.
+#		10/12/18 RSB	Added a single -SIMULATION specifier.
 
 # This program is probably not a bad introduction on how to write an AGC
 # program that interacts with the DSKY, though it doesn't use any interrupts.  
@@ -137,7 +138,7 @@ INIT		RELINT
 #		CCS	A
 #		TCF	INITLOOP
 		
-		TC	ERRORDSP	# display it on the DSKY.
+		TC	ERRORDSP	# display it on the DSKY. -SIMULATION
 
 # Just a little test of ERRORDSP ...		
 #LOOP		INCR	ERRNUM

@@ -1,5 +1,5 @@
 /*
- Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
+ Copyright 2003-2005,2009,2016,2019 Ronald S. Burkey <info@sandroid.org>
  
  *
  * This file is part of yaAGC.
@@ -373,7 +373,10 @@
  *				which is the logical OR of channel 11 bit 4 and
  *				channel 30 bit 15. The AGC did this internally
  *				so the light would still work in standby.
- *
+ *		04/29/19 RSB	It seems that agc_symtab.h is no longer being used
+ *				here, and that its presence isn't too desirable for
+ *				those who are porting minimized implementations,
+ *				so I've commented it out.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -420,7 +423,9 @@ typedef int int32_t;
 #endif
 #include "yaAGC.h"
 #include "agc_engine.h"
-#include "agc_symtab.h"
+#if 0
+  #include "agc_symtab.h"
+#endif
 
 // If COARSE_SMOOTH is 1, then the timing of coarse-alignment (in terms of 
 // bursting and separation of bursts) is according to the Delco manual.

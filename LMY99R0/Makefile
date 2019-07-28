@@ -11,6 +11,15 @@
 #		2012-09-16 JL	Updated to match tools dir changes.
 #		2016-10-04 JL	Change to use Makefile.inc.
 #		2017-08-01 MAS	Updated for LMY99 Rev 0.
+#		2019-07-27 MAS	Added check against bugger words from NASA
+#				drawing 2021152D.
 
 BASENAME=LMY99R0
+
+EXTRA_TARGETS=diffLMY99R0sums
+
 include ../Makefile.inc
+
+.PHONY: diffLMY99R0sums
+diffLMY99R0sums:
+	../Tools/check_buggers.py LMY99R0.bin LMY99R0.buggers
