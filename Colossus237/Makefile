@@ -28,8 +28,12 @@
 #				hasn't been building lately, just making
 #				the binsource). Also added a clean rule
 #				extension to clean the binsource.
+# 		2019-07-27 MAS	Added a check step against the bugger words
+#				specified in NASA drawing 2021151B.
 
 BASENAME=Colossus237
+
+EXTRA_TARGETS=diffColossus237sums
 
 include ../Makefile.inc
 
@@ -40,3 +44,7 @@ clean: clean-binsource
 
 clean-binsource:
 	rm -f $(BASENAME).binsource
+
+.PHONY: diffColossus237sums
+diffColossus237sums:
+	../Tools/check_buggers.py Colossus237.bin Colossus237.buggers
