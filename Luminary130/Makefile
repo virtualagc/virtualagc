@@ -22,4 +22,11 @@
 #		2018-09-04 MAS	Created for Luminary 130.
 
 BASENAME=Luminary130
+
+EXTRA_TARGETS=diffLuminary130sums
+
 include ../Makefile.inc
+
+.PHONY: diffLuminary130sums
+diffLuminary130sums:
+	../Tools/check_buggers.py Luminary130.bin Luminary130.buggers
