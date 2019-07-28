@@ -47,6 +47,7 @@
  *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
  *          	2019-06-17 RSB	Added Retread50 button.
  *          	2019-07-23 RSB	Added a SundialE button.
+ *          	2019-07-27 RSB  Added LUM69R2 button.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -126,6 +127,7 @@ enum
   ID_APOLLO9CMBUTTON,
   ID_APOLLO9LMBUTTON,
   ID_APOLLO10CMBUTTON,
+  ID_LUM69BUTTON,
   ID_APOLLO10LMBUTTON,
   ID_COMANCHE55BUTTON,
   ID_LMY99R0BUTTON,
@@ -134,6 +136,7 @@ enum
   ID_APOLLO12CMBUTTON,
   ID_APOLLO12LMBUTTON,
   ID_APOLLO13CMBUTTON,
+  ID_LUMINARY130BUTTON,
   ID_LUMINARY131BUTTON,
   ID_APOLLO14LMBUTTON,
   ID_APOLLO14CMBUTTON,

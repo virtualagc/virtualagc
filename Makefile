@@ -175,7 +175,7 @@
 #		2018-10-12 RSB	Added the Validation-hardware-simulation target.
 #		2019-06-17 RSB	Added RETREAD50.
 #		2019-07-23 RSB	Added SUNDIALE.
-#		2019-07-27 RSB	Added LUM69R2.
+#		2019-07-27 MAS	Added LUM69R2.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -194,7 +194,7 @@
 # certain changes that *may* allow building with clang rather than gcc.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2017-07-23\\\"
+NVER:=\\\"2017-07-28\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
