@@ -331,7 +331,7 @@ P0217   TRANSFER VECTOR, USED BY SERVICE MODULE, MANUFACTURING, ETC.
  0220              TS           Z,AU2         TYP RTURN     TYPIST              PRESERVE MANDATORY C ADDRESS.
 
  0222   RD SBDIRC  TS           Z,SH          Z,X1          RD SUBDRC           TO SUBDIRECTOR READER (0,65).
- 0224   HOWZAT     TS           WHODUNIT      Z,AJ1         HOWZ THAT           UNRECOGNIZED WORD ABORT (0,66).
+ 0224   HOWZAT     TS           WHODUNIT      Z,AU1         HOWZ THAT           UNRECOGNIZED WORD ABORT (0,66).
 
  0226   PCH LEDER  TS           Z,SH          Z,X4          PNCH LEDR           PUNCH "BEGIN..." & OBJECT MSG (0,67).
  0228   IGN SUBDR  TS           Z,SH          Z,X4          IGN SBDIR           IGNORE A NON-VITAL SUBDIRECTOR (0,68).
@@ -409,7 +409,7 @@ R0297   COMMON, COSEQUENCE CALL.  0,105 THRU 0,113.
  0323              WD           Z,SH          ONE           Z,SC           S    EXIT FROM ABOVE.
 
  0325   SYMS OR NO DEC          -GGGG                                           ALL ONES FOR SYMBOL TABLE (0,124).
- 0327   SB THREDS  TS           -             NO MD SUBS +1 SUB THRDS      C    EXTERNAL CALL TO SUB THRDS (0,125).
+ 0327   SB THREDS  TS           -             NO MO SUBS +1 SUB THRDS      C    EXTERNAL CALL TO SUB THRDS (0,125).
  0329   DISASTER   MPC,H        Z,1           301           MON PCR             EXTERNAL CALL TO DISASTER (0,126).
  0331              ALF          DISASTER                                        (0,127).  FOR ALL UNMANAGEABLE TROUBLES.
 
@@ -731,7 +731,7 @@ P0556              ADDRESS CONSTANTS.
  0558   L DIRECTS  SPEC                                     DIRECTS
  0559   L END THR  SPEC                                     END THR
  0560   L SUBSTRB  SPEC                                     SUBSTRAB
- 0561   RLS CO PCH CAC                        NUMERALS      16
+ 0561   RLS CD PCH CAC                        NUMERALS      16
 
  0562   L SN CPNCH SPEC                                     SN CPUNCH
  0563   L SIXES    SPEC                                     SIXES
@@ -1001,7 +1001,7 @@ P0817   SET UP SPECS AND BUFFERS FOR 4-LINE/RECORD COPY-WORKTAPE WRITING.
 R0834   ALPHABETIC CONSTANTS FOR THE BEGIN-JOB SUBSEGMENT.
 
  08341  BLANKS BJ  ALF
- 08341  H18003     ALF                B
+ 08341  H1800B     ALF                B
  08343  COMMA '62  ALF          , 1962
  08344  W ILLEGAL  ALF           ILLEGAL
  08345  LUMPED BJ  ALF          13 32 6,                                        MULTIPLE MASKED CONSTANT.
@@ -1012,7 +1012,7 @@ R0834   ALPHABETIC CONSTANTS FOR THE BEGIN-JOB SUBSEGMENT.
  08349  BJ END YUL ALF,2        END YUL SYSTEM
 
  0835   ND19B MSG  ALF,4        YUL SYSTEM NEEDS 19 BANKS: 1-3'
- 083505 ND25G MSG  ALF,4        YUL SYSTEM NEED TWO SIDE GROUPS
+ 083505 ND2SG MSG  ALF,4        YUL SYSTEM NEED TWO SIDE GROUPS
  08351  MONTHS     ALF,4          JAN     FEB    MAR     APR
  08352             ALF,4          MAY     JUN    JUL     AUG
  08353             ALF,4          SEP     OCT    NOV     DEC
@@ -1194,7 +1194,7 @@ R0941   SAGE.  REDUCE EACH IMBEDDED STRING OF BLANK WORDS TO ONE BLANK WORD.  AC
  0962              NA           N,CSC         BLANKS        C,-1                CONFIRM LAST WORD UNLESS IT IS BLANK.
  0964              NA           Z,CSC         L MSG AREA    TYP COUNT           BRANCH UNLESS BLANK MSG (END OF TASK).
  0966              LA           TYPIST        CAC3          SEND TYP W +1       BRANCH UNLESS TYPEWRITER IN SILENT MODE.
- 0968              TS           ZERO          TYPIST        SET POG HED    C    RESTORE TYPEWRITER AFTER SECRET TASK.
+ 0968              TS           ZERO          TYPIST        SET PG HED     C    RESTORE TYPEWRITER AFTER SECRET TASK.
  0970              TS           N,X6          N,X1          N,AU2               ALSO RESTORE FORMER BACKUP STATUS.
 
  0972   TYP COUNT  WD           Z,CSC         L MSG AREA    Z,CSC               TENTATIVELY, NO. OF WORDS TO BE TYPED.
@@ -2316,7 +2316,7 @@ R2269   ENTRIES TO ROUTINES IN SERVICE MODULE.
  2274   ADD COMP   TS           Z,SC,4        Z,AU1         SERVICE
  2275   RMOV COMP  TS           Z,SC,5        Z,AU1         SERVICE
  2276   PASS STAT  TS           Z,SC,6        Z,AU1         SERVICE
- 2277   MANY STAT  TS           Z,SC,7        Z,AU1         SERVICE
+ 2277   MANU STAT  TS           Z,SC,7        Z,AU1         SERVICE
 
 
 
