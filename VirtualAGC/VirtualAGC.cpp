@@ -187,7 +187,7 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
 	    { "Apollo 10 Command Module", "",
 		"Click this to select the CM for the Apollo 10 mission.",
 		DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
-            { "Luminary 69 rev 0", "Luminary069/MAIN.agc.html",
+            { "LUMINARY 69 rev 0 (LM)", "Luminary069/MAIN.agc.html",
                 "Click this to select Luminary 69 rev 0, a preliminary revision of the Apollo 10 LM software.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary069", "CM.ini" /* Yes, the CM is intentional */},
 	    { "Apollo 10 Lunar Module", "LUM69R2/MAIN.agc.html",
@@ -196,14 +196,20 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
 	    { "Apollo 11 Command Module", "Comanche055/MAIN.agc.html",
 		"Click this to select the CM for the Apollo 11 mission, running software COMANCHE 55.",
 		ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche055", "CM.ini" },
-	    { "Luminary 99 Rev 0", "LMY99R0/MAIN.agc.html",
-		"Click this to select Luminary 99 rev 0, a preliminary revision of the Apollo 11 LM software.",
+	    { "LUMINARY 97 (LM)", "Luminary097/MAIN.agc.html",
+		"Click this to select Luminary 97, the original software release targeting the Apollo 11 LM.",
+		ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary097", "LM.ini" },
+	    { "LUMINARY 98 (LM)", "Luminary098/MAIN.agc.html",
+		"Click this to select Luminary 98, an engineering revision of the Apollo 11 LM software.",
+		ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary098", "LM.ini" },
+	    { "LUMINARY 99 Rev 0 (LM)", "LMY99R0/MAIN.agc.html",
+		"Click this to select Luminary 99 rev 0, the 2nd software release targeting the Apollo 11 LM.",
 		ENABLED, LM, BLOCK2, PERIPHERALS, "LMY99R0", "LM.ini" },
-	    { "Apollo 11 Lunar Module rev 1", "Luminary099/MAIN.agc.html",
+	    { "Apollo 11 Lunar Module", "Luminary099/MAIN.agc.html",
 		"Click this to select the LM for the Apollo 11 mission, running software LUMINARY 99 Rev 1.",
 		ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary099", "LM.ini" },
-	    { "Luminary 99 rev 2", "LUM99R2/MAIN.agc.html",
-		"Click this to select Luminary 99 rev 2, a hypthetical revision of the Apollo 11 LM software.",
+	    { "LUMINARY 99 rev 2 (LM)", "LUM99R2/MAIN.agc.html",
+		"Click this to select Luminary 99 rev 2, a hypothetical but unflown revision of the Apollo 11 LM software.",
 		ENABLED, LM, BLOCK2, PERIPHERALS, "LUM99R2", "LM.ini" },
 	    { "Apollo 12 Command Module", "",
 		"Click this to select the CM for the Apollo 12 mission.",
@@ -214,7 +220,7 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
 	    { "Apollo 13 Command Module", "",
 		"Click this to select the CM for the Apollo 13 mission.",
 		DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
-            { "Luminary 130", "Luminary130/MAIN.agc.html",
+            { "LUMINARY 130 (LM)", "Luminary130/MAIN.agc.html",
                 "Click this to select Luminary 130, a preliminary revision of the Apollo 13 LM software.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary130", "LM.ini" },
 	    { "Apollo 13 Lunar Module", "Luminary131/MAIN.agc.html",
@@ -716,6 +722,8 @@ EVT_RADIOBUTTON(ID_APOLLO10CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUM69BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO10LMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_COMANCHE55BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_LUMINARY97BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_LUMINARY98BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LMY99R0BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUMINARY99BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUM99R2BUTTON, VirtualAGC::ConsistencyEvent)
