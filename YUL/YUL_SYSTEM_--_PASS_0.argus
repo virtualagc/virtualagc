@@ -484,7 +484,7 @@ P03931  NUMERIC CONSTANTS CONCLUDED.
  0396   CAC3 M1    OCT          -177776
 
  0397   BIT 32     OCT          -20 0000
- 0398   C1T4 348   DEC          GGGGGG 000001
+ 0398   C1T4 B48   DEC          GGGGGG 000001
  0399   B2 B13     OCT          20004
  0400   D11D12     DEC          -GG
 
@@ -695,7 +695,7 @@ P0529   ALPHABETIC CONSTANTS -- SIXTH OF 7 PAGES.
  0539   W CONDIT   ALF,2        CONDITIONALLY
 
  0540   W TRANSFD  ALF,2        TRANSFERRED
- 05402  OLDRVN MSG ALF,2        OLD REVISION NO.
+ 05402  OLRVN MSG  ALF,2        OLD REVISION NO.
  05403  NTHIS MSG  ALF,2        NOT ON THIS DISC
  05404  FDISC MSG  ALF,2        FOUND ON DISC
  0541   AS TRY MSG ALF,2        ASA TO TRY AGAIN
@@ -744,7 +744,7 @@ P0556              ADDRESS CONSTANTS.
  0569   Y FILE LIM SPEC,B7                                  500
 
  0570   GB SWITCH  SPEC,G0                                  N,R2
- 0571   BANK 3     SPEC, BB                                 DAMN ZERO
+ 0571   BANK B     SPEC, BB                                 DAMN ZERO
  0572   BKB PLACE  SPEC, BB                                 DAMN ZERO
  0573   END BANK B SPEC, BB                                 2039
 
@@ -1994,7 +1994,7 @@ P1902   DETACH PROG/SUB NAME FROM AUTHOR AND COMPUTER LISTS, ADD TO DELETE LIST.
 
  1903   DE AUTHOR  LA           3,1           PLUS ZERO     NOT 1(AU)           BRANCH IF NOT 1ST IN AUTHOR'S LIST.
  1905              SWS,ATHRED10 4,1           12,L          3,1                 REMOVE FROM HEAD OF AUTHOR'S LIST.
- 1907              TS           Z,X3          X,X5          DECR AUTH           LET X5 POINT TO AUTHOR NAME.
+ 1907              TS           Z,X3          Z,X5          DECR AUTH           LET X5 POINT TO AUTHOR NAME.
 
  1909   NOT 1(AU)  SS           4,1           B THRED 10    3,1                 REMOVE FROM MIDST OF AUTHOR'S LIST.
  1911              SWS,THREAD10 5,1           12            Z,X5                X4 AND X5 WERE EQUAL AFTER KNOWN PSR.
@@ -2131,7 +2131,7 @@ R2051   RESPECTIVELY IF THERE IS NO PRECEDING PROGRAM.
  2078              TN           Z,X3          2             Z,X4                ADDRESS OF PROGRAM NAME TO X4, X5.
  2080              SWS,THREAD10 3,1           12            Z,X3                THREAD TO NEXT PROGRAM BY SAME AUTHOR.
  2082              LA           3,1           PLUS ZERO     C,-1                REPEAT UNTIL AUTHOR NAME IS FOUND.
- 2084   SET LAUTH  TX           X,X3          -             L AUTH NAM
+ 2084   SET LAUTH  TX           Z,X3          -             L AUTH NAM
  2085              SS           3,1           THREAD11      Z,X5                THREAD TO SECOND HALF OF AUTHOR NAME.
  2087              NA           N,X3          AUTHNAME      RONG AUTH
  2088              NA           N,X5          AUTH NAME +1  RONG AUTH           BRANCH IF AUTHOR NAME IS WRONG.
@@ -2182,7 +2182,7 @@ R2129              TS           Z,SC          Z,S2          PROG ADJ
  2143   SHUD B REV TS           Z,X5          WHODUNIT      TRANSFD Q           IN CASE WORD IS NOT "REVISION",
  2145              NA           N,X5          W VERSION     C,+3                "VERSION", OR "TRANSFERRED".
  2147              NA           TASK MSG      W ASSMBLY     HOWZAT
- 2148              NA           6,16          W FROM        NEW VERB            BRANCH ON RECOGNIZING VERSION ASSEMBLY.
+ 2148              NA           6,16          W FROM        NEW VERS            BRANCH ON RECOGNIZING VERSION ASSEMBLY.
  2150              NA           N,X5,1        W REVISON     HOWZAT
  2151              NA           N,X5,2        BLANKS        HOWZAT              BRANCH IF WORD UNRECOGNIZED.
 
@@ -2292,7 +2292,7 @@ R2250   BIT 9 OF THE SWITCH REGISTER IS SET TO 0 IF PROGRAM OR 1 IF SUBROUTINE.
  22536             TS           Z,X5,3        -             WHAT PROG
 
  2254   FINGER     TX           Z,X5          -             WHODUNIT       S
- 2255              NA           N,X5,1        W SUBROT1     HOWZAT
+ 2255              NA           N,X5,1        W SUBROTI     HOWZAT
  2256              NA           N,X5,2        W NE          HOWZAT              BRANCH IF UNRECOGNIZED NOUN.
  2258              SM           SWITCH        BIT 9         SWITCH
 
@@ -2514,7 +2514,7 @@ R2479   ENTER AT 0,133 IN TRANSFER VECTOR.
  2480   GIVE PR    TX           1,8           -             N,AU1          C    MAKE 2ND WD POINT ALONG PAIR+SLOT LISTS.
  2482              SWS, CAC1    Z,AU2         32,L          1,8            C
  2483              SWS, CAC2    Z,AU2         16,L          1,8            C    SET PAIR+SLOT POINTERS TO 1ST WD.
- 2485              SWS, CAC1    Z,AU1         32,L          32,L                LET WD 1 POINT TO WD 2, EXIT.
+ 2485              SWS, CAC1    Z,AU1         32,L          N,AU2               LET WD 1 POINT TO WD 2, EXIT.
 
 # Page 95
 #      @YUL SYSTEM -- PASS 0                                                     USER'S OWN PAGE NO.  55        PAGE  55
@@ -2643,7 +2643,7 @@ R2605   ABLE.  IF ALL IS WELL, LOADS THE MANUFACTURING PROGRAM FOR THE NAMED COM
 
  26206             TS           C,+1          2DIG REVN -1  TYP WREVN +1
  26207             TS           SAY ABORT     TYP ABORT     C,+1                WRONG-REV-NO. MUST RESTORE ABORT.
- 26209             TX           TYP WREVN     -             WDIG REVN -1   S    ..THEN RESTORE ITSELF..
+ 26209             TX           TYP WREVN     -             2DIG REVN -1   S    ..THEN RESTORE ITSELF..
  26211             LA           REVNO         COMMON        OK NOUN +2          ..AND SEE IF REVNO IS REALLY OK FOR MFG.
  26213  TYP WREVN  S, MON TYPER WREVN MSG     SPRAMR +40    TYP ABORT           FALL INTO HERE IF SPEC. REVNO TOO BIG.
 
@@ -2802,7 +2802,7 @@ R2688   RESS, HALTS IT AND POSITIONS YULPROGS JUST AFTER THE LABEL.  ENTRY IS IN
 
  2694              TX           FETCH SS1     -             FETCH SSN           RESTORE SUBSTRAND FETCHER.
  2696              TX           NO TP TASK    -             PNCH FRAM           RESTORE TAPE PUNCHING TO INITIAL STATE.
- 2698              TS           N,SC,1        SRCH TEST     POSIT YYUL          RESTORE INSTRUCTION, POSITION YULPROGS.
+ 2698              TS           N,SC,1        SRCH TEST     POSIT YUL           RESTORE INSTRUCTION, POSITION YULPROGS.
  2700              NA           1,1           SERCH KEY     SRCH TEST -3
  2701              TS           YUL MASKS     Z,MXR         SET PG HED          PROCEED TO NEXT TASK.
 
@@ -2814,15 +2814,15 @@ R2705   COLUMN 1), OR TO L+1 IF NOT.  ENTER WITH L+1 IN X1 (CALLING FROM BANK 1)
 R2707   TRANSFER VECTOR.
 
  2708   RD SUBDRC  TX           Z,MXR         -             Z,R6
- 2709              TS           YUL MASKS     Z.MXR         NEX DIREC      C
+ 2709              TS           YUL MASKS     Z,MXR         NEX DIREC      C
  2710              TS           PHI WAA       Z,X4          PHI PEEK       C    PEEK AT NEXT CARD.
  2712              NA, CHAR1    4,0           S COLUMN 1    NOT S CARD          BRANCH IF NOT A SUBDIRECTOR.
 
  2714              S, PHI READ  6,1                                             SET UP FOR SENTENCE READING.
  2716   SET COL 81 TS           ONES          6,11          PHI SENTR           BREAK DOWN SUBDIRECTOR.
- 2718              TS           Z,R6          Z.MXR         1,1
+ 2718              TS           Z,R6          Z,MXR         1,1
 
- 2719   NOT S CARD TS           Z,R6          Z.MXR         N,X1                NON-SKIPPING EXIT IN THIS CASE.
+ 2719   NOT S CARD TS           Z,R6          Z,MXR         N,X1                NON-SKIPPING EXIT IN THIS CASE.
 
 
 
@@ -2869,7 +2869,7 @@ P27585  SUBROUTINE TO READ THE AUTHMEMO RECORD, A SYMBOL TABLE RECORD, OR A PARA
  2762              NA, C7T8     TRONDEX +6    ZERO          FROM DISC           BRANCH UNLESS RECD WAS LAST OF SUBFILE.
  2764              SWE, ONES    TRONDEX +7    24            TRONDEX +6          MAYBE MOVE UP ADDRESS OF 2ND SUBFILE.
  2766              NA           TRONDEX +6    ZERO          C,+2                BRANCH TO BEGIN 2ND SUBFILE.
- 2768              TS           EOR           1,1           PROC DISK -1        END OF FILE.  SEND LAST RECORD OF FILE.
+ 2768              TS           EOR           1,1           PROC DISC -1        END OF FILE.  SEND LAST RECORD OF FILE.
  2770              TX           ZERO          -             TRONDEX +7          SHOW THAT WE ARE IN 2ND SUBFILE.
 
  2772   FROM DISC  S, DISC READ 1,3           CHK DF ERR +4 TRONDEX +6          READ A PARAGRAPH OF 256 WORDS.
