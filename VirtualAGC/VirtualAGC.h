@@ -48,6 +48,9 @@
  *          	2019-06-17 RSB	Added Retread50 button.
  *          	2019-07-23 RSB	Added a SundialE button.
  *          	2019-07-27 RSB  Added LUM69R2 button.
+ *          	2019-07-31 RSB	Added Comanche 51 button.  I seem to have forgotten
+ *          			to note adding Luminary 97, 98, and 130 buttons a
+ *          			could of days back.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -129,6 +132,7 @@ enum
   ID_APOLLO10CMBUTTON,
   ID_LUM69BUTTON,
   ID_APOLLO10LMBUTTON,
+  ID_COMANCHE51BUTTON,
   ID_COMANCHE55BUTTON,
   ID_LUMINARY97BUTTON,
   ID_LUMINARY98BUTTON,

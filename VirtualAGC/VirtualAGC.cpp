@@ -113,7 +113,9 @@
  *          			work well anyway.
  *          	2019-07-23 RSB	Added SundialE.  I don't seem to have noted when I earlier
  *          			added Retread50, and perhaps other stuff.  What's the deal?
- *          	2019-07-28 RSB  Added Luminary 99 Rev 2 and Luminary 130.
+ *          	2019-07-28 RSB  Added Luminary 69 Rev 2 and Luminary 130.
+ *          	2019-07-31 RSB	Added Comanche 51.  Also, I had added Luminary 97 and 98 a
+ *          			couple of days ago, but neglected to mention it.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -193,6 +195,9 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
 	    { "Apollo 10 Lunar Module", "LUM69R2/MAIN.agc.html",
 		"Click this to select the LM for the Apollo 10 mission.",
 		ENABLED, LM, BLOCK2, PERIPHERALS, "LUM69R2", "CM.ini" /* Yes, the CM is intentional */},
+	    { "COMANCHE 51 (CM)", "Comanche051/MAIN.agc.html",
+		"Click this to select Comanche 51, the original software release targeting the Apollo 11 CM.",
+		ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche051", "CM.ini" },
 	    { "Apollo 11 Command Module", "Comanche055/MAIN.agc.html",
 		"Click this to select the CM for the Apollo 11 mission, running software COMANCHE 55.",
 		ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche055", "CM.ini" },
@@ -721,6 +726,7 @@ EVT_RADIOBUTTON(ID_APOLLO9LMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO10CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUM69BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO10LMBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_COMANCHE51BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_COMANCHE55BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUMINARY97BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUMINARY98BUTTON, VirtualAGC::ConsistencyEvent)

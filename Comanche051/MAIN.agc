@@ -16,7 +16,7 @@
 # Website:      www.ibiblio.org/apollo/index.html
 # Mod history:  2019-07-30 MAS  Created from Comanche 55.
 
-$CONTRACT_AND_APPROVALS.agc			        # p. 1						
+$CONTRACT_AND_APPROVALS.agc			        # p. 1
 $ASSEMBLY_AND_OPERATION_INFORMATION.agc		        # pp. 2-26
 $TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc      # pp. 27-35
 

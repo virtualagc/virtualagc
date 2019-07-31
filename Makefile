@@ -177,6 +177,7 @@
 #		2019-07-23 RSB	Added SUNDIALE.
 #		2019-07-27 MAS	Added LUM69R2.
 #		2019-07-28 MAS	Added Luminary 97 and 98.
+#		2019-07-31 RSB	Added COMANCHE051.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -423,6 +424,7 @@ MISSIONS += Luminary099 Artemis072 Colossus237 Luminary130
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
 MISSIONS += Retread50 SundialE LUM69R2 Luminary097 Luminary098
+MISSIONS += Comanche051
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif
