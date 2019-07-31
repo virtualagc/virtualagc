@@ -75,6 +75,7 @@ def check_buggers(rope_file, bugger_file):
     with open(bugger_file, 'r') as f:
         buggers = f.readlines()
 
+    errors = 0
     for l in buggers:
         l = l.strip()
         if l == '' or l.startswith(';'):
@@ -87,9 +88,9 @@ def check_buggers(rope_file, bugger_file):
         actual_bugger = get_bugger(rope, bank)
         if actual_bugger != expected_bugger:
             print('Bugger word mismatch in bank %02o; actual %05o != expected %05o' % (bank, actual_bugger, expected_bugger))
-            return 1
+            errors += 1
 
-    return 0
+    return errors
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check bugger words of a rope binary against a known set')
