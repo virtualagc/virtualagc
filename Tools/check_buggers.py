@@ -87,7 +87,8 @@ def check_buggers(rope_file, bugger_file):
 
         actual_bugger = get_bugger(rope, bank)
         if actual_bugger != expected_bugger:
-            print('Bugger word mismatch in bank %02o; actual %05o != expected %05o' % (bank, actual_bugger, expected_bugger))
+            print('Bugger word mismatch in bank %02o; actual %05o != expected %05o (diff = %05o)' %
+                  (bank, actual_bugger, expected_bugger, abs(actual_bugger - expected_bugger)))
             errors += 1
 
     return errors
