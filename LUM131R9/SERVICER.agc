@@ -18,6 +18,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUM131 REVISION 9.
 ## Mod history: 2019-08-04 MAS  Created from Luminary 130.
+##              2019-08-06 MAS  Added reconstructed code to check HLROFF, as per
+##                              PCR 942. The bank 33 checksum is now correct.
 
 ## Page 852
 		BANK	37
@@ -1088,8 +1090,10 @@ NOREASON	CS	FLGWRD11
 		CCS	A
 		TCF	VMEASCHK	# UPDATE INHIBITED - TEST VELOCITY ANYWAY
 
-		TC	INTPRET		# DO POSITION UPDATE
-		DLOAD	SR4
+## The following line is a TC INTPRET in Luminary 131, but has been replaced
+## with a TCF to the end of the bank for a code change.
+		TCF     HLROFCHK
+HLROFRET	DLOAD	SR4
 			HCALC		# RESCALE H TO 2(28)M
 		EXIT
 		EXTEND
@@ -1651,3 +1655,16 @@ SETPOS		XCH	Q		# SAVE INDEX IN Q
 		TC	LRADRET
 
 OCT523		OCT	00523
+
+## The code below has been reconstructed for LUM131 Rev 9 to match the
+## bugger word for bank 33. All comments are not original.
+# MODU
+HLROFCHK	TC	INTPRET
+		DLOAD	DSU		# CALCULATE (HCALC - HLROFF)
+			HCALC
+			HLROFF
+		BPL	CLEAR		# IF H < HLROFF, RESET LR PERMIT FLAG
+			HLROFRET
+			LRINH
+		EXIT
+		TCF	VMEASCHK	# TEST VELOCITY
