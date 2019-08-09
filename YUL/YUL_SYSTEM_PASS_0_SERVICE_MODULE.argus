@@ -150,7 +150,7 @@ R0086   ALPHABETIC ARRAYS.
  0088   BKUP LINE  ALF,4         DIRECTORY LISTING OF YULPROGS #
  0089   BUREL MSG  ALF,2        BACKUP RELABELED
  0090   CHEDL MSG  ALF,3        CHECK DIRECTORY LISTING
- 0091   COMPU MSG  ALF,2
+ 0091   COMPU LIN  ALF,2
  0092   COMUS MSG  ALF,3        COMPUTER IS STILL IN USE
  0093   CONCN MSG  ALF,5        CONFLICT WITH EXISTING COMPUTER NAME-
  0094   DCLAV MSG  ALF,3        DECLARED AVAILABLE
@@ -750,11 +750,11 @@ P0588   SELECT CARD IMAGES FOR SYMBOLIC-CARD-IMAGE TYPE TASK.
  0628   SEL UNLOG  SM           S CHAR 1      S C2T7        N,AU1               CHECK ALL BUT COLUMN 8 OF NON-LOG CARDS.
  0630              SWE,YYNNYYYY 6,1           A,3           6,12
  0631              TS           S SIX         Z,X5          C,+2                SET UP CHECK ON 6-COLUMN CARD NO. FIELD.
- 0633   CNDO CHEK  SWS, ONES    6,12          A,1           6,12
+ 0633   CDNO CHEK  SWS, ONES    6,12          A,1           6,12
  0634              LA, CHAR2    6,12          END OF 1      C,+3                BRANCH IF CHARACTER IS A DIGIT.
  0636              NA, CHAR2    6,12          S BLANKS      SEEK MTCH -1
  0637              TX, CHAR2    S ZERO        -             6,12                REPLACE BLANK BY ZERO.
- 0639              NA           Z,X5,1        S ONE         COND CHEK
+ 0639              NA           Z,X5,1        S ONE         CDNO CHEK
  0640              LA           A999999       6,12          SEEK MTCH -1        CARD NUMBER 999999 IS ALSO A SEQ. BREAK.
  0642              SS           6,12          S C2T7        6,1                 STANDARDIZE NON-SEQUENCE-BREAK NUMBER.
  0644              TS           SAVE X4       Z,X5          TEST MODE +2        REQUEST CARD IS NOW READY TO LOOK AT.
@@ -782,7 +782,7 @@ P0658   PREPARE A CARD IMAGE FOR TRANSFERRING, PRINTING, PUNCHING, OR PRINTING W
  0670   XFR LD X4  TX           XFR BUFFS     -             Z,X4           S
  0671              TN           XFR BUFFS     2             XFR BUFFS +4
  0672              TN           N,AU1         4             XFR BUFFS           SWAP OUTPUT BUFFER NAMES.
- 0674              S, DISC WAIT 4,0           128           DISC ADDR           WRITE BLOCKS OF 8192 WORDS ON THE DISC.
+ 0674              S, DISC WRIT 4,0           128           DISC ADDR           WRITE BLOCKS OF 8192 WORDS ON THE DISC.
  0676              WA           DISC ADDR     128 BLOX      DISC ADDR
  0678              TS           XFR BUFFS     XFR PLACE     XFR LD X4      C
  0679              NA           DISC ADDR     DISCALIM      SEND XFER
@@ -979,7 +979,7 @@ P08875  RUN COPY TAPE ONTO PRINTER AS REQUIRED, AND END TASK.
  0890              NA           Z,X6          L COP BUFS    C,+3                BRANCH WHEN LAST COPY BUFFER CLOSED OUT.
  0892              TS           L BLANCD      Z,X2          COPY PRT2           FILL OUT LAST COPY BUFFER.
  0894              TS           2,0           2,0           C,-2
- 0895              S, MON EOFRI COPY UP       -             S ZERO              CLOSE OUT COPY TAPE.
+ 0895              S, MON EOFRI COPY OP       -             S ZERO              CLOSE OUT COPY TAPE.
 
  0898   COPIES     TS           S TWO         Z,R2          PHI TAPE
  0899              RW,2         -             -             -
@@ -1091,7 +1091,7 @@ R1030   LOOP TO COPY OLD YULPROGS TO NEW.                                       
  1040              LA, BANBITS  5,0           S ZERO        INC RECNO           BRANCH ON GOOD RECD NO. AND ZERO BANNER.
  1042              NA, BANBITS  5,0           OK BANNER     CLOBBERD            BRANCH IF WRONG BANNER BITS.
  1044              TN           OK BANNER +1  2             OK BANNER           MOVE NEXT LEGAL BANNER CONFIG. UP.
- 1046   INC RECNO  WA           WA            S ONE         TASK2
+ 1046   INC RECNO  WA           TASK2         S ONE         TASK2
 # Annotation: Operand3 is hand-changed from C,+3 to C,+5.
  1047              NA, BANBITS  5,0           BAN EOFRI     C,+3                BRANCH UNLESS ABOUT TO WRITE 1ST EOFRI.
 
@@ -1165,7 +1165,7 @@ R1067   TO A SIMPLE TWO-PASS ASSEMBLER.  THIS PAGE: PASS 1, LEAVING BANK 7 ADDRE
  1136   MOV DELES  TN           N,R1          2             N,X2                MOVE DELETE ENTRY.
  1138              TX           Z,X2,1        -             N,R1                LEAVE FORWARDING ADDRESS.
  1140              SWS,THREAD10 N,X2,1        0             Z,R1                THREAD TO NEXT DELETE.
- 1142   LAS DELE Q NA           N,R1          S ONES        MOVE DELES          BRANCH IF MORE DELETES TO MOVE.
+ 1142   LAS DELE Q NA           N,R1          S ONES        MOV DELES           BRANCH IF MORE DELETES TO MOVE.
 
 # Page 134
 #      @YUL SYSTEM PASS 0 SERVICE MODULE                                         USER'S OWN PAGE NO.  27        PAGE  94
@@ -1204,7 +1204,7 @@ P1146   NEW SUBADDRESSES FOR BANK 7.  IN OTHER WORDS, FILL IN DEFINITIONS OF SYM
  1191   10 BIT THR TX           Z,CSC,3       -             -              C    DO 10-BIT THREAD AT END OF PROG/SUB PRC.
  1193   PSRS DUN Q NA           N,R2          S END THR     XFORM PSR           BRANCH IF MORE PROG/SUBS FOR THIS COMP.
 
- 1195   CMPS DUN Q NA           Z,R4          S END THR     XFOM CMP            BRANCH IF MORE COMPUTERS TO REVALUE.
+ 1195   CMPS DUN Q NA           Z,R4          S END THR     XFORM CMP           BRANCH IF MORE COMPUTERS TO REVALUE.
 
  1197              SWS,THREAD10 3,9           16            Z,R1                BANK 5 ADDRESS OF FIRST AUTHOR NAME.
  1199              SWS, CAC2    N,R1          16,L          1,9                 REVALUE THREAD TO FIRST AUTHOR.
@@ -1280,7 +1280,7 @@ P1268   AMEND LABEL OF BACKUP TAPE.
  12692             S, MON TYPER ASAMB MSG     SPRAMR +32    -                   "ASA TO AMEND BACKUP TAPE LABEL;"
  12694             TX, CHAR3    ASAMB MSG     -             S ACA OTHE
  12696             S, MON TYPER S ACA OTHE    SPRA +16      AMEND SC            "ACA OTHERWISE"
- 1270   AMED QST   STOP                                     -              S
+ 1270   AMEND QST  STOP                                     -              S
  12702             TS, CHAR8    S ZERO        1,0           C,+1           S    WIPE OUT AMEND FLAG AFTER REFUSAL.
  12704             NA           BKUP STOP     BKUP STOP +1  GROUP NAP           WAIT FOR GROUP B TO FINISH LISTING.
  12706             S, MON TYPER S SIGH        SPRAMR +8     RELOAD P0           "(SIGH)"
@@ -1423,7 +1423,7 @@ P1400   PROCEDURE TO TEST AND PRINT THE STATUS OF SOFTWARE FOR EACH COMPUTER.
 P1450   PROCEDURE TO PRINT A LIST OF PORGRAMS AND A LIST OF SUBROUTINES FOR EACH COMPUTER, WITH STATUS INFORMATION.
 
  1452              TS           W PROGRMS     SLINE +2      MSPACE 1       C
- 1453              TS           Z,X5          COMP LOCN     MSPAC1 +1      C    PRINT AND UNDERLINE PROGRAM HEADING.
+ 1453              TS           Z,X5          COMP LOCN     MSPACE1 +1     C    PRINT AND UNDERLINE PROGRAM HEADING.
  1455              TX           S ZERO        -             PRG OR SUB          DO THE LIST OF PROGRAMS FIRST.
 
  1457   LIST PR SU TN           PRSUB HDS     14            SLINE +2
@@ -1478,7 +1478,7 @@ R1497   IF A SUBROUTINE IS NOT CALLED BY ANY PROGRAM OR SUBROUTINE, MARK IT "UNU
 P1523   SET UP AUTHOR NAME, DATE OF LAST ASSEMBLY, WHETHER A PROGRAM HAS BINARY RECORDS, OR WHETHER A SUBROUTINE IS
 R1525   CONTROLLED.
 
- 1526   LIST AUTH  SWS,THREAD1O 4,1           12            Z,X4
+ 1526   LIST AUTH  SWS,THREAD10 4,1           12            Z,X4
  1527              LA           4,1           S PLS ZERO    C,-1                BRANCH IF AUTHOR NAME NOT FOUND.
 
  1529              TX           N,X4          -             SLINE +4            SET UP FIRST WORD OF AUTHOR NAME.
@@ -1557,7 +1557,7 @@ P1619   TERMINATION OF EITHER THE PROGRAM LIST OR THE SUBROUTINE LIST.
  1623              TX           W NONE        -             3,2                 ERASE HEADINGS AND SUBSTITUTE "(NONE)".
  1625              TX           SP3           -             N,X3
  1626              SS           S BIT 1       PRG OR SUB    N,X3                SP3 AFTER PROG LIST, SKIP AFTER SUBRO.
- 1628              NA           PRG OR SUB    S ZERO        EN COMS Q           BRANCH IF JUST FINISHED SUBROUTINE LIST.
+ 1628              NA           PRG OR SUB    S ZERO        EN COMPS Q          BRANCH IF JUST FINISHED SUBROUTINE LIST.
 
  1630              TS           W SUBROS      SLINE +2      EN COMPS Q     C
  1631              TS           W SUBROS +1   SLINE +3      M SPACE 1      C
@@ -1611,7 +1611,7 @@ P1674   FINALIZING PROCEDURE IN DIRECTORY LISTING.
  1677              TS           YDL RETRN     N,AU2         N,AU1               PLANT SPECIAL EXIT AND EXECUTE YULDLIST.
 
  16772  BYE BYE    TS           -             -             MONITOR             (SHOULD BE AT BASE ADDRESS +1).
- 16773  YUL RETRN  TS           -             -             N,S3
+ 16773  YDL RETRN  TS           -             -             N,S3
  16774             TX           Z,CSC         -             Z,S3           S    MAKE S3 POINT TO SPECIAL RETURN.
 
  16776  AFTER YDL  TS           L BANK 1      Z,X0          BK1 VIA X0 +1  C
@@ -1927,7 +1927,7 @@ P2000   PROCEDURE FOR ABSOLUTE, RATHER THAN EQUIVALENCE, DECLARATION.
  2041              TS           -             -             TYP REDUN -2
 
  2042   OBSOLETE   NA           N,X5,1        W OBSOLET     HOWZAT
- 2043              NA           N,X5          S BLANK       HOWZAT              CUSS AND ABORT IF NOT "OBSOLETE".
+ 2043              NA           N,X5          S BLANKS      HOWZAT              CUSS AND ABORT IF NOT "OBSOLETE".
  2045              S, YUL TYPER DCLOB MSG     AMTF +3       C,+1                TYPE "DECLARED OBSOLETE".
  2047              EX           PASS MASK     AVCO BITS     TEMP MSK            FORM AVAIL AND CHKO BITS FOR PASS.
  2051              EX           2,1           TEMP MSK      COMMON
