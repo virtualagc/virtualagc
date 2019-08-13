@@ -55,11 +55,7 @@ operators = {
     "SHR": { "opcode":0b1110, "a9":1, "a8":0 }, 
     "SHL": { "opcode":0b1110, "a9":1, "a8":0 }
 }
-# I have no actual info about the available pseudo-ops, so it's likely that
-# everything relating to the pseudo-ops will have to be ripped out later and
-# replaced.  But I'm putting in some pseudo-op functionality as a temporary
-# measure.
-pseudos = ["CODE", "DATA", "OCT", "DEC"]
+pseudos = []
 
 #----------------------------------------------------------------------------
 #           Read the source code and do simple preprocessing
@@ -69,7 +65,7 @@ pseudos = ["CODE", "DATA", "OCT", "DEC"]
 # expanding the CALL macro, etc.  The object is basically to parse the whole
 # mess into an easy-to-understand dictionary called inputFile. 
 #
-# As far as I know right now, it looks like we can painlessly assign a HOP 
+# As far as I know right now, it looks like we can painlessly assign a HOP constant
 # to each line of input that needs one as well.  If not, then HOP assignment
 # will have to be removed from this pass and one or more additional passes 
 # added later to determine the HOPs.
@@ -80,6 +76,7 @@ S = 1
 LOC = 0
 DM = 0
 DS = 0
+preConstants = {} # Numerical constants defined in the preprocessor.
 for line in sys.stdin:
     line = line.rstrip()
     inputLine = { "raw": line }
@@ -100,6 +97,19 @@ for line in sys.stdin:
             break
     
     if len(fields) == 3:
+        # Process preprocessor numerical constants.
+        if fields[2][:1] == "(":
+    	    efields = fields[2].split(")")
+    	    if len(efields) != 2:
+    	        inputLine["error"] = "Malformed preprocessor expression"
+    	        inputFile.append(inputLine)
+    	        continue
+    	    expression = efields[0][1:]
+    	    scale = efields[1]
+    	    if scale == "":
+    	        scale = "B0"
+        #if fields[1] == "EQU":
+        #	  TBD	
         # Operator/operand "CALL a,b" is really shorthand for 
         # "CLA b / HOP* a", so expand it in that manner.
         if fields[1] == "CALL":
