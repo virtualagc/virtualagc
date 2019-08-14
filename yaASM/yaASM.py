@@ -31,6 +31,8 @@
 # output, called lvdc.bin.
 
 import sys
+# The next line imports expression.py.
+import expression
 
 operators = {
     "HOP": { "opcode":0b0000 }, 
@@ -57,11 +59,89 @@ operators = {
 }
 pseudos = []
 
+lines = sys.stdin.readlines()
+for n in range(0,len(lines)):
+	lines[n] = lines[n].rstrip()
+
+
 #----------------------------------------------------------------------------
-#           Read the source code and do simple preprocessing
+#	Preprocessor pass
 #----------------------------------------------------------------------------
-# First step is just to read the entire input file into memory, doing some
-# simple preprocessing at the same time, such as getting rid of blank lines,
+# The idea for this pass is to process:
+#	EQU
+#	Expansion of CALL
+#	Macro definitions
+#	Usage of EQU-defined constants in assembly-language operands
+#	Expansion of macros
+#	Conditionally-assembled code.
+# The array expandedLines[] will end up being exactly the same length as lines[],
+# and the entries will correspond 1-to-1, but will mostly be blank if the 
+# preprocessor hasn't made any changes.  Except for macro expansions, the changed
+# entries will be the same but with macro constants replaced by numeric literals.
+# For macro expansions, the entry in the expandedLines[] array will itself be
+# an array of lines comprising the expanded macro.  The errors[] array is also 
+# in a similar 1-to-1 relationship, and contains error/warning messages for the lines.
+expandedLines = []
+errors = []
+constants = {}
+macros = {}
+inMacro = ""
+for n in range(0, len(lines)):
+	line = lines[n]
+	errors.append([])
+	expandedLines.append("")
+	# Split the line into fields.
+	if line[:1] in [" ", "\t"] and not line.isspace():
+		line = "@" + line
+	fields = line.split()
+	if len(fields) > 0 and fields[0] == "@":
+        	fields[0] = ""
+        	line = line[1:]
+        	
+	if inMacro != "":
+		if len(fields) >= 2 and fields[1] == "ENDMAC":
+			inMacro = ""
+		else:
+			macros[inMacro]["lines"].append(fields)
+	elif len(fields) >= 3 and fields[0] != "" and fields[1] == "EQU":
+		value,error = expression.yaEvaluate(fields[2], constants)
+		if error != "":
+			errors[n].append("Error: " + error)
+		else:
+			constants[fields[0]] = value 
+	elif len(fields) >= 3 and fields[1] == "CALL":
+		ofields = fields[2].split(",")
+		if len(ofields) == 2:
+			line1 = "%-7s%-8s%s" % (fields[0], "CLA", ofields[1])
+			line2 = "%-7s%-8s%s" % ("", "HOP*", ofields[0])
+			expandedLines[n] = [line1, line2]
+		elif len(ofields) == 3:
+			line1 = "%-7s%-8s%s" % (fields[0], "CLA", ofields[2])
+			line2 = "%-7s%-8s%s" % ("", "STO", "775")
+			line3 = "%-7s%-8s%s" % ("", "CLA", ofields[1])
+			line4 = "%-7s%-8s%s" % ("", "HOP*", ofields[0])
+			expandedLines[n] = [line1, line2, line3, line4]
+	elif len(fields) >= 2 and fields[0] != "" and fields[1] == "MACRO":
+		inMacro = fields[0]
+		if len(fields) == 2:
+			numArgs = 0
+		else:
+			numArgs = len(fields[2].split(","))
+		macros[inMacro] = { "numArgs": numArgs, "lines": [] }
+		
+print("Constants:")		
+for n in sorted(constants):
+	print("\t" + n + "\t= " + str(constants[n]["number"]) + "B" + str(constants[n]["scale"]))
+print("Macros:")
+for n in sorted(macros):
+	print("\t" + n + "\t= " + str(macros[n]))
+
+sys.exit(1)
+
+#----------------------------------------------------------------------------
+#           TBD
+#----------------------------------------------------------------------------
+# Getting rid of blank lines,
 # expanding the CALL macro, etc.  The object is basically to parse the whole
 # mess into an easy-to-understand dictionary called inputFile. 
 #
@@ -77,8 +157,7 @@ LOC = 0
 DM = 0
 DS = 0
 preConstants = {} # Numerical constants defined in the preprocessor.
-for line in sys.stdin:
-    line = line.rstrip()
+for line in lines:
     inputLine = { "raw": line }
     
     # Split the line into fields.
