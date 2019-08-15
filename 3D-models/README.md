@@ -1,4 +1,4 @@
-This folder contains 3D models of the Apollo Guidance Computer. 
+This folder contains .step files for 3D models of original Project Apollo CM and LM G&N system drawings.
 So far, work has been focused on the DSKY, but any contribution regarding the AGC is welcome. 
 
 The models are created to the exact dimensions the original drawings. Two decision have been made:
