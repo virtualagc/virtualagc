@@ -40,13 +40,20 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         </li>
       </ul>
       <li><a href="#LVDC_Assembly_Language">LVDC Assembly Language</a></li>
+      <ul>
+        <li><a href="#Basic_Factoids">Basic Factoids</a></li>
+        <li><a href="#Preprocessor_Pass">Preprocessor Pass</a></li>
+        <li><a href="#Assembly_Pass">Assembly Pass</a></li>
+        <li><a href="#ANATOMY">Program Structure</a><br>
+        </li>
+      </ul>
       <li><a href="#MIT_Instrumentation_Laboratory_vs_IBM">MIT
           Instrumentation Laboratory vs IBM Federal Systems Division</a></li>
       <li><big><a href="#yaLVDC_the_LVDC_CPU_Emulation"><small><small><big><small><big><span
                         style="font-weight: bold;">yaLVDC</span>, the
                       LVDC CPU Emulation</big></small></big></small></small></a></big></li>
       <li><a href="#yaLVDCASM_the_LVDC_Cross-Assembler"><span
-            style="font-weight: bold;">yaASM</span>, the LVDC
+            style="font-weight: bold;">yaASM.py</span>, the LVDC
           Cross-Assembler</a></li>
       <li><a href="#Plea_for_Data">Plea for Data</a></li>
       <li><a href="#Homage">Homage</a><br>
@@ -60,6 +67,8 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         src="lvdc_upper-small.jpg" style="border: 2px solid ; width:
         288px; height: 165px;" align="right" height="165" width="288"></a>The
 Launch
+
+
 
 
 
@@ -220,6 +229,8 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
 
 
 
@@ -470,6 +481,8 @@ Launch
 
 
 
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -516,6 +529,8 @@ Launch
 
 
 
+
+
       do it!</b>), you may unnecessarily excite yourself by noting that
     Saturn IB launch vehicle AS-206 was used for the Skylab 2 mission
     (Conrad/Weitz/Kerwin).&nbsp; You may then be chagrined to realize
@@ -554,6 +569,8 @@ Launch
     by the assembler.&nbsp; Unfortunately, the status of the assembly
     process for it found 41 warnings and 7 errors — meaning that there
     were problems in the source code and that the assembly process <i>failed</i>.&nbsp;
+
+
 
 
 
@@ -794,6 +811,8 @@ of
 
 
 
+
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -820,6 +839,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
+
 
 
 
@@ -909,9 +930,13 @@ Astrionics
 
 
 
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -1167,6 +1192,8 @@ of
 
 
 
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1216,6 +1243,8 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
+
 
 
 
@@ -1512,6 +1541,8 @@ However,
 
 
 
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -1631,6 +1662,8 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
 
 
 
@@ -1829,6 +1862,8 @@ However,
             "residual sector".&nbsp; The following addresses are
             special, as described in <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">the
+
+
 
 
 
@@ -2243,6 +2278,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2384,6 +2421,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
+
 
 
 
@@ -3780,6 +3819,8 @@ of
 
 
 
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -3795,6 +3836,8 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
+
 
 
 
@@ -3986,6 +4029,8 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -4232,30 +4277,34 @@ Assembly
 
 
 
+
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
     available in it.&nbsp; This section is actually a kind of running
     diary of what I infer about those things from evaluating the
-    available LVDC source code, and shouldn't be taken as authoritative
-    in any way.&nbsp; There's not too much organization of the topics in
-    this section just yet, but I hope to be able to provide a better
-    structure later, after I manage to get a more-solid grasp on the
-    syntax.<br>
+    available LVDC source code.&nbsp; It's intended to be authoritative
+    only in the sense that it describes how my own assembler (yaASM.py,
+    when it becomes available) will handle the code, but shouldn't be
+    taken as authoritative in any way with regard to how the original
+    assembler (whatever it may have been called) did so.&nbsp; <br>
     <br>
-    You'll probably also need to refer to the previous <a
+    You'll probably need to refer to the previous <a
       href="#CPU_Instructions">discussion of the CPU instructions</a>
     from time to time, in order to follow the discussion.<br>
-    <br>
-    Here are some of my takeaways:<br>
-    <br>
+    <h3><a name="Basic_Factoids"></a> Basic Factoids</h3>
     <i>Empty lines</i>:&nbsp; Are ignored by the assembler.<br>
     <br>
-    <i>Code comments</i>:&nbsp; Full-line comments seem to be prefixed
-    by the character '*' in column 1.&nbsp; Anything left over at the
-    end of a line after the beginning of a line has been correctly
-    parsed seems to be treated as a comment, and doesn't require any '*'
-    prefix.<br>
+    <i>Code comments (original Project Apollo)</i>:&nbsp; Full-line
+    comments seem to be prefixed by the character '*' in column 1.&nbsp;
+    Anything left over at the end of a line after the beginning of a
+    line has been correctly parsed seems to be treated as a comment, and
+    doesn't require any '*' prefix.<br>
+    <br>
+    <i>Code comments (modern Virtual AGC Project)</i>:&nbsp; Comments <i>I've</i>
+    added that were not present in the original listing are all
+    full-line comments but with a '#' character in column 1.<br>
     <br>
     <i>Character set</i>:&nbsp; Upper-case alphabetic, numeric, and some
     punctuation.&nbsp; This isn't really any great surprise, of course,
@@ -4265,6 +4314,8 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
 
 
 
@@ -4315,110 +4366,34 @@ Assembly
     ...):&nbsp; 6 characters or less, alphanumeric, with the leading
     character alphabetic.&nbsp; They may also contain the character ".",
     though not in the leading position.<br>
+    <i><br>
+      Literal numerical constants</i>:&nbsp; Decimal literals are as you
+    might expect from working with AGC code.&nbsp; They are just regular
+    decimal numbers, possibly with a suffixed exponent "<tt>E</tt><tt><i>n</i></tt>"
+    for powers of 10, or a suffixed "<tt>B<i>n</i></tt>" for binary
+    scaling, or both.&nbsp; Suffixed exponents and scales, if both are
+    present, can be in either order.<br>
     <br>
-    <i>The </i><i><tt>CALL</tt></i><i> macro</i>:&nbsp; <tt>CALL</tt>
-    is used as in source code as if it were a CPU instruction, but it is
-    not.&nbsp; There are both 2-argument and 2-argument variants.&nbsp;
-    They act like macros (see below), but seem to be hard-coded into the
-    assembler rather than being defined in the source code by the
-    general macro facility.<br>
+    As far as octal literals are concerned, some contexts (such as the <tt>OCT</tt>
+    pseudo-op or the <tt>PIO</tt> instruction) specifically require
+    them, in which case there's special syntax to distinguish them from
+    decimal numbers, other than the fact that they're not associated
+    with the digits '8' or '9', with decimal points, nor with
+    exponents.&nbsp; In some usages there is ambiguity, which case the
+    octal literal is prefixed by 'O' (upper-case alphabetical character,
+    <i>not</i> a zero).<br>
     <br>
-    The 2-argument version calls a subroutine having a single input
-    argument.&nbsp; An "instruction" of the form "<tt>CALL <i>ARG1</i>,<i>ARG2</i></tt>"
-    is replaced by a pair of actual instructions, <br>
-    <blockquote><tt>CLA <i>ARG2</i></tt><br>
-      <tt>HOP* <i>ARG1<br>
-        </i></tt></blockquote>
-    All three lines appear in assembly listings, but the <tt>CALL</tt>
-    is treated as a comment and the other two have a '+' character
-    printed next to them to show that they're there due to the expansion
-    of the macro. <br>
-    <br>
-    The 3-argument version, "<tt>CALL <i>ARG1,ARG2,ARG3</i></tt>"
-    instead expands as<br>
-    <blockquote><tt>CLA ARG3<br>
-        STO 775<br>
-        CLA ARG2<br>
-        HOP* ARG1<br>
-      </tt></blockquote>
-    and thus calls a subroutine with two input arguments.<br>
-    <br>
-    <i>General macro facility</i>:&nbsp; A code macro (unlike a macro
-    constant, see <tt>EQU</tt>, <tt>DEQD</tt>, etc.) can be defined
-    with a syntax like:<br>
-    <blockquote><tt><i>NAME</i>&nbsp;&nbsp;&nbsp;
-        MACRO&nbsp;&nbsp;&nbsp; ARG1,ARG2,...<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ... code using the symbols
-        ARG1, ARG2, and so on ...<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ENDMAC<br>
-      </tt></blockquote>
-    Subsequently, <i><tt>NAME</tt></i> can be used as if it were an
-    instruction name or pseudo-op.<br>
-    <br>
-    In the examples I've seen, <tt>ARG1</tt>, <tt>ARG2</tt>, and so on
-    are literal.&nbsp; Whether that's a requirement of the assembler or
-    whether whoever wrote the macros I saw just happened to use the
-    parameter names <tt>ARG1</tt>, ..., I can't say.&nbsp; Thus the <tt>
-      CALL</tt> macro mentioned above <i>could</i> have been defined
-    (although it does not seem to have been) as:<br>
-    <blockquote><tt>CALL&nbsp;&nbsp;&nbsp; MACRO&nbsp;&nbsp;&nbsp;
-        ARG1,ARG2<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; CLA&nbsp;&nbsp;&nbsp;
-        &nbsp; ARG2<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-        HOP*&nbsp;&nbsp;&nbsp;&nbsp; ARG1<br>
-        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ENDMAC<br>
-      </tt></blockquote>
-    <i>Literal numerical constants</i>:&nbsp; These seem to follow the
-    same rules as for AGC.&nbsp; (E.g., generally octal, but decimal if
-    containing a decimal point.&nbsp; Allows suffixes like "<tt>E</tt><tt><i>n</i></tt>"
-    for powers of 10, "<tt>B<i>n</i></tt>" for binary scaling, or both.)<br>
-    <br>
-    <i>Format of an instruction line</i>:&nbsp; Since I inferred the
-    latter from the assembly listing, I can't guarantee that the
-    punch-card format is as shown, even though the correct number of
-    columns is used:<br>
+    <i>Format of a non-comment line</i>:&nbsp; <br>
     <ul>
       <li>Columns 1-6:&nbsp; Optional symbol, supplying a name for the
         memory location of the current line of code.&nbsp; The original
-        coders apparently called these "left-hand symbols".</li>
-      <li>Columns 8-15:&nbsp; The name of the CPU instruction (or <tt>CALL</tt>).&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        Notice that this is <i>not</i> aligned with what is sometimes
-        thought of as the default position of a "tab stop", which would
-        have been at column 9.</li>
-      <li>Columns 16-28:&nbsp; The CPU instruction's operand. I'll talk
-        more about these operands below.<br>
+        coders called these "left-hand symbols".</li>
+      <li>Columns 8-15:&nbsp; The name of the CPU instruction,
+        pseudo-op, or macro.&nbsp; Notice that this is <i>not</i>
+        aligned with what is sometimes thought of as the default
+        position of a "tab stop", which would have been at column 9.</li>
+      <li>Columns 16-28:&nbsp; The operand. I'll talk more about these
+        operands below.<br>
       </li>
       <li>29-75:&nbsp; Comment, possibly blank.&nbsp;&nbsp;</li>
       <li><a name="SequenceNumber"></a>75-80:&nbsp; Sequence number,
@@ -4440,9 +4415,144 @@ Assembly
         rearranged internally to the assembler in sequence-number
         order.&nbsp; I don't believe the original assembler needed to
         use these sequence numbers other than for reference purposes in
-        the symbol table (see below).<br>
-      </li>
+        the symbol table (see below).</li>
     </ul>
+    <h3><a name="Preprocessor_Pass"></a>Preprocessor Pass</h3>
+    <p>The LVDC assembler is a macro assembler, meaning that the
+      language it processes has a variety of constructs intended to make
+      coding easier and more manageable but which aren't directly
+      related to the LVDC itself.&nbsp; These constructs are all
+      resolved and removed from the code by a dedicated preprocessor
+      pass prior to any assembly of actual LVDC instructions or
+      allocation of LVDC memory.&nbsp; The various preprocessor
+      constructs that appear in LVDC code are described in this section.<br>
+    </p>
+    <p>The preprocessor operates in a single pass, and therefore any
+      items it uses must have been defined prior to their use.<br>
+    </p>
+    <i>The </i><i><tt>CALL</tt></i><i> macro</i>:&nbsp; <tt>CALL</tt>
+    is a macro hard-coded into the assembler itself.&nbsp; By a "macro",
+    I mean that superficially it is used in source code as if it were a
+    CPU instruction, but it is not a CPU instruction.&nbsp; Rather, it
+    is a shorthand for a sequence of several CPU instructions, a single
+    <tt>CALL</tt> is expanded by the preprocessor into the appropriate
+    stream of true CPU instructions.&nbsp; When I say it is "hard-coded"
+    into the assembler, I mean that the language also includes ways for
+    the programmer to define his own custom macros within the LVDC
+    program if he wants, but that there are no such definitions for the
+    <tt>CALL</tt> macro in the LVDC source code.<br>
+    <br>
+    There are both 2-argument and 2-argument variants of the
+    macro.&nbsp; The 2-argument version is used for calling a subroutine
+    having a single input argument.&nbsp; The macro is invoked by a
+    source-code line of the form<br>
+    <blockquote><tt>CALL <i>ARG1</i>,<i>ARG2</i></tt> <br>
+    </blockquote>
+    which the preprocessor replaces by a pair of actual instructions, <br>
+    <blockquote><tt>CLA <i>ARG2</i></tt><br>
+      <tt>HOP* <i>ARG1<br>
+        </i></tt></blockquote>
+    All three lines appear in assembly listings, but the <tt>CALL</tt>
+    is treated as a comment and the other two have a '+' character
+    printed next to them to show that they're there due to the expansion
+    of the macro. <br>
+    <br>
+    The 3-argument version,<br>
+    <blockquote><tt>CALL <i>ARG1,ARG2,ARG3</i></tt> <br>
+    </blockquote>
+    instead expands as<br>
+    <blockquote><tt>CLA ARG3<br>
+        STO 775<br>
+        CLA ARG2<br>
+        HOP* ARG1<br>
+      </tt></blockquote>
+    and thus calls a subroutine with two input arguments.<br>
+    <br>
+    <i>General macro facility</i>:&nbsp; As I said above, the macro
+    facility is general-purpose, and custom macros can also be
+    defined.&nbsp; The syntax used is as follows:<br>
+    <blockquote><tt><i>NAME</i>&nbsp;&nbsp;&nbsp;
+        MACRO&nbsp;&nbsp;&nbsp; ARG1,ARG2,...<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ... code using the symbols
+        ARG1, ARG2, and so on ...<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ENDMAC<br>
+      </tt></blockquote>
+    Once defined, <i><tt>NAME</tt></i> can be used to invoke the
+    associated macro.<br>
+    <br>
+    Note that in the <i>definition</i> of the macro, the strings <tt>ARG1</tt>,
+    <tt>ARG2</tt>, and so on are literal.&nbsp; You can't <i>define</i>
+    a macro with arbitrary arguments names like (say) <tt>x</tt>, <tt>y</tt>,
+    and <tt>z</tt>.&nbsp;&nbsp; <br>
+    <br>
+    As an example, consider the 2-argument the <tt> CALL</tt> macro
+    described earlier.&nbsp; It is hard-coded into the assembler, and
+    therefore doesn't require a definition in the code, but if it
+    weren't hard-coded it could have been definedas:<br>
+    <blockquote><tt>CALL&nbsp;&nbsp;&nbsp; MACRO&nbsp;&nbsp;&nbsp;
+        ARG1,ARG2<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; CLA&nbsp;&nbsp;&nbsp;
+        &nbsp; ARG2<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        HOP*&nbsp;&nbsp;&nbsp;&nbsp; ARG1<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ENDMAC<br>
+      </tt></blockquote>
+    <i>Pseudo variables</i>:&nbsp; "Pseudo variables" are named numeric
+    constants known only by the preprocessor.&nbsp; Any usages of such
+    pseudo variables are replaced by numeric literals by the
+    preprocessor, and thus none of them remain in the code by the time
+    the actual assembly process begins.&nbsp; This implies that the
+    namespace for pseudo variables is distinct from that for left-hand
+    symbols in general, so a pseudo variable can have the same name as a
+    block of code or a data variable in memory without overlap.<br>
+    <br>
+    Pseudo variables are <i>defined</i> by the EQU pseudo-op, with a
+    syntax like the following:<br>
+    <blockquote><tt><i>NAME</i></tt><tt>&nbsp;&nbsp;&nbsp;
+        EQU&nbsp;&nbsp;&nbsp; (</tt><tt><i>EXPRESSION</i></tt><tt>)</tt><br>
+    </blockquote>
+    In the operand here, the parentheses are literal and must always be
+    present.&nbsp; <tt><i>EXPRESSION</i></tt> is an arithmetical
+    expression involving numeric literals, the operations + - * /,
+    parentheses, and other pseudo variables.&nbsp; For example,<br>
+    <blockquote><tt>OMEGA&nbsp;&nbsp; EQU&nbsp;&nbsp;&nbsp;
+        (.72921141E-4)</tt><tt><br>
+      </tt><tt>RWCP&nbsp;&nbsp;&nbsp; EQU&nbsp;&nbsp;&nbsp;
+        (OMEGA*6373377*.87993)</tt><br>
+    </blockquote>
+    In general, parenthesized expressions involving pseudo-variables
+    like this can appear anywhere in LVDC source code, and replaced by
+    the preprocessor with the numeric literals.&nbsp; Except for
+    appearing as left-hand symbols in <tt>EQU</tt> statements, pseudo
+    variables appear <i>only</i> with such parenthesized expressions.<br>
+    <br>
+    In most usages, an <tt>(<i>EXPRESSION</i>)</tt> appearing in an
+    assembly language operand can be suffixed with an optional binary
+    scaling factor<br>
+    <blockquote><tt>(<i>EXPRESSION</i>)B<i>n</i></tt></blockquote>
+    The optional scaling factor doesn't really make sense if it were
+    used in the <tt>EQU</tt> statements defining the pseudo-variables,
+    since the purpose of the scaling factor is really a relationship
+    between the logical value of the number and the physically-pragmatic
+    pattern of bits stored in memory.&nbsp; Nevertheless, the assembler
+    allows any expression to be thusly suffixed by a scaling factor,
+    even in the <tt>EQU</tt> statement itself. <br>
+    <i></i><i><br>
+      Conditional assembly</i>:&nbsp; Code can be conditionally retained
+    or discarded by the preprocessor the basis of a test, with the
+    syntax<br>
+    <blockquote>
+      <p><tt>IF&nbsp;&nbsp;&nbsp; <i>PSEUDOVARIABLE</i><i></i>=(<i>EXPRESSION</i>)<br>
+          ... code ...<br>
+          ENDIF<br>
+        </tt></p>
+    </blockquote>
+    If the value of the specified pseudo variable is equal the evaluated
+    expression, then enclosed code is retained by the preprocessor, and
+    is thus eventually assembled.&nbsp; If not, then the enclosed code
+    is discarded.<br>
+    <h3><a name="Assembly_Pass"></a>Assembly Pass</h3>
+    <i></i>
     <p><i>Instruction operands</i>:&nbsp; Operand formats differ for
       some CPU instruction types, but most of them require a variable (a
       word in data memory), and conform to a pattern in which there are
@@ -4482,6 +4592,8 @@ Assembly
         a "+" character as if it were a macro expansion ... which it
         probably is.&nbsp; For example, if <tt>(4*CBSTNO+1)</tt>
         resolves to 57, then the expanded instruction would be <tt>CBTAB+57</tt>.&nbsp;
+
+
 
 
 
@@ -4598,6 +4710,8 @@ Assembly
 
 
 
+
+
         where <tt><i>i</i></tt>, <tt><i>j</i></tt>, and <tt><i>k</i></tt>
         are all small integers.&nbsp; I cannot be sure, but referring to
         the description earlier of how the <tt>EXM</tt> instruction
@@ -4620,31 +4734,10 @@ Assembly
       <li>I believe the <tt>PIO</tt> instruction accepts only literal
         octal constants.</li>
     </ul>
-    <i>Parentheses in operands</i>:&nbsp; It appears to me that in
-    general, whenever paired parentheses are found in an operand, <tt>(<i>expression</i>)</tt>,
-    the internal content of the parentheses is an arithmetical
-    expression involving only literal numbers and macro constants.&nbsp;
-    More generally, I would infer that the assembler had a leading
-    preprocessor pass, and that the preprocessor pass expanded all such
-    expressions, as well as expanding all macros. <br>
-    <p><i>Conditional assembly</i>:&nbsp; Code can be conditionally
-      retained or discarded by the preprocessor the basis of a test,
-      with the syntax<br>
-    </p>
-    <blockquote>
-      <p><tt>IF&nbsp;&nbsp;&nbsp; <i>macroconst</i><i>ant</i>=(<i>expression</i>)<br>
-          ... code ...<br>
-          ENDIF<br>
-        </tt></p>
-    </blockquote>
-    Here, <tt><i>macroconstant</i></tt> would be a symbol defined with
-    an <tt>EQU</tt> pseudo-op as described below.<br>
-    <ul>
-    </ul>
-    <p><i>Pseudo-ops</i>:&nbsp; The following table shows every type of
-      pseudo-op I've encountered in the AS-206RAM program listing, and
-      what I've been able to guess about them:<br>
-    </p>
+    <i>Pseudo-ops</i>:&nbsp; The following table shows every type of
+    pseudo-op I've encountered in the AS-206RAM program listing, and
+    what I've been able to guess about them:<br>
+    <br>
     <table cellpadding="2" cellspacing="2" border="1" width="100%">
       <tbody>
         <tr>
@@ -4665,13 +4758,7 @@ Assembly
             </tt></td>
           <td valign="middle">This pseudo-op allocates one word of
             memory, and stores the decimal <tt><i>number</i></tt> in
-            it.&nbsp; Aside from being a literal decimal constant, <tt><i>number</i></tt>
-            can also be an expression of the form<br>
-            <div align="center"><tt>(</tt><i><tt>macroconstant</tt></i><tt>)B<i>n</i></tt><br>
-            </div>
-            where <tt><i>macroconstant</i></tt> has been defined by an
-            <tt>EQU</tt> (see below) and <tt><i>n</i></tt> is a desired
-            binary scaling.<br>
+            it.&nbsp; <br>
           </td>
         </tr>
         <tr>
@@ -4722,18 +4809,18 @@ Assembly
         <tr>
           <td valign="middle"><tt>EQU (<i>expression</i>)</tt><br>
           </td>
-          <td valign="middle">Defines a macro constant used only at
+          <td valign="middle">Defines a "pseudo variable" used only at
             assembly time.&nbsp; The parentheses are literally
             present.&nbsp; The expression is arithmetical in nature, and
-            can involve decimal numbers, other macro constants, and the
+            can involve decimal numbers, other pseudo variables, and the
             operations +, -, *, or /.&nbsp; The lines are evaluated in a
-            single pass, so macro constants used in expressions need to
-            have been defined at an earlier sequence number.&nbsp; For
+            single pass, so pseudo variables used in expressions need to
+            have been defined earlier in the source code.&nbsp; For
             example,<br>
             <blockquote><tt>PI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 EQU&nbsp;&nbsp;&nbsp; (3.1415927)</tt><br>
             </blockquote>
-            Note that when macro constants are <i>used</i>, they are
+            Note that when pseudo variables are <i>used</i>, they are
             also always within arithmetical expressions that are
             enclosed in parentheses, <tt>(<i>expression</i>)</tt>, such
             as:<br>
@@ -4743,7 +4830,7 @@ Assembly
                 (3*PI)B0<br>
               </tt></blockquote>
             These examples also illustrate the important point that the
-            namespace used for these macro constants is distinct from
+            namespace used for these pseudo variables is distinct from
             the namespace used for left-hand symbols naming variables or
             blocks of code.&nbsp; There are indeed symbols that have
             this double usage.&nbsp; For example, in the AS-206RAM
@@ -4790,6 +4877,8 @@ Assembly
             <br>
             The second of these lines uses the macro.&nbsp; It compiles
             such a constant and stores it at a the memory location <tt>MYCON</tt>.&nbsp;
+
+
 
 
 
@@ -4928,10 +5017,9 @@ Assembly
         </tr>
       </tbody>
     </table>
-    <p><a name="ANATOMY"></a><i><br>
-        Anatomy of the assembly listing</i>:&nbsp; Here are some of my
-      own observations and inferences, based on inspection of the
-      AS-206RAM assembly listing.<br>
+    <h3><a name="ANATOMY"></a>Program Structure </h3>
+    <p>Here are some of my own observations and inferences, based on
+      inspection of the AS-206RAM assembly listing.<br>
     </p>
     <p>As far as overall structure is concerned, <br>
     </p>
@@ -4941,8 +5029,8 @@ Assembly
         <li>pp. 1-2:&nbsp; Lists the name of the program and the
           individual sections of the program, of which there are 22.</li>
         <li>pp. 3-14:&nbsp; Explanatory comments about telemetry data.</li>
-        <li>pp. 14-17:&nbsp; "Pseudo variables":&nbsp; macro definitions
-          of constants used only by the assembler.</li>
+        <li>pp. 14-17:&nbsp; Pseudo variables definitions<br>
+        </li>
         <li>pp. 18: Code-entry points which are obliged to be at
           specific memory locations.&nbsp; (interrupt, initialization,
           timing "minor loop", abort)</li>
@@ -5176,6 +5264,8 @@ Assembly
 
 
 
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
@@ -5304,6 +5394,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -5713,25 +5805,12 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         language, so that it could be run in <span style="font-weight:
           bold;">yaLVDC</span>, and I think the NASSP project would like
         to do that if we're every capable of obliging them.<br>
-        <br>
       </div>
     </div>
     <h2><a name="yaLVDCASM_the_LVDC_Cross-Assembler"
-        id="yaLVDCASM_the_LVDC_Cross-Assembler"></a>yaASM, the LVDC
+        id="yaLVDCASM_the_LVDC_Cross-Assembler"></a>yaASM.py, the LVDC
       Cross-Assembler</h2>
-    Because of the tremendous similarity between the LVDC and <a
-      href="Gemini.html">Gemini OBC</a> computers, my intention was
-    originally to use the Gemini OBC assembler <a
-      href="Gemini.html#yaOBCASM_the_OBC_Cross-Assembler"><span
-        style="font-weight: bold;">yaASM</span></a> for both assembly
-    languages.&nbsp; When assembling LVDC code, the command-line switch
-    "--lvdc" is added.&nbsp; However, I never had any actual LVDC code
-    to test it with when I made those changes to yaASM.&nbsp; Now that I
-    have some actual LVDC source code, I've been exploring a cleaner
-    replacement for it that doesn't try to span the OBC world.&nbsp; The
-    executive summary, though, is that as of right now (July 2019) we
-    have no working assembler for LVDC code.&nbsp; Hopefully coming Real
-    Soon Now.<br>
+    Hopefully coming Real Soon Now.<br>
     <div style="text-align: center;">
       <div style="text-align: left;">
         <h2><a name="Plea_for_Data" id="Plea_for_Data"></a>Plea for Data</h2>
@@ -5754,6 +5833,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
           <li>Source code for the software run by the test &amp;
             checkout computers, as opposed to the LVDC itself.</li>
           <li>Any documents missing from the <a href="links.html#LVDC">Document
+
+
 
 
 
@@ -5865,10 +5946,12 @@ Commons
 
 
 
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-08-08.<br>
+          2019-08-15.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
