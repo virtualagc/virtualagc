@@ -78,6 +78,7 @@ knownProblems = [ "2008332", "MIL-A-25457", "MIL-I-8660", "MIL-I-15125", "MIL-L-
 
 github = "https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/"
 ibiblio = "https://www.ibiblio.org/apollo/KiCad/"
+githubModels = "https://github.com/virtualagc/virtualagc/blob/mechanical/3D-models/"
 
 if len(sys.argv) > 1:
 	assemblyName = sys.argv[1]
@@ -152,14 +153,15 @@ f.close()
 #print(components, file=sys.stderr)
 
 # Get a list of all schematics transcribed to CAD.
-files = os.listdir("../Schematics")
+tdir = "../Schematics/"
+files = os.listdir(tdir)
 cads = []
 for f in files:
 	if f[:1] not in ["1", "2"]:
 		continue
-	if not os.path.isdir("../Schematics/" + f):
+	if not os.path.isdir(tdir + f):
 		continue
-	if os.system("git ls-files --error-unmatch ../Schematics/" + f + "/module.pro 2>/dev/null 1>/dev/null"):
+	if os.system("git ls-files --error-unmatch " + tdir + f + "/module.pro 2>/dev/null 1>/dev/null"):
 		print("CAD directory " + f + " is present but not tracked in git, so any electrical schematics in it are ignored.", file=sys.stderr)
 		continue
 	if len(f) in [8,9]:
@@ -181,6 +183,33 @@ for d in cads:
 		cadDrawings[d[:7]][0] = d
 #for d in sorted(cadDrawings):
 #	print(str(d) + " " + str(cadDrawings[d]), file=sys.stderr)
+
+# Get a list of all 3D models created from the engineering drawings.  At this
+# point, I assume they're all named NNNNNNNR (7 digits plus one revision code
+# that's either - or else A-Z).
+tdir = "../../virtualagc-mechanical/3D-models/"
+files = os.listdir(tdir)
+models = []
+for f in files:
+	if f[-4:] != ".stp":
+		continue
+	if os.system("git -C " + tdir + " ls-files --error-unmatch " + f + " 2>/dev/null 1>/dev/null"):
+		print("STEP file " + f + " is present but not tracked in git, so it is ignored.", file=sys.stderr)
+		continue
+	f = f[:-4]
+	if len(f) == 8:
+		if not f[:7].isdigit():
+			continue
+		if f[7] not in [ '-', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
+			continue
+		models.append(f)
+models.sort()
+modelDrawings = {}
+for d in models:
+	modelDrawings[d[:7]] = d
+#for d in sorted(modelDrawings):
+#	print(str(d) + " " + str(modelDrawings[d]), file=sys.stderr)
+#sys.exit(1)
 
 # Splits an assembly name (like 1234567-011) or part name (like 1234567-001 or
 # MS1234-567 or NAS1234C567) into its constituent part number and dash number
@@ -675,6 +704,14 @@ def makeHtml(findTable):
 										' (<a href="' +  github + t + \
 										'">design files</a> or <a href="' + ibiblio + t + \
 										'">image files</a>)'
+					if thisDrawing[:7] in modelDrawings:
+						t = modelDrawings[thisDrawing[:7]]
+						if seeAlso == "":
+							if not asTables:
+								seeAlso = '.&nbsp;&nbsp;'
+						else:
+							seeAlso += ', or '
+						seeAlso += '<a href="' + githubModels + t + '.stp">3D model of drawing ' + t + '</a>'
 				if asTables:
 					thisLine += "</td>"
 				if markAsAssembly or expandedBelow != "":
