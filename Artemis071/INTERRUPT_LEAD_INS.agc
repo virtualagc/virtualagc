@@ -3,7 +3,7 @@
 ## Filename:    INTERRUPT_LEAD_INS.agc
 ## Purpose:     A section of Artemis revision 071.
 ##              It is part of the reconstructed source code for the first
-##              release of the flighta software for the Command Module's
+##              release of the flight software for the Command Module's
 ##              (CM) Apollo Guidance Computer (AGC) for Apollo 15 through
 ##              17. The code has been recreated from a copy of Artemis 072.
 ##              It has been adapted such that the resulting bugger words
@@ -14,10 +14,7 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              ARTEMIS 071.
-## Mod history: 2019-08-14 MAS  Created from Artemis 071.
+## Mod history: 2019-08-14 MAS  Created from Artemis 072.
 
 ## Page 139
 		SETLOC	4000

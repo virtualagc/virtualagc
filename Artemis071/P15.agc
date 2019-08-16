@@ -3,7 +3,7 @@
 ## Filename:    P15.agc
 ## Purpose:     A section of Artemis revision 071.
 ##              It is part of the reconstructed source code for the first
-##              release of the flighta software for the Command Module's
+##              release of the flight software for the Command Module's
 ##              (CM) Apollo Guidance Computer (AGC) for Apollo 15 through
 ##              17. The code has been recreated from a copy of Artemis 072.
 ##              It has been adapted such that the resulting bugger words
@@ -14,10 +14,9 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              ARTEMIS 071.
-## Mod history: 2019-08-14 MAS  Created from Artemis 071.
+## Mod history: 2019-08-14 MAS  Created from Artemis 072.
+##              2019-08-15 MAS  Undid changes between Artemis 071 and 072
+##                              in the KILLSIVB logic.
 
 ## Page 527
 
@@ -219,17 +218,23 @@ SETVPAST	DLOAD
 KILLSIVB	EXIT
 		INHINT
 		EXTEND
+## The following code has a bug with sign agreement that was fixed in Artemis 072.
+## It is possible for the (TIG - TIME2) calculation to result in a mixed-sign result,
+## in which case the following logic will behave incorrectly. In Artemis 072, the
+## result of the calculation was stored in MPAC instead of AVEGDT. After the DAS,
+## sign agreement was then forced via a "TCR DPAGREE". Finally, because the result
+## was now in MPAC instead of AVEGDT where it needed to be, the TCF +3 was changed
+## to TCF +2 to ensure the number made it safely into AVEGDT +1.
 		DCA	TIG
-		DXCH	MPAC
+		DXCH	AVEGDT
 		EXTEND
 		DCS	TIME2
-		DAS	MPAC
-		TCR	DPAGREE
-		CAE	MPAC +1		# DT TO C/O = TIG - TIME2 (< 4 SECS TO GO)
+		DAS	AVEGDT
+		CAE	AVEGDT +1	# DT TO C/O = TIG - TIME2 (< 4 SECS TO GO)
 					#	      PIPTIME + TGO - TIME2	
 		EXTEND			# DT <= 0 ?
 		BZMF	+2		# YES
-		TCF	+2		# NO
+		TCF	+3		# NO
 		CAF	ONE
 		TS	AVEGDT +1
 		TC	TWIDDLE

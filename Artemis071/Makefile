@@ -7,9 +7,6 @@
 #		from a listing of Artemis 071 and NASA drawing
 #		2021154-.
 # Contact:	Ron Burkey <info@sandroid.org>.
-# Warning:	THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-# 		AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-# 		ARTEMIS 071.
 # Mod history:	2019-08-14 MAS	Created from Artemis 072.
 
 BASENAME=Artemis071
