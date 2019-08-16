@@ -51,6 +51,7 @@
  *          	2019-07-31 RSB	Added Comanche 51 button.  I seem to have forgotten
  *          			to note adding Luminary 97, 98, and 130 buttons a
  *          			could of days back.
+ *          	2019-8-16 RSB	Added Artemis 71.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -146,6 +147,7 @@ enum
   ID_LUMINARY131BUTTON,
   ID_APOLLO14LMBUTTON,
   ID_APOLLO14CMBUTTON,
+  ID_ARTEMIS71BUTTON,
   ID_ARTEMIS72BUTTON,
   ID_APOLLO15LMBUTTON,
   ID_SKYLABCMBUTTON,

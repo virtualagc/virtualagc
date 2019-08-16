@@ -116,6 +116,7 @@
  *          	2019-07-28 RSB  Added Luminary 69 Rev 2 and Luminary 130.
  *          	2019-07-31 RSB	Added Comanche 51.  Also, I had added Luminary 97 and 98 a
  *          			couple of days ago, but neglected to mention it.
+ *          	2019-08-16 RSB	Added Artemis 71.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -237,6 +238,9 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
 	    { "Apollo 14 Lunar Module", "",
 		"Click this to select the LM for the Apollo 14 mission.",
 		DISABLED, LM, BLOCK2, PERIPHERALS, "", "LM.ini" },
+	    { "ARTEMIS 71 (CM)", "Artemis071/MAIN.agc.html",
+		"Click this to select Artemis 71, the initial software release targeting the CM for the Apollo 15 mission.",
+		ENABLED, CM, BLOCK2, PERIPHERALS, "Artemis071", "CM.ini" },
 	    { "Apollo 15-17 Command Module", "Artemis072/MAIN.agc.html",
 		"Click this to select the CM for the Apollo 15-17 mission, running software ARTEMIS 72.",
 		ENABLED, CM, BLOCK2, PERIPHERALS, "Artemis072", "CM.ini" },
@@ -740,6 +744,7 @@ EVT_RADIOBUTTON(ID_LUMINARY130BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUMINARY131BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO14CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO14LMBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_ARTEMIS71BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_ARTEMIS72BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO15LMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SKYLABCMBUTTON, VirtualAGC::ConsistencyEvent)
