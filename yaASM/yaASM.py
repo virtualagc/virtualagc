@@ -44,16 +44,20 @@ operators = {
     "SUB": { "opcode":0b0010 }, 
     "DIV": { "opcode":0b0011 }, 
     "TNZ": { "opcode":0b0100 }, 
+    "TNZ*": { "opcode":0b0100 }, 
     "MPH": { "opcode":0b0101 }, 
     "AND": { "opcode":0b0110 }, 
     "ADD": { "opcode":0b0111 },
     "TRA": { "opcode":0b1000 }, 
+    "TRA*": { "opcode":0b1000 }, 
     "XOR": { "opcode":0b1001 }, 
     "PIO": { "opcode":0b1010 }, 
     "STO": { "opcode":0b1011 }, 
     "TMI": { "opcode":0b1100 }, 
+    "TMI*": { "opcode":0b1100 }, 
     "RSU": { "opcode":0b1101 }, 
     "CDS": { "opcode":0b1110, "a9":0 }, 
+    "CDSD": { "opcode":0b1110, "a9":0 }, 
     "SHF": { "opcode":0b1110, "a9":1, "a8":0 }, 
     "EXM": { "opcode":0b0000, "a9":1, "a8":0 },
     "CLA": { "opcode":0b1111 }, 
@@ -101,9 +105,9 @@ for n in range(0, len(lines)):
 		line = "@" + line
 	fields = line.split()
 	if len(fields) > 0 and fields[0] == "@":
-        	fields[0] = ""
-        	line = line[1:]
-        	
+		fields[0] = ""
+		line = line[1:]
+		
 	if inMacro != "":
 		if len(fields) >= 2 and fields[1] == "ENDMAC":
 			if len(macros[inMacro]["lines"]) == 1:
@@ -115,6 +119,7 @@ for n in range(0, len(lines)):
 			inMacro = ""
 		else:
 			macros[inMacro]["lines"].append(fields)
+		expandedLines[-1] = []
 	elif len(fields) >= 3 and fields[0] != "" and fields[1] == "EQU":
 		value,error = expression.yaEvaluate(fields[2], constants)
 		if error != "":
@@ -255,45 +260,71 @@ S = 1
 LOC = 0
 DM = 0
 DS = 0
+DLOC = 0
 
-for n in range(0, len(expandedLines):
-    for line in expandedLines[n]:
-	    inputLine = { "raw": line }
-	    
-	    # Split the line into fields.
-	    if line[:1] in [" ", "\t"] and not line.isspace():
-	        line = "@" + line
-	    fields = line.split()
-	    if len(fields) > 0 and fields[0] == "@":
-	        fields[0] = ""
-	    
-	    # Remove comments from the fields.
-	    for n in range(0, len(fields)):
-	        if fields[n][:1] == "#" or (n <= 1 and fields[n][:1] == "*"):
-	            if n == 1 and fields[0] == "":
-	                n = 0
-	            del fields[n:]
-	            break
-	    
-	    if len(fields) == 3:
-	        if fields[1] in operators:
-	            if fields[0] != "":
-	                inputLine["lhs"] = fields[0]
-	            inputLine["operator"] = fields[1]
-	            inputLine["operand"] = fields[2]
-	            inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS}
-	            LOC += 1
-	        elif fields[1] in pseudos:
-	            errors[n].append("Error: Unknown pseudo-op")
-	        else:
-	            errors[n].append("Error: Unrecognized operator")
-	    elif len(fields) == 1:
-	        inputLine["lhs"] = fields[0]
-	        inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS}
-	        LOC += 1
-	    elif len(fields) != 0:
-	        errors[n].append("Wrong number of fields")
-	    inputFile.append(inputLine)
+for lineNumber in range(0, len(expandedLines)):
+	for line in expandedLines[lineNumber]:
+		inputLine = { "raw": line }
+		    
+		# Split the line into fields.
+		if line[:1] in [" ", "\t"] and not line.isspace():
+			line = "@" + line
+		fields = line.split()
+		if len(fields) > 0 and fields[0] == "@":
+			fields[0] = ""
+		    
+		# Remove comments.
+		if inputLine["raw"][:1] in ["*", "#"]:
+			fields = []
+		    
+		if len(fields) >= 3:
+			ofields = fields[2].split(",")
+			if fields[1] == "ORGDD":
+				if len(ofields) != 7:
+					errors[lineNumber].append("Error: Wrong number of ORGDD arguments")
+				else:
+					IM = int(ofields[0], 8)
+					IS = int(ofields[1], 8)
+					S = int(ofields[2], 8)
+					LOC = int(ofields[3], 8)
+					DM = int(ofields[4], 8)
+					DS = int(ofields[5], 8)
+					if ofields[6] != "":
+						DLOC = int(ofields[6], 8)
+			elif fields[1] == "DOGD":
+				if len(ofields) != 3:
+					errors[lineNumber].append("Error: Wrong number of DOGD arguments")
+				else:
+					DM = int(ofields[0], 8)
+					DS = int(ofields[1], 8)
+					if ofields[2] != "":
+						DLOC = int(ofields[2], 8)
+			elif fields[1] == "BSS":
+				inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				DLOC += int(fields[2])
+			elif fields[1] in ["DEC", "OCT"]:
+				inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				DLOC += 1	
+			elif fields[1] in operators:
+				if fields[0] != "":
+					inputLine["lhs"] = fields[0]
+				inputLine["operator"] = fields[1]
+				inputLine["operand"] = fields[2]
+				inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				LOC += 1
+				if fields[1] in ["CDS", "CDSD"]:
+					if len(ofields) != 2:
+						errors[lineNumber].append("Error: Wrong number of CDS/CDSD arguments")
+					else:
+						DM = int(ofields[0], 8)
+						DS = int(ofields[1], 8)
+			elif fields[1] in pseudos:
+				errors[lineNumber].append("Error: Unknown pseudo-op")
+			else:
+				errors[lineNumber].append("Error: Unrecognized operator")
+		elif len(fields) != 0:
+				errors[lineNumber].append("Wrong number of fields")
+		inputFile.append(inputLine)
 
 #----------------------------------------------------------------------------
 # If it turns out later that the code above can't assign all HOPs in its
@@ -307,20 +338,20 @@ for n in range(0, len(expandedLines):
 # Create a table to quickly look up addresses of symbols.
 symbols = {}
 for inputLine in inputFile:
-    if "lhs" in inputLine:
-        if "hop" in inputLine:
-            lhs = inputLine["lhs"]
-            if lhs in symbols:
-                if "error" in inputLine:
-                    inputLine["error"] += ". " + "Symbol already defined"
-                else:
-                    inputLine["error"] = "Symbol already defined"
-            symbols[lhs] = inputLine["hop"]
-        else:
-            if "error" in inputLine:
-                inputLine["error"] += ". " + "Symbol without HOP."
-            else:
-                inputLine["error"] = "Symbol without HOP."
+	if "lhs" in inputLine:
+		if "hop" in inputLine:
+			lhs = inputLine["lhs"]
+			if lhs in symbols:
+				if "error" in inputLine:
+					inputLine["error"] += ". " + "Symbol already defined"
+				else:
+					inputLine["error"] = "Symbol already defined"
+			symbols[lhs] = inputLine["hop"]
+		else:
+			if "error" in inputLine:
+				inputLine["error"] += ". " + "Symbol without HOP."
+			else:
+				inputLine["error"] = "Symbol without HOP."
 
 #----------------------------------------------------------------------------
 #                           Complete the assembly
@@ -331,37 +362,37 @@ for inputLine in inputFile:
 # therefore be able to actually complete the entire assembly.
 print("IM IS S LOC DM DS  A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT")
 for inputLine in inputFile:
-    if "error" in inputLine:
-        print("Error: " + inputLine["error"])
-    
-    if "hop" in inputLine:
-        hop = inputLine["hop"]
-        line = " %o %02o %o %03o  %o %02o  " % (hop["IM"], hop["IS"], hop["S"], 
-                                                hop["LOC"], hop["DM"], 
-                                                hop["DS"])
-    else:
-        line = "                  "
-    
-    if "operator" in inputLine:
-        operator = inputLine["operator"]
-        if operator == "SHR":
-            n = 1
-        elif operator == "SHL":
-            n = 1
-        elif operator == "SHF":
-            n = 1
-        elif operator == "EXM":
-            n = 1
-        else:
-            n = 1
-    
-    print(line + "\t" + inputLine["raw"])
+	if "error" in inputLine:
+		print("Error: " + inputLine["error"])
+	    
+	if "hop" in inputLine:
+		hop = inputLine["hop"]
+		line = " %o %02o %o %03o  %o %02o %03o  " % (hop["IM"], hop["IS"], hop["S"], 
+							hop["LOC"], hop["DM"], 
+							hop["DS"], hop["DLOC"])
+	else:
+		line = "                      "
+	    
+	if "operator" in inputLine:
+		operator = inputLine["operator"]
+		if operator == "SHR":
+			n = 1
+		elif operator == "SHL":
+			n = 1
+		elif operator == "SHF":
+			n = 1
+		elif operator == "EXM":
+			n = 1
+		else:
+			n = 1
+	    
+	print(line + "\t" + inputLine["raw"])
 
 #----------------------------------------------------------------------------
 #                           Print a symbol table
 #----------------------------------------------------------------------------
 print("\n\nSymbol Table:")
 for key in sorted(symbols):
-    hop = symbols[key]
-    print(key + "\t" + " %o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
-                                                hop["LOC"]))
+	hop = symbols[key]
+	print(key + "\t" + " %o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
+						hop["LOC"]))
