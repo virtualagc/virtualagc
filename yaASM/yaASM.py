@@ -58,6 +58,7 @@ operators = {
     "RSU": { "opcode":0b1101 }, 
     "CDS": { "opcode":0b1110, "a9":0 }, 
     "CDSD": { "opcode":0b1110, "a9":0 }, 
+    "CDSS": { "opcode":0b1110, "a9":0 }, 
     "SHF": { "opcode":0b1110, "a9":1, "a8":0 }, 
     "EXM": { "opcode":0b0000, "a9":1, "a8":0 },
     "CLA": { "opcode":0b1111 }, 
@@ -65,6 +66,7 @@ operators = {
     "SHL": { "opcode":0b1110, "a9":1, "a8":0 }
 }
 pseudos = []
+preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC"]
 
 lines = sys.stdin.readlines()
 for n in range(0,len(lines)):
@@ -100,6 +102,7 @@ for n in range(0, len(lines)):
 	line = lines[n]
 	errors.append([])
 	expandedLines.append([line])
+	
 	# Split the line into fields.
 	if line[:1] in [" ", "\t"] and not line.isspace():
 		line = "@" + line
@@ -107,6 +110,37 @@ for n in range(0, len(lines)):
 	if len(fields) > 0 and fields[0] == "@":
 		fields[0] = ""
 		line = line[1:]
+
+	# Most expansions of (EXPRESSION) are handled later, and I don't want to
+	# override that here, but there is one case that the later code can't
+	# handle very efficiently, in which the operand of an instruction or a 
+	# macro argument is of the form
+	#	LHS+(EXPRESSION)
+	# or
+	#	LHS-(EXPRESSION)
+	# So I handle that case here.
+	if len(fields) >= 3:
+		fields2 = fields[2]
+		while "+(" in fields2 or "-(" in fields2:
+			index = fields2.find("+(")
+			if index < 0:
+				index = fields2.find("-(")
+			if index < 0:
+				break;
+			index += 1
+			index2 = fields2.find(")", index)
+			if index2 < 0:
+				errors[n].append("Error: No end parenthesis in expression")
+				break
+			index2 += 1
+			value,error = expression.yaEvaluate(fields2[index:index2], constants)
+			if error != "":
+				errors[n].append(error)
+				break
+			fields2 = fields2[:index] + str(value["number"]) + fields2[index2:]
+		if fields2 != fields[2]:
+			expandedLines[n] = [line.replace(fields[2], fields2)]
+			fields[2] = fields2
 		
 	if inMacro != "":
 		if len(fields) >= 2 and fields[1] == "ENDMAC":
@@ -222,28 +256,6 @@ if False:
 			print("\t" + str(n + 1) + ": " + str(expandedLines[n]))
 	sys.exit(1)
 
-# Below, except for the final step of producing the assembly listing visually, can just
-# loop through all of the lines of code by having an outer loop on all of the elements
-# of expandedLines[], and an inner loop on all of the elements of expandedLines[n][].
-# For the visual purposes of the assembly listing, it's a bit trickier to try and 
-# describe it succinctly, because there are several cases 
-# depending on what the preprocessor had done.
-#	Case 1: Conditionally-compiled code that is being discarded.  In this case,
-#		expandedLines[n][] will be empty because the code is being discarded,
-#		so there's actually nothing much to process.
-#	Case 2: expandedLines[n][] contains a single element that's identical to lines[n].
-#		In this (the usual) case, the preprocessor made no changes, so it's 
-#		equivalent to just assembling lines[n] by itself.
-#	Case 3:	expandedLines[n][] contains a single element that differs from lines[n].
-#		In this case, it's expandedLines[n][0] that needs to be assembled, but
-#		lines[n] will serve as the visual model for the assembly listing.  Note
-#		that we disallow macros with a single line in them, and that's what allows
-#		this conclusion.
-#	Case 4:	expandedLines[n][] contains more than one element.  In this case, lines[n]
-#		is a macro invocation and does generate something visually in the assembly
-#		listing, but is not itself assembled.  Only the lines in expandedLines[n][]
-#		actually need to be assembled.
-
 #----------------------------------------------------------------------------
 #           Discovery pass
 #----------------------------------------------------------------------------
@@ -251,7 +263,12 @@ if False:
 # or in other words, to assign an address (HOP constant) to each line of code.
 # As far as I know right now, it looks like we can do this in a single pass.   
 # The result of the pass is a hopefully easy-to-understand dictionary called 
-# inputFile. 
+# inputFile. It also buffers the lhs, operator, and operand fields, so they 
+# don't have to be parsed out again on the next pass.
+
+# For this pass, we can just loop through all of the lines of code by having an 
+# outer loop on all of the elements of expandedLines[], and an inner loop on all 
+# of the elements of expandedLines[n][].
 
 inputFile = []
 IM = 0
@@ -260,7 +277,9 @@ S = 1
 LOC = 0
 DM = 0
 DS = 0
+dS = 0
 DLOC = 0
+useDat = False
 
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
@@ -276,10 +295,18 @@ for lineNumber in range(0, len(expandedLines)):
 		# Remove comments.
 		if inputLine["raw"][:1] in ["*", "#"]:
 			fields = []
-		    
+		
 		if len(fields) >= 3:
 			ofields = fields[2].split(",")
-			if fields[1] == "ORGDD":
+			if fields[1] == "USE":
+				if fields[2] == "INST":
+					useDat = False
+				elif fields[2] == "DAT":
+					dS = 1
+					useDat = True
+				else:
+					errors[lineNumber].append("Error: Wrong operand for USE")
+			elif fields[1] == "ORGDD":
 				if len(ofields) != 7:
 					errors[lineNumber].append("Error: Wrong number of ORGDD arguments")
 				else:
@@ -299,11 +326,28 @@ for lineNumber in range(0, len(expandedLines)):
 					DS = int(ofields[1], 8)
 					if ofields[2] != "":
 						DLOC = int(ofields[2], 8)
+			elif fields[1] in ["DEQS", "DEQD"]:
+				if len(ofields) != 3:
+					errors[lineNumber].append("Error: Wrong number of DEQS or DEQD arguments")
+				else:
+					if fields[0] != "":
+						inputLine["lhs"] = fields[0]
+					inputLine["operator"] = fields[1]
+					inputLine["operand"] = fields[2]
+					inputLine["hop"] = {"IM":int(ofields[0], 8), "IS":int(ofields[1], 8), "S":0, "LOC":int(ofields[2], 8), "DM":int(ofields[0], 8), "DS":int(ofields[1], 8), "DLOC":int(ofields[2], 8)}
 			elif fields[1] == "BSS":
-				inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				if fields[0] != "":
+					inputLine["lhs"] = fields[0]
+				inputLine["operator"] = fields[1]
+				inputLine["operand"] = fields[2]
+				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				DLOC += int(fields[2])
-			elif fields[1] in ["DEC", "OCT"]:
-				inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+			elif fields[1] in ["DEC", "OCT", "HPCDD"]:
+				if fields[0] != "":
+					inputLine["lhs"] = fields[0]
+				inputLine["operator"] = fields[1]
+				inputLine["operand"] = fields[2]
+				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				DLOC += 1	
 			elif fields[1] in operators:
 				if fields[0] != "":
@@ -311,20 +355,31 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
 				inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-				LOC += 1
+				if useDat:
+					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					dS = 1 - dS
+					if dS == 1:
+						DLOC += 1
+				else:
+					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					LOC += 1
 				if fields[1] in ["CDS", "CDSD"]:
 					if len(ofields) != 2:
 						errors[lineNumber].append("Error: Wrong number of CDS/CDSD arguments")
 					else:
 						DM = int(ofields[0], 8)
 						DS = int(ofields[1], 8)
+			elif fields[1] in preprocessed:
+				pass
 			elif fields[1] in pseudos:
-				errors[lineNumber].append("Error: Unknown pseudo-op")
+				pass
 			else:
 				errors[lineNumber].append("Error: Unrecognized operator")
+		elif len(fields) == 2 and fields[1] == "MACRO" and fields[0] in macros and macros[fields[0]]["numArgs"] == 0:
+			pass
 		elif len(fields) != 0:
-				errors[lineNumber].append("Wrong number of fields")
-		inputFile.append(inputLine)
+			errors[lineNumber].append("Wrong number of fields")
+		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
 
 #----------------------------------------------------------------------------
 # If it turns out later that the code above can't assign all HOPs in its
@@ -337,7 +392,8 @@ for lineNumber in range(0, len(expandedLines)):
 #----------------------------------------------------------------------------
 # Create a table to quickly look up addresses of symbols.
 symbols = {}
-for inputLine in inputFile:
+for entry in inputFile:
+	inputLine = entry["expandedLine"]
 	if "lhs" in inputLine:
 		if "hop" in inputLine:
 			lhs = inputLine["lhs"]
@@ -359,11 +415,35 @@ for inputLine in inputFile:
 # At this point we have a dictionary called inputFile in which the entire 
 # input source file has been parsed into a relatively simple structure.  The
 # addresses of all symbols (constants, variables, code) are known.  We should
-# therefore be able to actually complete the entire assembly.
+# therefore be able to actually complete the entire assembly and print it out.
+
+# For the visual purposes of the assembly listing, it's a bit tricky to try and 
+# describe succinctly where the data is coming from, because there are several cases 
+# depending on what the preprocessor had done.
+#	Case 1: Conditionally-compiled code that is being discarded.  In this case,
+#		expandedLines[n][] will be empty because the code is being discarded,
+#		so there's actually nothing much to process.
+#	Case 2: expandedLines[n][] contains a single element that's identical to lines[n].
+#		In this (the usual) case, the preprocessor made no changes, so it's 
+#		equivalent to just assembling lines[n] by itself.
+#	Case 3:	expandedLines[n][] contains a single element that differs from lines[n].
+#		In this case, it's expandedLines[n][0] that needs to be assembled, but
+#		lines[n] will serve as the visual model for the assembly listing.  Note
+#		that we disallow macros with a single line in them, and that's what allows
+#		this conclusion.
+#	Case 4:	expandedLines[n][] contains more than one element.  In this case, lines[n]
+#		is a macro invocation and does generate something visually in the assembly
+#		listing, but is not itself assembled.  Only the lines in expandedLines[n][]
+#		actually need to be assembled.
+
 print("IM IS S LOC DM DS  A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT")
-for inputLine in inputFile:
-	if "error" in inputLine:
-		print("Error: " + inputLine["error"])
+for entry in inputFile:
+	lineNumber = entry["lineNumber"]
+	inputLine = entry["expandedLine"]
+	errorList = errors[lineNumber]
+	originalLine = lines[lineNumber]
+	for error in errorList:
+		print(error)
 	    
 	if "hop" in inputLine:
 		hop = inputLine["hop"]
@@ -375,16 +455,6 @@ for inputLine in inputFile:
 	    
 	if "operator" in inputLine:
 		operator = inputLine["operator"]
-		if operator == "SHR":
-			n = 1
-		elif operator == "SHL":
-			n = 1
-		elif operator == "SHF":
-			n = 1
-		elif operator == "EXM":
-			n = 1
-		else:
-			n = 1
 	    
 	print(line + "\t" + inputLine["raw"])
 
