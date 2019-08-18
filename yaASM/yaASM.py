@@ -37,6 +37,9 @@ import sys
 # The next line imports expression.py.
 import expression
 
+# Array for keeping track of which memory locations have been used already.
+used = [[[[False for offset in range(256)] for syllable in range(2)] for sector in range(16)] for module in range(8)]
+	
 operators = {
     "HOP": { "opcode":0b0000 }, 
     "HOP*": { "opcode":0b0000 }, 
@@ -281,6 +284,54 @@ dS = 0
 DLOC = 0
 useDat = False
 
+def getDLOC(start):
+	global DLOC
+	global errors
+	global used
+	for n in range(start, 256):
+		if (not useDat or dS == 0) and used[DM][DS][0][n]:
+			continue
+		if (not useDat or dS == 2) and used[DM][DS][1][n]:
+			continue
+		DLOC = n
+		return
+	errors[-1].append("Error: No space left in " + str((DM,DS)))
+
+def incDLOC(increment):
+	global DLOC
+	global errors
+	global used
+	global dS
+	for n in range(0,increment):
+		if not useDat or dS == 0:
+			if used[DM][DS][0][DLOC]:
+				errors[-1].append("Warning: Location " + str((DM,DS,0,DLOC)) + " reused")
+			used[DM][DS][0][DLOC] = True
+		if not useDat or dS == 1:
+			if used[DM][DS][1][DLOC]:
+				errors[-1].append("Warning: Location " + str((DM,DS,1,DLOC)) + " reused")
+			used[DM][DS][1][DLOC] = True
+		if useDat:
+			dS = 1 - dS
+			if dS == 1:
+				DLOC += 1
+		else:
+			DLOC += 1
+
+def incLOC(increment):
+	global LOC
+	global errors
+	global used
+	for n in range(0, increment):
+		if used[IM][IS][S][LOC]:
+			errors[-1].append("Warning: Location " + str((IM,IS,S,LOC)) + " reused")
+		used[IM][IS][S][LOC] = True
+		LOC += 1
+		if LOC >= 256:
+			errors[-1].append("Error: Memory bank overflow")
+			LOC = 255
+			return
+
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
 		inputLine = { "raw": line }
@@ -318,6 +369,8 @@ for lineNumber in range(0, len(expandedLines)):
 					DS = int(ofields[5], 8)
 					if ofields[6] != "":
 						DLOC = int(ofields[6], 8)
+					else:
+						getDLOC(0)
 			elif fields[1] == "DOGD":
 				if len(ofields) != 3:
 					errors[lineNumber].append("Error: Wrong number of DOGD arguments")
@@ -326,6 +379,11 @@ for lineNumber in range(0, len(expandedLines)):
 					DS = int(ofields[1], 8)
 					if ofields[2] != "":
 						DLOC = int(ofields[2], 8)
+						if used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]:
+							errors[lineNumber].append("Warning: Skipping already-used memory location")
+							getDLOC(DLOC)
+					else:
+						getDLOC(0)
 			elif fields[1] in ["DEQS", "DEQD"]:
 				if len(ofields) != 3:
 					errors[lineNumber].append("Error: Wrong number of DEQS or DEQD arguments")
@@ -341,14 +399,14 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-				DLOC += int(fields[2])
-			elif fields[1] in ["DEC", "OCT", "HPCDD"]:
+				incDLOC(int(fields[2]))
+			elif fields[1] in ["DEC", "OCT", "HPC", "HPCDD", "DFW"]:
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-				DLOC += 1	
+				incDLOC(1)	
 			elif fields[1] in operators:
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
@@ -357,12 +415,10 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				if useDat:
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					dS = 1 - dS
-					if dS == 1:
-						DLOC += 1
+					incDLOC(1)
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					LOC += 1
+					incLOC(1)
 				if fields[1] in ["CDS", "CDSD"]:
 					if len(ofields) != 2:
 						errors[lineNumber].append("Error: Wrong number of CDS/CDSD arguments")
@@ -377,6 +433,10 @@ for lineNumber in range(0, len(expandedLines)):
 				errors[lineNumber].append("Error: Unrecognized operator")
 		elif len(fields) == 2 and fields[1] == "MACRO" and fields[0] in macros and macros[fields[0]]["numArgs"] == 0:
 			pass
+		elif len(fields) >= 2 and fields[1] == "VEC":
+			DLOC = (DLOC + 3) & ~3
+		elif len(fields) >= 2 and fields[1] == "MAT":
+			DLOC = (DLOC + 15) & ~15
 		elif len(fields) != 0:
 			errors[lineNumber].append("Wrong number of fields")
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
