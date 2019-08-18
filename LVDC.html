@@ -112,6 +112,7 @@ Launch
 
 
 
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -231,6 +232,7 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
 
 
 
@@ -489,6 +491,7 @@ Launch
 
 
 
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -539,6 +542,7 @@ Launch
 
 
 
+
       do it!</b>), you may unnecessarily excite yourself by noting that
     Saturn IB launch vehicle AS-206 was used for the Skylab 2 mission
     (Conrad/Weitz/Kerwin).&nbsp; You may then be chagrined to realize
@@ -577,6 +581,7 @@ Launch
     by the assembler.&nbsp; Unfortunately, the status of the assembly
     process for it found 41 warnings and 7 errors — meaning that there
     were problems in the source code and that the assembly process <i>failed</i>.&nbsp;
+
 
 
 
@@ -827,6 +832,7 @@ of
 
 
 
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -853,6 +859,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
 
 
 
@@ -950,9 +957,11 @@ Astrionics
 
 
 
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -1216,6 +1225,7 @@ of
 
 
 
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1265,6 +1275,7 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
 
 
 
@@ -1569,6 +1580,7 @@ However,
 
 
 
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -1688,6 +1700,7 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -1890,6 +1903,7 @@ However,
             "residual sector".&nbsp; The following addresses are
             special, as described in <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">the
+
 
 
 
@@ -2314,6 +2328,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2455,6 +2470,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
 
 
 
@@ -3859,6 +3875,7 @@ of
 
 
 
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -3874,6 +3891,7 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
 
 
 
@@ -4069,6 +4087,7 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -4323,6 +4342,7 @@ Assembly
 
 
 
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -4358,6 +4378,7 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
 
 
 
@@ -4652,6 +4673,7 @@ Assembly
 
 
 
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -4762,6 +4784,7 @@ Assembly
 
 
 
+
         where <tt><i>i</i></tt>, <tt><i>j</i></tt>, and <tt><i>k</i></tt>
         are all small integers.&nbsp; I cannot be sure, but referring to
         the description earlier of how the <tt>EXM</tt> instruction
@@ -4837,14 +4860,13 @@ Assembly
           </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap"><tt>DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,</tt><tt><i>DUPDN</i></tt><tt><br>
+          <td valign="middle" nowrap="nowrap"><tt>DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,</tt><tt><i>DLOC</i></tt><tt><br>
             </tt><i>&nbsp;&nbsp; or</i><br>
             <tt>DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,</tt></td>
           <td valign="middle">Abbreviated form of <tt>ORGDD</tt> (see
-            below) that only modifies the data-memory settings of the
-            assembler's internal HOP constant.&nbsp; See the description
-            of the <tt>CDS</tt> instruction above for an explanation of
-            the operand fields.&nbsp; It does not allocate any memory.<br>
+            below) that only modifies the assembler's current
+            data-memory pointer, leaving the instruction-memory pointer
+            untouched.&nbsp; It does not allocate any memory.<br>
           </td>
         </tr>
         <tr>
@@ -4929,6 +4951,7 @@ Assembly
 
 
 
+
             The 2-bit field will have the (binary) value 01, the 3-bit
             field will have the value 010, and so on, so the actual
             value of <tt>MYCON</tt>, in binary, as displayed by the
@@ -4990,17 +5013,24 @@ Assembly
         <tr>
           <td valign="middle"><tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,<br>
               </i></tt><i>&nbsp;&nbsp; or</i><tt><i><br>
-              </i></tt><tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,LOC2</i></tt><br>
+              </i></tt><tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,DLOC</i></tt><br>
           </td>
-          <td valign="middle">Set the HOP constant (i.e., the location
-            and the data-memory assumptions) for the next code line to
-            be assembled.<br>
+          <td valign="middle">Set the instruction-memory and the
+            data-memory assumptions for the next code or data lines to
+            be assembled.&nbsp; The fields within the operand relate to
+            those within the HOP constants, except while the HOP
+            constant has a single LOC field, the assembler internally
+            maintains separate LOC fields for instruction memory (<i><tt>LOC</tt></i>)
+            and data memory (<tt><i>DLOC</i></tt>).<br>
             <br>
-            If the optional <i><tt>LOC2</tt></i> is present, I think it
-            may represent an endpoint of the memory associated with the
-            <tt>ORGDD</tt>, so that if assembly reaches that point
-            before an other <tt>ORGDD</tt> is encountered, the assembly
-            will flag it as a memory overrun error.<br>
+            If the optional <tt><i>DLOC</i></tt> is not present, then
+            the first previously-unused location in the select data
+            module/sector is used.&nbsp; Actually, specifying <tt><i>DLOC</i></tt>
+            does not necessarily imply that the data location is set to
+            <i><tt>DLOC</tt></i>, since if that location has already
+            been used, the next unused location after that will be
+            selected instead, and the assembler generates a warning
+            message.<br>
           </td>
         </tr>
         <tr>
@@ -5040,6 +5070,7 @@ Assembly
             memory.&nbsp; The usual positioning and ordering is
             represented by <tt>USE INST</tt>, whereas I think that <tt>USE
 
+
               DAT</tt> may be a convenience feature for producing
             certain types of structures such as tables.<br>
             <br>
@@ -5047,6 +5078,7 @@ Assembly
             <blockquote>The <tt>ORGDD</tt> pseudo-op (see above)
               defines an origin for both "instructions" (fields <tt><i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i></tt>)
               and "data" (fields <tt><i>DM</i>,<i>DS,LOC2</i></tt>).&nbsp;
+
 
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
@@ -5061,6 +5093,7 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
 
               but in the memory area selected by the <tt><i>DM</i>,<i>DS,LOC2</i></tt>
               fields from <tt>ORGDD</tt> instead.&nbsp; Moreover, data
@@ -5362,6 +5395,7 @@ Assembly
 
 
 
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
@@ -5490,6 +5524,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -5976,6 +6011,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -6050,10 +6086,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-08-17.<br>
+          2019-08-18.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
