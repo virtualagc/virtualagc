@@ -121,7 +121,8 @@ for n in range(0, len(lines)):
 	#	LHS+(EXPRESSION)
 	# or
 	#	LHS-(EXPRESSION)
-	# So I handle that case here.
+	# So I handle that case here.  Also, there are some pseudo-ops (TABLE)
+	# whose entire operand can be an (EXPRESSION)
 	if len(fields) >= 3:
 		fields2 = fields[2]
 		while "+(" in fields2 or "-(" in fields2:
@@ -144,7 +145,15 @@ for n in range(0, len(lines)):
 		if fields2 != fields[2]:
 			expandedLines[n] = [line.replace(fields[2], fields2)]
 			fields[2] = fields2
-		
+	if len(fields) >= 3 and fields[1] in ["TABLE"] and fields[2][:1] == "(" and fields[2][-1:] == ")":
+		value,error = expression.yaEvaluate(fields2, constants)
+		if error != "":
+			errors[n].append(error)
+			break
+		fields2 = str(value["number"])
+		expandedLines[n] = [line.replace(fields[2], fields2)]
+		fields[2] = fields2
+
 	if inMacro != "":
 		if len(fields) >= 2 and fields[1] == "ENDMAC":
 			if len(macros[inMacro]["lines"]) == 1:
@@ -212,7 +221,7 @@ for n in range(0, len(lines)):
 					operand = "=" + str(value["number"]) + "B" + str(value["scale"])
 				if m == 0:
 					lhs = fields[0]
-				expandedLines[n].append("%-7s%-8s%s" % (lhs, operator, operand))
+				expandedLines[n].append("%-8s%-8s%s" % (lhs, operator, operand))
 	elif len(fields) >= 3 and fields[2][:2] == "=(":
 		value,error = expression.yaEvaluate(fields[2][1:], constants)
 		if error != "":
@@ -283,54 +292,94 @@ DS = 0
 dS = 0
 DLOC = 0
 useDat = False
+lineNumber = 0
+forms = {}
 
-def getDLOC(start):
+def incDLOC(increment = 1):
 	global DLOC
 	global errors
-	global used
-	for n in range(start, 256):
-		if (not useDat or dS == 0) and used[DM][DS][0][n]:
-			continue
-		if (not useDat or dS == 2) and used[DM][DS][1][n]:
-			continue
-		DLOC = n
-		return
-	errors[-1].append("Error: No space left in " + str((DM,DS)))
-
-def incDLOC(increment):
-	global DLOC
-	global errors
-	global used
-	global dS
-	for n in range(0,increment):
-		if not useDat or dS == 0:
-			if used[DM][DS][0][DLOC]:
-				errors[-1].append("Warning: Location " + str((DM,DS,0,DLOC)) + " reused")
+	while increment > 0:
+		increment -= 1
+		if DLOC < 256:
 			used[DM][DS][0][DLOC] = True
-		if not useDat or dS == 1:
-			if used[DM][DS][1][DLOC]:
-				errors[-1].append("Warning: Location " + str((DM,DS,1,DLOC)) + " reused")
 			used[DM][DS][1][DLOC] = True
-		if useDat:
-			dS = 1 - dS
-			if dS == 1:
-				DLOC += 1
-		else:
-			DLOC += 1
+		DLOC += 1
 
-def incLOC(increment):
-	global LOC
+# This function checks to see if a block of the desired size is 
+# available at the currently selected DM/DS/DLOC, and if not,
+# increments DLOC until it finds the space.
+def checkDLOC(increment = 1):
+	global DLOC
 	global errors
 	global used
-	for n in range(0, increment):
-		if used[IM][IS][S][LOC]:
-			errors[-1].append("Warning: Location " + str((IM,IS,S,LOC)) + " reused")
-		used[IM][IS][S][LOC] = True
+	start = DLOC
+	n = start
+	length = 0
+	reuse = False
+	while n < 256 and length < increment:
+		if used[DM][DS][0][n] or used[DM][DS][1][n]:
+			n += 1
+			length = 0
+			reuse = True
+			continue
+		if length == 0:
+			start = n
+		length += 1
+	if reuse:
+		errors[lineNumber].append("Warning: Skipping memory locations already used")
+	if length < increment:
+		errors[lineNumber].append("Error: No space of size " + str(increment) + " found in memory bank")
+	DLOC = start
+
+def incLOC():
+	global LOC
+	global DLOC
+	global dS
+	global used
+	if useDat:
+		if DLOC < 256:
+			used[DM][DS][dS][DLOC] = True
+		dS = 1 - dS
+		if dS == 1:
+			DLOC += 1
+	else:
+		if LOC < 256:
+			used[IM][IS][S][LOC] = True
 		LOC += 1
-		if LOC >= 256:
-			errors[-1].append("Error: Memory bank overflow")
-			LOC = 255
-			return
+
+# This function checks to see if a block of the desired size is 
+# available at the currently selected IM/IS/S/LOC or DM/DS/dS/DLOC, 
+# and if not, increments DLOC until it finds the space.
+def checkLOC():
+	global LOC
+	global DLOC
+	global dS
+	global errors
+	global used
+	reuse = False
+	if useDat:
+		n = DLOC
+		dN = dS
+		while n < 256 and used[DM][DS][dN][n]:
+			reuse = True
+			dN = 1 - dN
+			if dN == 1:
+				n += 1
+	else:
+		n = LOC
+		while n < 256 and used[IM][IS][S][n]:
+			reuse = True
+			n += 1
+	if reuse:
+		errors[lineNumber].append("Warning: Skipping memory locations already used")
+	if n >= 256:
+		errors[lineNumber].append("Error: Memory bank already completely full")
+	else:
+		if useDat:
+			DLOC = n
+			dS = dN
+		else:
+			LOC = n	
 
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
@@ -357,6 +406,12 @@ for lineNumber in range(0, len(expandedLines)):
 					useDat = True
 				else:
 					errors[lineNumber].append("Error: Wrong operand for USE")
+			elif fields[1] == "TABLE":
+				checkDLOC(int(fields[2]))
+			elif fields[0] != "" and fields[1] == "FORM":
+				if fields[0] in forms:
+					errors[n].append("Warning: Form already defined")
+				forms[fields[0]] = ofields
 			elif fields[1] == "ORGDD":
 				if len(ofields) != 7:
 					errors[lineNumber].append("Error: Wrong number of ORGDD arguments")
@@ -370,7 +425,7 @@ for lineNumber in range(0, len(expandedLines)):
 					if ofields[6] != "":
 						DLOC = int(ofields[6], 8)
 					else:
-						getDLOC(0)
+						DLOC = 0
 			elif fields[1] == "DOGD":
 				if len(ofields) != 3:
 					errors[lineNumber].append("Error: Wrong number of DOGD arguments")
@@ -379,11 +434,8 @@ for lineNumber in range(0, len(expandedLines)):
 					DS = int(ofields[1], 8)
 					if ofields[2] != "":
 						DLOC = int(ofields[2], 8)
-						if used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]:
-							errors[lineNumber].append("Warning: Skipping already-used memory location")
-							getDLOC(DLOC)
 					else:
-						getDLOC(0)
+						DLOC = 0
 			elif fields[1] in ["DEQS", "DEQD"]:
 				if len(ofields) != 3:
 					errors[lineNumber].append("Error: Wrong number of DEQS or DEQD arguments")
@@ -394,31 +446,32 @@ for lineNumber in range(0, len(expandedLines)):
 					inputLine["operand"] = fields[2]
 					inputLine["hop"] = {"IM":int(ofields[0], 8), "IS":int(ofields[1], 8), "S":0, "LOC":int(ofields[2], 8), "DM":int(ofields[0], 8), "DS":int(ofields[1], 8), "DLOC":int(ofields[2], 8)}
 			elif fields[1] == "BSS":
+				checkDLOC(int(fields[2]))
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				incDLOC(int(fields[2]))
-			elif fields[1] in ["DEC", "OCT", "HPC", "HPCDD", "DFW"]:
+			elif fields[1] in ["DEC", "OCT", "HPC", "HPCDD", "DFW"] or fields[1] in forms:
+				checkDLOC()
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-				incDLOC(1)	
+				incDLOC()	
 			elif fields[1] in operators:
+				checkLOC()
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
-				inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				if useDat:
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					incDLOC(1)
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					incLOC(1)
+				incLOC()
 				if fields[1] in ["CDS", "CDSD"]:
 					if len(ofields) != 2:
 						errors[lineNumber].append("Error: Wrong number of CDS/CDSD arguments")
