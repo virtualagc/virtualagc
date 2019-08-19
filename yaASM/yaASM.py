@@ -101,10 +101,19 @@ constants = {}
 macros = {}
 inMacro = ""
 inFalseIf = False
+
+def addError(n, msg):
+	global errors
+	if msg not in errors[n]:
+		errors[n].append(msg) 
+
 for n in range(0, len(lines)):
 	line = lines[n]
 	errors.append([])
 	expandedLines.append([line])
+	
+	if line[:1] in ["*", "#"]:
+		continue
 	
 	# Split the line into fields.
 	if line[:1] in [" ", "\t"] and not line.isspace():
@@ -134,12 +143,12 @@ for n in range(0, len(lines)):
 			index += 1
 			index2 = fields2.find(")", index)
 			if index2 < 0:
-				errors[n].append("Error: No end parenthesis in expression")
+				addError(n, "Error: No end parenthesis in expression")
 				break
 			index2 += 1
 			value,error = expression.yaEvaluate(fields2[index:index2], constants)
 			if error != "":
-				errors[n].append(error)
+				addError(n, error)
 				break
 			fields2 = fields2[:index] + str(value["number"]) + fields2[index2:]
 		if fields2 != fields[2]:
@@ -148,7 +157,7 @@ for n in range(0, len(lines)):
 	if len(fields) >= 3 and fields[1] in ["TABLE"] and fields[2][:1] == "(" and fields[2][-1:] == ")":
 		value,error = expression.yaEvaluate(fields2, constants)
 		if error != "":
-			errors[n].append(error)
+			addError(n, error)
 			break
 		fields2 = str(value["number"])
 		expandedLines[n] = [line.replace(fields[2], fields2)]
@@ -161,7 +170,7 @@ for n in range(0, len(lines)):
 				# why a macro can't have a single line in it, but
 				# we don't allow it just because it would complicate
 				# our processing.
-				errors[n].append("Error: Macro has a single line")
+				addError(n, "Error: Macro has a single line")
 			inMacro = ""
 		else:
 			macros[inMacro]["lines"].append(fields)
@@ -169,20 +178,20 @@ for n in range(0, len(lines)):
 	elif len(fields) >= 3 and fields[0] != "" and fields[1] == "EQU":
 		value,error = expression.yaEvaluate(fields[2], constants)
 		if error != "":
-			errors[n].append("Error: " + error)
+			addError(n, "Error: " + error)
 		else:
 			constants[fields[0]] = value 
 	elif len(fields) >= 3 and fields[1] == "CALL":
 		ofields = fields[2].split(",")
 		if len(ofields) == 2:
-			line1 = "%-7s%-8s%s" % (fields[0], "CLA", ofields[1])
-			line2 = "%-7s%-8s%s" % ("", "HOP*", ofields[0])
+			line1 = "%-8s%-8s%s" % (fields[0], "CLA", ofields[1])
+			line2 = "%-8s%-8s%s" % ("", "HOP*", ofields[0])
 			expandedLines[n] = [line1, line2]
 		elif len(ofields) == 3:
-			line1 = "%-7s%-8s%s" % (fields[0], "CLA", ofields[2])
-			line2 = "%-7s%-8s%s" % ("", "STO", "775")
-			line3 = "%-7s%-8s%s" % ("", "CLA", ofields[1])
-			line4 = "%-7s%-8s%s" % ("", "HOP*", ofields[0])
+			line1 = "%-8s%-8s%s" % (fields[0], "CLA", ofields[2])
+			line2 = "%-8s%-8s%s" % ("", "STO", "775")
+			line3 = "%-8s%-8s%s" % ("", "CLA", ofields[1])
+			line4 = "%-8s%-8s%s" % ("", "HOP*", ofields[0])
 			expandedLines[n] = [line1, line2, line3, line4]
 	elif len(fields) >= 2 and fields[0] != "" and fields[1] == "MACRO":
 		inMacro = fields[0]
@@ -198,8 +207,8 @@ for n in range(0, len(lines)):
 		else:
 			ofields = []
 		numArgs = len(ofields)
-		if numArgs != macro["numArgs"]:
-			errors[n].append("Error: " + "Wrong number of macro arguments")
+		if macro["numArgs"] != 0 and numArgs != macro["numArgs"]:
+			addError(n, "Error: " + "Wrong number of macro arguments")
 		else:
 			macroLines = macro["lines"]
 			expandedLines[n] = []
@@ -216,7 +225,7 @@ for n in range(0, len(lines)):
 				if operand[:2] == "=(":
 					value,error = expression.yaEvaluate(operand[1:], constants)
 					if error != "":
-						errors[n].append("Error: " + error)
+						addError(n, "Error: " + error)
 						continue
 					operand = "=" + str(value["number"]) + "B" + str(value["scale"])
 				if m == 0:
@@ -225,7 +234,7 @@ for n in range(0, len(lines)):
 	elif len(fields) >= 3 and fields[2][:2] == "=(":
 		value,error = expression.yaEvaluate(fields[2][1:], constants)
 		if error != "":
-			errors[n].append("Error: " + error)
+			addError(n, "Error: " + error)
 		else:
 			expandedLines[n] = [line.replace(fields[2], "=" + str(value["number"]) + "B" + str(value["scale"]))]
 	elif inFalseIf:
@@ -244,11 +253,11 @@ for n in range(0, len(lines)):
 		# logical expressions with scales of B0 anyway.
 		ofields = fields[2].split("=")
 		if len(ofields) != 2 or ofields[0] not in constants or ofields[1][:1] != "(":
-			errors[n].append("Error: Misformed IF")
+			addError(n, "Error: Misformed IF")
 			continue
 		value,error = expression.yaEvaluate(ofields[1], constants)
 		if error != "":
-			errors[n].append("Error: " + error)
+			addError(n, "Error: " + error)
 			continue
 		constant = constants[ofields[0]]
 		if constant["number"] != value["number"] or constant["scale"] != value["scale"]:
@@ -294,6 +303,7 @@ DLOC = 0
 useDat = False
 lineNumber = 0
 forms = {}
+synonyms = {}
 
 def incDLOC(increment = 1):
 	global DLOC
@@ -311,7 +321,6 @@ def incDLOC(increment = 1):
 def checkDLOC(increment = 1):
 	global DLOC
 	global errors
-	global used
 	start = DLOC
 	n = start
 	length = 0
@@ -324,11 +333,12 @@ def checkDLOC(increment = 1):
 			continue
 		if length == 0:
 			start = n
+		n += 1
 		length += 1
 	if reuse:
-		errors[lineNumber].append("Warning: Skipping memory locations already used")
+		addError(lineNumber, "Warning: Skipping memory locations already used")
 	if length < increment:
-		errors[lineNumber].append("Error: No space of size " + str(increment) + " found in memory bank")
+		addError(lineNumber, "Error: No space of size " + str(increment) + " found in memory bank")
 	DLOC = start
 
 def incLOC():
@@ -347,39 +357,74 @@ def incLOC():
 			used[IM][IS][S][LOC] = True
 		LOC += 1
 
-# This function checks to see if a block of the desired size is 
-# available at the currently selected IM/IS/S/LOC or DM/DS/dS/DLOC, 
-# and if not, increments DLOC until it finds the space.
-def checkLOC():
+# This function finds the next location available for storing instructions.
+# if there aren't at least two consecutive locations available at the present
+# location, the notion is that a TRA or HOP is transparently inserted to
+# another location in another syllable, sector, or module. We don't actually
+# insert the TRA or HOP here, if we change the current location, we do return
+# an array holding the previous current location ([IM,IS,S,LOC]) which the 
+# calling routine can use to insert the TRA or HOP.  If there is no available
+# TRA/HOP, then an empty array ([]) is returned instead.
+lastORG = False
+roofs = [255, 252]
+def checkLOC(extra = 0):
 	global LOC
-	global DLOC
-	global dS
+	global IM
+	global IS
+	global S
 	global errors
-	global used
-	reuse = False
 	if useDat:
-		n = DLOC
-		dN = dS
-		while n < 256 and used[DM][DS][dN][n]:
-			reuse = True
-			dN = 1 - dN
-			if dN == 1:
-				n += 1
+		# This is the "USE DAT" case.  I don't believe TRA's or HOP's are used
+		# here, since USE DAT requires a very specific layout of the instructions,
+		# and anything inserted would presumably break that ordering.
+		if used[DM][DS][dS][DLOC]:
+			addError(lineNumber, "Error: Memory syllable already used")
+			return []
 	else:
-		n = LOC
-		while n < 256 and used[IM][IS][S][n]:
-			reuse = True
-			n += 1
-	if reuse:
-		errors[lineNumber].append("Warning: Skipping memory locations already used")
-	if n >= 256:
-		errors[lineNumber].append("Error: Memory bank already completely full")
-	else:
-		if useDat:
-			DLOC = n
-			dS = dN
-		else:
-			LOC = n	
+		# This is the "USE INST" case.
+		if not lastORG and (LOC >= 256 or used[IM][IS][S][LOC]):
+			# If the current location is already used up, we're out
+			# of luck since there's no room to even insert a TRA or HOP.
+			addError(lineNumber, "Error: No memory available at current location")
+			return []
+		roof = roofs[S] - extra
+		if LOC >= roof or used[IM][IS][S][LOC + 1]:
+			# Only one word available here, just insert TRA or HOP.  However, we need
+			# to find address for the TRA or HOP to take us to, always searching
+			# upward.
+			if lastORG:
+				addError(lineNumber, "Warning: Skipping past already-used memory")
+			else:
+				addError(lineNumber, "Warning: Automatic syllable/sector/module switch needed")
+			tLoc = LOC
+			tSyl = S
+			tSec = IS
+			tMod = IM
+			while True:
+				roof = roofs[tSyl] - extra
+				if tLoc < roof and not used[tMod][tSec][tSyl][tLoc] and not used[tMod][tSec][tSyl][tLoc + 1]:
+					retVal = [IM, IS, S, LOC]
+					IM = tMod
+					IS = tSec
+					S = tSyl
+					LOC = tLoc
+					return retVal
+				tLoc += 1
+				if tLoc >= roof:
+					tLoc = 0
+					tSyl += 1
+					if tSyl >= 2:
+						tSyl = 0
+						tSec += 1
+						if tSec >= 16:
+							tSec = 0
+							tMod += 1
+							if tMod >= 8:
+								addError(lineNumber, "Error: Memory totally exhausted")
+								return []
+		# At this point, we know there are two consecutive words available at the 
+		# current location, so we can just keep the current address.
+		return []
 
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
@@ -396,7 +441,25 @@ for lineNumber in range(0, len(expandedLines)):
 		if inputLine["raw"][:1] in ["*", "#"]:
 			fields = []
 		
-		if len(fields) >= 3:
+		if len(fields) >= 2 and fields[1] == "VEC":
+			while DLOC < 256:
+				DLOC = (DLOC + 3) & ~3
+				checkDLOC()
+				if (DLOC & 3) == 0:
+					break
+		elif len(fields) >= 2 and fields[1] == "MAT":
+			while DLOC < 256:
+				DLOC = (DLOC + 15) & ~15
+				checkDLOC()
+				if (DLOC & 15) == 0:
+					break
+		elif len(fields) >= 2 and fields[1] == "MACRO" and fields[0] in macros and macros[fields[0]]["numArgs"] == 0:
+			pass
+		elif len(fields) >= 2 and fields[1] in macros and macros[fields[1]]["numArgs"] == 0:
+			pass
+		elif len(fields) >= 2 and fields[1] in ["ENDIF"]:
+			pass
+		elif len(fields) >= 3:
 			ofields = fields[2].split(",")
 			if fields[1] == "USE":
 				if fields[2] == "INST":
@@ -405,16 +468,19 @@ for lineNumber in range(0, len(expandedLines)):
 					dS = 1
 					useDat = True
 				else:
-					errors[lineNumber].append("Error: Wrong operand for USE")
+					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
 				checkDLOC(int(fields[2]))
+			elif fields[0] != "" and fields[1] == "SYN":
+				synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
 				if fields[0] in forms:
-					errors[n].append("Warning: Form already defined")
+					addError(n, "Warning: Form already defined")
 				forms[fields[0]] = ofields
 			elif fields[1] == "ORGDD":
+				lastORG = True
 				if len(ofields) != 7:
-					errors[lineNumber].append("Error: Wrong number of ORGDD arguments")
+					addError(lineNumber, "Error: Wrong number of ORGDD arguments")
 				else:
 					IM = int(ofields[0], 8)
 					IS = int(ofields[1], 8)
@@ -428,7 +494,7 @@ for lineNumber in range(0, len(expandedLines)):
 						DLOC = 0
 			elif fields[1] == "DOGD":
 				if len(ofields) != 3:
-					errors[lineNumber].append("Error: Wrong number of DOGD arguments")
+					addError(lineNumber, "Error: Wrong number of DOGD arguments")
 				else:
 					DM = int(ofields[0], 8)
 					DS = int(ofields[1], 8)
@@ -438,13 +504,15 @@ for lineNumber in range(0, len(expandedLines)):
 						DLOC = 0
 			elif fields[1] in ["DEQS", "DEQD"]:
 				if len(ofields) != 3:
-					errors[lineNumber].append("Error: Wrong number of DEQS or DEQD arguments")
+					addError(lineNumber, "Error: Wrong number of DEQS or DEQD arguments")
 				else:
 					if fields[0] != "":
 						inputLine["lhs"] = fields[0]
 					inputLine["operator"] = fields[1]
 					inputLine["operand"] = fields[2]
-					inputLine["hop"] = {"IM":int(ofields[0], 8), "IS":int(ofields[1], 8), "S":0, "LOC":int(ofields[2], 8), "DM":int(ofields[0], 8), "DS":int(ofields[1], 8), "DLOC":int(ofields[2], 8)}
+					inputLine["hop"] = {	"IM":IM, "IS":IS, "S":S, 
+								"LOC":LOC, "DM":int(ofields[0], 8), 
+								"DS":int(ofields[1], 8), "DLOC":int(ofields[2], 8)}
 			elif fields[1] == "BSS":
 				checkDLOC(int(fields[2]))
 				if fields[0] != "":
@@ -462,19 +530,53 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				incDLOC()	
 			elif fields[1] in operators:
-				checkLOC()
+				extra = 0
+				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
+					extra = int(fields[2][2:])
+				oldLocation = checkLOC(extra)
+				lastORG = False
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
 				inputLine["operator"] = fields[1]
 				inputLine["operand"] = fields[2]
 				if useDat:
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["useDat"] = True
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-				incLOC()
+				if fields[1] in ["SHL", "SHR"]:
+					count = int(fields[2])
+					if count == 0:
+						count = 1
+					else:
+						count = (count + 1) // 2
+					while count > 0:
+						incLOC()
+						count -= 1
+				else:
+					incLOC()
 				if fields[1] in ["CDS", "CDSD"]:
-					if len(ofields) != 2:
-						errors[lineNumber].append("Error: Wrong number of CDS/CDSD arguments")
+					if len(ofields) == 1:
+						if not useDat:
+							# We assume this is the name of a variable, and we have to
+							# find it to determine its DM/DS.  I presume it could be
+							# defined later, and so we don't find it ... let's hope not!
+							found = False
+							for testEntry in inputFile:
+								testLine = testEntry["expandedLine"]
+								if "lhs" in testLine and testLine["lhs"] == fields[2] and "hop" in testLine:
+									if fields[1] == "CDSD":
+										DM = testLine["hop"]["DM"]
+										DS = testLine["hop"]["DS"]
+									elif fields[1] == "CDS":
+										DM = testLine["hop"]["IM"]
+										DS = testLine["hop"]["IS"]
+									found = True
+									break
+							if not found:
+								addError(lineNumber, "Warning: Symbol not found")
+					elif len(ofields) != 2:
+						addError(lineNumber, "Error: Wrong number of CDS/CDSD arguments")
 					else:
 						DM = int(ofields[0], 8)
 						DS = int(ofields[1], 8)
@@ -483,15 +585,9 @@ for lineNumber in range(0, len(expandedLines)):
 			elif fields[1] in pseudos:
 				pass
 			else:
-				errors[lineNumber].append("Error: Unrecognized operator")
-		elif len(fields) == 2 and fields[1] == "MACRO" and fields[0] in macros and macros[fields[0]]["numArgs"] == 0:
-			pass
-		elif len(fields) >= 2 and fields[1] == "VEC":
-			DLOC = (DLOC + 3) & ~3
-		elif len(fields) >= 2 and fields[1] == "MAT":
-			DLOC = (DLOC + 15) & ~15
+				addError(lineNumber, "Error: Unrecognized operator")
 		elif len(fields) != 0:
-			errors[lineNumber].append("Wrong number of fields")
+			addError(lineNumber, "Wrong number of fields")
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
 
 #----------------------------------------------------------------------------
@@ -550,24 +646,36 @@ for entry in inputFile:
 #		actually need to be assembled.
 
 print("IM IS S LOC DM DS  A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT")
+lastLineNumber = -1
 for entry in inputFile:
 	lineNumber = entry["lineNumber"]
 	inputLine = entry["expandedLine"]
 	errorList = errors[lineNumber]
 	originalLine = lines[lineNumber]
-	for error in errorList:
-		print(error)
+	if lineNumber != lastLineNumber:
+		lastLineNumber = lineNumber
+		for error in errorList:
+			print(error)
+	
+	operator = ""
+	if "operator" in inputLine:
+		operator = inputLine["operator"]
 	    
 	if "hop" in inputLine:
 		hop = inputLine["hop"]
-		line = " %o %02o %o %03o  %o %02o %03o  " % (hop["IM"], hop["IS"], hop["S"], 
-							hop["LOC"], hop["DM"], 
-							hop["DS"], hop["DLOC"])
+		if "useDat" in inputLine:
+			line = "      %o %03o  %o %02o  " % (hop["S"], hop["DLOC"], hop["DM"], hop["DS"])
+		elif operator in ["DEC", "OCT", "DFW", "BSS", "HPC", "HPCDD"] or operator in forms:
+			line = "        %03o  %o %02o  " % (hop["DLOC"], hop["DM"], hop["DS"])
+		elif operator in ["CDS", "CDSD", "SHL", "SHR", "SHF"]:
+			line = " %o %02o %o %03o        " % (hop["IM"], hop["IS"], hop["S"], hop["LOC"])
+		elif operator in ["DEQD", "DEQS"]:
+			line = "                  "
+		else:
+			line = " %o %02o %o %03o  %o %02o  " % (hop["IM"], hop["IS"], hop["S"], 
+								hop["LOC"], hop["DM"], hop["DS"])
 	else:
-		line = "                      "
-	    
-	if "operator" in inputLine:
-		operator = inputLine["operator"]
+		line = "                  "
 	    
 	print(line + "\t" + inputLine["raw"])
 
