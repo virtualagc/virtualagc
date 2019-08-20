@@ -357,6 +357,20 @@ def incLOC():
 			used[IM][IS][S][LOC] = True
 		LOC += 1
 
+# Find out the last usable instruction location in a sector.
+roofs = {}
+def getRoof(imod, isec, syl, extra):
+	roofKey = (imod << 4) | isec
+	if syl == 0:
+		roof = 0o377
+	elif roofKey not in roofs:
+		roof = 0o374
+	else:
+		roof = roofs[roofKey]
+	if extra > 0:
+		extra -= 1
+	return roof - extra
+
 # This function finds the next location available for storing instructions.
 # if there aren't at least two consecutive locations available at the present
 # location, the notion is that a TRA or HOP is transparently inserted to
@@ -366,20 +380,27 @@ def incLOC():
 # calling routine can use to insert the TRA or HOP.  If there is no available
 # TRA/HOP, then an empty array ([]) is returned instead.
 lastORG = False
-roofs = [255, 252]
 def checkLOC(extra = 0):
 	global LOC
 	global IM
 	global IS
 	global S
+	global DLOC
 	global errors
 	if useDat:
-		# This is the "USE DAT" case.  I don't believe TRA's or HOP's are used
-		# here, since USE DAT requires a very specific layout of the instructions,
-		# and anything inserted would presumably break that ordering.
-		if used[DM][DS][dS][DLOC]:
-			addError(lineNumber, "Error: Memory syllable already used")
-			return []
+		# This is the "USE DAT" case. 
+		if DLOC >= 255:
+		 	addError(lineNumber, "Error: No room left in memory sector")
+		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC] or used[DM][DS][0][DLOC+1] or used[DM][DS][1][DLOC+1]):
+			tLoc = DLOC
+			addError(lineNumber, "Warning: Automatically skipping already-used memory location")
+			while tLoc < 255 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc] or used[DM][DS][0][tLoc+1] or used[DM][DS][1][tLoc+1]):
+				tLoc += 1
+			if tLoc >= 256:
+				addError(lineNumber, "Error: No room left in memory sector")
+			else:
+				DLOC = tLoc
+		return []
 	else:
 		# This is the "USE INST" case.
 		if not lastORG and (LOC >= 256 or used[IM][IS][S][LOC]):
@@ -387,7 +408,7 @@ def checkLOC(extra = 0):
 			# of luck since there's no room to even insert a TRA or HOP.
 			addError(lineNumber, "Error: No memory available at current location")
 			return []
-		roof = roofs[S] - extra
+		roof = getRoof(IM, IS, S, extra)
 		if LOC >= roof or used[IM][IS][S][LOC + 1]:
 			# Only one word available here, just insert TRA or HOP.  However, we need
 			# to find address for the TRA or HOP to take us to, always searching
@@ -401,7 +422,7 @@ def checkLOC(extra = 0):
 			tSec = IS
 			tMod = IM
 			while True:
-				roof = roofs[tSyl] - extra
+				roof = getRoof(tMod, tSec, tSyl, extra)
 				if tLoc < roof and not used[tMod][tSec][tSyl][tLoc] and not used[tMod][tSec][tSyl][tLoc + 1]:
 					retVal = [IM, IS, S, LOC]
 					IM = tMod
@@ -439,6 +460,9 @@ for lineNumber in range(0, len(expandedLines)):
 		    
 		# Remove comments.
 		if inputLine["raw"][:1] in ["*", "#"]:
+			if len(fields) == 5 and fields[0] == "#!" and fields[1] == "ROOF":
+				roofKey = (int(fields[2], 8) << 4) | int(fields[3], 8)
+				roofs[roofKey] = int(fields[4], 8)
 			fields = []
 		
 		if len(fields) >= 2 and fields[1] == "VEC":
@@ -457,7 +481,7 @@ for lineNumber in range(0, len(expandedLines)):
 			pass
 		elif len(fields) >= 2 and fields[1] in macros and macros[fields[1]]["numArgs"] == 0:
 			pass
-		elif len(fields) >= 2 and fields[1] in ["ENDIF"]:
+		elif len(fields) >= 2 and fields[1] in ["ENDIF", "END"]:
 			pass
 		elif len(fields) >= 3:
 			ofields = fields[2].split(",")
@@ -551,11 +575,12 @@ for lineNumber in range(0, len(expandedLines)):
 					else:
 						count = (count + 1) // 2
 					while count > 0:
+						checkLOC()
 						incLOC()
 						count -= 1
 				else:
 					incLOC()
-				if fields[1] in ["CDS", "CDSD"]:
+				if fields[1] in ["CDS", "CDSD", "CDSS"]:
 					if len(ofields) == 1:
 						if not useDat:
 							# We assume this is the name of a variable, and we have to
