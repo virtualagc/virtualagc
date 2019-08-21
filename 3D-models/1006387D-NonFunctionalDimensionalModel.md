@@ -7,10 +7,15 @@ The models are created to the exact dimensions from the original drawings. A few
 SolidWorks was used for the parametric drawings. Contact me (ManoDaSilva) you need them.
 
 # Specific notes
+* This model is only an external, dimensional model, as per the available specification control drawing. Sadly, we currently don't have any more details regarding internal details of this part. 
+* The text has not been added to the part, front grid as a .1in pocket. 
+* Back connector pocket has conflicting dimensions: side shows .615in, but front .500 by showing space between hole and sidewall.
 
-* Fillets are often not specified, and .09 default value **seems** too small. Left as is. 
-* Some fillets aren't possible and are excluded
-* Center ribs should all be there, but the schematic is unclear on where they might be. Used photographic evidence to guesstimate their position (dimensions are fixed by the drawings). 
 
 # Licensing
 Under CC0 license.
+
+
+
+
+
