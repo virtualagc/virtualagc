@@ -220,7 +220,7 @@ def yaShuntingYard(tokens):
 		except:
 			pass
 		if token in precedence:
-			while len(stack) > 0 and stack[-1] in precedence and precedence.index(token) > precedence.index(stack[-1]):
+			while len(stack) > 0 and stack[-1] in precedence and precedence.index(token) >= precedence.index(stack[-1]):
 				queue.append(stack[-1])
 				stack = stack[:-1]
 			stack.append(token)

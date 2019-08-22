@@ -27,6 +27,9 @@
 #		2019-08-14 RSB	Began working on this more seriously since
 #				the LVDC-206RAM transcription is now available.
 #				Specifically, began adding preprocessor pass.
+#		2019-08-22 RSB	I think the preprocessor and discovery passes
+#				are essentially working, except for autoallocation
+#				of =... constants.
 #
 # The usage is just
 #              yaASM.py <INPUT.lvdc >OUTPUT.listing
@@ -42,22 +45,18 @@ used = [[[[False for offset in range(256)] for syllable in range(2)] for sector 
 	
 operators = {
     "HOP": { "opcode":0b0000 }, 
-    "HOP*": { "opcode":0b0000 }, 
     "MPY": { "opcode":0b0001 }, 
     "SUB": { "opcode":0b0010 }, 
     "DIV": { "opcode":0b0011 }, 
     "TNZ": { "opcode":0b0100 }, 
-    "TNZ*": { "opcode":0b0100 }, 
     "MPH": { "opcode":0b0101 }, 
     "AND": { "opcode":0b0110 }, 
     "ADD": { "opcode":0b0111 },
     "TRA": { "opcode":0b1000 }, 
-    "TRA*": { "opcode":0b1000 }, 
     "XOR": { "opcode":0b1001 }, 
     "PIO": { "opcode":0b1010 }, 
     "STO": { "opcode":0b1011 }, 
     "TMI": { "opcode":0b1100 }, 
-    "TMI*": { "opcode":0b1100 }, 
     "RSU": { "opcode":0b1101 }, 
     "CDS": { "opcode":0b1110, "a9":0 }, 
     "CDSD": { "opcode":0b1110, "a9":0 }, 
@@ -154,12 +153,15 @@ for n in range(0, len(lines)):
 		if fields2 != fields[2]:
 			expandedLines[n] = [line.replace(fields[2], fields2)]
 			fields[2] = fields2
-	if len(fields) >= 3 and fields[1] in ["TABLE"] and fields[2][:1] == "(" and fields[2][-1:] == ")":
+	if len(fields) >= 3 and fields[1] in ["TABLE", "DEC"] and fields[2][:1] == "(":
 		value,error = expression.yaEvaluate(fields2, constants)
 		if error != "":
 			addError(n, error)
 			break
-		fields2 = str(value["number"])
+		if fields[1] == "TABLE":
+			fields2 = str(value["number"])
+		else:
+			fields2 = str(value["number"]) + "B" + str(value["scale"])
 		expandedLines[n] = [line.replace(fields[2], fields2)]
 		fields[2] = fields2
 
@@ -185,13 +187,13 @@ for n in range(0, len(lines)):
 		ofields = fields[2].split(",")
 		if len(ofields) == 2:
 			line1 = "%-8s%-8s%s" % (fields[0], "CLA", ofields[1])
-			line2 = "%-8s%-8s%s" % ("", "HOP*", ofields[0])
+			line2 = "%-8s%-8s%s" % ("", "HOP", ofields[0])
 			expandedLines[n] = [line1, line2]
 		elif len(ofields) == 3:
 			line1 = "%-8s%-8s%s" % (fields[0], "CLA", ofields[2])
 			line2 = "%-8s%-8s%s" % ("", "STO", "775")
 			line3 = "%-8s%-8s%s" % ("", "CLA", ofields[1])
-			line4 = "%-8s%-8s%s" % ("", "HOP*", ofields[0])
+			line4 = "%-8s%-8s%s" % ("", "HOP", ofields[0])
 			expandedLines[n] = [line1, line2, line3, line4]
 	elif len(fields) >= 2 and fields[0] != "" and fields[1] == "MACRO":
 		inMacro = fields[0]
@@ -370,6 +372,71 @@ def getRoof(imod, isec, syl, extra):
 	if extra > 0:
 		extra -= 1
 	return roof - extra
+
+# Convert a numeric literal to LVDC binary format.  I accept literals of the forms:
+#	if isOctal == False:
+#		O + octal digits
+#		float + optional Bn
+#		decimal + Bn + optional En
+#	if isOctal == True:
+#		octal digits
+# Returns a string of 9 octal digits, or else "" if error.
+def convertNumericLiteral(n, isOctal = False):
+	if isOctal or n[:1] == "O":
+		if isOctal:
+			constantString = n[0:]
+		else:
+			constantString = n[1:]
+		if len(constantString) > 9 or len(constantString) == 0:
+			return ""
+		for c in constantString:
+			if c not in ["0", "1", "2", "3", "4", "5", "6", "7"]:
+				return ""
+		while len(constantString) < 9:
+			constantString += "0"
+		return constantString
+	# The decimal-number case.
+	# The following manipulations try to produce two strings called
+	# "decimal" (which includes the decimal portion of the number, 
+	# including sign, decimal point, and En exponent) and "scale"
+	# (which is just the Bn portion).  The trick is that the En may
+	# follow the Bn in the original operand.
+	decimal = n[0:]
+	scale = "B26"
+	if "B" in decimal:
+		whereB = decimal.index("B")
+		scale = decimal[whereB:]
+		decimal = decimal[:whereB]
+		if "E" in scale:
+			whereE = scale.index("E")
+			decimal += scale[whereE:]
+			scale = scale[:whereE]
+	try:
+		decimal = float(decimal)
+		scale = int(scale[1:])
+		value = round(decimal * pow(2, 27 - scale - 1))
+		if value < 0:
+			value += 0o1000000000
+		constantString = "%09o" % value
+		return constantString
+	except:
+		return ""	
+
+# Allocate/store a nameless variable for "=..." constant, returning its offset
+# into the sector.
+nameless = {}
+def allocateNameless(lineNumber, value):
+	global nameless
+	if value in nameless:
+		return nameless[value]
+	for loc in range(DLOC, 256):
+		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
+			used[DM][DS][0][loc] = True
+			used[DM][DS][1][loc] = True
+			nameless[value] = loc
+			return loc
+	addError(lineNumber, "Error: No remaining memory to store nameless constant")
+	return 0
 
 # This function finds the next location available for storing instructions.
 # if there aren't at least two consecutive locations available at the present
@@ -555,6 +622,12 @@ for lineNumber in range(0, len(expandedLines)):
 				incDLOC()	
 			elif fields[1] in operators:
 				extra = 0
+				if fields[2][:1] == "=":
+					constantString = convertNumericLiteral(fields[2][1:])
+					if constantString == "":
+						addError(lineNumber, "Error: Illegal numeric literal")
+					else:
+						allocateNameless(lineNumber, "%o_%02o_%s" % (DM, DS, constantString))
 				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
 					extra = int(fields[2][2:])
 				oldLocation = checkLOC(extra)
@@ -616,32 +689,21 @@ for lineNumber in range(0, len(expandedLines)):
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
 
 #----------------------------------------------------------------------------
-# If it turns out later that the code above can't assign all HOPs in its
-# single pass, insert code to do that here.  However, with my incomplete 
-# state of knowledge right now, it doesn't seem as thought that will be
-# necessary.
-
-#----------------------------------------------------------------------------
 #                           Create a symbol table
 #----------------------------------------------------------------------------
 # Create a table to quickly look up addresses of symbols.
 symbols = {}
 for entry in inputFile:
 	inputLine = entry["expandedLine"]
+	lineNumber = entry["lineNumber"]
 	if "lhs" in inputLine:
 		if "hop" in inputLine:
 			lhs = inputLine["lhs"]
 			if lhs in symbols:
-				if "error" in inputLine:
-					inputLine["error"] += ". " + "Symbol already defined"
-				else:
-					inputLine["error"] = "Symbol already defined"
+				addError(lineNumber, "Error: Symbol already defined")
 			symbols[lhs] = inputLine["hop"]
 		else:
-			if "error" in inputLine:
-				inputLine["error"] += ". " + "Symbol without HOP."
-			else:
-				inputLine["error"] = "Symbol without HOP."
+			addError(lineNumber, "Warning: Symbol location unknown")
 
 #----------------------------------------------------------------------------
 #                           Complete the assembly
@@ -670,6 +732,23 @@ for entry in inputFile:
 #		listing, but is not itself assembled.  Only the lines in expandedLines[n][]
 #		actually need to be assembled.
 
+# Put the assembled value wherever it's supposed to go in the executable image.
+def storeAssembled(value, hop, data = True):
+	if data:
+		module = hop["DM"]
+		sector = hop["DS"]
+		location = hop["DLOC"]
+		syllable1 = (value >> 12) & 0o77774
+		syllable0 = value & 0o37776
+		used[module][sector][1][location] = syllable1
+		used[module][sector][0][location] = syllable0
+	else:
+		module = hop["IM"]
+		sector = hop["IS"]
+		syllable = hop["S"]
+		location = hop["LOC"]
+		used[module][sector][syllable][location] = (value << 2) & 0o77774
+
 print("IM IS S LOC DM DS  A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT")
 lastLineNumber = -1
 for entry in inputFile:
@@ -677,15 +756,13 @@ for entry in inputFile:
 	inputLine = entry["expandedLine"]
 	errorList = errors[lineNumber]
 	originalLine = lines[lineNumber]
-	if lineNumber != lastLineNumber:
-		lastLineNumber = lineNumber
-		for error in errorList:
-			print(error)
+	constantString = ""
 	
 	operator = ""
 	if "operator" in inputLine:
 		operator = inputLine["operator"]
-	    
+	
+	# Print the address portion of the line.
 	if "hop" in inputLine:
 		hop = inputLine["hop"]
 		if "useDat" in inputLine:
@@ -701,8 +778,25 @@ for entry in inputFile:
 								hop["LOC"], hop["DM"], hop["DS"])
 	else:
 		line = "                  "
-	    
-	print(line + "\t" + inputLine["raw"])
+	
+	# Assemble.
+	if operator in [ "DEC", "OCT" ]:
+		if operator == "DEC":
+			constantString = convertNumericLiteral(operand)
+		elif operator == "OCT":
+			constantString = convertNumericLiteral(operand, True)
+		if constantString == "":
+			addError(lineNumber, "Error: Invalid numeric literal")
+		else:
+			assembled = int(constantString, 8)
+			# Put the assembled value wherever it's supposed to 
+			storeAssembled(assembled, inputLine["hop"])
+	
+	if lineNumber != lastLineNumber:
+		lastLineNumber = lineNumber
+		for error in errorList:
+			print(error)
+	print(line + ("%9s" % constantString) + "    " + inputLine["raw"])
 
 #----------------------------------------------------------------------------
 #                           Print a symbol table
@@ -710,5 +804,10 @@ for entry in inputFile:
 print("\n\nSymbol Table:")
 for key in sorted(symbols):
 	hop = symbols[key]
-	print(key + "\t" + " %o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
-						hop["LOC"]))
+	print("%o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
+						hop["LOC"]) + "  " + key)
+for key in sorted(nameless):
+	loc = nameless[key]
+	fields = key.split("_")
+	print(fields[0] + " " + fields[1] + "   " + ("%03o" % loc) + "  " + fields[2])
+
