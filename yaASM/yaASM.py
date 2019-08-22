@@ -456,17 +456,19 @@ def checkLOC(extra = 0):
 	global errors
 	if useDat:
 		# This is the "USE DAT" case. 
-		if DLOC >= 255:
+		if DLOC >= 256:
 		 	addError(lineNumber, "Error: No room left in memory sector")
-		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC] or used[DM][DS][0][DLOC+1] or used[DM][DS][1][DLOC+1]):
+		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]):
 			tLoc = DLOC
 			addError(lineNumber, "Warning: Automatically skipping already-used memory location")
-			while tLoc < 255 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc] or used[DM][DS][0][tLoc+1] or used[DM][DS][1][tLoc+1]):
+			while tLoc < 256 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc]):
 				tLoc += 1
 			if tLoc >= 256:
 				addError(lineNumber, "Error: No room left in memory sector")
 			else:
+				retVal = [DM, DS, dS, DLOC]
 				DLOC = tLoc
+				return retVal
 		return []
 	else:
 		# This is the "USE INST" case.
@@ -675,7 +677,7 @@ for lineNumber in range(0, len(expandedLines)):
 								addError(lineNumber, "Warning: Symbol not found")
 					elif len(ofields) != 2:
 						addError(lineNumber, "Error: Wrong number of CDS/CDSD arguments")
-					else:
+					elif not useDat:
 						DM = int(ofields[0], 8)
 						DS = int(ofields[1], 8)
 			elif fields[1] in preprocessed:
