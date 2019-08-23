@@ -133,7 +133,7 @@ def pullNumber(string):
 	if bexp != "" and error == "":
 		bexp = int(bexp[1:])
 	else:
-		bexp = 0
+		bexp = None
 	return number,bexp,string,error
 
 # From an input string, outputs an array of tokens plus an error string
@@ -163,7 +163,10 @@ def yaTokenize(string):
 			number,bexp,string,error = pullNumber(string)
 			if error != "":
 				break
-			tokens.append({"number": number, "scale": bexp})			
+			item = {"number": number}
+			if bexp != None:
+				item["scale"] = bexp
+			tokens.append(item)			
 		elif string[0] in ["-", "+"]:
 			# This could be unary or binary operators, or 
 			# the first part of a literal number, and we
@@ -179,7 +182,10 @@ def yaTokenize(string):
 				number,bexp,string,error = pullNumber(string)
 				if error != "":
 					break
-				tokens.append({"number": number, "scale": bexp})			
+				item = {"number": number}
+				if bexp != None:
+					item["scale"] = bexp
+				tokens.append(item)			
 			else:
 				# Must be a unary operator.
 				tokens.append("U" + string[0])
@@ -238,7 +244,8 @@ def yaShuntingYard(tokens):
 					return queue,error
 				stack = stack[:-1]
 				try:
-					queue.append({"scale":token["scale"]})
+					if "scale" in token:
+						queue.append({"scale":token["scale"]})
 				except:
 					pass
 				continue
@@ -263,7 +270,7 @@ def yaShuntingYard(tokens):
 # where value is what the string evaluates to numerically in the form of 
 # a number/scale dictionary, and error is a hopefully-empty error message.
 def yaEvaluate(string, constants):
-	value = { "number":0, "scale":0 }
+	value = { "number":0 }
 	# Let's tokenize the string.
 	tokens,error = yaTokenize(string)
 	if error != "":
@@ -271,7 +278,10 @@ def yaEvaluate(string, constants):
 	# Let's replace all constant symbols by their numerical values.
 	for n in range(0, len(tokens)):
 		if type(tokens[n]) != type({}) and tokens[n] in constants:
-			tokens[n] = { "number":constants[tokens[n]]["number"], "scale":constants[tokens[n]]["scale"] }
+			item = { "number":constants[tokens[n]]["number"] }
+			if "scale" in constants[tokens[n]]:
+				item["scale"] = constants[tokens[n]]["scale"]
+			tokens[n] = item
 	# Let's use the "shunting yard" algorithm to convert the 
 	# tokenized version of the expression string to an RPN
 	# form of it.
@@ -281,31 +291,40 @@ def yaEvaluate(string, constants):
 	rpn = []
 	for token in queue:
 		if type(token) == type({}) and "number" in token:
-			rpn.append({"number":token["number"], "scale":token["scale"]})
+			item = {"number":token["number"]}
+			if "scale" in token:
+				item["scale"] = token["scale"]
+			rpn.append(item)
 		elif token == "U+":
 			pass
 		elif token == "U-":
 			rpn[-1]["number"] = -rpn[-1]["number"]
 		elif token == "B+":
-			if rpn[-2]["scale"] != rpn[-1]["scale"]:
+			if ("scale" in rpn[-2] and "scale" in rpn[-1]) and rpn[-2]["scale"] != rpn[-1]["scale"]:
 				error = "Scale of terms doesn't match"
 			rpn[-2]["number"] += rpn[-1]["number"]
 			rpn.pop()
 		elif token == "B-":
-			if rpn[-2]["scale"] != rpn[-1]["scale"]:
+			if ("scale" in rpn[-2] and "scale" in rpn[-1]) and rpn[-2]["scale"] != rpn[-1]["scale"]:
 				error = "Scale of terms doesn't match"
 			rpn[-2]["number"] -= rpn[-1]["number"]
 			rpn.pop()
 		elif token == "*":
 			rpn[-2]["number"] *= rpn[-1]["number"]
-			rpn[-2]["scale"] += rpn[-1]["scale"]
+			if "scale" in rpn[-2] and "scale" in rpn[-1]:
+				rpn[-2]["scale"] += rpn[-1]["scale"]
 			rpn.pop()
 		elif token == "/":
 			rpn[-2]["number"] /= rpn[-1]["number"]
-			rpn[-2]["scale"] -= rpn[-1]["scale"]
+			if "scale" in rpn[-2] and "scale" in rpn[-1]:
+				rpn[-2]["scale"] -= rpn[-1]["scale"]
 			rpn.pop()
 		elif type(token) == type({}):
-			rpn[-1]["scale"] += token["scale"]
+			if "scale" in token:
+				if "scale" in rpn[-1]:
+					rpn[-1]["scale"] += token["scale"]
+				else:
+					rpn[-1]["scale"] = token["scale"]
 	if len(rpn) != 1:
 		error = "Could not evaluate expression"
 	else:

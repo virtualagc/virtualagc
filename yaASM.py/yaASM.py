@@ -28,7 +28,7 @@
 #				the LVDC-206RAM transcription is now available.
 #				Specifically, began adding preprocessor pass.
 #		2019-08-22 RSB	I think the preprocessor and discovery passes
-#				are essentially working, except for autoallocation
+#				are essentially working, except for auto-allocation
 #				of =... constants.
 #
 # The usage is just
@@ -40,6 +40,9 @@ import sys
 # The next line imports expression.py.
 import expression
 
+#----------------------------------------------------------------------------
+#	Definitions of global variables.
+#----------------------------------------------------------------------------
 # Array for keeping track of which memory locations have been used already.
 used = [[[[False for offset in range(256)] for syllable in range(2)] for sector in range(16)] for module in range(8)]
 	
@@ -70,10 +73,271 @@ operators = {
 pseudos = []
 preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC"]
 
+expandedLines = []
+errors = []
+constants = {}
+macros = {}
+inMacro = ""
+inFalseIf = False
+
+inputFile = []
+IM = 0
+IS = 0
+S = 1
+LOC = 0
+DM = 0
+DS = 0
+dS = 0
+DLOC = 0
+useDat = False
+lineNumber = 0
+forms = {}
+synonyms = {}
+nameless = {}
+roofs = {}
+lastORG = False
+inDataMemory = False
+
+symbols = {}
+lastLineNumber = -1
+
+# Array for keeping track of assembled octals
+octals = [[[[None for offset in range(256)] for syllable in range(3)] for sector in range(16)] for module in range(8)]
+
 lines = sys.stdin.readlines()
 for n in range(0,len(lines)):
 	lines[n] = lines[n].rstrip()
 
+#----------------------------------------------------------------------------
+#	Definitions of utility functions
+#----------------------------------------------------------------------------
+def addError(n, msg):
+	global errors
+	if msg not in errors[n]:
+		errors[n].append(msg) 
+
+def incDLOC(increment = 1):
+	global DLOC
+	global errors
+	while increment > 0:
+		increment -= 1
+		if DLOC < 256:
+			used[DM][DS][0][DLOC] = True
+			used[DM][DS][1][DLOC] = True
+		DLOC += 1
+
+# This function checks to see if a block of the desired size is 
+# available at the currently selected DM/DS/DLOC, and if not,
+# increments DLOC until it finds the space.
+def checkDLOC(increment = 1):
+	global DLOC
+	global errors
+	start = DLOC
+	n = start
+	length = 0
+	reuse = False
+	while n < 256 and length < increment:
+		if used[DM][DS][0][n] or used[DM][DS][1][n]:
+			n += 1
+			length = 0
+			reuse = True
+			continue
+		if length == 0:
+			start = n
+		n += 1
+		length += 1
+	if reuse:
+		addError(lineNumber, "Warning: Skipping memory locations already used")
+	if length < increment:
+		addError(lineNumber, "Error: No space of size " + str(increment) + " found in memory bank")
+	DLOC = start
+
+def incLOC():
+	global LOC
+	global DLOC
+	global dS
+	global used
+	if useDat:
+		if DLOC < 256:
+			used[DM][DS][dS][DLOC] = True
+		dS = 1 - dS
+		if dS == 1:
+			DLOC += 1
+	else:
+		if LOC < 256:
+			used[IM][IS][S][LOC] = True
+		LOC += 1
+
+# Find out the last usable instruction location in a sector.
+def getRoof(imod, isec, syl, extra):
+	roofKey = (imod << 4) | isec
+	if syl == 0:
+		roof = 0o377
+	elif roofKey not in roofs:
+		roof = 0o374
+	else:
+		roof = roofs[roofKey]
+	if extra > 0:
+		extra -= 1
+	return roof - extra
+
+# Convert a numeric literal to LVDC binary format.  I accept literals of the forms:
+#	if isOctal == False:
+#		O + octal digits
+#		float + optional Bn
+#		decimal + Bn + optional En
+#	if isOctal == True:
+#		octal digits
+# Returns a string of 9 octal digits, or else "" if error.
+def convertNumericLiteral(n, isOctal = False):
+	if isOctal or n[:1] == "O":
+		if isOctal:
+			constantString = n[0:]
+		else:
+			constantString = n[1:]
+		if len(constantString) > 9 or len(constantString) == 0:
+			return ""
+		for c in constantString:
+			if c not in ["0", "1", "2", "3", "4", "5", "6", "7"]:
+				return ""
+		while len(constantString) < 9:
+			constantString += "0"
+		return constantString
+	# The decimal-number case.
+	# The following manipulations try to produce two strings called
+	# "decimal" (which includes the decimal portion of the number, 
+	# including sign, decimal point, and En exponent) and "scale"
+	# (which is just the Bn portion).  The trick is that the En may
+	# follow the Bn in the original operand.
+	decimal = n[0:]
+	scale = "B26"
+	if "B" in decimal:
+		whereB = decimal.index("B")
+		scale = decimal[whereB:]
+		decimal = decimal[:whereB]
+		if "E" in scale:
+			whereE = scale.index("E")
+			decimal += scale[whereE:]
+			scale = scale[:whereE]
+	try:
+		decimal = float(decimal)
+		scale = int(scale[1:])
+		value = round(decimal * pow(2, 27 - scale - 1))
+		if value < 0:
+			value += 0o1000000000
+		constantString = "%09o" % value
+		return constantString
+	except:
+		return ""	
+
+# Allocate/store a nameless variable for "=..." constant, returning its offset
+# into the sector.
+def allocateNameless(lineNumber, value):
+	global nameless
+	if value in nameless:
+		return nameless[value]
+	for loc in range(DLOC, 256):
+		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
+			used[DM][DS][0][loc] = True
+			used[DM][DS][1][loc] = True
+			nameless[value] = loc
+			return loc
+	addError(lineNumber, "Error: No remaining memory to store nameless constant (" + value + ")")
+	return 0
+
+# This function finds the next location available for storing instructions.
+# if there aren't at least two consecutive locations available at the present
+# location, the notion is that a TRA or HOP is transparently inserted to
+# another location in another syllable, sector, or module. We don't actually
+# insert the TRA or HOP here, if we change the current location, we do return
+# an array holding the previous current location ([IM,IS,S,LOC]) which the 
+# calling routine can use to insert the TRA or HOP.  If there is no available
+# TRA/HOP, then an empty array ([]) is returned instead.
+def checkLOC(extra = 0):
+	global LOC
+	global IM
+	global IS
+	global S
+	global DLOC
+	global errors
+	if useDat:
+		# This is the "USE DAT" case. 
+		if DLOC >= 256:
+		 	addError(lineNumber, "Error: No room left in memory sector")
+		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]):
+			tLoc = DLOC
+			addError(lineNumber, "Warning: Automatically skipping already-used memory location")
+			while tLoc < 256 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc]):
+				tLoc += 1
+			if tLoc >= 256:
+				addError(lineNumber, "Error: No room left in memory sector")
+			else:
+				retVal = [DM, DS, dS, DLOC]
+				DLOC = tLoc
+				return retVal
+		return []
+	else:
+		# This is the "USE INST" case.
+		if not lastORG and (LOC >= 256 or used[IM][IS][S][LOC]):
+			# If the current location is already used up, we're out
+			# of luck since there's no room to even insert a TRA or HOP.
+			addError(lineNumber, "Error: No memory available at current location")
+			return []
+		roof = getRoof(IM, IS, S, extra)
+		if LOC >= roof or used[IM][IS][S][LOC + 1]:
+			# Only one word available here, just insert TRA or HOP.  However, we need
+			# to find address for the TRA or HOP to take us to, always searching
+			# upward.
+			if lastORG:
+				addError(lineNumber, "Warning: Skipping past already-used memory")
+			else:
+				addError(lineNumber, "Warning: Automatic syllable/sector/module switch needed")
+				used[IM][IS][S][LOC] = True
+			tLoc = LOC
+			tSyl = S
+			tSec = IS
+			tMod = IM
+			while True:
+				roof = getRoof(tMod, tSec, tSyl, extra)
+				if tLoc < roof and not used[tMod][tSec][tSyl][tLoc] and not used[tMod][tSec][tSyl][tLoc + 1]:
+					retVal = [IM, IS, S, LOC]
+					IM = tMod
+					IS = tSec
+					S = tSyl
+					LOC = tLoc
+					return retVal
+				tLoc += 1
+				if tLoc >= roof:
+					tLoc = 0
+					tSyl += 1
+					if tSyl >= 2:
+						tSyl = 0
+						tSec += 1
+						if tSec >= 16:
+							tSec = 0
+							tMod += 1
+							if tMod >= 8:
+								addError(lineNumber, "Error: Memory totally exhausted")
+								return []
+		# At this point, we know there are two consecutive words available at the 
+		# current location, so we can just keep the current address.
+		return []
+
+
+# Put the assembled value wherever it's supposed to go in the executable image.
+def storeAssembled(value, hop, data = True):
+	global octals, octalsUsed
+	if data:
+		module = hop["DM"]
+		sector = hop["DS"]
+		location = hop["DLOC"]
+		octals[module][sector][2][location] = value
+	else:
+		module = hop["IM"]
+		sector = hop["IS"]
+		syllable = hop["S"]
+		location = hop["LOC"]
+		octals[module][sector][syllable][location] = (value << 2) & 0o77774
 
 #----------------------------------------------------------------------------
 #	Preprocessor pass
@@ -94,18 +358,6 @@ for n in range(0,len(lines)):
 # expands to line1, line2, and line3.  Then expandedLines[n] will be [line1,line2,line3].
 # The errors[] array is also in a similar 1-to-1 relationship, and errors[n] contains 
 # an array (hopefully usually empty) of error/warning messages for lines[n].
-expandedLines = []
-errors = []
-constants = {}
-macros = {}
-inMacro = ""
-inFalseIf = False
-
-def addError(n, msg):
-	global errors
-	if msg not in errors[n]:
-		errors[n].append(msg) 
-
 for n in range(0, len(lines)):
 	line = lines[n]
 	errors.append([])
@@ -161,7 +413,9 @@ for n in range(0, len(lines)):
 		if fields[1] == "TABLE":
 			fields2 = str(value["number"])
 		else:
-			fields2 = str(value["number"]) + "B" + str(value["scale"])
+			fields2 = str(value["number"])
+			if "scale" in value:
+				fields2 += "B" + str(value["scale"])
 		expandedLines[n] = [line.replace(fields[2], fields2)]
 		fields[2] = fields2
 
@@ -229,7 +483,9 @@ for n in range(0, len(lines)):
 					if error != "":
 						addError(n, "Error: " + error)
 						continue
-					operand = "=" + str(value["number"]) + "B" + str(value["scale"])
+					operand = "=" + str(value["number"])
+					if "scale" in value:
+						operand +=  "B" + str(value["scale"])
 				if m == 0:
 					lhs = fields[0]
 				expandedLines[n].append("%-8s%-8s%s" % (lhs, operator, operand))
@@ -238,7 +494,10 @@ for n in range(0, len(lines)):
 		if error != "":
 			addError(n, "Error: " + error)
 		else:
-			expandedLines[n] = [line.replace(fields[2], "=" + str(value["number"]) + "B" + str(value["scale"]))]
+			replacement = "=" + str(value["number"])
+			if "scale" in value:
+				replacement += "B" + str(value["scale"])
+			expandedLines[n] = [line.replace(fields[2], replacement)]
 	elif inFalseIf:
 		if len(fields) >= 2 and fields[1] == "ENDIF":
 			inFalseIf = False
@@ -262,7 +521,7 @@ for n in range(0, len(lines)):
 			addError(n, "Error: " + error)
 			continue
 		constant = constants[ofields[0]]
-		if constant["number"] != value["number"] or constant["scale"] != value["scale"]:
+		if constant["number"] != value["number"] or ("scale" in value and constant["scale"] != value["scale"]):
 			inFalseIf = True
 
 if False:
@@ -280,7 +539,7 @@ if False:
 	sys.exit(1)
 
 #----------------------------------------------------------------------------
-#           Discovery pass
+#     	Discovery pass (creation of symbol table)
 #----------------------------------------------------------------------------
 # The object of this pass is to discover all addresses for left-hand symbols,
 # or in other words, to assign an address (HOP constant) to each line of code.
@@ -292,229 +551,6 @@ if False:
 # For this pass, we can just loop through all of the lines of code by having an 
 # outer loop on all of the elements of expandedLines[], and an inner loop on all 
 # of the elements of expandedLines[n][].
-
-inputFile = []
-IM = 0
-IS = 0
-S = 1
-LOC = 0
-DM = 0
-DS = 0
-dS = 0
-DLOC = 0
-useDat = False
-lineNumber = 0
-forms = {}
-synonyms = {}
-
-def incDLOC(increment = 1):
-	global DLOC
-	global errors
-	while increment > 0:
-		increment -= 1
-		if DLOC < 256:
-			used[DM][DS][0][DLOC] = True
-			used[DM][DS][1][DLOC] = True
-		DLOC += 1
-
-# This function checks to see if a block of the desired size is 
-# available at the currently selected DM/DS/DLOC, and if not,
-# increments DLOC until it finds the space.
-def checkDLOC(increment = 1):
-	global DLOC
-	global errors
-	start = DLOC
-	n = start
-	length = 0
-	reuse = False
-	while n < 256 and length < increment:
-		if used[DM][DS][0][n] or used[DM][DS][1][n]:
-			n += 1
-			length = 0
-			reuse = True
-			continue
-		if length == 0:
-			start = n
-		n += 1
-		length += 1
-	if reuse:
-		addError(lineNumber, "Warning: Skipping memory locations already used")
-	if length < increment:
-		addError(lineNumber, "Error: No space of size " + str(increment) + " found in memory bank")
-	DLOC = start
-
-def incLOC():
-	global LOC
-	global DLOC
-	global dS
-	global used
-	if useDat:
-		if DLOC < 256:
-			used[DM][DS][dS][DLOC] = True
-		dS = 1 - dS
-		if dS == 1:
-			DLOC += 1
-	else:
-		if LOC < 256:
-			used[IM][IS][S][LOC] = True
-		LOC += 1
-
-# Find out the last usable instruction location in a sector.
-roofs = {}
-def getRoof(imod, isec, syl, extra):
-	roofKey = (imod << 4) | isec
-	if syl == 0:
-		roof = 0o377
-	elif roofKey not in roofs:
-		roof = 0o374
-	else:
-		roof = roofs[roofKey]
-	if extra > 0:
-		extra -= 1
-	return roof - extra
-
-# Convert a numeric literal to LVDC binary format.  I accept literals of the forms:
-#	if isOctal == False:
-#		O + octal digits
-#		float + optional Bn
-#		decimal + Bn + optional En
-#	if isOctal == True:
-#		octal digits
-# Returns a string of 9 octal digits, or else "" if error.
-def convertNumericLiteral(n, isOctal = False):
-	if isOctal or n[:1] == "O":
-		if isOctal:
-			constantString = n[0:]
-		else:
-			constantString = n[1:]
-		if len(constantString) > 9 or len(constantString) == 0:
-			return ""
-		for c in constantString:
-			if c not in ["0", "1", "2", "3", "4", "5", "6", "7"]:
-				return ""
-		while len(constantString) < 9:
-			constantString += "0"
-		return constantString
-	# The decimal-number case.
-	# The following manipulations try to produce two strings called
-	# "decimal" (which includes the decimal portion of the number, 
-	# including sign, decimal point, and En exponent) and "scale"
-	# (which is just the Bn portion).  The trick is that the En may
-	# follow the Bn in the original operand.
-	decimal = n[0:]
-	scale = "B26"
-	if "B" in decimal:
-		whereB = decimal.index("B")
-		scale = decimal[whereB:]
-		decimal = decimal[:whereB]
-		if "E" in scale:
-			whereE = scale.index("E")
-			decimal += scale[whereE:]
-			scale = scale[:whereE]
-	try:
-		decimal = float(decimal)
-		scale = int(scale[1:])
-		value = round(decimal * pow(2, 27 - scale - 1))
-		if value < 0:
-			value += 0o1000000000
-		constantString = "%09o" % value
-		return constantString
-	except:
-		return ""	
-
-# Allocate/store a nameless variable for "=..." constant, returning its offset
-# into the sector.
-nameless = {}
-def allocateNameless(lineNumber, value):
-	global nameless
-	if value in nameless:
-		return nameless[value]
-	for loc in range(DLOC, 256):
-		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
-			used[DM][DS][0][loc] = True
-			used[DM][DS][1][loc] = True
-			nameless[value] = loc
-			return loc
-	addError(lineNumber, "Error: No remaining memory to store nameless constant")
-	return 0
-
-# This function finds the next location available for storing instructions.
-# if there aren't at least two consecutive locations available at the present
-# location, the notion is that a TRA or HOP is transparently inserted to
-# another location in another syllable, sector, or module. We don't actually
-# insert the TRA or HOP here, if we change the current location, we do return
-# an array holding the previous current location ([IM,IS,S,LOC]) which the 
-# calling routine can use to insert the TRA or HOP.  If there is no available
-# TRA/HOP, then an empty array ([]) is returned instead.
-lastORG = False
-def checkLOC(extra = 0):
-	global LOC
-	global IM
-	global IS
-	global S
-	global DLOC
-	global errors
-	if useDat:
-		# This is the "USE DAT" case. 
-		if DLOC >= 256:
-		 	addError(lineNumber, "Error: No room left in memory sector")
-		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]):
-			tLoc = DLOC
-			addError(lineNumber, "Warning: Automatically skipping already-used memory location")
-			while tLoc < 256 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc]):
-				tLoc += 1
-			if tLoc >= 256:
-				addError(lineNumber, "Error: No room left in memory sector")
-			else:
-				retVal = [DM, DS, dS, DLOC]
-				DLOC = tLoc
-				return retVal
-		return []
-	else:
-		# This is the "USE INST" case.
-		if not lastORG and (LOC >= 256 or used[IM][IS][S][LOC]):
-			# If the current location is already used up, we're out
-			# of luck since there's no room to even insert a TRA or HOP.
-			addError(lineNumber, "Error: No memory available at current location")
-			return []
-		roof = getRoof(IM, IS, S, extra)
-		if LOC >= roof or used[IM][IS][S][LOC + 1]:
-			# Only one word available here, just insert TRA or HOP.  However, we need
-			# to find address for the TRA or HOP to take us to, always searching
-			# upward.
-			if lastORG:
-				addError(lineNumber, "Warning: Skipping past already-used memory")
-			else:
-				addError(lineNumber, "Warning: Automatic syllable/sector/module switch needed")
-			tLoc = LOC
-			tSyl = S
-			tSec = IS
-			tMod = IM
-			while True:
-				roof = getRoof(tMod, tSec, tSyl, extra)
-				if tLoc < roof and not used[tMod][tSec][tSyl][tLoc] and not used[tMod][tSec][tSyl][tLoc + 1]:
-					retVal = [IM, IS, S, LOC]
-					IM = tMod
-					IS = tSec
-					S = tSyl
-					LOC = tLoc
-					return retVal
-				tLoc += 1
-				if tLoc >= roof:
-					tLoc = 0
-					tSyl += 1
-					if tSyl >= 2:
-						tSyl = 0
-						tSec += 1
-						if tSec >= 16:
-							tSec = 0
-							tMod += 1
-							if tMod >= 8:
-								addError(lineNumber, "Error: Memory totally exhausted")
-								return []
-		# At this point, we know there are two consecutive words available at the 
-		# current location, so we can just keep the current address.
-		return []
 
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
@@ -557,9 +593,11 @@ for lineNumber in range(0, len(expandedLines)):
 			if fields[1] == "USE":
 				if fields[2] == "INST":
 					useDat = False
+					inDataMemory = False
 				elif fields[2] == "DAT":
 					dS = 1
 					useDat = True
+					inDataMemory = True
 				else:
 					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
@@ -572,6 +610,7 @@ for lineNumber in range(0, len(expandedLines)):
 				forms[fields[0]] = ofields
 			elif fields[1] == "ORGDD":
 				lastORG = True
+				inDataMemory = False
 				if len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORGDD arguments")
 				else:
@@ -586,6 +625,7 @@ for lineNumber in range(0, len(expandedLines)):
 					else:
 						DLOC = 0
 			elif fields[1] == "DOGD":
+				inDataMemory = True
 				if len(ofields) != 3:
 					addError(lineNumber, "Error: Wrong number of DOGD arguments")
 				else:
@@ -688,13 +728,10 @@ for lineNumber in range(0, len(expandedLines)):
 				addError(lineNumber, "Error: Unrecognized operator")
 		elif len(fields) != 0:
 			addError(lineNumber, "Wrong number of fields")
+		inputLine["inDataMemory"] = inDataMemory
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
 
-#----------------------------------------------------------------------------
-#                           Create a symbol table
-#----------------------------------------------------------------------------
 # Create a table to quickly look up addresses of symbols.
-symbols = {}
 for entry in inputFile:
 	inputLine = entry["expandedLine"]
 	lineNumber = entry["lineNumber"]
@@ -706,9 +743,13 @@ for entry in inputFile:
 			symbols[lhs] = inputLine["hop"]
 		else:
 			addError(lineNumber, "Warning: Symbol location unknown")
+if False:
+	for key in sorted(symbols):
+		symbol = symbols[key]
+		print("%-8s  %o %02o %o %03o  %o %02o %03o" % (key, symbol["IM"], symbol["IS"], symbol["S"], symbol["LOC"], symbol["DM"], symbol["DS"], symbol["DLOC"]))
 
 #----------------------------------------------------------------------------
-#                           Complete the assembly
+#   	Assembly pass, printout of assembly listing
 #----------------------------------------------------------------------------
 # At this point we have a dictionary called inputFile in which the entire 
 # input source file has been parsed into a relatively simple structure.  The
@@ -733,26 +774,10 @@ for entry in inputFile:
 #		is a macro invocation and does generate something visually in the assembly
 #		listing, but is not itself assembled.  Only the lines in expandedLines[n][]
 #		actually need to be assembled.
-
-# Put the assembled value wherever it's supposed to go in the executable image.
-def storeAssembled(value, hop, data = True):
-	if data:
-		module = hop["DM"]
-		sector = hop["DS"]
-		location = hop["DLOC"]
-		syllable1 = (value >> 12) & 0o77774
-		syllable0 = value & 0o37776
-		used[module][sector][1][location] = syllable1
-		used[module][sector][0][location] = syllable0
-	else:
-		module = hop["IM"]
-		sector = hop["IS"]
-		syllable = hop["S"]
-		location = hop["LOC"]
-		used[module][sector][syllable][location] = (value << 2) & 0o77774
-
+if False:
+	for key in sorted(nameless):
+		print(key + " " + ("%03o" % nameless[key]))
 print("IM IS S LOC DM DS  A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT")
-lastLineNumber = -1
 for entry in inputFile:
 	lineNumber = entry["lineNumber"]
 	inputLine = entry["expandedLine"]
@@ -763,10 +788,32 @@ for entry in inputFile:
 	operator = ""
 	if "operator" in inputLine:
 		operator = inputLine["operator"]
+	operand = ""
+	operandModifierOperation = ""
+	if "operand" in inputLine:
+		operand = inputLine["operand"]
+		if operand[:1] != "=":
+			where = -1
+			if "+" in operand:
+				where = operand.index("+")
+			elif "-" in operand: 
+				where = operand.index("-")
+			if where > 0:
+				operandModifier = operand[where:]
+				operand = operand[:where]
+				operandModifierOperation = operandModifier[:1]
+				operandModifier = operandModifier[1:]
+				if len(operandModifier) == 0 or not operandModifier.isdigit():
+					addError(lineNumber, "Error: Improper modifer for symbol in operand")
+					operandModiferOperation = ""
+				else:
+					operandModifier = int(operandModifier)
 	
 	# Print the address portion of the line.
 	if "hop" in inputLine:
 		hop = inputLine["hop"]
+		DM = hop["DM"]
+		DS = hop["DS"]
 		if "useDat" in inputLine:
 			line = "      %o %03o  %o %02o  " % (hop["S"], hop["DLOC"], hop["DM"], hop["DS"])
 		elif operator in ["DEC", "OCT", "DFW", "BSS", "HPC", "HPCDD"] or operator in forms:
@@ -774,34 +821,80 @@ for entry in inputFile:
 		elif operator in ["CDS", "CDSD", "SHL", "SHR", "SHF"]:
 			line = " %o %02o %o %03o        " % (hop["IM"], hop["IS"], hop["S"], hop["LOC"])
 		elif operator in ["DEQD", "DEQS"]:
-			line = "                  "
+			line = "                   "
 		else:
 			line = " %o %02o %o %03o  %o %02o  " % (hop["IM"], hop["IS"], hop["S"], 
 								hop["LOC"], hop["DM"], hop["DS"])
 	else:
-		line = "                  "
+		line = "                   "
 	
 	# Assemble.
+	a81 = "   "
+	a9 = " "
+	op = "  "
+	constantString = ""
 	if operator in [ "DEC", "OCT" ]:
 		if operator == "DEC":
 			constantString = convertNumericLiteral(operand)
 		elif operator == "OCT":
 			constantString = convertNumericLiteral(operand, True)
+		else:
+			constantString = ""
 		if constantString == "":
-			addError(lineNumber, "Error: Invalid numeric literal")
+			addError(lineNumber, "Error: Invalid numeric literal as operand")
 		else:
 			assembled = int(constantString, 8)
 			# Put the assembled value wherever it's supposed to 
 			storeAssembled(assembled, inputLine["hop"])
+	elif operator in ["MPY", "SUB", "DIV", "MPH", "AND", "ADD", "XOR", "STO", "RSU", "CLA"]:
+		loc = 0
+		residual = 0
+		assembled = operators[operator]["opcode"]
+		op = "%02o" % operators[operator]["opcode"]
+		if len(operand) == 0:
+			addError(lineNumber, "Error: Operand is empty")
+		elif operand.isdigit():
+			loc = int(operand, 8)
+			if loc < 0 or loc > 0o777:
+				addError(lineNumber, "Error: Operand is out of range")
+				loc = 0
+		elif operand [:1] == "=":
+			constantString = convertNumericLiteral(operand[1:])
+			if constantString == "":
+				addError(lineNumber, "Error: Illegal numeric literal")
+			else:
+				key = "%o_%02o_%s" % (DM, DS, constantString)
+				loc = allocateNameless(lineNumber, key)
+		elif operand not in symbols:
+			addError(lineNumber, "Error: LHS (" + operand + ") from operand not found")
+		else: 
+			hop = symbols[operand]
+			if hop["DM"] != DM or (hop["DS"] != DS and hop["DS"] != 0o17):
+				addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
+			else:
+				loc = hop["DLOC"]
+				if operandModifierOperation == "+":
+					loc += operandModifier
+				elif operandModifierOperation == "-":
+					loc -= operandModifier
+				if hop["DS"] == 0o17:
+					residual = 1
+		if loc > 0o377:
+			loc = loc & 0o377
+			residual = 1
+		a81 = "%03o" % loc
+		a9 = "%o" % residual
+		assembled = (assembled | (loc << 5) | (residual << 4)) << 3
+		storeAssembled(assembled, hop, False)
 	
 	if lineNumber != lastLineNumber:
 		lastLineNumber = lineNumber
 		for error in errorList:
 			print(error)
-	print(line + ("%9s" % constantString) + "    " + inputLine["raw"])
+	print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString) + " \t" + inputLine["raw"])
 
 #----------------------------------------------------------------------------
-#                           Print a symbol table
+#   	Print a symbol table
 #----------------------------------------------------------------------------
 print("\n\nSymbol Table:")
 for key in sorted(symbols):
@@ -813,3 +906,52 @@ for key in sorted(nameless):
 	fields = key.split("_")
 	print(fields[0] + " " + fields[1] + "   " + ("%03o" % loc) + "  " + fields[2])
 
+#----------------------------------------------------------------------------
+#   	Print octal listing
+#----------------------------------------------------------------------------
+formatLine = "%03o"
+for n in range(8):
+	formatLine += "   %s D"
+heading = "     "
+for n in range(8):
+	heading += "      %o         " % n
+for module in range(8):
+	for sector in range(16):
+		sectorUsed = False
+		for syllable in range(2):
+			if sectorUsed:
+				break
+			for loc in range(256):
+				if used[module][sector][syllable][loc]:
+					sectorUsed = True
+					break
+		if not sectorUsed:
+			continue
+		print("")
+		print("")
+		print("%56sMODULE %o      SECTOR %02o" % ("", module, sector))
+		print("")
+		print("")
+		print(heading)
+		print("")
+		for row in range(0, 256, 8):
+			rowList = [row]
+			for loc in range(row, row + 8):
+				if not (used[module][sector][0][loc] or used[module][sector][1][loc]):
+					rowList.append("           ")
+				elif octals[module][sector][2][loc] != None:
+					rowList.append(" %09o " % octals[module][sector][2][loc])
+				else:
+					col = ""
+					for syl in [1, 0]:
+						if syl == 0:
+							col += " "
+						if not used[module][sector][syl][loc]:
+							col += "     "
+						elif octals[module][sector][syl][loc] == None:
+							col += "-----"
+						else:
+							col += "%05o" % octals[module][sector][syl][loc]
+					rowList.append(col)
+			print(formatLine % tuple(rowList))
+	 
