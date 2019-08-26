@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Copyright 2019 Ronald S. Burkey <info@sandroid.org>
 #
-# This file is part of yaAGC.
+# This file is part of yaAGC. 
 #
 # yaAGC is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ synonyms = {}
 nameless = {}
 roofs = {}
 lastORG = False
-inDataMemory = False
+inDataMemory = True
 
 symbols = {}
 lastLineNumber = -1
@@ -231,28 +231,39 @@ def convertNumericLiteral(n, isOctal = False):
 		return ""	
 
 # Allocate/store a nameless variable for "=..." constant, returning its offset
-# into the sector.
-def allocateNameless(lineNumber, value):
+# into the sector, and a residual (0 if in sector specified or 1 if in residual
+# sector).
+def allocateNameless(lineNumber, constantString, useResidual = True):
 	global nameless
+	value = "%o_%02o_%s" % (DM, DS, constantString)
 	if value in nameless:
-		return nameless[value]
+		return nameless[value],0
+	if useResidual and DS != 0o17:
+		valueR = "%o_17_%s" % (DM, constantString)
+		if valueR in nameless:
+			return nameless[valueR],1
 	for loc in range(0, 256):
 		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
 			used[DM][DS][0][loc] = True
 			used[DM][DS][1][loc] = True
 			nameless[value] = loc
-			return loc
+			return loc,0
+	if useResidual and DS != 0o17:
+		for loc in range(0, 256):
+			if not used[DM][0o17][0][loc] and not used[DM][0o17][1][loc]:
+				used[DM][0o17][0][loc] = True
+				used[DM][0o17][1][loc] = True
+				nameless[valueR] = loc
+				return loc,1
 	addError(lineNumber, "Error: No remaining memory to store nameless constant (" + value + ")")
-	return 0
+	return 0,0
 
 # This function finds the next location available for storing instructions.
-# if there aren't at least two consecutive locations available at the present
-# location, the notion is that a TRA or HOP is transparently inserted to
-# another location in another syllable, sector, or module. We don't actually
-# insert the TRA or HOP here, if we change the current location, we do return
-# an array holding the previous current location ([IM,IS,S,LOC]) which the 
-# calling routine can use to insert the TRA or HOP.  If there is no available
-# TRA/HOP, then an empty array ([]) is returned instead.
+# If we determine that an automatic switch to a different memory sector is
+# needed, we return an array [oldIM,oldIS,oldS,oldLOC,newIM,newIS,newS,newLOC]
+# containing enough info to create a TRA or HOP instruction to the starting
+# location in the new sector. Hopefully the calling routine can figure
+# out something sensible to do with the returned array.
 def checkLOC(extra = 0):
 	global LOC
 	global IM
@@ -272,12 +283,12 @@ def checkLOC(extra = 0):
 			if tLoc >= 256:
 				addError(lineNumber, "Error: No room left in memory sector")
 			else:
-				retVal = [DM, DS, dS, DLOC]
 				DLOC = tLoc
-				return retVal
+				return []
 		return []
 	else:
 		# This is the "USE INST" case.
+		autoSwitch = False
 		if not lastORG and (LOC >= 256 or used[IM][IS][S][LOC]):
 			# If the current location is already used up, we're out
 			# of luck since there's no room to even insert a TRA or HOP.
@@ -293,6 +304,7 @@ def checkLOC(extra = 0):
 			else:
 				addError(lineNumber, "Info: Automatic syllable/sector/module switch needed")
 				used[IM][IS][S][LOC] = True
+				autoSwitch = True
 			tLoc = LOC
 			tSyl = S
 			tSec = IS
@@ -300,7 +312,10 @@ def checkLOC(extra = 0):
 			while True:
 				roof = getRoof(tMod, tSec, tSyl, extra)
 				if tLoc < roof and not used[tMod][tSec][tSyl][tLoc] and not used[tMod][tSec][tSyl][tLoc + 1]:
-					retVal = [IM, IS, S, LOC]
+					if autoSwitch:
+						retVal = [IM, IS, S, LOC, tMod, tSec, tSyl, tLoc]
+					else:
+						retVal = []
 					IM = tMod
 					IS = tSec
 					S = tSyl
@@ -568,6 +583,7 @@ if False:
 
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
+		inDataMemory = True
 		inputLine = { "raw": line }
 		    
 		# Split the line into fields.
@@ -586,21 +602,21 @@ for lineNumber in range(0, len(expandedLines)):
 		
 		if len(fields) >= 2 and fields[1] == "VEC":
 			while DLOC < 256:
-				while (DLOC & 3) != 0:
-					used[DM][DS][0][DLOC] = True
-					used[DM][DS][1][DLOC] = True
-					DLOC += 1
-				#DLOC = (DLOC + 3) & ~3
+				#while (DLOC & 3) != 0:
+				#	used[DM][DS][0][DLOC] = True
+				#	used[DM][DS][1][DLOC] = True
+				#	DLOC += 1
+				DLOC = (DLOC + 3) & ~3
 				checkDLOC()
 				if (DLOC & 3) == 0:
 					break
 		elif len(fields) >= 2 and fields[1] == "MAT":
 			while DLOC < 256:
-				while (DLOC & 15) != 0:
-					used[DM][DS][0][DLOC] = True
-					used[DM][DS][1][DLOC] = True
-					DLOC += 1
-				#DLOC = (DLOC + 15) & ~15
+				#while (DLOC & 15) != 0:
+				#	used[DM][DS][0][DLOC] = True
+				#	used[DM][DS][1][DLOC] = True
+				#	DLOC += 1
+				DLOC = (DLOC + 15) & ~15
 				checkDLOC()
 				if (DLOC & 15) == 0:
 					break
@@ -615,11 +631,9 @@ for lineNumber in range(0, len(expandedLines)):
 			if fields[1] == "USE":
 				if fields[2] == "INST":
 					useDat = False
-					inDataMemory = False
 				elif fields[2] == "DAT":
 					dS = 1
 					useDat = True
-					inDataMemory = True
 				else:
 					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
@@ -632,7 +646,6 @@ for lineNumber in range(0, len(expandedLines)):
 				forms[fields[0]] = ofields
 			elif fields[1] == "ORGDD":
 				lastORG = True
-				inDataMemory = False
 				if len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORGDD arguments")
 				else:
@@ -647,7 +660,6 @@ for lineNumber in range(0, len(expandedLines)):
 					else:
 						DLOC = 0
 			elif fields[1] == "DOGD":
-				inDataMemory = True
 				if len(ofields) != 3:
 					addError(lineNumber, "Error: Wrong number of DOGD arguments")
 				else:
@@ -685,10 +697,13 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				incDLOC()	
 			elif fields[1] in operators:
+				inDataMemory = False
 				extra = 0
 				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
 					extra = int(fields[2][2:])
 				oldLocation = checkLOC(extra)
+				if oldLocation != []:
+					inputLine["switchSectorAt"] = oldLocation
 				lastORG = False
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
@@ -706,7 +721,9 @@ for lineNumber in range(0, len(expandedLines)):
 					else:
 						count = (count + 1) // 2
 					while count > 0:
-						checkLOC()
+						oldLocation = checkLOC()
+						if oldLocation != []:
+							inputLine["switchSectorAt"] = oldLocation
 						incLOC()
 						count -= 1
 				else:
@@ -776,9 +793,9 @@ if False:
 # allocation task the "discovery" pass was NOT able to do was to do automatic
 # assignments of nameless variables or targets of code jumps for things like
 #   1.  Operands of the form "=something"
-#   2.  Operands of HOP*.
+#   2.  Operands of HOP*, TRA*.
 #   3.  Targets of HOPs transparently added for automatic sector changes.
-# Note that the discovery pass should have already taken care of TRA*, TMI*,
+# Note that the discovery pass should have already taken care of TMI*
 # and TNZ*, even though unable to take care of HOP*.  Now, though, we should
 # have all of the info need to allocate those during assembly pass,
 # and should therefore be able to actually complete the entire assembly and 
@@ -812,6 +829,8 @@ for entry in inputFile:
 	errorList = errors[lineNumber]
 	originalLine = lines[lineNumber]
 	constantString = ""
+	if "switchSectorAt" in inputLine:
+		print("SWITCH: " + str(inputLine["switchSectorAt"]))
 	
 	operator = ""
 	if "operator" in inputLine:
@@ -866,6 +885,7 @@ for entry in inputFile:
 	a9 = " "
 	op = "  "
 	constantString = ""
+	inDataMemory = True
 	if operator in [ "DEC", "OCT" ]:
 		if operator == "DEC":
 			constantString = convertNumericLiteral(operand)
@@ -879,14 +899,47 @@ for entry in inputFile:
 			assembled = int(constantString, 8)
 			# Put the assembled value wherever it's supposed to 
 			storeAssembled(assembled, inputLine["hop"])
-	elif operator in ["HOP", "MPY", "SUB", "DIV", "MPH", "AND", "ADD", "XOR", "STO", "RSU", "CLA"]:
+	elif operator in ["HOP", "MPY", "SUB", "DIV", "MPH", "AND", "ADD", "TRA", "XOR", "STO", "RSU", "CLA"]:
+		inDataMemory = False
 		loc = 0
 		residual = 0
 		assembled = operators[operator]["opcode"]
 		op = "%02o" % assembled
 		if len(operand) == 0:
 			addError(lineNumber, "Error: Operand is empty")
+		elif operator == "TRA":
+			if operand == "*":
+				loc = LOC
+				residual = S
+			elif operand[:2] in ["*+", "*-"]:
+				if operand[:2] == "*+":
+					loc = LOC + int(operand[2:])
+				elif operand[:2] == "*-":
+					loc = LOC - int(operand[2:])
+				if loc < 0 or loc > 0o377:
+					addError(lineNumber, "Error: Target location out of range")
+					loc = 0 
+				residual = S
+			else:
+				if operand not in symbols:
+					addError(lineNumber, "Error: Target location of TRA not found")
+				elif symbols[operand]["IM"] == IM and symbols[operand]["IS"] == IS:
+					loc = symbols[operand]["LOC"]
+					residual = symbols[operand]["S"]
+				else:
+					# The target location exists, but is not in this IM/IS.
+					# We must therefore substituted a HOP instruction instead,
+					# and allocate a HOP constant nameless variable.
+					hopConstant = formConstantHOP(symbols[operand])
+					constantString = "%09o" % hopConstant
+					#print("C1: allocateNameless " + constantString + " " + operand)
+					loc,residual = allocateNameless(lineNumber, constantString, False)
+					#print("C2: %o,%20o,%03o %o" % (DM, DS, loc, residual))
+					assembled = operators["HOP"]["opcode"]
+					op = "%02o" % assembled
+					addError(lineNumber, "Info: Converting TRA to HOP at %o,%02o,%03o" % (DM, DS, loc))	
 		elif operand.isdigit():
+			print(operand)
 			loc = int(operand, 8)
 			if loc < 0 or loc > 0o777:
 				addError(lineNumber, "Error: Operand is out of range")
@@ -920,9 +973,9 @@ for entry in inputFile:
 					else:
 						hopConstant = formConstantHOP(hop)
 						constantString = "%09o" % hopConstant
-						key = "%o_%02o_%s" % (DM, DS, constantString)
-						loc = allocateNameless(lineNumber, key)
-						residual = 0
+						#print("A1: allocateNameless " + constantString + " " + operand)
+						loc,residual = allocateNameless(lineNumber, constantString)
+						#print("A2: %o,%20o,%03o %o" % (DM, DS, loc, residual))
 						ds = DS
 						if loc > 0o377 or DS == 0o17:
 							loc = loc & 0o377
@@ -937,8 +990,9 @@ for entry in inputFile:
 					addError(lineNumber, "Error: Illegal numeric literal")
 					loc = 0
 				else:
-					key = "%o_%02o_%s" % (DM, DS, constantString)
-					loc = allocateNameless(lineNumber, key)
+					#print("B1: allocateNameless " + constantString + " " + operand)
+					loc,residual = allocateNameless(lineNumber, constantString)
+					#print("B2: %o,%20o,%03o %o" % (DM, DS, loc, residual))
 					ds = DS
 					if loc > 0o377 or DS == 0o17:
 						loc = loc & 0o377
