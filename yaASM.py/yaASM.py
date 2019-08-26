@@ -236,7 +236,7 @@ def allocateNameless(lineNumber, value):
 	global nameless
 	if value in nameless:
 		return nameless[value]
-	for loc in range(DLOC, 256):
+	for loc in range(0, 256):
 		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
 			used[DM][DS][0][loc] = True
 			used[DM][DS][1][loc] = True
@@ -291,7 +291,7 @@ def checkLOC(extra = 0):
 			if lastORG:
 				addError(lineNumber, "Warning: Skipping past already-used memory")
 			else:
-				addError(lineNumber, "Warning: Automatic syllable/sector/module switch needed")
+				addError(lineNumber, "Info: Automatic syllable/sector/module switch needed")
 				used[IM][IS][S][LOC] = True
 			tLoc = LOC
 			tSyl = S
@@ -338,6 +338,20 @@ def storeAssembled(value, hop, data = True):
 		syllable = hop["S"]
 		location = hop["LOC"]
 		octals[module][sector][syllable][location] = (value << 2) & 0o77774
+
+# Form a HOP constant from a hop dictionary.
+def formConstantHOP(hop):
+	hopConstant = 0
+	hopConstant |= (hop["IM"] & 1) << 25
+	hopConstant |= 1 << 24
+	hopConstant |= hop["DS"] << 20
+	hopConstant |= hop["DM"] << 17
+	hopConstant |= 1 << 16
+	hopConstant |= hop["LOC"] << 7
+	hopConstant |= hop["S"] << 6
+	hopConstant |= hop["IS"] << 2
+	hopConstant |= (hop["IM"] & 6) >> 1
+	return hopConstant << 1
 
 #----------------------------------------------------------------------------
 #	Preprocessor pass
@@ -572,13 +586,21 @@ for lineNumber in range(0, len(expandedLines)):
 		
 		if len(fields) >= 2 and fields[1] == "VEC":
 			while DLOC < 256:
-				DLOC = (DLOC + 3) & ~3
+				while (DLOC & 3) != 0:
+					used[DM][DS][0][DLOC] = True
+					used[DM][DS][1][DLOC] = True
+					DLOC += 1
+				#DLOC = (DLOC + 3) & ~3
 				checkDLOC()
 				if (DLOC & 3) == 0:
 					break
 		elif len(fields) >= 2 and fields[1] == "MAT":
 			while DLOC < 256:
-				DLOC = (DLOC + 15) & ~15
+				while (DLOC & 15) != 0:
+					used[DM][DS][0][DLOC] = True
+					used[DM][DS][1][DLOC] = True
+					DLOC += 1
+				#DLOC = (DLOC + 15) & ~15
 				checkDLOC()
 				if (DLOC & 15) == 0:
 					break
@@ -664,12 +686,6 @@ for lineNumber in range(0, len(expandedLines)):
 				incDLOC()	
 			elif fields[1] in operators:
 				extra = 0
-				if fields[2][:1] == "=":
-					constantString = convertNumericLiteral(fields[2][1:])
-					if constantString == "":
-						addError(lineNumber, "Error: Illegal numeric literal")
-					else:
-						allocateNameless(lineNumber, "%o_%02o_%s" % (DM, DS, constantString))
 				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
 					extra = int(fields[2][2:])
 				oldLocation = checkLOC(extra)
@@ -741,24 +757,36 @@ for entry in inputFile:
 			if lhs in symbols:
 				addError(lineNumber, "Error: Symbol already defined")
 			symbols[lhs] = inputLine["hop"]
+			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
 		else:
 			addError(lineNumber, "Warning: Symbol location unknown")
 if False:
 	for key in sorted(symbols):
 		symbol = symbols[key]
-		print("%-8s  %o %02o %o %03o  %o %02o %03o" % (key, symbol["IM"], symbol["IS"], symbol["S"], symbol["LOC"], symbol["DM"], symbol["DS"], symbol["DLOC"]))
+		print("%-8s  %o %02o %o %03o  %o %02o %03o" % (key, symbol["IM"], 
+                symbol["IS"], symbol["S"], symbol["LOC"], symbol["DM"], 
+                symbol["DS"], symbol["DLOC"]))
 
 #----------------------------------------------------------------------------
 #   	Assembly pass, printout of assembly listing
 #----------------------------------------------------------------------------
 # At this point we have a dictionary called inputFile in which the entire 
 # input source file has been parsed into a relatively simple structure.  The
-# addresses of all symbols (constants, variables, code) are known.  We should
-# therefore be able to actually complete the entire assembly and print it out.
+# addresses of all symbols (constants, variables, code) are known.  One memory
+# allocation task the "discovery" pass was NOT able to do was to do automatic
+# assignments of nameless variables or targets of code jumps for things like
+#   1.  Operands of the form "=something"
+#   2.  Operands of HOP*.
+#   3.  Targets of HOPs transparently added for automatic sector changes.
+# Note that the discovery pass should have already taken care of TRA*, TMI*,
+# and TNZ*, even though unable to take care of HOP*.  Now, though, we should
+# have all of the info need to allocate those during assembly pass,
+# and should therefore be able to actually complete the entire assembly and 
+# print it out in a single pass.
 
 # For the visual purposes of the assembly listing, it's a bit tricky to try and 
-# describe succinctly where the data is coming from, because there are several cases 
-# depending on what the preprocessor had done.
+# describe succinctly where the data is coming from, because there are several 
+# cases depending on what the preprocessor had done.
 #	Case 1: Conditionally-compiled code that is being discarded.  In this case,
 #		expandedLines[n][] will be empty because the code is being discarded,
 #		so there's actually nothing much to process.
@@ -814,6 +842,11 @@ for entry in inputFile:
 		hop = inputLine["hop"]
 		DM = hop["DM"]
 		DS = hop["DS"]
+		DLOC = hop["DLOC"]
+		IM = hop["IM"]
+		IS = hop["IS"]
+		S = hop["S"]
+		LOC = hop["LOC"]
 		if "useDat" in inputLine:
 			line = "      %o %03o  %o %02o  " % (hop["S"], hop["DLOC"], hop["DM"], hop["DS"])
 		elif operator in ["DEC", "OCT", "DFW", "BSS", "HPC", "HPCDD"] or operator in forms:
@@ -846,11 +879,11 @@ for entry in inputFile:
 			assembled = int(constantString, 8)
 			# Put the assembled value wherever it's supposed to 
 			storeAssembled(assembled, inputLine["hop"])
-	elif operator in ["MPY", "SUB", "DIV", "MPH", "AND", "ADD", "XOR", "STO", "RSU", "CLA"]:
+	elif operator in ["HOP", "MPY", "SUB", "DIV", "MPH", "AND", "ADD", "XOR", "STO", "RSU", "CLA"]:
 		loc = 0
 		residual = 0
 		assembled = operators[operator]["opcode"]
-		op = "%02o" % operators[operator]["opcode"]
+		op = "%02o" % assembled
 		if len(operand) == 0:
 			addError(lineNumber, "Error: Operand is empty")
 		elif operand.isdigit():
@@ -858,27 +891,74 @@ for entry in inputFile:
 			if loc < 0 or loc > 0o777:
 				addError(lineNumber, "Error: Operand is out of range")
 				loc = 0
-		elif operand [:1] == "=":
-			constantString = convertNumericLiteral(operand[1:])
-			if constantString == "":
-				addError(lineNumber, "Error: Illegal numeric literal")
+		elif operator == "HOP":
+			if operand not in symbols:
+				addError(lineNumber, "Error: Target location of HOP not found")
 			else:
-				key = "%o_%02o_%s" % (DM, DS, constantString)
-				loc = allocateNameless(lineNumber, key)
-		elif operand not in symbols:
-			addError(lineNumber, "Error: LHS (" + operand + ") from operand not found")
-		else: 
-			hop = symbols[operand]
-			if hop["DM"] != DM or (hop["DS"] != DS and hop["DS"] != 0o17):
-				addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
-			else:
-				loc = hop["DLOC"]
-				if operandModifierOperation == "+":
-					loc += operandModifier
-				elif operandModifierOperation == "-":
-					loc -= operandModifier
-				if hop["DS"] == 0o17:
-					residual = 1
+				hop = symbols[operand]
+				if operandModifierOperation != "":
+					addError(lineNumber, "Error: Cannot apply + or - in HOP operand")
+				elif "inDataMemory" in hop and hop["inDataMemory"]:
+					# The operand is a variable, as it ought to be.
+					if hop["DM"] != DM or (hop["DS"] != DS and hop["DS"] != 0o17):
+						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
+					else:
+						loc = hop["DLOC"]
+						if hop["DS"] == 0o17:
+							residual = 1
+				else:
+					# The operand is an LHS in instruction space.  If that's within the 
+					# current instruction sector, we can convert the HOP to a TRA and
+					# be done with it.  If not, then we need to allocate a nameless
+					# variable to hold the HOP constant.
+					if hop["IM"] == IM and hop["IS"] == IS:
+						loc = hop["LOC"]
+						residual = hop["S"]
+						assembled = operators["TRA"]["opcode"]
+						op = "%02o" % assembled
+						addError(lineNumber, "Info: Converting HOP to TRA")
+					else:
+						hopConstant = formConstantHOP(hop)
+						constantString = "%09o" % hopConstant
+						key = "%o_%02o_%s" % (DM, DS, constantString)
+						loc = allocateNameless(lineNumber, key)
+						residual = 0
+						ds = DS
+						if loc > 0o377 or DS == 0o17:
+							loc = loc & 0o377
+							residual = 1
+							ds = 0o17
+						addError(lineNumber, "Info: Allocating variable for HOP at %o,%02o,%03o" % (DM, ds, loc))
+		else:
+			# Instruction is a "regular" one ... not a HOP.
+			if operand [:1] == "=":
+				constantString = convertNumericLiteral(operand[1:])
+				if constantString == "":
+					addError(lineNumber, "Error: Illegal numeric literal")
+					loc = 0
+				else:
+					key = "%o_%02o_%s" % (DM, DS, constantString)
+					loc = allocateNameless(lineNumber, key)
+					ds = DS
+					if loc > 0o377 or DS == 0o17:
+						loc = loc & 0o377
+						residual = 1
+						ds = 0o17
+					addError(lineNumber, "Info: Allocating nameless variable for =constant at %o,%02o,%03o" % (DM, ds, loc))
+			elif operand not in symbols:
+				addError(lineNumber, "Error: LHS (" + operand + ") from operand not found")
+			else: 
+				hop = symbols[operand]
+				if hop["DM"] != DM or (hop["DS"] != DS and hop["DS"] != 0o17):
+					addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
+				else:
+					loc = hop["DLOC"]
+					if operandModifierOperation == "+":
+						loc += operandModifier
+					elif operandModifierOperation == "-":
+						loc -= operandModifier
+					if hop["DS"] == 0o17:
+						residual = 1
 		if loc > 0o377:
 			loc = loc & 0o377
 			residual = 1
