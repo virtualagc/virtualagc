@@ -228,6 +228,7 @@ def convertNumericLiteral(n, isOctal = False):
 		constantString = "%09o" % value
 		return constantString
 	except:
+		print(n)
 		return ""	
 
 # Allocate/store a nameless variable for "=..." constant, returning its offset
@@ -373,6 +374,7 @@ def formConstantHOP(hop):
 # The idea for this pass is to process:
 #	EQU
 #	Expansion of CALL
+#	Expansion of SHL, SHR
 #	Macro definitions
 #	Usage of EQU-defined constants in assembly-language operands
 #	Expansion of macros
@@ -381,7 +383,7 @@ def formConstantHOP(hop):
 # and the entries will correspond 1-to-1 to it, but the entries will be arrays of
 # replacement lines.  In other words, suppose line=lines[n].  If the preprocessor
 # doesn't need to change the line, then expandedLines[n] will be [line].  Suppose
-# the proprocessor needs to change line to (say) newLine.  Then expandedLines[n]
+# the preprocessor needs to change line to (say) newLine.  Then expandedLines[n]
 # will be [newLine].  Or suppose line contains a macro that the preprocessor 
 # expands to line1, line2, and line3.  Then expandedLines[n] will be [line1,line2,line3].
 # The errors[] array is also in a similar 1-to-1 relationship, and errors[n] contains 
@@ -459,6 +461,17 @@ for n in range(0, len(lines)):
 		else:
 			macros[inMacro]["lines"].append(fields)
 		expandedLines[-1] = []
+	elif len(fields) >= 3 and fields[0] != "" and fields[1] in ["DEQD", "DEQS"]:
+		constants[fields[0]] = [fields[1]] + fields[2].split(",")
+	elif len(fields) >= 3 and fields[1] == "CDS" and fields[2] in constants and type(constants[fields[2]]) == type([]) and len(constants[fields[2]]) >= 3:
+		constant = constants[fields[2]]
+		op = fields[1]
+		if constant[0] == "DEQS":
+			op = "CDSS"
+		elif constant[0] == "DEQD":
+			op = "CDSD"
+		line = "%-8s%-8s%s" % (fields[0], op, "%s,%s" % (constant[1], constant[2]))
+		expandedLines[n] = [line]
 	elif len(fields) >= 3 and fields[0] != "" and fields[1] == "EQU":
 		value,error = expression.yaEvaluate(fields[2], constants)
 		if error != "":
@@ -477,6 +490,21 @@ for n in range(0, len(lines)):
 			line3 = "%-8s%-8s%s" % ("", "CLA", ofields[1])
 			line4 = "%-8s%-8s%s" % ("", "HOP", ofields[0])
 			expandedLines[n] = [line1, line2, line3, line4]
+	elif len(fields) >= 3 and fields[1] in ["SHL", "SHR"] and fields[2].isdigit():
+		count = int(fields[2])
+		expandedLines[n] = []
+		thisLabel = fields[0]
+		operator = fields[1]
+		if count == 0:
+			expandedLines[n].append("%-8s%-8s0" % (thisLabel, operator))
+		else:
+			while count > 0:
+				thisCount = 2
+				if thisCount > count:
+					thisCount = 1
+				expandedLines[n].append("%-8s%-8s%d" % (thisLabel, operator, thisCount))
+				thisLabel = ""
+				count -= thisCount
 	elif len(fields) >= 2 and fields[0] != "" and fields[1] == "MACRO":
 		inMacro = fields[0]
 		if len(fields) == 2:
@@ -660,17 +688,11 @@ for lineNumber in range(0, len(expandedLines)):
 						DLOC = int(ofields[2], 8)
 					else:
 						DLOC = 0
-			elif fields[1] in ["DEQS", "DEQD"]:
-				if len(ofields) != 3:
-					addError(lineNumber, "Error: Wrong number of DEQS or DEQD arguments")
-				else:
-					if fields[0] != "":
-						inputLine["lhs"] = fields[0]
-					inputLine["operator"] = fields[1]
-					inputLine["operand"] = fields[2]
-					inputLine["hop"] = {	"IM":IM, "IS":IS, "S":S, 
-								"LOC":LOC, "DM":int(ofields[0], 8), 
-								"DS":int(ofields[1], 8), "DLOC":int(ofields[2], 8)}
+			elif fields[1] in ["DEQS", "DEQD"] and fields[0] in constants:
+				symbols[fields[0]] = {	"IM":IM, "IS":IS, "S":S, 
+								"LOC":LOC, "DM":DM, 
+								"DS":DS, "DLOC":DLOC,
+								"inDataMemory":True }
 			elif fields[1] == "BSS":
 				checkDLOC(int(fields[2]))
 				if fields[0] != "":
@@ -705,37 +727,34 @@ for lineNumber in range(0, len(expandedLines)):
 					inputLine["useDat"] = True
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-				if fields[1] in ["SHL", "SHR"]:
-					count = int(fields[2])
-					if count == 0:
-						count = 1
-					else:
-						count = (count + 1) // 2
-					while count > 0:
-						oldLocation = checkLOC()
-						if oldLocation != []:
-							inputLine["switchSectorAt"] = oldLocation
-						incLOC()
-						count -= 1
-				else:
-					incLOC()
+				incLOC()
 				if fields[1] in ["CDS", "CDSD", "CDSS"]:
+					# I should be doing something here with the simplex vs duplex info, but I don't
+					# know what, so I'll just ignore it for now.
 					if len(ofields) == 1:
 						if not useDat:
+							found = False
+							# Operand symbol could have been defined by a DEQS or DEQD
+							#if fields[2] in constants:
+							#	constant = constants[fields[2]]
+							#	if type(constant) == type([]) and len(constant) >= 3:
+							#		DM = int(constant[1], 8)
+							#		DS = int(constant[2], 8)
+							#		found = True
 							# We assume this is the name of a variable, and we have to
 							# find it to determine its DM/DS.  I presume it could be
 							# defined later, and so we don't find it ... let's hope not!
-							found = False
-							for testEntry in inputFile:
-								testLine = testEntry["expandedLine"]
-								if "lhs" in testLine and testLine["lhs"] == fields[2] and "hop" in testLine:
-									if fields[1] == "CDSD":
-										DM = testLine["hop"]["DM"]
-										DS = testLine["hop"]["DS"]
-									elif fields[1] == "CDS":
-										DM = testLine["hop"]["IM"]
-										DS = testLine["hop"]["IS"]
-									found = True
+							if not found:
+								for testEntry in inputFile:
+									testLine = testEntry["expandedLine"]
+									if "lhs" in testLine and testLine["lhs"] == fields[2] and "hop" in testLine:
+										if fields[1] == "CDSD":
+											DM = testLine["hop"]["DM"]
+											DS = testLine["hop"]["DS"]
+										elif fields[1] == "CDS":
+											DM = testLine["hop"]["IM"]
+											DS = testLine["hop"]["IS"]
+										found = True
 									break
 							if not found:
 								addError(lineNumber, "Warning: Symbol not found")
@@ -768,6 +787,23 @@ for entry in inputFile:
 			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
 		else:
 			addError(lineNumber, "Warning: Symbol location unknown")
+
+# A mini-pass to set up SYN symbols.
+for n in range(0, len(lines)):
+	line = lines[n]
+	# Split the line into fields.
+	if line[:1] in [" ", "\t"] and not line.isspace():
+		line = "@" + line
+	fields = line.split()
+	if len(fields) > 0 and fields[0] == "@":
+		fields[0] = ""
+		line = line[1:]
+	if len(fields) >= 3 and fields[0] != "" and fields[1] == "SYN":
+		if fields[2] not in symbols:
+			addError(n, "Warning: Synonym not found")
+		else:
+			symbols[fields[0]] = symbols[fields[2]]
+
 if False:
 	for key in sorted(symbols):
 		symbol = symbols[key]
@@ -820,7 +856,6 @@ for entry in inputFile:
 	errorList = errors[lineNumber]
 	originalLine = lines[lineNumber]
 	constantString = ""
-	repeat = 0
 	
 	# If there's an automatic sector switch here, we have to take care of it prior to
 	# doing anything with the instruction that's actually associated with this line.
@@ -864,7 +899,7 @@ for entry in inputFile:
 	operandModifier = 0
 	if "operand" in inputLine:
 		operand = inputLine["operand"]
-		if operand[:1] != "=":
+		if operand[:1].isalpha() or operand[:1] == "*":
 			where = -1
 			if "+" in operand:
 				where = operand.index("+")
@@ -927,13 +962,27 @@ for entry in inputFile:
 			else:
 				symbol1 = symbols[ofields[0]]
 				symbol2 = symbols[ofields[1]]
-				symbol1["DM"] = symbol2["DM"]
-				symbol1["DS"] = symbol2["DS"]
-				hopConstant = formConstantHOP(symbol1)
+				hopConstant = formConstantHOP({
+					"IM": symbol1["IM"],
+					"IS": symbol1["IS"],
+					"S": symbol1["S"],
+					"LOC": symbol1["LOC"],
+					"DM": symbol2["DM"],
+					"DS": symbol2["DS"]
+				})
 				constantString = "%09o" % hopConstant
 		elif operator == "HPCDD":
 			ofields = operand.split(",")
-			if len(ofields) != 6 or not ofields[0].isdigit() or not ofields[1].isdigit() \
+			if len(ofields) == 2 and ofields[0] in symbols and ofields[1] in symbols:
+				symbol1 = symbols[ofields[0]]
+				symbol2 = symbols[ofields[1]]
+				im = symbol1["IM"]
+				isc = symbol1["IS"]
+				s = symbol1["S"]
+				loc = symbol1["LOC"]
+				dm = symbol2["DM"]
+				ds = symbol2["DS"]
+			elif len(ofields) != 6 or not ofields[0].isdigit() or not ofields[1].isdigit() \
 				or not ofields[2].isdigit() or not ofields[3].isdigit() \
 				or not ofields[4].isdigit() or not ofields[5].isdigit() \
 				or int(ofields[0], 8) > 7 or int(ofields[1], 8) > 15 \
@@ -971,14 +1020,10 @@ for entry in inputFile:
 				symbol0 = symbols[ofields[3]]
 				residual1 = 0
 				residual0 = 0
-				if False:
-					if symbol1["DS"] == 0o17:
-						residual1 = 1
-					if symbol0["DS"] == 0o17:
-						residual0 = 1
-				else:
-					residual1 = symbol1["S"]
-					residual0 = symbol0["S"]
+				if symbol1["DS"] != DS:
+					residual1 = 1
+				if symbol0["DS"] != DS:
+					residual0 = 1
 				assembled1 |= (residual1 << 4) | (symbol1["LOC"] << 5)
 				assembled0 |= (residual0 << 4) | (symbol0["LOC"] << 5)
 				assembled1 = assembled1 | 0o140
@@ -1013,28 +1058,14 @@ for entry in inputFile:
 					addError(lineNumber, "Error: Operand is out of range")
 					loc = 0
 		if operator in ["SHR", "SHL"]:
-			# We set this up with a loc, just like the other types of 
-			# instructions, but if the shift count is bigger than 2, there
-			# will (eventually) also be automatic repeats.  All the repeats
-			# will be the same instruction, except the latter one which could
-			# be a different shift amount.
-			repeat = loc
-			if not operand.isdigit():
-				addError(lineNumber, "Error: Illegal operand for SHR/SHL")
-				repeat = 0
-			if repeat == 0:
-				loc = 0
-			elif operator == "SHL":
-				loc = 0o040
-			elif operator == "SHR":
-				loc = 0o002
-			if (repeat & 1) == 0:
-				locFinal = loc
+			if loc == 0:
+				pass
+			elif operator == "SHR" and loc <= 2:
+				pass
+			elif operator == "SHL" and loc <= 2:
+				loc = loc << 4
 			else:
-				locFinal = loc >> 1
-			repeat = (repeat + 2) // 2
-			if repeat == 1:
-				loc = locFinal
+				addError(lineNumber, "Error: Shift count must be 0, 1, or 2")
 		elif operator in ["TRA", "TNZ", "TMI"]:
 			if operand == "*":
 				loc = LOC
@@ -1090,10 +1121,9 @@ for entry in inputFile:
 					# The operand is a variable, as it ought to be.
 					if hop["DM"] != DM or (hop["DS"] != DS and hop["DS"] != 0o17):
 						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
-					else:
-						loc = hop["DLOC"]
-						if hop["DS"] == 0o17:
-							residual = 1
+					loc = hop["DLOC"]
+					if hop["DS"] == 0o17:
+						residual = 1
 				else:
 					# The operand is an LHS in instruction space.  If that's within the 
 					# current instruction sector, we can convert the HOP to a TRA and
@@ -1117,28 +1147,22 @@ for entry in inputFile:
 							residual = 1
 							ds = 0o17
 						#addError(lineNumber, "Info: Allocating variable for HOP at %o,%02o,%03o" % (DM, ds, loc))
-		elif operator in ["CDS", "CDSD", "CDSS"]:
-			ofields = operand.split(",")
-			insane = False
-			if len(ofields) not in [2, 3]:
-				insane = True
-			elif not ofields[0].isdigit() or not ofields[1].isdigit() or int(ofields[0],8) > 7 or int(ofields[1],8) > 15:
-				insane = True
-			elif len(ofields) == 3 and ofields[2] not in ["0", "1"]:
-				insane = True
-			elif len(ofields) == 3 and operator != "CDS":
-				insane = True
-			elif len(ofields) == 2 and operator not in ["CDSD", "CDSS"]:
-				insane = True
-			elif operator == "CDSD":
-				ofields.append("1")
-			elif operator == "CDSS":
-				ofields.append("0")
-			if insane:
+		elif operator == "CDS":
+			if operand not in symbols:
+				addError(lineNumber, "Error: Symbol not found")
 				loc = 0
-				addError(lineNumber, "Error: Illegal operand for CDS/CDSS/CDSD")
 			else:
-				loc = int(ofields[2], 8) | (int(ofields[0], 8) << 1) | (int(ofields[1], 8) << 4)
+				loc = 1 | (symbols[operand]["DM"] << 1) | (symbols[operand]["DS"] << 4)
+			residual = 0
+		elif operator in ["CDSD", "CDSS"]:
+			ofields = operand.split(",")
+			duplex = 1
+			if len(ofields) != 2 or not ofields[0].isdigit() or not ofields[1].isdigit() or int(ofields[0],8) > 7 or int(ofields[1],8) > 15:
+				loc = 0
+				addError(lineNumber, "Error: Illegal operand for CDSS/CDSD")
+			if operator == "CDSS":
+				duplex = 0
+			loc = duplex | (int(ofields[0], 8) << 1) | (int(ofields[1], 8) << 4)
 			residual = 0
 		else:
 			# Instruction is a "regular" one ... not one of the ones dealt with above.
@@ -1166,25 +1190,23 @@ for entry in inputFile:
 				if hop["inDataMemory"]:
 					if hop["DM"] != DM or (hop["DS"] != DS and hop["DS"] != 0o17):
 						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
-					else:
-						loc = hop["DLOC"]
-						if operandModifierOperation == "+":
-							loc += operandModifier
-						elif operandModifierOperation == "-":
-							loc -= operandModifier
-						if hop["DS"] == 0o17:
-							residual = 1
+					loc = hop["DLOC"]
+					if operandModifierOperation == "+":
+						loc += operandModifier
+					elif operandModifierOperation == "-":
+						loc -= operandModifier
+					if hop["DS"] == 0o17:
+						residual = 1
 				else:
 					if hop["IM"] != DM or hop["IS"] != DS:
 						addError(lineNumber, "Error: Operand not in current data-memory sector")
-					else:
-						loc = hop["LOC"]
-						if operandModifierOperation == "+":
-							loc += operandModifier
-						elif operandModifierOperation == "-":
-							loc -= operandModifier
-						if hop["DS"] == 0o17:
-							residual = 1
+					loc = hop["LOC"]
+					if operandModifierOperation == "+":
+						loc += operandModifier
+					elif operandModifierOperation == "-":
+						loc -= operandModifier
+					if hop["DS"] == 0o17:
+						residual = 1
 		if loc > 0o377:
 			loc = loc & 0o377
 			residual = 1
@@ -1198,18 +1220,6 @@ for entry in inputFile:
 		for error in errorList:
 			print(error)
 	print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString) + " \t" + inputLine["raw"])
-	if repeat > 0:
-		repeat -= 1
-		hopLOC = hop["LOC"]
-		while repeat > 0:
-			hopLOC += 1
-			if repeat == 1:
-				line = " %o %02o %o %03o        " % (hop["IM"], hop["IS"], hop["S"], hopLOC)
-				a81 = "%03o" % locFinal
-				assembled = (assembled | (locFinal << 5) | (residual << 4)) << 3
-				storeAssembled(assembled, hop, False)
-			print(line + " " + a81 + "  " + a9 + "  " + op)
-			repeat -= 1
 
 #----------------------------------------------------------------------------
 #   	Print a symbol table
