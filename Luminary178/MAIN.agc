@@ -18,6 +18,8 @@
 #               AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 #               LUMINARY 178.
 # Mod history:  2019-08-14 MAS  Created from Zerlina 56.
+#               2019-08-17 MAS  Removed CHECK EQUALS LIST, since it was
+#                               not introduced until Luminary 182.
 
 $ABSOLUTE_ADDRESSES_FOR_UPDATE_PROGRAM.agc              # p.  1
 $ASSEMBLY_AND_OPERATION_INFORMATION.agc                 # pp. 2-27
@@ -27,7 +29,6 @@ $INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc              # pp. 55-61
 $FLAGWORD_ASSIGNMENTS.agc                               # pp. 62-89
 $SUBROUTINE_CALLS.agc                                   # p.  90
 $ERASABLE_ASSIGNMENTS.agc                               # pp. 91-156
-$CHECK_EQUALS_LIST.agc                                  # pp. 157-158
 $INTERRUPT_LEAD_INS.agc                                 # pp. 159-160
 $T4RUPT_PROGRAM.agc                                     # pp. 161-195
 $RCS_FAILURE_MONITOR.agc                                # pp. 196-198
