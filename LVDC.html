@@ -114,6 +114,7 @@ Launch
 
 
 
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -233,6 +234,7 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
 
 
 
@@ -495,6 +497,7 @@ Launch
 
 
 
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -547,6 +550,7 @@ Launch
 
 
 
+
       do it!</b>), you may unnecessarily excite yourself by noting that
     Saturn IB launch vehicle AS-206 was used for the Skylab 2 mission
     (Conrad/Weitz/Kerwin).&nbsp; You may then be chagrined to realize
@@ -585,6 +589,7 @@ Launch
     by the assembler.&nbsp; Unfortunately, the status of the assembly
     process for it found 41 warnings and 7 errors — meaning that there
     were problems in the source code and that the assembly process <i>failed</i>.&nbsp;
+
 
 
 
@@ -837,6 +842,7 @@ of
 
 
 
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -863,6 +869,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
 
 
 
@@ -964,9 +971,11 @@ Astrionics
 
 
 
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -1234,6 +1243,7 @@ of
 
 
 
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1283,6 +1293,7 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
 
 
 
@@ -1550,22 +1561,29 @@ Incidentally,
             </blockquote>
             What the assembler does in a case like this is:<br>
             <ul>
+            </ul>
+            <ol>
+              <li>If the target address (<tt>HIGTHR</tt>) is in the
+                current instruction-memory sector (either in the same or
+                the opposite syllable), transparently replace the <tt>HOP</tt>
+                instruction by a <tt>TRA</tt> instruction.&nbsp;
+                Otherwise, proceed to step 2.<br>
+              </li>
               <li>Allocate a data word in the current data sector.&nbsp;
-                It believe it did this by searching upward in the data
-                sector, starting from the last selection of a location
-                by a <tt>DOGD</tt> or <tt>ORGDD</tt> pseudo-op.&nbsp;
-                (See below.)<br>
+                Do this by searching upward in the data sector, looking
+                for the first unused location.<br>
               </li>
               <li>Create a HOP constant for the target location <tt>HIGTHR</tt>,
                 and store it in the newly-allocated data word.</li>
-              <li>Assemble "<tt>HOP HIGTHR</tt>" by using the address of
-                the newly-allocated data word as its operand.</li>
-              <li>Whenever such a substitution was performed by the
-                assembler, it noted it in the assembly listing by
-                printing "<tt>HOP</tt>" as "<tt>HOP*</tt>".&nbsp;
-                However, I think that "<tt>HOP</tt>" is always what
-                would have originally been used on the punch card.<br>
-              </li>
+              <li>Use the address of the newly-allocated data word as
+                the operand for the <tt>HOP</tt> instruction.</li>
+            </ol>
+            Whenever such a substitution was performed by the assembler,
+            it noted it in the assembly listing by printing "<tt>HOP</tt>"
+            as "<tt>HOP*</tt>".&nbsp; However, I think that "<tt>HOP</tt>"
+            is always what would have originally been used on the punch
+            card.
+            <ul>
             </ul>
           </td>
         </tr>
@@ -1609,6 +1627,7 @@ Incidentally,
             (more accurately, 4 computer cycles) following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -1766,6 +1785,7 @@ However,
                 instruction-memory sector, find an unallocated memory
                 location.</li>
               <li>In that newly-allocated memory location, put a "<tt>HOP
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -1804,6 +1824,7 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -2019,6 +2040,10 @@ However,
             destination of the i/o.&nbsp;&nbsp; A table of the i/o ports
             vs. addresses is given in the <a
               href="#IO_Ports_For_PIO_Instruction">following section</a>.<br>
+            <br>
+            In so far as assembly-language syntax is concerned, the
+            operand of the instruction is always a literal octal
+            numerical constant.<br>
           </td>
         </tr>
         <tr>
@@ -2046,6 +2071,7 @@ However,
             "residual sector".&nbsp; The following addresses are
             special, as described in <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">the
+
 
 
 
@@ -2238,6 +2264,25 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               <div style="text-align: left;"> <br>
                 See also <span style="font-family: Courier
                   New,Courier,monospace;">HOP</span>.<br>
+                <br>
+                In terms of assembly-language syntax, there are the
+                following variations:<br>
+                <blockquote><tt>CDS&nbsp;&nbsp;&nbsp;&nbsp; <i></i><i>SYMBOLNAME</i></tt><tt><br>
+                  </tt><tt>CDSD&nbsp;&nbsp;&nbsp; <i>DM,DS</i></tt><tt><br>
+                  </tt><tt>CDSS&nbsp;&nbsp;&nbsp; <i>DM,DS</i></tt><br>
+                </blockquote>
+                Thus <tt>CDS</tt> uses the characteristics of a
+                variable name or a name defined with the <tt>DEQD</tt>
+                or <tt>DEQS</tt> pseudo-ops (see below), whereas the
+                module number and sector number are simply supplied with
+                octal numeric literals in <tt>CDSD</tt> or <tt>CDSS</tt>.&nbsp;
+                The difference between <tt>CDSD</tt> and <tt>CDSS</tt>
+                is that the former selects duplex memory while the later
+                selects simplex memory.<br>
+                <br>
+                In the usage I've seen, usage of <tt>CDSS</tt> is
+                confined almost entirely to the context of <tt>USE DAT</tt>
+                (see below).<br>
               </div>
             </div>
           </td>
@@ -2351,6 +2396,18 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               </tbody>
             </table>
             <br>
+            In terms of assembly-language syntax, I have never seen <tt>SHF</tt>
+            itself used.&nbsp; The only variations actually used are<br>
+            <blockquote><tt>SHL <i>N</i></tt><tt><br>
+              </tt><tt>SHR <i>N</i></tt><br>
+            </blockquote>
+            where <i><tt>N</tt></i> is a literal decimal numerical
+            constant.&nbsp; However, <tt>N</tt> is not limited to just
+            0, 1, or 2, even those are all that <tt>SHF</tt> directly
+            supports.&nbsp; If an operand <i><tt>N</tt></i>&gt;2 is
+            encountered, the assembler transparently replaces it with an
+            appropriates sequence of shift-by-2 and shift-by-1
+            instructions.<br>
           </td>
         </tr>
         <tr>
@@ -2439,6 +2496,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                     A9<br>
                   </th>
                   <th style="vertical-align: top; font-weight: bold;">Data
+
 
 
 
@@ -2627,6 +2685,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
 
 
 
@@ -4035,6 +4094,7 @@ of
 
 
 
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -4050,6 +4110,7 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
 
 
 
@@ -4247,6 +4308,7 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -4505,6 +4567,7 @@ Assembly
 
 
 
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -4540,6 +4603,7 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
 
 
 
@@ -4823,6 +4887,7 @@ Assembly
 
 
 
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -4931,6 +4996,7 @@ Assembly
 
 
 
+
         where <tt><i>i</i></tt>, <tt><i>j</i></tt>, and <tt><i>k</i></tt>
         are all small integers.&nbsp; I cannot be sure, but referring to
         the description earlier of how the <tt>EXM</tt> instruction
@@ -4988,9 +5054,15 @@ Assembly
             left-hand-symbol with a specific fixed location in memory,
             specified by its module, sector, and offset.&nbsp; It does
             not appear to store anything at that locations, but merely
-            puts an entry in the symbol table for use in code operands.<br>
+            defines a symbol representing that particular memory
+            configuration.&nbsp; The symbol does not appear in the
+            symbol table, but acts in essence as though it is a
+            preprocessor symbol, expanded only as the operand of a <tt>CDS</tt>
+            instruction (see above).<br>
             <br>
-            I do not know how <tt>DEQD</tt> differs from <tt>DEQS</tt>.<br>
+            <tt>DEQD</tt> differs from <tt>DEQS</tt> in that the former
+            specifies a duplex memory configuration whereas the latter
+            specifies a simplex configuration.<br>
           </td>
         </tr>
         <tr>
@@ -5013,6 +5085,11 @@ Assembly
             below) that only modifies the assembler's current
             data-memory pointer, leaving the instruction-memory pointer
             untouched.&nbsp; It does not allocate any memory.<br>
+            <br>
+            Presumably there is a <tt>DOGS</tt> pseudo-op as well
+            (differing in that it pertains to a simplex memory
+            configuration rather than a duplex one), but I have not
+            encountered it in actual code.<br>
           </td>
         </tr>
         <tr>
@@ -5099,6 +5176,7 @@ Assembly
 
 
 
+
             The 2-bit field will have the (binary) value 01, the 3-bit
             field will have the value 010, and so on, so the actual
             value of <tt>MYCON</tt>, in binary, as displayed by the
@@ -5114,41 +5192,48 @@ Assembly
           </td>
         </tr>
         <tr>
-          <td nowrap="nowrap" valign="middle"><tt>HPC</tt><tt> <i>arg</i><br>
+          <td nowrap="nowrap" valign="middle"><tt>HPC</tt><tt> <i>SYMBOLNAME</i><br>
             </tt>
             <div align="left"><i>&nbsp;&nbsp; or</i><br>
             </div>
-            <tt>HPC <i>arg</i>,<i>arg2</i><br>
+            <tt>HPC <i>SYMBOLNAME1</i>,<i>SYMBOLNAME</i><i>2</i><br>
             </tt></td>
-          <td valign="middle">I think this allocates a word of memory
-            and stores a HOP constant in it.&nbsp; The <tt><i>arg</i></tt>
-            is probably the symbolic name of an area in instruction
-            memory for which the HOP constant needs to be formed.&nbsp;
-            I don't know yet what the two-argument version does.&nbsp; I
-            suspect that <i><tt>arg2</tt></i> may be added to the
-            address or bitwise-OR'd to it, in order to provide an offset
-            (as if for an array or table).<br>
+          <td valign="middle">This allocates a word of memory at the
+            current location, and stores a HOP constant in it that's
+            constructed from the operand.&nbsp; <br>
+            <br>
+            In the one-operand variation, the HOP constant is simply the
+            same as that of the symbol whose name is given by the
+            operand.<br>
+            <br>
+            In the two-operand variation, IM, IS, S, and LOC fields of
+            the HOP constant are taken from <tt><i>SYMBOLNAME1</i></tt>,
+            while the DM and DS fields are taken from <tt><i>SYMBOLNAME</i><i>2</i></tt>.<br>
           </td>
         </tr>
         <tr>
-          <td nowrap="nowrap" valign="middle"><tt>HPCDD</tt><tt> <i>arg</i><br>
+          <td nowrap="nowrap" valign="middle"><tt>HPCDD</tt><tt> <i>arg1,arg2</i><br>
             </tt>
             <div align="left"><i>&nbsp;&nbsp; or</i><br>
             </div>
-            <tt>HPCDD <i>arg</i>,<i>arg2</i><br>
+            <tt>HPCDD <i>IM,IS,S,LOC,DM,DS</i><i></i><br>
             </tt></td>
-          <td valign="middle">I think this may be similar to HPC, but
-            may instead use a symbol <tt><i>arg</i></tt> that's in data
-            memory rather than instruction memory.<br>
+          <td valign="middle">Like <tt>HPC</tt> (see above), constructs
+            a HOP constant and stores it at the current location.<br>
+            <br>
+            For all I know, there may be an <tt>HPCDS</tt> variation as
+            well, differing from <tt>HPCDD</tt> in applying to a
+            simplex memory configuration rather than a duplex one, but I
+            have not encountered it in practice.<br>
           </td>
         </tr>
         <tr>
           <td valign="top"><tt>MAT</tt><br>
           </td>
-          <td valign="top">I think this may force alignment on a
-            020-word (octal, or 16 decimal) boundary, and may have
-            something to do with the succeeding words logically forming
-            a matrix.&nbsp; </td>
+          <td valign="top">Forces alignment for the next memory
+            allocated to a 020-word (octal, or 16 decimal) boundary, and
+            may have something to do with the succeeding words logically
+            forming a matrix.&nbsp; </td>
         </tr>
         <tr>
           <td valign="middle"><tt>OCT <i>number</i></tt><br>
@@ -5178,6 +5263,10 @@ Assembly
             been used, the next unused location after that will be
             selected instead, and the assembler generates a warning
             message.<br>
+            <br>
+            There may be an <tt>ORGDS</tt> variant as well, specifying
+            a simplex memory configuration rather than a duplex
+            configuration, but I have not encountered it in practice.<br>
           </td>
         </tr>
         <tr>
@@ -5215,17 +5304,17 @@ Assembly
           <td valign="middle">These pseudo-ops alter the way the
             assembler places and orders succeeding items in
             memory.&nbsp; The usual positioning and ordering is
-            represented by <tt>USE INST</tt>, whereas I think that <tt>USE
-
-
-
-              DAT</tt> may be a convenience feature for producing
-            certain types of structures such as tables.<br>
+            represented by <tt>USE INST</tt>, whereas I'm unsure of
+            what <tt>USE DAT</tt> is for.&nbsp; I think it may be a
+            convenient way to pack CPU instructions when one wants to
+            place them in the midst of an area of memory used primarily
+            for storing variables.<br>
             <br>
             <tt>USE INST</tt>:<br>
             <blockquote>The <tt>ORGDD</tt> pseudo-op (see above)
               defines an origin for both "instructions" (fields <tt><i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i></tt>)
               and "data" (fields <tt><i>DM</i>,<i>DS,LOC2</i></tt>).&nbsp;
+
 
 
 
@@ -5242,6 +5331,7 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
 
 
 
@@ -5269,27 +5359,21 @@ Assembly
               .....&nbsp;&nbsp; (Notice that syllable 1 comes first in
               the sequence.)<br>
               <br>
-              Of course, there is no corresponding hardware setting in
-              the CPU for such an ordering, so when the code is actually
-              executed by the CPU, successively-executed instructions
-              are really from the same syllable.&nbsp; In other words
-              the instructions appear in the assembly-language
-              source-code out of order from they way they are actually
-              executed by the CPU.<br>
+              I'm not sure how the CPU responds to this ordering.&nbsp;
+              The <tt>USE DAT</tt> context is often (though not always)
+              associated with simplex memory configuration as selected
+              by a <tt>CDSS</tt> instruction so perhaps this is really
+              the order in which the CPU executes instructions in a
+              simplex configuration.<br>
             </blockquote>
           </td>
         </tr>
         <tr>
           <td nowrap="nowrap" valign="middle"><tt>VEC</tt><tt><br>
             </tt></td>
-          <td valign="middle">I think this may force alignment on a
-            4-word boundary, and may have something to do with the
-            succeeding words logically forming a vector.&nbsp; It does
-            not allocate any memory.&nbsp; It <i>may</i> (I'm unsure!)
-            be unwilling to align exactly at a boundary that's an exact
-            multiple of 0100, thus skipping past it, going to the
-            next-higher address n*0100+010, and flagging the line with
-            an assembler warning.<br>
+          <td valign="middle">Forces alignment on a 4-word boundary, and
+            may have something to do with the succeeding words logically
+            forming a vector.&nbsp; It does not allocate any memory.<br>
           </td>
         </tr>
       </tbody>
@@ -5547,6 +5631,7 @@ Assembly
 
 
 
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
@@ -5675,6 +5760,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -6165,6 +6251,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -6241,10 +6328,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-08-22.<br>
+          2019-08-28.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
