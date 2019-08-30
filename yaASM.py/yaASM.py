@@ -65,7 +65,7 @@ operators = {
     "CDSD": { "opcode":0b1110, "a9":0 }, 
     "CDSS": { "opcode":0b1110, "a9":0 }, 
     "SHF": { "opcode":0b1110, "a9":1, "a8":0 }, 
-    "EXM": { "opcode":0b0000, "a9":1, "a8":0 },
+    "EXM": { "opcode":0b1110, "a9":1, "a8":1 },
     "CLA": { "opcode":0b1111 }, 
     "SHR": { "opcode":0b1110, "a9":1, "a8":0 }, 
     "SHL": { "opcode":0b1110, "a9":1, "a8":0 }
@@ -395,10 +395,21 @@ def storeAssembled(value, hop, data = True):
 		sector = hop["IS"]
 		syllable = hop["S"]
 		location = hop["LOC"]
-		if syllable == 1:
-			octals[module][sector][syllable][location] = (value << 2) & 0o77774
+		if useDat:
+			value = value & 0o17777
+			if syllable == 1:
+				value = value << 14
+			else:
+				value = value << 1
+			if octals[module][sector][2][location] == None:
+				octals[module][sector][2][location] = value
+			else:
+				octals[module][sector][2][location] = octals[module][sector][2][location] | value
 		else:
-			octals[module][sector][syllable][location] = (value << 1) & 0o37776
+			if syllable == 1:
+				octals[module][sector][syllable][location] = (value << 2) & 0o77774
+			else:
+				octals[module][sector][syllable][location] = (value << 1) & 0o37776
 
 # Form a HOP constant from a hop dictionary.
 def formConstantHOP(hop):
@@ -658,6 +669,7 @@ for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
 		inDataMemory = True
 		inputLine = { "raw": line }
+		isCDS = False
 		    
 		# Split the line into fields.
 		if line[:1] in [" ", "\t"] and not line.isspace():
@@ -784,6 +796,7 @@ for lineNumber in range(0, len(expandedLines)):
 				if fields[1] in ["CDS", "CDSD", "CDSS"]:
 					# I should be doing something here with the simplex vs duplex info, but I don't
 					# know what, so I'll just ignore it for now.
+					isCDS = True
 					if len(ofields) == 1:
 						if not useDat:
 							found = False
@@ -826,6 +839,7 @@ for lineNumber in range(0, len(expandedLines)):
 			addError(lineNumber, "Wrong number of fields")
 		inputLine["inDataMemory"] = inDataMemory
 		inputLine["useDat"] = useDat
+		inputLine["isCDS"] = isCDS
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
 
 # Create a table to quickly look up addresses of symbols.
@@ -839,6 +853,7 @@ for entry in inputFile:
 				addError(lineNumber, "Error: Symbol already defined")
 			symbols[lhs] = inputLine["hop"]
 			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
+			symbols[lhs]["isCDS"] = inputLine["isCDS"]
 		else:
 			addError(lineNumber, "Warning: Symbol location unknown")
 
@@ -920,6 +935,7 @@ for entry in inputFile:
 	errorList = errors[lineNumber]
 	originalLine = lines[lineNumber]
 	constantString = ""
+	star = False
 	
 	# If there's an automatic sector switch here, we have to take care of it prior to
 	# doing anything with the instruction that's actually associated with this line.
@@ -949,6 +965,15 @@ for entry in inputFile:
 			a81 = "%03o" % loc
 			a9 = "%o" % residual
 			op = "%02o" % operators["HOP"]["opcode"]
+			storeAssembled(hopConstant, {
+				"IM": IM,
+				"IS": IS,
+				"S": residual,
+				"LOC": loc,
+				"DM": DM,
+				"DS": DS,
+				"DLOC": loc
+			}, True)
 		storeAssembled(assembled, {"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
 		line = " %o %02o %o %03o  %o %02o  " % (im0, is0, s0, 
 							loc0, inputLine["hop"]["DM"], inputLine["hop"]["DS"])
@@ -1014,7 +1039,12 @@ for entry in inputFile:
 	op = "  "
 	constantString = ""
 	inDataMemory = True
-	if operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
+	if operator == "BSS":
+		bssHop = hop.copy()
+		for n in range(int(operand)):
+			storeAssembled(0, bssHop)
+			bssHop["DLOC"] += 1
+	elif operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
 		if operator in forms:
 			formDef = forms[operator]
 			ofields = operand.split(",")
@@ -1155,11 +1185,11 @@ for entry in inputFile:
 			try:
 				a76 = int(ofields[0], 8)
 				a5 = int(ofields[1], 8)
-				a41 = int(ofields[0], 8)
+				a41 = int(ofields[2], 8)
 				if a76 > 3 or a5 > 1 or a41 > 15:
 					addError(lineNumber, "Error: Illegal operands")
 				else:
-					loc = (1 << 7) | (a76 << 5) | (a5 << 4) | a41
+					loc = (a76 << 5) | (a5 << 4) | a41
 					residual = 1
 			except:
 				addError(lineNumber, "Error: Illegal operands")
@@ -1183,17 +1213,26 @@ for entry in inputFile:
 				if loc < 0 or loc > 0o377:
 					addError(lineNumber, "Error: Target location out of range")
 					loc = 0 
-				residual = S
+					residual = 0
 			elif operand.isdigit():
 				#print("Here: " + str(inputLine))
 				pass
 			elif operand not in symbols:
 				addError(lineNumber, "Error: Target location of TRA not found")
-			elif symbols[operand]["IM"] == IM and symbols[operand]["IS"] == IS:
+			elif symbols[operand]["IM"] == IM and symbols[operand]["IS"] == IS and ((symbols[operand]["DM"] == DM \
+					and symbols[operand]["DS"] in [DS, 0o17]) or symbols[operand]["isCDS"]):
+				# Regarding DM/DS, which appears in this conditional, a TRA/TMI/TNZ 
+				# instruction doesn't require the target location to be in the same
+				# DM/DS, but the original assembler seemed to disallow it.  I assume
+				# that's for safety purposes.  On the other hand, even if there's a 
+				# DM/DS mismatch, the TRA seems to be allowed if there's a CDS instruction
+				# at the target location or if the target is on the residial sector.  
+				# Which seems pretty convoluted, though pragmatically reasonable, so I may be
+				# misinterpreting what's going on.
 				loc = symbols[operand]["LOC"]
 				residual = symbols[operand]["S"]
 			elif operator == "TRA":
-				# The target location exists, but is not in this IM/IS.
+				# The target location exists, but is not in this IM/IS/DM/DS.
 				# We must therefore substituted a HOP instruction instead,
 				# and allocate a HOP constant nameless variable.
 				hopConstant = formConstantHOP(symbols[operand])
@@ -1204,6 +1243,16 @@ for entry in inputFile:
 				assembled = operators["HOP"]["opcode"]
 				op = "%02o" % assembled
 				#addError(lineNumber, "Info: Converting TRA to HOP at %o,%02o,%03o" % (DM, DS, loc))	
+				storeAssembled(hopConstant, {
+					"IM": IM,
+					"IS": IS,
+					"S": residual,
+					"LOC": loc,
+					"DM": DM,
+					"DS": DS,
+					"DLOC": loc
+				})
+				star = True
 			else: 
 				# For the moment, I'm ignoring the possibility of 
 				#	TMI	SYMBOL+offset
@@ -1216,6 +1265,7 @@ for entry in inputFile:
 				# 1 of the sector to store a HOP instruction that gets us to the 
 				# target.  The words are used in the order 0o377, 0o376, 0o374 (0o375
 				# is alway skipped), 0o373, etc.
+				star = True
 				residual = 1
 				hopConstant2 = formConstantHOP(symbols[operand])
 				constantString = "%09o" % hopConstant2
@@ -1235,6 +1285,15 @@ for entry in inputFile:
 						loc -= 1
 					roofed[IM][IS].append(operand)
 					loc2,residual2 = allocateNameless(lineNumber, constantString, False)
+					storeAssembled(hopConstant2, {
+						"IM": IM,
+						"IS": IS,
+						"S": residual2,
+						"LOC": loc2,
+						"DM": DM,
+						"DS": DS,
+						"DLOC": loc2
+					})
 					assembled2 = operators["HOP"]["opcode"]
 					assembled2 = (assembled2 | (loc2 << 5) | (residual2 << 4))
 					storeAssembled(assembled2, {
@@ -1266,16 +1325,21 @@ for entry in inputFile:
 						residual = 1
 				else:
 					# The operand is an LHS in instruction space.  If that's within the 
-					# current instruction sector, we can convert the HOP to a TRA and
-					# be done with it.  If not, then we need to allocate a nameless
-					# variable to hold the HOP constant.
-					if hop2["IM"] == IM and hop2["IS"] == IS:
+					# current instruction sector, we should be able to convert the HOP 
+					# to a TRA and be done with it, and I could have sworn I saw
+					# cases where that had happened. However, I can't find them any
+					# longer, and I definitely know cases where that _doesn't_ happen:
+					# see HOPs to MMSET.  At any rate, that's why the first half of the
+					# conditional was written and then disabled. 
+					if False and hop2["IM"] == IM and hop2["IS"] == IS:
 						loc = hop2["LOC"]
 						residual = hop2["S"]
 						assembled = operators["TRA"]["opcode"]
 						op = "%02o" % assembled
 						#addError(lineNumber, "Info: Converting HOP to TRA")
 					else:
+						star = True
+						# We need to allocate a nameless variable to hold the HOP constant.
 						hopConstant = formConstantHOP(hop2)
 						constantString = "%09o" % hopConstant
 						#print("A1: allocateNameless " + constantString + " " + operand)
@@ -1287,6 +1351,15 @@ for entry in inputFile:
 							residual = 1
 							ds = 0o17
 						#addError(lineNumber, "Info: Allocating variable for HOP at %o,%02o,%03o" % (DM, ds, loc))
+						storeAssembled(hopConstant, {
+							"IM": IM,
+							"IS": IS,
+							"S": residual,
+							"LOC": loc,
+							"DM": DM,
+							"DS": DS,
+							"DLOC": loc
+						})
 		elif operator == "CDS":
 			if operand not in symbols:
 				addError(lineNumber, "Error: Symbol not found")
@@ -1321,6 +1394,15 @@ for entry in inputFile:
 						residual = 1
 						ds = 0o17
 					#addError(lineNumber, "Info: Allocating nameless variable for =constant at %o,%02o,%03o" % (DM, ds, loc))
+					storeAssembled(int(constantString, 8), {
+						"IM": IM,
+						"IS": IS,
+						"S": residual,
+						"LOC": loc,
+						"DM": DM,
+						"DS": DS,
+						"DLOC": loc
+					})
 			elif operand.isdigit():
 				pass
 			elif operand in constants and type(constants[operand]) == type([]) and len(constants[operand]) == 4:
@@ -1362,6 +1444,8 @@ for entry in inputFile:
 		if loc > 0o377:
 			loc = loc & 0o377
 			residual = 1
+		if "a8" in operators[operator]:
+			loc = (loc & 0o177) | (operators[operator]["a8"] << 7)
 		a81 = "%03o" % loc
 		a9 = "%o" % residual
 		assembled = assembled | (loc << 5) | (residual << 4)
@@ -1371,7 +1455,21 @@ for entry in inputFile:
 		lastLineNumber = lineNumber
 		for error in errorList:
 			print(error)
-	print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString) + " \t" + inputLine["raw"])
+	# If jump instructions have been remapped mark them with an asterisk.
+	raw = inputLine["raw"]
+	if star and operator in ["HOP", "TRA", "TNZ", "TMI"]:
+		for n in range(len(raw)):
+			if raw[n] in [" ", "\t"]:
+				break
+		for m in range(n, len(raw)):
+			if raw[m] not in [" ", "\t"]:
+				break
+		m += 3
+		if raw[m] == " ":
+			raw = raw[:m] + "*" + raw[(m+1):]
+		elif raw[m] == "\t":
+			raw = raw[:m] + "*" + raw[m:]
+	print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString) + " \t" + raw)
 
 #----------------------------------------------------------------------------
 #   	Print a symbol table
@@ -1397,11 +1495,15 @@ for key in sorted(nameless):
 	print(fields[0] + " " + fields[1] + "   " + ("%03o" % loc) + "  " + fields[2])
 
 #----------------------------------------------------------------------------
-#   	Print octal listing
+#   	Print octal listing and save as a .tsv file too
 #----------------------------------------------------------------------------
+f = open("yaASM.tsv", "w")
 formatLine = "%03o"
 for n in range(8):
-	formatLine += "   %s D"
+	formatLine += "   %s %1s"
+formatFileLine = "%03o"
+for n in range(8):
+	formatFileLine += "\t%s\t%s"
 heading = "     "
 for n in range(8):
 	heading += "      %o         " % n
@@ -1417,6 +1519,7 @@ for module in range(8):
 					break
 		if not sectorUsed:
 			continue
+		print("%o\t%02o" % (module, sector), file=f)
 		print("")
 		print("")
 		print("%56sMODULE %o      SECTOR %02o" % ("", module, sector))
@@ -1429,10 +1532,13 @@ for module in range(8):
 			for loc in range(row, row + 8):
 				if not (used[module][sector][0][loc] or used[module][sector][1][loc]):
 					rowList.append("           ")
+					rowList.append("")
 				elif octals[module][sector][2][loc] != None:
 					rowList.append(" %09o " % octals[module][sector][2][loc])
+					rowList.append("D")
 				else:
 					col = ""
+					usedEntry = False
 					for syl in [1, 0]:
 						if syl == 0:
 							col += " "
@@ -1440,8 +1546,16 @@ for module in range(8):
 							col += "     "
 						elif octals[module][sector][syl][loc] == None:
 							col += "-----"
+							usedEntry = True
 						else:
 							col += "%05o" % octals[module][sector][syl][loc]
+							usedEntry = True
 					rowList.append(col)
+					if usedEntry:
+						rowList.append("D")
+					else:
+						rowList.append("")
 			print(formatLine % tuple(rowList))
-	 
+			print(formatFileLine % tuple(rowList), file=f)
+f.close()
+		
