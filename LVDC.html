@@ -116,6 +116,7 @@ Launch
 
 
 
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -235,6 +236,7 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
 
 
 
@@ -501,6 +503,7 @@ Launch
 
 
 
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -555,6 +558,7 @@ Launch
 
 
 
+
       do it!</b>), you may unnecessarily excite yourself by noting that
     Saturn IB launch vehicle AS-206 was used for the Skylab 2 mission
     (Conrad/Weitz/Kerwin).&nbsp; You may then be chagrined to realize
@@ -593,6 +597,7 @@ Launch
     by the assembler.&nbsp; Unfortunately, the status of the assembly
     process for it found 41 warnings and 7 errors — meaning that there
     were problems in the source code and that the assembly process <i>failed</i>.&nbsp;
+
 
 
 
@@ -849,6 +854,7 @@ of
 
 
 
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -875,6 +881,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
 
 
 
@@ -980,9 +987,11 @@ Astrionics
 
 
 
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -1254,6 +1263,7 @@ of
 
 
 
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1303,6 +1313,7 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
 
 
 
@@ -1574,17 +1585,20 @@ Incidentally,
             <ul>
             </ul>
             <ol>
-              <li>If the target address (<tt>HIGTHR</tt>) is in the
-                current instruction-memory sector (either in the same or
-                the opposite syllable), transparently replace the <tt>HOP</tt>
-                instruction by a <tt>TRA</tt> instruction.&nbsp;
-                Otherwise, proceed to step 2.<br>
-              </li>
+              <li><strike>If the target address </strike><strike>is in
+                  the current instruction-memory sector (either in the
+                  same or the opposite syllable), transparently replace
+                  the </strike><strike><tt>HOP</tt></strike><strike>
+                  instruction by a </strike><strike><tt>TRA</tt></strike><strike>
+                  instruction.&nbsp; Otherwise, proceed to step 2.</strike><strike><br>
+                </strike> </li>
               <li>Allocate a data word in the current data sector.&nbsp;
                 Do this by searching upward in the data sector, looking
-                for the first unused location.<br>
+                for the first unused location.&nbsp; The residual sector
+                is searched if there's no room left in the current
+                sector.<br>
               </li>
-              <li>Create a HOP constant for the target location <tt>HIGTHR</tt>,
+              <li>Create a HOP constant for the target location<tt></tt>,
                 and store it in the newly-allocated data word.</li>
               <li>Use the address of the newly-allocated data word as
                 the operand for the <tt>HOP</tt> instruction.</li>
@@ -1638,6 +1652,7 @@ Incidentally,
             (more accurately, 4 computer cycles) following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -1799,6 +1814,7 @@ However,
               <li>In that newly-allocated memory location, put a "<tt>HOP
 
 
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -1837,6 +1853,7 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -1968,44 +1985,60 @@ However,
             "residual sector" cannot be accessed.<br>
             <br>
             Note, however, that the <i>assembler</i> transparently
-            worked around this limitation in the instruction.&nbsp; The
-            assembler would automatically insert a <tt>HOP</tt>
-            instruction instead of a <tt>TRA</tt> whenever it found
-            that it was necessary to do so.&nbsp; For example, consider
-            the instruction "<tt>TRA ETCBTC</tt>".&nbsp; If the target
-            location <tt>ETCBTC</tt> is within the current instruction
-            sector, the assembler would indeed assemble this exact as
-            expected, using a <tt>TRA</tt> instruction with opcode <tt>1000</tt>.
-            But if the target location <tt>ETCBTC</tt> was <i>not</i>
-            within the current instruction sector, the assembler would
-            instead perform the following complicated maneuver that
-            preserves the expected program logic, at the cost of an
-            extra machine cycle and an extra word of memory:<br>
+            worked around the limitation that the target address had to
+            be in the same sector.&nbsp; The assembler would
+            automatically insert a <tt>HOP</tt> instruction instead of
+            a <tt>TRA</tt> whenever it found that it was necessary to
+            do so.&nbsp; For example, consider the instruction "<tt>TRA
+              ETCBTC</tt>".&nbsp; If the target location <tt>ETCBTC</tt>
+            is within the current instruction sector, the assembler
+            would indeed assemble this exact as expected, using a <tt>TRA</tt>
+            instruction with opcode <tt>1000</tt>.&nbsp; Actually, the
+            assembler would refuse to directly do a <tt>TRA</tt> to a
+            target in the same instruction sector under some
+            circumstances, presumably to help guard the programmer from
+            easy-to-make errors.&nbsp; The condition I've noticed in
+            which this occurs is if the target address has been tagged
+            by the assembler as being in a region with a different
+            setting for the <i>data</i> module or sector, since unlike
+            a <tt>HOP</tt> instruction, a <tt>TRA</tt> instruction
+            doesn't alter the DM/DS settings.&nbsp; Whereas if a <tt>CDS</tt>
+            instruction (which changes the DM/DS settings in the
+            processor itself) happens to be at the target location, it
+            doesn't trigger a replacement by <tt>HOP</tt>.&nbsp; Quite
+            a complicated set of conditions! One wonders if the original
+            programmers actually had much awareness at the time (or
+            cared!) that these substitutions were being made for them.<br>
+            <br>
+            But if the target location (<tt>ETCBTC</tt> in this example)
+            wasn't within the current instruction sector or failed the
+            DM/DS conditions, then the assembler would instead perform
+            the following complicated maneuver which preserves the
+            expected program logic, at the cost of an extra machine
+            cycle and an extra word of memory:<br>
             <ul>
               <li>Allocate a data word in the current data sector.&nbsp;
-                It believe it did this by searching upward in the data
-                sector, starting from the last selection of a location
-                by a <tt>DOGD</tt> or <tt>ORGDD</tt> pseudo-op.&nbsp;
-                (See below.)<br>
+                This is done by searching upward through the current
+                data sector (or the residual sector, failing that) until
+                an unallocated word is found.<br>
               </li>
               <li>Create a HOP constant for the target location <tt>ETCBTC</tt>,
                 and store it in the newly-allocated data word.</li>
-              <li>Assemble "<tt>TRA ETCBTC</tt>" as a <tt>HOP</tt>
-                instruction (with opcode <tt>0000</tt>) the the
+              <li>Assemble a <tt>HOP</tt> instruction with the
                 newly-allocated data word as its operand.</li>
               <li>Whenever such a substitution was performed by the
                 assembler, it noted it in the assembly listing by
-                printing "<tt>TRA</tt>" as "<tt>TRA*</tt>".&nbsp;
+                replacing "<tt>TRA</tt>" with "<tt>TRA*</tt>".&nbsp;
                 However, I think that "<tt>TRA</tt>" is always what
                 would have originally been used on the punch card.<br>
               </li>
             </ul>
             This in so far as the assembly-language source code is
-            concerned, one may as well always use <tt>TRA</tt> rather
-            than <tt>HOP</tt>, since <tt>TRA</tt> is more economical
-            than <tt>HOP</tt>, and the assembler will always substitute
-            <tt>HOP</tt> anyway whenever some limitation of <tt>TRA</tt>
-            necessitates it.<br>
+            concerned, it seems that one may as well always use <tt>TRA</tt>
+            rather than <tt>HOP</tt>, since <tt>TRA</tt> is more
+            economical than <tt>HOP</tt>, and the assembler will always
+            substitute <tt>HOP</tt> anyway whenever some limitation of
+            <tt>TRA</tt> necessitates it.<br>
           </td>
         </tr>
         <tr>
@@ -2085,6 +2118,7 @@ However,
             "residual sector".&nbsp; The following addresses are
             special, as described in <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">the
+
 
 
 
@@ -2291,6 +2325,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 or <tt>DEQS</tt> pseudo-ops (see below), whereas the
                 module number and sector number are simply supplied with
                 octal numeric literals in <tt>CDSD</tt> or <tt>CDSS</tt>.&nbsp;
+
 
                 The difference between <tt>CDSD</tt> and <tt>CDSS</tt>
                 is that the former selects duplex memory while the later
@@ -2561,6 +2596,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2702,6 +2738,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
 
 
 
@@ -4114,6 +4151,7 @@ of
 
 
 
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -4129,6 +4167,7 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
 
 
 
@@ -4328,6 +4367,7 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -4590,6 +4630,7 @@ Assembly
 
 
 
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -4625,6 +4666,7 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
 
 
 
@@ -4912,6 +4954,7 @@ Assembly
 
 
 
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -4983,6 +5026,7 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>i</i>,<i>j</i>,<i>k</i></tt>",
+
 
 
 
@@ -5205,6 +5249,7 @@ Assembly
 
 
 
+
             The 2-bit field will have the (binary) value 01, the 3-bit
             field will have the value 010, and so on, so the actual
             value of <tt>MYCON</tt>, in binary, as displayed by the
@@ -5347,6 +5392,7 @@ Assembly
 
 
 
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -5360,6 +5406,7 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
 
 
 
@@ -5663,6 +5710,7 @@ Assembly
 
 
 
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
@@ -5791,6 +5839,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -6285,6 +6334,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -6363,10 +6413,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-08-28.<br>
+          2019-08-30.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
