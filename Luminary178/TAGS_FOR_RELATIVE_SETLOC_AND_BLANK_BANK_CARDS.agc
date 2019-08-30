@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-08-29 MAS  Updated based on three-way diff of Luminary
+##                              131, Zerlina 56, and Luminary 210.
 
 ## Page 28
                 COUNT           BANKSUM
@@ -41,7 +43,6 @@ FFTAG13         EQUALS
 
 
                 BLOCK           03
-FFSERV          EQUALS
 FFTAG5          EQUALS
 FFTAG6          EQUALS
                 BNKSUM          03
@@ -183,6 +184,7 @@ KALCMON1        EQUALS
 KALCMON2        EQUALS
 R30LOC          EQUALS
 RENDEZ          EQUALS
+SERV2           EQUALS
 LANDCNST        EQUALS
                 BNKSUM          22
 
@@ -238,6 +240,7 @@ TOF-FF1         EQUALS
 P40S1           EQUALS
 VECPT           EQUALS
 ASENT1          EQUALS
+SERV3           EQUALS
                 BNKSUM          27
 
 
@@ -263,11 +266,13 @@ VB67            EQUALS
 
 
                 BANK            32
+P20S4           EQUALS
 F2DPS*32        EQUALS
 ABORTS          EQUALS
 LRS22           EQUALS
 P66LOC          EQUALS
 R47             EQUALS
+SERV            EQUALS
 P40S4           EQUALS
                 BNKSUM          32
 
@@ -285,7 +290,7 @@ P30S1           EQUALS
 CSI/CDH1        EQUALS
 ASCFILT         EQUALS
 R12STUFF        EQUALS
-SERV1           EQUALS
+SERV4           EQUALS
 F2DPS*34        EQUALS
                 BNKSUM          34
 
@@ -309,12 +314,11 @@ P40S            EQUALS
 
                 BANK            37
 P05P06          EQUALS
-P20S4           EQUALS
 IMU2            EQUALS
 IMU4            EQUALS
 R31             EQUALS
 IMUSUPER        EQUALS
-SERV2           EQUALS
+SERV1           EQUALS
                 BNKSUM          37
 
 
