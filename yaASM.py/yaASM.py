@@ -936,7 +936,7 @@ for entry in inputFile:
 		loc1 = switch[7]
 		if IM == im1 and IS == is1:
 			# Can use a TRA.
-			assembled = (operators["TRA"]["opcode"] | (loc1 << 5) | (s1 << 4)) << 3
+			assembled = (operators["TRA"]["opcode"] | (loc1 << 5) | (s1 << 4))
 			a81 = "%03o" % loc1
 			a9 = "%o" % s1
 			op = "%02o" % operators["TRA"]["opcode"]
@@ -945,7 +945,7 @@ for entry in inputFile:
 			hopConstant = formConstantHOP(inputLine["hop"])
 			constantString = "%09o" % hopConstant
 			loc,residual = allocateNameless(lineNumber, constantString, False)
-			assembled = (operators["HOP"]["opcode"] | (loc << 5) | (residual << 4)) << 3
+			assembled = (operators["HOP"]["opcode"] | (loc << 5) | (residual << 4))
 			a81 = "%03o" % loc
 			a9 = "%o" % residual
 			op = "%02o" % operators["HOP"]["opcode"]
@@ -1236,7 +1236,7 @@ for entry in inputFile:
 					roofed[IM][IS].append(operand)
 					loc2,residual2 = allocateNameless(lineNumber, constantString, False)
 					assembled2 = operators["HOP"]["opcode"]
-					assembled2 = (assembled2 | (loc2 << 5) | (residual2 << 4)) << 3
+					assembled2 = (assembled2 | (loc2 << 5) | (residual2 << 4))
 					storeAssembled(assembled2, {
 						"IM": IM,
 						"IS": IS,
@@ -1253,30 +1253,30 @@ for entry in inputFile:
 			elif operand not in symbols:
 				addError(lineNumber, "Error: Target location of HOP not found")
 			else:
-				hop = symbols[operand]
+				hop2 = symbols[operand]
 				if operandModifierOperation != "":
 					addError(lineNumber, "Error: Cannot apply + or - in HOP operand")
-				elif "inDataMemory" in hop and hop["inDataMemory"]:
+				elif "inDataMemory" in hop2 and hop2["inDataMemory"]:
 					# The operand is a variable, as it ought to be.
-					if hop["DM"] != DM or (hop["DS"] != DS and hop["DS"] != 0o17):
+					if hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17):
 						if not useDat or S == 1:
 							addError(lineNumber, "Warning: Operand not in current data-memory sector or residual sector")
-					loc = hop["DLOC"]
-					if hop["DS"] == 0o17:
+					loc = hop2["DLOC"]
+					if hop2["DS"] == 0o17:
 						residual = 1
 				else:
 					# The operand is an LHS in instruction space.  If that's within the 
 					# current instruction sector, we can convert the HOP to a TRA and
 					# be done with it.  If not, then we need to allocate a nameless
 					# variable to hold the HOP constant.
-					if hop["IM"] == IM and hop["IS"] == IS:
-						loc = hop["LOC"]
-						residual = hop["S"]
+					if hop2["IM"] == IM and hop2["IS"] == IS:
+						loc = hop2["LOC"]
+						residual = hop2["S"]
 						assembled = operators["TRA"]["opcode"]
 						op = "%02o" % assembled
 						#addError(lineNumber, "Info: Converting HOP to TRA")
 					else:
-						hopConstant = formConstantHOP(hop)
+						hopConstant = formConstantHOP(hop2)
 						constantString = "%09o" % hopConstant
 						#print("A1: allocateNameless " + constantString + " " + operand)
 						loc,residual = allocateNameless(lineNumber, constantString)
@@ -1336,35 +1336,35 @@ for entry in inputFile:
 			elif operand not in symbols:
 				addError(lineNumber, "Error: Symbol (" + operand + ") from operand not found")
 			else: 
-				hop = symbols[operand]
-				if hop["inDataMemory"]:
-					if hop["DM"] != DM or (hop["DS"] != DS and hop["DS"] != 0o17):
+				hop2 = symbols[operand]
+				if hop2["inDataMemory"]:
+					if hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17):
 						if not useDat or S == 1:
 							addError(lineNumber, "Warning: Operand not in current data-memory sector or residual sector")
-					loc = hop["DLOC"]
+					loc = hop2["DLOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier
 					elif operandModifierOperation == "-":
 						loc -= operandModifier
-					if hop["DS"] == 0o17:
+					if hop2["DS"] == 0o17:
 						residual = 1
 				else:
-					if hop["IM"] != DM or hop["IS"] != DS:
+					if hop2["IM"] != DM or hop2["IS"] != DS:
 						if not useDat or S == 1:
 							addError(lineNumber, "Warning: Operand not in current data-memory sector")
-					loc = hop["LOC"]
+					loc = hop2["LOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier
 					elif operandModifierOperation == "-":
 						loc -= operandModifier
-					if hop["DS"] == 0o17:
+					if hop2["DS"] == 0o17:
 						residual = 1
 		if loc > 0o377:
 			loc = loc & 0o377
 			residual = 1
 		a81 = "%03o" % loc
 		a9 = "%o" % residual
-		assembled = (assembled | (loc << 5) | (residual << 4)) << 3
+		assembled = assembled | (loc << 5) | (residual << 4)
 		storeAssembled(assembled, hop, False)
 	
 	if lineNumber != lastLineNumber:
