@@ -213,7 +213,7 @@ def yaTokenize(string):
 	return tokens[1:],error
 
 # Followed algorithm here:  https://infogalactic.com/info/Shunting-yard_algorithm
-precedence = ["U-", "U+", "*", "/", "B+", "B-"]
+precedence = ["U-", "U+", "/", "*", "B+", "B-"]
 def yaShuntingYard(tokens):
 	queue = []
 	stack = []

@@ -288,6 +288,7 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 			return nameless[valueR],1
 	for loc in range(0, 256):
 		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
+			#addError(lineNumber, "Info: Allocation of nameless " + value)
 			used[DM][DS][0][loc] = True
 			used[DM][DS][1][loc] = True
 			nameless[value] = loc
@@ -295,6 +296,7 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 	if useResidual and DS != 0o17:
 		for loc in range(0, 256):
 			if not used[DM][0o17][0][loc] and not used[DM][0o17][1][loc]:
+				#addError(lineNumber, "Info: Allocation of nameless " + valueR)
 				used[DM][0o17][0][loc] = True
 				used[DM][0o17][1][loc] = True
 				nameless[valueR] = loc
@@ -488,7 +490,7 @@ for n in range(0, len(lines)):
 			if error != "":
 				addError(n, error)
 				break
-			fields2 = fields2[:index] + str(value["number"]) + fields2[index2:]
+			fields2 = fields2[:index] + str(value["number"]).upper() + fields2[index2:]
 		if fields2 != fields[2]:
 			expandedLines[n] = [line.replace(fields[2], fields2)]
 			fields[2] = fields2
@@ -498,9 +500,9 @@ for n in range(0, len(lines)):
 			addError(n, error)
 			break
 		if fields[1] == "TABLE":
-			fields2 = str(value["number"])
+			fields2 = str(value["number"]).upper()
 		else:
-			fields2 = str(value["number"])
+			fields2 = str(value["number"]).upper()
 			if "scale" in value:
 				fields2 += "B" + str(value["scale"])
 		expandedLines[n] = [line.replace(fields[2], fields2)]
@@ -596,7 +598,7 @@ for n in range(0, len(lines)):
 					if error != "":
 						addError(n, "Error: " + error)
 						continue
-					operand = "=" + str(value["number"])
+					operand = "=" + str(value["number"]).upper()
 					if "scale" in value:
 						operand +=  "B" + str(value["scale"])
 				if m == 0:
@@ -607,7 +609,7 @@ for n in range(0, len(lines)):
 		if error != "":
 			addError(n, "Error: " + error)
 		else:
-			replacement = "=" + str(value["number"])
+			replacement = "=" + str(value["number"]).upper()
 			if "scale" in value:
 				replacement += "B" + str(value["scale"])
 			expandedLines[n] = [line.replace(fields[2], replacement)]
@@ -745,9 +747,9 @@ for lineNumber in range(0, len(expandedLines)):
 						DLOC = 0
 			elif fields[1] in ["DEQS", "DEQD"] and fields[0] in constants:
 				symbols[fields[0]] = {	"IM":IM, "IS":IS, "S":S, 
-								"LOC":LOC, "DM":DM, 
-								"DS":DS, "DLOC":DLOC,
-								"inDataMemory":True }
+								"LOC":LOC, "DM":int(constants[fields[0]][1], 8), 
+								"DS":int(constants[fields[0]][2], 8), 
+								"DLOC":DLOC, "inDataMemory":True }
 			elif fields[1] == "BSS":
 				checkDLOC(int(fields[2]))
 				if fields[0] != "":
@@ -801,12 +803,13 @@ for lineNumber in range(0, len(expandedLines)):
 						if not useDat:
 							found = False
 							# Operand symbol could have been defined by a DEQS or DEQD
-							#if fields[2] in constants:
-							#	constant = constants[fields[2]]
-							#	if type(constant) == type([]) and len(constant) >= 3:
-							#		DM = int(constant[1], 8)
-							#		DS = int(constant[2], 8)
-							#		found = True
+							if fields[2] in constants:
+								constant = constants[fields[2]]
+								if type(constant) == type([]) and len(constant) >= 3:
+									#print(constant[1] + " " + constant[2])
+									DM = int(constant[1], 8)
+									DS = int(constant[2], 8)
+									found = True
 							# We assume this is the name of a variable, and we have to
 							# find it to determine its DM/DS.  I presume it could be
 							# defined later, and so we don't find it ... let's hope not!
@@ -941,7 +944,7 @@ for entry in inputFile:
 	# If there's an automatic sector switch here, we have to take care of it prior to
 	# doing anything with the instruction that's actually associated with this line.
 	if "switchSectorAt" in inputLine:
-		print("Info: Automatic syllable/sector/module switch")
+		print("*")
 		switch = inputLine["switchSectorAt"]
 		im0 = switch[0]
 		is0 = switch[1]
@@ -1366,6 +1369,7 @@ for entry in inputFile:
 				addError(lineNumber, "Error: Symbol not found")
 				loc = 0
 			else:
+				#print("%o %2o" % (symbols[operand]["DM"], symbols[operand]["DS"]))
 				loc = 1 | (symbols[operand]["DM"] << 1) | (symbols[operand]["DS"] << 4)
 			residual = 0
 		elif operator in ["CDSD", "CDSS"]:
