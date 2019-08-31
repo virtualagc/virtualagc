@@ -19,6 +19,9 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-08-31 MAS  Removed ALW66FLG, SERVOVER, and LPOS2FLG.
+##                              Added R12RDFLG and restored comments on
+##                              R10FLAG to their original state.
 
 ## Page 62
 #         FLAGWORDS 0-11 ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -40,7 +43,6 @@
 # ACC4-2FL      199             BIT 11 FLAG 13          ACC4OR2X
 # ACMODFLG      032             BIT 13 FLAG 2           ACMODBIT
 # ALTSCALE      186             BIT 9  FLAG 12          ALTSCBIT
-# ALW66FLG                      BIT  9 FLAG 1           ALW66BIT
 # ANTENFLG      183             BIT 12 FLAG 12          ANTENBIT
 # AORBSFLG      085             BIT 5 FLAG 5            AORBSYST
 # AORBTFLG      200             BIT 10 FLAG 13          AORBTRAN
@@ -120,7 +122,6 @@
 # LOKONSW       010             BIT 5  FLAG 0           LOKONBIT
 # LOSCMFLG      033             BIT 12 FLAG 2           LOSCMBIT
 ## Page 64
-# LPOS2FLG      174             BIT 6 FLAG 11           LPOS2BIT
 # LRALTFLG      190             BIT 5  FLAG 12          LRALTBIT
 # LRBYPASS      165             BIT 15 FLAG 11          LRBYBIT
 # LRINH         172             BIT 8  FLAG 11          LRINHBIT
@@ -197,9 +198,9 @@
 # RVSW          111             BIT 9  FLAG 7           RVSWBIT
 # R04FLAG       051             BIT 9  FLAG 3           R04FLBIT
 # R10FLAG       013             BIT 2  FLAG 0           R10FLBIT
+# R12RDFLG      177D            BIT 3  FLAG 11          R12RDBIT
 # R61FLAG       020             BIT 10 FLAG 1           R61FLBIT
 # R77FLAG       079             BIT 11 FLAG 5           R77FLBIT
-# SERVOVER      043             BIT 10 FLAG 2           SEROVBIT
 # SLOPESW       027             BIT 3  FLAG 1           SLOPEBIT
 # SNUFFER       077             BIT 13 FLAG 5           SNUFFBIT
 # SOLNSW        087             BIT 3  FLAG 5           SOLNSBIT
@@ -317,15 +318,10 @@ FREEFBIT        =               BIT3
 #
 
 #                               BIT 2 FLAG 0
-## The following line is missing the "D" of the expected "013D", resulting in R10FLAG evaluating
-## to the same thing as NEEDLFLG (11D). This might potentially cause the flags to conflict with
-## each other. The D may have been accidentally dropped, since the comments for R10FLAG below
-## were rewritten to better describe its purpose in Zerlina (which would have necessitated
-## entirely new cards being punched).
-R10FLAG         =               013                     # LATVEL DISPLAYED    LATVEL AND FORVEL
-R10FLBIT        =               BIT2                    # IN INERTIAL AXES.   DISPLAYED IN LM
-                                                        # FORVEL ZERO.        BODY AXES (ROUGHLY).
-#
+R10FLAG         =               013D                    # R10 OUTPUTS DATA TO BESIDES OUTPUT WHEN
+R10FLBIT        =               BIT2                    # ALTITUDE & ALTITUDE SET, R10 ALSO OUTPUT
+                                                        # RATE METERS ONLY    TO FORWARD & LATERAL
+                                                        #                     VELOCITY CROSSPOINTR
 
 #
 ## Page 68
@@ -370,9 +366,8 @@ R61FLBIT        =               BIT10
 #
 
 #                               BIT 9 FLAG 1
-ALW66FLG        =               021D                    # P66 SELECTION       P66 CANNOT BE
-ALW66BIT        =               BIT9                    # ALLOWED NOW         SELECTED NOW
-#
+#               =               021D
+#               =               BIT9
 
 #                               BIT 8 FLAG 1              (S)
 VEHUPFLG        =               022D                    # CSM STATE VECTOR    LEM STATE VECTOR
@@ -448,9 +443,6 @@ STEERBIT        =               BIT11                   # IS PRESENT          IS
 #
 
 #                               BIT 10 FLAG 2             (S)
-SERVOVER        =               35D                     # GUIDANCE PORTION    SERVICER PORTION
-                                                        # OF SERVICER JOB     OF SERVICER JOB
-SEROVBIT        =               BIT10                   # IS IN PROGRESS      IS IN PROGRESS
 #
 
 #                               BIT 9 FLAG 2              (S)
@@ -1240,9 +1232,9 @@ RNGEDBIT        =               BIT4                    # MEASUREMENT MADE    NO
 #
 
 #                               BIT 3 FLAG 11
-#               =               177D
-#               =               BIT3
-#
+R12RDFLG        =               177D                    # WAIT UNTIL ALL VEL  ALLOW R12 PROCESS-
+R12RDBIT        =               BIT3                    # READS DONE BEFORE   ING OF VELDATA;
+                                                        # R12 PROCESSING      LR VEL READ DONE
 #
 
 #                               BIT 2 FLAG 11             (L)(R12)
