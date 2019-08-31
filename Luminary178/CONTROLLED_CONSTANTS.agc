@@ -19,6 +19,10 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-08-30 MAS  Corrected value of K1VAL to 140.12, moved
+##                              LR beam transformation matrices back into
+##                              SERVICES, and restored -MU constants to
+##                              their Luminary versions.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -57,7 +61,7 @@ FRCS2           2DEC            0.08896         B-7     # 200 LBS FORCE IN NEWTO
 
 # *** APS IMPULSE DATA FOR P42 *******************************************
 
-K1VAL           2DEC            141.12          B-23    # 3150 LB.SEC APS IMPULSE (WET)
+K1VAL           2DEC            140.12          B-23    # 3150 LB.SEC APS IMPULSE (WET)
 
 K2VAL           2DEC            31.138          B-24    # 700  LB-SEC
 
@@ -169,7 +173,7 @@ RDOTCONV        2DEC            -.0019135344    B7      # CONVERTS RR RDOT READI
 
 RANGCONV        2DEC            2.859024        B-3     # CONVERTS RR RANGE READING TO M. AT 2(-29
 
-                SETLOC          SERV1
+                SETLOC          SERVICES
                 BANK
                 COUNT*          $$/SERV
 
@@ -229,11 +233,6 @@ VXBEAMNB        2DEC            +0.9135454576           # POS 1 VX  BEAM
 
                 2DEC            +0.0
 
-
-
-                SETLOC          SERVICES
-                BANK
-                COUNT*          $$/SERV
 
 HSCAL           2DEC            -.3288792               # SCALES 1.079 FT/BIT TO 2(22)M.
 
@@ -352,15 +351,12 @@ MOONRATE        2DEC*           .26616994890062991 E-7 B+19*    # RAD/CS.
 
 # *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST BE PRESERVED *********
 
--MUEARTH        2DEC*           -.3986032       E+11 B-36*
-
-
--MUMOON         2DEC*           -.4902778       E+09 B-36*
-
-
+-MUDT           2DEC*           -7.9720645      E+12 B-44*
+-MUDT1          2DEC*           -9.8055560      E+10 B-44*
 # ************************************************************************
 
 ## Page 46
+-MUDTMUN        2DEC*           -9.8055560      E+10 B-38*
 RESQ            2DEC*           40.6809913      E12 B-58*
 
 20J             2DEC            3.24692010      E-2
