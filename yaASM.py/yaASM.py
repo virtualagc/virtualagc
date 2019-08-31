@@ -929,6 +929,7 @@ if False:
 		print(key + " " + ("%03o" % nameless[key]))
 print("IM IS S LOC DM DS  A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT")
 useDat = False
+errorsPrinted = []
 for entry in inputFile:
 	lineNumber = entry["lineNumber"]
 	inputLine = entry["expandedLine"]
@@ -1452,8 +1453,11 @@ for entry in inputFile:
 		storeAssembled(assembled, hop, False)
 	
 	if lineNumber != lastLineNumber:
+		errorsPrinted = []
 		lastLineNumber = lineNumber
-		for error in errorList:
+	for error in errorList:
+		if error not in errorsPrinted:
+			errorsPrinted.append(error)
 			print(error)
 	# If jump instructions have been remapped mark them with an asterisk.
 	raw = inputLine["raw"]
