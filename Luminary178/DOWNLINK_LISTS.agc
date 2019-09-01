@@ -19,6 +19,11 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-08-31 MAS  Restored the LMREND07 downlist to what
+##                              it was in Luminary 131, deleted the
+##                              LMREND08 sublist, reverted the leadin
+##                              for RENDEZVU, deleted all of the DLxxx
+##                              tags, and replaced LRTIMEDL with MKTIME.
 
 ## Page 199
                 BANK            22
@@ -28,20 +33,20 @@
                 EBANK=          DNTMBUFF
 
 # SPECIAL DOWNLINK OP CODES
-#       					    OP CODE ADDRESS(EXAMPLE) SENDS..     BIT 15  BITS 14-12 BITS 11
-#							                                                         -0
-#       					    ------ ----------      ----------    ------  ---------- -------
-#								                                                 --
-#       					    1DNADR TIME2           (2 AGC WDS)     0         0      ECADR
-#   						    2DNADR TEPHEM          (4 AGC WDS)     0         1      ECADR
-#  						    3DNADR VGBODY          (6 AGC WDS)     0         2      ECADR
-#  						    4DNADR STATE           (8 AGC WDS)     0         3      ECADR
-#  						    5DNADR UPBUFF          (10AGC WDS)     0         4      ECADR
-#  						    6DNADR DSPTAB          (12AGC WDS)     0         5      ECADR
-#   						    DNCHAN 30              CHANNELS        0         7      CHANNEL
-#                                                              					            ADDRESS
-#   						    DNPTR  NEXTLIST        POINTS TO NEXT  0         6      ADRES
-#                               				            LIST.
+#                                                   OP CODE ADDRESS(EXAMPLE) SENDS..     BIT 15  BITS 14-12 BITS 11
+#                                                                                                                -0
+#                                                   ------ ----------      ----------    ------  ---------- -------
+#                                                                                                                --
+#                                                   1DNADR TIME2           (2 AGC WDS)     0         0      ECADR
+#                                                   2DNADR TEPHEM          (4 AGC WDS)     0         1      ECADR
+#                                                   3DNADR VGBODY          (6 AGC WDS)     0         2      ECADR
+#                                                   4DNADR STATE           (8 AGC WDS)     0         3      ECADR
+#                                                   5DNADR UPBUFF          (10AGC WDS)     0         4      ECADR
+#                                                   6DNADR DSPTAB          (12AGC WDS)     0         5      ECADR
+#                                                   DNCHAN 30              CHANNELS        0         7      CHANNEL
+#                                                                                                           ADDRESS
+#                                                   DNPTR  NEXTLIST        POINTS TO NEXT  0         6      ADRES
+#                                                                           LIST.
 
 # DOWNLIST FORMAT DEFINITIONS AND RULES-
 # 1. END OF A LIST = -XDNADR (X = 1 TO 6), -DNPTR, OR -DNCHAN.
@@ -132,14 +137,14 @@ LMORBM03       -1DNADR          RN              +2      # RN +2,+3              
 
 LMORBM04        2DNADR          OMEGAPD                 # OMEGAPD,OMEGAQD,OMEGARD,GARBAGE
                 DNCHAN          76                      # GARBAGE,CHANNEL77
-                2DNADR          CADRFLSH	+2	# CADRFLSH +2,FAILREG,+1,+2
+                2DNADR          CADRFLSH        +2      # CADRFLSH +2,FAILREG,+1,+2
                -1DNADR          RADMODES                # RADMODES,DAPBOOLS        COMMON DATA
 
 LMORBM05        2DNADR          OMEGAP                  # OMEGAP,OMEGAQ,OMEGAR,GARBAGE
                 2DNADR          CDUXD                   # CDUXD,CDUXD,CDUZD,GARBAGE
                 2DNADR          CDUX                    # CDUX,CDUY,CDUZ,CDUT
                 1DNADR          ALPHAQ                  # ALPHAQ,ALPHAR            COMMON DATA
-	        1DNADR          POSTORKP                # POSTORKP,NEGTORKP
+                1DNADR          POSTORKP                # POSTORKP,NEGTORKP
 LMORBM09        DNCHAN          11                      # CHANNEL11 ,12
                 DNCHAN          13                      # CHANNELS13,14
                 DNCHAN          30                      # CHANNELS30,31
@@ -147,49 +152,6 @@ LMORBM09        DNCHAN          11                      # CHANNEL11 ,12
 
 LMORBM06        1DNADR          PIPTIME1                # PIPTIME,+1               COMMON DATA
                -3DNADR          DELV                    # DELV+0...+5
-
-#     ---------------------------------------------------------
-# *** THE FOLLOWING IS A LIST OF LOCATIONS IN DOWNLINK LISTS
-# *** BUT NOT REFERENCED IN THE DIRECTORY BECAUSE THEY ARE NOT
-# *** THE FIRST LOCATION REFERENCED IN AN INSTRUCTION
-# *** THIS LIST SHOULD BE UPDATED WHEN ANY CHANGES ARE MADE TO LISTS.
-
-#                               LOCATION                LIST NAME
-DL101           =               DNLRALT                 # ORBMANUV
-DL102           =               TIME1
-DL1O3           =               NEGTORKU
-DL104           =               POSTORKV
-DL105           =               NEGTORKV
-DL106           =               DUMLOOPS
-DL107           =               DNRRDOT
-DL108           =               DNLRVELY
-
-## Page 202
-DL109           =               DNLRVELZ
-DL110           =               DNLRALT
-DL111           =               CSMMASS
-DL112           =               IMODES33
-DL113           =               THETAD                  # LMORBM02
-DL114           =               OMEGAQ
-DL115           =               OMEGAR
-DL116           =               CDUYD
-DL117           =               CDUZD
-DL118           =               CDUY
-DL119           =               CDUZ
-DL120           =               CDUT
-DL121           =               OMEGAQD                 # LMORBM04
-DL122           =               OMEGARD
-DL123           =               FAILREG
-DL124           =               DAPBOOLS
-DL125           =               OMEGAQ                  # LMORBM05
-DL126           =               OMEGAR
-DL127           =               CDUYD
-DL128           =               CDUZD
-DL129           =               CDUY
-DL130           =               CDUZ
-DL131           =               CDUT
-DL132           =               ALPHAR
-DL133           =               NEGTORKP
 
 ## Page 203
 # LM COAST AND ALIGNMENT DOWNLIST
@@ -235,41 +197,16 @@ LMCSTA03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
 
 LMCSTA04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
 
-LMCSTA05        EQUALS          LMORBM05		# COMMON DOWNLIST DATA
+LMCSTA05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
 
 LMCSTA06        2DNADR          X789                    # X789+0...+3              COMMON DATA
-                -1DNADR         LASTYCMD                # LASTYCMD,LASTXCMD
+               -1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
 
 LMCSTA07        3DNADR          OGC                     # OGC,+1,IGC,+1,MGC,+1     COMMON DATA
                 1DNADR          BESTI                   # BESTI,BESTJ
 # Page 204                
                 3DNADR          STARSAV1                # STARSAV1+0...+5
                -3DNADR          STARSAV2                # STARSAV2+0...+5
-
-#     ---------------------------------------------------------
-# *** UNREFERENCED LOCATIONS USED IN LIST 2
-# *** UPDATE THIS LIST WHEN ANY CHANGES ARE MADE TO DOWNLINK LISTS.
-
-#                               LOCATION                LIST NAME
-DL201           =               NEGTORKU                # COSTALIN
-DL202           =               POSTORKV
-DL203           =               NEGTORKV
-DL204           =               DNRRDOT
-DL205           =               DNLRVELY
-DL206           =               DNLRVELZ
-DL207           =               DNLRALT
-DL208           =               TIME1
-DL209           =               DUMLOOPS
-DL210           =               PIPAX
-DL211           =               PIPAY
-DL212           =               PIPAZ
-DL213           =               LASTXCMD
-DL214           =               CSMMASS
-DL215           =               IMODES33
-DL216           =               LASTXCMD                # LMCSTA06
-DL217           =               IGC                     # LMCSTA07
-DL218           =               MGC
-DL219           =               BESTJ
 
 ## Page 205
 # LM RENDEZVOUS AND PRE-THRUST DOWNLIST
@@ -280,8 +217,9 @@ RENDEZVU        EQUALS                                  # SEND ID BY SPECIAL COD
                 DNPTR           LMREND01                # COLLECT SNAPSHOT
                 6DNADR          DNTMBUFF                # SEND SNAPSHOT
                 DNPTR           LMREND07                # COLLECT SNAPSHOT
-                DNPTR           LMREND08                # SEND    SNAPSHOT
+                4DNADR          DNTMBUFF                # SEND SNAPSHOT
                 1DNADR          DELLT4                  # DELLT4,+1
+                3DNADR          RTARG                   # RTARG +0...+5
                 3DNADR          DELVSLV                 # DELVSLV+0...+5
                 1DNADR          TCSI                    # TCSI,+1
                 3DNADR          DELVEET1                # DELVEET+0...+5
@@ -331,35 +269,8 @@ LMREND06        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
 LMREND07       -1DNADR          AIG                     # AIG,AMG       SNAPSHOT
                 1DNADR          AOG                     # AOG,TRKMKCNT
                 1DNADR          TANGNB                  # TANGNB,+1
-                1DNADR          TANGNB          +1      # TANGNB+1,GARBAGE
-                1DNADR          RANGRDOT                # DNRRANGE,DNRRDOT
-                1DNADR          RANGRDOT        +1      # DNRRDOT,GARBAGE
-                1DNADR          AGSCODE                 # AGSCODE,GARBAGE
-               -1DNADR          MKTIME                  # MKTIME,+1
-LMREND08        6DNADR          DNTMBUFF                # SEND SNAPSHOT
-               -1DNADR          DNTMBUFF        +12D    # SEND SNAPSHOT
-
-#     ---------------------------------------------------------
-# *** UNREFERENCED LOCATIONS USED IN LIST 3
-#                                                         LOCATION        LIST NAME
-
-# *** UPDATE THIS LIST WHEN ANY CHANGES ARE MADE TO DOWNLINK LISTS.
-
-
-DL301           =               DUMLOOPS                # RENDEZVU
-DL302           =               TIME1
-DL303           =               NEGTORKU
-DL304           =               POSTORKV
-DL305           =               NEGTORKV
-DL306           =               PIPAX
-DL307           =               PIPAY
-DL308           =               PIPAZ
-DL309           =               LASTXCMD
-DL310           =               CSMMASS
-DL311           =               IMODES33
-DL312           =               AMG                     # LMREND07
-DL313           =               TRKMKCNT
-DL314           =               DNRRDOT
+                1DNADR          MKTIME                  # MKTIME,+1
+               -1DNADR          RANGRDOT                # DNRRANGE,DNRRDOT
 
 ## Page 207
 # LM DESCENT AND ASCENT DOWNLIST
@@ -367,9 +278,9 @@ DL314           =               DNRRDOT
 #     -----------------  CONTROL LIST  --------------------------
 
 DESC/ASC        EQUALS                                  # SEND ID BY SPECIAL CODING
-                1DNADR		SPARE
-                1DNADR		SPARE
-                1DNADR		SPARE
+                1DNADR          SPARE
+                1DNADR          SPARE
+                1DNADR          SPARE
                 DNPTR           LMDSAS08                # COLLECT SNAPSHOT
                 1DNADR          DNTMBUFF                # SEND SNAPSHOT
                 DNPTR           LMDSAS07                # COLLECT SNAPSHOT
@@ -378,7 +289,7 @@ DESC/ASC        EQUALS                                  # SEND ID BY SPECIAL COD
                 3DNADR          UNFC/2                  # UNFC/2+0...+5
                 3DNADR          VGVECT                  # VGVECT+0...+5
                 1DNADR          TTF/8                   # TTF/8,+1
-                1DNADR          DELTAH			# DELTAH,+1
+                1DNADR          DELTAH                  # DELTAH,+1
                 3DNADR          RLS                     # RLS+0...+5
                 1DNADR          ZDOTD                   # ZDOTD,+1
                 DNPTR           LMDSAS09                # COMMON DATA
@@ -421,30 +332,11 @@ LMDSAS07       -1DNADR          HMEASDL                 # HMEASDL,+1
                 1DNADR          AOG                     # AOG,VSELECT
                 1DNADR          LATVMETR                # LATVMETR,FORVMETR
                 1DNADR          SERVDURN                # SERVDURN,DUMLOOPS
-               -1DNADR          LRTIMEDL		# LRTIMEDL,+1
+               -1DNADR          MKTIME                  # MKTIME,+1
 
 LMDSAS08       -1DNADR          GTCTIME                 # GTCTIME,+1
-               -1DNADR          FC			# FC, GARBAGE
+               -1DNADR          FC                      # FC, GARBAGE
 LMDSAS09        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
-
-#     ---------------------------------------------------------
-# *** UNREFERENCED LOCATIONS USED IN LIST 4
-# *** UPDATE THIS LIST WHEN ANY CHANGES ARE MADE TO DOWNLINK LISTS.
-
-
-#                                                         LOCATION          LIST NAME
-
-DL401           =               TIME1                   # DESC/ASC
-DL402           =               NEGTORKU
-DL403           =               POSTORKV
-DL404           =               NEGTORKV
-DL405           =               LASTXCMD
-DL406           =               CSMMASS
-DL407           =               IMODES33
-DL408           =               AMG                     # LMDSAS07
-DL409           =               VSELECT
-DL410           =               FORVMETR
-DL411           =               DUMLOOPS
 
 ## Page 209
 # LM LUNAR SURFACE ALIGN DOWNLIST
@@ -474,10 +366,10 @@ SURFALIN        EQUALS                                  # SEND ID BY SPECIAL COD
                 1DNADR          LEMMASS                 # LEMMASS,CSMMASS
                 1DNADR          IMODES30                # IMODES30,IMODES33
                 1DNADR          TIG                     # TIG,+1
-                2DNADR		OMEGAP			# OMEGAP,OMEGAQ,OMEGAR,GARBAGE
-                2DNADR		CDUXD			# CDUXD,CDUYD,CDUZD,GARBAGE
-                2DNADR		CDUX			# CDUX,CDUY,CDUZ,CDUT
-                1DNADR		ALPHAQ			# ALPHAQ,ALPHAR		   COMMON DATA
+                2DNADR          OMEGAP                  # OMEGAP,OMEGAQ,OMEGAR,GARBAGE
+                2DNADR          CDUXD                   # CDUXD,CDUYD,CDUZD,GARBAGE
+                2DNADR          CDUX                    # CDUX,CDUY,CDUZ,CDUT
+                1DNADR          ALPHAQ                  # ALPHAQ,ALPHAR            COMMON DATA
                 1DNADR          AOTCODE                 # AOTCODE,GARBAGE
                 DNPTR           LMLSAL09                # COMMON DATA
                 DNPTR           LMLSAL06                # COMMON DATA
@@ -498,32 +390,10 @@ LMLSAL05        EQUALS          LMCSTA05                # COMMON DOWNLIST DATA
 LMLSAL06        EQUALS          LMORBM06                # COMMON DOWNLIST DATA
 ## Page 210
 
-LMLSAL07        EQUALS		LMREND07		# COMMON DOWNLIST DATA
+LMLSAL07        EQUALS          LMREND07                # COMMON DOWNLIST DATA
 
 LMLSAL08        EQUALS          LMCSTA07                # COMMON DOWNLIST DATA
 LMLSAL09        EQUALS          LMORBM09                # COMMON DOWNLIST DATA
-#     ---------------------------------------------------------
-# *** UNREFERENCED LOCATIONS USED IN LIST 5
-# *** UPDATE THIS LIST WHEN ANY CHANGES ARE MADE TO DOWNLINK LISTS.
-
-
-#                                                         LOCATION           LIST NAME
-
-DL501           =               ZNBSAV                  # SURFALIN
-DL502           =               LASTXCMD
-DL503           =               TIME1
-DL504           =               LASTXCMD
-DL505           =               CSMMASS
-DL506           =               IMODES33
-DL507           =               OMEGAQ
-DL508           =               OMEGAR
-DL509           =               CDUYD
-DL510           =               CDUZD
-DL511           =               CDUY
-DL512           =               CDUZ
-DL513           =               CDUT
-DL514           =               ALPHAR
-DL515           =               SPIRAL
 
 ## Page 211
 # LM AGS INITIALIZATION AND UPDATE DOWNLIST
@@ -569,25 +439,6 @@ LMAGSI04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
 
 LMAGSI05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
 
-#     ---------------------------------------------------------
-
-# *** UNREFERENCED LOCATIONS USED IN LIST 6
-# *** UPDATE THIS LIST WHEN ANY CHANGES ARE MADE TO DOWNLINK LISTS.
-
-#                                                         LOCATION           LIST NAME
-
-## Page 212
-DL601           =               UPOLDMOD                # AGSI/UPD
-DL602           =               UPVERB
-DL603           =               UPCOUNT
-DL604           =               UPBUFF
-DL605           =               TIME1
-DL606           =               NEGTORKU
-DL607           =               POSTORKV
-DL608           =               NEGTORKV
-DL609           =               DUMLOOPS
-DL610           =               CSMMASS
-DL611           =               IMODES33
 # -------------------------------------------------------------------
 DNTABLE         GENADR          COSTALIN                # LM COAST AND ALIGN DOWNLIST
                 GENADR          AGSI/UPD                # LM AGS INITIALIZATION/UPDATE DOWNLIST
