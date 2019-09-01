@@ -323,7 +323,7 @@ def checkLOC(extra = 0):
 		 	addError(lineNumber, "Error: No room left in memory sector")
 		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]):
 			tLoc = DLOC
-			addError(lineNumber, "Warning: Automatically skipping already-used memory location")
+			addError(lineNumber, "Warning: Skipping memory locations already used")
 			while tLoc < 256 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc]):
 				tLoc += 1
 			if tLoc >= 256:
@@ -346,7 +346,7 @@ def checkLOC(extra = 0):
 			# to find address for the TRA or HOP to take us to, always searching
 			# upward.
 			if lastORG:
-				addError(lineNumber, "Warning: Skipping past already-used memory")
+				addError(lineNumber, "Warning: Skipping memory locations already used")
 			else:
 				used[IM][IS][S][LOC] = True
 				autoSwitch = True
@@ -629,7 +629,7 @@ for n in range(0, len(lines)):
 		# logical expressions with scales of B0 anyway.
 		ofields = fields[2].split("=")
 		if len(ofields) != 2 or ofields[0] not in constants or ofields[1][:1] != "(":
-			addError(n, "Error: Misformed IF")
+			addError(n, "Error: Malformed IF")
 			continue
 		value,error = expression.yaEvaluate(ofields[1], constants)
 		if error != "":
@@ -718,7 +718,7 @@ for lineNumber in range(0, len(expandedLines)):
 				synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
 				if fields[0] in forms:
-					addError(n, "Warning: Form already defined")
+					addError(n, "Error: Form already defined")
 				forms[fields[0]] = ofields
 			elif fields[1] == "ORGDD":
 				lastORG = True
@@ -826,7 +826,7 @@ for lineNumber in range(0, len(expandedLines)):
 										found = True
 										break
 							if not found:
-								addError(lineNumber, "Warning: Symbol not found")
+								addError(lineNumber, "Error: Symbol not found")
 					elif len(ofields) != 2:
 						addError(lineNumber, "Error: Wrong number of CDS/CDSD arguments")
 					elif not useDat:
@@ -858,7 +858,7 @@ for entry in inputFile:
 			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
 			symbols[lhs]["isCDS"] = inputLine["isCDS"]
 		else:
-			addError(lineNumber, "Warning: Symbol location unknown")
+			addError(lineNumber, "Error: Symbol location unknown")
 
 # A mini-pass to set up SYN symbols.
 for n in range(0, len(lines)):
@@ -872,7 +872,7 @@ for n in range(0, len(lines)):
 		line = line[1:]
 	if len(fields) >= 3 and fields[0] != "" and fields[1] == "SYN":
 		if fields[2] not in symbols:
-			addError(n, "Warning: Synonym not found")
+			addError(n, "Error: Synonym not found")
 		else:
 			symbols[fields[0]] = symbols[fields[2]]
 
@@ -969,13 +969,16 @@ for entry in inputFile:
 			a81 = "%03o" % loc
 			a9 = "%o" % residual
 			op = "%02o" % operators["HOP"]["opcode"]
+			ds = DS
+			if residual != 0:
+				ds = 0o17
 			storeAssembled(hopConstant, {
 				"IM": IM,
 				"IS": IS,
 				"S": residual,
 				"LOC": loc,
 				"DM": DM,
-				"DS": DS,
+				"DS": ds,
 				"DLOC": loc
 			}, True)
 		storeAssembled(assembled, {"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
@@ -1247,13 +1250,16 @@ for entry in inputFile:
 				assembled = operators["HOP"]["opcode"]
 				op = "%02o" % assembled
 				#addError(lineNumber, "Info: Converting TRA to HOP at %o,%02o,%03o" % (DM, DS, loc))	
+				ds = DS
+				if residual != 0:
+					ds = 0o17
 				storeAssembled(hopConstant, {
 					"IM": IM,
 					"IS": IS,
 					"S": residual,
 					"LOC": loc,
 					"DM": DM,
-					"DS": DS,
+					"DS": ds,
 					"DLOC": loc
 				})
 				star = True
@@ -1289,13 +1295,16 @@ for entry in inputFile:
 						loc -= 1
 					roofed[IM][IS].append(operand)
 					loc2,residual2 = allocateNameless(lineNumber, constantString, False)
+					ds = DS
+					if residual2 != 0:
+						ds = 0o17
 					storeAssembled(hopConstant2, {
 						"IM": IM,
 						"IS": IS,
 						"S": residual2,
 						"LOC": loc2,
 						"DM": DM,
-						"DS": DS,
+						"DS": ds,
 						"DLOC": loc2
 					})
 					assembled2 = operators["HOP"]["opcode"]
@@ -1323,7 +1332,7 @@ for entry in inputFile:
 					# The operand is a variable, as it ought to be.
 					if hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17):
 						if not useDat or S == 1:
-							addError(lineNumber, "Warning: Operand not in current data-memory sector or residual sector")
+							addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
 					loc = hop2["DLOC"]
 					if hop2["DS"] == 0o17:
 						residual = 1
@@ -1348,9 +1357,9 @@ for entry in inputFile:
 						constantString = "%09o" % hopConstant
 						#print("A1: allocateNameless " + constantString + " " + operand)
 						loc,residual = allocateNameless(lineNumber, constantString)
-						#print("A2: %o,%20o,%03o %o" % (DM, DS, loc, residual))
+						#print("A2: %o,%02o,%03o %o" % (DM, DS, loc, residual))
 						ds = DS
-						if loc > 0o377 or DS == 0o17:
+						if loc > 0o377 or DS == 0o17 or residual != 0:
 							loc = loc & 0o377
 							residual = 1
 							ds = 0o17
@@ -1361,7 +1370,7 @@ for entry in inputFile:
 							"S": residual,
 							"LOC": loc,
 							"DM": DM,
-							"DS": DS,
+							"DS": ds,
 							"DLOC": loc
 						})
 		elif operator == "CDS":
@@ -1394,7 +1403,7 @@ for entry in inputFile:
 					loc,residual = allocateNameless(lineNumber, constantString)
 					#print("B2: %o,%20o,%03o %o" % (DM, DS, loc, residual))
 					ds = DS
-					if loc > 0o377 or DS == 0o17:
+					if loc > 0o377 or DS == 0o17 or residual != 0:
 						loc = loc & 0o377
 						residual = 1
 						ds = 0o17
@@ -1405,7 +1414,7 @@ for entry in inputFile:
 						"S": residual,
 						"LOC": loc,
 						"DM": DM,
-						"DS": DS,
+						"DS": ds,
 						"DLOC": loc
 					})
 			elif operand.isdigit():
@@ -1415,7 +1424,7 @@ for entry in inputFile:
 				ds = int(constants[operand][2], 8)
 				dloc = int(constants[operand][3], 8)
 				if DM != DM or DS != DS:
-					addError(lineNumber, "Warning: Operand not in current data-memory sector or residual sector")
+					addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
 				else:
 					loc = dloc
 					if ds == 0o17:
@@ -1427,7 +1436,7 @@ for entry in inputFile:
 				if hop2["inDataMemory"]:
 					if hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17):
 						if not useDat or S == 1:
-							addError(lineNumber, "Warning: Operand not in current data-memory sector or residual sector")
+							addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
 					loc = hop2["DLOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier
@@ -1438,7 +1447,7 @@ for entry in inputFile:
 				else:
 					if hop2["IM"] != DM or hop2["IS"] != DS:
 						if not useDat or S == 1:
-							addError(lineNumber, "Warning: Operand not in current data-memory sector")
+							addError(lineNumber, "Error: Operand not in current data-memory sector")
 					loc = hop2["LOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier
