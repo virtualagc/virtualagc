@@ -51,6 +51,9 @@
 # is called directly.
 
 import sys
+from ibm360math import *
+
+nativeFloat = True
 
 # Function to pull a numeric literal constant from a string.
 # The leading portion of the input string is known to be a number
@@ -301,21 +304,45 @@ def yaEvaluate(string, constants):
 			rpn[-1]["number"] = -rpn[-1]["number"]
 		elif token == "B+":
 			if ("scale" in rpn[-2] and "scale" in rpn[-1]) and rpn[-2]["scale"] != rpn[-1]["scale"]:
-				error = "Scale of terms doesn't match"
-			rpn[-2]["number"] += rpn[-1]["number"]
+				error = "Scale of terms doesn't match"	
+			if nativeFloat:
+				rpn[-2]["number"] += rpn[-1]["number"]
+			else:
+				v1 = floatToIbm(rpn[-2]["number"])
+				v2 = floatToIbm(rpn[-1]["number"])
+				v1 = ibmAdd(v1, v2)
+				rpn[-2]["number"] = ibmToFloat(v1)
 			rpn.pop()
 		elif token == "B-":
 			if ("scale" in rpn[-2] and "scale" in rpn[-1]) and rpn[-2]["scale"] != rpn[-1]["scale"]:
 				error = "Scale of terms doesn't match"
-			rpn[-2]["number"] -= rpn[-1]["number"]
+			if nativeFloat:
+				rpn[-2]["number"] -= rpn[-1]["number"]
+			else:
+				v1 = floatToIbm(rpn[-2]["number"])
+				v2 = floatToIbm(rpn[-1]["number"])
+				v1 = ibmAdd(v1, v2, True)
+				rpn[-2]["number"] = ibmToFloat(v1)
 			rpn.pop()
 		elif token == "*":
-			rpn[-2]["number"] *= rpn[-1]["number"]
+			if nativeFloat:
+				rpn[-2]["number"] *= rpn[-1]["number"]
+			else:
+				v1 = floatToIbm(rpn[-2]["number"])
+				v2 = floatToIbm(rpn[-1]["number"])
+				v1 = ibmMultiply(v1, v2)
+				rpn[-2]["number"] = ibmToFloat(v1)
 			if "scale" in rpn[-2] and "scale" in rpn[-1]:
 				rpn[-2]["scale"] += rpn[-1]["scale"]
 			rpn.pop()
 		elif token == "/":
-			rpn[-2]["number"] /= rpn[-1]["number"]
+			if nativeFloat:
+				rpn[-2]["number"] /= rpn[-1]["number"]
+			else:
+				v1 = floatToIbm(rpn[-2]["number"])
+				v2 = floatToIbm(rpn[-1]["number"])
+				v1 = ibmDivide(v1, v2)
+				rpn[-2]["number"] = ibmToFloat(v1)
 			if "scale" in rpn[-2] and "scale" in rpn[-1]:
 				rpn[-2]["scale"] -= rpn[-1]["scale"]
 			rpn.pop()

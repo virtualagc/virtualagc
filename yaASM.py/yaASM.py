@@ -38,7 +38,7 @@
 
 import sys
 # The next line imports expression.py.
-import expression
+from expression import *
 
 #----------------------------------------------------------------------------
 #	Definitions of global variables.
@@ -486,7 +486,7 @@ for n in range(0, len(lines)):
 				addError(n, "Error: No end parenthesis in expression")
 				break
 			index2 += 1
-			value,error = expression.yaEvaluate(fields2[index:index2], constants)
+			value,error = yaEvaluate(fields2[index:index2], constants)
 			if error != "":
 				addError(n, error)
 				break
@@ -495,7 +495,7 @@ for n in range(0, len(lines)):
 			expandedLines[n] = [line.replace(fields[2], fields2)]
 			fields[2] = fields2
 	if len(fields) >= 3 and fields[1] in ["TABLE", "DEC"] and fields[2][:1] == "(":
-		value,error = expression.yaEvaluate(fields2, constants)
+		value,error = yaEvaluate(fields2, constants)
 		if error != "":
 			addError(n, error)
 			break
@@ -532,7 +532,7 @@ for n in range(0, len(lines)):
 		line = "%-8s%-8s%s" % (fields[0], op, "%s,%s" % (constant[1], constant[2]))
 		expandedLines[n] = [line]
 	elif len(fields) >= 3 and fields[0] != "" and fields[1] == "EQU":
-		value,error = expression.yaEvaluate(fields[2], constants)
+		value,error = yaEvaluate(fields[2], constants)
 		if error != "":
 			addError(n, "Error: " + error)
 		else:
@@ -594,7 +594,7 @@ for n in range(0, len(lines)):
 				if argNum > 0 and argNum <= numArgs:
 					operand = ofields[argNum - 1]
 				if operand[:2] == "=(":
-					value,error = expression.yaEvaluate(operand[1:], constants)
+					value,error = yaEvaluate(operand[1:], constants)
 					if error != "":
 						addError(n, "Error: " + error)
 						continue
@@ -605,7 +605,7 @@ for n in range(0, len(lines)):
 					lhs = fields[0]
 				expandedLines[n].append("%-8s%-8s%s" % (lhs, operator, operand))
 	elif len(fields) >= 3 and fields[2][:2] == "=(":
-		value,error = expression.yaEvaluate(fields[2][1:], constants)
+		value,error = yaEvaluate(fields[2][1:], constants)
 		if error != "":
 			addError(n, "Error: " + error)
 		else:
@@ -631,7 +631,7 @@ for n in range(0, len(lines)):
 		if len(ofields) != 2 or ofields[0] not in constants or ofields[1][:1] != "(":
 			addError(n, "Error: Malformed IF")
 			continue
-		value,error = expression.yaEvaluate(ofields[1], constants)
+		value,error = yaEvaluate(ofields[1], constants)
 		if error != "":
 			addError(n, "Error: " + error)
 			continue
@@ -713,7 +713,14 @@ for lineNumber in range(0, len(expandedLines)):
 				else:
 					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
-				checkDLOC(int(fields[2]))
+				try:
+					checkDLOC(int(fields[2]))
+				except:
+					print(lineNumber)
+					print(line)
+					print(fields)
+					print(ofields)
+					sys.exit(1)
 			elif fields[0] != "" and fields[1] == "SYN":
 				synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
@@ -1052,6 +1059,7 @@ for entry in inputFile:
 			storeAssembled(0, bssHop)
 			bssHop["DLOC"] += 1
 	elif operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
+		assembled = 0
 		if operator in forms:
 			formDef = forms[operator]
 			ofields = operand.split(",")
@@ -1167,8 +1175,8 @@ for entry in inputFile:
 			addError(lineNumber, "Error: Invalid operand")
 		else:
 			assembled = int(constantString, 8)
-			# Put the assembled value wherever it's supposed to 
-			storeAssembled(assembled, inputLine["hop"])
+		# Put the assembled value wherever it's supposed to 
+		storeAssembled(assembled, inputLine["hop"])
 	elif operator in operators:
 		inDataMemory = False
 		loc = 0
