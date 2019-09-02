@@ -19,6 +19,9 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-01 MAS  Updated for Luminary 178. Added clearing
+##                              of R12RDFLG, zeroing of R1SAVE, and
+##                              initialization of SAMPLIM to STARTSB2.
 
 ## Page 218
                 BANK            10
@@ -446,6 +449,10 @@ STARTSB2        CAF             OCT30001                # DURING SOFTWARE RESTAR
                                                         # TRIM DRIVES. LEAVE RR LOCKON ENABLE
                                                         # ALONE.
 
+                CS              R12RDBIT                # R12RDFLG CLEARED TO ESCAPE FROM POSSIBLE
+                MASK            FLGWRD11                #  "CCS NEWJOB" LOOP IN VUPDAT SEC. OF R12
+                TS              FLGWRD11
+
                 CS              NORRMBIT                # ENABLE R25.
                 MASK            FLAGWRD5
                 TS              FLAGWRD5
@@ -537,6 +544,7 @@ DSPOFF          TS              MPAC                    # R1,R2,R3).
                 TS              DELAYLOC
                 TS              DELAYLOC        +1
                 TS              DELAYLOC        +2
+                TS              R1SAVE
                 TS              INLINK
                 TS              DSPCNT
                 TS              CADRSTOR
@@ -559,6 +567,8 @@ DSPOFF          TS              MPAC                    # R1,R2,R3).
                 CAF             NOUTCON
                 TS              NOUT
 
+                CS              ONE
+                TS              SAMPLIM
                 CAF             BIT6
                 MASK            IMODES33                # LEAVE BIT 6 UNCHANGED
                 AD              IM33INIT                # NO PIP OR TM FAILS.BIT6=0 IN THIS WORD.
