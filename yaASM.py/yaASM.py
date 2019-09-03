@@ -96,7 +96,8 @@ synonyms = {}
 nameless = {}
 lastORG = False
 inDataMemory = True
-
+lastWasVEC = False
+lastWasMAT = False
 symbols = {}
 lastLineNumber = -1
 
@@ -670,7 +671,7 @@ if False:
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
 		inDataMemory = True
-		inputLine = { "raw": line }
+		inputLine = { "raw": line, "VEC": False, "MAT": False }
 		isCDS = False
 		    
 		# Split the line into fields.
@@ -684,13 +685,22 @@ for lineNumber in range(0, len(expandedLines)):
 		if inputLine["raw"][:1] in ["*", "#"]:
 			fields = []
 		
+		if lastWasVEC:
+			inputLine["VEC"] = True
+			lastWasVEC = False
+		elif lastWasMAT:
+			inputLine["MAT"] = True
+			lastWasMAT = False
+		
 		if len(fields) >= 2 and fields[1] == "VEC":
+			lastWasVEC = True
 			while DLOC < 256:
 				DLOC = (DLOC + 3) & ~3
 				checkDLOC()
 				if (DLOC & 3) == 0:
 					break
 		elif len(fields) >= 2 and fields[1] == "MAT":
+			lastWasMAT = True
 			while DLOC < 256:
 				DLOC = (DLOC + 15) & ~15
 				checkDLOC()
@@ -864,6 +874,8 @@ for entry in inputFile:
 			symbols[lhs] = inputLine["hop"]
 			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
 			symbols[lhs]["isCDS"] = inputLine["isCDS"]
+			symbols[lhs]["VEC"] = inputLine["VEC"]
+			symbols[lhs]["MAT"] = inputLine["MAT"]
 		else:
 			addError(lineNumber, "Error: Symbol location unknown")
 
@@ -1163,10 +1175,24 @@ for entry in inputFile:
 					residual1 = 1
 				if symbol0["DS"] != DS:
 					residual0 = 1
-				assembled1 |= (residual1 << 4) | (symbol1["LOC"] << 5)
-				assembled0 |= (residual0 << 4) | (symbol0["LOC"] << 5)
-				assembled1 = assembled1 | 0o140
-				assembled0 = assembled0 | 0o140
+				loc1 = symbol1["LOC"]
+				loc0 = symbol0["LOC"]
+				#print(ofields[1] + " " + str(symbol1))
+				#print(ofields[3] + " " + str(symbol0))
+				if symbol1["MAT"]:
+					loc1 = loc1 | 3
+				elif symbol1["VEC"]:
+					loc1 = loc1 | 3
+				else:
+					loc1 = loc1 | 3
+				if symbol0["MAT"]:
+					loc0 = loc0 | 3
+				elif symbol0["VEC"]:
+					loc0 = loc0 | 3
+				else:
+					loc0 = loc0 | 3
+				assembled1 |= (residual1 << 4) | (loc1 << 5)
+				assembled0 |= (residual0 << 4) | (loc0 << 5)
 				hopConstant = (assembled1 << 14) | (assembled0 << 1)
 				constantString = "%09o" % hopConstant
 		else:
