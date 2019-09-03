@@ -19,6 +19,12 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-03 MAS  Updated for Luminary 178. Replaced RR
+##                              bit clearing with calls to CLRADMOD,
+##                              restored a missing TCF GOPIN, restored
+##                              displays in LRON, restored original coding
+##                              for TRMTRAK1, and moved DSPRRLOS and V16N56
+##                              back to their original bank.
 
 ## Page 268
                 BANK    7
@@ -301,13 +307,7 @@ IMUCOARV        VN      4100
 
 RRDESNBK        TC      RDRUSECK
                 TC      TESTXACT
-                CS	BIT10+15		# TERMINATE PRESENT DESIGNATION.
-REFTAG3		=	DESIGBIT
-REFTAG4		=	CDESBIT
-		INHINT				# RELINT DONE IN GOXDSPF
-		MASK	RADMODES		# RESET CONTINUOUS DESIGNATE BIT AND
-		TS	RADMODES		#   DESIGNATION IN PROGRESS BIT.                
-                
+                TC      CLRADMOD
                 CAF     VNLDRCDU                # ASK FOR GIMBAL ANGLES.
                 TC      BANKCALL
                 CADR    GOXDSPF
@@ -357,24 +357,14 @@ RRDESEND        CCS     RADMODES                # TERMINATE CONTINUOUS DESIGNATE
                 TCF     GOPIN
                 TCF     GOPIN
                 TCF     +1
-REMODCHK        CS      RADMODES                # CHECK FOR REMODE OR REPOSITION
-                MASK    BIT14&11
-REFTAG1         =       REMODBIT
-REFTAG2         =       REPOSBIT
-                CCS	A
-                TCF     NOREMODE                # NO
-                CAF     1SEC                    # YES- WAIT 1 SECOND AND CHECK AGAIN
-                TC      BANKCALL
-                CADR    DELAYJOB
-                TC      REMODCHK
-NOREMODE        TC      CLRADMOD
+                TC      CLRADMOD
                 CAF     1SEC
                 TC      BANKCALL
                 CADR    DELAYJOB
                 TC      DOWNFLAG                # ENABLE R25 GIMBAL MONITOR
                 ADRES   NORRMON
-BIT14&11        =       PRIO22
-		BANK	23
+                TCF     GOPIN
+                BANK    23
                 SETLOC  EXTVB1
                 BANK
                 COUNT*  $$/EXTVB
@@ -424,15 +414,61 @@ V04N1272        VN      412
                 BANK
                 COUNT*  $$/EXTVB
 
-LRON            TC      UPFLAG                  # PERMIT INCORPORATION OF LR DATA      V57
+LRON            TC      TESTXACT
+
+DSP68           CAF     V06N68
+                TC      BANKCALL
+                CADR    GOMARKFR
+                TC      B1+5OFF
+                TC      SET57
+                TC      ENDOFJOB
+                
+WAIT68          TC      BANKCALL
+                CADR    2SECDELY
+                
+                CAF     OCT21
+                MASK    EXTVBACT
+                EXTEND
+                BZF     ENDEXT
+                
+                MASK    BIT5
+                CCS     A
+                TCF     DSP68
+                
+DSP5068         CAF     V50N68
+                TC      BANKCALL
+                CADR    GOMARK3R -1
+                TCF     B1+5OFF
+                TCF     B1+5OFF
+                TCF     RESET57
+                
+                TCF     WAIT68
+                
+SET57           TC      UPFLAG
                 ADRES   LRINH
-                TC      GOPIN
+                
+                TCF     B5OFF
+                
+RESET57         TC      DOWNFLAG
+                ADRES   LRINH
+                
+                CAF     OCT25
+                TC      B5OFF +2
+                
+B1+5OFF         CS      OCT21
+                TCF     B5OFF +1
+                
+OCT21           EQUALS  ND1
+
+V06N68          VN      0668
+V50N68          =       V06N68
+
 
 LROFF           TC      DOWNFLAG                # INHIBIT INCORPORATION OF LR DATA     V58
                 ADRES   LRINH
                 TC      GOPIN
 
-TEROFF          TC      UPFLAG                  # TURN OFF TERRAIN MODEL	       V68
+TEROFF          TC      UPFLAG                  # BYPASS TERRAIN MODEL
                 ADRES   NOTERFLG
                 TCF     GOPIN
 
@@ -1063,11 +1099,11 @@ TRMTRACK        CA      BITS9+7         # IS REND OR P25 FLAG ON
                 EXTEND
                 BZF     GOPIN           # NO
 
-		TC	DOWNFLAG
-		ADRES	RNDVZFLG
-		
-		TC	DOWNFLAG
-		ADRES	P25FLAG
+                TC      DOWNFLAG
+                ADRES   RNDVZFLG
+                
+                TC      DOWNFLAG
+                ADRES   P25FLAG
 
                 TC      DOWNFLAG        # ENSURE SEARCH FLAG IS OFF
                 ADRES   SRCHOPTN
@@ -1087,12 +1123,15 @@ BITS9+7         OCT     500
 
                 COUNT*  $$/EXTVB
 
-TRMTRAK1        TC      INTPRET
-                CLEAR   CLEAR
-                        UPDATFLG	# CLEAR UPDATE FLAG
-                        TRACKFLG	# CLEAR TRACK FLAG
-                CLEAR	CALL
-                	IMUSE
+TRMTRAK1        TC      DOWNFLAG        
+                ADRES   UPDATFLG        # UPDATE FLAG DOWN
+                TC      DOWNFLAG
+                ADRES   TRACKFLG        # TRACK FLAG DOWN
+                TC      DOWNFLAG
+                ADRES   IMUSE
+                
+                TC      INTPRET
+                CALL
                         INTSTALL        # DONT INTERRUPT INTEGRATION
                 EXIT
 
@@ -1304,7 +1343,7 @@ MSKDATR1        MASK    DSPLYMSK
                 TCF     ENDEXT          # V34E  TERMINATE
                 TCF     DPDAT1          # V33E  PROCEED
                 TCF     CHKDATA1        # E     NEW DATA    CHECK AND REDISPLAY
-                CAF     REVCNT		# BITS 2 & 3:  BLANKS R2 & R3.
+                CAF     REVCNT          # BITS 2 & 3:  BLANKS R2 & R3.
                 TC      BLANKET
                 TCF     ENDOFJOB
 FORCEONE        CAF     BIT13
@@ -1582,7 +1621,7 @@ VERB85          TC      TESTXACT
                 TC      POSTJUMP
                 CADR    DSPRRLOS
 
-                SETLOC  PINBALL2
+                SETLOC  PINBALL1
                 BANK
 
                 COUNT*  $$/EXTVB
@@ -1605,11 +1644,6 @@ DSPRRLOS        CAF     PRIO5
                 TC      BLANKET
                 TC      ENDOFJOB
 
-V16N56          VN      1656
-
-
-                SETLOC  PINBALL1
-                BANK
 
 RRLOSDSP        EXTEND
                 DCA     CDUT
@@ -1660,3 +1694,5 @@ RRLOSDSP        EXTEND
                 CCS     A
                 TC      RRLOSDSP
                 TC      ENDEXT
+
+V16N56          VN      1656
