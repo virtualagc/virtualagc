@@ -19,6 +19,9 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-03 MAS  Updated for Luminary 178. It is mostly
+##                              the same as Luminary 131 now, except for
+##                              scaling changes for noun 60.
 
 ## Page 306
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -75,7 +78,7 @@
 #                                                             USE ARITHDP1
 # 00110                           WEIGHT2 (XXXXX. LBS)        USE ARITH1
 # 00111                           POSITION5 (XXX.XX NAUTICAL MILES)
-#                                                             USE ARITHDP1
+#                                                             USE ARITHDP3
 # 01000                           POSITION4 (XXXX.X NAUTICAL MILES)
 #                                                             USE ARITHDP3
 # 01001                           VELOCITY2 (XXXXX. FT/SEC)   USE ARITHDP4
@@ -83,7 +86,7 @@
 # 01011                           ELEVATION DEGREES(89.999MAX) USE ARITH
 # 01100                           RENDEZVOUS RADAR RANGE (XXX.XX NAUT MI)
 #                                                             USE RR RANGE
-# 01101                           RENDEZVOUS RADAR RANGE RATE(XXXX.XFT/SEC
+# 01101                           RENDEZVOUS RADAR RANGE RATE(XXXXX.FT/SEC
 #                                                        USE RR RANGE RATE
 # 01110                           LANDING RADAR ALTITUDE(XXXXX.FEET)
 #                                                             USE ARITHDP1
@@ -109,9 +112,6 @@
 # 11011                           VELOCITY4 (XXXX.X FT/SEC)   USE ARITHDP2
 # 11100                           RADIANS (XX.XXX RADIANS)    USE ARITHDP4
 # 11101                           VELOCITY5 (XXXX.X FT/SEC)   USE ARITHDP3
-## The following two lines are marked as having been added between ZERLAID.000 and ZERLAID.001
-# 11110                           COMPUTED ALTITUDE 2 (XXXXX. FEET)
-#                                                             USE ARITHDP3
 # END OF SF CONSTANT CODE NUMBERS
 
 
@@ -295,8 +295,7 @@ NNADTAB         OCT     00000                   # 00 NOT IN USE
                                                 #    DELTA V TPI
                                                 #    DELTA V TPF
                 OCT     24071                   # 59 DELTA VELOCITY LOS
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     64074                   # 60 FORWARD VELOCITY - LPD ANGLE
+                OCT     24074                   # 60 FORWARD VELOCITY
                                                 #    ALTITUDE RATE
                                                 #    COMPUTED ALTITUDE
                 OCT     64077                   # 61 TIME TO GO IN BRAKING PHASE
@@ -304,9 +303,8 @@ NNADTAB         OCT     00000                   # 00 NOT IN USE
                                                 #    CROSS RANGE DISTANCE
                 OCT     64102                   # 62 ABSOLUTE VALUE OF VELOCITY
                                                 #    TIME TO IGNITION
-                                                #    DELTA V (ACCUMULATEDj
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     64105                   # 63 LR ALTITUDE MINUS COMPUTED ALTITUDE
+                                                #    DELTA V (ACCUMULATED)
+                OCT     24105                   # 63 ABSOLUTE VALUE OF VELOCITY
                                                 #    ALTITUDE RATE
                                                 #    COMPUTED ALTITUDE
                 OCT     64110                   # 64 TIME LEFT FOR REDESIGNATION-LPD ANGLE
@@ -319,11 +317,9 @@ NNADTAB         OCT     00000                   # 00 NOT IN USE
                 OCT     04121                   # 67 LRVX
                                                 #    LRVY
                                                 #    LRVZ
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     64124                   # 68 SM Z-AXIS RANGE TO LANDING SITE
+                OCT     64124                   # 68 SLANT RANGE TO LANDING SIGHT
                                                 #    TIME TO GO IN BRAKING PHASE
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                                                #    ABSOLUTE VALUE OF VELOCITY
+                                                #    LR ALTITUDE - COMPUTED ALTITUDE
                 OCT     24127                   # 69 LANDING SITE CORRECTION, Z-COMPONENT
                                                 #    LANDING SITE CORRECTION, Y-COMPONENT
                                                 #    LANDING SITE CORRECTION, X-COMPONENT
@@ -373,13 +369,9 @@ NNADTAB         OCT     00000                   # 00 NOT IN USE
                                                 #    FLIGHT PATH ANGLE
                 OCT     04234                   # 92 PCT FTP(10.5KLB) AT PRESENT THRUST
                                                 #    ALTITUDE RATE
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
                                                 #    COMPUTED ALTITUDE
                 OCT     04237                   # 93 DELTA GYRO ANGLES
-## The following three lines are marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     64242                   # 94 VGX (BODY)
-                                                #    ALTITUDE RATE
-                                                #    COMPUTED ALTITUDE
+                OCT     00000                   # 94    SPARE
                 OCT     0                       # 95 SPARE
                 OCT     0                       # 96 SPARE
                 OCT     04253                   # 97 SYSTEM TEST INPUTS
@@ -448,12 +440,12 @@ NNTYPTAB        OCT     00000                   # 00 NOT IN USE
                                                 #           (NO LOAD, DEC ONLY)
                 OCT     10000                   # 45 3COMP  WHOLE, MIN/SEC, DPDEG(360)
                                                 #           (NO LOAD, DEC ONLY)
-                OCT     00000                   # 46 2COMP  OCTAL ONLY
+                OCT     00000                   # 46 1COMP  OCTAL ONLY
                 OCT     00306                   # 47 2COMP WEIGHT2 FOR EACH
                                                 #           (DEC ONLY)
                 OCT     01367                   # 48 2COMP  TRIM DEG2 FOR EACH
                                                 #           (DEC ONLY)
-                OCT     00507                   # 49 3COMP  POS5, VEL3, WHOLE
+                OCT     00510                   # 49 3COMP  POS4, VEL3, WHOLE
                                                 #           (DEC ONLY)
                 OCT     0                       # 50        SPARE
                 OCT     00204                   # 51 2COMP  DPDEG(360), DPDEG(360)
@@ -471,15 +463,13 @@ NNTYPTAB        OCT     00000                   # 00 NOT IN USE
                                                 #           (DEC ONLY)
                 OCT     24512                   # 59 3COMP  VEL3 FOR EACH
                                                 #           (DEC ONLY)
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     75640                   # 60 3COMP  2INT, VEL5, COMP ALT 2
+                OCT     60535                   # 60 3COMP  VEL5, VEL3, COMP ALT
                                                 #           (DEC ONLY)
                 OCT     54000                   # 61 3COMP  MIN/SEC, MIN/SEC, POS7
                                                 #           (NO LOAD, DEC ONLY)
                 OCT     24012                   # 62 3COMP  VEL3, MIN/SEC, VEL3
                                                 #           (NO LOAD, DEC ONLY)
-## The following two lines are marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     60530                   # 63 3COMP  COMP ALT, VEL3, COMP ALT
+                OCT     60512                   # 63 3COMP  VEL3, VEL3, COMP ALT
                                                 #           (DEC ONLY)
                 OCT     60500                   # 64 3COMP  2INT, VEL3, COMP ALT
                                                 #           (NO LOAD, DEC ONLY)
@@ -487,8 +477,7 @@ NNTYPTAB        OCT     00000                   # 00 NOT IN USE
                 OCT     00016                   # 66 2COMP  LANDING RADAR ALT, POSITION
                                                 #           (NO LOAD, DEC ONLY)
                 OCT     53223                   # 67 3COMP LANDING RADAR VELX, Y, Z
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     24026                   # 68 3COMP  POS7, MIN/SEC, VEL3
+                OCT     60026                   # 68 3COMP  POS7, MIN/SEC, COMP ALT
                                                 #           (NO LOAD, DEC ONLY)
                 OCT     61430                   # 69 3COMP  COMP ALT, COMP ALT, COMP ALT
                                                 #           (DEC ONLY)
@@ -532,8 +521,7 @@ NNTYPTAB        OCT     00000                   # 00 NOT IN USE
                 OCT     10450                   # 91 3COMP  POS4, VEL2, DPDEG(360)
                 OCT     60500                   # 92 3COMP  WHOLE, VEL3, COMP ALT
                 OCT     06143                   # 93 3COMP  DPDEG(90) FOR EACH
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     60512                   # 94 3COMP  VEL3, VEL3, COMP ALT
+                OCT     00000                   # 94        SPARE
                 OCT     0                       # 95        SPARE
                 OCT     0                       # 96        SPARE
                 OCT     00000                   # 97 3COMP  WHOLE FOR EACH
@@ -604,9 +592,6 @@ SFINTAB         OCT     00006                   # WHOLE, DP TIME (SEC)
 
 ## Page 318
                 2DEC    .3048 E2 B-5            # VELOCITY5
-
-## The following line is marked as having been added between ZERLAID.000 and ZERLAID.001
-                2DEC    .3048 E5 B-15           # COMPUTED ALTITUDE 2
                 
                                                 # END OF SFINTAB
 
@@ -672,9 +657,6 @@ SFOUTAB         OCT     05174                   # WHOLE, DP TIME (SEC)
 
 ## The following line is circled in blue pencil.
                 2DEC*   3.280839896 E-2 B-2 *   # VELOCITY5
-
-## The following line is marked as having been added between ZERLAID.000 and ZERLAID.001
-                2DEC*   3.280839896 E-5 B8  *   # COMPUTED ALTITUDE 2
                 
                                                 # END OF SFOUTAB
 
@@ -709,7 +691,7 @@ IDADDTAB        ECADR   TTOGO                   # 40 MIN/SEC                    
                 ECADR   ROLLTIME                # 48 TRIM DEG2                        ARTH
                 OCT     0                       # 48 SPARE COMPONENT
 ## Page 320
-                ECADR   R22DISP                 # 49 POS5                             DP1
+                ECADR   R22DISP                 # 49 POS4                             DP3
                 ECADR   R22DISP +2              # 49 VEL3                             DP3
                 ECADR   WHCHREAD                # 49 WHOLE                            ARTH
                 OCT     0                       # 50 SPARE
@@ -742,21 +724,18 @@ IDADDTAB        ECADR   TTOGO                   # 40 MIN/SEC                    
                 ECADR   DVLOS                   # 59 VEL3                             DP3
                 ECADR   DVLOS +2                # 59 VEL3                             DP3
                 ECADR   DVLOS +4                # 59 VEL3                             DP3
-## The following three lines are marked as having changed between ZERLAID.000 and ZERLAID.001
-                ECADR   FUNNYDSP                # 60 2INT                             2INT
-                ECADR   ALTRATE                 # 60 VEL5                             DP3
-                ECADR   ALTITUDE                # 60 COMP ALT 2                       DP3
+                ECADR   FORVEL                  # 60 VEL5                             DP1
+                ECADR   HDOTDISP                # 60 VEL3                             DP3
+                ECADR   HCALC1                  # 60 COMP ALT                         DP1
                 ECADR   TTFDISP                 # 61 MIN/SEC                          M/S
                 ECADR   TTOGO                   # 61 MIN/SEC                          M/S
                 ECADR   OUTOFPLN                # 61 POS7                             DP4
                 ECADR   ABVEL                   # 62 VEL3                             DP3
                 ECADR   TTOGO                   # 62 MIN/SEC                          M/S
                 ECADR   DVTOTAL                 # 62 VEL3                             DP3
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                ECADR   DELTAH                  # 63 COMP ALT                         DP1
+                ECADR   ABVEL                   # 63 VEL3                             DP3
                 ECADR   HDOTDISP                # 63 VEL3                             DP3
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                ECADR   HCALC                   # 63 COMP ALT                         DP1
+                ECADR   HCALC1                  # 63 COMP ALT                         DP1
                 ECADR   FUNNYDSP                # 64 2INT                             2INT
                 ECADR   HDOTDISP                # 64 VEL3                             DP3
                 ECADR   HCALC                   # 64 COMP ALT                         DP1
@@ -772,8 +751,7 @@ IDADDTAB        ECADR   TTOGO                   # 40 MIN/SEC                    
                 ECADR   RSTACK +4               # 67 LANDING RADAR VELZ               DP1
                 ECADR   RANGEDSP                # 68 POS7                             DP4
                 ECADR   TTFDISP                 # 68 MIN/SEC                          M/S
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                ECADR   ABVEL                   # 68 VEL3                             DP3
+                ECADR   DELTAH                  # 68 COMP ALT                         DP1
                 ECADR   DLANDZ                  # 69 COMP ALT                         DP1
                 ECADR   DLANDY                  # 69 COMP ALT                         DP1
                 ECADR   DLANDX                  # 69 COMP ALT                         DP1
@@ -838,23 +816,21 @@ IDADDTAB        ECADR   TTOGO                   # 40 MIN/SEC                    
                 ECADR   LANDLAT                 # 89 DPDEG(90)                        DP3
                 ECADR   LANDLONG                # 89 DPDEG(90)                        DP3
                 ECADR   LANDALT                 # 89 POS5                             DP1
-                ECADR   YLEM                    # 90 POS5                              DP1
-                ECADR   YDOTLEM                 # 90  VEL3                             DP3
-                ECADR   PHILEM                  # 90 DPDEG(360)                        DP4
+                ECADR   RANGE                   # 90 POS5                              DP1
+                ECADR   RRATE                   # 90  VEL3                             DP3
+                ECADR   RTHETA                  # 90 DPDEG(360)                        DP4
                 ECADR   P21ALT                  # 91 POS4                             DP3
                 ECADR   P21VEL                  # 91 VEL2                             DP4
                 ECADR   P21GAM                  # 91 DPDEG(360)                       DP4
                 ECADR   THRDISP                 # 92 WHOLE                            ARTH
                 ECADR   HDOTDISP                # 92 VEL3                             DP3
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                ECADR   HCALC                   # 92 COMP ALT                         DP1
+                ECADR   HCALC1                  # 92 COMP ALT                         DP1
                 ECADR   OGC                     # 93 DPDEG(90)                        DP3
                 ECADR   OGC +2                  # 93 DPDEG(90)                        DP3
                 ECADR   OGC +4                  # 93 DPDEG(90)                        DP3
-## The following three lines are marked as having changed between ZERLAID.000 and ZERLAID.001
-                ECADR   VGBODY                  # 94 VEL3                             DP3
-                ECADR   HDOTDISP                # 94 VEL3                             DP3
-                ECADR   HCALC                   # 94 COMP ALT                         DP1
+                OCT     00000                   # 94 SPARE
+                OCT     00000                   # 94
+                OCT     00000                   # 94
                 OCT     0                       # 95 SPARE
                 OCT     0                       # 95 SPARE
                 OCT     0                       # 95 SPARE
@@ -896,18 +872,15 @@ RUTMXTAB        OCT     16351                   # 40 M/S, DP3, DP3
                 OCT     0                       # 57 SPARE
                 OCT     16347                   # 58 DP3, DP3, DP3
                 OCT     16347                   # 59 DP3, DP3, DP3
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     16354                   # 60 2INT, DP3, DP3
+                OCT     10347                   # 60 DP3, DP3, DP1
                 OCT     24451                   # 61 M/S, M/S, DP4
                 OCT     16447                   # 62 DP3, M/S, DP3
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     10344                   # 63 DP1, DP3, DP1
+                OCT     10347                   # 63 DP3, DP3, DP1
                 OCT     10354                   # 64 2INT, DP3, DP1
                 OCT     20410                   # 65 HMS, HMS, HMS
                 OCT     00304                   # 66 DP1, LRPOS
                 OCT     10204                   # 67 DP1, DP1, DP1
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     16452                   # 68 DP4, M/S, DP3
+                OCT     10452                   # 68 DP4, M/S, DP1
                 OCT     10204                   # 69 DP1, DP1, DP1
                 OCT     0                       # 70 OCT, OCT, OCT
                 OCT     0                       # 71 OCT, OCT, OCT
@@ -934,8 +907,7 @@ RUTMXTAB        OCT     16351                   # 40 M/S, DP3, DP3
                 OCT     24507                   # 91 DP3, DP4, DP4
                 OCT     10343                   # 92 ARTH, DP3, DP1
                 OCT     16347                   # 93 DP3, DP3, DP3
-## The following line is marked as having changed between ZERLAID.000 and ZERLAID.001
-                OCT     10347                   # 94 DP3, DP3, DP1
+                OCT     00000                   # 94 SPARE
                 OCT     0                       # 95 SPARE
                 OCT     0                       # 96 SPARE
                 OCT     06143                   # 97 ARTH, ARTH, ARTH
