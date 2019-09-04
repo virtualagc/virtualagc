@@ -19,6 +19,7 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-03 MAS  Removed Zerlina-specific scaling changes.
 
 ## Page 331
                 BANK            7
@@ -64,7 +65,7 @@
                 EXTEND
                 MP              1/PIPADT                # (CS) X 2(+8) NOW (PIPA PULSES) X 2(+5)*
                 EXTEND
-                MP              BIT8                    # SCALE 2(+9)   SHIFT RIGHT 7
+                MP              BIT6                    # SCALE 2(+9) SHIFT RIGHT 9             *
                 INDEX           BUF             +2
                 DAS             DELVX                   # (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)
 
@@ -214,13 +215,13 @@ DRIFTSUB        EXTEND
                 MP              1/PIPADT                # (CS) X 2(+8)   NOW (GYRO PULSES) X 2(+3)
                 LXCH            MPAC            +1      # SAVE FOR FRACTIONAL COMPENSATION
                 EXTEND
-                MP              BIT6                    # SCALE 2(+11)   SHIFT RIGHT 9
+                MP              BIT4                    # SCALE 2(+11)     SHIFT RIGHT 11
                 INDEX           BUF
                 DAS             GCOMP                   # HI(NBD)(DELTAT)   (GYRO PULSES) X 2(+14)
 
                 CA              MPAC            +1      # NOW MINOR PART
                 EXTEND
-                MP              BIT6                    # SCALE 2(+11)   SHIFT RIGHT 9
+                MP              BIT4                    # SCALE 2(+11)     SHIFT RIGHT 11
                 TS              L
                 CAF             ZERO
                 INDEX           BUF                     # ADD IN FRACTIONAL COMPENSATION
