@@ -19,6 +19,10 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-04 MAS  Updated for Luminary 178. Removed scaling
+##                              of RR range data, as well as Zerlina-
+##                              specific modification of 2INTOUT and
+##                              commenting out of DSPDECNR.
 
 ## Page 395
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -1449,10 +1453,6 @@ RRDOTOUT        TC      RRSPTODP        # CONVERT TO DP.
                 EXTEND
                 DCS     BIASRDOT        # SUBTRACT BIAS OF 17000 COUNTS.
                 DAS     MPAC
-                CAF     TEN             # MULTIPLY DATA BY TEN TO DISPLAY TENTHS
-                TC      SHORTMP         #   FPS - (ATTEMPT TO MULTIPLY DISPLAY
-                DXCH    MPAC +1         #          SF BY TEN PRODUCED SF GREATER
-                DXCH    MPAC            #          THAN 16383)
                 TC      SCALELO         # SCALE FOR DISPLAY.
 BIASRDOT        2DEC    17000
 
@@ -1543,15 +1543,9 @@ DPOUT           XCH     Q
 # RXD1-RXD2.
 
 2INTOUT         TC      5BLANK          # TO BLANK RXD3
-                CS      MPAC            # FIRST TURN ON THE APPROPRIATE SIGN
-                EXTEND
-                BZMF    +4
-                TC      -ON
-                CS      MPAC
-                TCF     +3
- +4             TC      +ON
+                TC      +ON             # TURN ON + SIGN
                 CA      MPAC
- +3             TC      DSPDECVN
+                TC      DSPDECVN        # DISPLAY 1ST INTEGER (LIKE VERB AND NOUN)
                 CS      THREE
                 INDEX   DECOUNT
                 AD      R1D1            # RXD4
@@ -2640,12 +2634,10 @@ DECROUND        OCT     02476
 # DSPDECNR CONVERTS C( MPAC,MPAC+1) INTO A SIGN AND 5 CHAR DECIMAL
 # STARTING IN LOC SPECIFIED IN DSPCOUNT. IT DOES NOT ROUND
 
-## The following four lines are marked as having changed (likely having been commented out) between 
-## ZERLAID.000 and ZERLAID.001.
-#DSPDECNR       XCH     Q
-#               TS      WDRET
-#               TC      DSPSIGN
-#               TC      DSPDCWD1 -1
+DSPDECNR        XCH     Q
+                TS      WDRET
+                TC      DSPSIGN
+                TC      DSPDCWD1 -1
 
 # DSPDC2NR CONVERTS C( MPAC,MPAC+1) INTO A SIGN AND 2 CHAR DECIMAL
 # STARTING IN LOC SPECIFIED IN DSPCOUNT. IT DOES NOT ROUND
