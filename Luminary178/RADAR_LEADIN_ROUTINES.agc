@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-05 MAS  Changed an ADRES to a CADR to restore
+##                              a bug present in Luminary 178.
 
 ## Page 498
                 BANK            15
@@ -35,7 +37,7 @@ RADSAMP         CCS             RSAMPDT                 # TIMES NORMAL ONCE-PER-
                 TCF             TASKOVER                # +0 INSERTED MANUALLY TERMINATES TEST.
 
                 TC              TWIDDLE
-                ADRES           RADSAMP
+                CADR            RADSAMP
                 CAF             PRIO25
                 TC              NOVAC
                 EBANK=          RSTACK
