@@ -32,7 +32,12 @@
 #				of =... constants.
 #
 # The usage is just
-#              yaASM.py <INPUT.lvdc >OUTPUT.listing
+#              yaASM.py [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing
+# Regardless of whether or not the assembly is successful, an octal-listing
+# file called yaASM.tsv is created.  It is also possible to optionally have
+# an octal-listing file (OCTALS.tsv) as in input.  If so, it does not affect
+# the assembly process at all, but is used for checking purposes and for 
+# marking lines in the output assembly listing which disagree with OCTALS.tsv.
 # If the assembly is successful, an executable file for the assembler is 
 # output, called lvdc.bin.
 
@@ -103,6 +108,59 @@ lastLineNumber = -1
 
 # Array for keeping track of assembled octals
 octals = [[[[None for offset in range(256)] for syllable in range(3)] for sector in range(16)] for module in range(8)]
+octalsForChecking = [[[[None for offset in range(256)] for syllable in range(3)] for sector in range(16)] for module in range(8)]
+checkTheOctals = False
+
+if len(sys.argv) > 1:
+	try:
+		f = open(sys.argv[1], "r")
+		module = -1
+		sector = -1
+		for line in f:
+			line = line.strip()
+			if line[:1] == "#" or len(line) == 0:
+				continue
+			fields = line.split("\t")
+			if len(fields) == 0:
+				continue
+			if fields[0] == "SECTOR":
+				module = int(fields[1], 8)
+				sector = int(fields[2], 8)
+				if module > 7 or sector > 15:
+					raise("Warning: module or sector out of range")
+				continue
+			offset = int(fields[0], 8)
+			ptr = 1
+			for count in range((len(fields) - 1) // 2):
+				if len(fields[ptr]) != 11:
+					raise("Warning: wrong field length")
+				elif fields[ptr].strip() == "" and fields[ptr + 1].strip() == "":
+					# An unused word.
+					pass
+				elif fields[ptr + 1] == "D" and fields[ptr][0] == " " and fields[ptr][-1] == " " and fields[ptr][1:-2].isdigit():
+					# A data word.
+					value = int(fields[ptr].strip(), 8)
+					octalsForChecking[module][sector][2][offset] = value
+				elif fields[ptr + 1] == "D" and (fields[ptr][:5] == "     " or fields[ptr][:5].isdigit()) \
+					and fields[ptr][5] == " " and (fields[ptr][6:] == "     " or fields[ptr][6:].isdigit()):
+					# An instruction-pair word.
+					syl1 = fields[ptr][:5]
+					syl0 = fields[ptr][6:]
+					if syl1.strip() != "":
+						value = int(syl1, 8)
+						octalsForChecking[module][sector][1][offset] = value
+					if syl0.strip() != "":
+						value = int(syl0, 8)
+						octalsForChecking[module][sector][0][offset] = value
+				else:
+					raise("Warning: unrecognized format: " + line)	
+				ptr += 2
+				offset += 1
+		f.close()
+		checkTheOctals = True
+	except:
+		print("Warning: Cannot open octal-comparison file " + sys.argv[1] + " or file is corrupted")
+#print(octalsForChecking)
 
 # The following structures are used for tracking instructions transparently
 # inserted at the ends of syllable 1 of memory sectors by the assembler when
@@ -386,12 +444,14 @@ def checkLOC(extra = 0):
 
 
 # Put the assembled value wherever it's supposed to go in the executable image.
-def storeAssembled(value, hop, data = True):
+def storeAssembled(lineNumber, value, hop, data = True):
 	global octals, octalsUsed
+	checkSyl = -1
 	if data:
 		module = hop["DM"]
 		sector = hop["DS"]
 		location = hop["DLOC"]
+		checkSyl = 2
 		octals[module][sector][2][location] = value
 	else:
 		module = hop["IM"]
@@ -407,12 +467,23 @@ def storeAssembled(value, hop, data = True):
 			if octals[module][sector][2][location] == None:
 				octals[module][sector][2][location] = value
 			else:
+				checkSyl = 2
 				octals[module][sector][2][location] = octals[module][sector][2][location] | value
 		else:
+			checkSyl = syllable
 			if syllable == 1:
 				octals[module][sector][syllable][location] = (value << 2) & 0o77774
 			else:
 				octals[module][sector][syllable][location] = (value << 1) & 0o37776
+	if checkTheOctals and checkSyl >= 0:
+		if octals[module][sector][checkSyl][location] != octalsForChecking[module][sector][checkSyl][location]:
+			msg = "Error: Octal mismatch, "
+			if checkSyl == 2:
+				fmt = "%09o rather than %09o" 
+			else:
+				fmt = "%05o rather than %05o"
+			msg += fmt % (octals[module][sector][checkSyl][location], octalsForChecking[module][sector][checkSyl][location])
+			addError(lineNumber, msg)
 
 # Form a HOP constant from a hop dictionary.
 def formConstantHOP(hop):
@@ -991,7 +1062,7 @@ for entry in inputFile:
 			ds = DS
 			if residual != 0:
 				ds = 0o17
-			storeAssembled(hopConstant, {
+			storeAssembled(lineNumber, hopConstant, {
 				"IM": IM,
 				"IS": IS,
 				"S": residual,
@@ -1000,7 +1071,7 @@ for entry in inputFile:
 				"DS": ds,
 				"DLOC": loc
 			}, True)
-		storeAssembled(assembled, {"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
+		storeAssembled(lineNumber, assembled, {"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
 		line = " %o %02o %o %03o  %o %02o  " % (im0, is0, s0, 
 							loc0, inputLine["hop"]["DM"], inputLine["hop"]["DS"])
 		print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString))
@@ -1068,7 +1139,7 @@ for entry in inputFile:
 	if operator == "BSS":
 		bssHop = hop.copy()
 		for n in range(int(operand)):
-			storeAssembled(0, bssHop)
+			storeAssembled(lineNumber, 0, bssHop)
 			bssHop["DLOC"] += 1
 	elif operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
 		assembled = 0
@@ -1202,7 +1273,7 @@ for entry in inputFile:
 		else:
 			assembled = int(constantString, 8)
 		# Put the assembled value wherever it's supposed to 
-		storeAssembled(assembled, inputLine["hop"])
+		storeAssembled(lineNumber, assembled, inputLine["hop"])
 	elif operator in operators:
 		inDataMemory = False
 		loc = 0
@@ -1287,7 +1358,7 @@ for entry in inputFile:
 				ds = DS
 				if residual != 0:
 					ds = 0o17
-				storeAssembled(hopConstant, {
+				storeAssembled(lineNumber, hopConstant, {
 					"IM": IM,
 					"IS": IS,
 					"S": residual,
@@ -1332,7 +1403,7 @@ for entry in inputFile:
 					ds = DS
 					if residual2 != 0:
 						ds = 0o17
-					storeAssembled(hopConstant2, {
+					storeAssembled(lineNumber, hopConstant2, {
 						"IM": IM,
 						"IS": IS,
 						"S": residual2,
@@ -1343,7 +1414,7 @@ for entry in inputFile:
 					})
 					assembled2 = operators["HOP"]["opcode"]
 					assembled2 = (assembled2 | (loc2 << 5) | (residual2 << 4))
-					storeAssembled(assembled2, {
+					storeAssembled(lineNumber, assembled2, {
 						"IM": IM,
 						"IS": IS,
 						"S": 1,
@@ -1398,7 +1469,7 @@ for entry in inputFile:
 							residual = 1
 							ds = 0o17
 						#addError(lineNumber, "Info: Allocating variable for HOP at %o,%02o,%03o" % (DM, ds, loc))
-						storeAssembled(hopConstant, {
+						storeAssembled(lineNumber, hopConstant, {
 							"IM": IM,
 							"IS": IS,
 							"S": residual,
@@ -1442,7 +1513,7 @@ for entry in inputFile:
 						residual = 1
 						ds = 0o17
 					#addError(lineNumber, "Info: Allocating nameless variable for =constant at %o,%02o,%03o" % (DM, ds, loc))
-					storeAssembled(int(constantString, 8), {
+					storeAssembled(lineNumber, int(constantString, 8), {
 						"IM": IM,
 						"IS": IS,
 						"S": residual,
@@ -1497,7 +1568,7 @@ for entry in inputFile:
 		a81 = "%03o" % loc
 		a9 = "%o" % residual
 		assembled = assembled | (loc << 5) | (residual << 4)
-		storeAssembled(assembled, hop, False)
+		storeAssembled(lineNumber, assembled, hop, False)
 	
 	if lineNumber != lastLineNumber:
 		errorsPrinted = []
@@ -1570,7 +1641,7 @@ for module in range(8):
 					break
 		if not sectorUsed:
 			continue
-		print("%o\t%02o" % (module, sector), file=f)
+		print("SECTOR\t%o\t%02o" % (module, sector), file=f)
 		print("")
 		print("")
 		print("%56sMODULE %o      SECTOR %02o" % ("", module, sector))
