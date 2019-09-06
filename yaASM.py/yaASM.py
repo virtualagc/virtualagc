@@ -444,6 +444,52 @@ def checkLOC(extra = 0):
 		# current location, so we can just keep the current address.
 		return []
 
+# Disassembles the two syllables of a word into instructions.  Useful only for debugging
+# DFW pseudo-ops.  Code adapted from unOP.py.
+def unassemble(word):
+	instructions = [ "HOP", "MPY", "SUB", "DIV", "TNZ", "MPH", "AND", "ADD", "TRA", "XOR", "PIO", "STO", "TMI", "RSU", "", "CLA" ]
+	syllables = [(word & 0o777740000) >> 13 , word & 0o37776]
+	s = ""
+	for syllable in syllables:
+		if s != "":
+			s += "   "
+		op = (syllable >> 1) & 0x0F
+		if op == 0o16:
+			if (syllable & 32) == 0:
+				instruction = "CDS"
+				DM = (syllable >> 7) & 3
+				DS = (syllable >> 10) & 15
+				s += "%s %o,%02o" % (instruction, DM, DS)
+			elif (syllable & 0o10000) == 0:
+				instruction = "SHF"
+				address = (syllable >> 6) & 0o63
+				if address == 0:
+					s += "SHL 0"
+				elif address == 1:
+					s += "SHR 1"
+				elif address == 2:
+					s += "SHR 2"
+				elif address == 16:
+					s += "SHL 1"
+				elif address == 32:
+					s += "SHL 2"
+				else:
+					s += "%s %03o" % (instruction, address)
+			else:
+				instruction = "EXM"
+				left = (syllable >> 11) & 3
+				middle = (syllable >> 10) & 1
+				right = (syllable >> 6) & 15
+				s += "%s %o,%o,%02o" % (instruction, left, middle, right)
+		else:
+			instruction = instructions[op]
+			address = ((syllable >> 6) & 0xFF) | ((syllable << 3) & 0x100)
+			residual = 0
+			if address > 0o377:
+				residual = 1
+				address = address & 0o377
+			s += "%s %o %03o" % (instruction, residual, address)
+	return s
 
 # Put the assembled value wherever it's supposed to go in the executable image.
 def storeAssembled(lineNumber, value, hop, data = True):
@@ -481,10 +527,13 @@ def storeAssembled(lineNumber, value, hop, data = True):
 		if octals[module][sector][checkSyl][location] != octalsForChecking[module][sector][checkSyl][location]:
 			msg = "Error: Octal mismatch, "
 			if checkSyl == 2:
-				fmt = "%09o rather than %09o" 
+				fmt = "%09o != %09o, xor = %09o" 
 			else:
-				fmt = "%05o rather than %05o"
-			msg += fmt % (octals[module][sector][checkSyl][location], octalsForChecking[module][sector][checkSyl][location])
+				fmt = "%05o != %05o, xor = %05o"
+			xor = octals[module][sector][checkSyl][location] ^ octalsForChecking[module][sector][checkSyl][location]
+			msg += fmt % (octals[module][sector][checkSyl][location], octalsForChecking[module][sector][checkSyl][location], xor)
+			msg += ", disassembly   " + unassemble(octals[module][sector][checkSyl][location])
+			msg += "   !=   " + unassemble(octalsForChecking[module][sector][checkSyl][location])
 			addError(lineNumber, msg)
 
 # Form a HOP constant from a hop dictionary.
@@ -1252,18 +1301,19 @@ for entry in inputFile:
 				loc0 = symbol0["LOC"]
 				#print(ofields[1] + " " + str(symbol1))
 				#print(ofields[3] + " " + str(symbol0))
-				if symbol1["MAT"]:
-					loc1 = loc1 | 3
-				elif symbol1["VEC"]:
-					loc1 = loc1 | 3
-				else:
-					loc1 = loc1 | 3
-				if symbol0["MAT"]:
-					loc0 = loc0 | 3
-				elif symbol0["VEC"]:
-					loc0 = loc0 | 3
-				else:
-					loc0 = loc0 | 3
+				if True:
+					if symbol1["MAT"]:
+						loc1 = loc1 | 3
+					elif symbol1["VEC"]:
+						loc1 = loc1 | 3
+					else:
+						loc1 = loc1 | 3
+					if symbol0["MAT"]:
+						loc0 = loc0 | 3
+					elif symbol0["VEC"]:
+						loc0 = loc0 | 3
+					else:
+						loc0 = loc0 | 3
 				assembled1 |= (residual1 << 4) | (loc1 << 5)
 				assembled0 |= (residual0 << 4) | (loc0 << 5)
 				hopConstant = (assembled1 << 14) | (assembled0 << 1)
