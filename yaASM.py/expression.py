@@ -53,6 +53,8 @@
 import sys
 from ibm360math import *
 
+# It turns out the IBM 360 library is never needed ... i.e., this should 
+# always be True.
 nativeFloat = True
 
 # Function to pull a numeric literal constant from a string.

@@ -320,11 +320,13 @@ def convertNumericLiteral(n, isOctal = False):
 		if not isInt:
 			decimal = float(decimal)
 			scale = int(scale[1:])
-			value = round(decimal * pow(2, 27 - scale - 1))
+			value = round(decimal * pow(2, 27 - scale - 1 - 1)) << 1
 		else:
 			decimal = int(decimal)
 			scale = int(scale[1:])
 			value = round(decimal * pow(2, 27 - scale))
+			if not nativeFloat:
+				value = ibmToFloat(floatToIbm(value))
 		if value < 0:
 			value += 0o1000000000
 		constantString = "%09o" % value
