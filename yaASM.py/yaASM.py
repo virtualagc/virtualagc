@@ -78,6 +78,18 @@ operators = {
 pseudos = []
 preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM"]
 
+# Bit patterns used by DFW pseudo-ops. The key value is the DS.
+dfwBits = {
+	0o04: { "a2": 0, "a1": 0, "a9": 0 },
+	0o14: { "a2": 0, "a1": 0, "a9": 1 },
+	0o05: { "a2": 0, "a1": 1, "a9": 0 },
+	0o15: { "a2": 0, "a1": 1, "a9": 1 },
+	0o06: { "a2": 1, "a1": 0, "a9": 0 },
+	0o16: { "a2": 1, "a1": 0, "a9": 1 },
+	0o07: { "a2": 1, "a1": 1, "a9": 0 },
+	0o17: { "a2": 1, "a1": 1, "a9": 1 }
+}
+
 expandedLines = []
 errors = []
 constants = {}
@@ -101,8 +113,6 @@ synonyms = {}
 nameless = {}
 lastORG = False
 inDataMemory = True
-lastWasVEC = False
-lastWasMAT = False
 symbols = {}
 lastLineNumber = -1
 
@@ -807,22 +817,13 @@ for lineNumber in range(0, len(expandedLines)):
 		if inputLine["raw"][:1] in ["*", "#"]:
 			fields = []
 		
-		if lastWasVEC:
-			inputLine["VEC"] = True
-			lastWasVEC = False
-		elif lastWasMAT:
-			inputLine["MAT"] = True
-			lastWasMAT = False
-		
 		if len(fields) >= 2 and fields[1] == "VEC":
-			lastWasVEC = True
 			while DLOC < 256:
 				DLOC = (DLOC + 3) & ~3
 				checkDLOC()
 				if (DLOC & 3) == 0:
 					break
 		elif len(fields) >= 2 and fields[1] == "MAT":
-			lastWasMAT = True
 			while DLOC < 256:
 				DLOC = (DLOC + 15) & ~15
 				checkDLOC()
@@ -996,8 +997,6 @@ for entry in inputFile:
 			symbols[lhs] = inputLine["hop"]
 			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
 			symbols[lhs]["isCDS"] = inputLine["isCDS"]
-			symbols[lhs]["VEC"] = inputLine["VEC"]
-			symbols[lhs]["MAT"] = inputLine["MAT"]
 		else:
 			addError(lineNumber, "Error: Symbol location unknown")
 
@@ -1293,27 +1292,20 @@ for entry in inputFile:
 				symbol0 = symbols[ofields[3]]
 				residual1 = 0
 				residual0 = 0
-				if symbol1["DS"] != DS:
-					residual1 = 1
-				if symbol0["DS"] != DS:
-					residual0 = 1
 				loc1 = symbol1["LOC"]
 				loc0 = symbol0["LOC"]
-				#print(ofields[1] + " " + str(symbol1))
-				#print(ofields[3] + " " + str(symbol0))
-				if True:
-					if symbol1["MAT"]:
-						loc1 = loc1 | 3
-					elif symbol1["VEC"]:
-						loc1 = loc1 | 3
-					else:
-						loc1 = loc1 | 3
-					if symbol0["MAT"]:
-						loc0 = loc0 | 3
-					elif symbol0["VEC"]:
-						loc0 = loc0 | 3
-					else:
-						loc0 = loc0 | 3
+				ds1 = symbol1["DS"]
+				ds0 = symbol0["DS"]
+				if ds1 not in dfwBits:
+					addError(lineNumber, "Error: Wrong sector in DFW constant for syllable 1")
+				else:
+					residual1 = dfwBits[ds1]["a9"]
+					loc1 = (loc1 & ~3) | (dfwBits[ds1]["a2"] << 1) | dfwBits[ds1]["a1"]
+				if ds0 not in dfwBits:
+					addError(lineNumber, "Error: Wrong sector in DFW constant for syllable 0")
+				else:
+					residual0 = dfwBits[ds0]["a9"]
+					loc0 = (loc0 & ~3) | (dfwBits[ds0]["a2"] << 1) | dfwBits[ds0]["a1"]
 				assembled1 |= (residual1 << 4) | (loc1 << 5)
 				assembled0 |= (residual0 << 4) | (loc0 << 5)
 				hopConstant = (assembled1 << 14) | (assembled0 << 1)
