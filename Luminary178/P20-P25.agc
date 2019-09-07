@@ -19,6 +19,12 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-06 MAS  Removed Zerlina-specific changes, including
+##                              the call to CDU*SMNB, removal of R12FLAG
+##                              handling, and changes to downlink numbers.
+##                              Also removed stuff added after Luminary 178,
+##                              including the branch to NOTSHIFT and handling
+##                              of AGSCODE.
 
 ## Page 500
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -1243,8 +1249,6 @@ R65LEM          TC      MAKECADR
                 TS      GENRET
                 TC      DOWNFLAG        # RESET R61 FLAG
                 ADRES   R61FLAG
-                CA      BIT14           # RESET AGS CODE WORD (=20000).  DON'T USE
-                TS      AGSCODE         #   PGNCS DOWNLINKED RADAR DATA.
 R61C+L01        CAF     BIT4            # BYPASS RADAR READING IF DATA
                 EXTEND                  # GOOD NOT PRESENT
                 RAND    CHAN33
@@ -2484,7 +2488,9 @@ DODES           EXTEND
                 VXSC    VAD             # ADD ONE SECOND RELATIVE VELOCITY TO LOS
                         MCTOMS
                 UNIT    CALL
-                        CDU*SMNB
+                        CDUTRIG
+                CALL
+                        *SMNB*
                         
 DONBRD          STODL   32D
                         TANG +1
@@ -2725,17 +2731,15 @@ R12READ         CS      FLGWRD11
                 EXTEND
                 BZF     TASKOVER
 
+R12RDSET        CS      FLGWRD11        # STOP R12 FROM
+                MASK    R12RDBIT        #   ATTEMPTING UPDATE
+                ADS     FLGWRD11        #       BEFORE R12 READS ARE DONE
+
                 INDEX   VSELECT
                 CA      VBITS
                 TC      PRERADAR
                 CA      SIX             # RADAR RUPT USES THIS FOR R12 READ
                 TS      NSAMP
-## The following 5 lines are marked as having changed between ZLEMP20S.000 and ZLEMP20S.001.
-                CAF     OCT31           # SET UP RDGIMS FOR MIDPOINT OF LR READ
-                TC      WAITLIST
-                EBANK=  LRTIME
-                2CADR   RDGIMS
-
                 TC      TASKOVER
 
 ## Page 564
@@ -3013,38 +3017,25 @@ R12DL           CCS     VSELECT         # UPDATE VSELECT
                 DCA     HMEAS           # STORE HMEAS FOR DOWNLINK
                 DXCH    HMEASDL
 
-## The next 18 lines (up to and including CA ITEMP3) are marked as having changed between
-## ZLEMP20S.000 and ZLEMP20S.001.
-                CAF     EBANK4
-                TS      EBANK
-                EBANK=  LRTIME
+                EXTEND
+                DCA     PIPTIME1        # STORE TIME FOR DOWNLINK
+                DXCH    MKTIME
 
                 EXTEND
-                DCA     LRYCDU
-                DXCH    ITEMP1
-
-                CA      LRXCDU
-                TS      ITEMP3
-
-                EXTEND
-                DCA     LRTIME
-
-                INCR    BBANK
-                INCR    BBANK
-                INCR    BBANK
-                EBANK=  LRTIMEDL
-
-                DXCH    LRTIMEDL
-
-                DXCH    ITEMP1
+                DCA     CDUTEMPY        # STORE CDUY,CDUZ FOR DOWNLINK
                 DXCH    AIG
 
-                CA      ITEMP3
+                CA      CDUTEMPX        # STORE CDUX FOR LINK
                 TS      AOG
 
                 TC      RADLITES        # UPDATE DSKY VEL LIGHT
                 CA      ZERO
                 TS      RADUSE
+
+OKUPDATE        CS      R12RDBIT        # R12 READ IS DONE SO ALLOW R12 UPDATE
+                MASK    FLGWRD11
+                TS      FLGWRD11
+
                 TC      RESUME
 
 ## Page 570
@@ -3317,10 +3308,8 @@ CSMINT          STCALL  TDEC1
                 TC      INTPRET
                 STOVL   LOSVEL
                         RATT
-                VSU     BOFF
+                VSU
                         LMPOS
-                        RNDVZFLG
-                        NOTSHIFT
                 STORE   RRANGE          # RANGE FOR POSSIBLE ALARM B-29
                 BOVB    VSL
                         TCDANZIG
@@ -3514,12 +3503,6 @@ READRDOT        TC      BANKCALL
                 DXCH    TANGNB          # TRUNNION AND SHAFT ANGLES
                 CA      MPAC +2
                 TS      AOG             # CDUX
-                CS      FLGWRD12        # IS RR READING HIGH SCALE
-                MASK    RRRSBIT
-                CCS     A
-                CA      POSMAX          # NO- LOW SCALE (SET CONFIG) AGSCODE=17777
-                AD      -BIT14          # YES- HI SCALE (SET CONFIG) AGSCODE=57777
-                TS      AGSCODE         # SET AGS CODE WORD
                 TC      INTPRET
                 STODL   20D             # SAVE TIME OF CDU READINGS IN 20D
                         RDOTMSAV        # CONVERT ROOT UNITS AND SCALING
