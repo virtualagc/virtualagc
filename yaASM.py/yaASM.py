@@ -38,8 +38,9 @@
 # an octal-listing file (OCTALS.tsv) as in input.  If so, it does not affect
 # the assembly process at all, but is used for checking purposes and for 
 # marking lines in the output assembly listing which disagree with OCTALS.tsv.
-# If the assembly is successful, an executable file for the assembler is 
-# output, called lvdc.bin.
+# No separate binary file of octals is produced; the yaASM.tsv file, which 
+# is tab-delimited ASCII, should be parsed instead if required for (for example)
+# an LVDC simulator.
 
 import sys
 # The next line imports expression.py.
@@ -335,8 +336,6 @@ def convertNumericLiteral(n, isOctal = False):
 			decimal = int(decimal)
 			scale = int(scale[1:])
 			value = round(decimal * pow(2, 27 - scale))
-			if not nativeFloat:
-				value = ibmToFloat(floatToIbm(value))
 		if value < 0:
 			value += 0o1000000000
 		constantString = "%09o" % value
@@ -1073,6 +1072,8 @@ if False:
 print("IM IS S LOC DM DS  A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT")
 useDat = False
 errorsPrinted = []
+lastLineNumber = -1
+expansionMarker = " "
 for entry in inputFile:
 	lineNumber = entry["lineNumber"]
 	inputLine = entry["expandedLine"]
@@ -1081,6 +1082,16 @@ for entry in inputFile:
 	constantString = ""
 	star = False
 	
+	# If the line is expanded by the preprocessor, we have to display its unexpanded form
+	# before proceeding.
+	if lineNumber != lastLineNumber:
+		lastLineNumber = lineNumber
+		if inputLine["raw"] == originalLine:
+			expansionMarker = " "
+		else:
+			expansionMarker = "+"
+			print(("%40s" % "") + "\t" + originalLine)
+			
 	# If there's an automatic sector switch here, we have to take care of it prior to
 	# doing anything with the instruction that's actually associated with this line.
 	if "switchSectorAt" in inputLine:
@@ -1635,7 +1646,16 @@ for entry in inputFile:
 			raw = raw[:m] + "*" + raw[(m+1):]
 		elif raw[m] == "\t":
 			raw = raw[:m] + "*" + raw[m:]
-	print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString) + " \t" + raw)
+	print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString) + " " + expansionMarker + "\t" + raw)
+	fields = originalLine.split()
+	if len(fields) > 1 and fields[1] == "MACRO" and fields[0] in macros:
+		macroLines = macros[fields[0]]["lines"]
+		for macroLine in macroLines:
+			lineText = ""
+			for n in macroLine:
+				lineText += n + "\t"
+			print(("%40s" % "") + "\t" + lineText)
+		print(("%40s" % "") + "\t\tENDMAC")
 
 #----------------------------------------------------------------------------
 #   	Print a symbol table
