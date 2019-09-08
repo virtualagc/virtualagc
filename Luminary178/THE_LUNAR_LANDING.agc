@@ -19,6 +19,11 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-08 MAS  Updated for Luminary 178. HLROFF init was
+##                              moved back to its original place, Zerlina-
+##                              specific flag setting was removed, G was
+##                              replaced with GDT/2, and the fine alignment
+##                              prompt in P63 was restored.
 
 ## Page 771
                 BANK            32
@@ -53,17 +58,13 @@ P63LM           TC              PHASCHNG
                 CA              ZERO
                 TS              FLPASS0
 
-                CAF             HLROFFF                 # SET LR CUTOFF ALTITUDE
-                TS              HLROFF
-
                 CS              BIT14
                 EXTEND
                 WAND            CHAN12                  # REMOVE TRACK-ENABLE DISCRETE.
 
 FLAGORGY        TC              INTPRET                 # DIONYSIAN FLAG WAVING
-                CLEAR           SET
+                CLEAR
                                 NOTERFLG                # PERMIT TERRAIN MODEL
-                                ALW66FLG                # PERMIT P66 SELECTION
                 CLEAR           CLEAR
                                 NOTHROTL
                                 REDFLAG
@@ -107,7 +108,9 @@ IGNALG          SETPD           VLOAD                   # FIRST SET UP INPUTS FO
                                 ZEROVECS
                 STODL           UNFC/2                  # INITIALIZE TRIM VELOCITY CORRECTION TERM
                                 HI6ZEROS
-                STORE           TTF/8
+                STODL           TTF/8
+                                HLROFFF
+                STORE           HLROFF                  # LR CUTOFF ALTITUDE.
 
 IGNALOOP        DLOAD
                                 TAT
@@ -118,7 +121,7 @@ IGNALOOP        DLOAD
                                 REFSMMAT
                 STCALL          R
                                 MUNGRAV
-                STCALL          G
+                STCALL          GDT/2
                                 ?GUIDSUB                # WHICH DELIVERS N PASSES OF GUIDANCE
 
 # DDUMCALC IS PROGRAMMED AS FOLLOWS:-
@@ -191,22 +194,20 @@ DDUMCALC        TS              NIGNLOOP
                 GOTO
                                 IGNALOOP
 
-DDUMGOOD        VLOAD           UNIT                    # INITIALIZE KALCMANU
-                                UNFC/2
-                STOVL           POINTVSM
-                                UNITX
-                STOVL           SCAXIS                  # NEXT COMPUTE DISTANCE LANDING SITE IS
+DDUMGOOD        SLOAD           SR
+                                ZOOMTIME
+                                14D
+                BDSU
+                                TDEC1
+                STOVL           TIG                     # COMPUTE DISTANCE LANDING SITE WILL BE
                                 V                       #   OUT OF LM'S ORBITAL PLANE AT IGNITION:
                 VXV             UNIT                    #   SIGN IS + IF LANDING SITE IS TO THE
                                 R                       #   RIGHT, NORTH; - IF TO THE LEFT, SOUTH.
                 DOT             SL1
                                 LAND
-                STODL           OUTOFPLN                # NEXT COMPUTE TIG
-                                ZOOMTIME
-                SR              BDSU
-                                14D
-                                TDEC1
-                STORE           TIG
+R60INIT         STOVL           OUTOFPLN                # INITIALIZATION FOR CALCMANU
+                                UNFC/2
+                STORE           R60VSAVE                # STORE UNFC/2 TEMPORARILY IN R60SAVE
                 EXIT
                                                         # ****************************************
 
@@ -218,7 +219,19 @@ ASTNCLOK        CS              ASTNDEX
                 CADR            STCLOK2
                 TCF             ENDOFJOB                # RETURN IN NEW JOB AND IN EBANK FIVE
 
-ASTNRET         CAF             EBANK7
+ASTNRET         TC              INTPRET
+                SSP             RTB                     # GO PICK UP DISPLAY AT END OF R51:
+                                QMAJ                    #       "PROCEED" WILL DO A FINE ALIGNMENT
+                FCADR           P63SPOT2                #       "ENTER" WILL RETURN TO P63SPOT2
+                                R51P63
+P63SPOT2        VLOAD           UNIT                    # INITIALIZE KALCMANU FOR BURN ATTITUDE
+                                R60VSAVE
+                STOVL           POINTVSM
+                                UNITX
+                STORE           SCAXIS
+                EXIT
+
+                CAF             EBANK7
                 TS              EBANK
 
                 INHINT
