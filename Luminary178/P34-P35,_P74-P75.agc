@@ -19,6 +19,9 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-07 MAS  Changed referenes to TMPDV to GDT/2, and
+##                              references to YLEM, YDOTLEM, and PHILEM to
+##                              RANGE, RRATE, and RTHETA, respectively.
 
 ## Page 653
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -866,8 +869,7 @@ S34/35.5        STQ             BON
 FLAGON          CLEAR           VLOAD
                                 NTARGFLG
                                 DELVLVC
-## The following line is marked as having been changed between KISSING.063 and KISSING.064.
-                STORE           TMPDV                   # SAVE DV BEFORE DISPLAY
+                STORE           GDT/2                   # SAVE DV BEFORE DISPLAY
                 EXIT
  +5             CAF             V06N81
                 TC              BANKCALL
@@ -884,8 +886,7 @@ NTARGCHK        TS              Q
                 INDEX           Q
                 CS              DELVLVC
                 INDEX           Q
-## The following line is marked as having been changed between KISSING.063 and KISSING.064.
-                AD              TMPDV
+                AD              GDT/2
                 ADS             L
                 CCS             Q
                 TCF             NTARGCHK
@@ -1704,13 +1705,13 @@ R36INT          STCALL          TDEC1
                 BVSU            PDVL                    #                   A  -   -
                                 RPASS36                 # LINE OF SIGHT VECTOR R - R       12D
                 DOT             SL1                     #                        P   A
-                                UNP36                   #     -  -
-                STOVL           YLEM
-                                00D                     #         A
+                                UNP36                   #     -   -
+                STOVL           RANGE                   # Y = U . R
+                                00D                     #          A
                 DOT             SL1
-                                UNP36                   # .   -  -
-                STOVL           YDOTLEM                 #
-                                06D                     # -       A   -
+                                UNP36                   # .   -   -
+                STOVL           RRATE                   # Y = U . V
+                                06D                     # -        A  -
                 UNIT            PUSH                    # U   = UNIT( R )                  18D
                 VXV             VXV                     #  RA          A
                                 00D                     #  -   -   -     -
@@ -1727,16 +1728,16 @@ R36INT          STCALL          TDEC1
                 UNIT
                 PUSH            DOT                     # LOS PROJECTED INTO HORIZONTAL    12D
                                 00D                     # PLANE
-                SL1             ARCCOS                  #             -  -
-                STOVL           PHILEM                  #
-                VXV             DOT                     #              A  L
+                SL1             ARCCOS                  #              -   -
+                STOVL           RTHETA                  # PSI = ARCCOS(U . U )
+                VXV             DOT                     #               A   L
                                 00D
                 BPL             DLOAD
                                 R36TAG2
                                 LODPMAX
                 DSU
-                                PHILEM
-                STORE           PHILEM
+                                RTHETA
+                STORE           RTHETA
 R36TAG2         EXIT
                 CAF             V06N90N                 #  DISPLAY Y , YDOT , AND PSI
                 TC              BANKCALL
