@@ -19,45 +19,31 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-08 MAS  Re-based on Luminary 210, since Don entirely
+##                              rewrote this section in Zerlina. Undid a
+##                              couple of small changes made after Luminary
+##                              178; namely a DXCH->XCH and a DOUBLE->DDOUBL.
 
-## Page 779
-# T  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  E
-#  H  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  Y
-#   R  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  L
-#    O  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  E
-#     T  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  S
+## Page 789
+                BANK    31
                 
                 SETLOC  FTHROT
+                
                 BANK
-                COUNT*  $$/THROT
+                
                 EBANK=  PIF
-
-#     ENTER HERE FROM P66ROD WITH PIF IN A.
-
-P66THROT        EXTEND
-                QXCH    RTNHOLD
-                TS      PIF
-                TCF     DOITP66
-
-#     ENTER HERE IN P63 AND P64.  FIRST COMPUTE FP (PRESENT THRUST) AND FC (DESIRED THRUST) IN OUTPUT BIT UNITS.
+                
+                COUNT*  $$/THROT
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# HERE FC, DESIRED THRUST, AND FP, PRESENT THRUST, UNWEIGHTED, ARE COMPUTED.
 
 THROTTLE        CA      ABDELV          # COMPUTE PRESENT ACCELERATION IN UNITS OF
-                EXTEND                  #   2(-4) M/CS/CS, SAVING SERVICER TROUBLE
+                EXTEND                  #  2(-4) M/CS/CS, SAVING SERVICER TROUBLE
                 MP      /AF/CNST
-                EXTEND
+ +3             EXTEND
                 QXCH    RTNHOLD
 AFDUMP          TC      MASSMULT
                 DXCH    FP              # FP = PRESENT THRUST
-                EXTEND
-                DCA     FWEIGHT
-                DAS     FP
-                DXCH    FP
-                EXTEND
-                MP      2SECS
-                EXTEND
-                DV      PGUIDE
-                TS      FP
-
                 EXTEND
                 DCA     /AFC/
                 TC      MASSMULT
@@ -71,12 +57,39 @@ AFDUMP          TC      MASSMULT
                 DXCH    GTCTIME         # DOWNLINK TIME AGREEMENT
                 RELINT
                 
-## Page 780
+# COMPUTE DESIRED THRUST FOR DISPLAY AS A PERCENTAGE OF 10,500 POUNDS
+
+                CAF     4FMAXNOM        # MOVE 4FMAXNOM TO ERASABLE FOR DV BELOW
+                TS      Q
+                CA      FC
+                MASK    OCT17777        # FOR SAFETY
+                EXTEND
+                DV      Q
+                EXTEND
+                MP      4SECS
+                TS      THRDISP         # FOR DISPLAY IN  N92
+
+# IF IT HAS BEEN LESS THAN 3 SECONDS SINCE THE LAST THROTTLING, AUGMENT FP USING THE FWEIGHT CALCULATED THEN.
+
+                CS      TTHROT          # THIS CODING ASSUMES A FLATOUT WITHIN
+## Page 790             
+                AD      TIME1           #   80 SECONDS BEFORE FIRST THROTTLE CALL
+                MASK    POSMAX
+                COM
+                AD      3SECS
+                EXTEND
+                BZMF    WHERETO         # BRANCH IF (TIME1-TTHROT +1) > 3 SECONDS
+                EXTEND
+                DCA     FWEIGHT
+                DAS     FP
+
+
 #     THIS LOGIC DETERMINES THE THROTTLING IN THE REGION 10% - 94%.   THE MANUAL THROTTLE, NOMINALLY SET AT
-# MINIMUM BY THE ASTRONAUT, PROVIDES THE LOWER BOUND.   A STOP IN THE THROTTLE HARDWARE PROVIDES THE UPPER.
+# MINIMUM BY ASTRONAUT OR MISSION CONTROL PROGRAMS, PROVIDES THE LOWER BOUND.   A STOP IN THE THROTTLE HARDWARE
+# PROVIDES THE UPPER.
 
 WHERETO         CA      EBANK5          # INITIALIZE L*WCR*T AND H*GHCR*T FROM
-                TS      EBANK           #   PAD LOADED ERASABLES IN W-MATRIX
+                TS      EBANK           #  PAD LOADED ERASABLES IN W-MATRIX
                 EBANK=  LOWCRIT
                 EXTEND
                 DCA     LOWCRIT
@@ -107,42 +120,40 @@ LOWFCOLD        CS      H*GHCR*T
                 BZMF    DOPIF           # BRANCH IF FC < OR = HIGHCRIT
 
                 CA      FMAXPOS         # NO:   THROTTLE-UP
-FLATOUT1        XCH     FCODD
+FLATOUT1        DXCH    FCODD
                 CA      FEXTRA
+## Page 791
 FLATOUT2        TS      PIFPSET
 
-#                                         NOTE 1   FC IS SET EQUAL TO FP SO PIF WILL BE ZERO.   THIS IS DESIRABLE
-#                                                  AS THERE IS ACTUALLY NO THROTTLE CHANGE.
+# NOTE 1   FC IS SET EQUAL TO FP SO PIF WILL BE ZERO.   THIS IS DESIRABLE
+#          AS THERE IS ACTUALLY NO THROTTLE CHANGE.
 
-#                                         NOTE 2   HERE, SINCE WE ARE ABOUT TO RETURN TO THE THROTTLEABLE REGION
-#                                                  (BELOW 55%) THE QUANTITY -(FMAXODD - FP) IS COMPUTED AND PUT
-#                                                  INTO PIFPSET TO COMPENSATE FOR THE DIFFERENCE BETWEEN THE
-#                                                  NUMBER OF BITS CORRESPONDING TO FULL THROTTLE (FMAXODD) AND THE
-#                                                  NUMBER CORRESPONDING TO ACTUAL THRUST (FP).   THUS THE TOTAL
-#                                                  THROTTLE COMMAND PIF = FC - FP -(FMAXODD - FP) = FC - FMAXODD.
+# NOTE 2   HERE, SINCE WE ARE ABOUT TO RETURN TO THE THROTTLEABLE REGION
+#          (BELOW 55%) THE QUANTITY -(FMAXODD - FP) IS COMPUTED AND PUT
+#          INTO PIFPSET TO COMPENSATE FOR THE DIFFERENCE BETWEEN THE
+#          NUMBER OF BITS CORRESPONDING TO FULL THROTTLE (FMAXODD) AND THE
+#          NUMBER CORRESPONDING TO ACTUAL THRUST (FP).   THUS THE TOTAL
+#          THROTTLE COMMAND PIF = FC - FP -(FMAXODD - FP) = FC - FMAXODD.
 
-DOPIF           CS      FP              # COMPUTE PIF AND LIMIT IT TO 4096 BITS
-## Page 781
-                AD      FCODD           #   SO FWEIGHT COMPUTATION CAN'T OVERFLOW
-                TS      L
-                CAF     BIT13
-                TC      BANKCALL
-                CADR    LIMITSUB
-
-DOIT            TS      PIF
-                AD      PIFPSET         # ADD IN PIFPSET, WITHOUT CHANGING PIF
-DOITP66         XCH     PIFPSET         # STASH IT IN PIFPSET FOR A MOMENT
-                CAF     BIT10           # DOES PGNCS HAVE CONTROL?
+DOPIF           TC      FASTCHNG
                 EXTEND
-                RAND    CHAN30
-                CCS     A
-                TCF     ZILCH           # NO:   AGS, DARN IT, ZERO AUTO-THROTTLE
-                CA      PIFPSET         # YES:  RETRIEVE OUTPUT AND PRESS ON
-THROTOUT        TS      PSEUDO55
+                DCA     FCODD
+                TS      FCOLD
+                DXCH    PIF
+                EXTEND
+                DCS     FP
+                DAS     PIF             # PIF = FC - FP, NEVER EQUALS +0
+
+
+DOIT            CA      PIF
+                AD      PIFPSET         # ADD IN PIFPSET, WITHOUT CHANGING PIF
+                TS      PSEUDO55
                 TS      THRUST
                 CAF     BIT4
                 EXTEND
                 WOR     CHAN14
+                CA      TIME1
+                TS      TTHROT
 
 #     SINCE /AF/ IS NOT AN INSTANTANEOUS ACCELERATION, BUT RATHER AN "AVERAGE" OF THE ACCELERATION LEVELS DURING
 # THE PRECEEDING PIPA INTERVAL, AND SINCE FP IS COMPUTED DIRECTLY FROM /AF/, FP IN ORDER TO CORRESPOND TO THE
@@ -156,25 +167,36 @@ THROTOUT        TS      PSEUDO55
 # FRATE IS THE THROTTLING RATE (32 UNITS PER CENTISECOND).  PGUID IS EITHER 1 OR 2 SECONDS. THE "TL" IN THE
 # FIRST TERM REPRESENTS THE ENGINE'S RESPONSE LAG.   HERE FWEIGHT IS COMPUTED FOR USE NEXT PASS.
 
-                CAF     8SECS
-                TS      Q
+                CA      THISTPIP +1             # INITIALIZE FWEIGHT COMP AS IF FOR P66
+                TS      BUF
+
+                CS      MODREG                  # ARE WE IN FACT IN P66?
+                AD      DEC66
                 EXTEND
-                MP      BIT5
-                LXCH    BUF  +1
-                CS      GTCTIME  +1     # TIME AT LAST PIPA READING.
+## Page 792
+                BZF     FWCOMP          # YES
+
+                CA      PIPTIME +1      # NO:   INITIALIZE FOR TWO SECOND PERIOD
+                TS      BUF
+                CAF     4SECS
+                TCF     FWCOMP +1
+
+FWCOMP          CAF     2SECS
+   +1           TS      Q
+                EXTEND
+                MP      BIT6
+                LXCH    BUF +1
+                CS      BUF             # TIME OF LAST PIPA READING.
                 AD      TIME1
-## "AD THROTLAG" below is surrounded by drawn-in parentheses.
                 AD      THROTLAG        # COMPENSATE FOR ENGINE RESPONSE LAG
-                MASK    LOW9            # MAKE SURE SMALL AND POSITIVE
+                MASK    LOW8            # MAKE SURE SMALL AND POSITIVE
                 ZL
                 EXTEND
                 DV      Q
                 EXTEND
                 MP      PIF
-                DDOUBL
-                DDOUBL
-                DXCH    FWEIGHT1
-## Page 782
+                DOUBLE
+                DXCH    FWEIGHT
                 CCS     PIF
                 AD      ONE
                 TCF     +2
@@ -183,41 +205,30 @@ THROTOUT        TS      PSEUDO55
                 MP      PIF
                 EXTEND
                 DV      BUF +1
-                ADS     FWEIGHT1
-#     COMPUTE DESIRED THRUST FOR DISPLAY AS A PERCENTAGE OF 10500 POUNDS.
+                ZL
+                DAS     FWEIGHT
 
-                CA      FC
-                EXTEND
-                MP      100/3727
-                TS      THRDISP         # FOR DISPLAY IN  N92
 
 THDUMP          TC      RTNHOLD
 
 
-#     FLATOUT THROTTLES UP THE DESCENT ENGINE, AND IS CALLED AS A BASIC SUBROUTINE.
+# FLATOUT THROTTLES UP THE DESCENT ENGINE, AND IS CALLED AS A BASIC SUBROUTINE.
 
 FLATOUT         CAF     BIT13           # 4096 PULSES
 WHATOUT         TS      PIFPSET         # USE PIFPSET SO FWEIGHT WILL BE ZERO
                 CS      ZERO
                 TS      FCOLD
+                TS      PIF
                 EXTEND
                 QXCH    RTNHOLD
                 TCF     DOIT
 
+## Page 793
+# MASSMULT SCALES ACCELERATION, ARRIVING IN A AND L IN UNITS OF 2(-4) M/CS/CS, TO FORCE IN PULSE UNITS.
 
-#     DO WHAT HAS TO BE DONE WHEN AGS HAS CONTROL.
-
-ZILCH           CS      ZERO            # COME HERE WHEN IN AGS TO ZERO THE AUTO-
-                TS      PIF             #   THROTTLE.  FIRST SET PIF AND FC SO THE
-                TS      FC              #   FWEIGHT AND N92 DISPLAY COMPUTATIONS
-                CS      FEXTRA          #   WILL COME OUT RIGHTER.  THEN GRAB A
-                TCF     THROTOUT        #   BATCH OF NEG BITS AND RETURN.
-
-#     MASSMULT SCALES ACCELERATION, ARRIVING IN A AND L IN UNITS OF 2(-4) M/CS/CS, TO FORCE IN PULSE UNITS.
-
-MASSMULT        DXCH    MPAC
- +1             EXTEND
+MASSMULT        EXTEND
                 QXCH    BUF
+                DXCH    MPAC
                 TC      DMP
                 ADRES   MASS
                 TC      DMP             # LEAVES PROPERLY SCALED FORCE IM MPAC
@@ -225,7 +236,6 @@ MASSMULT        DXCH    MPAC
                 TC      TPAGREE
                 CA      MPAC
                 EXTEND
-## Page 783
                 BZF     +3
                 CAF     POSMAX
                 TC      BUF
@@ -233,18 +243,12 @@ MASSMULT        DXCH    MPAC
                 TC      BUF
 
 
-#           CONSTANTS:-
+# CONSTANTS:-
 
-FEXTRA          =       BIT13           # FEXT        +5.13309020 E+4
+FEXTRA          =       BIT13           #        FEXT +5.13309020 E+4
 
 /AF/CNST        DEC     .13107
 
-100/3727        DEC     .02683
-
-8SECS           DEC     +800
-
-# *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
-#  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
-#   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
-
-#   *  *  *  *  *  *  *  *  *  *  *  *  *
+OCT17777        OCT     17777
+4FMAXNOM        DEC     14908           # EQUIVALENT TO 10,500 LBS.
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
