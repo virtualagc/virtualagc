@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-08 MAS  Removed Zerlina-specific changes to
+##                              restart points, and calls to PIPCYCLE.
 
 ## Page 738
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -404,7 +406,9 @@ CALCN83         TC      INTPRET
                         S41.1
                 STORE   DELVIMU
                 EXIT
-                TC      SERVCHNG
+                TC      PHASCHNG
+                OCT     10035           # REREADAC AND HERE
+
                 TC      INTPRET
                 VLOAD
                         DELVSIN
@@ -536,7 +540,8 @@ S40RET          BON     BON             # WILL RETURN HERE FROM S40.8
 
                 TC      2PHSCHNG
                 OCT     00172           # 2.17SPOT FOR S40.9
-                OCT     04025
+                OCT     10035           # HERE AND REREADAC AFTER RESTART
+
 ENDSTEER        TC      INTPRET
                 DLOAD
                         TIGSAVEP
@@ -573,8 +578,8 @@ NSTEER          INHINT
                 MASK    IDLEFBIT        #     (IDLEFLAG = 0 --> DVMON ON)
                 CCS     A
                 TCF     +3              # DVMON ON-->THRUSTING-->IMPULSW VIA S40.8
-GOPIPCYC        TC      POSTJUMP        # DVMON OFF-->IMPULSW ON VIA S40.13-->EXIT
-                CADR    PIPCYCLE
+                TC      POSTJUMP        # DVMON OFF-->IMPULSW ON VIA S40.13-->EXIT
+                CADR    SERVEXIT
 
                 TC      IBNKCALL
                 CADR    STOPRATE
@@ -600,8 +605,8 @@ GOPIPCYC        TC      POSTJUMP        # DVMON OFF-->IMPULSW ON VIA S40.13-->EX
                 ADRES   ENGOFTSK
                 TC      2PHSCHNG
                 OCT     40114           # ENGOFTSK (ENGINOFF)
-                OCT     04025
-                TCF     GOPIPCYC
+                OCT     00035           # SERVICER--REREADAC
+                TCF     ENDOFJOB
 
 GETDT           CCS     A
                 TCF     +3
@@ -934,7 +939,8 @@ BDTOK           VLOAD   ABVAL
                         VG
                 STORE   VGDISP
                 EXIT
-                TC      SERVCHNG
+                TC      PHASCHNG
+                OCT     10035
                 TC      INTPRET
 TGDCALC         SETPD   VLOAD
                         0
