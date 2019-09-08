@@ -557,6 +557,10 @@ VirtualAGC:
 VirtualAGC-installer: all
 	$(BUILD) -C VirtualAGC "YADSKY_SUFFIX=$(YADSKY_SUFFIX)" "YADEDA_SUFFIX=$(YADEDA_SUFFIX)" $(ISMACOSX) $(DEV_STATIC) VirtualAGC-installer
 
+.PHONY: yaASM
+yaASM:
+	$(BUILD) -C $@
+
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings
 AGC_LISTINGS = $(addprefix listing-agc-, $(MISSIONS))
