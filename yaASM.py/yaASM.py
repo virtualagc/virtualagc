@@ -454,7 +454,9 @@ def checkLOC(extra = 0):
 		return []
 
 # Disassembles the two syllables of a word into instructions.  Useful only for debugging
-# DFW pseudo-ops.  Code adapted from unOP.py.
+# DFW pseudo-ops, and now that DFW is working properly, I've actually commented its use out.  
+# However, I like the function definition, so I'll leave it here for a while in case I think
+# of something else to use it for.  The code was adapted from unOP.py.
 def unassemble(word):
 	instructions = [ "HOP", "MPY", "SUB", "DIV", "TNZ", "MPH", "AND", "ADD", "TRA", "XOR", "PIO", "STO", "TMI", "RSU", "", "CLA" ]
 	syllables = [(word & 0o777740000) >> 13 , word & 0o37776]
@@ -541,8 +543,8 @@ def storeAssembled(lineNumber, value, hop, data = True):
 				fmt = "%05o != %05o, xor = %05o"
 			xor = octals[module][sector][checkSyl][location] ^ octalsForChecking[module][sector][checkSyl][location]
 			msg += fmt % (octals[module][sector][checkSyl][location], octalsForChecking[module][sector][checkSyl][location], xor)
-			msg += ", disassembly   " + unassemble(octals[module][sector][checkSyl][location])
-			msg += "   !=   " + unassemble(octalsForChecking[module][sector][checkSyl][location])
+			#msg += ", disassembly   " + unassemble(octals[module][sector][checkSyl][location])
+			#msg += "   !=   " + unassemble(octalsForChecking[module][sector][checkSyl][location])
 			addError(lineNumber, msg)
 
 # Form a HOP constant from a hop dictionary.
