@@ -122,9 +122,18 @@ octals = [[[[None for offset in range(256)] for syllable in range(3)] for sector
 octalsForChecking = [[[[None for offset in range(256)] for syllable in range(3)] for sector in range(16)] for module in range(8)]
 checkTheOctals = False
 
+countInfos = 0
+countWarnings = 0
+countErrors = 0
+countMismatches = 0
+countOthers = 0
+countRollovers = 0
+
+checkFilename = ""
 if len(sys.argv) > 1:
 	try:
-		f = open(sys.argv[1], "r")
+		checkFilename = sys.argv[1]
+		f = open(checkFilename, "r")
 		module = -1
 		sector = -1
 		for line in f:
@@ -170,7 +179,9 @@ if len(sys.argv) > 1:
 		f.close()
 		checkTheOctals = True
 	except:
-		print("Warning: Cannot open octal-comparison file " + sys.argv[1] + " or file is corrupted")
+		countWarnings += 1
+		print("Warning: Cannot open octal-comparison file " + checkFilename + " or file is corrupted")
+		checkFilename = ""
 #print(octalsForChecking)
 
 # The following structures are used for tracking instructions transparently
@@ -203,8 +214,18 @@ for n in range(0,len(lines)):
 #	Definitions of utility functions
 #----------------------------------------------------------------------------
 def addError(n, msg):
-	global errors
+	global errors, countInfos, countWarnings, countErrors, countMismatches, countOthers
 	if msg not in errors[n]:
+		if msg[:5] == "Info:":
+			countInfos += 1
+		elif msg[:8] == "Warning:":
+			countWarnings += 1
+		elif msg[:6] == "Error:":
+			countErrors += 1
+		elif msg[:9] == "Mismatch:":
+			countMismatches += 1
+		else:
+			countOthers += 1
 		errors[n].append(msg) 
 
 def incDLOC(increment = 1):
@@ -536,7 +557,7 @@ def storeAssembled(lineNumber, value, hop, data = True):
 				octals[module][sector][syllable][location] = (value << 1) & 0o37776
 	if checkTheOctals and checkSyl >= 0:
 		if octals[module][sector][checkSyl][location] != octalsForChecking[module][sector][checkSyl][location]:
-			msg = "Error: Octal mismatch, "
+			msg = "Mismatch: Octal mismatch, "
 			if checkSyl == 2:
 				fmt = "%09o != %09o, xor = %09o" 
 			else:
@@ -1071,7 +1092,7 @@ if False:
 if False:
 	for key in sorted(nameless):
 		print(key + " " + ("%03o" % nameless[key]))
-print("IM IS S LOC DM DS  A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT")
+header = "    IM IS S LOC DM DS  A8-A1 A9 OP  CONSTANT    SOURCE STATEMENT"
 useDat = False
 errorsPrinted = []
 lastLineNumber = -1
@@ -1083,6 +1104,8 @@ for entry in inputFile:
 	originalLine = lines[lineNumber]
 	constantString = ""
 	star = False
+	if originalLine[:7] == "# PAGE ":
+		print("\f")
 	
 	# If the line is expanded by the preprocessor, we have to display its unexpanded form
 	# before proceeding.
@@ -1097,8 +1120,8 @@ for entry in inputFile:
 	# If there's an automatic sector switch here, we have to take care of it prior to
 	# doing anything with the instruction that's actually associated with this line.
 	if "switchSectorAt" in inputLine:
-		print("*")
 		switch = inputLine["switchSectorAt"]
+		countRollovers += 1
 		im0 = switch[0]
 		is0 = switch[1]
 		s0 = switch[2]
@@ -1135,7 +1158,7 @@ for entry in inputFile:
 				"DLOC": loc
 			}, True)
 		storeAssembled(lineNumber, assembled, {"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
-		line = " %o %02o %o %03o  %o %02o  " % (im0, is0, s0, 
+		line = "*    %o %02o %o %03o  %o %02o  " % (im0, is0, s0, 
 							loc0, inputLine["hop"]["DM"], inputLine["hop"]["DS"])
 		print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString))
 		constantString = ""
@@ -1648,16 +1671,49 @@ for entry in inputFile:
 			raw = raw[:m] + "*" + raw[(m+1):]
 		elif raw[m] == "\t":
 			raw = raw[:m] + "*" + raw[m:]
-	print(line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString) + " " + expansionMarker + "\t" + raw)
 	fields = originalLine.split()
-	if len(fields) > 1 and fields[1] == "MACRO" and fields[0] in macros:
-		macroLines = macros[fields[0]]["lines"]
-		for macroLine in macroLines:
-			lineText = ""
-			for n in macroLine:
-				lineText += n + "\t"
-			print(("%40s" % "") + "\t" + lineText)
-		print(("%40s" % "") + "\t\tENDMAC")
+	if originalLine[:1] == "#":
+		print("    " + originalLine)
+		if len(fields) > 1 and fields[1] == "PAGE":
+			print(header)
+		
+	else:
+		print("    " + line + " " + a81 + "  " + a9 + "  " + op + "  " + ("%9s" % constantString) + " " + expansionMarker + "\t" + raw)
+		if len(fields) > 1 and fields[1] == "MACRO" and fields[0] in macros:
+			macroLines = macros[fields[0]]["lines"]
+			for macroLine in macroLines:
+				lineText = ""
+				for n in macroLine:
+					lineText += n + "\t"
+				print(("%40s" % "") + "\t" + lineText)
+			print(("%40s" % "") + "\t\tENDMAC")
+
+if checkTheOctals:
+	# While we have now checked all of the assembed values against the 
+	# octal cross-check file, it's still possible that the cross-check
+	# file contains octals which didn't come from the assembled source
+	# code.  We need to check for those.
+	for module in range(8):
+		for sector in range(16):
+			for syllable in range(3):
+				for location in range(0o400):
+					assembledOctal = octals[module][sector][syllable][location]
+					checkOctal = octalsForChecking[module][sector][syllable][location]
+					if assembledOctal == None and checkOctal != None:
+						countMismatches += 1
+						print("Mismatch: Octal mismatch at %o,%02o,%o,%03o" %(module,sector,syllable,location))
+print("")
+print("Assembly-message summary:")
+print("\tErrors:     %d" % countErrors)
+print("\tWarnings:   %d" % countWarnings)
+if checkTheOctals:
+	print("\tMismatches: %d (vs %s)" % (countMismatches,checkFilename))
+else:
+	print("\tMismatches: (not checked)")
+print("\tRollovers:  %d" % countRollovers)
+print("\tInfos:      %d" % countInfos)
+print("\tOther:      %d" % countOthers)
+
 
 #----------------------------------------------------------------------------
 #   	Print a symbol table
