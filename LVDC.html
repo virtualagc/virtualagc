@@ -121,6 +121,7 @@ Launch
 
 
 
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -240,6 +241,7 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
 
 
 
@@ -516,6 +518,7 @@ Launch
 
 
 
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -575,6 +578,7 @@ Launch
 
 
 
+
       do it!</b>), you may unnecessarily excite yourself by noting that
     Saturn IB launch vehicle AS-206 was used for the Skylab 2 mission
     (Conrad/Weitz/Kerwin).&nbsp; You may then be chagrined to realize
@@ -613,6 +617,7 @@ Launch
     by the assembler.&nbsp; Unfortunately, the status of the assembly
     process for it found 41 warnings and 7 errors — meaning that there
     were problems in the source code and that the assembly process <i>failed</i>.&nbsp;
+
 
 
 
@@ -879,6 +884,7 @@ of
 
 
 
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -905,6 +911,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
 
 
 
@@ -1020,9 +1027,11 @@ Astrionics
 
 
 
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -1304,6 +1313,7 @@ of
 
 
 
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1353,6 +1363,7 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
 
 
 
@@ -1750,6 +1761,7 @@ However,
 
 
 
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -1867,6 +1879,7 @@ However,
 
 
 
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -1905,6 +1918,7 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -2218,6 +2232,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>0775 (octal) stores into the Product-Quotient register
@@ -2385,6 +2400,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 or <tt>DEQS</tt> pseudo-ops (see below), whereas the
                 module number and sector number are simply supplied with
                 octal numeric literals in <tt>CDSD</tt> or <tt>CDSS</tt>.&nbsp;
+
 
 
 
@@ -2664,6 +2680,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2805,6 +2822,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Purpose
 of
+
 
 
 
@@ -4227,6 +4245,7 @@ of
 
 
 
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -4242,6 +4261,7 @@ of
       new,courier,monospace;">STO 0776</span> or <span
       style="font-family: courier new,courier,monospace;">STO 0777</span>.&nbsp;
 Only
+
 
 
 
@@ -4446,6 +4466,7 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -4718,16 +4739,25 @@ Assembly
 
 
 
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
-    available in it.&nbsp; This section is actually a kind of running
-    diary of what I infer about those things from evaluating the
-    available LVDC source code.&nbsp; It's intended to be authoritative
-    only in the sense that it describes how my own assembler (yaASM.py,
-    when it becomes available) will handle the code, but shouldn't be
-    taken as authoritative in any way with regard to how the original
-    assembler (whatever it may have been called) did so.&nbsp; <br>
+    available in it, nor any source code for the original LVDC
+    assembler.&nbsp; <br>
+    <br>
+    This section is a compilation of my own inferences about those
+    things from evaluating the available LVDC source code and from
+    writing my own LVDC assembler.&nbsp; The description is intended to
+    be authoritative only in the sense that it describes how my own
+    assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
+    which does produce an assembled core-rope image identical to that of
+    the original assembler, handles the code.&nbsp; However, my
+    description shouldn't be taken as authoritative in any larger
+    sense.&nbsp; For example, when I say below that the assembler has an
+    initial "preprocessor pass" that performs certain processing, I mean
+    that yaASM.py has such a pass; I <i>imagine</i> that the original
+    assembler did as well, but cannot guarantee it.<br>
     <br>
     You'll probably need to refer to the previous <a
       href="#CPU_Instructions">discussion of the CPU instructions</a>
@@ -4753,6 +4783,7 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
 
 
 
@@ -4826,9 +4857,9 @@ Assembly
     <br>
     As far as octal literals are concerned, some contexts (such as the <tt>OCT</tt>
     pseudo-op or the <tt>PIO</tt> instruction) specifically require
-    them, in which case there's special syntax to distinguish them from
-    decimal numbers, other than the fact that they're not associated
-    with the digits '8' or '9', with decimal points, nor with
+    them, in which case there's no special syntax to distinguish them
+    from decimal numbers, other than the fact that they're not
+    associated with the digits '8' or '9', with decimal points, nor with
     exponents.&nbsp; In some usages there is ambiguity, which case the
     octal literal is prefixed by 'O' (upper-case alphabetical character,
     <i>not</i> a zero).<br>
@@ -4867,35 +4898,47 @@ Assembly
         use these sequence numbers other than for reference purposes in
         the symbol table (see below).</li>
     </ul>
+    <p>By the way, these observations about columnar alignment don't
+      relate to the new assembler (yaASM.py), which does not enforce or
+      use the columnar alignment in any way, other than to recognize
+      that column 1 is special.&nbsp; I don't know if the original
+      assembler actually cared about the columnar alignment.<br>
+    </p>
+    <ul>
+    </ul>
     <h3><a name="Preprocessor_Pass"></a>Preprocessor Pass</h3>
     <p>The LVDC assembler is a macro assembler, meaning that the
       language it processes has a variety of constructs intended to make
       coding easier and more manageable but which aren't directly
-      related to the LVDC itself.&nbsp; These constructs are all
-      resolved and removed from the code by a dedicated preprocessor
-      pass prior to any assembly of actual LVDC instructions or
-      allocation of LVDC memory.&nbsp; The various preprocessor
-      constructs that appear in LVDC code are described in this section.<br>
+      related to the internal characteristics of the LVDC CPU.&nbsp;
+      These constructs are all resolved and removed from the code by a
+      dedicated preprocessor pass prior to any assembly of actual LVDC
+      instructions or allocation of LVDC memory.&nbsp; The various
+      preprocessor constructs that appear in LVDC code are described in
+      this section.<br>
     </p>
-    <p>The preprocessor operates in a single pass, and therefore any
-      items it uses must have been defined prior to their use.<br>
+    <p>The preprocessor itself operates in a single pass, and therefore
+      any symbols or macros it uses must have been defined prior in the
+      source code to such use.<br>
     </p>
     <i>The </i><i><tt>CALL</tt></i><i> macro</i>:&nbsp; <tt>CALL</tt>
     is a macro hard-coded into the assembler itself.&nbsp; By a "macro",
     I mean that superficially it is used in source code as if it were a
     CPU instruction, but it is not a CPU instruction.&nbsp; Rather, it
-    is a shorthand for a sequence of several CPU instructions, a single
-    <tt>CALL</tt> is expanded by the preprocessor into the appropriate
-    stream of true CPU instructions.&nbsp; When I say it is "hard-coded"
-    into the assembler, I mean that the language also includes ways for
-    the programmer to define his own custom macros within the LVDC
-    program if he wants, but that there are no such definitions for the
-    <tt>CALL</tt> macro in the LVDC source code.<br>
+    is a shorthand for a sequence of several CPU instructions.&nbsp; A
+    single <tt>CALL</tt> is expanded by the preprocessor into the
+    appropriate stream of true CPU instructions.&nbsp; When I say it is
+    "hard-coded" into the assembler, I mean that the language also
+    includes ways for the programmer to define his own custom macros
+    within the LVDC program if he wants, but that there are no such
+    definitions for the <tt>CALL</tt> macro in the LVDC source code.<br>
     <br>
-    There are both 2-argument and 2-argument variants of the
-    macro.&nbsp; The 2-argument version is used for calling a subroutine
-    having a single input argument.&nbsp; The macro is invoked by a
-    source-code line of the form<br>
+    It is probably hard-coded in the assembler rather than having a soft
+    definition within the source code because there are two distinct
+    variations of it.:&nbsp; There are both 2-argument and 2-argument
+    variants of the macro.&nbsp; The 2-argument version is used for
+    calling a subroutine having a single input argument.&nbsp; The macro
+    is invoked by a source-code line of the form<br>
     <blockquote><tt>CALL <i>ARG1</i>,<i>ARG2</i></tt> <br>
     </blockquote>
     which the preprocessor replaces by a pair of actual instructions, <br>
@@ -4918,9 +4961,10 @@ Assembly
       </tt></blockquote>
     and thus calls a subroutine with two input arguments.<br>
     <br>
-    <i>General macro facility</i>:&nbsp; As I said above, the macro
-    facility is general-purpose, and custom macros can also be
-    defined.&nbsp; The syntax used is as follows:<br>
+    <i>General macro-definition facility</i>:&nbsp; As I said above, the
+    macro facility is general-purpose, and custom macros can also be
+    defined within the source code.&nbsp; The syntax used for defining a
+    macro is as follows:<br>
     <blockquote><tt><i>NAME</i>&nbsp;&nbsp;&nbsp;
         MACRO&nbsp;&nbsp;&nbsp; ARG1,ARG2,...<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ... code using the symbols
@@ -4938,7 +4982,8 @@ Assembly
     As an example, consider the 2-argument the <tt> CALL</tt> macro
     described earlier.&nbsp; It is hard-coded into the assembler, and
     therefore doesn't require a definition in the code, but if it
-    weren't hard-coded it could have been definedas:<br>
+    weren't hard-coded it could have been giving the following soft
+    definition:<br>
     <blockquote><tt>CALL&nbsp;&nbsp;&nbsp; MACRO&nbsp;&nbsp;&nbsp;
         ARG1,ARG2<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; CLA&nbsp;&nbsp;&nbsp;
@@ -4964,17 +5009,19 @@ Assembly
     In the operand here, the parentheses are literal and must always be
     present.&nbsp; <tt><i>EXPRESSION</i></tt> is an arithmetical
     expression involving numeric literals, the operations + - * /,
-    parentheses, and other pseudo variables.&nbsp; For example,<br>
+    parentheses, and other (previously-defined) pseudo variables.&nbsp;
+    For example,<br>
     <blockquote><tt>OMEGA&nbsp;&nbsp; EQU&nbsp;&nbsp;&nbsp;
         (.72921141E-4)</tt><tt><br>
       </tt><tt>RWCP&nbsp;&nbsp;&nbsp; EQU&nbsp;&nbsp;&nbsp;
         (OMEGA*6373377*.87993)</tt><br>
     </blockquote>
     In general, parenthesized expressions involving pseudo-variables
-    like this can appear anywhere in LVDC source code, and replaced by
-    the preprocessor with the numeric literals.&nbsp; Except for
+    like this can appear anywhere in LVDC source code, and is replaced
+    by the preprocessor with the numeric literals.&nbsp; Except for
     appearing as left-hand symbols in <tt>EQU</tt> statements, pseudo
-    variables appear <i>only</i> with such parenthesized expressions.<br>
+    variables appear <i>only</i> with such parenthesized expressions,
+    or in tests for conditional assembly (see below).<br>
     <br>
     In most usages, an <tt>(<i>EXPRESSION</i>)</tt> appearing in an
     assembly language operand can be suffixed with an optional binary
@@ -5002,6 +5049,15 @@ Assembly
     is thus eventually assembled.&nbsp; If not, then the enclosed code
     is discarded.<br>
     <h3><a name="Assembly_Pass"></a>Assembly Pass</h3>
+    <p>(Technically, what I'm calling the "assembly pass" here is really
+      implemented in two successive passes, known the "discovery pass"
+      and the "assembly pass", in yaASM.py.&nbsp; The former associates
+      all program labels and variable names with physical addresses,
+      while the latter performs the actual assembly using the
+      now-resolved addresses.&nbsp; That detail is totally irrelevant
+      and transparent to the user, but would be necessary information to
+      anybody modifying yaASM.py itself.)<br>
+    </p>
     <i></i>
     <p><i>Instruction operands</i>:&nbsp; Operand formats differ for
       some CPU instruction types, but most of them require a variable (a
@@ -5050,6 +5106,7 @@ Assembly
 
 
 
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -5059,32 +5116,41 @@ Assembly
         constant.&nbsp; Here the assembler allocates an <i>unnamed</i>
         variable in the current DM/DS, stores the value of the constant
         at that variable, and then uses the location of the new-created
-        variable as the operand.&nbsp; Each numerically-unique constant
-        is stored only once as a variable and is reused everywhere that
-        requires it.&nbsp; For example, in the AS-206RAM LVDC assembly
-        listing, <tt>=1B18</tt> is an operand in the lines with
-        sequence numbers 051570 and 051910, while <tt>=00000004</tt> is
-        used at 051950 and 053380, but they both evaluate to the same
-        numerical value and thus reference the same memory location
-        (2-06-076).&nbsp; Note that if the literal numerical constant
-        begins with the character 'O' (alphabetic, not digit) then the
-        number is octal, while if the leading 'O' is not present then
-        the number is decimal.<br>
+        variable as the operand.&nbsp; In other words, not all program
+        variables are explicitly defined by pseudo-ops ... some of them
+        are transparently allocated in as needed by the assembler itself
+        in memory locations not previously used for anything..&nbsp;
+        Each numerically-unique constant is stored only once as a
+        variable and is reused everywhere that requires it.&nbsp; For
+        example, in the AS-206RAM LVDC assembly listing, <tt>=1B18</tt>
+        is an operand in the lines with sequence numbers 051570 and
+        051910, while <tt>=00000004</tt> is used at 051950 and 053380,
+        but they both evaluate to the same numerical value and thus
+        reference the same memory location (2-06-076).&nbsp; Note that
+        if the literal numerical constant begins with the character 'O'
+        (alphabetic, not digit) then the number is octal, while if the
+        leading 'O' is not present then the number is decimal.<br>
       </li>
     </ol>
     <p>Except for the <tt>HOP</tt><tt></tt> instructions, the other CPU
       instructions that transfer program control target a location in
       the current IM/IS rather than a variable in the DM/DS, and thus
-      require a different type of operand.Those instructions (<tt>TRA</tt>,
+      require a different type of operand. Those instructions (<tt>TRA</tt>,
       <tt>TNZ</tt>, <tt>TMI</tt>) thus have operands in one of the
       following two formats:<br>
     </p>
     <ul>
       <li>The symbolic name of a code location in the current IM/IS.</li>
       <li>"<tt>*+<i>n</i></tt>" or "<tt>*-<i>n</i></tt>", where <tt><i>n</i></tt>
-        is an octal(?) constant.&nbsp; This references the memory
+        is a literal decimal constant.&nbsp; This references the memory
         location <tt><i>n</i></tt> words later or earlier than the
-        current instruction, respectively.</li>
+        current instruction, respectively.&nbsp; (I say that the literal
+        constant is <i>decimal</i> because yaASM.py implements it in
+        that way.&nbsp; However, there are no instances of <tt><i>n</i></tt>&gt;7
+        in the existing LVDC source code, so I really have no way of
+        knowing whether the original assembler accepted decimal
+        constants or octal ones.)<br>
+      </li>
     </ul>
     <ul>
     </ul>
@@ -5120,7 +5186,7 @@ Assembly
         (see below) can be used to create symbolic macro names for such
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
-      <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>i</i>,<i>j</i>,<i>k</i></tt>",
+      <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>target</i>,<i>syllable</i>,<i>modifier</i></tt>",
 
 
 
@@ -5165,31 +5231,34 @@ Assembly
 
 
 
-        where <tt><i>i</i></tt>, <tt><i>j</i></tt>, and <tt><i>k</i></tt>
-        are all small integers.&nbsp; I cannot be sure, but referring to
-        the description earlier of how the <tt>EXM</tt> instruction
-        works, I think that these fields may be interpreted as follows:</li>
+
+        where <tt><i>target</i></tt>, <tt><i>syllable</i></tt>, and <tt><i>modifier</i></tt>
+        are all small literal octal integer constants.&nbsp; These
+        fields may be interpreted as follows:</li>
       <ul>
-        <li><tt><i>i</i></tt> (0-3):&nbsp; Specifies offset in residual
-          memory of target instruction:&nbsp; 0 for 600, 1 for 640, 2
-          for 700, 3 for 740.<br>
+        <li><tt><i>target</i></tt> (0-3):&nbsp; Specifies offset in
+          residual memory of target instruction:&nbsp; 0 for 600, 1 for
+          640, 2 for 700, 3 for 740.<br>
         </li>
-        <li><tt><i>j</i></tt> (0-1):&nbsp; Specifies syllable of the
-          target instruction within the target word.<br>
+        <li><tt><i>syllable</i></tt> (0-1):&nbsp; Specifies syllable of
+          the target instruction within the target word.<br>
         </li>
-        <li><tt><i>k</i></tt> (0-17 octal):&nbsp; Specifies modifier for
-          the instruction:&nbsp; the two least-significant bits replace
-          the corresponding bits in the target instruction, while the
-          two most-significant bits bitwise-OR with the corresponding
-          bits.<br>
+        <li><tt><i>modifier</i></tt> (0-17 octal):&nbsp; Specifies a
+          4-bit modifier for the instruction:&nbsp; the two
+          least-significant bits <i>replace</i> the corresponding bits
+          in the target instruction, while the two most-significant bits
+          <i>bitwise-OR</i> with the corresponding bits.<br>
         </li>
       </ul>
-      <li>I believe the <tt>PIO</tt> instruction accepts only literal
-        octal constants.</li>
+      <li>The <tt>PIO</tt> instruction accepts only literal octal
+        constants (000-377).&nbsp; All of the examples I saw in the
+        original LVDC printout were 0-padded, though yaASM.py does not
+        enforce that restriction.<br>
+      </li>
     </ul>
     <i>Pseudo-ops</i>:&nbsp; The following table shows every type of
     pseudo-op I've encountered in the AS-206RAM program listing, and
-    what I've been able to guess about them:<br>
+    what I've been able to infer about them:<br>
     <br>
     <table cellpadding="2" cellspacing="2" border="1" width="100%">
       <tbody>
@@ -5202,15 +5271,15 @@ Assembly
         <tr>
           <td nowrap="nowrap" valign="middle"><tt>BSS</tt><tt> <i>n</i><br>
             </tt></td>
-          <td valign="middle">I think this pseudo-op simply allocates <tt><i>n</i></tt>
-            words of memory.<br>
+          <td valign="middle">This pseudo-op simply allocates <tt><i>n</i></tt>
+            words of memory.&nbsp; They are loaded with the value 0.<br>
           </td>
         </tr>
         <tr>
           <td nowrap="nowrap" valign="middle"><tt>DEC</tt><tt> <i>number</i><br>
             </tt></td>
           <td valign="middle">This pseudo-op allocates one word of
-            memory, and stores the decimal <tt><i>number</i></tt> in
+            memory, and loads the decimal <tt><i>number</i></tt> in
             it.&nbsp; <br>
           </td>
         </tr>
@@ -5218,15 +5287,20 @@ Assembly
           <td nowrap="nowrap" valign="middle"><tt>DEQD</tt><tt> </tt><tt><i>M</i></tt><tt>,</tt><tt><i>S</i></tt><tt>,</tt><tt><i>LOC<br>
               </i></tt><i>&nbsp; or</i><tt><i><br>
               </i></tt><tt>DEQS</tt><tt> </tt><tt><i>M</i></tt><tt>,</tt><tt><i>S</i></tt><tt>,</tt><tt><i>LOC</i></tt></td>
-          <td valign="middle">This pseudo-op associates its
-            left-hand-symbol with a specific fixed location in memory,
-            specified by its module, sector, and offset.&nbsp; It does
-            not appear to store anything at that locations, but merely
-            defines a symbol representing that particular memory
-            configuration.&nbsp; The symbol does not appear in the
-            symbol table, but acts in essence as though it is a
-            preprocessor symbol, expanded only as the operand of a <tt>CDS</tt>
-            instruction (see above).<br>
+          <td valign="middle">This preprocessor pseudo-op is a variant
+            of <tt>EQU</tt> (see below).&nbsp; It defines a
+            pseudo-variable, named according to its left-hand symbol,
+            referencing a specific fixed location in memory, specified
+            by its module, sector, and offset, which are literal octal
+            constants.&nbsp; Since the pseudo-variable exists only in
+            the preprocessor, it does not store anything at that
+            location, but merely defines a symbol representing that
+            particular memory configuration.&nbsp; The symbol for the
+            pseudo-variable created in this manner did not appear in the
+            symbol tables produced by the original LVDC assembler, but
+            do so in symbol tables produced by yaASM.py.&nbsp; As far as
+            I know, those pseudo-variables are used only as operands of
+            <tt>CDS</tt> instructions (see above).<br>
             <br>
             <tt>DEQD</tt> differs from <tt>DEQS</tt> in that the former
             specifies a duplex memory configuration whereas the latter
@@ -5241,9 +5315,9 @@ Assembly
             instruction (see earlier).&nbsp; Note that <tt>EXM</tt>
             cannot access such a constant in-place — i.e., not at the
             location where the <tt>DFW</tt> pseudo-op stores it —
-            rather, requiring that the constant be moved to one of the
-            addresses 200, 240, 300, or 340 in residual memory
-            beforehand.<br>
+            rather, requiring that the constant be moved at runtime to
+            one of the addresses 200, 240, 300, or 340 in residual
+            memory.<br>
             <br>
             Naively, what this pseudo-op does is to assembles two
             instructions (remember, each instruction assembles into one
@@ -5266,7 +5340,14 @@ Assembly
           <td valign="middle">Abbreviated form of <tt>ORGDD</tt> (see
             below) that only modifies the assembler's current
             data-memory pointer, leaving the instruction-memory pointer
-            untouched.&nbsp; It does not allocate any memory.<br>
+            untouched.&nbsp; It does not allocate any memory.&nbsp; The
+            location parameter <tt><i>DLOC</i></tt> is treated as a
+            suggestion rather than as a hard specification of the offset
+            into the data-memory sector, since if the assembler finds
+            that the requested <tt><i>DLOC</i></tt> has already been
+            used, it will search upward through the data sector until it
+            finds a location that hasn't already been used.&nbsp; If <tt><i>DLOC</i></tt>
+            is omitted entirely, it is taken to be 000.<br>
             <br>
             Presumably there is a <tt>DOGS</tt> pseudo-op as well
             (differing in that it pertains to a simplex memory
@@ -5277,21 +5358,20 @@ Assembly
         <tr>
           <td valign="middle"><tt>EQU (<i>expression</i>)</tt><br>
           </td>
-          <td valign="middle">Defines a "pseudo variable" used only at
-            assembly time.&nbsp; The parentheses are literally
-            present.&nbsp; The expression is arithmetical in nature, and
-            can involve decimal numbers, other pseudo variables, and the
-            operations +, -, *, or /.&nbsp; The lines are evaluated in a
-            single pass, so pseudo variables used in expressions need to
-            have been defined earlier in the source code.&nbsp; For
-            example,<br>
+          <td valign="middle">Defines a "pseudo variable" used only by
+            the assembler's preprocessor pass.&nbsp; The parentheses are
+            literally present.&nbsp; The expression is arithmetical in
+            nature, and can involve decimal numbers, other pseudo
+            variables, and the operations +, -, *, or /.&nbsp; The lines
+            are evaluated in a single pass, so pseudo variables used in
+            expressions need to have been defined earlier in the source
+            code.&nbsp; For example,<br>
             <blockquote><tt>PI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 EQU&nbsp;&nbsp;&nbsp; (3.1415927)</tt><br>
             </blockquote>
-            Note that when pseudo variables are <i>used</i>, they are
-            also always within arithmetical expressions that are
-            enclosed in parentheses, <tt>(<i>expression</i>)</tt>, such
-            as:<br>
+            Note that when pseudo variables are <i>used</i> they are
+            always within arithmetical expressions that are enclosed in
+            parentheses, <tt>(<i>expression</i>)</tt>, such as:<br>
             <blockquote><tt>PI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 DEC&nbsp;&nbsp;&nbsp; (PI)B0<br>
                 PI3&nbsp;&nbsp;&nbsp;&nbsp; DEC&nbsp;&nbsp;&nbsp;
@@ -5309,10 +5389,10 @@ Assembly
         <tr>
           <td valign="middle"><tt>FORM <i>a,b,</i>...</tt><br>
           </td>
-          <td valign="middle">This pseudo-op defines to the assembler
-            (without generating any actual code) the name of a macro
-            that, when used, will pack a pattern of bit-fields into a
-            single word-size constant.&nbsp; In the <tt>FORM</tt>
+          <td valign="middle">This preprocessor pseudo-op defines to the
+            assembler (without generating any actual code) the name of a
+            macro that, when used, will pack a pattern of bit-fields
+            into a single word-size constant.&nbsp; In the <tt>FORM</tt>
             statement itself, the field-widths are decimal, whereas when
             the macro is used, the values of the fields are octal.&nbsp;
             An example may make all this clearer:<br>
@@ -5343,32 +5423,12 @@ Assembly
             really appear that there are 7 unused bits assigned the
             value 0.<br>
             <br>
-            The second of these lines uses the macro.&nbsp; It compiles
-            such a constant and stores it at a the memory location <tt>MYCON</tt>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            The 2-bit field will have the (binary) value 01, the 3-bit
-            field will have the value 010, and so on, so the actual
-            value of <tt>MYCON</tt>, in binary, as displayed by the
-            assembler, will be<br>
+            The second of the lines shown above uses the macro.&nbsp; It
+            compiles such a constant and stores it at a the memory
+            location <tt>MYCON</tt>.&nbsp; The 2-bit field will have
+            the (binary) value 01, the 3-bit field will have the value
+            010, and so on, so the actual value of <tt>MYCON</tt>, in
+            binary, as displayed by the assembler, will be<br>
             <blockquote><tt>01 010 0011 00100 000101&nbsp;&nbsp; 000000
                 0</tt><br>
             </blockquote>
@@ -5421,7 +5481,9 @@ Assembly
           <td valign="top">Forces alignment for the next memory
             allocated to a 020-word (octal, or 16 decimal) boundary, and
             may have something to do with the succeeding words logically
-            forming a matrix.&nbsp; </td>
+            forming a matrix.&nbsp; It does not allocate any
+            memory.&nbsp; I.e., any memory it skips past to reach the
+            proper alignment remains unallocated. </td>
         </tr>
         <tr>
           <td valign="middle"><tt>OCT <i>number</i></tt><br>
@@ -5460,28 +5522,27 @@ Assembly
         <tr>
           <td valign="middle"><tt>SYN <i>symbol</i></tt><br>
           </td>
-          <td valign="middle">I think this may require a left-hand
-            symbol to precede the <tt>SYN</tt> on the line, and to tell
-            the assembler to treat the left-hand symbol as a synonym for
-            <tt><i>symbol</i></tt>.&nbsp; This is similar in concept to
-            <tt>EQU</tt>, except that I think <tt>EQU</tt> is processed
-            by the preprocessor and therefore can only handle other
-            symbols known to the preprocessor.&nbsp; <tt>SYN</tt>, in
-            contrast, would be used in cases where <tt><i>symbol</i></tt>
-            isn't known to the preprocessor ... for example, if it were
-            the label of a subroutine or the name of a variable.<br>
+          <td valign="middle">This pseudo-op requires a left-hand symbol
+            to precede the <tt>SYN</tt> on the line.&nbsp; It tells the
+            assembler to treat the left-hand symbol as a synonym for <tt><i>symbol</i></tt>.&nbsp;
+            This is similar in concept to <tt>EQU</tt>, which
+            essentially creates synonyms for numerical constants.&nbsp;
+            But it differs from <tt>EQU</tt> in that it is not a part
+            of the preprocessor, and thus can reference symbols defined
+            later in the source code.&nbsp; Further, the symbols it
+            references can be program labels or variable names <br>
           </td>
         </tr>
         <tr>
           <td valign="middle"><tt>TABLE <i>number</i></tt><br>
           </td>
-          <td valign="middle">I think this may inform the assembler that
-            the succeeding <tt><i>number</i></tt> words of memory form
-            a table.&nbsp; The only use I can see for this is to make
-            sure the assembler doesn't split the table across a
-            memory-sector boundary.&nbsp; All of the uses of <tt>TABLE</tt>
-            I find in the AS-206RAM listing are tagged as assembler
-            warnings.<br>
+          <td valign="middle">This informs the assembler that the
+            succeeding <tt><i>number</i></tt> words of memory form a
+            table.&nbsp; The operand is a decimal number.&nbsp; The only
+            use I can see for this is to make sure the assembler doesn't
+            split the table across a memory-sector boundary.&nbsp; All
+            of the uses of <tt>TABLE</tt> I find in the AS-206RAM
+            listing are tagged as assembler warnings.<br>
           </td>
         </tr>
         <tr>
@@ -5496,12 +5557,14 @@ Assembly
             what <tt>USE DAT</tt> is for.&nbsp; I think it may be a
             convenient way to pack CPU instructions when one wants to
             place them in the midst of an area of memory used primarily
-            for storing variables.<br>
+            for storing variables, or may represent an alternative to
+            the <tt>DFW</tt> pseudo-op (see above).<br>
             <br>
             <tt>USE INST</tt>:<br>
             <blockquote>The <tt>ORGDD</tt> pseudo-op (see above)
               defines an origin for both "instructions" (fields <tt><i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i></tt>)
               and "data" (fields <tt><i>DM</i>,<i>DS,LOC2</i></tt>).&nbsp;
+
 
 
 
@@ -5525,6 +5588,7 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
 
 
 
@@ -5573,7 +5637,9 @@ Assembly
             </tt></td>
           <td valign="middle">Forces alignment on a 4-word boundary, and
             may have something to do with the succeeding words logically
-            forming a vector.&nbsp; It does not allocate any memory.<br>
+            forming a vector.&nbsp; It does not allocate any
+            memory.&nbsp; I.e., any memory it skips past to reach the
+            proper alignment remains unallocated.<br>
           </td>
         </tr>
       </tbody>
@@ -5881,6 +5947,7 @@ Assembly
 
 
 
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unHOP.py">unHOP.py</a>)
@@ -6032,6 +6099,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM/unOP.py">unOP.p
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -6483,6 +6551,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
     <br>
     With that warning out of the way, <a
       href="https://github.com/virtualagc/virtualagc/tree/master/yaASM.py">the
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -6510,7 +6579,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         &gt;<i>OUTPUT</i>.lst</tt><br>
     </blockquote>
     The assembler simply takes an input file of LVDC source code (<i>INPUT</i>.lvdc),
+
     and produces as output a human-readable assembly listing (<i>OUTPUT</i>.lst).&nbsp;
+
     Additionally, it produces a file containing an octal listing of the
     assembled code, which is always called yaASM.tsv.&nbsp; This file is
     produced whether or not there were fatal errors in the assembly
@@ -6680,6 +6751,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -6763,10 +6835,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-09-09.<br>
+          2019-09-10.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
