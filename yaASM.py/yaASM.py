@@ -825,7 +825,7 @@ if False:
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
 		inDataMemory = True
-		inputLine = { "raw": line, "VEC": False, "MAT": False }
+		inputLine = { "raw": line, "VEC": False, "MAT": False, "numExpanded": len(expandedLines[lineNumber]) }
 		isCDS = False
 		    
 		# Split the line into fields.
@@ -1098,6 +1098,7 @@ errorsPrinted = []
 lastLineNumber = -1
 expansionMarker = " "
 for entry in inputFile:
+	#print(entry)
 	lineNumber = entry["lineNumber"]
 	inputLine = entry["expandedLine"]
 	errorList = errors[lineNumber]
@@ -1111,7 +1112,7 @@ for entry in inputFile:
 	# before proceeding.
 	if lineNumber != lastLineNumber:
 		lastLineNumber = lineNumber
-		if inputLine["raw"] == originalLine:
+		if inputLine["numExpanded"] == 1: # inputLine["raw"] == originalLine:
 			expansionMarker = " "
 		else:
 			expansionMarker = "+"
