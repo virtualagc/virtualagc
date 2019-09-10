@@ -1,0 +1,789 @@
+# Copyright:    Public domain.
+# Filename:     sample-1967.lvdc
+# Purpose:      This is an abridged form of LVDC flight program 
+#               AS-206RAM (1967), from which all guidance-related
+#               code has been removed, in order to insure that 
+#               there are no possible ITAR restrictions against
+#               its export.  It includes only code for mathematical 
+#               utility functions and other generic computer
+#               operations, and exists for the purpose of
+#               demonstrating the syntax and the constructs in 
+#               LVDC assembly language. 
+# Assembler:    yaASM.py
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      www.ibiblio.org/apollo/LVDC.html
+# Mod history:  2019-09-10 RSB  Abridged LVDC-AS206RAM.lvdc.
+#
+# The original program listing from which this code was transcribed
+# (and abridged) was an unreleased engineering version.  It contained 
+# assembly-time errors that rendered it non-functional as-is, and some
+# such errors have been corrected in this abridged version.  Additionally, 
+# some modern code has been added to facilitate demonstrating operation 
+# of those portions of the original code that have been retained.
+#
+# The nature of the "demonstration" is that there is now a "workshop"
+# area of the code that is used to call various utility subroutines
+# that were provided by the original code, such as trigonometric 
+# functions and matrix operations.  You can modify the workshop area
+# and reassemble the code, if desired.  Look for the program label 
+# "WRKSHP".
+#
+# Beyond what was mentioned above, there are several purely-visual
+# ways in which this abridged transcription differs from the original
+# printout:
+#
+#    1. Possible transcription errors in program comments.
+#    2. Slight differences in columnar alignment.
+#    3. Insertion of addition program comments.  These are visually
+#       distinguished from the original comments in that modern
+#       comments all occupy a full line, and are marked by the
+#       character "#" in column 1.
+#    4. In the original code, almost all lines have SEQUENCE numbers 
+#       at the ends of lines.  Those sequence numbers are not 
+#       preserved here, but the range of sequence numbers for 
+#       individual pages are indicated in the comments.
+
+# What follows are various allocations of variables that were spread
+# out across various pages of the original program listing.  The comments
+# associated with these allocations have been retained as-is, and may
+# refer to code that has been removed during abridgment.
+
+	DOGD	2,14,100
+OPTMP1	BSS	1	      		ORBITAL PROCESSOR TEMPORARY STORAGE
+
+	DOGD	2,17,0
+HCFDIV	HPC	UFDIV			TO UTILITY DIVIDE ROUTINE
+HCPSQR	HPC	UPSQRT			TO UTILITY PARTIAL SQUARE ROOT ROUTINE
+KMINUS	OCT	400000000
+KONES	OCT	777777776
+KPLUS	OCT	200000000
+KZERO	DEC	0.B0			ZERO
+
+	DOGD	2,17,100
+	MAT
+TEMP	BSS	1			)
+TEMP1	BSS	1			)
+TEMP2	BSS	1			)
+	VEC
+TEMP3	BSS	1			)
+TEMP4	BSS	1			) TEMPORARY STORAGE LOCATIONS THAT
+TEMP5	BSS	1			)     MAY BE USED BY ANY PROGRAM THAT
+	VEC
+TEMP6	BSS	1			)         IS NOT INITIATED BY AN
+TEMP7	BSS	1			)            INTERRUPT
+TEMP8	BSS	1			)
+TEMP9	BSS	1			)
+
+UTEMP1	BSS	1			   )
+UTEMP2	BSS	1			   )
+UTEMP3	BSS	1			   )
+	VEC
+UTEMP4	BSS	1			   ) TEMPORARY STORAGE LOCATIONS
+UTEMP5	BSS	1			   )    USED BY UTILITY ROUTINES.
+UTEMP6	BSS	1			   )
+UTEMP7	BSS	1			   )
+UTDIV1	BSS	1			DENOMINATOR FOR THE FIXED POINT DIVIDE
+CMDATA	BSS	1	      CMDATA
+*					WORD USED TO SAVE COMPRESSED DATA WORD
+*					PRIOR TO COMPRESSION
+
+	DOGD	2,17,200
+UTEXM	BSS	1			LOCATION USED BY EXM IN SUBROUTINES
+
+# Workshop area.
+
+	ORGDD	4,1,0,0,2,14,
+WRKSHP	TRA	WRKSHP
+
+# From this point to the end of the program is a portion of the "utilities"
+# section of the original program listing.
+
+	ORGDD	4,3,0,0,2,14,
+
+# PAGE 261, SEQUENCE 113100-113440, TITLE "22. UTILITY ROUTINES"
+
+************************************************************************
+*                          UTILITY ROUTINES                            *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  FUNCTION    PROVIDES FOR CALCULATIONS NEEDED BY VARIOUS ROUTINES.   *
+*                                                                      *
+*  ENTRIES     AUATAN - ARC-TANGENT                                    *
+*              AUSC   - SIN-COS                                        *
+*              UFDIV  - FIXED POINT DIVIDE                             *
+*              UPSQRT - PARTIAL SQUARE ROOT                            *
+*              MATMPY - MATRIX MULTIPLY                                *
+*              MATTRA - MATRIX TRANSPOSE                               *
+*              UVDOT  - VECTOR DOT PRODUCT                             *
+*              UVCRS  - VECTOR CROSS PRODUCT                           *
+*              AULN   - NATURAL LOGARITHM                              *
+*              AUDIVD - AUTOMATIC DIVIDE                               *
+*              WIPER  - BSS AREA ZEROING                               *
+*              TERMIN - VARIABLE ZEROING FOR REPEATABLE MODE           *
+*              UGCOMP - DATA COMPRESSION                               *
+*              UACOMP - DATA COMPRESSION                               *
+*              TABST  - TABLE STORE                                    *
+*                                                                      *
+************************************************************************
+
+# PAGE 273, SEQUENCE 116450-116980
+
+************************************************************************
+*                                                                      *
+*                          ARCTANGENT ROUTINE                          *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       TWO ARGUMENTS, X IN ACC AND Z IN PQ, SCALED THE SAME    *
+*                                                                      *
+*  OUTPUT      ARCTAN (X/Z) IN ACCUMULATOR, IN PIRADS SCALED B0        *
+*                                                                      *
+*  NOTE        X CORRESPONDS TO A SIN AND Z CORRESPONDS TO A COS SINCE *
+*              TAN = SIN/COS                                           *
+*                                                                      *
+************************************************************************
+
+
+AUATAN	STO	777
+	SHR	1
+	STO	UTEMP1			BN+1  SIN Z
+	TMI	*+2
+	TRA	*+2
+	RSU	KZERO
+	STO	UTEMP3			BN+1  ABS (SIN Z)
+	CLA	775			BN
+	SHR	1
+	STO	UTEMP2			BN+1  COS Z
+	TMI	*+2
+	TRA	*+2
+	RSU	KZERO
+	STO	UTEMP4			BN+1  ABS (COS Z)
+	SUB	UTEMP3			BN+1  ABS (SIN Z)
+	SHR	1
+	STO	UTEMP5			BN+2  ABS (COS Z) - ABS (SIN Z)
+	CLA	UTEMP3			BN+1  ABS (SIN Z)
+	ADD	UTEMP4			BN+1  ABS (COS Z)
+	STO	UTDIV1			BN+1  ABS (COS Z) + ABS (SIN Z)
+	CLA	777
+	STO	UTEMP3
+	CLA	UTEMP5
+	HOP	HCFDIV
+
+*	
+*   V = (1/2)*(ABS(COS Z) - ABS(SIN Z))/(ABS(COS Z) + ABS(SIN Z))
+*
+
+	STO	UTEMP4			B1    V
+	MPH	UTEMP4			B1
+	SHL	1
+	STO	UTEMP5			B1    V**2
+	MPH	=-.3730974E-2B-6	C11
+	ADD	=.016760072B-5		C9
+	MPH	UTEMP5			B1    V**2
+	ADD	=-.037061733B-4		C7
+	MPH	UTEMP5			B1    V**2
+	ADD	=.06160680B-3		C5
+# PAGE 274, SEQUENCE 116990-117220
+	MPH	UTEMP5			B1    V**2
+	ADD	=-.10587734B-2		C3
+	MPH	UTEMP5			B1    V**2
+	ADD	=.31830264B-1		C1
+	MPH	UTEMP4			B1    V
+	STO	UTEMP4			B0    X
+*
+*   X =  V*(C1 + V**2*(C3 + V**2*(C5 + V**2*(C7 + V**2*(C9+V**2*C11)))))
+*
+	CLA	UTEMP2			BN+1  COS Z
+	TMI	*+4
+	CLA	=O1			B0    1/4
+	SUB	UTEMP4			B0    X
+	TRA	*+3
+	CLA	=O3			B0    3/4
+	ADD	UTEMP4			B0    X
+	STO	UTEMP4			B0
+	CLA	UTEMP1			BN+1  SIN Z
+	TMI	*+3
+	CLA	UTEMP4
+	HOP	UTEMP3
+	CLA	KZERO
+	SUB	UTEMP4
+	HOP	UTEMP3
+	
+# PAGE 275, SEQUENCE 117240-117730
+
+************************************************************************
+*                                                                      *
+*                      SINE AND COSINE ROUTINE                         *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       ARGUMENT IN ACCUMULATOR, IN PIRADS SCALED B0            *
+*                                                                      *
+*  OUTPUT      SINE IN ACCUMULATOR AND COSINE IN PQ, BOTH SCALED B0    *
+*                                                                      *
+************************************************************************
+
+
+AUSC	STO	777
+	STO	UTEMP1			B0    Z
+	TMI	AUSC1
+	RSU	KPLUS			B0    1/2
+	STO	UTEMP2			B0    1/2 - Z
+	TMI	*+2
+	TRA	AUSC3
+	ADD	KPLUS			B0    1/2
+	TRA	AUSC2			      AC = 1 - Z, B0
+AUSC1	ADD	KPLUS			B0    1/2
+	STO	UTEMP2			B0    1/2 + Z
+	TMI	*+2
+	TRA	AUSC3
+	RSU	=O6			B0    - 1/2
+AUSC2	STO	UTEMP1			B0    - (1 + Z)
+AUSC3	CLA	777
+	STO	UTEMP3
+	CALL	SCPOLY,UTEMP1		COMPUTE SIN
+	STO	UTEMP1
+	CALL	SCPOLY,UTEMP2		COMPUTE COS
+	STO	775
+	CLA	UTEMP1
+	HOP	UTEMP3
+SCPOLY	STO	777
+	STO	UTEMP4			B0    ANGLE
+	MPH	UTEMP4			B0
+	SHL	1
+	STO	UTEMP5			B-1   SQUARE OF ANGLE
+	MPH	=-.558396947B3			C7
+	ADD	=2.54360520B2			C5
+	MPH	UTEMP5			B-1
+	SHR	2
+	ADD	=-5.16736782B3			C3
+	MPH	UTEMP5			B-1
+	ADD	=3.14158970B2			C1
+# PAGE 276, SEQUENCE 117740-117760
+	MPH	UTEMP4			B0
+	SHL	2				RESCALE TO B0
+	HOP	777
+	
+# PAGE 277, SEQUENCE 117780-117980
+
+************************************************************************
+*                                                                      *
+*                      FIXED POINT DIVIDE ROUTINE                      *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       NUMERATOR IN ACCUMULATOR, DENOMINATOR IN UTDIV1         *
+*                                                                      *
+*  OUTPUT      QUOTIENT IN THE AC AND IN THE PQ AT RETURN HOP          *
+*                                                                      *
+*  NOTE        BY TRANSFERRING TO PARTIAL SQUARE ROOT ROUTINE          *
+*              A 7 INSTRUCTION DELAY IS PRODUCED.                      *
+*                                                                      *
+************************************************************************
+
+
+UFDIV	STO	777			     LINKAGE
+	DIV	UTDIV1			ISSUE DIVIDE
+	CLA	KZERO			DELAY ONE CYCLE
+	TRA	UD1			DELAY 6 MORE CYCLES BEFORE AC # QUOTIENT
+
+# PAGE 278, SEQUENCE 118000-118250
+
+************************************************************************
+*                                                                      *
+*                     PARTIAL SQUARE ROOT ROUTINE                      *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       ARGUMENT IN ACCUMULATOR, ITS PREVIOUS SQUARE ROOT VALUE *
+*              IN UTDIV1.  ARGUMENT SCALED B%2N<, SQ RT SCALED B%N<.   *
+*                                                                      *
+*  OUTPUT      AC CONTAINS NEW VALUE FOR SQ RT OF ARGUMENT.            *
+*              PQ CONTAINS HALF OF %ARGUENT<%PREVIOUS SQ RT<.          *
+*                                                                      *
+************************************************************************
+
+
+UPSQRT	STO	777			      LINKAGE
+	SHR	1			 DIVIDE BY 2
+	DIV	UTDIV1			 ISSUE DIVIDE
+	CLA	UTDIV1
+	SHR	1			 DIVIDE BY 2
+UD1	EXM	2,1,0			 DELAY 2 CYCLES
+	EXM	2,1,0			 DELAY TWO CYCLES
+	ADD	KZERO			 DELAY 1 CYCLE
+	ADD	775			 RESULT OF DIVISION
+	HOP	777			RETURN
+	
+# PAGE 279, SEQUENCE 118270-118800
+
+************************************************************************
+*                                                                      *
+*                   MATRIX MULTIPLY ROUTINE                            *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A DFW OF THE FORM CLA,A,MPY,B       *
+*              WHERE A AND B ARE THE INITIAL LOCATIONS OF THE          *
+*	       MATRICES TO BE MULTIPLIED.			       *
+*              IN THE PQ, A WORD CONTAINING A DFW IN SYLLABLE 1        *
+*	       OF THE FORM STO, C AND A COUNTER (SCALED 25) IN         *
+*              SYLLABLE 0.  C IS THE INITIAL LOCATION OF THE PRODUCT   *
+*              MATRIX.                                                 *
+*                                                                      *
+*  OUTPUT      A PRODUCT MATRIX C = AXB (NOT BXA).                     *
+*	       IF COUNTER = 1, C(3X1) = A(3X3) X B(3X1).               *
+*              IF COUNTER = 3, C(3X3) = A(3X3) X B(3X3).               *
+*                                                                      *
+*  NOTES       ALL MATRICES WILL BE GROUPED IN VECTOR FORM.            *
+*	       EACH COLUMN OR ROW WILL BE STORED AS A VECTOR USING     *
+*              THE VEC PSEUDO OPERATION.  IN ADDITION, THE 3           *
+*              VECTORS REQUIRED TO REPRESENT A 3X3 MATRIX              *
+*              MUST BE STORED CONSECUTIVELY.                           *
+*              THE A MATRIX MUST BE STORED BY ROWS AND THE             *
+*              B MATRIX BY COLUMNS.  THE OUTPUT MATRIX WILL            *
+*              BE STORED BY COLUMNS.                                   *
+*                                                                      *
+************************************************************************
+
+
+MATMPY	STO	777
+	SUB	=O01			ADJUST DFW
+	STO	UTEMP4			SAVE DFW USED TO FORM PRODUCT
+	CLA	775	
+	STO	UTEMP7			SAVE DFW USED TO STORE PRODUCT
+	AND	=3
+	STO	UTEMP5			SAVE COUNTER
+	CLA	777
+	STO	UTEMP6			SAVE RETURN HOP CONSTANT
+MM1	HOP	MMSET
+	EXM	0,1,0			STORE FIRST ELEMENT
+	HOP	MMSET
+	EXM	0,1,1			STORE SECOND ELEMENT
+	HOP	MMSET
+	EXM	0,1,2			STORE THIRD ELEMENT
+	CLA	UTEMP5			COUNTER = 1 OR 3 ORIGINALLY
+	SUB	=1			DECREMENT COUNTER
+	TNZ	*+2
+	HOP	UTEMP6			EXIT WHEN COUNTER = 0
+	STO	UTEMP5			SAVE COUNTER
+	CLA	UTEMP4			)
+	ADD	=O7500004		)RESET A ADDRESS, INCREMENT B ADDRESS
+	STO	UTEMP4			)           IN PRODUCT DFW
+# PAGE 280, SEQUENCE 118810-118890
+	CLA	UTEMP7			    )
+	ADD	=O01			    )INCREMENT A ADDRESS IN STORE DFW
+	STO	UTEMP7			    )
+	TRA	MM1
+MMSET	STO	777
+	CLA	UTEMP4			)
+	ADD	=O01			)INCREMENT A ADDRESS IN PRODUCT DFW
+	STO	UTEMP4			)
+	TRA	UVDOT1			GO FORM DOT PRODUCT
+
+# PAGE 281, SEQUENCE 118910-119370
+
+************************************************************************
+*                                                                      *
+*              MATRIX TRANSPOSE ROUTINE                                *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A DFW OF THE FORM STO,B,CLA,A WHERE *
+*              A AND B ARE THE INITIAL LOCATIONS OF THE MATRIX TO BE   *
+*	       TRANSPOSED AND OF THE MATRIX WHERE THE TRANSPOSE IS TO  *
+*              BE STORED.                                              *
+*                                                                      *
+*  OUTPUT      TRANSPOSE OF MATRIX A                                   *
+*                                                                      *
+*  NOTES       IF A = B, THEN THE MATRIX A WILL BE TRANSPOSED AND      *
+*	       STORED IN THE MATRIX LOCATION A.                        *
+*                                                                      *
+************************************************************************
+
+
+
+MATTRA	STO	777
+	STO	UTEXM			SET UP DFW FOR USE BY EXM
+	EXM	0,0,0			)
+	EXM	0,1,0			)
+	EXM	0,0,5			)  MOVE DIAGONAL ELEMENTS
+	EXM	0,1,5			)
+	EXM	0,0,12			)
+	EXM	0,1,12			)
+	EXM	0,0,1			 )
+	STO	UTEMP1			 )  
+	EXM	0,0,2			 )  SAVE ONE SET OF OFF DIAGONAL
+	STO	UTEMP2			 )  ELEMENTS
+	EXM	0,0,6			 )
+	STO	UTEMP3			 )
+	EXM	0,0,4			)
+	EXM	0,1,1			)
+	EXM	0,0,10			)  MOVE OPPOSITE ELEMENTS ACROSS
+	EXM	0,1,2			)
+	EXM	0,0,11			)
+	EXM	0,1,6			)
+	CLA	UTEMP1			 )
+	EXM	0,1,4			 )
+	CLA	UTEMP2			 ) SET DIAGONAL ELEMENTS
+	EXM	0,1,10			 )
+	CLA	UTEMP3			 )
+	EXM	0,1,11			 )
+	HOP	777
+		
+# PAGE 282, SEQUENCE 119390-119790
+
+************************************************************************
+*                                                                      *
+*              MATRIX TRANSPOSE ROUTINE                                *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A WORD DEFINED BY THE DFW MACRO     *
+*              OPERATION.  SYLLABLE 1 OF THIS WORD MUST CONTAIN THE    *
+*	       INSTRUCTION- CLA P, WHERE P IS THE FIRST OF THREE       *
+*              CONSECUTIVE LOCATIONS CONTAINING MULTIPLICANDS.         *
+*	       SYLLABLE 2 CONTAINS THE INSTRUCTION- MPY Q, WHERE Q IS  *
+*	       THE FIRST OF THREE CONSECUTIVELY LOCATED MULTIPLIERS.   *
+*                                                                      *
+*  OUTPUT      THE SUM OF PRODUCTS- P(1)*Q(1) + P(2)*Q(2) + P(3)*Q(3)  *
+*                                                                      *
+************************************************************************
+
+
+UVDOT	STO	777			LINKAGE
+UVDOT1	STO	UTEXM			     EXM LOCATION USED BY UTILITY ROUTINE
+	EXM	0,1,0			CLA A(1)
+	EXM	0,0,0			MPY B(1)
+	EXM	0,1,1		        CLA A(2)
+	STO	UTEMP1
+	CLA	775			FIRST PRODUCT
+	STO	UTEMP2
+	CLA	UTEMP1
+	EXM	0,0,1			MPY B(2)
+	EXM	0,1,2			CLA A(3)
+	STO	UTEMP1
+	CLA	775			SECOND PRODUCT
+	STO	UTEMP3
+	CLA	UTEMP1
+	EXM	0,0,2			MPY B(3)
+	CLA	UTEMP7
+	STO	UTEXM			     SET UP DFW USED BY MATMPY TO STORE
+	CLA	UTEMP2
+	ADD	UTEMP3
+	ADD	775			THIRD PRODUCT
+	HOP	777
+	
+# PAGE 283, SEQUENCE 119810-120340
+
+************************************************************************
+*                                                                      *
+*                     VECTOR CROSS PRODUCT ROUTINE                     *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A WORD DEFINED BY THE DFW MACRO     *
+*              OPERATION.  SYLLABLE 1 OF THIS WORD MUST CONTAIN THE    *
+*	       INSTRUCTION- CLA A, WHERE A IS THE FIRST OF THREE       *
+*              CONSECUTIVE LOCATIONS CONTAINING THE FIRST VECTOR.      *
+*	       SYLLABLE 2 CONTAINS THE INSTRUCTION- MPY B, WHERE B IS  *
+*	       THE FIRST OF THREE CONSECUTIVE LOCATIONS CONTAINING     *
+*	       THE SECOND VECTOR.				       *
+*                                                                      *
+*  OUTPUT      UTEMP1 CONTAINS AXB(1) = A(2)*B(3) - A(3)*B(2)          *
+*              UTEMP2 CONTAINS AXB(2) = A(3)*B(1) - A(1)*B(2)          *
+*	       UTEMP3 CONTAINS AXB(3) = A(1)*B(2) - A(2)*B(1)          *
+*                                                                      *
+************************************************************************
+
+
+UVCRS	STO	777
+	STO	UTEXM			STORE INTO LOCATION FOR EXM
+	EXM	0,1,1			CLA  A2
+	EXM	0,0,2			MPY  B3
+	EXM	0,1,2			CLA  A3
+	STO	UTEMP4			A3
+	CLA	775
+	STO	UTEMP1			A2*B3
+	CLA	UTEMP4			A3
+	EXM	0,0,1			MPY  B2
+	EXM	0,1,0			CLA  A1     (DELAY)
+	CLA	UTEMP1			A2*B3
+	SUB	775			A3*B2
+	STO	UTEMP1			AXB(1) = A2*B3 - A3*B2
+	CLA	UTEMP4			A3
+	EXM	0,0,0			MPY  B1
+	EXM	0,1,0			CLA  A1
+	STO	UTEMP4			A1
+	CLA	775
+	STO	UTEMP2			A3*B1
+	CLA	UTEMP4			A1
+	EXM	0,0,2			MPY  B3
+	EXM	0,1,0			CLA  A1     (DELAY)
+	CLA	UTEMP2			A3*B1
+	SUB	775			A1*B3
+	STO	UTEMP2			AXB(2) = A3*B1 - A1*B3
+	CLA	UTEMP4			A1
+	EXM	0,0,1			MPY  B2
+	EXM	0,1,1			CLA  A2
+	STO	UTEMP4			A2
+	CLA	775
+	STO	UTEMP3			A1*B2
+# PAGE 284, SEQUENCE 120250-120410
+	CLA	UTEMP4			A2
+	EXM	0,0,0			MPY  B1
+	EXM	0,1,0			CLA  A1     (DELAY)
+	CLA	UTEMP3			A1*B2
+	SUB	775			A2*B1
+	STO	UTEMP3			AXB(3) = A1*B2 - A2*B1
+	HOP	777
+	
+# PAGE 285, SEQUENCE 120430-120950
+
+************************************************************************
+*                                                                      *
+*                          NATURAL LOG                                 *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       TWO ARGUMENTS, X IN ACC AND Z IN PQ, SCALED THE SAME    *
+*                                                                      *
+*  OUTPUT      LN (X/Z) IN ACCUMULATOR, SCALED B2                      *
+*                                                                      *
+************************************************************************
+
+
+	DOGD	2,6,
+AULN	STO	777			ENTER SCALED B0
+	STO	UTEMP1
+	CLA	775
+	STO	UTEMP3
+	RSU	UTEMP1
+	TMI	AUL5
+	TNZ	AUL4
+	HOP	777
+AUL4	CLA	UTEMP3
+	DIV	UTEMP1
+	CLA	=-.69314718B2
+	TRA	*+5
+AUL5	CLA	UTEMP1
+	DIV	UTEMP3
+	SHL	0
+	TRA	*+1
+	STO	UTEMP4
+	EXM	2,1,0			DELAY 2 INSTRUCTIONS
+	CLA	=-1.3862944B2		INITIALIZE L = -2LN2
+	STO	UTEMP2
+	CLA	775
+	SHR	1			SCALE B1
+	STO	UTEMP1
+	SUB	=.25B1
+	TMI	AUL1
+	SUB	=.25B1			IS IT LESS THAN 1/2
+	TMI	AUL2			YES
+	CLA	UTEMP2
+	SUB	=-.69314718B2		LET L = -LN2
+	STO	UTEMP2
+	CLA	UTEMP1
+	SHL	1
+	TRA	AUL3
+AUL1	CLA	UTEMP2
+	ADD	=-.69314718B2
+	STO	UTEMP2
+	CLA	UTEMP1
+	SHL	1
+# PAGE 286, SEQUENCE 120960-121210
+	TRA	*+2
+AUL2	CLA	UTEMP1
+	SHL	2
+AUL3	SUB	KPLUS			SUB 1 AND SCALE B0
+	SHL	1
+	STO	UTEMP1
+	MPH	=-.01833831B2
+	ADD	=.08556927B2
+	MPH	UTEMP1
+	ADD	=-.19376149B2
+	MPH	UTEMP1
+	ADD	=.31765005B2
+	MPH	UTEMP1
+	ADD	=-.49787544B2
+	MPH	UTEMP1
+	ADD	=.99990167B2
+	MPH	UTEMP1
+	ADD	UTEMP2
+	STO	UTEMP1
+	CLA	UTEMP4
+	TNZ	*+3
+	CLA	UTEMP1
+	HOP	777
+	SHL	0
+	SUB	UTEMP1
+	HOP	777
+	
+# PAGE 287, SEQUENCE 121230-121760
+
+************************************************************************
+*                                                                      *
+*                        SCALED DIVIDE ROUTINE                         *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       NUMERATOR IN ACCUMULATOR, ITS SCALING IN TEMP           *
+*              DENOMINATOR IN PQ, ITS SCALING IN TEMP1                 *
+*              SCALING OF ANSWER IN TEMP2, ALL SCALINGS SCALED B25     *
+*                                                                      *
+*  OUTPUT      QUOTIENT IN ACCUMULATOR                                 *
+*                                                                      *
+************************************************************************
+
+
+AUDIVD	STO	777			SAVE HOP CONSTANT FOR RETURN.
+	STO	UTEMP1			SAVE NUMERATOR.
+	CLA	775
+	STO	UTEMP2			SAVE
+	XOR	UTEMP1
+	STO	UTEMP3			PLUS IF SIGNS SAME, MINUS IF DIFFERENT.
+	CLA	UTEMP1
+	RSU	KZERO
+	TMI	AUDV10
+	STO	UTEMP1			IF NUMER WAS MINUS, SAVE COMPLEMENT.
+AUDV10	CLA	UTEMP2
+	RSU	KZERO
+	TMI	AUDV20
+	STO	UTEMP2			IF DENOM WAS MINUS, SAVE COMPLEMENT.
+AUDV20	CLA	UTEMP2
+	TNZ	*+2			***
+	TRA	AUDV85			ZERO DENOM.
+	SHL	1			SHIFT DENOM LEFT 1.
+	TMI	AUDV30			TRANSFER IF SHIFTED TOO FAR.
+	STO	UTEMP2			IF NOT YET SHIFTED TOO FAR,
+	CLA	TEMP1
+	SUB	=1B25			UPDATE (DECREMENT) SCALING
+	STO	TEMP1
+	TRA	AUDV20			AND GO SHIFT AGAIN.
+AUDV30	SHR	1			IF SHIFTED TOO FAR,
+	AND	=O377777776		REPAIR DAMAGE
+	STO	UTEMP2			AND SAVE DESIRED DENOM.
+AUDV40	CLA	UTEMP1
+	TNZ	*+2			***
+	HOP	777			***
+	SHL	1			SHIFT NUMBER LEFT 1.
+	TMI	AUDV50			TRANSFER IF SHIFTED TOO FAR.
+	STO	UTEMP1			IF NOT YET SHIFTED TOO FAR,
+	CLA	TEMP
+	SUB	=1B25			UPDATE (DECREMENT) SCALING
+	STO	TEMP
+	TRA	AUDV40			AND GO SHIFT AGAIN.
+AUDV50	SHR	1			IF SHIFTED TOO FAR,
+# PAGE 288, SEQUENCE 121770-122240
+	AND	=O377777776		REPAIR DAMAGE
+	STO	UTEMP1			AND SAVE DESIRED NUMER.
+	SUB	UTEMP2
+	TMI	AUDV60			TRANSFER IF NUMER LT DENOM.
+	CLA	UTEMP1			IF NUMER GE DENOM,
+	SHR	1			SHIFT NUMER RIGHT 1,
+	STO	UTEMP1			SAVE,
+	CLA	TEMP			AND UPDATE (INCREMENT) SCALING.
+	ADD	=1B25
+	STO	TEMP
+AUDV60	CLA	UTEMP1			BEGIN DIVISION N/D.
+	DIV	UTEMP2
+	CLA	TEMP			FIND NUMER SCALING
+	SUB	TEMP1			- DENOM SCALING
+	SUB	TEMP2			- ANSWER SCALING.
+	STO	UTEMP4
+	TMI	AUDV70			TRANSFER TO SHIFT RIGHT.
+	TNZ	AUDV80			TRANSFER TO SHIFT LEFT.
+	TRA	AUDV90			NO SHIFT NEEDED.
+AUDV70	CLA	UTEMP4
+	ADD	=1B25			UPDATE SCALING.
+	STO	UTEMP4
+	TMI	*+2
+	TNZ	AUDV90			TRANSFER IF SHIFTER IS GOING PLUS.
+	CLA	775
+	SHR	1			AS LONG AS SHIFTER IS MINUS OR ZERO,
+	STO	775			SHIFT.
+	TRA	AUDV70			GO TRY FOR ANOTHER RIGHT SHIFT.
+AUDV80	CLA	UTEMP4
+	SUB	=1B25			UPDATE SCALING.
+	STO	UTEMP4
+	TMI	AUDV90			TRANSFER IF SHIFTER IS GOING PLUS.
+	CLA	775
+	SHL	1			SHIFT AS LONG AS SHIFTER IS ZERO OR MINUS.
+	TMI	*+3			TRANSFER IF OVERFLOW.
+	STO	775
+	TRA	AUDV80			GO TRY FOR ANOTEHR LEFT SHIFT.
+AUDV85	CLA	=O377777770		IF OVERFLOW, REPLACE WITH
+	STO	775			ALL BITS (LARGETS POSSIBLE NUMBER).
+	TRA	*+1			REPLACE THIS WITH TELE. PIO  **************
+AUDV90	CLA	UTEMP3
+	TMI	*+2			SIGN OF ANSWER MUST BE MADE MINUS.
+	TRA	*+4			SKIP COMPLEMENTING IF PLUS.
+	CLA	775
+	RSU	KZERO
+	STO	775
+	CLA	775			ANSWER IN ACCUMULATOR.
+	HOP	777
+	
+# PAGE 294, SEQUENCE 124180-124490
+
+************************************************************************
+*                                                                      *
+*                     DATA COMPRESSION POSITION SUBROUTINE             *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       ARGUMENT IN ACCUMULATOR				       *
+*                                                                      *
+*  OUTPUT      ACCUMULATOR WILL CONTAIN ARGUMENT PROPERLY MASKED AND   *
+*              POSITIONED FOR DATA COMPRESSION			       *
+*                                                                      *
+************************************************************************
+
+
+	DOGD	2,14,
+UGCOMP	STO	776			SAVE RETURN HOP
+	AND	=O777707776		MASK OUT BITS 12,13,14
+	STO	OPTMP1
+	SHR	3
+	
+	AND	=O07777
+	TRA	*+6
+UACOMP	STO	776			SAVE RETURN HOP
+	AND	=O777717776		MASK OUT BITS 12,13
+	STO	OPTMP1
+	SHR	2
+	AND	=O17776			POSITION AND MASK OFF 1ST TWO BITS
+	STO	775
+	CLA	OPTMP1
+	AND	=O000017776
+	ADD	775
+	HOP	776
+	
+	END
+
