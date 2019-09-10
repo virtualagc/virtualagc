@@ -24,6 +24,10 @@
 ##                              specific flag setting was removed, G was
 ##                              replaced with GDT/2, and the fine alignment
 ##                              prompt in P63 was restored.
+##              2019-09-09 MAS  Added initialization of LRPOS to 1, which
+##                              was introduced in Luminary 152-154 and
+##                              removed in Luminary 182, so it doesn't show
+##                              up in any other versions we have.
 
 ## Page 771
                 BANK            32
@@ -267,6 +271,9 @@ P63SPOT4        CAF             TWO                     # ENTER      INITIALIZE 
                 TS              LRRCTR
                 TS              LRSCTR
                 TS              VSELECT
+
+                CAF             ONE
+                TS              LRPOS
 
                 CA              FOUR                    # INITIALIZE COUNTER TO ISSUE 511
                 TS              511CTR                  #   ALARM AFTER 10 SECONDS
