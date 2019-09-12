@@ -90,11 +90,6 @@ CMDATA	BSS	1	      CMDATA
 	DOGD	2,17,200
 UTEXM	BSS	1			LOCATION USED BY EXM IN SUBROUTINES
 
-# Workshop area.
-
-	ORGDD	4,1,0,0,2,14,
-WRKSHP	TRA	WRKSHP
-
 # PAGE 1, SEQUENCE 000060-000100
 
 ***************************************
@@ -765,6 +760,71 @@ WRKSHP	TRA	WRKSHP
 *   0 (OLD GIMBAL)  1  1  1 (CURRENT GIMBAL)  YAW GIMBAL SWITCHED TO
 *                                               BACKUPS
 ************************************************************************
+
+# PAGE 21, SEQUENCE 009150-009670, TITLE "MACRO DEFINITIONS"
+
+CBSTA	MACRO	ARG1,ARG2,ARG3
+	DEC	ARG1
+	DEC	ARG2
+	DEC	ARG3
+	ENDMAC
+
+
+INHIB	MACRO
+	MPY	KPLUS
+	CLA	=O35774
+	PIO	072
+	CLA	KZERO
+	PIO	032
+	ENDMAC
+	
+
+MOVE1	MACRO	ARG1,ARG2
+	CDS	ARG1
+	CLA	ARG1
+	CDS	ARG2
+	STO	ARG2
+	ENDMAC
+
+
+MOVE2	MACRO	ARG1,ARG2,ARG3
+	CLA	ARG1
+	STO	ARG2
+	STO	ARG3
+	ENDMAC
+
+
+ORS	MACRO	ARG1,ARG2
+	CLA	ARG1
+	AND	ARG2
+	XOR	ARG2
+	XOR	ARG1
+	STO	ARG1
+	ENDMAC
+
+
+TELEM	MACRO	ARG1,ARG2,ARG3
+	HOP	ARG1
+	CLA	ARG2
+	PIO	ARG3
+	ENDMAC
+
+#-----------------------------------------------------------------------
+# Workshop area.  Stuff in between these lines is totally customizable
+# for the purpose of demo'ing the this abridged LVDC program, and does
+# not come from the original AS-206RAM LVDC flight program.
+
+# The idea of this demo is to exercise the mathematical functions supplied
+# originally as "utility routines".  Since in this demo there is no 
+# ground-control system to either upload commands or to receive download
+# data, we can use PIO instructions otherwise used for that purpose to
+# receive inputs or to transmit outputs for the demo.
+
+	ORGDD	4,1,0,0,2,14,
+WRKSHP	TRA	WRKSHP
+
+# End of workshop area.
+#-----------------------------------------------------------------------
 
 # From this point to the end of the program is a portion of the "utilities"
 # section of the original program listing.
