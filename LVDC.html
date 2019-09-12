@@ -124,6 +124,7 @@ Launch
 
 
 
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -243,6 +244,7 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
 
 
 
@@ -525,6 +527,7 @@ Launch
 
 
 
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
@@ -565,6 +568,7 @@ Launch
     revision of the flight program is available to us.&nbsp; It is an
     engineering revision of the software, from 1967, designated
     "AS-206RAM LVDC FLIGHT PROGRAM".&nbsp; If you were to Google this (<b>don't
+
 
 
 
@@ -669,6 +673,7 @@ Launch
 
 
 
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -697,6 +702,7 @@ Launch
       images, since you can do things like text searches on it, or even
       assemble it using the nifty new LVDC assembler I've written (<a
         href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>).&nbsp;
+
 
       The problem, of course, is that the transcribed source code is
       just as much subject (or hopefully, it will eventually turn out, <i>not</i>
@@ -732,6 +738,7 @@ href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identificati
     restricted by ITAR, if they do not pertain to guidance, control, or
     other technical aspects of the launch vehicle.&nbsp; <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">Such
+
 
       an abridged transcription of the source code does indeed appear in
       our software repository</a>. &nbsp; The transcribed code, unlike
@@ -916,6 +923,7 @@ of
 
 
 
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -942,6 +950,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
 
 
 
@@ -1063,9 +1072,11 @@ Astrionics
 
 
 
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -1353,6 +1364,7 @@ of
 
 
 
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1402,6 +1414,7 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
 
 
 
@@ -1642,6 +1655,7 @@ Incidentally,
             the following:<br>
             <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt>HOP&nbsp;&nbsp;&nbsp;&nbsp;
 
+
                 HIGTHR<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
@@ -1718,6 +1732,7 @@ Incidentally,
             (more accurately, 4 computer cycles) following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -1895,6 +1910,7 @@ However,
 
 
 
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -1933,6 +1949,7 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -2252,6 +2269,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>0775 (octal) stores into the Product-Quotient register
@@ -2419,6 +2437,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 or <tt>DEQS</tt> pseudo-ops (see below), whereas the
                 module number and sector number are simply supplied with
                 octal numeric literals in <tt>CDSD</tt> or <tt>CDSS</tt>.&nbsp;
+
 
 
 
@@ -2704,6 +2723,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2842,6 +2862,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           <th colspan="1" rowspan="2">Data Destination<br>
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Specific
+
             I/O Ports<br>
           </th>
         </tr>
@@ -2887,183 +2908,823 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             </i> </td>
           <td style="text-align: center;" align="center" valign="middle">0<br>
           </td>
-          <td style="text-align: center;" align="center" valign="middle">X<br>
+          <td style="text-align: center;" align="center" valign="middle"><i>A</i><br>
           </td>
           <td valign="middle">LVDC Accumulator Register<br>
           </td>
           <td valign="middle">LVDA Telemetry Registers<span
               style="font-style: italic;"></span><br>
           </td>
-          <td colspan="1" rowspan="3" valign="middle">
+          <td colspan="1" rowspan="3" valign="middle">(Note:&nbsp; Used
+            to output telemetry consisting of the values of variables,
+            typically via the <tt>TELEM</tt> macro in the LVDC source
+            code.&nbsp; For definitions of non-standard units of
+            measurement, see <a href="#AngleUnits">the later discussion
+              of that topic</a>.&nbsp; Page-number references are to the
+            AS-206RAM LVDC source code or to its <a
+href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">abridged
+              form</a>.)<br>
             <table cellpadding="2" cellspacing="2" align="center"
               border="1" width="80%">
               <tbody>
                 <tr>
-                  <th valign="top"><i>AAAAA</i><br>
+                  <th valign="bottom">A9 - A1 (octal)<br>
                   </th>
-                  <th valign="top">Purpose<br>
+                  <th valign="bottom">Variable<br>
+                  </th>
+                  <th valign="bottom">Scale<br>
+                  </th>
+                  <th valign="bottom">Units<br>
+                  </th>
+                  <th align="left" valign="bottom">Interpretation<br>
                   </th>
                 </tr>
                 <tr>
-                  <td valign="top">00000<br>
+                  <td align="center" valign="middle">000<br>
                   </td>
-                  <td valign="top">TBD<br>
+                  <td align="center" valign="middle"><tt>TASEC</tt><tt><br>
+                    </tt><tt>ONTAS</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B15</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">sec<br>
+                  </td>
+                  <td valign="middle">Time elapsed from GRR or time of
+                    last orbit navigation<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00001<br>
+                  <td align="center" valign="middle">001<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>CHIZ</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad<br>
+                  </td>
+                  <td valign="middle">Yaw guidance command in
+                    space-fixed coordinates<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">00010<br>
+                  <td align="center" valign="middle">004<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>ACCZ</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">0.05 m/sec<br>
+                  </td>
+                  <td valign="middle">Accelerator optisyn reading<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">00011<br>
+                  <td align="center" valign="middle">005<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>CHIX</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad<br>
+                  </td>
+                  <td valign="middle">Pitch guidance command in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">00100<br>
+                  <td align="center" valign="middle">010<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>ACCX</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">0.05 m/sec</td>
+                  <td valign="middle">Accelerator optisyn reading</td>
                 </tr>
                 <tr>
-                  <td valign="top">00101<br>
+                  <td align="center" valign="middle">011<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>CHIY</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad<br>
+                  </td>
+                  <td valign="middle">Roll guidance command in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">00110<br>
+                  <td align="center" valign="middle">014<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>ACCY</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">0.05 m/sec</td>
+                  <td valign="middle">Accelerator optisyn reading</td>
                 </tr>
                 <tr>
-                  <td valign="top">00111<br>
+                  <td align="center" valign="middle">015<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>THETZ</tt></td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad</td>
+                  <td valign="middle">Whole yaw gimbal angle<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">01000<br>
+                  <td align="center" valign="middle">021<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>THETX</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad</td>
+                  <td valign="middle">Whole roll gimbal angle</td>
                 </tr>
                 <tr>
-                  <td valign="top">01001<br>
+                  <td align="center" valign="middle">025<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>THETY</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad</td>
+                  <td valign="middle">Whole pitch gimbal angle</td>
                 </tr>
                 <tr>
-                  <td valign="top">01010<br>
+                  <td align="center" valign="middle">030<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>TLTBB</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B15</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">sec<br>
+                  </td>
+                  <td valign="middle">Biased time elapsed in time base<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">01011<br>
+                  <td align="center" valign="middle">031<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>TB</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B15</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">sec<br>
+                  </td>
+                  <td valign="middle">Time elapsed in current time base<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">01100<br>
+                  <td align="center" valign="middle">034<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>ZS</tt><tt><br>
+                    </tt><tt>ONZN</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Component of position in
+                    space-fixed coordinates<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">01101<br>
+                  <td align="center" valign="middle">044<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>XS</tt><tt><br>
+                    </tt><tt>ONXN</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Component of position in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">01110<br>
+                  <td align="center" valign="middle">050<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>Y</tt><tt>S</tt><tt><br>
+                    </tt><tt>ONYN</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Component of position in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">01111<br>
+                  <td align="center" valign="middle">054<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>GR10R</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B-22</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<sup>-1</sup></td>
+                  <td valign="middle">Reciprocal of total radius in
+                    space-fixed coordinates<sup></sup><br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">10000<br>
+                  <td align="center" valign="middle">060<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>GZ</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of gravitational
+                    acceleration<sup></sup><br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">10001<br>
+                  <td align="center" valign="middle">064<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>GX</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of gravitational
+                    acceleration<sup></sup></td>
                 </tr>
                 <tr>
-                  <td valign="top">10010<br>
+                  <td align="center" valign="middle">070<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>GY</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of gravitational
+                    acceleration<sup></sup></td>
                 </tr>
                 <tr>
-                  <td valign="top">10011<br>
+                  <td align="center" valign="middle">074<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>TBA</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B15</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">sec<br>
+                  </td>
+                  <td valign="middle">Set equal to TBB at the time of a
+                    C-band station gain or loss<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">10100<br>
+                  <td align="center" valign="middle">075<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>SS</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Switch selector interrupt<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">10101<br>
+                  <td align="center" valign="middle">110<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>ZDS</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B14</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<br>
+                  </td>
+                  <td valign="middle">Component of velocity in
+                    space-fixed coordinates<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">10110<br>
+                  <td align="center" valign="middle">114<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>XDS</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B14</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec</td>
+                  <td valign="middle">Component of velocity in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">10111<br>
+                  <td align="center" valign="middle">120<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>YDS</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B14</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec</td>
+                  <td valign="middle">Component of velocity in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">11000<br>
+                  <td align="center" valign="middle">124<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>V</tt><tt><br>
+                    </tt>
+                  </td>
+                  <td align="center" valign="middle"><tt>B14</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec</td>
+                  <td valign="middle">Total velocity in space-fixed
+                    coordinates<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">11001<br>
+                  <td align="center" valign="middle">134<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>ZS</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Component of position in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">11010<br>
+                  <td align="center" valign="middle">144<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>XS</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Component of position in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">11011<br>
+                  <td align="center" valign="middle">150<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>YS</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Component of position in
+                    space-fixed coordinates</td>
                 </tr>
                 <tr>
-                  <td valign="top">11100<br>
+                  <td align="center" valign="middle">174<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>ACCT</tt><tt><br>
+                    </tt><tt>TLPAST</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B25</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">qms<br>
+                  </td>
+                  <td valign="middle">Real time clock reading<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">11101<br>
+                  <td align="center" valign="middle">400<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>T1I</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B10</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">sec<br>
+                  </td>
+                  <td valign="middle">First IGM phase time-to-go<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">11110<br>
+                  <td align="center" valign="middle">414<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>MC28</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Mode code 28 status changes.&nbsp;
+                    Refer to p. 12.<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top">11111<br>
+                  <td align="center" valign="middle">415<br>
                   </td>
-                  <td valign="top">TBD</td>
+                  <td align="center" valign="middle"><tt>MC24</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Mode code 24 status changes.&nbsp;
+                    Refer to pp. 4-5.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">420<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>MC27</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Mode code 27 status changes.&nbsp;
+                    Refer to pp. 11-12<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">421<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>MC25</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Mode code 25 status changes.&nbsp;
+                    Refer to p. 5.</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">425<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>DORSW</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Discrete output register
+                    contents.&nbsp; A change indicates a guidance
+                    failure.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">431<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>ICR</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">LVDA internal control register
+                    contents.&nbsp; Refer to pp. 5-6.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">434<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>Z4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Position in target plane
+                    coordinates<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">435<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>EMRR</tt><tt><br>
+                    </tt><tt>TLEMR1</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Error monitor register
+                    contents.&nbsp; Change indicates ladder failure or
+                    redundancy disagreement.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">441<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>INT</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">LLS, OBCO, TLC, or S4BCO
+                    interrupt.&nbsp; Refer to p. 6.</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">444<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>X4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Position in target plane
+                    coordinates</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">445<br>
+                  </td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">450<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>Y4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B23</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Position in target plane
+                    coordinates</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">460<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>T3I</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B10</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">sec<br>
+                  </td>
+                  <td valign="middle">Time-to-go in S4B second burn<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">461<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>TLCHPC</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">TLC ("tough luck charlie") HOP
+                    constant<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">465<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>DIS.IN</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Discrete inputs.&nbsp; Refer to p.
+                    6.</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">471<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>SQ3</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B1</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">(1-ZSP<sup>2</sup>)<sup>1/2</sup></td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">475<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>TBBU</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Time base backup<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">500<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>FDBK</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Switch-selector feedback register,
+                    in the event of an error<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">501<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>MLCHIZ</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad<br>
+                  </td>
+                  <td valign="middle">Minor loop CHIZ<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">504<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>ZDDV</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of vent acceleration<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">505<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>MLCHIX</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad<br>
+                  </td>
+                  <td valign="middle">Minor loop CHIX</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">510<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>XDDV</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of vent acceleration<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">511<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>MLCHIY</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B0</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">pirad<br>
+                  </td>
+                  <td valign="middle">Minor loop CHIY</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">514<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>YDDV</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of vent acceleration<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">520<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>ZDDD</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of drag acceleration</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">524<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>XDDD</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of drag acceleration</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">530<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>YDDD</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m/sec<sup>2</sup></td>
+                  <td valign="middle">Component of drag acceleration</td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">534<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>ALT</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B4</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">m<br>
+                  </td>
+                  <td valign="middle">Altitude<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">535<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>TLEMR8</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Minor-loop error code<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">544<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>TAUD</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B10</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">sec<br>
+                  </td>
+                  <td valign="middle">Time-to-go<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">561<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>TI</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt>B15</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle">sec<br>
+                  </td>
+                  <td valign="middle">Time from GRR of time-base change<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">570<br>
+                  </td>
+                  <td align="center" valign="middle">(various)<br>
+                  </td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Minor-loop error code.&nbsp; Refer
+                    to pp. 6 and 14.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">571<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>ETC</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">End of telemetry cycle, 1 per CC<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">575<br>
+                  </td>
+                  <td align="center" valign="middle"><tt>BTC</tt><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><tt><br>
+                    </tt></td>
+                  <td align="center" valign="middle"><br>
+                  </td>
+                  <td valign="middle">Begin telemetry cycle, 1 per CC<br>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -3082,7 +3743,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           <td align="center" valign="middle"><i>A</i></td>
           <td align="center" valign="middle">0<br>
           </td>
-          <td align="center" valign="middle">X<br>
+          <td align="center" valign="middle"><i>A</i><br>
           </td>
           <td valign="middle">LVDC Main Memory<br>
           </td>
@@ -3101,7 +3762,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           <td align="center" valign="middle"><i>A</i></td>
           <td align="center" valign="middle">0<br>
           </td>
-          <td align="center" valign="middle">X<br>
+          <td align="center" valign="middle"><i>A</i><br>
           </td>
           <td valign="middle">LVDC Residual Memory<br>
           </td>
@@ -3135,117 +3796,99 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               border="1" width="80%">
               <tbody>
                 <tr>
-                  <th valign="top"><i>AAAAA</i><br>
-                  </th>
-                  <th valign="top">Purpose<br>
+                  <th valign="top">A7 - A1 (octal) </th>
+                  <th align="left" valign="top">Purpose<br>
                   </th>
                 </tr>
                 <tr>
-                  <td valign="top">00001<br>
+                  <td align="center" valign="top">006<br>
                   </td>
                   <td valign="top">Mode Register<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00010<br>
-                  </td>
+                  <td align="center" valign="top">012 </td>
                   <td valign="top">Discrete Output Register (Reset)<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00011<br>
-                  </td>
+                  <td align="center" valign="top">016 </td>
                   <td valign="top">Discrete Output Register (Set)<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00100<br>
-                  </td>
+                  <td align="center" valign="top">022 </td>
                   <td valign="top">Internal Control Register (Set)<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00101<br>
-                  </td>
+                  <td align="center" valign="top">026 </td>
                   <td valign="top">Internal Control Register (Reset)<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00110<br>
-                  </td>
+                  <td align="center" valign="top">032 </td>
                   <td valign="top">Interrupt Register Reset<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00111<br>
-                  </td>
+                  <td align="center" valign="top">036 </td>
                   <td valign="top">Switch Selector Register (Load)<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01000<br>
-                  </td>
+                  <td align="center" valign="top">042 </td>
                   <td valign="top">Orbital Checkout<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01010<br>
-                  </td>
+                  <td align="center" valign="top">052 </td>
                   <td valign="top">Switch Selector &amp; Discrete Output
                     Registers (Read)<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01100<br>
-                  </td>
+                  <td align="center" valign="top">062 </td>
                   <td valign="top">Switch Selector Interrupt Counter<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01101<br>
-                  </td>
+                  <td align="center" valign="top">066 </td>
                   <td valign="top">COD Error (Read)<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01110<br>
-                  </td>
+                  <td align="center" valign="top">072 </td>
                   <td valign="top">Inhibit Interrupt<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01111<br>
-                  </td>
+                  <td align="center" valign="top">076 </td>
                   <td valign="top">Minor Loop Timed Interrupt Counter<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11001<br>
-                  </td>
+                  <td align="center" valign="top">146 </td>
                   <td valign="top">Ladder No. 1<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11010<br>
-                  </td>
+                  <td align="center" valign="top">152 </td>
                   <td valign="top">Ladder No. 2<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11011<br>
-                  </td>
+                  <td align="center" valign="top">156 </td>
                   <td valign="top">Ladder No. 3<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11100<br>
-                  </td>
+                  <td align="center" valign="top">162 </td>
                   <td valign="top">Ladder No. 4<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11101<br>
-                  </td>
+                  <td align="center" valign="top">166 </td>
                   <td valign="top">Ladder No. 5<br>
                   </td>
                 </tr>
@@ -3325,66 +3968,65 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               border="1" width="80%">
               <tbody>
                 <tr>
-                  <th valign="top"><i>AAAAA</i><br>
-                  </th>
-                  <th valign="top">Purpose<br>
+                  <th valign="top">A8 - A1 (octal) </th>
+                  <th align="left" valign="top">Purpose<br>
                   </th>
                 </tr>
                 <tr>
-                  <td valign="top">00100<br>
+                  <td align="center" valign="top">023<br>
                   </td>
                   <td valign="top">Error Monitor Register<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01000<br>
+                  <td align="center" valign="top">043<br>
                   </td>
                   <td valign="top">Command Receiver or RCA-110<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01010<br>
+                  <td align="center" valign="top">053<br>
                   </td>
                   <td valign="top">Discrete Input Spares<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01101<br>
+                  <td align="center" valign="top">067<br>
                   </td>
                   <td valign="top">Telemetry Scanner<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01111<br>
+                  <td align="center" valign="top">077<br>
                   </td>
                   <td valign="top">Switch Selector<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10000<br>
+                  <td align="center" valign="top">103<br>
                   </td>
                   <td valign="top">Real Time<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10001<br>
+                  <td align="center" valign="top">107<br>
                   </td>
                   <td valign="top">Accelerometer Processor X<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10011<br>
+                  <td align="center" valign="top">117<br>
                   </td>
                   <td valign="top">Accelerometer Processor Z<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10101<br>
+                  <td align="center" valign="top">127<br>
                   </td>
                   <td valign="top">Accelerometer Processor Y </td>
                 </tr>
                 <tr>
-                  <td valign="top">10111<br>
+                  <td align="center" valign="top">137<br>
                   </td>
                   <td valign="top">Interrupt Storage </td>
                 </tr>
@@ -3419,127 +4061,126 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               border="1" width="80%">
               <tbody>
                 <tr>
-                  <th valign="top"><i>AAAAA</i><br>
-                  </th>
-                  <th valign="top">Purpose<br>
+                  <th valign="top">A7 - A1 (octal) </th>
+                  <th align="left" valign="top">Purpose<br>
                   </th>
                 </tr>
                 <tr>
-                  <td valign="top">00001<br>
+                  <td align="center" valign="top">207<br>
                   </td>
                   <td valign="top">Spare No. 6<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00011<br>
+                  <td align="center" valign="top">217<br>
                   </td>
                   <td valign="top">Computer COD Counter Start<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00100<br>
+                  <td align="center" valign="top">223<br>
                   </td>
                   <td valign="top">Fine Gimbal No. 1<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00110<br>
+                  <td align="center" valign="top">233<br>
                   </td>
                   <td valign="top">Coarse Gimbal No. 3<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">00111<br>
+                  <td align="center" valign="top">237<br>
                   </td>
                   <td valign="top">Computer COD Counter Start<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01000<br>
+                  <td align="center" valign="top">243<br>
                   </td>
                   <td valign="top">Coarse Gimbal No. 1<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01001<br>
+                  <td align="center" valign="top">247<br>
                   </td>
                   <td valign="top">Horizon Seeker No. 1<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01011<br>
+                  <td align="center" valign="top">257<br>
                   </td>
                   <td valign="top">Spare No. 3<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">01111<br>
+                  <td align="center" valign="top">277<br>
                   </td>
                   <td valign="top">Spare No. 4<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10010<br>
+                  <td align="center" valign="top">313<br>
                   </td>
                   <td valign="top">Fine Gimbal No. 4<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10011<br>
+                  <td align="center" valign="top">317<br>
                   </td>
                   <td valign="top">Spare No. 1<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10100<br>
+                  <td align="center" valign="top">323<br>
                   </td>
                   <td valign="top">Horizon Seeker No. 3<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10101<br>
+                  <td align="center" valign="top">327<br>
                   </td>
                   <td valign="top">Horizon Seeker No. 2<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10110<br>
+                  <td align="center" valign="top">333<br>
                   </td>
                   <td valign="top">Coarse Gimbal No. 4<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">10111<br>
+                  <td align="center" valign="top">337<br>
                   </td>
                   <td valign="top">Spare No. 5<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11000<br>
+                  <td align="center" valign="top">343<br>
                   </td>
                   <td valign="top">Coarse Gimbal No. 2<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11010<br>
+                  <td align="center" valign="top">353<br>
                   </td>
                   <td valign="top">Fine Gimbal No. 3<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11011<br>
+                  <td align="center" valign="top">357<br>
                   </td>
                   <td valign="top">Spare No. 2<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11100<br>
+                  <td align="center" valign="top">363<br>
                   </td>
                   <td valign="top">Fine Gimbal No. 2<br>
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top">11101<br>
+                  <td align="center" valign="top">367<br>
                   </td>
                   <td valign="top">Horizon Seeker No. 4<br>
                   </td>
@@ -3551,6 +4192,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
       </tbody>
     </table>
     <h3><a name="Subroutine_Linkage" id="Subroutine_Linkage"></a>Subroutine
+
 
 
 
@@ -3680,6 +4322,7 @@ Only
 
 
 
+
     those special addresses work.&nbsp; So a typical subroutine linkage
     would look like this:<br>
     <br>
@@ -3689,6 +4332,7 @@ Only
       </span> </div>
     <div style="margin-left: 40px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; ... <i>return
+
 
           to here</i> ...<br>
         <br>
@@ -3832,6 +4476,7 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -4170,6 +4815,7 @@ Assembly
 
 
 
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -4181,6 +4827,7 @@ Assembly
     writing my own LVDC assembler.&nbsp; The description is intended to
     be authoritative only in the sense that it describes how my own
     assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
+
 
 
     which does produce an assembled core-rope image identical to that of
@@ -4215,6 +4862,7 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
 
 
 
@@ -4308,11 +4956,52 @@ Assembly
       </li>
       <li>Pure decimal (integer) constants are fully <i>right</i>-aligned.&nbsp;
 
+
         In other words, a decimal integer encoded as <i>N</i> bits
         would be sign-extended on the left by 26-<i>N</i> bits.</li>
       <li>Decimal non-integer constants are treated as being in the
-        range -1.0 &lt; <i>constant</i> &lt; 1.0. <br>
-      </li>
+        range -1.0 &lt; <i>constant</i> &lt; 1.0.&nbsp;</li>
+    </ul>
+    <p><i><a name="AngleUnits"></a>Units of angular measurement</i>:&nbsp;
+      For most internal purposes, the source code typically measures
+      angles in a unit called a <i>pirad</i>.&nbsp; I can find no
+      reference to any unit by this name outside of the LVDC source
+      code, nor does the LVDC source code choose to define it in the
+      program comments.&nbsp; However, from the usage, it seems pretty
+      clear that<br>
+    </p>
+    <blockquote>1 pirad = 180° = <font face="Times New Roman, Times,
+        serif">π</font> radians<br>
+    </blockquote>
+    And then there are <i>ladder units</i>.&nbsp; They are undefined,
+    of course, but I suspect this is the form required for outputting
+    angular commands to external hardware:<br>
+    <blockquote>1° = 1/0.06 ladder units<br>
+    </blockquote>
+    There are also references to angles measured in <i>2016 fine units</i>,
+    again undefined.&nbsp; Apparently, the "fine" refers to "fine
+    resolvers", and thus is likely the form in which the angular data is
+    delivered to the LVDC from the resolvers.&nbsp; At any rate, it
+    appears that<br>
+    <blockquote>1° = 2016/5.625 fine units<br>
+    </blockquote>
+    Finally, there are references to <i>backup units</i>, which are
+    (you guessed it!) undefined.&nbsp; It appears that<br>
+    <blockquote>1° = 2016/180 backup units<br>
+    </blockquote>
+    <i>Units of time</i>:&nbsp; The source code sometimes refers to a
+    unit of time measurement it calls <i>qms</i>, but does not
+    define.&nbsp; I suspect this is the unit of measurement in which the
+    real-time clock delivers data to the LVDC.&nbsp; Apparently,<br>
+    <blockquote>1 ms = 1/0.24609375 qms<br>
+      1 ms ≈&nbsp; 4.063492 qms<br>
+    </blockquote>
+    In other words, "qms" probably stands for "quarter millisecond".<br>
+    <blockquote>
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    </blockquote>
+    <blockquote></blockquote>
+    <ul>
     </ul>
     <i>Format of a non-comment line</i>:&nbsp; <br>
     <ul>
@@ -4560,6 +5249,7 @@ Assembly
 
 
 
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -4602,6 +5292,7 @@ Assembly
         that way.&nbsp; However, there are no instances of <tt><i>n</i></tt>&gt;7
 
 
+
         in the existing LVDC source code, so I really have no way of
         knowing whether the original assembler accepted decimal
         constants or octal ones.)<br>
@@ -4642,6 +5333,7 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>target</i>,<i>syllable</i>,<i>modifier</i></tt>",
+
 
 
 
@@ -4984,6 +5676,7 @@ Assembly
             assembler to treat the left-hand symbol as a synonym for <tt><i>symbol</i></tt>.&nbsp;
 
 
+
             This is similar in concept to <tt>EQU</tt>, which
             essentially creates synonyms for numerical constants.&nbsp;
             But it differs from <tt>EQU</tt> in that it is not a part
@@ -5036,6 +5729,7 @@ Assembly
 
 
 
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -5049,6 +5743,7 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
 
 
 
@@ -5413,6 +6108,7 @@ Assembly
 
 
 
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unHOP.py">unHOP.py</a>)
@@ -5579,6 +6275,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -6029,6 +6726,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -6059,7 +6757,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
     and produces as output a human-readable assembly listing (<i>OUTPUT</i>.lst).&nbsp;
+
 
 
 
@@ -6235,6 +6935,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -6321,10 +7022,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-09-11.<br>
+          2019-09-12.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
