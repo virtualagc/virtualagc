@@ -43,7 +43,7 @@
 #       preserved here, but the range of sequence numbers for 
 #       individual pages are indicated in the comments.
 
-# What follows are various allocations of variables that were spread
+# What follows are allocations of variables that were spread
 # out across various pages of the original program listing.  The comments
 # associated with these allocations have been retained as-is, and may
 # refer to code that has been removed during abridgment.
@@ -94,6 +94,677 @@ UTEXM	BSS	1			LOCATION USED BY EXM IN SUBROUTINES
 
 	ORGDD	4,1,0,0,2,14,
 WRKSHP	TRA	WRKSHP
+
+# PAGE 1, SEQUENCE 000060-000100
+
+***************************************
+*                                     *
+*  AS - 206RAM  LVDC FLIGHT PROGRAM   *
+*                                     *
+***************************************
+
+# PAGE 2, SEQUENCE 000120-000370, TITLE "TABLE OF CONTENTS"
+
+***********************************************************************
+*                                                                     *
+*   1    INITIALIZATION                                               *
+*   2    ACCELEROMETER PROCESSING                                     *
+*   3    BOOST NAVIGATION                                             *
+*   4    GUIDANCE SELECT AND PRE-IGM                                  *
+*   5    IGM                                                          *
+*   6    BACKUP ROUTINES                                              *
+*   7    INTERRUPT ROUTINES                                           *
+*   8    ORBITAL INITIALIZATION                                       *
+*   9    ORBITAL PROCESSOR                                            *
+*  10    ORBITAL NAVIGATION                                           *
+*  11    C-BAND TRANSPONDER ROUTINE                                   *
+*  12    ACCELERATION ROUTINES                                        *
+*  13    ORBITAL GUIDANCE                                             *
+*  14    INTERRUPT PROCESSING                                         *
+*  15    TLC                                                          *
+*  16    MINOR LOOP SUPPORT                                           *
+*  17    MINOR LOOP                                                   *
+*  18    DISAGREEMENT BIT PROCESSING                                  *
+*  19    SWITCH SELECTOR CHECK                                        *
+*  20    SWITCH SELECTOR PROCESSING                                   *
+*  21    FLIGHT SIMULATION                                            *
+*  22    UTILITY ROUTINES                                             *
+*                                                                     *
+***********************************************************************
+
+# PAGE 3, SEQUENCE 000390-000920, TITLE "TELEMETRY DESCRIPTION"
+
+**********************************************************************
+*
+****************************
+*        1  3     REAL     *      TELEMETRY OUTPUT FROM THE LVDC AND THE
+*        2  2     TIME     * LVDA IS A CONFIGURATION OF FORTY BITS. OF
+*        3  1  A1 REGISTER * THESE, BITS 5 THROUGH 10 AND BITS 21
+*       -------------------* THROUGH 40 CONTAIN TELEMETRY DATA.  BITS 1,
+* 10     4  P     PARITY   * 2, 3, 19, AND 20 CONTAIN THE CONTENTS OF
+* BIT   -------------------* THE REAL TIME REGISTER.  IF THE TELEMETRY
+* ARRAY  5  6              * IS FROM THE LVDA, THE REAL TIME REGISTER
+*        6  5              * CONTAINS THE 5 LOW ORDER BITS OF THE REAL
+*        7  4              * TIME CLOCK WHEN THE DATA WORD ENTERS THE
+*        8  3     DATA     * DOM.  HOWEVER, IF THE TELEMETRY IS FROM THE
+*        9  2              * LVDC, BIT 19 IS A VALIDITY BIT THAT IS
+*       10  1              * ADDED TO THE TELEMETRY WORD IF THE COMPUTER
+********-------------------* INFORMATION IS VALID.  IT IS CONSIDERED NOT
+*       11  8 NA2          * VALID IF THE TAG OR BUFFER REGISTERS ARE
+*       12  1  A8          * BEING LOADED WHILE THE PCM IS SAMPLING THE
+*       13  2  A9          * BUFFER REGISTER OR IF THE BUFFER REGISTER
+*       14  7  A7 TAG      * CONTAINS ORBITAL CHECK OUT ADDRESS INFOR-
+* 10    15  6  A6 REGISTER * MATION.  BITS 20, 1, AND 2 ARE THE 3 LOW
+* BIT   16  5  A5          * ORDER BITS OF THE MODE REGISTER.  BIT 3 IS
+* ARRAY 17  4  A4          * THE A1 BIT OF THE ASSOCIATED LVDC PIO
+*       18  3  A3          * TELEMETRY TAG.  THE TAG REGISTER CONTENTS,
+*       -------------------* STORED IN BITS 11 THROUGH 18, ARE USED TO
+*       19  5 VAL REAL TIME* IDENTIFY TELEMETRY DATA. THE PIO CODES AND
+*       20  4     REGISTER * THE DATA WHICH EACH TELEMETERS ARE LISTED
+********-------------------* BELOW.  A REAL TIME REGISTER BIT IS ADDED
+*       21 16              * TO THESE 8 BITS IF THE DATA IS FROM THE
+*       22 15              * LVDC.  THESE 9 BITS CORRESPOND TO A UNIQUE
+*       23 14              * PIO CODE.  THE REMAINING BIT, BIT 4, IS
+*       24 13              * USED TO EFFECT ODD PARITY IN THE 40 BIT
+* 10    25 12              * WORD.
+* BIT   26 11     DATA     *
+* ARRAY 27 10              *      PCM (PULSE CODE MODULATION) IS THE
+*       28  9              * MAIN TELEMETRY SYSTEM USED WITH THE DATA
+*       29  8              * ADAPTER.  THE TELEMETRY OUTPUT IS IN THE 
+*       30  7              * FORM OF A 10 BIT ARRAY.  THUS, FOUR 10 BIT
+**************************** TELEMETRY ARRAYS ARE REQUIRED TO TRANSMIT
+*       31 26              * ONE 40 BIT DATA ADAPTER WORD.  THE BIT
+*       32 25              * OUTPUT CONFIGURATION OF THE PCM, LVDC, AND
+*       33 24              * THE BUFFER REGISTER DIFFERS AS SHOWN IN
+*       34 23              * THE CHART BELOW.
+* 10    35 22              *
+* BIT   36 21     DATA     *          TELEMETRY TAG ARRAY
+* ARRAY 37 20              *
+*       38 19              * L *M3 *M2 *M1  A9  A8 A7 A6 A5 A4 A3 A2  A1
+*       39 18              * B *M3 *M2 *M1 *A1 NA2 A7 A6 A5 A4 A3 A9  A8
+*       40 17              * P *M2 *M1 *A1 NA2  A8 A9 A7 A6 A5 A4 A3 *M3
+****************************   L = LVDC, B = BUFFER, P = PCM
+*                              NA2 = NOT A2
+*                              *XY IS NOT USED IN IDENTIFICATION OF LVDA
+*                                  TELEMETRY
+************************************************************************
+
+# PAGE 4, SEQUENCE 000940-001480, TITLE "BOOST TELEMETRY"
+
+************************************************************************
+*
+* TASEC    0000   0200   0400    15              SECONDS
+*                                      TIME ELAPSED FROM GRR IN SECONDS
+* CHIZ     0001   0600   1400    0               PIRADS
+*                                      YAW GUID. COMM. IN SPACE-FIX. SYS
+* CHIX     0005   0604   1402    0               PIRADS
+*                                      PITCH GUID COMM. IN SPACE-FIX.SYS
+* CHIY     0011   0610   1404    0               PIRADS
+*                                      ROLL GUID. COMM. IN SPACE-FIX.SYS
+* ACCZ     0004   0204   0402                    .05 M/SEC
+* ACCX     0010   0210   0404                    .05 M/SEC
+* ACCY     0014   0214   0406                    .05 M/SEC
+*                                      ACCELEROMETER OPTISYN READINGS
+* THETZ    0015   0614   1406    0               PIRADS
+*                                      WHOLE YAW GIMBAL ANGLE
+* THETX    0021   0620   1410    0               PIRADS
+*                                      WHOLE ROLL GIMBAL ANGLE
+* THETY    0025   0624   1412    0               PIRADS
+*                                      WHOLE PITCH GIMBAL ANGLE
+* TB       0031   0630   1414    15              SECONDS
+*                                      TIME ELAPSED IN CURRENT TIME BASE
+* ZS       0034   0234   0416    23              METERS
+* XS       0044   0244   0422    23              METERS
+* YS       0050   0250   0424    23              METERS
+*                                      COMPONENTS OF SPACE-FIXED POS.
+* 1/R      0054   0254   0426    -22             1/METERS
+*                                      RECIP. OF TOTAL SPACE-FIXED RAD.
+* GZ       0060   0260   0430    4               M/SEC**2
+* GX       0064   0264   0432    4               M/SEC**2
+* GY       0070   0270   0434    4               M/SEC**2
+*                                      COMP. OF GRAVITATIONAL ACCEL.
+* SS       0075   0674   1436
+*                                      SWITCH SELECTOR INTERRUPT
+* ZDS      0110   0310   0444    14              M/SEC
+* XDS      0114   0314   0446    14              M/SEC
+* YDS      0120   0320   0450    14              M/SEC
+*                                      COMP. OF SPACE-FIXED VELOCITY
+* V        0124   0324   0452    14              M/SEC
+*                                      TOTAL SPACE-FIXED VELOCITY
+* ACCT     0174   0374   0476    25              QMS
+*                                      REAL TIME CLOCK READING IN QMS
+* T1I      0400   0202   0500    10              SECONDS
+*                                      FIRST IGM PHASE TIME-TO -GO
+* MC24     0415   0616   1506
+*                                      MODE CODE 24 STATUS CHANGES
+*
+*         1 Z ACC   0 NOMINAL   0 B FAILED   1 A FAILED   1 BOTH FAILED
+*         2 Z ACC   0 A USED    1 USED A     0 USED B     1 USED (F/M)C
+*
+*         3 X ACC   0 NOMINAL   0 B FAILED   1 A FAILED   1 BOTH FAILED
+*         4 X ACC   0 A USED    1 USED A     0 USED B     1 USED (F/M)C
+*
+*         5 Y ACC   0 NOMINAL   0 B FAILED   1 A FAILED   1 BOTH FAILED
+*         6 Y ACC   0 A USED    1 USED A     0 USED B     1 USED (F/M)C
+
+# PAGE 5, SEQUENCE 001490-00230
+
+*
+*         7  Z GIM   0 NOMINAL  0 3 FINE FAILURES  1 BACKUPS FAILING
+*         8  Z GIM   0 NOMINAL  1 BACKUP IN USE    1   15/SEC
+*
+*         9  X GIM   0 NOMINAL  0 3 FINE FAILURES  1 BACKUPS FAILING
+*         10 X GIM   0 NOMINAL  1 BACKUP IN USE    1   15/SEC
+*
+*         11 Y GIM   0 NOMINAL  0 3 FINE FAILURES  1 BACKUPS FAILING
+*         12 Y GIM   0 NOMINAL  1 BACKUP IN USE    1   15/SEC
+*
+*         13 DGCNT   0 DGCNT NEG  0 DGCNT ZERO   1 DGCNT POS
+*         14 DGCNT   0 NOMINAL    1 ONE COD BAD  1 BOTH CODS BAD
+*
+*         15 AFAL    A COD BAD
+*         16 BFAL    B COD BAD
+*
+*         17 LADAFL  0 NOMINAL  1 PROGRAM CONTINUOUSLY SELECTS
+*         18 SS FEEDBACK ERROR WITH 2 OR MORE BITS IN ERROR
+*
+*         21 DGMAF   0 NOMINAL  1 A COUNTER BAD
+*         22 DGMBF   0 NOMINAL  1 B COUNTER BAD
+*
+*         23 Z ACCELEROMETER ZERO FAILURE
+*         24 X ACCELEROMETER ZERO FAILURE
+*
+*
+* MC25     0421   0622   1510
+*                                      MODE CODE 25 STATUS CHANGES
+*
+*
+*         1  GUIDANCE REFERENCE RELEASE INTERRUPT TB0
+*         2  LIFTOFF TB1
+*         3  START PITCH AND ROLL
+*         4  STOP ROLL
+*         5  TIME BASE 2
+*         6  STOP PITCH
+*         7  INBOARD ENGINE CUTOFF COMMAND
+*         8  TIME BASE 3
+*         9  START 1ST PHASE IGM EQUATIONS
+*         10 ) ENGINE MIXTURE  0 NOMINAL  1 HIGH   1 LOW
+*         11 ) RATIO CHANGE    1 ACCEL   0 ACCEL  1 ACCEL
+*         12 STEERING MISALIGNMENT CORRECTION
+*         13 IGM CHI TILDA STEERING
+*         14 IGM FREEZE
+*         15 S-IVB CUTOFF COMMAND
+*         16 TIME BASE 4
+*         17-20 SPARES
+*         21 S-I INBOARD ENGINE OUT
+*         22 S-I OUTBOARD ENGINE OUT
+*         23-26 SPARES
+*
+* DORSW    0425   0626   1512
+*                                      DISCRETE OUTPUT REGISTER CONTENTS
+*                                     DOR STATUS CHANGE=GUIDANCE FAILURE
+* ICR      0431   0632   1514
+# PAGE 6, SEQUENCE 002040-002580
+*                                      LVDA INTERNAL CONT. REG. CONTENTS
+*                                      ICR STATUS CHANGE- TO Z BACKUP
+*                                      COD ORDER IN DISAGREEMENT BIT
+*                                      PROCESSING, FORCE LADDERS TO
+*                                      CHANNEL A IN ML, CHANGE CHANNEL A
+*                                      TO CHANNEL B OR B TO A IN SWITCH
+*                                      SELECTOR
+* Z4       0434   0236   0516    23              METERS
+* X4       0444   0246   0522    23              METERS
+* Y4       0450   0252   0524    23              METERS
+*                                      POSITIONS IN TARGET PLANE COORD.
+* EMRR     0435   0636   1516
+*                                      ERROR MONITOR REG. CONTENTS
+*                                     EMR STATUS CHANGE = LADDER ERROR
+*                                     USING CONVERTER B OR DISAGREEMENT
+*                                     IN SELECTOR VOTER CIRCUITS
+* INT      0441   0642   1520
+*                                      LLS,OBCO,TLC,S4BCO INTERRUPTS
+*                                       INT = INT + REALTIME
+*                                     INTERRUPT IDENTIFICATION CODES
+*                                       GRR  =  101010100
+*                                       LLS  =  202020202
+*                                       OBCO =  303030303
+*                                       S4BEO=  404040404
+*                                       TLC  =  357740000
+* T3I      0460   0262   0530    10              SECONDS
+*                                      TIME-TO-GO IN S4B SECOND BURN
+* TLCHPC   0461   0662   1530
+*                                      TLC HOP CONSTANT
+* DIS.IN   0465   0666   1532
+*                                      DISCRETE INPUTS - LO, ENG. OUT
+*                                     DI = DI + REALTIME
+*                                       LO = 101000000  ) REAL TIME IN
+*                                       EO = 000600000  ) LOWER HALF
+*                                       S4B= 404040404
+* SQ3      0471   0672   1534    1
+*                                      SQRT(1-ZSP**2)
+* TBBU     0475   0676   1536
+*                                      TIME BASE BACKUP
+*                                       LIFTOFF BACKUP = 101010100
+*                                       LLS BACKUP     = 202020202
+*                                       OBCO BACKUP    = 303030302
+*                                       S4BCO BACUP    = 404040404
+*
+* FDBK     0500   0302   0540
+*                                      SS FEEDBACK REG.,IN EVENT OF ERR.
+* ML ERROR 0570   0372   0574
+*                                      MINOR LOOP ERROR CODE
+*
+*
+*         GROUP 1 TELEMETRY COMES FROM DISAGREEMENT PROCESSING
+*
+*
+*                      BIT ASSIGNMENTS FOR ERROR DATA WORD
+*         1   2 - 12    13 14 15   16 - 26
+
+# PAGE 7, SEQUENCE 002590-003130
+
+*         1 (A COUNTER)  0  0  1 (B COUNTER)  DG BIT ON IN ERROR
+*
+*         1 (A COUNTER)  0  0  0 (B COUNTER)  THIS DATA WORD WITH 000
+*                                             ERROR TAG WILL BE PAIRED
+*                                             WITH ONE OF THE SPECIAL
+*                                             COUNTER DATA WORDS
+*
+*         1 (A COUNTER)  0  1  0 (B COUNTER)  A COUNTER BAD ) A AND B
+*         1 (A COUNTER)  0  1  1 (B COUNTER)  B COUNTER BAD ) ARE THE 
+*         1 (A COUNTER)  1  0  0 (B COUNTER)  BOTH BAD      ) SPECIAL
+*         1 (A COUNTER)  1  0  1 (B COUNTER)  NONE BAD      ) COUNTERS
+*
+*
+*         GROUP 2 TELEMETRY COMES FROM ML REASONABLENESS FAILURES
+*
+*
+*         1   2 - 12    13 14 15   16 - 26
+*                      BIT ASSIGNMENTS FOR ERROR DATA WORD
+*         0 (OLD GIMBAL) 0  0  0 (CURRENT GIMBAL)    PITCH ) GIMBAL
+*         0 (OLD GIMBAL) 0  0  1 (CURRENT GIMBAL)    ROLL  ) FAILED ZERO
+*         0 (OLD GIMBAL) 0  1  0 (CURRENT GIMBAL)    YAW   ) TEST
+*         0 (OLD GIMBAL) 0  1  1 (CURRENT GIMBAL)    PITCH ) FAILED ON
+*         0 (OLD GIMBAL) 1  0  0 (CURRENT GIMBAL)    ROLL  ) INCREASING
+*         0 (OLD GIMBAL) 1  0  1 (CURRENT GIMBAL)    YAW   ) DECREASING
+*         0 (OLD GIMBAL) 1  1  0 (CURRENT GIMBAL)    ROLL  ) SWITCHED
+*         0 (OLD GIMBAL) 1  1  1 (CURRENT GIMBAL)    PITCH ) TO
+*         0 (OLD GIMBAL) 1  1  1 (CURRENT GIMBAL)    YAW   ) BACKUPS
+*
+*
+* MLCHIZ   0501   0702   1540    0               PIRADS
+* MLCHIX   0505   0706   1542    0               PIRADS
+* MLCHIY   0511   0712   1544    0               PIRADS
+*                                      MINOR LOOP CHI'S
+* TAUD     0544   0346   0562    10              SECONDS
+*                                      TIME-TO-GO
+* T(I)     0561   0762   1570    15              SECONDS
+*                                      TIME FROM GRR OF TIME BASE CHANGE
+* ETC      0571   0772   1574    
+*                                      END OF TELEMETRY CYCLE, 1 PER CC
+* BTC      0575   0776   1576
+*                                      BEGIN TELEMETRY CYCLE, 1 PER CC
+* ZDM      1020   1220   2410    14              M/SEC
+* XDM      1024   1224   2412    14              M/SEC
+* YDM      1030   1230   2414    14              M/SEC
+*                                      COMPONENTS OF MEASURED VELOCITY
+* IGZ      1074   1274   2436    14              M/SEC
+* IGX      1100   1300   2440    14              M/SEC
+* IGY      1104   1304   2442    14              M/SEC
+*                                      COMP. OF GRAVITATIONAL VELOCITY
+* ZDDM     1130   1330   2454    6               M/SEC**2
+* XDDM     1134   1334   2456    6               M/SEC**2
+* YDDM     1140   1340   2460    6               M/SEC**2
+*                                      COMP. OF MEASURED ACCELERATION
+* F/M      1144   1344   2462    6               M/SEC**2
+# The following should obviously read TOTAL MEASURED ACCELERATION, but 
+# the original printout does incorrectly say VELOCITY instead. - RSB 2019
+*                                      TOTAL MEASURED VELOCITY
+
+# PAGE 8, SEQUENCE 003140-003680
+
+* DCHIZ    1445   1646   3522    0               PIRADS
+* DCHIX    1451   1652   3524    0               PIRADS
+* DCHIY    1455   1656   3526    0               PIRADS
+*                                      CHANGE IN CHI'S PER MINOR LOOP
+* ACZ1     1501   1702   3540
+* ACX1     1505   1706   3542
+* ACY1     1511   1712   3544
+*                                      FIRST ACCELEROMETER READ EXTRA
+* RLT1     1515   1716   3546    25
+*                                      FIRST -EXTRA- ACCEL. READ
+* ACZ2     1521   1722   3550
+* ACX2     1525   1726   3552
+* ACY2     1531   1732   3554
+*                                      SECOND ACCELEROMETER READ EXTRA
+* RLT2     1535   1736   3556    25
+*                                      SECOND -EXTRA- ACCEL. READ
+* (M/F)I   2150   2350   4454    -02             SEC**2/M
+*                                      RECIPROCAL OF F/M
+* (M/F)S   2154   2354   4456    -02             SEC**2/M
+*                                      SMOOTHED VALUE OF (M/F)I
+* TAU1     2404   2206   4502    10              SECONDS
+*                                      FIRST IGM PHASE TOTAL BURN TIME
+* TAU3     2410   2212   4504    10              SECONDS
+*                                      SECOND IGM PHASE TOTAL BURN TIME
+* PSI(T)   2414   2216   4506    0               PIRADS
+*                                      TOTAL RANGE ANGLE
+* XV       2424   2226   4512    23              METERS
+* YV       2430   2232   4514    23              METERS
+*                                      COMP. OF POSITION IN IGM COMP.SYS
+* ZDV      2434   2236   4516    14              M/SEC
+* XDV      2444   2246   4522    14              M/SEC
+* YDV      2450   2252   4524    14              M/SEC
+*                                      COMP. OF VEL. IN IGM COMP. SYS.
+* DT3IP    2454   2256   4526    10              SECONDS
+*                                      CORRECTION TO TIME-TO-GO
+* DZDV     2464   2266   4532    14              M/SEC
+* DXDV     2470   2272   4534    14              M/SEC
+* DYDV     2474   2275   4536    14              M/SEC
+*                                      VELOCITIES TO BE GAINED
+* CHITZ    2500   2302   4540    0               PIRADS
+*                                      VEL. CORRECTION IN IGM YAW, GUID.
+* CHITY    2504   2306   4542    0               PIRADS
+*                                      VEL. CORRECTION IN IGM PITCH,GUID
+* G0       2510   2312   4544    11
+*                                      TOTAL Y(V) DISTANCE TO BE GAINED
+* N1       2514   2316   4546    0               PIRADS
+*                                      ALT. CORRECTION IN IGM YAW, GUID.
+* N2       2520   2322   4550    -08             PIRADS/SEC
+*                                      IDEAL IGM YAW RATE
+* N3       2530   2332   4554    0               PIRADS
+*                                      ALT. CORRECTION IN IGM PITCH
+* N4       2534   2336   4556    -07             PIRADS/SEC
+*                                      IDEAL IGM PITCH RATE
+* GOP      2524   2326   4552    11   
+*                                      TOTAL X(V) DISTANCE TO BE GAINED
+
+# PAGE 9, SEQUENCE 003690-004230
+
+* CHIZP    2550   2352   0564    0               PIRADS
+*                                      YAW GUID. COMMAND IN IGM COMP SYS
+* CHIYP    2554   2356   0566    0               PIRADS
+*                                      PITCH GUID. COMMAND, IGM COMP SYS
+* SMCZ     2560   2362   0570    0               PIRADS
+*                                      YAW STEERING MISALIGNMENT
+* SMCY     2564   2366   0572    0               PIRADS
+*                                      PITCH STEERING MISALIGNMENT
+*
+*      CERTAIN QUANTITIES MAY BE TELEMETERED FROM THE DISCRETE OUTPUT
+* MULTIPLEXOR (DOM).  THE DOM HAS THE CAPACITY TO HOLD FOUR WORDS AT
+* ONE TIME.  WORDS ARE TELEMETERED FROM THE FIRST POSITION EACH 4.167
+* MILLISECONDS IF NO LVDC TELEMETRY IS GIVEN DURING THAT TIME.  OTHER
+* WORDS IN THE DOM ARE THEN SHIFTED FORWARD.  NEWLY PIO-ED WORDS ARE
+* PLACED IN THE FIRST AVAILABLE LOCATIONS IN THE DOM.  THE WORDS WHICH
+* MAY ENTER THE DOM, AND THE CONDITIONS WHICH MUST EXIST BEFORE THE
+* DOM IS USED, ARE GIVEN BELOW.
+*
+*      WHEN THE MINOR LOOP INTERRUPT BIT IS SET IN THE INTERRUPT
+* STORAGE REGISTER, ONLY GIMBAL ANGLE READINGS AND LADDER OUTPUTS
+* ARE STORED IN THE DOM.  THE GIMBAL ANGLE READINGS OCCUPY THE LEFT
+* (HIGH-ORDER) HALF OF THE WORD AND THE LADDER OUTPUT IS PUT IN THE
+* RIGHT HALF OF THE WORD.  DURING A MINOR LOOP, THE POSSIBLE DOM WORDS
+* ARE-     Z GIMBAL - YAW   LADDER COMMAND     (ASSUMED LOST)
+*          Y GIMBAL - PITCH LADDER COMMAND     (TIMING GUARANTEES THAT
+*          X GIMBAL - YAW   LADDER COMMAND       EACH OF THESE THREE
+*          Z GIMBAL - ROLL  LADDER COMMAND       WILL BE PUT INTO DOM)
+*
+*      NOTICE THAT THE PIO CODES DO NOT CONVERT TO TAGS AS ABOVE.
+*
+* ZGIMB      223 023 144              FINE GIMBAL NO.1
+* XGIMB      363 163 174              FINE GIMBAL NO.2
+* YGIMB      353 153 172              FINE GIMBAL NO.3
+* YAW LAD    156                      TURNS ON DATA BITS 16 AND 17
+* ROL LAD    152                      TURNS ON DATA BIT 16, BIT 17 OFF
+* PIT LAD    146                      TURNS ON DATA BIT 17, BIT 16 OFF
+*
+*   DURING EACH MINOR LOOP ONE EXTRA WORD IS PLACED ON THE DOM AFTER THE
+* MINOR LOOP INTERRUPT BIT HAS BEEN RESET.  THE ACCELEROMETERS ARE READ
+* THREE TIMES PER MAJOR LOOP.  TIMING GUARANTEES THAT AT LEAST ONE
+* READING WILL ENTER THE DOM SO THE ACCELEROMETERS ARE READ IN A 
+* DIFFERENT ORDER DURING EACH OF THE THREE READINGS.  THE OTHER WORDS
+* THAT ARE PLACED ON THE DOM ARE THE INTERNAL CONTROL REGISTER, DISCRETE
+* INPUT REGISTER, DISCRETE INPUT SPARES REGISTER, ERROR MONITOR REGISTER
+* AND THE COD AND POWER SUPPLY WORD.  THE BACKUP GIMBALS WILL ALSO BE
+* PLACED ON THE DOM ONCE PER MAJOR LOOP.
+*     203   BACKUP GIMBAL NO. 1  (Z)
+*     303   BACKUP GIMBAL NO. 2  (X)
+*     273   BACKUP GIMBAL NO. 3  (Y)
+*     107   Z ACCELEROMETER
+*     127   X ACCELEROMETER
+*     117   Y ACCELEROMETER
+*     057   DISCRETE INPUT REGISTER
+*     023   ERROR MONITOR REGISTER
+*     066   COD AND POWER SUPPLY WORD
+# PAGE 10, SEQUENCE 004240-004260
+*     053   DISCRETE INPUT SPARES
+*     022   INTERNAL CONTROL REGISTER
+************************************************************************
+
+# PAGE 11, SEQUENCE 004280-004820, TITLE "ORBITAL TELEM."
+
+************************************************************************
+*
+*
+*                 **********************************
+*                 *                                *
+*                 *  TELEMETERED ONCE PER SECOND   *
+*                 *                                *
+*                 **********************************
+*
+*
+*
+* CHIZ     0001   0600   1400    0               PIRADS
+*                                      YAW GUID. COMM. IN SPACE-FIX. SYS
+* CHIX     0005   0604   1402    0               PIRADS
+*                                      PITCH GUID COMM. IN SPACE-FIX.SYS
+* CHIY     0011   0610   1404    0               PIRADS
+*                                      ROLL GUID. COMM. IN SPACE-FIX.SYS
+* THETZ    0015   0614   1406    0               PIRADS
+*                                      WHOLE YAW GIMBAL ANGLE
+* THETX    0021   0620   1410    0               PIRADS
+*                                      WHOLE ROLL GIMBAL ANGLE
+* THETY    0025   0624   1412    0               PIRADS
+*                                      WHOLE PITCH GIMBAL ANGLE
+* TLTBB    0030   0230   0414    15              SECONDS
+*                                      BIASED TIME ELAPSED IN TB
+* TB       0031   0630   1414    15              SECONDS
+*                                      TIME ELAPSED IN CURRENT TIME BASE
+* TBA      0074   0274   0436    15              SECONDS
+*                                      SET EQUAL TO TBB AT THE TIME OF
+*                                      A STATION GAIN OR OF A STATION
+*                                      LOSS
+* TASEC    0000   0300   0440    15              SECONDS
+*                                      TIME ELAPSED FROM GRR IN SECONDS
+* ZS       0134   0334   0456    23              METERS
+* XS       0144   0344   0462    23              METERS
+* YS       0150   0350   0464    23              METERS
+*                                      COMPONENTS OF SPACE-FIXED POS.
+* TLPAST   0174   0374   0476    25              QMS
+*                                      RTC READING ASSO'D WITH TB
+* MC27     0420   0222   0510
+*                                      MODE CODE 27 STATUS CHANGE
+*
+*
+* 1      LVDC IS CONFIGURED TO THE ORBITAL NAVIGATION MODE
+* 2      ORBITAL MANUEVER NO. 1 IN PROGRESS
+* 3      ORBITAL MANUEVER NO. 2 IN PROGRESS
+* 4      ORBITAL MANUEVER NO. 3 IN PROGRESS
+* 5      ORBITAL MANUEVER NO. 4 IN PROGRESS
+* 6      SPARE
+* 7      ORBITAL MANUEVER NO. 5 (RETROGRADE MANUEVER) IN PROGRESS
+* 8      SPARE
+* 9      SECTOR DUMP IN PROGRESS INDICATION
+* 10     NAVIGATION UPDATE HAS BEEN RECEIVED
+* 11     INERTIAL ATTITUDE HOLD, CONTROL MODE IS IN PROGRESS
+* 12     NORMAL ORBITAL PITCH RATE, CONTROL MODE IN PROGRESS
+* 13     SPARE
+# PAGE 12, SEQUENCE 004830-005370
+* 14     TIME SEQUENCE UPDATE HAS BEEN RECEIVED
+*        (THIS BIT WILL BE RESET TO ZERO AT RECEIPT OF THE COMMAND MODE)
+*        (WORD INTERRUPT AND A ONE BIT WILL BE SET UPON THE VALIDATION)
+# Yes, in the line below, the original printout did say NOMMAND. - RSB 2019
+*        (OF THE DATA NOMMAND WORD FOR EACH UPDATE.)
+* 15     S-IVB CUTOFF COMMAND
+* 16     TIME BASE 4
+*
+* MC28     0414   0216   0506
+*                                      MODE CODE 28 STATUS CHANGE
+*
+*
+* 1    Z ACC    0 NOMINAL   0 A BAD   1 BOTH BAD
+* 2    Z ACC    0 NOMINAL   0 B USED  1 F/MC USED
+*
+* 3    X ACC    0 NOMINAL   0 A BAD   1 BOTH BAD
+* 4    X ACC    0 NOMINAL   0 B USED  1 F/MC USED
+*
+* 5    Y ACC    0 NOMINAL   0 A BAD   1 BOTH BAD
+* 6    Y ACC    0 NOMINAL   0 B USED  1 F/MC USED
+*
+* 7    Z GIM    0 NOMINAL   0 3 FINE FAILURES  1  BACKUPS FAILING
+* 8    Z GIM    0 NOMINAL   1 BACKUP IN USE    1    15/SEC
+*
+* 9    X GIM    0 NOMINAL   0 3 FINE FAILURES  1  BACKUPS FAILING
+* 10   X GIM    0 NOMINAL   1 BACKUP IN USE    1    15/SEC
+*
+* 11   Y GIM    0 NOMINAL   0 3 FINE FAILURES  1  BACKUPS FAILING
+* 12   Y GIM    0 NOMINAL   1 BACKUP IN USE    1    15/SEC
+*
+* 13   DGCNT    0 DGBIT NEG   0 DGBIT ZERO      1  DGBIT POS
+* 14   DGCNT    0 NOMINAL     1 ONE COD BAD    1  BOTH CODS BAD
+*
+* 15   AFAL     A COD BAD
+* 16   BFAL     B COD BAD
+*
+* 17   LADAFL   0 NOMINAL   1 PROGRAM CONTINUOUSLY SELECTS CONVERTER B
+*
+* 18   SS FEEDBACK ERROR WITH 2 OR MORE BITS IN ERROR
+* 19   SELF TEST FAILURE
+*
+* 21   DGMAF    0 NOMINAL   1 A BAD
+* 22   DGMBF    0 NOMINAL   1 B BAD
+*
+* Z4       0434   0236   0516    23              METERS
+* X4       0444   0246   0522    23              METERS
+*                                      POSITIONS IN TARGET PLANE COORD.
+* TLEMR1   0435   0636   1516
+*                                      ERROR MONITOR REG. CONTENTS
+*                                     EMR STATUS CHANGE = LADDER ERROR
+*                                     USING CONVERTER B OR DISAGREEMENT
+*                                     IN SELECTOR VOTOR CIRCUITS
+* MLCHIZ   0501   0602   1500    0               PIRADS
+* MLCHIX   0505   0606   1502    0               PIRADS
+* MLCHIY   0511   0612   1504    0               PIRADS
+*                                      MINOR LOOP CHI'S
+
+# PAGE 13, SEQUENCE 005380-005920
+
+* T(I)     0561   0762   1570    15              SECONDS
+*                                      TIME FROM GRR OF TIME BASE CHANGE
+* ETC      0571   0772   1574
+*                                      END OF TELEMETRY CYCLE, 1 PER CC
+* BTC      0575   0776   1576  
+*                                      BEGIN TELEMETRY CYCLE, 1 PER CC
+*
+*
+*                 **********************************
+*                 *                                *
+*                 * TELEMETERED ONCE PER 8 SECONDS *
+*                 *                                *
+*                 **********************************
+*
+*
+*
+* ONTAS    0000   0200   0400    15              SECONDS
+*                                      TIME OF LAST ORBIT NAVIGATION
+* ACCZ     0004   0204   0402                    .05 M/SEC
+* ACCX     0010   0210   0404                    .05 M/SEC
+* ACCY     0014   0214   0406                    .05 M/SEC
+*                                      ACCELEROMETER OPTISYN READINGS
+* ONZN     0034   0234   0416    23              METERS
+* ONXN     0044   0244   0422    23              METERS
+* ONYN     0050   0250   0424    23              METERS
+*                                      COMPONENTS OF S INTERIAL POSITION
+* 1/R      0054   0254   0426    -22             1/METERS
+*                                      RECIP. OF TOTAL SPACE-FIXED RAD.
+* GZ       0060   0260   0430    4               M/SEC**2
+* GX       0064   0264   0432    4               M/SEC**2
+* GY       0070   0270   0434    4               M/SEC**2
+*                                      COMP. OF GRAVITATIONAL ACCEL.
+* ZDS      0110   0310   0444    14              M/SEC
+* XDS      0114   0314   0446    14              M/SEC
+* YDS      0120   0320   0450    14              M/SEC
+*                                      COMP. OF SPACE-FIXED VELOCITY
+* V        0124   0324   0452    14              M/SEC
+*                                      TOTAL SPACE-FIXED VELOCITY
+* ZDDV     0504   0306   0542    4               M/SEC**2
+* XDDV     0510   0310   0544    4               M/SEC**2
+* YDDV     0514   0314   0546    4               M/SEC**2
+*                                      COMPONENTS OF VENT ACCELERATION
+* ZDDD     0520   0322   0550    4               M/SEC**2
+* XDDD     0524   0326   0552    4               M/SEC**2
+* YDDD     0530   0332   0552    4               M/SEC**2
+*                                      COMPONENTS OF DRAG ACCELERATION
+* ALT      0534   0336   0556    4               METERS
+*                                      ALTITUDE
+* TLEMR8   0535   0736   1556 
+*                                      MINOR LOOP ERROR CODE
+*
+*
+*
+*                 *****************************
+# PAGE 14, SEQUENCE 005930-006430
+*                 *                           *
+*                 *   TELEMETERED ONLY WHEN   *
+*                 * IN VIEW OF GROUND STATION *
+*                 *                           *
+*                 *****************************
+*
+*
+* ML ERROR 0570   0372   0574
+*                                      MINOR LOOP ERROR CODE
+*
+* GROUP 1 TELEMETRY COMES FROM DISAGREEMENT PROCESSING
+*
+*   BIT ASSIGNMENTS FOR ERROR DATA WORD
+*  1   2 - 12    13 14 15   16 - 26
+*  1 (A COUNTER)  0  0  1 (B COUNTER)    DG BIT ON IN ERROR
+*
+*  1 (A COUNTER)  0  0  0 (B COUNTER)    THIS DATA WORD WITH 000 ERROR
+*                                         TAG WILL BE ASSOCIATED WITH
+*                                         ONE OF THE FOLLOWING WORDS
+*
+*  1 (A COUNTER)  0  1  0 (B COUNTER)    A COUNTER BAD,SPECIAL COUNTER
+*  1 (A COUNTER)  0  1  1 (B COUNTER)    B COUNTER BAD,SPECIAL COUNTER
+*  1 (A COUNTER)  1  0  0 (B COUNTER)    A AND B BOTH BAD, SPECIAL
+*                                           COUNTERS
+*  1 (A COUNTER)  1  0  1 (B COUNTER)    NO COUNTERS BAD, SPECIAL
+*                                           COUNTERS
+*
+*
+* GROUP 2 TELEMETRY COMES FROM MINOR LOOP REASONABLENESS FAILURES
+*
+*   BIT ASSIGNMENTS FOR ERROR DATA WORD
+*   1    2 - 12    13 14 15    16 - 26
+*   0 (OLD GIMBAL)  0  0  0 (CURRENT GIMBAL)  PITCH GIMBAL FAILED ZERO
+*                                               TEST
+*   0 (OLD GIMBAL)  0  0  1 (CURRENT GIMBAL)  ROLL GIMBAL FAILED ZERO
+*                                               TEST
+*   0 (OLD GIMBAL)  0  1  0 (CURRENT GIMBAL)  YAW GIMBAL FAILED ZERO
+*                                               TEST
+*   0 (OLD GIMBAL)  0  1  1 (CURRENT GIMBAL)  PITCH GIMBAL FAILED TEST
+*                                               INCREASING OR DECREASING
+*   0 (OLD GIMBAL)  1  0  0 (CURRENT GIMBAL)  ROLL GIMBAL FAILED TEST
+*                                               INCREASING OR DECREASING
+*   0 (OLD GIMBAL)  1  0  1 (CURRENT GIMBAL)  YAW GIMBAL FAILED TEST
+*                                               INCREASING OR DECREASING
+*   0 (OLD GIMBAL)  1  1  0 (CURRENT GIMBAL)  ROLL GIMBAL SWITCHED TO
+*                                               BACKUPS
+*   0 (OLD GIMBAL)  1  1  1 (CURRENT GIMBAL)  PITCH GIMBAL SWITCHED TO
+*                                               BACKUPS
+*   0 (OLD GIMBAL)  1  1  1 (CURRENT GIMBAL)  YAW GIMBAL SWITCHED TO
+*                                               BACKUPS
+************************************************************************
 
 # From this point to the end of the program is a portion of the "utilities"
 # section of the original program listing.
