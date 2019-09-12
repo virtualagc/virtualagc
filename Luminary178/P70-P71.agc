@@ -19,42 +19,101 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-11 MAS  Re-based on Luminary 210. Removed checking
+##                              of CHANBKUP. Returned erasables TGO1, PIPCTR,
+##                              and PIPCTR1 to their original locations.
 
-## Page 822
+## Page 831
                 BANK    21
                 SETLOC  R11
                 BANK
 
-                EBANK=  PHSNAME5
+                EBANK=  DVCNTR
+                COUNT*  $$/R11
+
+R10,R11         CS      FLAGWRD7        # IS SERVICER STILL RUNNING?
+                MASK    AVEGFBIT
+                CCS     A
+                TCF     TASKOVER        # LET AVGEND TAKE CARE OF GROUP 2.
+                CCS     PIPCTR
+                TCF     STORPCTR
+                EXTEND
+                DCA     NEG0
+                DXCH    -PHASE2
+                TCF     R10,R11A
+
+STORPCTR        TS      PIPCTR1
+
+PIPCTR1         =       VVECTY
+PIPCTR          =       PHSPRDT2
+                CAF     OCT31
+                TC      TWIDDLE
+                ADRES   R10,R11
+R10,R11A        CAF     HFLSHBIT
+FLASHH?         MASK    FLGWRD11
+                EXTEND
+                BZF     FLASHV?         # H FLASH OFF, SO LEAVE ALONE
+
+                CA      HLITE
+                TS      L
+                TC      FLIP            # FLIP H LITE
+
+FLASHV?         CA      VFLSHBIT        # VFLASHBIT MUST BE BIT 2.
+                MASK    FLGWRD11
+                EXTEND
+                BZF     10,11           # VFLASH OFF
+
+                CA      VLITE
+                TS      L
+                TC      FLIP            # FLIP V LITE
+
+
+10,11           CA      FLAGWRD9        # IS THE LETABORT FLAG SET ?
+                MASK    LETABBIT
+                EXTEND
+                BZF     LANADISP        # NO. PROCEED TO R10.
+
+P71NOW?         CS      MODREG          # YES.  ARE WE IN P71 NOW?
+                AD      1DEC71
+                EXTEND
+## Page 832
+                BZF     LANADISP        # YES.  PROCEED TO R10.
+
+                EXTEND                  # NO. IS AN ABORT STAGE COMMANDED?
+                READ    CHAN30
+                COM
+                TS      L
+                MASK    BIT4
+                CCS     A
+                TCF     P71A            # YES.
+
+P70NOW?         CS      MODREG          # NO. ARE WE IN P70 NOW?
+                AD      1DEC70
+                EXTEND
+                BZF     LANADISP        # YES.  PROCEED TO R10.
+
+                CA      L               # NO.  IS AN ABORT COMMANDED?
+                MASK    BIT1
+                CCS     A
+                TCF     P70A            # YES.
+                TCF     LANADISP        # NO.  PROCEED TO R10.
 
                 COUNT*  $$/P70
 
 P70             TC      LEGAL?
-P70A            CS      ZERO            # COME HERE FROM QUARTASK
+P70A            CS      ZERO
                 TCF     +3
 P71             TC      LEGAL?
-P71A            CAF     TWO             # COME HERE FROM QUARTASK
+P71A            CAF     TWO
    +3           TS      Q
                 INHINT
-                CS      DAPBITS         # DAPBITS = OCT 40640 = BITS 6, 8, 9, 15
-                MASK    DAPBOOLS        #   WHICH RESET ULLAGE, DRIFT, XOVRIINH,
-                TS      DAPBOOLS        #   AND PULSES FLAGS
-
-                CAF     1DEGDB          # INSURE DAP DEADBAND IS SET TO 1 DEGREE
-                TS      DB
-
-                CAF     BIT15           # TREATING FLAGWORDS THUS IS BAD PRACTICE
-                TS      FLGWRD11
-
                 EXTEND
                 DCA     CNTABTAD
                 DTCB
 
-                EBANK=  PHSNAME5
+                EBANK=  DVCNTR
 CNTABTAD        2CADR   CONTABRT
 
-DAPBITS         OCT     40640
-1DEGDB          OCT     00554
 1DEC70          DEC     70
 1DEC71          DEC     71
 
@@ -63,6 +122,7 @@ DAPBITS         OCT     40640
                 BANK
                 COUNT*  $$/P70
 
+## Page 833
 CONTABRT        CAF     ABRTJADR
                 TS      BRUPT
                 RESUME
@@ -71,7 +131,6 @@ ABRTJADR        TCF     ABRTJASK
 
 ABRTJASK        CAF     OCTAL27
                 AD      Q
-## Page 823
                 TS      L
                 COM
                 DXCH    -PHASE4
@@ -85,6 +144,12 @@ ABRTJASK        CAF     OCTAL27
                 CS      FLGWRD10        # SET APSFLAG PRIOR TO THE ENEMA.
                 MASK    APSFLBIT
                 ADS     FLGWRD10
+                CS      DAPBITS         # DAPBITS = OCT 40640 = BITS 6,8,9,15
+                MASK    DAPBOOLS        # RESET ULLAGE,DRIFT,XOVRIINH,AND PULSES
+                TS      DAPBOOLS
+
+                CAF     1DEGDB          # INSURE DAP DEADBAND IS SET TO 1 DEGREE
+                TS      DB
 
                 CS      FLAGWRD5        # SET ENGONFLG.
                 MASK    ENGONBIT
@@ -97,9 +162,8 @@ ABRTJASK        CAF     OCTAL27
                 EXTEND
                 WRITE   DSALMOUT
 
-                CS      ALW66BIT        # DISALLOW P66 SELECTION
-                MASK    FLAGWRD1
-                TS      FLAGWRD1
+                CAF     LRBYBIT         # TERMINATE R12.
+                TS      FLGWRD11
 
                 CS      FLAGWRD0        # SIGNAL THE LAD TO DISPLAY LATVEL IN
                 MASK    R10FLBIT        #   INERTIAL COORDINATES AND FORVEL ZERO
@@ -109,49 +173,37 @@ ABRTJASK        CAF     OCTAL27
                 DCA     TIME2
                 DXCH    TEVENT
 
+## Page 834
                 EXTEND
-                DCA     ATMAGAD         # CONNECT ASCENT GUIDANCE
+                DCA     SVEXITAD
                 DXCH    AVGEXIT
 
                 TC      ABTKLEAN        # KILL GROUPS 1,3, AND 6.
-                
+
                 CAF     THREE           # SET UP 4.3SPOT FOR GOABORT
                 TS      L
                 COM
                 DXCH    -PHASE4
 
-                CA      FLAGWRD2        # IS GUIDANCE IN PROGRESS?
-                MASK    SEROVBIT
-## Page 824
-                EXTEND
-                BZF     GOENEMA         # NO
-
-                EXTEND                  # YES:  RESET PHSNAME5 FOR PIPCYCLE
-                DCA     PIPCYCAD
-                DXCH    PHSNAME5
-
-GOENEMA         TC      POSTJUMP
+                TC      POSTJUMP
                 CADR    ENEMA
 
                 EBANK=  DVCNTR
-PIPCYCAD        2CADR   PIPCYCLE
+SVEXITAD        2CADR   SERVEXIT
 
 MODE70          DEC     70
 OCTAL27         OCT     27
 MODE71          DEC     71
 
-                EBANK=  DVCNTR
-ATMAGAD         2CADR   ATMAG
+DAPBITS         OCT     40640
 
-
-
+1DEGDB          OCT     00554
                 BANK    32
                 SETLOC  ABORTS
                 BANK
 
                 COUNT*  $$/P70
 
-                EBANK=  DVCNTR
 GOABORT         CAF     FOUR
                 TS      DVCNTR
 
@@ -172,9 +224,9 @@ GOABORT         CAF     FOUR
 
                 TC      CHECKMM
 70DEC           DEC     70
+## Page 835
                 TCF     P71RET
 
-## Page 825
 P70INIT         TC      INTPRET
                 CALL
                         TGOCOMP
@@ -223,9 +275,9 @@ YOK             DLOAD   DSU
                         THETCRIT
                         +4
                 VLOAD   GOTO
+## Page 836
                         J1PARM
                         STORPARM
-## Page 826
   +4            VLOAD   SET             # IF J2 IS USED, SET THE
                         J2PARM          # ABORT TARGETING FLAG
                         ABTTGFLG
@@ -248,6 +300,13 @@ UPTHROT1        TC      BANKCALL        # VERIFY THAT THE PANEL SWITCHES
 
                 TC      THROTUP
 
+                CAF     PRIO17          # LET SERVICER FINISH BEFORE CONNECTING
+                TC      PRIOCHNG        #     ASCENT GUIDANCE EQUATIONS.
+
+                EXTEND
+                DCA     ATMAGAD
+                DXCH    AVGEXIT
+
 GRP4OFF         TC      PHASCHNG        # TERMINATE USE OF GROUP 4.
                 OCT     00004
 
@@ -267,6 +326,7 @@ P71RET          TC      DOWNFLAG
                         OLDTIME
                         TGOCOMP         # IF FLAP=0, TGO=T-TIG
                 GOTO
+## Page 837
                         INJTARG
 OLDTIME         DLOAD   SL1             # IF FLAP=1,TGO=2 TGO
                         TGO
@@ -276,18 +336,19 @@ OLDTIME         DLOAD   SL1             # IF FLAP=1,TGO=2 TGO
                 TC      PHASCHNG
                 OCT     04024
 
-## Page 827
                 EXTEND
                 DCA     TGO1
                 DXCH    TGO
                 TCF     UPTHROT1
+
+TGO1            =       VGBODY
 
 # ************************************************************************
 
                 BANK    21
                 SETLOC  R11
                 BANK
-                
+
                 COUNT*  $$/P70
 
 LEGAL?          CS      MMNUMBER        # IS THE DESIRED PGM ALREADY IN PROGRESS?
@@ -318,6 +379,7 @@ ABORTALM        TC      FALTON
 # ************************************************************************
 
 TGOCOMP         RTB     DSU
+## Page 838
                         LOADTIME
                         TIG
                 SL
@@ -327,7 +389,6 @@ TGOCOMP         RTB     DSU
 
 # ************************************************************************
 
-## Page 828
 THROTUP         CAF     BIT13
                 TS      THRUST
                 CAF     BIT4
@@ -348,3 +409,6 @@ K(AT)           2DEC    .02             # SCALING CONSTANT
 WHICHADR        REMADR  ABRTABLE
 
 # ************************************************************************
+
+                EBANK=  DVCNTR
+ATMAGAD         2CADR   ATMAG
