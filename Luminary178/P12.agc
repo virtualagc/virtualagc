@@ -19,6 +19,7 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-12 MAS  Removed clearing of ALW66FLG from P12LM.
 
 ## Page 829
                 BANK    24
@@ -59,8 +60,7 @@ P12LM           TC      PHASCHNG
                 SET     SET
                         FLPI
                         FLVR
-                CLEAR   CALL
-                        ALW66FLG
+                CALL
                         GUIDINIT
                 CALL
                         P12INIT
