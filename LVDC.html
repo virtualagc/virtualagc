@@ -21,8 +21,7 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
           the AGC</a><br>
       </li>
       <li><a href="#LVDC_Documentation">LVDC Documentation</a></li>
-      <li><a href="#Evolution_of_the_Flight_Software">The Flight
-          Software</a></li>
+      <li><a href="#Evolution_of_the_Flight_Software">LVDC Software</a></li>
       <li><a href="#Architecture_of_the_LVDC">Architecture of the LVDC</a></li>
       <ul>
         <li><a href="#References_">References</a></li>
@@ -36,7 +35,8 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         <li><a href="#Subroutine_Linkage">Subroutine Linkage</a><br>
         </li>
         <li><a href="#Interrupts">Interrupts</a></li>
-        <li><a href="#Telemetry">Telemetry</a><br>
+        <li><a href="#Telemetry">Telemetry</a></li>
+        <li><a href="#Up-data">Up-data</a><br>
         </li>
       </ul>
       <li><a href="#LVDC_Assembly_Language">LVDC Assembly Language</a></li>
@@ -67,6 +67,8 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         src="lvdc_upper-small.jpg" style="border: 2px solid ; width:
         288px; height: 165px;" align="right" height="165" width="288"></a>The
 Launch
+
+
 
 
 
@@ -245,6 +247,8 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
 
 
 
@@ -531,10 +535,12 @@ Launch
 
 
 
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="Evolution_of_the_Flight_Software"
-        id="Evolution_of_the_Flight_Software"></a>The Flight Software</h2>
+        id="Evolution_of_the_Flight_Software"></a>LVDC Software</h2>
     Some useful things to know about the LVDC's software:<br>
     <ul>
       <li><i>The </i><i>name</i><i> of the program</i>.&nbsp; Beginning
@@ -571,6 +577,8 @@ Launch
     revision of the flight program is available to us.&nbsp; It is an
     engineering revision of the software, from 1967, designated
     "AS-206RAM LVDC FLIGHT PROGRAM".&nbsp; If you were to Google this (<b>don't
+
+
 
 
 
@@ -679,6 +687,8 @@ Launch
 
 
 
+
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -707,6 +717,8 @@ Launch
       images, since you can do things like text searches on it, or even
       assemble it using the nifty new LVDC assembler I've written (<a
         href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>).&nbsp;
+
+
 
 
 
@@ -744,6 +756,8 @@ href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identificati
     restricted by ITAR, if they do not pertain to guidance, control, or
     other technical aspects of the launch vehicle.&nbsp; <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">Such
+
+
 
 
 
@@ -932,6 +946,8 @@ of
 
 
 
+
+
       the LVDC</h2>
     <h3><a name="References_" id="References_"></a>References<br>
     </h3>
@@ -958,6 +974,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             Instructions: Saturn V Launch Vehicle Digital Computer,
             Simplex Models, Volume I: General Description and Theory</span></a>.&nbsp;
 This
+
+
 
 
 
@@ -1083,9 +1101,13 @@ Astrionics
 
 
 
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -1377,6 +1399,8 @@ of
 
 
 
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1426,6 +1450,8 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
+
 
 
 
@@ -1670,6 +1696,8 @@ Incidentally,
 
 
 
+
+
                 HIGTHR<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
@@ -1746,6 +1774,8 @@ Incidentally,
             (more accurately, 4 computer cycles) following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
 
 
 
@@ -1927,6 +1957,8 @@ However,
 
 
 
+
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -1965,6 +1997,8 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
 
 
 
@@ -2288,6 +2322,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>0775 (octal) stores into the Product-Quotient register
@@ -2455,6 +2491,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 or <tt>DEQS</tt> pseudo-ops (see below), whereas the
                 module number and sector number are simply supplied with
                 octal numeric literals in <tt>CDSD</tt> or <tt>CDSS</tt>.&nbsp;
+
+
 
 
 
@@ -2744,6 +2782,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -2884,6 +2924,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Specific
 
 
+
+
             I/O Ports<br>
           </th>
         </tr>
@@ -2944,6 +2986,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               of that topic</a>.&nbsp; Page-number references are to the
             AS-206RAM LVDC source code or to its <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">abridged
+
+
 
               form</a>.)<br>
             <table cellpadding="2" cellspacing="2" align="center"
@@ -3448,18 +3492,6 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                     coordinates</td>
                 </tr>
                 <tr>
-                  <td align="center" valign="middle">445<br>
-                  </td>
-                  <td align="center" valign="middle"><tt><br>
-                    </tt></td>
-                  <td align="center" valign="middle"><tt><br>
-                    </tt></td>
-                  <td align="center" valign="middle"><br>
-                  </td>
-                  <td valign="middle"><br>
-                  </td>
-                </tr>
-                <tr>
                   <td align="center" valign="middle">450<br>
                   </td>
                   <td align="center" valign="middle"><tt>Y4</tt><tt><br>
@@ -3711,7 +3743,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                     </tt></td>
                   <td align="center" valign="middle"><br>
                   </td>
-                  <td valign="middle">End of telemetry cycle, 1 per CC<br>
+                  <td valign="middle">End of telemetry cycle, one per
+                    computation cycle<br>
                   </td>
                 </tr>
                 <tr>
@@ -3723,7 +3756,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                     </tt></td>
                   <td align="center" valign="middle"><br>
                   </td>
-                  <td valign="middle">Begin telemetry cycle, 1 per CC<br>
+                  <td valign="middle">Begin telemetry cycle, one per
+                    computation cycle<br>
                   </td>
                 </tr>
               </tbody>
@@ -3808,12 +3842,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                 </tr>
                 <tr>
                   <td align="center" valign="top">012 </td>
-                  <td valign="top">Discrete Output Register (Reset)<br>
+                  <td valign="top">Discrete Output Register
+                    (Reset).&nbsp; The <a
+                      href="Documents/satinstunitibm_3.pdf">LVDC EDD for
+                      the Saturn IB Flight Program</a> document, section
+                    7.3, summarizes the discrete outputs as: <br>
+                    <div align="center"><img alt="" src="lvdcDO.png"
+                        height="285" width="497"><br>
+                    </div>
                   </td>
                 </tr>
                 <tr>
                   <td align="center" valign="top">016 </td>
-                  <td valign="top">Discrete Output Register (Set)<br>
+                  <td valign="top">Discrete Output Register (Set).&nbsp;
+                    See <tt>PIO 012</tt> above.<br>
                   </td>
                 </tr>
                 <tr>
@@ -3987,7 +4029,38 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                 <tr>
                   <td align="center" valign="top">053<br>
                   </td>
-                  <td valign="top">Discrete Input Spares<br>
+                  <td valign="top">Discrete Input Spares.&nbsp; Refer to
+                    the DIS1-DIS8 inputs in the table for <tt>PIO 057</tt>
+                    below.<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="top">057<br>
+                  </td>
+                  <td valign="top">Discrete Inputs.&nbsp; The <a
+                      href="Documents/satinstunitibm_3.pdf">LVDC EDD for
+                      the Saturn IB Flight Program</a> document, section
+                    7.4, summarizes the discrete inputs in the table
+                    below.&nbsp; (The DIS1-DIS8 inputs in the table for
+                    <tt>PIO 053</tt> above.)<br>
+                    <div align="center"><img alt="" src="lvdcDI.png"
+                        height="549" width="499"><br>
+                      <div align="left">The Command Decoder OM/D bits
+                        mentioned in the table originate in an <a
+                          href="#Up-data">up-data command word</a>
+                        transmitted to the rocket from mission
+                        control.&nbsp; There are two such bits in the
+                        transmitted word, but the LVDA combines them
+                        into a single bit before passing them to the
+                        LVDC — hence, OM/D bits "A" and "B" both appear
+                        at the same position in <tt>PIO 057</tt>.&nbsp;
+                        A value of 1 in the OM/D bit indicates that a
+                        "mode" command word has been received (and is
+                        accessible via <tt>PIO 043</tt>), while a value
+                        of 0 indicates instead that a "data" command
+                        word has been received (in <tt>PIO 043</tt>).<br>
+                      </div>
+                    </div>
                   </td>
                 </tr>
                 <tr>
@@ -4064,6 +4137,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                   <th valign="top">A7 - A1 (octal) </th>
                   <th align="left" valign="top">Purpose<br>
                   </th>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle">203<br>
+                  </td>
+                  <td valign="top">Z Gimbal Backup.&nbsp; (This is not
+                    covered by the available documentation, but seems to
+                    be implied by the comments in the source code.)<br>
+                  </td>
                 </tr>
                 <tr>
                   <td align="center" valign="top">207<br>
@@ -4251,6 +4332,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -4325,6 +4408,8 @@ Only
 
 
 
+
+
     those special addresses work.&nbsp; So a typical subroutine linkage
     would look like this:<br>
     <br>
@@ -4334,6 +4419,8 @@ Only
       </span> </div>
     <div style="margin-left: 40px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; ... <i>return
+
+
 
 
 
@@ -4538,6 +4625,8 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
 
 
 
+
+
               System Handbook, Saturn Launch Vehicles</a>.</td>
         </tr>
         <tr>
@@ -4565,12 +4654,12 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
             salt: I believe that this interrupt may occur when a special
             uplink command ("Terminate") is received.&nbsp; The purpose
             of the "Terminate" command is to halt an operation from a
-            previously uplinked command (see the 2nd line above) and to
-            return the LVDC flight program to normal operation.&nbsp;
-            Since the "command LVDA/RCA-110A" interrupt would be
-            disabled until that processing is completed, a separate
-            interrupt for the "Terminate" command is needed, and that is
-            the "Program re-cycle" interrupt.<br>
+            previously uplinked command (see above) and to return the
+            LVDC flight program to normal operation.&nbsp; Since the
+            "command LVDA/RCA-110A" interrupt would be disabled until
+            that processing is completed, a separate interrupt for the
+            "Terminate" command is needed, and that is the "Program
+            re-cycle" interrupt.<br>
           </td>
         </tr>
         <tr>
@@ -4683,8 +4772,8 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
           <td rowspan="2">Probably.<br>
           </td>
           <td rowspan="2">The switch-selector interrupt and the
-            minor-loop interrupt <span style="font-style: italic;">are</span>
-            generated internally by the LVDC/LVDA.<br>
+            minor-loop interrupt are generated internally by the
+            LVDC/LVDA.<br>
           </td>
         </tr>
         <tr>
@@ -4761,16 +4850,20 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
     <br>
     As far as the numerical specifics of the tag values used in the
     40-bit packets, this is TBD.<br>
-    <h3>Up-data</h3>
+    <h3><a name="Up-data"></a>Up-data</h3>
+    <p>(A lot of information in this section is abstracted from the <a
+        href="Documents/AstrionicsSystemsHandbook_Nov69.pdf">Astrionics
+        System Handbook</a>, chapter 6, "Radio Command Systems".)<br>
+    </p>
     <p>The term <i>up-data</i> refers to commands transmitted from
       mission control to the LVDC/LVDA.<br>
     </p>
-    <p>The standard command-word format consists of 35 bits:<br>
+    <p>As transmitted, the standard command-word format consists of 35
+      bits:<br>
     </p>
     <ul>
-      <li>The first three 3 bits transmitted are referred to as the "X"
-        bits.&nbsp; This is an address, indicating which vehicle the
-        message is intended for. <br>
+      <li>3 bits are referred to as the "X" bits.&nbsp; They form an
+        address, indicating which vehicle the message is intended for. <br>
       </li>
       <li>14 bits are also an address, but they identify a specific
         "command decoder" for processing the message.&nbsp; A vehicle
@@ -4781,27 +4874,99 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
       </li>
     </ul>
     <p>The latter two sets of bits are interspersed within the message,
-      and thus are not transmitted in the order shown.&nbsp; However,
-      only a portion of these bits reach the LVDC software — and
-      specifically only some of the bits from the final group of 18 — so
-      this fact is largely irrelevant.&nbsp; Thus, let's confine our
-      discussion to the group of 18 bits.<br>
+      and thus are not transmitted in the specific order shown above.<br>
     </p>
-    <p>The LVDC recognizes two types of commands, <i>mode commands
-        words</i> and <i>data command words</i>, and the type of the
-      command is determined by two bits called the <i>orbital mode/data</i>
-      (OM/D) bits.&nbsp; The LVDA combines this pair of bits (in some
-      manner unknown to me), so the LVDC receives a single OM/D bit
-      which has a value of 1 for a mode command and a value of 0 for a
-      data command.<br>
+    <div align="center"><img alt="" src="upDataLVDC.png" height="501"
+        width="923"></div>
+    <p>However, the as-transmitted format of the data isn't really very
+      relevant to how the LVDC and its software relate to the up-data,
+      since only a portion of the transmitted bits reach the LVDC
+      software — specifically only some of the bits from the final group
+      of 18 — and even then they don't always reach the LVDC in the
+      exact form they are transmitted.&nbsp; Thus, let's narrow our
+      discussion of the up-data to just the LVDC's perspective.&nbsp;
+      The 18 control&amp;data bits of the message are further
+      categorized as:<br>
     </p>
-    <p>Similarly<br>
+    2 "OM/D" or&nbsp;<i>orbital mode/data</i> (OM/D) bits.&nbsp; (These
+    are depicted in the image above, presumably mistakenly, as <b>D</b>M/D
+
+    bits.)&nbsp; The LVDA combines this pair of bits (in some manner
+    unknown to me), and thus the LVDC receives a single OM/D bit.&nbsp;
+    The LVDC recognizes two types of commands, <i>mode commands words</i>
+    and <i>data command words</i>, and the type of the command word is
+    determined by the OM/D bits. &nbsp; <br>
+    <p>Similarly, there are two transmitted "interrupt bits" (see the
+      image above).&nbsp; These cause an interrupt to occur in the LVDC,
+      which I believe is designated in <a href="#Interrupts">the
+        interrupt table given earlier as bit-position 4</a>, Command
+      Receiver Interrupt.<br>
     </p>
-    <p>TBD<br>
+    <p>Finally, the 14 remaining bits actually represent just 7 bits of
+      actual information, since each bit appears both in its normal form
+      and in its logically-complemented form for the purpose of
+      error-detection. <br>
+    </p>
+    <p><img alt="" src="commandWordFormat.png" align="right"
+        height="411" width="363">Refer to section 6.2 of <a
+        href="Documents/AstrionicsSystemsHandbook_Nov69.pdf">the
+        Astrionics System Handbook</a> for more detail, but the LVDC
+      software accesses the received command using the following general
+      steps:<br>
+    </p>
+    <ul>
+      <li>Do unrelated processing until the Command Receiver interrupt
+        occurs. </li>
+      <li>Interrogate the OM/D bit of <tt>PIO 057</tt> to verify that
+        its value is 1.&nbsp; This means that the received word is a
+        "mode command word".&nbsp; (The first word of any sequence of
+        commands will be a mode command word, followed by some number of
+        "data command words".)<br>
+      </li>
+      <li>Interrogate <tt>PIO 043</tt> to get the value of the mode
+        word, and parses it to determine the specific command that has
+        been requested.&nbsp; Each command type will imply the number of
+        data command words that will be subsequently transmitted and
+        processed.&nbsp; For the sake of discussion, let's call that
+        number <i>N</i>.<br>
+      </li>
+      <li>Outputs telemetry (TBD) indicating successful reception of a
+        command word.</li>
+      <li>For each of the <i>N</i> data command words that are supposed
+        to be received for this sequence, do the following:</li>
+      <ul>
+        <li>Do unrelated processing until the Command Receiver interrupt
+          occurs.</li>
+        <li>Interrogate the OM/D bit of <tt>PIO 057</tt> to verify that
+          its value is 0.&nbsp; I.e., that the received word is a data
+          command word.</li>
+        <li>Get the received word using <tt>PIO 043</tt>.</li>
+        <li>Buffer the received word in memory.</li>
+      </ul>
+      <li>After all of the <i>N</i> data words are received, perform
+        whatever action is appropriate for the now-completely-received
+        command.</li>
+    </ul>
+    <p>The command word read using <tt>PIO 043</tt> has the format
+      shown in the illustration to the right.&nbsp; As mentioned above,
+      there are 7 actual data bits, but they appear twice each:&nbsp;
+      Once "normally", and once inverted.&nbsp; Besides that, there is a
+      "sequence bit" which also appears normally (bit 8) and inverted
+      (bit 1).&nbsp; This bet helps to make sure the command words have
+      been received in an appropriate order.&nbsp; The sequence bit is 0
+      for the mode command word, then 1 for the first data command word
+      (if any), and then it just toggles between 0 and 1 for each
+      subsequent data command word received.&nbsp; When the next mode
+      command word is received, the sequence bit goes back to 0 and the
+      pattern repeats.<br>
+    </p>
+    <p><br>
     </p>
     <h3> </h3>
     <h2><a name="LVDC_Assembly_Language" id="LVDC_Assembly_Language"></a>LVDC
 Assembly
+
+
 
 
 
@@ -4876,6 +5041,8 @@ Assembly
 
 
 
+
+
     which does produce an assembled core-rope image identical to that of
     the original assembler, handles the code.&nbsp; However, my
     description shouldn't be taken as authoritative in any larger
@@ -4908,6 +5075,8 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
 
 
 
@@ -5005,12 +5174,16 @@ Assembly
 
 
 
+
+
         In other words, a decimal integer encoded as <i>N</i> bits
         would be sign-extended on the left by 26-<i>N</i> bits.</li>
       <li>Decimal non-integer constants are treated as being in the
         range -1.0 &lt; <i>constant</i> &lt; 1.0.&nbsp;</li>
     </ul>
     <p><i><a name="AngleUnits"></a>Units of angular measurement</i>:&nbsp;
+
+
 
       For most internal purposes, the source code typically measures
       angles in a unit called a <i>pirad</i>.&nbsp; I can find no
@@ -5300,6 +5473,8 @@ Assembly
 
 
 
+
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -5344,6 +5519,8 @@ Assembly
 
 
 
+
+
         in the existing LVDC source code, so I really have no way of
         knowing whether the original assembler accepted decimal
         constants or octal ones.)<br>
@@ -5384,6 +5561,8 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>target</i>,<i>syllable</i>,<i>modifier</i></tt>",
+
+
 
 
 
@@ -5730,6 +5909,8 @@ Assembly
 
 
 
+
+
             This is similar in concept to <tt>EQU</tt>, which
             essentially creates synonyms for numerical constants.&nbsp;
             But it differs from <tt>EQU</tt> in that it is not a part
@@ -5784,6 +5965,8 @@ Assembly
 
 
 
+
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -5797,6 +5980,8 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
+
 
 
 
@@ -6165,6 +6350,8 @@ Assembly
 
 
 
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unHOP.py">unHOP.py</a>)
@@ -6331,6 +6518,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -6785,6 +6974,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -6817,7 +7008,11 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
     and produces as output a human-readable assembly listing (<i>OUTPUT</i>.lst).&nbsp;
+
+
 
 
 
@@ -6997,6 +7192,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -7085,10 +7282,12 @@ Commons
 
 
 
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-09-12.<br>
+          2019-09-13.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
