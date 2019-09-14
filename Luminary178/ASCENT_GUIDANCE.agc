@@ -19,6 +19,12 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-14 MAS  Updated for Luminary 178. Removed Zerlina-
+##                              specific things; restored ASCSAVE and 1/DV0
+##                              definitions; moved CHECKYAW and 40FPS back
+##                              to their original banks; moved ENGOFF through
+##                              CUTOFF1 back to bank 34; replaced noun 94
+##                              references with noun 63.
 
 ## Page 834
                 BANK    34
@@ -30,20 +36,13 @@
                 COUNT*  $$/ASENT
 
 ATMAG           TC      PHASCHNG
-                OCT     06025
-                EBANK=  DVCNTR
-                2CADR   PIPCYCLE
-
-
+                OCT     00035
                 TC      INTPRET
                 BON
                         FLRCS
                         ASCENT
-                SLOAD   DMP
-                        ABDVACC
-                        KPIP
-                STORE   6D
-                DSU
+                DLOAD   DSU
+                        ABDVCONV
                         MINABDV
                 BMN     CLEAR
                         ASCTERM4
@@ -52,7 +51,7 @@ ATMAG           TC      PHASCHNG
                         RENDWFLG
                         BIT3H
                 DDV     EXIT
-                        6D
+                        ABDVCONV
                 DXCH    MPAC
                 DXCH    1/DV3
                 DXCH    1/DV2
@@ -109,8 +108,9 @@ ASCENT          VLOAD   ABVAL
                 STCALL  YDOT            # YDOT * 2(-7)
                         YCOMP
                 VLOAD
-                        G1
-                DOT     SL4
+                        GDT1/2          # LOAD GDT1/2*2(-7)M/CS.
+                V/SC    DOT
+                        2SEC(18)
                         UNIT/R/         # G.UR*2(9) = GR*2(9).
                 PDVL    VXV             # STORE IN PDL(0)                     (2)
                         UNIT/R/         # LOAD UNIT/R/*2(-1).
@@ -165,8 +165,8 @@ ASCENT          VLOAD   ABVAL
                         AT/RCS
                 STCALL  TGO             # THIS WILL BE USED ON NEXT CYCLE
                         RPCOMP1         # COMPUTE NEW RP FOR NEXT CYCLE.
-                RTB 
-                        ASCTERM3
+                GOTO
+                        ASCTERM2
 MAINENG         DDV     PUSH            # VG/VE IN PDL(0)                    (2)
                         VE
                 SR1     BDSU            # 1 - VG / 2 VE
@@ -377,16 +377,12 @@ ASCTERM1        EXIT
                 MASK    FLUNDBIT        # INDICATED.
                 CCS     A
                 TCF     ASCTERM3
-                CAF     PRIO23          # RAISE PRIORITY SO MAKEPLAY WILL BE SET
-                TC      PRIOCHNG        #   UP AT A HIGHER PRIORITY THAN SERVICER
-                CAF     V06N94
+                TC      VACRLEAS
+                CAF     V06N63*
                 TC      BANKCALL
-                CADR    REGODSPR
-                CAF     PRIO20          # RETURN TO NORMAL SERVICER PRIORITY
-                TC      PRIOCHNG
-ASCTERM3        TC      POSTJUMP
-                CADR    PIPCYCLE
-## Page 842
+                CADR    GODSP
+ASCTERM2        EXIT
+ASCTERM3        TCF     ENDOFJOB
 ASCTERM4        EXIT
                 INHINT
                 TC      IBNKCALL        # NO GUIDANCE THIS CYCLE -- HENCE ZERO
@@ -434,7 +430,7 @@ OFFROT          CLRGO
                         CLRXFLAG
 
                 BANK    7
-                SETLOC  ASENT1
+                SETLOC  ASENT2
                 BANK
                 COUNT*  $$/ASENT
 
@@ -456,6 +452,11 @@ CHECKYAW        SET
                 BPL     GOTO
                         EXITVR1
                         KEEPVR
+
+                BANK    5
+                SETLOC  ASENT3
+                BANK
+                COUNT*  $$/ASENT
 
 40FPS           2DEC    0.12192 B-7
 
@@ -638,6 +639,8 @@ THETCOMP        VLOAD   UNIT
                         30D
                 RVQ
 
+ASCSAVE         EQUALS  DLAND +6
+
                 BANK    27
                 SETLOC  ASENT1
                 BANK
@@ -670,9 +673,11 @@ T3              2DEC    1000 B-17
 
 6SEC(18)        2DEC    600 B-18
 
+BIT4H           OCT     10
+
 2SEC(9)         2DEC    200 B-9
 
-V06N94          VN      0694
+V06N63*         VN      0663
 V06N76          VN      0676
 V06N33A         VN      0633
 
@@ -686,6 +691,8 @@ PRLIMIT         2DEC    -.0639          # (B/TBUP)MIN=-.1FT.SEC(-3)
 MINABDV         2DEC    .0356 B-5       # 10 PERCENT BIGGER THAN GRAVITY
 
 25KFT           2DEC    7620 B-24
+
+1/DV0           =       MASS1
 
 ## Page 849
 # THE LOGARITHM SUBROUTINE
