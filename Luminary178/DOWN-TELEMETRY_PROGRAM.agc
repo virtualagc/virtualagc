@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-15 MAS  Restored the definitions of DNECADR,
+##                              CTLIST, and SUBLIST.
 
 ## Page 979
 # PROGRAM NAME- DOWN TELEMETRY PROGRAM
@@ -334,6 +336,11 @@ TMEXITL         EXTEND
 TMRESUME        TCF     RESUME          # EXIT TELEMETRY PROGRAM VIA RESUME.
 
 MINB12          EQUALS  -1/8
+DNECADR         EQUALS  TMINDEX
+CTLIST          EQUALS  LDATALST
+SUBLIST         EQUALS  DNQ
+
+# MOD BY - DENSMORE - JUNE 1969 - ELIMINATE ERASABLE DUMP COUNT
 
 ## Page 987
 # SUBROUTINE NAME- DNDUMP
