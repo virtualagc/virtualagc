@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-15 MAS  Removed DONTPULS, COARSTST, and CAGETSTG,
+##                              which were added in Luminary 183.
 
 ## Page 1298
                 BLOCK   02
@@ -494,7 +496,7 @@ STRTGYRO        CS      GDESELCT        # DE-SELECT LAST GYRO.
                 EXTEND
                 WAND    CHAN14
 
-                TC      CAGETSTG
+                TC      CAGETEST
 
 STRTGYR2        CA      LGYRO           # JUMP ON PHASE COUNTER IN BITS 13-14.
                 EXTEND
@@ -596,9 +598,6 @@ GMERGE          EXTEND                  # IN MINOR PART. THE MAJOR PART WILL BE
 ## Page 1313
                 CA      ITEMP2          # ENTIRE COMMAND.
 LASTSEG         TS      GYROCMD
-                TC      COARSTST
-
-                CA      GYROCMD
                 EXTEND
                 MP      BIT10           # WAITLIST DT
                 AD      THREE           # TRUNCATION AND PHASE UNCERTAINTIES.
@@ -640,8 +639,14 @@ AUG3            EXTEND                  # GET WAITLIST DT TO TIME WHEN TRAIN IS
                 2CADR   8192AUG
 
                 TCF     EXITGYRO
-8192AUG         TC      COARSTST
 
+8192AUG         TC      CAGETEST
+
+                CAF     BIT4
+                EXTEND
+                RAND    CHAN12
+                CCS     A
+                TCF     IMUBAD
                 CA      LGYRO           # ADD 8192 PULSES TO GYROCMD
                 TS      EBANK
 ## Page 1314
@@ -699,23 +704,6 @@ ENDIMU          EXTEND                  # MODE IS BAD IF CAGE HAS OCCURED OR IF
                 TCF     IMUBAD
 
 IMUGOOD         TCF     GOODEND         # WITH C(A) = 0.
-
-COARSTST        CAF     BIT4
-                EXTEND
-                RAND    CHAN12
-                CCS     A
-                TCF     DONTPULS
-
-CAGETSTG        CS      IMODES30
-                MASK    BIT6
-                CCS     A
-                TC      Q
-
-DONTPULS        CAF     ZERO
-                TS      LGYRO
-
-                CAF     LGWAKE
-                TC      JOBWAKE
 
 IMUBAD          CAF     ZERO
                 TCF     BADEND
