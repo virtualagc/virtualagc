@@ -19,6 +19,7 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-15 MAS  Restored the STORE RQVV in ACCOMP.
 
 ## Page 1217
 #          DELETE
@@ -180,6 +181,7 @@ ACCOMP          LXA,1   LXA,2
                 XCHX,2
                         DIFEQCNT
                 STORE   VECTAB +6,2
+                STORE   RQVV
                 XCHX,2
                         DIFEQCNT
 GETRPSV         VLOAD   INCR,1
