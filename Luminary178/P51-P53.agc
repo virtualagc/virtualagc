@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-15 MAS  Updated for Luminary 178. Restored definitions
+##                              of SPIRAL, CURSOR, and POSCODE.
 
 ## Page 918
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
@@ -274,7 +276,7 @@ P52LS           SET     CLEAR           # GET LANDING SITE ORIENTATION
 
 N89DISP         STQ
                         QMAJ
-                STCALL  GDT/2 +4        # STORE TIME
+                STCALL  GDT/2 +4        # TEMP STORE TIME
                         LAT-LONG
                 DLOAD   SR1
                         LONG
@@ -926,7 +928,7 @@ FINEONLY        AXC,1   AXC,2
 ## Page 940
                 GOTO
                         COARSRET
-MATMOVE         VLOAD*
+MATMOVE         VLOAD*                  # TRANSFER MATRIX
                         0,1
                 STORE   0,2
                 VLOAD*
@@ -1473,6 +1475,10 @@ DEG30           2DEC    .083333333      # 30 DEGRESS
 DEG.5           2DEC    .00138888       # .5 DEGRESS SCALED IN REVS
 
 DEG60           OCT     12525           # 60 DEG CDU SCALING
+
+CURSOR          EQUALS  GDT/2
+SPIRAL          EQUALS  GDT/2 +1
+POSCODE         EQUALS  GDT/2 +4
 
 ## Page 953
 # NAME -   PLANET
