@@ -19,291 +19,196 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-14 MAS  Re-based on Luminary 210. Removed restart
+##                              protection from MOONSPOT, changed multiplication
+##                              there back to SHORTMP, moved the MOONSPOT label
+##                              back to its original place, restored the
+##                              definition of DVCNTR1, removed storing of
+##                              TEMDELH and TRUDELH, and changed an SL2 to an
+##                              SL3 in TERSKIP.
 
-## Page 850
-# ****************************************************************************************************************
-# VARIABLE GUIDANCE PERIOD SERVICER                                                               WRITTEN BY EYLES
-# ****************************************************************************************************************
-
+## Page 860
+                BANK    37
                 SETLOC  SERV1
                 BANK
+
                 EBANK=  DVCNTR
+# *************************************   PREREAD   **************************************************************
+
+
                 COUNT*  $$/SERV
 
-# ****************************************************************************************************************
-# PREREAD
-# ****************************************************************************************************************
-
-#           THIS ROUTINE IS CALLED BY A TASK (TO WHICH IT DOES NOT RETURN) TO START SERVICER.   PREREAD ZEROES
-# THE PIPAS AND PIPASOLD (PIPTIME1 IS ALREADY SET), SETS V37FLAG AND AVEGFLAG SO SHOW THAT SERVICER IS ON, CLEARS
-# DRIFTFLAG TO SHOW THAT THOSE PASSIVE GUYS ARE NO LONGER IN CONTROL, INITIALIZES THE INFAMOUS DV MONITOR,
-# INITIATES QUARTASK WHICH COMPRISES R10 AND R11, AND SETS UP NORMLIZE, THE JOB LEAD-IN TO THE SERVICER CYCLE.
-
-
-PREREAD         TC      PHASCHNG        # SKIP LASTBIAS IF THERE IS A RESTART
-                OCT     47015
-                OCT     77777
-                EBANK=  DVCNTR
-                2CADR   BIBIBIAS
-
-
+PREREAD         CAF     SEVEN           # 5.7 SPOT TO SKIP LASTBIAS AFTER
+                TC      GNUFAZE5        # RESTART.
                 CAF     PRIO21
                 TC      NOVAC
                 EBANK=  NBDX
                 2CADR   LASTBIAS        # DO LAST GYRO COMPENSATION IN FREE FALL
 
-
-BIBIBIAS        CS      ZERO            # ZERO PIPAS AND PIPASOLD
-                TS      PIPAX
-                TS      PIPAY
-                TS      PIPAZ
-                TS      PIPAXOLD
-                TS      PIPAYOLD
-                TS      PIPAZOLD
-
-                CAF     BIT9            # SET TEST CONNECTOR OUTBIT TO TELL THE
-                EXTEND                  #   HYBRID THAT AVERAGE-G IS STARTING
-                WOR     DSALMOUT
+BIBIBIAS        TC      PIPASR +3       # CLEAR + READ PIPS LAST TIME IN FREE FALL
+                                        # DO NOT DESTROY VALUE OF PIPTIME1
 
                 CS      FLAGWRD7
                 MASK    SUPER011        # SET V37FLAG AND AVEGFLAG (BITS 5 AND 6
-                ADS     FLAGWRD7        #   OF FLAGWRD7)
+                ADS     FLAGWRD7        #    OF FLAGWRD7)
 
-                TC      DOWNFLAG        # CLEAR DRIFTFLG TO STOP COASTING FLIGHT
-                ADRES   DRIFTFLG        #   TYPE GYRO COMPENSATION  ????
+                CS      DRFTBIT
+                MASK    FLAGWRD2        # START POWERED FLITE GYRO COMPENSATION
+                TS      FLAGWRD2        # BY T3RUPT
 
-## Page 851
-                CA      FLAGWRD6        # IS MUNFLAG SET?
+                CAF     FOUR            # NO LONGER NEEDED
+                TS      PIPAGE
+
+                CAF     PRIO22          # INITIALIZE NAVIGATED STATE VECTOR(SM COO
+                TC      FINDVAC         # RD) FROM MIDTOAVE OUTPUTS PRIOR TO FIRST
+                EBANK=  DVCNTR          # AVERAGE G.
+                2CADR   NORMLIZE
+
+
+                CA      TWO             # 5.2SPOT FOR REREADAC AND NORMLIZE
+GOREADAX        TC      GNUTFAZ5
+                CA      2SECS           # WAIT TWO SECONDS FOR READACCS
+                TC      VARDELAY
+
+## Page 861
+# *************************************   READACCS   *************************************************************
+READACCS        CS      OCT37771        # THIS PIECE OF CODING ATTEMPTS TO
+                AD      TIME5           # SYNCHRONIZE READACCS WITH THE DIGITAL
+                CCS     A               # AUTOPILOT SO THAT A PAXIS RUPT WILL
+                CS      ONE             # OCCUR APPROXIMATELY 70 MILLISECONDS
+                TCF     +2              # FOLLOWING THE READACCS RUPT.  THE 70 MS
+                CA      ONE             # OFFSET WAS CHOSEN SO THAT THE PAXIS
+ +2             ADS     TIME5           # RUPT WOULD NOT OCCUR SIMULTANEOUSLY
+                                        # WITH ANY OF THE 8 SUBSEQUENT R10,R11
+                                        # INTERRUPTS -- THUS MINIMIZING THE POSS-
+                                        # IBILITY OF LOSING DOWNRUPTS.
+
+                TC      PIPASR          # READ THE PIPAS AND THEN ZERO THEM.
+
+PIPSDONE        CA      FIVE
+                TC      GNUFAZE5
+REDO5.5         CAF     ONE             # SHOWS THAT PIPAREAD HAD NOT STARTED
+                TS      PIPAGE          # SO THAT RESTART BEGINS AT READACCS.
+
+                CA      PRIO20
+                TC      FINDVAC
+                EBANK=  DVCNTR
+                2CADR   SERVICER        # SET UP SERVICER JOB
+
+                CA      BIT9
+                EXTEND
+                WOR     DSALMOUT        # TURN ON TEST CONNECTOR OUTBIT,AVE G ON.
+
+                CA      FLAGWRD7        # WAS AVERAGE G ASKED TO BE TERMINATED?
+                MASK    AVEGFBIT
+                EXTEND
+                BZF     AVEGOUT         # YES: SET UP FINAL EXIT.
+
+                CA      FLAGWRD6        # NO: IS THIS P6X OR P12?
                 MASK    MUNFLBIT
                 EXTEND
-                BZF     NORMSET         # NO:   DO NOT INITIATE QUARTASK
+                BZF     MAKEACCS        # NO: BYPASS LR READ AND DISPLAYS
 
-                CCS     PHASE2          # AVOID MULTIPLE QUARTASK CALL
-                TCF     NORMSET
+                CS      FLGWRD11        # YES: DOES SOMEONE WANT TO BYPASS LR UPDT
+                MASK    LRBYBIT
+                EXTEND
+                BZF     R10CALL         # YES: BYPASS LR READINGS
 
-                CS      TIME1
-                TS      TBASE2
-                CAF     DEC17           # 2.21SPOT FOR QUARTASK
+                CA      1.75SEC         # CALL R12 0.25 SEC PRIOR TO NEXT READACCS
+                TC      WAITLIST        # VELOCITY LANDING RADAR READINGS ARE CENT
+                EBANK=  VSELECT         # ERED AROUND PIPTIME. 2 VELOCITY AND 1 AL
+                2CADR   R12READ         # TITUDE READINGS BEFORE PIPTIME,3 V AFTER
+
+## Page 862
+R10CALL         CCS     PHASE2
+                TCF     MAKEACCS        # PHASE 2 ACTIVATED - AVOID MULTIPLE R10.
+
+                CAF     SEVEN           # SET PIPCTR FOR 4X/SEC RATE.
+                TS      PIPCTR
+
+                CS      TIME1           # SET TBASE2 .05 SECONDS IN THE PAST.
+                AD      FIVE
+                AD      NEG1/2
+                AD      NEG1/2
+                XCH     TBASE2
+
+                CAF     DEC17           # 2.21SPOT FOR R10,R11
                 TS      L
                 COM
                 DXCH    -PHASE2
 
-                CAF     OCT31
+                CAF     OCT24           # FIRST R10,R11 IN .200 SECONDS.
                 TC      WAITLIST
-                EBANK=  END-E7
-                2CADR   QUARTASK
+                EBANK=  UNIT/R/
+                2CADR   R10,R11
 
 
-NORMSET         CAF     PRIO20          # SET UP SERVICER LEAD-IN AT PRIORITY 20
-                TC      FINDVAC
-                EBANK=  DVCNTR
-                2CADR   NORMLIZE
+MAKEACCS        CA      FOUR
+                TCF     GOREADAX        # DO PHASE CHANGE AND RECALL READACCS
 
 
-                TC      PHASCHNG        # PROTECT NORMLIZE IN GROUP 5 AT PRIO 20
-                OCT     07025
-                OCT     20000           # PRIORITY 20
-                EBANK=  DVCNTR
-                2CADR   NORMLIZE
-
-
-                TCF     TASKOVER
-
-# ****************************************************************************************************************
-# NORMLIZE - SERVICER JOB LEAD-IN
-# ****************************************************************************************************************
-                
-                SETLOC  SERVICES
-                BANK
-                EBANK=  DVCNTR
-                COUNT*  $$/SERV
-
-NORMLIZE        TC      INTPRET
-                VLOAD   BOFF
-                        RN1
-                        MUNFLAG
-                        NORMLIZ1
-## Page 852
-                VSL6    MXV
-                        REFSMMAT
-                STCALL  R
-                        MUNGRAV
-                VLOAD   VSL1
-                        VN1
-                MXV
-                        REFSMMAT
-                STORE   V
-                SLOAD   PUSH            # COMPUTE PIPA BIAS VECTOR FOR USE BY
-                        PBIASZ          #   P66ROD AND LANDING ANALOG DISPLAYS
-                SLOAD   PUSH
-                        PBIASY
-                SLOAD   VDEF
-                        PBIASX
-                VXSC    EXIT            # RESCALE TO UNITS OF 2(-9) M/CS/CS
-                        BIASFACT
-
-                CA      MPAC
-                TS      BIASACCX
-                CA      MPAC     +3
-                TS      BIASACCY
-                CA      MPAC     +5
-                TS      BIASACCZ
-
-                TCF     NORMLIZ2
-
-NORMLIZ1        CALL
-                        CALCGRAV
-                EXIT
-
-NORMLIZ2        CAF     OCT24           # TWENTY TO YOU
-                TC      COPYCYC +1      # DO NOT COPY MASS IN NORMLIZE
-
-                RELINT
-
-#                                            (FALL THROUGH TO PIPCYCLE)
-
-# ****************************************************************************************************************
-# START OF SERVICER CYCLE
-# ****************************************************************************************************************
-
-SERVEXIT        =       PIPCYCLE
-
-PIPCYCLE        TC      SERVCHNG
-
-                TC      DOWNFLAG        # CLEAR SERVOVER FLAG TO INDICATE THAT
-                ADRES   SERVOVER        #   SERVICER IS STARTING A NEW PASS
-
-                CAF     EBANK7          # INSURE PROPER EBANK
-## Page 853
-                TS      EBANK
-                EBANK=  END-E7
-
-                CS      TIME1           # WAS LAST READACCS LONG ENOUGH AGO?
-                AD      PIPTIME  +1
-                AD      NEG1/2
-                AD      NEG1/2
-                XCH     L               # CLEAR PROBABLE OVERFLOW
-                XCH     L
-                AD      PGMIN
-                EXTEND
-                BZMF    READACCS        # YES:  GO STRAIGHT TO READACCS
-
-                TC      BANKCALL        # NO:   DELAY IT ACCORDINGLY
-                CADR    DELAYJOB
-
-READACCS        INHINT                  # INHINT SO DELVS, CDUTEMPS, PIPTIME1 AND
-                EXTEND                  #   PGUIDE1 WILL BE A CONSISTENT SET
-                DCA     TIME2
-                DXCH    PIPTIME1
-
-                CA      PIPAX
-                TS      PIPATMPX
-                CA      PIPAY
-                TS      PIPATMPY
-                CA      PIPAZ
-                TS      PIPATMPZ
-                CA      CDUX
-                TS      CDUTEMPX
-                CA      CDUY
-                TS      CDUTEMPY
-                CA      CDUZ
-                TS      CDUTEMPZ
-
-                CS      PIPAXOLD
-                AD      PIPATMPX
-                TC      PIPNORM
-                DXCH    DELVX
-
-                CS      PIPAYOLD
-                AD      PIPATMPY
-                TC      PIPNORM
-                DXCH    DELVY
-
-                CS      PIPAZOLD
-                AD      PIPATMPZ
-                TC      PIPNORM
-                DXCH    DELVZ
-
-                CS      PIPTIME  +1     # COMPUTE GUIDANCE PERIOD PGUIDE1
-## Page 854
-                AD      PIPTIME1 +1
-                AD      HALF
-                AD      HALF
-                ZL
-                DXCH    PGUIDE1
-
-                RELINT
-                TC      SERVCHNG        # PIPATMPS GO TO PIPASOLD AT COPYCYCL
-
-#          THE PHILOSOPHY OF THE HANDLING OF PIPAS AND PIPASOLD IS THIS:   THAT AT ANY TIME THE QUANTITY
-# PIPAS-PIPASOLD BE THE THRUST DELTA-V NEEDED TO EXTRAPOLATE LM POSITION AND VELOCITY FROM R AND V (VALID AT
-# PIPTIME) TO THE PRESENT TIME.   THE COMPUTATIONS THIS PARTICULARLY ASSISTS ARE IN THE LANDING ANALOG
-# DISPLAYS, LANDING RADAR DATA INCORPORATION (PART OF SERVICER), AND P66 R.O.D.
-
-PIPSDONE        CS      PGMAX           # WAS LAST READACCS TOO LONG AGO?
-                AD      PGUIDE1
-                EXTEND
-                BZMF    +3              # NO
-
-                TC      ALARM           # YES:  LIGHT ALARM LIGHT
-                OCT     00555
-
-                CS      FLAGWRD7        # HAS AVEGFLAG FALLEN?
-                MASK    AVEGFBIT
-                EXTEND
-                BZF     SERVICER        # NO:   CONTINUE AVERAGE-G
-
-AVEGOUT         EXTEND                  # YES:  THEN THIS IS THE LAST SERVICER
-                DCA     AVOUTCAD
+AVEGOUT         EXTEND
+                DCA     AVOUTCAD        # SET UP FINAL SERVICER EXIT
                 DXCH    AVGEXIT
 
-SERVICER        CAF     EBANK3
-                TS      EBANK
-                EBANK=  PHSNAME5
-                CAF     GETABADR        # SKIP 1/PIPA AFTER RESTART
-                TS      PHSNAME5
-                CAF     EBANK7
-                TS      EBANK
-                EBANK=  DVCNTR
+                CA      FOUR            # SET 5.4 SPOT FOR REREADAC AND SERVICER
+                TC      GNUTFAZ5        # IF REREADAC IS CALLED, IT WILL EXIT
+                TC      TASKOVER        # END TASK WITHOUT CALLING READACCS
 
-                CA      PGUIDE1         # SET 1/PIPADT TO PGUIDE1 JUST COMPUTED
-                EXTEND
-                MP      BIT5            # RESCALE PGUIDE TO UNITS OF 2(10) CS
-                LXCH    1/PIPADT
+
+GNUTFAZ5        TS      L               # SAVE INPUT IN L
+                CS      TIME1
+                TS      TBASE5          # SET TBASE5
+                TCF     +2
+
+GNUFAZE5        TS      L               # SAVE INPUT IN L
+                CS      L               # -PHASE IN A, PHASE IN L
+                DXCH    -PHASE5         # SET -PHASE5,PHASE5
+                TC      Q
+
+
+                EBANK=  DVCNTR
+AVOUTCAD        2CADR   AVGEND
+
+## Page 863
+1.75SEC         DEC     175
+OCT37771        OCT     37771
+
+                BANK    33
+                SETLOC  SERVICES
+                BANK
+
+                COUNT*  $$/SERV
+
+## Page 864
+# *************************************   SERVICER   *************************************************************
+#
+
+SERVICER        TC      PHASCHNG        # RESTART REREADAC + SERVICER
+                OCT     16035
+                OCT     20000
+                EBANK=  DVCNTR
+                2CADR   GETABVAL
+
+                CAF     PRIO31          # INITIALIZE 1/PIPADT IN CASE RESTART HAS
+                TS      1/PIPADT        # CAUSED LASTBIAS TO BE SKIPPED.
+
 
                 TC      BANKCALL        # PIPA COMPENSATION CALL
                 CADR    1/PIPA
 
-GETABVAL        CA      FIXLOC          # ZERO PUSHDOWN POINTER
-                TS      PUSHLOC
-
-## Page 855
-                CA      DELV
-                EXTEND
-                MP      A
-                DXCH    MPAC
-                CA      DELV     +2
-                EXTEND
-                MP      A
-                DAS     MPAC
-                CA      DELV     +4
-                EXTEND
-                MP      A
-                DAS     MPAC
-                TC      USPRCADR
-                CADR    SQRT
+GETABVAL        TC      INTPRET
+                VLOAD   ABVAL
+                        DELV
+                EXIT
                 CA      MPAC
-                TS      ABDELV          # |DELV| IN LM PIPA UNITS OF ONE CM/S/BIT
-
-                EXTEND                  # MAKE A NUMBER FOR THOSE WHO ARE USED
-                MP      2SECS           #   TO USING ABDELV AS AN ACCELERATION,
-                EXTEND                  #   LIKE 1/ACCS AND THE DELTA-V MONITOR
-                DV      PGUIDE1
-                TS      ABDVACC         # SAME UNITS AS ABDELV BUT AN ACCELERATION
-
+                TS      ABDELV          # ABDELV = CM/SEC*2(-14).
+                EXTEND
+                MP      KPIP
+                DXCH    ABDVCONV        # ABDVCONV = M/CS *2(-5).
                 EXTEND
                 DCA     MASS
-                DXCH    MASS1           # INITIALIZE MASS1 IN CASE WE SKIP MASSMON
+                DXCH    MASS1           # NO MASS MONITOR ON SURFACE.
 
 MASSMON         CS      FLAGWRD8        # ARE WE ON THE SURFACE?
                 MASK    SURFFBIT
@@ -317,9 +222,8 @@ MASSMON         CS      FLAGWRD8        # ARE WE ON THE SURFACE?
                 DCA     APSVEX          #   OTHERWISE DPSVEX --> A
                 TS      Q
 
-                CA      ABDELV
                 EXTEND
-                MP      KPIP
+                DCA     ABDVCONV
                 EXTEND
                 DV      Q               # WHERE APPROPRIATE VEX RESIDES
                 EXTEND
@@ -327,846 +231,93 @@ MASSMON         CS      FLAGWRD8        # ARE WE ON THE SURFACE?
                 DAS     MASS1
 
 MOONSPOT        CA      KPIP1           # TP MPAC = ABDELV AT 2(14) CM/SEC
-                TC      SHORTMP         # MULTIPLY BY KPIP1 TO GET
-                        
-## Page 856
-## The following 5 lines are marked as having changed between ZFLY.048 and ZFLY.049
-                EXTEND
-                DCA     DVTOTAL
-                DAS     MPAC
-                DXCH    MPAC
-                DXCH    DVTEMP          # PRELIMINARY DVTOTAL, UNITS OF 2(7) M/CS
-
-                TC      TMPTOSPT
-
-                TC      BANKCALL        # COMPUTE SINES AND COSINES FOR FLESHPOT
-                CADR    QUICTRIG
-
-                CAF     XNBPIPAD        # COMPUTE BODY-PLATFORM MATRIX
-                TC      BANKCALL
-                CADR    FLESHPOT
-
-AVERAGEG        CS      FLAGWRD6        # IS MUNFLAG SET?
-                MASK    MUNFLBIT
-                EXTEND
-                BZF     RVBOTH          # YES:  DO DESCENT-ASCENT NAVIGATION
-
-#                                            (FALL THROUGH TO CALCRVG)    NO
-
-# ****************************************************************************************************************
-# NAVIGATION USED BY THE P40S NEAR EARTH OR MOON
-# ****************************************************************************************************************
-
-
-CALCRVG         TC      INTPRET
-                VLOAD   VXM
-                        DELV
-                        REFSMMAT
-                VXSC    VSL1
-                        KPIP1
-                STORE   DELVREF
-                VSR1    PUSH
-                PDDL    VXSC
-                        PGUIDE1
-                        G
-                VAD     VAD
-                        VN
-                PUSH    VSR
-                        8D
-                VXSC    VAD
-                        PGUIDE1
-                        RN
-                STCALL  RN1             # VECTOR RN1 IN UNITS OF 2(29) METERS
-                        CALCGRAV
-
-                VXSC    VAD
-                        PGUIDE1
-                VAD     STADR
-
-## Page 857
-                STORE   VN1             # VECTOR VN1 IN UNITS OF 2(7) M/CS
-                EXIT
-
-                TC      SERVCHNG
-                TCF     COPYCYCL
-
-# ****************************************************************************************************************
-# NAVIGATION USED BY DESCENT AND ASCENT ONLY
-# ****************************************************************************************************************
-
-RVBOTH          TC      INTPRET
-                VLOAD   VXSC
-                        G(CSM)
-                        PGUIDE1
-                VAD     PUSH
-                        V(CSM)
-                VSR3    VXSC
-                        PGUIDE1
-                VAD
-                        R(CSM)
-                STCALL  R1S             # CSM POSITION IN UNITS OF 2(24) METERS
-                        MUNGRAV
-                VXSC
-                        PGUIDE1
-                VAD     STADR
-                STORE   V1S             # CSM VELOCITY IN UNITS OF 2(7) M/CS
-                EXIT
-
-                TC      SERVCHNG
-
-                TC      INTPRET
-                VLOAD
-                        G1
-                STOVL   G(CSM)
-                        R1S
-                STOVL   R(CSM)
-                        V1S
-                STORE   V(CSM)
-                EXIT
-
-                TC      SERVCHNG
-
-MUNRVG          TC      INTPRET
-                VLOAD   VXSC
-                        DELV
-                        KPIP2
-                PUSH    PDDL            # PUSH DOWN SCALED DELV TWICE
-                        PGUIDE1
-                VXSC    VAD
-                        G
-## Page 858
-                VAD     PUSH
-                        V
-                VSR3    VXSC
-                        PGUIDE1
-                VAD
-                        R
-                STCALL  R1S             # VECTOR R1S IN UNITS OF 2(24) METERS
-                        MUNGRAV
-                VXSC    VAD
-                        PGUIDE1
-                VAD     STADR
-                STORE   V1S             # VECTOR V1S IN UNITS OF 2(7) M/CS
-                ABVAL
-                STOVL   ABVEL           # ABVEL IN UNITS OF 2(7) M/CS
-                        28D
-                STODL   UNIT/R/         # ONLY UNIT/R/ COMPUTATION IN MUNGRAV CASE
-                        36D
-                DSU     RTB             # MPAC MUST BE SIGNAGREED FOR MUNRETRN
-                        /LAND/
-                        SGNAGREE
-                STORE   HCALC           # COPYCYC1 MAY CHANGE THIS HCALC
-                EXIT
-
-                CS      FLGWRD11        # IS LRBYPASS SET?
-                MASK    LRBYBIT
-                EXTEND
-                BZF     COPYCYC1        # YES:  BYPASS ALL LANDING RADAR LOGIC
-
-#                                            (FALL THROUGH TO LR LOGIC)
-
-# ****************************************************************************************************************
-# LANDING RADAR DATA INCORPORATION
-# ****************************************************************************************************************
-
-
-# ********************************
-# LR PRELIMINARIES
-# ********************************
-
-#     MUNRETRN DEPENDS ON SEEING HCALC IN MPAC WITH SIGNS AGREED.
-
-MUNRETRN        CA      MPAC            # IS ALT < 1024 METERS?
-                EXTEND
-                BZF     LROFF?          # YES:  GO CHECK ALTITUDE AGAINST HLROFF
-
-                CS      FLGWRD11        # NO:   IS ALTITUDE ALREADY < 30000 FEET?
-                MASK    XORFLBIT
-                EXTEND
-                BZF     R12             # YES
-
-30KCHK          EXTEND                  # NO:   IS ALT < 30000 FEET NOW?
-## Page 859
-                DCA     1-30KFT
-                DAS     MPAC
-
-                CCS     A
-                TCF     R12             # NO:   ALTITUDE STILL > 30000 FEET
-                TC      UPFLAG          # YES:   SET X-AXIS OVERRIDE INHIBIT FLAG
-                ADRES   XOVINFLG
-                TC      UPFLAG
-                ADRES   XORFLG
-
-LROFF?          CS      MPAC     +1     # IS ALTITUDE < HLROFF?
-                AD      HLROFF
-                EXTEND
-                BZMF    R12             # NO:   GO TRY UPDATE
-
-                TC      DOWNFLAG        # YES:  RESET LR PERMIT FLAG
-                ADRES   LRINH
-
-R12             CS      FLGWRD11        # IS NOLRREAD SET (BY HIGATASK)?
-                MASK    NOLRRBIT
-                EXTEND
-                BZF     CONTSERV        # YES:  BYPASS POSITION CHECK AND UPDATE
-
-POSTST          CA      BITS6+7         # NO:   TEST LR ANTENNA POSITION DISCRETES
-                EXTEND
-                RAND    CHAN33
-                EXTEND
-                MP      BIT10           # SHIFT BITS 6 AND 7 TO BITS 1 AND 2
-
-                INDEX   A
-                TCF     +1
-                TCF     511?            # A = 0 --> BOTH DISCRETES PRESENT
-                TCF     POSCHNG?        # A = 1 --> POSITION 2
-                TCF     POSCHNG?        # A = 2 --> POSITION 1
-511?            CCS     511CTR          # IF CONDITION PERSISTS FOR FIVE
-                TCF     ST511CTR        # CONSECUTIVE PASSES,ISSUE 511 ALARM
-                TC      ALARM
-                OCT     511
-                CS      ZERO            # SET CTR TO -0 TO BYPASS ALARM
-ST511CTR        TS      511CTR
-                TCF     CONTSERV
-POSCHNG?        TS      L
-
-                CA      FOUR            # SET 511CTR TO RE-ENABLE 511 ALARM
-                TS      511CTR
-
-                LXCH    LRPOS           # UPDATE LRPOS WITH NEW POSITION
-                CS      LRPOS
-                AD      L               # IS NEWPOS = OLDPOS?
-                EXTEND
-## Page 860
-                BZF     EXTRAPRV        # YES
-                TCF     CONTSERV        # NO
-
-#          NOW MUST BE COMPUTED THE ALTITUDE AND VELOCITY VECTORS AT THE TIME OF THE RADAR READING.   THE
-# FINAL VALUES OF R AND V FROM THE LAST SERVICER ARE EXTRAPOLATED FORWARD TO LRTIME.   THE CONTENTS OF THE PIPAS
-# AT LRTIME WERE STORED IN PIPTEM.   THE RESULTS ARE STORED IN RN1, VN1 AND HLRTIME FOR POSUPDAT AND VELUPDAT.
-
-#     ALSO EXTRAPRV COMPUTES A BODY-PLATFORM MATRIX VALID AT LRTIME AND STORES IT AT XNBRAD.   THIS IS USED BY
-# POSUPDAT AND VELUPDAT TO CONVERT BEAM VECTORS TO PLATFORM COORDINATES.
-
-EXTRAPRV        CAF     EBANK4
-                EBANK=  PIPTEM
-                TS      EBANK
-
-                CA      LRYCDU
-                TS      CDUSPOTY
-                CA      LRZCDU
-                TS      CDUSPOTZ
-                CA      LRXCDU
-                TS      CDUSPOTX
-
-                TC      BANKCALL        # PREPARE SINES AND COSINES FOR FLESHPOT
-                CADR    QUICTRIG
-
-                CAF     XNBRADAD        # COMPUTE MATRIX XNBRAD VALIB AT LRTIME
-                TC      BANKCALL        #   (CAN'T USE *NBSM* LATER BECAUSE P66ROD
-                CADR    FLESHPOT        #   COULD CLOBBER SINES AND COSINES)
-
-                INHINT                  # INHINT FOR PIPNORM, INTPRET WILL RELINT
-                CS      PIPAXOLD
-                AD      PIPTEM
-                TC      PIPNORM
-                DXCH    MPAC
-                CS      PIPAYOLD
-                AD      PIPTEM   +1
-                TC      PIPNORM
-                DXCH    MPAC     +3
-                CS      PIPAZOLD
-                AD      PIPTEM   +2
-                TC      PIPNORM
-                DXCH    MPAC     +5
-
-                CS      PIPTIME  +1
-                AD      LRTIME   +1
-                AD      HALF
-                AD      HALF
-                ZL
-                INDEX   FIXLOC
-                DXCH    12D
-
-## Page 861
-                CA      EBANK7
-                EBANK=  DVCNTR
-                TS      EBANK
-
-                CS      ONE             # SET MODE TO VECTOR
-                TS      MODE
-
-                TC      INTPRET
-                VXSC    PUSH
-                        KPIP2
-                PDDL    VXSC
-                        12D
-                        G
-                VAD     VAD
-                        V
-                PUSH    VSR3
-                VXSC    VAD
-                        12D
-                        R
-                STCALL  RN1             # IN RN1 POSITION AT TIME OF READING
-                        MUNGRAV
-                VXSC    VAD
-                        12D
-                VAD     STADR
-                STODL   VN1             # IN VN1 VELOCITY AT TIME OF READING
-                        36D
-                DSU
-                        /LAND/
-                STORE   HLRTIME         # ALTITUDE AT TIME OF RADAR READ
-                EXIT
-
-# ***********************************
-# ALTITUDE UPDATE (CUM TERRAIN MODEL)
-# ***********************************
-
-HMEASCHK        CA      FLGWRD11        # WAS ALT READING MADE THIS PASS?
-                MASK    RNGEDBIT
-                EXTEND
-                BZF     VMEASCHK        # NO:   CHECK FOR VELOCITY MEASUREMENT
-
-POSUPDAT        TC      SERVCHNG        # YES
-                TC      POSINDEX        # SET X1 ACCORDING TO ANTENNA POSITION
-
-                TC      INTPRET
-                VLOAD*  VXM             # CONVERT PROPER HBEAM FROM NB TO SM
-                        HBEAMNB,1
-                        XNBRAD
-                PDDL    SL              # STORE IN PL AND SCALE HMEAS
-                        HMEAS
-                        6D
-## Page 862
-                DMP     VXSC            # SLANT RANGE AT 2(22), PUSH UP FOR HBEAM
-                        HSCAL           # SLANT RANGE VECTOR AT 2(23) M
-                PUSH    DOT             # PUSH NEG OF RADAR ALTITUDE BEAM VECTOR
-                        UNIT/R/         # ALTITUDE AT 2(24) METERS
-                DSU     PDDL            # PUSH PARTIAL DELTA H, LOAD NEG OF BEAM Z
-                        HLRTIME
-                SR1     DAD
-                        LAND     +4
-                BDSU    SL              # SCALE RANGE TO UNITS OF 2(18) METERS
-                        RN1      +4     # WHERE EXTRAPRV LEFT POSITION AT LRTIME
-                        6D
-                BOVB    EXIT
-                        SIGNMPAC        # PICK UP NEGMAX UPON OVERFLOW
-
-                CS      FLAGWRD1        # IS NOTERFLG SET (BY P66 OR V68)?
-                MASK    NOTERBIT
-                EXTEND
-                BZF     TERSKIP         # Y: SKIP TERRAIN BUT TRANSFER DELTA H
-
-                CA      EBANK5          # N: PREPARE TO ACCESS TERRAIN TABLE
-                TS      EBANK
-                EBANK=  END-E5
-
-                CA      ZERO            # INITIALIZE MINUS LAST ABSCISSA FOR
-                TS      TEM2            #   TERLOOP WHICH ADDS THE CONTRIBUTIONS
-                CA      FOUR            #   OF FIVE TERRAIN SEGMENTS TO DELTA H
-TERLOOP         TS      TEM5
-
-                CA      MPAC            # PICK UP CURRENT RANGE (NEG BEFORE SITE)
-                TS      L
-                INDEX   TEM5
-                CS      ABSC0           # TERRAIN ABSCISSAE UNITS: 2(18) METERS
-                TC      BANKCALL        # LIMIT GIVEN LIMITSUB MUST BE POSITIVE
-                FCADR   LIMITSUB        # LIMIT |RANGE| <= |CURRENT ABSCISSA|
-                TS      TEM4            # SAVE TO COMPARE WITH CURRENT ABSCISSA
-
-                AD      TEM2            # SUBTRACT LAST ABSCISSA
-                EXTEND
-                INDEX   TEM5
-                MP      SLOPE0          # SLOPE UNITS: 2(6) RADIANS. RESOL: 3.9 MR
-
-                INDEX   FIXLOC          # ADD CONTRIBUTION OF SEGMENT TO YIELD
-                DAS     4               #   CORRECTED DELTAH IN UNITS 2(24) METERS
-
-                CA      TEM1            # RETRIEVE MINUS CURR ABSC FROM LIMITSUB*
-                TS      TEM2            # STORE AS MINUS LAST ABSC FOR NEXT SEG
-
-# * NOTE:  IF WE HAVE FLOWN BEYOND THE LANDING SITE BY MORE THAN THE
-#          LENGTH OF THE SEGMENT ADJACENT TO THE LANDING SITE, CA TEM1
-#          WILL RETRIEVE - INSTEAD OF MINUS THE CURRENT ABSCISSA -
-## Page 863
-#          A ZERO OR POSITIVE REMAINDER OF THE DIVISION DONE BY LIMITSUB.
-#          THIS RETRIEVAL WILL CAUSE AN IMMEDIATE BRANCH TO TEREND,
-#          WHICH IS THE DESIRED RESULT.  HOWEVER, FLYING PAST THE LANDING
-#          SITE IS IMPOSSIBLE EXCEPT IN P66 WHEN THE TERRAIN MODEL IS OFF.
-
-                AD      TEM4            # HAS LM FLOWN PAST CURRENT ABSCISSA?
-                EXTEND
-                BZF     +2
-                TCF     TEREND          # Y: IGNORE FURTHER ABSCISSAE
-                CCS     TEM5            # N: IS CURRENT ABSCISSA THE LAST?
-                TCF     TERLOOP         # N: REPEAT TERRAIN LOOP
-
-TEREND          CA      EBANK7          # Y: RESTORE EBANK AND DEPART
-                TS      EBANK
-                EBANK=  END-E7
-
-TERSKIP         INDEX   FIXLOC          # TRANSFER COMPLETED DELTA H HOME
-                DXCH    4               #   TO BE ACCESSED BY DISPLAYS, TELEMETRY,
-                DXCH    DELTAH          #   AND POSITION UPDATE WHICH FOLLOWS
-
-                CA      FIXLOC          # RESTORE PUSHDOWN POINTER TO ZERO
-                TS      PUSHLOC
-
-                CA      FLGWRD11        # IS PSTHIBIT SET (BY HIGATASK)?
-                MASK    PSTHIBIT
-                EXTEND
-                BZF     NOREASON        # NO:   DON'T DO REASONABILITY TEST YET
-
-                TC      INTPRET         # YES:  DO REASONABILITY TEST
-                DLOAD   ABS
-                        DELTAH
-                DSU     SL3             # ABS(DELTAH) - DQFIX
-                        DELQFIX
-                DSU     EXIT            # ABS(DELTAH) - (DQFIX + HLRT/8) AT 2(21)
-                        HLRTIME
-                INCR    LRLCTR
-                TC      BRANCH
-                TCF     HFAIL           # DELTA H TOO LARGE
-                TCF     HFAIL           # DELTA H TOO LARGE
-                TC      DOWNFLAG        # RESET HFAIL FLAG
-                ADRES   HFAILFLG
-                TC      DOWNFLAG        # TURN OFF ALT FAIL LAMP
-                ADRES   HFLSHFLG
-
-NOREASON        CS      FLGWRD11        # IS UPDATE INHIBITED?
-                MASK    LRINHBIT
-                CCS     A
-                TCF     VMEASCHK        # YES:  TEST VELOCITY ANYWAY
-
-                EXTEND                  # RESCALE HLRTIME TO UNITS OF 2(28) METERS
-## Page 864
-                DCA     HLRTIME
-                DXCH    MPAC
-                CAF     BIT11
-                TC      SHORTMP
-
-                EXTEND
-                DCA     DELTAH          # STORE DELTAH IN MPAC AND
-                DXCH    MPAC            # BRING HCALC INTO A,L
-                TC      ALSIGNAG
-                EXTEND                  # IF HIGH PART OF HCALC IS NON ZERO, THEN
-                BZF     +2              # HCALC > HMAX,
-                TCF     VMEASCHK        # SO UPDATE IS BYPASSED
-                TS      MPAC +2         #   FOR LATER SHORTMP
-
-                CS      L               # -H AT 2(14)M
-                AD      LRHMAX          # HMAX - H
-                EXTEND
-                BZMF    VMEASCHK        # IF H >HMAX, BYPASS UPDATE
-                EXTEND
-                MP      LRWH            # WH(HMAX - H)
-                EXTEND
-                DV      LRHMAX          # WH(1 - H/HMAX)
-                TS      MPTEMP
-                TC      SHORTMP2        # DELTAH (WH)(1 - H/HMAX) IN MPAC
-                TC      INTPRET         # MODE IS DP FROM ABOVE
-                SL1
-                VXSC    VAD
-                        UNIT/R/         # DELTAR = DH(WH)(1 - H/HMAX) UNIT/R/
-                        R1S
-                STORE   GNUR            # CORRECTED R AT PIPTIME1 (NEW G1 WILL
-                EXIT                    #   BE COMPUTED AT COPYCYC1)
-
-                TC      SERVCHNG
-
-                EXTEND
-                DCA     GNUR
-                DXCH    R1S
-                EXTEND
-                DCA     GNUR     +2
-                DXCH    R1S      +2
-                EXTEND
-                DCA     GNUR     +4
-RUPDATED        DXCH    R1S      +4
-
-# ********************************
-# VELOCITY UPDATE
-# ********************************
-
-VMEASCHK        TC      SERVCHNG
-                CS      FLGWRD11
 ## Page 865
-                MASK    VELDABIT        # IS V READING AVAILABLE?
-                CCS     A
-                TCF     VALTCHK         # NO   SEE IF V READING TO BE TAKEN
+                TC      SHORTMP         # MULTIPLY BY KPIP1 TO GET
 
-VELUPDAT        TC      SERVCHNG        # YES
-                TC      POSINDEX        # SET X1 ACCORDING TO ANTENNA POSITION
+                DXCH    MPAC            # ABDELV AT 2(7) M/CS
+                DAS     DVTOTAL         # UPDATE DVTOTAL FOR DISPLAY
 
-                CS      VSELECT
-                TS      L
-                ADS     L               # -2 VSELECT IN L
-                AD      L
-                AD      L               # -6 VSELECT IN A
-                INDEX   FIXLOC
-                DAS     X1              # X1 = -6 VSELECT + POS, X2 = -2 VSELECT
+                TC      TMPTOSPT        # CDUS AT PIPTIME LOADED INTO CDUSPOT CELL
+                TC      BANKCALL        # SINES AND COSINES OF CDUSPOT.
+                CADR    QUICTRIG
 
-                CA      FIXLOC
-                TS      PUSHLOC         # SET PD TO ZERO
+                CAF     XNBPIPAD
+                TC      BANKCALL        # COMPUTE BOD-TO-SM MATRIX (XNB),AND
+                CADR    FLESHPOT        # STORE INTO XNBPIPAD.
 
                 TC      INTPRET
-                VLOAD*  VXM             # CONVERT PROPER VBEAM FROM NB TO SM
-                        VZBEAMNB,1
-                        XNBRAD
-                PDDL    SL              # STORE IN PD 0-5
-                        VMEAS           # LOAD VELOCITY MEASUREMENT
-                        12D
-                DMP*    PDVL            # SCALE TO M/CS AT 2(6)
-                        VZSCAL,2        # AND STORE IN PD 6-7
-                        VN1             # VELOCITY AT TIME OF READING
-                VSL2    VSU             # SCALE TO UNITS OF 2(5) M/CS AND
-                        VSURFACE        #   SUBTRACT SURFACE VELOCITY
-                PUSH    ABVAL           # STORE IN PD
-                SR4     DAD             # ABS(VM)/8 + VELBIAS AT 2(6)
-                        VELBIAS
-                STOVL   20D             # STORE IN 20D AND PICK UP VM
-                DOT     BDSU            # V(EST) AT 2(6)
-                        0               # DELTAV = VMEAS - V(EST)
-                PUSH    ABS
-                DSU     EXIT            # ABS(DV) - (7.5 + ABS(VM)/8))
-                        20D
-
-                INCR    LRMCTR
-                TC      BRANCH
-                TCF     VFAIL           # DELTA V TOO LARGE     ALARM
-                TCF     VFAIL           # DELTA V TOO LARGE     ALARM
-
-                TC      DOWNFLAG        # RESET HFAIL FLAG
-                ADRES   VFAILFLG
-                TC      DOWNFLAG        # TURN OFF VEL FAIL LAMP
-                ADRES   VFLSHFLG
-
-## Page 866
-                CA      FLGWRD11
-                MASK    VXINHBIT
-                EXTEND
-                BZF     VUPDAT          # IF VX INHIBIT RESET, INCORPORATE DATA.
-
-                TC      DOWNFLAG
-                ADRES   VXINH           # RESET VX INHIBIT
-
-                CA      VSELECT
-                AD      NEG2            # IF VSELECT = 2 (X AXIS),
-                EXTEND                  # BYPASS UPDATE
-                BZF     ENDVDAT
-
-VUPDAT          CS      FLGWRD11
-                MASK    LRINHBIT
-                CCS     A
-                TCF     VALTCHK         # UPDATE INHIBITED
-
-                TS      MPAC +1
-
-                CA      ABVEL           # STORE E7 ERASABLES NEEDED IN TEMPS
-                TS      ABVEL*
-                CA      VSELECT
-                TS      VSELECT*
-                CA      EBANK5
-                TS      EBANK           # CHANGE EBANKS
-
-                EBANK=  LRVF
-                CS      LRVF
-                AD      ABVEL*          # IF V < VF, USE WVF
-                EXTEND
-                BZMF    USEVF
-
-                CS      ABVEL*
-                AD      LRVMAX          # VMAX - V
-                EXTEND
-                BZMF    WSTOR -1        # IF V > VMAX, W = 0
-
-                EXTEND
-                INDEX   VSELECT*
-                MP      LRWVZ           # WV(VMAX - V)
-
-                EXTEND
-                DV      LRVMAX          # WV( 1 - V/VMAX )
-                TCF     WSTOR
-
-USEVF           INDEX   VSELECT*
-                CA      LRWVFZ          # USE APPROPRIATE CONSTANT WEIGHT
-                TCF     WSTOR
-
-## Page 867
- -1             CA      ZERO
-WSTOR           TS      MPAC
-                CS      BIT7            # IS CURRENT PROGRAM P66?
-                AD      MODREG
-                EXTEND
-                BZMF    +3              # NO
-
-                CA      LRWVFF          # YES
-                TS      MPAC
-
- +3             CA      EBANK7
-                TS      EBANK           # CHANGE EBANKS
-
-                EBANK=  ABVEL
-                TC      INTPRET
-                DMP     VXSC            # W(DELTA V)(VBEAMSM)  UP 6-7, 0-5
-                VAD
-                        V1S             # ADD WEIGHTED DELTA V TO VELOCITY
-                STORE   GNUV            # CORRECTED V AT PIPTIME1
+AVERAGEG        BON     CALL
+                        MUNFLAG         # COMPUTE LM & CM STATE VECTORS IN LUNAR G
+                        RVBOTH          # ,DO R12 , DO COPYCYCL1, RETURN AT COPYCL
+                        CALCRVG         # UPDATE LM STATE VECTOR.
                 EXIT
+GOSERV          TC      QUIKFAZ5
 
-                TC      SERVCHNG
+COPYCYCL        TC      COPYCYC         # RN1,VN1,MASS1 => RN,VN,MASS.
 
-                EXTEND
-                DCA     GNUV
-                DXCH    V1S
-                EXTEND
-                DCA     GNUV     +2
-                DXCH    V1S      +2
-                EXTEND
-                DCA     GNUV     +4
-VUPDATED        DXCH    V1S      +4
+#               CA      ZERO            A IS ZERO ON RETURN FROM COPYCYC
+                TS      PIPATMPX        # STILL UNDER INHINT
+                TS      PIPATMPY
+                TS      PIPATMPZ
 
-ENDVDAT         =       VALTCHK
-
-VALTCHK         TC      SERVCHNG        # DO NOT REPEAT ABOVE
-
-HIGATCHK        CS      FLGWRD11        # IS PSTHIBIT SET?
-                MASK    PSTHIBIT
-                EXTEND
-                BZF     CONTSERV        # YES
-
-                CA      TTF/8           # NO
-                AD      RPCRTIME
-                EXTEND
-                BZMF    CONTSERV
-
-                CA      EBANK4
-                XCH     EBANK
-                TS      L
-
-## Page 868
-                EBANK=  XNBPIP
-                CS      XNBPIP
-                EBANK=  DVCNTR
-                LXCH    EBANK
-                AD      RPCRTQSW
-                EXTEND
-                BZMF    HIGATASK
-
-CONTSERV        TC      SERVCHNG
-                INHINT
-                CS      BITS4-7
-                MASK    FLGWRD11        # CLEAR LR MEASUREMENT MADE DISCRETES.
-                TS      FLGWRD11
-
-#          NOTE THAT R12READ (AND RDGIMS) IS NOT RESTART PROTECTED.   IF THERE SHOULD BE A RESTART, THIS
-# READING SIMPLY IS NOT MADE.
-
-                CAF     BIT1            # NOW SAFE TO MAKE A READING
-                TC      WAITLIST
-                EBANK=  VSELECT
-                2CADR   R12READ
-
-
-#                                            (FALL THROUGH TO COPYCYC1)
-
-# ****************************************************************************************************************
-# COPYCYCLE CODING
-# ****************************************************************************************************************
-
-COPYCYC1        TC      SERVCHNG
-
-                CA      FIXLOC          # BATTEN DOWN THE HATCHES
-                TS      PUSHLOC
-
-                TC      INTPRET
-                VLOAD   CALL            # RECOMPUTE G1 IN CASE LR UPDATED R1S
-                        R1S
-                        MUNGRAV
-                DLOAD   DSU
-                        36D
-                        /LAND/
-                STORE   HCALC           # ALTITUDE IN UNITS OF 2(24) METERS
-                SL      PDVL            # STORE HCALCLAD AT PD 0
-                        9D
-                        UNIT/R/
-                VXV     ABVAL
-                        V1S
-                DSQ     DDV
-                        36D
-                SL1     PDVL            # STORE DALTRATE AT PD 2
-## Page 869
-                        UNIT/R/
-                DOT     SL1
-                        V1S
-                STORE   HDOTDISP        # HDOT IN UNITS OF 2(7) M/CS
-                SL2     PDVL            # STORE HDOTLAD AT PD 4
-                        WM
-                VXV     VSL2
-                        R1S
-                STOVL   VSURFACE        # SURFACE VELOCITY IN UNITS OF 2(5) M/CS
-                        R1S             #   (NO NEED TO LOAD VSURFACE UNDER INHINT
-                VXM     VSR4            #   BECAUSE IT CHANGES ONLY VERY SLOWLY)
-                        REFSMMAT
-                STOVL   RN1             # POSITION IN REFERENCE COORDINATES
-                        V1S
-                VXM     VSL1
-                        REFSMMAT
-                STOVL   VN1             # VELOCITY IN REFERENCE COORDINATES
-                        G1
-                VSL3    EXIT            # GRAVACC IN MPAC UNITS OF 2(-9) M/CS/CS
-
-                INHINT                  # INHINT TO PREVENT DOWNRUPT OR QUARTASK
-
-                INDEX   FIXLOC          # FETCH HCALCLAD FROM PD 0
-                DXCH    0
-                DXCH    HCALCLAD        # ALTITUDE IN UNITS OF 2(15) METERS
-
-                INDEX   FIXLOC          # FETCH DALTRATE FROM PD 2
-                DXCH    2
-                TS      DALTRATE        # DALTRATE IN UNITS OF 2(-9) M/CS/CS
-    
-                INDEX   FIXLOC          # FETCH HDOTLAD FROM PD 4
-                DXCH    4
-                DXCH    HDOTLAD         # HDOTLAD IN UNITS OF 2(5) M/CS
-
-                CA      MPAC
-                TS      GRAVACCX        # GRAVACCX IN UNITS OF 2(-9) M/CS/CS
-                CA      MPAC     +3
-                TS      GRAVACCY        # GRAVACCY IN UNITS OF 2(-9) M/CS/CS
-                CA      MPAC     +5
-                TS      GRAVACCZ        # GRAVACCZ IN UNITS OF 2(-9) M/CS/CS
-
-                EXTEND
-                DCA     UNIT/R/
-                DDOUBL                  # SCALE FULL-SIZE BUT WATCH FOR OVERFLOW
-                OVSK
-                TCF     +2
-                CAF     POSMAX
- +2             XCH     RUNITX
-
-                EXTEND
-## Page 870
-                DCA     UNIT/R/  +2
-                DDOUBL                  # SCALE FULL-SIZE, OVERFLOW MOST UNLIKELY
-                XCH     RUNITY
-
-                EXTEND
-                DCA     UNIT/R/  +4
-                DDOUBL                  # SCALE FULL-SIZE, OVERFLOW MOST UNLIKELY
-                XCH     RUNITZ
-
-                EXTEND
-                DCA     R1S
-                DXCH    R
-                EXTEND
-                DCA     R1S +2
-                DXCH    R +2
-                EXTEND
-                DCA     R1S +4
-                DXCH    R +4
-                EXTEND
-                DCA     V1S
-                DXCH    V
-                EXTEND
-                DCA     V1S +2
-                DXCH    V +2
-                EXTEND
-                DCA     V1S +4
-                DXCH    V +4
-
-                CS      FLAGWRD7        # INDICATE TO LANADISP THAT THE NUMBERS IT
-                MASK    SWANDBIT        #   NEEDS FROM SERVICER HAVE BEEN PROVIDED
-                ADS     FLAGWRD7
-
-COPYCYCL        INHINT                  # ENTER HERE FROM CALCRVG
-
-                CA      PGUIDE1
-                TS      SERVDURN        # FOR DOWNLINK
-
-                CA      PIPATMPX
-                TS      PIPAXOLD
-                CA      PIPATMPY
-                TS      PIPAYOLD
-                CA      PIPATMPZ
-                TS      PIPAZOLD
-
-                EXTEND
-                DCA     DVTEMP
-                DXCH    DVTOTAL
-
-                TC      COPYCYC         # COPY RN1 - MASS1 INTO RN - MASS
-
-## Page 871
-                TC      SERVCHNG
-
-#                                         (FALL THROUGH TO DVMON, STILL UNDER INHINT)
-
-# ****************************************************************************************************************
-# DVMON
-# ****************************************************************************************************************
-
-DVMON           CS      STEERBIT        # STEERSW IS RESET IF THRUST IS ADEQUATE
+                CS      STEERBIT        # CLEAR STEERSW PRIOR TO DVMON.
                 MASK    FLAGWRD2
                 TS      FLAGWRD2
 
-                CAF     IDLEFBIT        # IS THE IDLE FLAG SET?
+                CAF     IDLEFBIT        # IS DV MONITOR TO BE TURNED ON?
                 MASK    FLAGWRD7
                 CCS     A
-                TCF     NODVMON1        # IDLEFLAG = 1, HENCE SET AUXFLAG TO 0.
+                TCF     NODVMON1        # NO: SET AUXFLAG TO 0
 
-                CS      FLAGWRD6
+                CS      FLAGWRD6        # ALLOW ANOTHER PASS WITHOUT DVMON?
                 MASK    AUXFLBIT
                 CCS     A
-                TCF     NODVMON2        # AUXFLAG = 0, HENCE SET AUXFLAG TO 1.
+                TCF     NODVMON2        # YES: SET AUXFLAG TO 0
 
-                CS      DVTHRUSH        # DOES THRUST EXCEED CRITERION DVTHRUSH?
-                AD      ABDVACC
+## Page 866
+DVMON           CS      DVTHRUSH        # SUFFICIENT THRUST TO STEER WITH?
+                AD      ABDELV
                 EXTEND
-                BZMF    LOTHRUST        # NO
+                BZMF    LOTHRUST        # NO: THRUST TOO LO, DECREMENT DVCNTR
 
-                CS      FLAGWRD2        # YES: SET STEERSW
+                CS      FLAGWRD2        # YES: SET STEERSW TO ALLOW GUIDANCE.
                 MASK    STEERBIT
                 ADS     FLAGWRD2
 
 DVCNTSET        CAF     ONE             # ALLOW TWO PASSES MAXIMUM NOW THAT
                 TS      DVCNTR          # THRUST HAS BEEN DETECTED.
 
-                CA      FLGWRD10        # BRANCH IF APSFLAG IS SET.
+                CA      FLGWRD10        # IS APSFLAG SET?
                 MASK    APSFLBIT
                 CCS     A
-                TCF     USEJETS
+                TCF     USEJETS         # YES: USE RCS TO STEER ASCENT STAGE.
 
-                CA      BIT9            # CHECK GIMBAL FAIL BIT
+                CA      BIT9            # NO: PITCH GIMBAL FAILURE?
                 EXTEND
                 RAND    CHAN32
                 EXTEND
-                BZF     USEJETS
+                BZF     USEJETS         # YES: USE RCS TO STEER DESCENT STAGE.
 
-USEGTS          CS      USEQRJTS
+USEGTS          CS      USEQRJTS        # NO: USE GTS TO STEER DESCENT STAGE.
                 MASK    DAPBOOLS
                 TS      DAPBOOLS
-                TCF     DVMONEND
+                TCF     SERVOUT
 
-## Page 872
 NODVMON1        CS      AUXFLBIT        # SET AUXFLAG TO 0.
                 MASK    FLAGWRD6
                 TS      FLAGWRD6
                 TCF     USEJETS
-
 NODVMON2        CS      FLAGWRD6        # SET AUXFLAG TO 1.
                 MASK    AUXFLBIT
                 ADS     FLAGWRD6
                 TCF     USEJETS
 
-LOTHRUST        TC      SERVCHNG
-                CCS     DVCNTR
-                TCF     DECCNTR
+LOTHRUST        TC      QUIKFAZ5
+                CCS     DVCNTR          # TWO PASSES OF LO THRUST?
+                TCF     DECCNTR         # NO: DECREMENT DVCNTR.
 
                 CCS     PHASE4          # COMFAIL JOB ACTIVE?
-                TCF     DVMONEND
+                TCF     SERVOUT         # YES   WON'T NEED ANOTHER.
 
                 TC      PHASCHNG        # 4.37SPOT FOR COMFAIL.
                 OCT     00374
@@ -1174,38 +325,24 @@ LOTHRUST        TC      SERVCHNG
                 CAF     PRIO25
                 TC      NOVAC
                 EBANK=  WHICH
-                2CADR   COMFAIL
+## Page 867
+                2CADR   COMFAIL         # ESTABLISH JOB COMFAIL FOR
 
-                TCF     DVMONEND
+                TCF     SERVOUT         # THRUST FAIL LOGIC.
 
 DECCNTR         TS      DVCNTR1
-                TC      SERVCHNG
+                TC      QUIKFAZ5
                 CA      DVCNTR1
                 TS      DVCNTR
+                INHINT
                 TC      IBNKCALL        # IF THRUST IS LOW, NO STEERING IS DONE
                 CADR    STOPRATE        # AND THE DESIRED RATES ARE SET TO ZERO.
 USEJETS         CS      DAPBOOLS
                 MASK    USEQRJTS
-                ADS     DAPBOOLS
-DVMONEND        RELINT
+                ADS     DAPBOOLS        # TELL DAP TO USE RCS TO STEER.
 
-# ****************************************************************************************************************
-# EXIT TO GUIDANCE EQUATIONS
-# ****************************************************************************************************************
-
-#          RULES FOR USERS OF SERVICER:
-
-#          DO NOT GO TO ENDOFJOB.   RETURN TO THE START OF SERVICER AT PIPCYCLE.   INSURE THAT ALL BRANCHES LEAD
-# EVENTUALLY TO PIPCYCLE.
-
-#          USE GROUP 5 AS RESTART GROUP AND USE A "TC SERVCHNG" (WHICH IS IN FIXED-FIXED) WHENEVER POSSIBLE
-# FOR RESTART PROTECTION.
-
-## Page 873
-#          AVOID CHANGING PRIORITY EXCEPT BEFORE CALLING DISPLAY ROUTINES WHICH WILL SET UP OFF-LINE JOBS.
-# IN THIS CASE RAISE PRIORITY TO 23 AND RESTORE TO 20 AS SOON AS POSSIBLE.
-
-                TC      BANKCALL
+SERVOUT         RELINT
+                TC      BANKCALL        # COMPUTE VEHICLE MOMENTS OF INERTIA.
                 CADR    1/ACCS
 
                 CA      PRIORITY
@@ -1214,31 +351,37 @@ DVMONEND        RELINT
                 ZL
                 DXCH    FIXLOC          # FIXLOC AND OVFIND
 
-                TC      SERVCHNG
+                TC      QUIKFAZ5
+                CS      PIPTIME +1
+                AD      TIME1
+                AD      HALF
+                AD      HALF
+                XCH     SERVDURN        # SERVICER DURATION FOR DOWNLINK
+                EXTEND                  # EXIT TO SELECTED ROUTINE WHETHER THERE
+                DCA     AVGEXIT         # IS THRUST OR NOT.  THE STATE OF STEERSW
+                DXCH    Z               # WILL CONVEY THIS INFORMATION.
 
-                TC      UPFLAG          # SET SERVOVER FLAG TO INDICATE THAT
-                ADRES   SERVOVER        #   SERVICER IS THROUGH FOR THIS PASS
+XNBPIPAD        ECADR   XNBPIP
 
-SERVOUT         EXTEND                  # EXIT TO SELECTED ROUTINE WHETHER THERE
-                DCA     AVGEXIT         #   IS THRUST OR NOT.   STEERSW WILL
-                DXCH    Z               #   CONVEY THIS INFORMATION.
+                BANK    32
+                SETLOC  SERV2
+                BANK
+                COUNT*  $$/SERV
 
-# ****************************************************************************************************************
-# COME HERE VIA AVGEXIT ON LAST SERVICER PASS
-# ****************************************************************************************************************
+AVGEND          CA      PIPTIME +1      # FINAL AVERAGE G EXIT,AVEGFLAG SET.
+                TS      1/PIPADT        # SET UP COASTING FLIGHT GYRO COMPENSATION
 
-AVGEND          CA      PIPTIME +1      # FINAL AVERAGE G EXIT
-                TS      1/PIPADT        # SET UP FREE FALL GYRO COMPENSATION.
-
-                TC      UPFLAG          # SET DRIFT FLAG.
-                ADRES   DRIFTFLG
+                TC      UPFLAG          # SET DRIFT FLAG, TERMINATE POWERED FLITE
+                ADRES   DRIFTFLG        # GYRO COMPENSATION.
+## The above two instructions are circled.
 
                 TC      BANKCALL
                 CADR    PIPFREE
 
+## Page 868
                 CS      BIT9
                 EXTEND
-                WAND    DSALMOUT
+                WAND    DSALMOUT        # TELL WORLD THAT AVERAGEG IS NOW OFF.
 
                 TC      2PHSCHNG
                 OCT     5               # GROUP 5 OFF
@@ -1250,21 +393,26 @@ AVGEND          CA      PIPTIME +1      # FINAL AVERAGE G EXIT
                         SWANDISP        # SHUT OFF R10 WHEN SERVICER ENDS.
                 CLEAR   CALL            # RESET MUNFLAG.
                         MUNFLAG
-                        AVETOMID
+                        AVETOMID        # BRING CM STATE VECTOR UP TO PIPTIME.
                 CLEAR   EXIT
-## Page 874
                         V37FLAG
+
 AVERTRN         TC      POSTJUMP
-                CADR    V37RET
+                CADR    V37RET          # GO TO V37 LOGIC.
 
 OUTGOAVE        =       AVERTRN
+DVCNTR1         =       MASS1
 
-# ****************************************************************************************************************
-# COME HERE FROM POODOO TO CURTAIL BUT NOT HALT SERVICER
-# ****************************************************************************************************************
+## Page 869
+# SERVIDLE IS ENTERED AFTER A POODOO SOFTWARE RESTART. SERVICER CONTINUES,BUT GUIDANCE AND R12 ( IF RUNNING) ARE
+# TERMINATED. ABORTS MONITOR CONTINUES TO RUN.
+
+                SETLOC  SERV3
+                BANK
+                COUNT*  $$/SERV
 
 SERVIDLE        EXTEND                  # DISCONNECT SERVICER FROM ALL GUIDANCE
-                DCA     CYCLEADR
+                DCA     SVEXTADR
                 DXCH    AVGEXIT
 
                 CS      FLAGWRD7        # DISCONNECT THE DELTA-V MONITOR
@@ -1303,20 +451,995 @@ SERVIDLE        EXTEND                  # DISCONNECT SERVICER FROM ALL GUIDANCE
                 TCF     WHIMPER         # PERFORM A SOFTWARE RESTART AND PROCEED
                                         # TO GOTOPOOH WHILE SERVICER CONTINUES TO
                                         # RUN, ALBEIT IN A GROUND STATE WHERE
-## Page 875
                                         # ONLY STATE-VECTOR DEPENDENT FUNCTIONS
                                         # ARE MAINTAINED.
 
+## Page 870
+                EBANK=  DVCNTR
+SVEXTADR        2CADR   SERVEXIT
+
+
+
+                BANK    32
+                SETLOC  SERV
+                BANK
+                COUNT*  $$/SERV
+
+SERVEXIT        TC      PHASCHNG
+                OCT     00035
+
+                TCF     ENDOFJOB
+
+## Page 871
+# NORMLIZE AND COPYCYCL
+
+NORMLIZE        TC      INTPRET
+                VLOAD   BOFF
+                        RN1
+                        MUNFLAG
+                        NORMLIZ1        # DO NOT USE LUNAR LANDING AVERAGE G
+                VSL6    MXV
+                        REFSMMAT
+                STCALL  R               # LM POS VECTOR IN SM COORD AT 2(+24)M.
+                        MUNGRAV         # USE LUNAR LANDING AVERAGE G ROUTINE.
+                VLOAD   VSL1
+                        VN1
+                MXV
+                        REFSMMAT
+                STORE   V               # LM VEL VECTOR IN SM COORD AT 2(+7)M/CS.
+                SLOAD   PUSH            # COMPUTE PIPA BIAS VECTOR FOR USE BY
+                        PBIASZ          #   P66ROD AND LANDING ANALOG DISPLAYS
+                SLOAD   PUSH
+                        PBIASY
+                SLOAD   VDEF
+                        PBIASX
+                VXSC
+                        BIASFACT
+                STORE   VBIAS           # ONE SECOND'S BIAS IN UNITS OF 2(7) M/CS
+ASCSPOT         EXIT
+                EXTEND                  # MAKE SURE GOUP 2 IS OFF.
+                DCA     NEG0
+                DXCH    -PHASE2
+
+                TC      POSTJUMP
+                CADR    NORMLIZ2
+
+                BANK    33
+                SETLOC  SERVICES
+                BANK
+                COUNT*  $$/SERV
+
+NORMLIZ1        CALL
+                        CALCGRAV
+                EXIT
+
+NORMLIZ2        CA      EIGHTEEN
+                TC      COPYCYC +1      # DO NOT COPY MASS IN NORMLIZE
+                TC      ENDOFJOB
+
+# COPYCYC PLACES NEWLY NAVIGATED STATE VECTORS AND MASS INTO DOWNLIST REG
+
+COPYCYC         CA      OCT24           # DEC 20
+## Page 872
+ +1             INHINT
+ +2             MASK    NEG1            # REDUCE BY 1 IF ODD
+                TS      ITEMP1
+                EXTEND
+                INDEX   ITEMP1
+                DCA     RN1
+                INDEX   ITEMP1
+                DXCH    RN
+                CCS     ITEMP1
+                TCF     COPYCYC +2
+                TC      Q               # RETURN UNDER INHINT
+
+
+EIGHTEEN        DEC     18
+
+## Page 873
+# ******************* PIPA READER ********************
+
+#                 MOD NO. 00  BY D. LICKLY  DEC.9 1966
+
+
+# FUNCTIONAL DESCRIPTION
+#    SUBROUTINE TO READ PIPA COUNTERS, TRYING TO BE VERY CAREFUL SO THAT IT WILL BE RESTARTABLE.
+#    PIPA READINGS ARE STORED IN THE VECTOR DELV. THE HIGH ORDER PART OF EACH COMPONENT CONTAINS THE PIPA READING,
+#    RESTARTS BEGIN AT REREADAC.
+
+
+#    AT THE END OF THE PIPA READER THE CDUS ARE READ AND STORED AS A
+# VECTOR IN CDUTEMP.  THE HIGH ORDER PART OF EACH COMPONENT CONTAINS
+# THE CDU READING IN 2S COMP IN THE ORDER CDUX,Y,Z.  THE THRUST
+# VECTOR ESTIMATOR IN FINDCDUD REQUIRES THE CDUS BE READ AT PIPTIME.
+
+# CALLING SEQUENCE AND EXIT
+
+#    CALL VIA TC, ISWCALL, ETC.
+
+#    EXIT IS VIA Q.
+
+
+#
+
+# INPUT
+
+#    INPUT IS THROUGH THE COUNTERS PIPAX, PIPAY, PIPAZ, AND TIME2.
+
+
+# OUTPUT
+
+#    HIGH ORDER COMPONENTS OF THE VECTOR DELV CONTAIN THE PIPA READINGS.
+#    PIPTIME CONTAINS TIME OF PIPA READING.
+
+
+# DEBRIS (ERASABLE LOCATIONS DESTROYED BY PROGRAM)
+
+#          TEMX   TEMY   TEMZ   PIPAGE
+
+
+                BANK    37
+                SETLOC  SERV1
+                BANK
+
+                COUNT*  $$/SERV
+
+PIPASR          EXTEND
+## Page 874
+                DCA     TIME2
+                DXCH    PIPTIME1        # CURRENT TIME  POSITIVE VALUE
+ +3             CS      ZERO            # INITIALIZE THESE AT NEG. ZERO.
+                TS      TEMX
+                TS      TEMY
+                TS      TEMZ
+
+                CA      ZERO
+                TS      DELVZ
+                TS      DELVZ +1
+                TS      DELVY
+                TS      DELVY +1
+                TS      DELVX +1
+                TS      PIPAGE          # SHOW PIPA READING IN PROGRESS
+
+REPIP1          EXTEND
+                DCS     PIPAX           # X AND Y PIPS READ
+                DXCH    TEMX
+                DXCH    PIPAX           # PIPAS SET TO NEG ZERO AS READ.
+                TS      DELVX
+                LXCH    DELVY
+
+REPIP3          CS      PIPAZ           # REPEAT PROCESS FOR Z PIP
+                XCH     TEMZ
+                XCH     PIPAZ
+DODELVZ         TS      DELVZ
+
+REPIP4          EXTEND                  # COMPUTE GUIDANCE PERIOD
+                DCA     PIPTIME1
+                DXCH    PGUIDE
+                EXTEND
+                DCS     PIPTIME
+                DAS     PGUIDE
+
+                CA      CDUX            # READ CDUS INTO HIGH ORDER CDUTEMPS
+                TS      CDUTEMPX
+                CA      CDUY
+                TS      CDUTEMPY
+                CA      CDUZ
+                TS      CDUTEMPZ
+                CA      DELVX
+                TS      PIPATMPX
+                CA      DELVY
+                TS      PIPATMPY
+                CA      DELVZ
+                TS      PIPATMPZ
+
+                TC      Q
+## In the margins above there are some doodles of something I can't quite make out. Possibly satellites.
+
+## Page 875
+REREADAC        CCS     PIPAGE
+                TCF     READACCS        # PIP READING NOT STARTED. GO TO BEGINNING
+
+                CAF     DONEADR         # SET UP RETURN FROM PIPASR
+                TS      Q
+
+                CCS     DELVZ
+                TCF     REPIP4          # Z DONE, GO DO CDUS
+                TCF     +3              # Z NOT DONE, CHECK Y.
+                TCF     REPIP4
+                TCF     REPIP4
+
+                ZL
+                CCS     DELVY
+                TCF     +3
+                TCF     CHKTEMX         # Y NOT DONE, CHECK X.
+                TCF     +1
+                LXCH    PIPAZ           # Y DONE, ZERO Z PIP.
+
+                CCS     TEMZ
+                CS      TEMZ            # TEMZ NOT = -0, CONTAINS -PIPAZ VALUE.
+                TCF     DODELVZ
+                TCF     -2
+                LXCH    DELVZ           # TEMZ = -0, L HAS ZPIP VALUE.
+                TCF     REPIP4
+
+CHKTEMX         CCS     TEMX            # HAS THIS CHANGED
+                CS      TEMX            # YES
+                TCF     +3              # YES
+                TCF     -2              # YES
+                TCF     REPIP1          # NO
+                TS      DELVX
+
+                CS      TEMY
+                TS      DELVY
+
+                CS      ZERO            # ZERO X AND Y PIPS
+                DXCH    PIPAX           # L STILL ZERO FROM ABOVE
+
+                TCF     REPIP3
+
+DONEADR         GENADR  PIPSDONE
+
+## Page 876
+                BANK    33
+                SETLOC  SERVICES
+                BANK
+
+                COUNT*  $$/SERV
+
+TMPTOSPT        CA      CDUTEMPY        # THIS SUBROUTINE, CALLED BY AN RTB FROM
+                TS      CDUSPOTY        # INTERPRETIVE, LOADS THE CDUS CORRESPON-
+                CA      CDUTEMPZ        # DING TO PIPTIME INTO THE CDUSPOT VECTOR.
+                TS      CDUSPOTZ
+                CA      CDUTEMPX
+                TS      CDUSPOTX
+                TC      Q
+
+                BANK    33
+                SETLOC  SERVICES
+                BANK
+
+                COUNT* $$/SERV
+
+# HIGATASK IS ENTERED APPROXIMATELY 6 SECS PRIOR TO HIGATE DURING THE
+# DESCENT PHASE.  HIGATASK SETS THE HIGATE FLAG (BIT11) AND THE LR INHIBIT
+# FLAG (BIT10) IN LRSTAT.  THE HIGATJOB IS SET UP TO REPOSITION THE LR
+# ANTENNA FROM POSITION 1 TO POSITION 2.  IF THE REPOSITIONING IS
+# SUCCESSFUL THE ALT BEAM AND VELOCITY BEAMS ARE TRANSFORMED TO THE NEW
+# ORIENTATION IN NB COORDINATES AND STORED IN ERASABLE.
+
+HIGATASK        TC      PHASCHNG
+                OCT     51
+
+                CA      PRIO32
+                TC      FINDVAC
+                EBANK=  HMEAS
+                2CADR   HIGATJOB
+
+                CS      FLGWRD11
+                MASK    PRIO3
+                ADS     FLGWRD11
+                TCF     CONTSERV +1
+
+## Page 877
+#    MUNRETRN IS THE RETURN LOC FROM SPECIAL AVE G ROUTINE (MUNRVG)
+
+MUNRETRN        EXIT
+
+                CS      FLGWRD11
+                MASK    LRBYBIT
+                EXTEND
+                BZF     COPYCYC1        # BYPASS LR LOGIC IF BIT15 IS SET.
+
+                CS      FLGWRD11        # CHECK IF AT 30000 FT
+                MASK    XORFLBIT
+                EXTEND
+                BZF     LROFF?
+
+30KCHK          EXTEND
+                DCA     1-30KFT
+                DAS     MPAC            # HCALC IS STILL IN MPAC FROM RVBOTH
+
+                CCS     A
+                TCF     R12             # ALTITUDE > 30KFT
+                TC      UPFLAG          # ALTITUDE < 30KFT SET X-AXIS OVERRIDE
+                ADRES   XOVINFLG
+                TC      UPFLAG
+                ADRES   XORFLG
+
+LROFF?          CA      HCALC
+                EXTEND                  # IF HIGH ORDER PART ZERO, H < 3000 FT,
+                BZF     +2              #   SO MAKE CUTOFF TEST
+                TCF     R12
+                CS      HCALC +1
+                AD      HLROFF
+                EXTEND
+                BZMF    R12             # IF H < HLROFF, RESET LR PERMIT FLAG
+                TC      DOWNFLAG
+                ADRES   LRINH
+
+R12             CS      FLGWRD11
+                MASK    NOLRRBIT
+                EXTEND
+                BZF     CONTSERV
+
+POSTST          CA      BITS6+7         # TEST LANDING RADAR POSITION DISCRETES
+                EXTEND
+                RAND    CHAN33
+                EXTEND
+                MP      BIT10           # SHIFT BITS 6+7 TO BITS 1+2
+
+                INDEX   A
+                TCF     +1
+                TCF     511?            # A = 0 - BOTH DISCRETES PRESENT
+## Page 878
+                TCF     POSCHNG?        # A = 1 - POSITION 2
+                TCF     POSCHNG?        # A = 2 - POSITION 1
+511?            CCS     511CTR          # IF CONDITION PERSISTS FOR FIVE
+                TCF     ST511CTR        # CONSECUTIVE PASSES,ISSUE 511 ALARM
+                TC      ALARM
+                OCT     511
+                CS      ZERO            # SET CTR TO -0 TO BYPASS ALARM
+ST511CTR        TS      511CTR
+                TCF     CONTSERV
+POSCHNG?        TS      L
+                CA      FOUR            # SET 511CTR TO RE-ENABLE 511 ALARM
+                TS      511CTR
+                LXCH    LRPOS           # UPDATE LRPOS
+                CS      LRPOS           # COMPARE OLD AND NEW POSITIONS
+                AD      L
+                EXTEND                  # IF OLDPOS = NEWPOS,
+                BZF     UPDATCHK        # TRY TO UPDATE WITH LR DATA
+
+CONTSERV        INHINT
+                CS      BITS4-7
+                MASK    FLGWRD11        # CLEAR LR MEASUREMENT MADE DISCRETES.
+                TS      FLGWRD11
+
+## Page 879
+COPYCYC1        TC      QUIKFAZ5
+
+                CA      FIXLOC          # BATTEN DOWN THE HATCHES
+                TS      PUSHLOC
+
+                TC      INTPRET
+                VLOAD   ABVAL
+                        R1S
+                PUSH    DSU
+                        /LAND/
+                STORE   HCALC           # ALTITUDE IN UNITS OF 2(24) METERS
+                STORE   HCALC1
+                SL      PDVL            # STORE HCALCLAD AT PD 2
+                        9D
+                        UNIT/R/
+                VXV     ABVAL
+                        V1S
+                DSQ     DDV
+                        0
+                SL1     PDVL            # STORE DALTRATE AT PD 4
+                        UNIT/R/
+                DOT     SL1
+                        V1S
+                STORE   HDOTDISP        # HDOT IN UNITS OF 2(7) M/CS
+                SL2     PDVL            # STORE HDOTLAD AT PD 6
+                        R1S
+                VXM     VSR4
+                        REFSMMAT
+                STOVL   RN1             # POSITION IN REFERENCE COORDINATES
+                        V1S
+                VXM     VSL1
+                        REFSMMAT
+                STOVL   VN1             # VELOCITY IN REFERENCE COORDINATES
+                        GDT1/2
+                VSU     V/SC
+                        VBIAS
+                        GSCALE1
+                EXIT                    # G-VBIAS IN MPAC UNITS OF 2(-9) M/CS/CS
+
+                INHINT
+
+                INDEX   FIXLOC          # FETCH HCALCLAD FROM PD 2
+                DXCH    2
+                DXCH    HCALCLAD        # ALTITUDE IN UNITS OF 2(15) METERS
+
+                INDEX   FIXLOC          # FETCH DALTRATE FROM PD 4
+                CA      4
+                TS      DALTRATE        # DALTRATE IN UNITS OF 2(-9) M/CS/CS
+    
+## Page 880
+                INDEX   FIXLOC          # FETCH HDOTLAD FROM PD 6
+                DXCH    6
+                DXCH    HDOTLAD         # HDOTLAD IN UNITS OF 2(5) M/CS
+
+                CA      MPAC            # FETCH G-VBIAS FROM MPAC
+                TS      G-VBIASX
+                CA      MPAC +3
+                TS      G-VBIASY
+                CA      MPAC +5
+                TS      G-VBIASZ        # G-VBIAS IN UNITS OF 2(-9) M/CS/CS
+
+                EXTEND
+                DCA     UNIT/R/
+                DDOUBL                  # SCALE FULL-SIZE BUT WATCH FOR OVERFLOW
+                OVSK
+                TCF     +2
+                CAF     POSMAX
+ +2             XCH     RUNITX
+
+                EXTEND
+                DCA     UNIT/R/ +2
+                DDOUBL                  # SCALE FULL-SIZE, OVERFLOW MOST UNLIKELY
+                XCH     RUNITY
+
+                EXTEND
+                DCA     UNIT/R/ +4
+                DDOUBL                  # SCALE FULL-SIZE, OVERFLOW MOST UNLIKELY
+                XCH     RUNITZ
+
+                CS      FLAGWRD7        # INDICATE TO LANADISP THAT THE NUMBERS IT
+                MASK    SWANDBIT        #   NEEDS FROM SERVICER HAVE BEEN PROVIDED
+                ADS     FLAGWRD7
+
+
+                EXTEND
+                DCA     R1S             # LOAD NEW NAVIGATED STATE VECTOR INTO R,V
+                                        # VECTORS, FOR GUIDANCE.
+                DXCH    R
+                EXTEND
+                DCA     R1S +2
+                DXCH    R +2
+                EXTEND
+                DCA     R1S +4
+                DXCH    R +4
+                EXTEND
+                DCA     V1S
+                DXCH    V
+                EXTEND
+                DCA     V1S +2
+                DXCH    V +2
+                EXTEND
+## Page 881
+                DCA     V1S +4
+                DXCH    V +4
+
+                TCF     COPYCYCL        # COMPLETE THE COYPCYCL.
+
+# COPYCYC1 CONSTANTS:
+
+GSCALE1         2DEC    100 B-16
+
+
+BIASFACT        2DEC    .01 B-10
+
+## Page 882
+# *********************************************************************************************************
+
+CALCGRAV        UNIT    PUSH            # SAVE UNIT/R/ IN PUSHLIST            (18)
+                STORE   UNIT/R/
+                LXC,1   SLOAD           # RTX2 = 0 IF EARTH ORBIT, =2 IF LUNAR.
+                        RTX2
+                        RTX2
+                DCOMP   BMN
+                        CALCGRV1
+                VLOAD   DOT             #                                     (12)
+                        UNITZ
+                        UNIT/R/
+                SL1     PUSH            #                                     (14)
+                DSQ     BDSU
+                        DP1/20
+                PDDL    DDV
+                        RESQ
+                        34D             # (RN)SQ
+                STORE   32D             # TEMP FOR (RE/RN)SQ
+                DMP     DMP
+                        20J
+                VXSC    PDDL
+                        UNIT/R/
+                DMP     DMP
+                        2J
+                        32D
+                VXSC    VSL1
+                        UNITZ
+                VAD     STADR
+                STORE   UNITGOBL
+                VAD     PUSH            # MPAC = UNIT GRAVITY VECTOR.         (18)
+CALCGRV1        DLOAD   NORM            # PERFORM A NORMALIZATION ON RMAGSQ IN
+                        34D             # ORDER TO BE ABLE TO SCALE THE MU FOR
+                        X2              # MAXIMUM PRECISION.
+                BDDV*   SLR*
+                        -MUDT,1
+                        0 -21D,2
+                VXSC    STADR
+                STORE   GDT1/2          # SCALED AT 2(+7) M/CS
+                RVQ
+
+CALCRVG         VLOAD   VXM
+                        DELV
+                        REFSMMAT
+                VXSC    VSL1
+                        KPIP1
+                STORE   DELVREF
+                VSR1    PUSH
+                VAD     PUSH            # (DV-OLDGDT)/2 TO PD SCALED AT 2(+7)M/CS
+## Page 883
+                        GDT/2
+                VAD     PDDL            #                                       (18)
+                        VN
+                        PGUIDE
+                SL      VXSC
+                        6D
+                VAD     STQ
+                        RN
+                        31D
+                STCALL  RN1             # TEMP STORAGE OF RN SCALED 2(+29)M
+                        CALCGRAV
+
+                VAD     VAD
+                VAD
+                        VN
+                STCALL  VN1             # TEMP STORAGE OF VN SCALED 2(+7)M/CS
+                        31D
+
+DP1/20          2DEC    0.05
+
+SHIFT11         2DEC    1 B-11
+
+## Page 884
 # ****************************************************************************************************************
-# MISCELLANEOUS OFF-LINE LANDING RADAR TASKS AND JOBS
-# ****************************************************************************************************************
 
-# ********************************
-# HFAIL AND VFAIL
-# ********************************
+# MUNRVG IS A SPECIAL AVERAGE G INTEGRATION ROUTINE USED BY THRUSTING
+# PROGRAMS WHICH FUNCTION IN THE VICINITY OF AN ASSUMED SPHERICAL MOON.
+# THE INPUT AND OUTPUT QUANTITIES ARE REFERENCED TO THE STABLE MEMBER
+# COORDINATE SYSTEM.
 
-#          ENTER HFAIL FROM MAIN-LINE SERVICER IF ALTITUDE REASONABLENESS TEST IS FAILED.
+RVBOTH          VLOAD   PUSH
+                        G(CSM)          # CSM GDT1/2 FOR LAST PASS.
+                VAD     PDDL
+                        V(CSM)
+                        PGUIDE
+                DDV     VXSC
+                        SHIFT11
+                VAD
+                        R(CSM)
+                STCALL  R1S             # = RCSM + PGUIDE(VCSM + GCSM) AT 2(+24)M.
+                        MUNGRAV         # COMPUTE LUNAR GRAVITY AT CSM ALTITUDE.
+                VAD     VAD
+                        V(CSM)
+                STADR
+                STORE   V1S             # = VCSM + GCSM + GDT1/2 AT 2(+7)M/CS.
+                EXIT
+                TC      QUIKFAZ5
+                TC      INTPRET
+                VLOAD                   # FOR RESTART PURPOSES.
+                        GDT1/2
+                STOVL   G(CSM)
+                        R1S
+                STOVL   R(CSM)
+                        V1S
+                STORE   V(CSM)
+                EXIT
+                TC      QUIKFAZ5
+                TC      INTPRET
+MUNRVG          VLOAD   VXSC
+                        DELV
+                        KPIP2
+                PUSH    VAD             # 1ST PUSH: DELV IN UNITS OF 2(8) M/CS
+                        GDT/2
+                PUSH    VAD             # 2ND PUSH: (DELV + GDT)/2, UNITS OF 2(7)
+                        V               #                                     (12)
+                PDDL    DDV
+                        PGUIDE
+                        SHIFT11
+                VXSC
+                VAD
+                        R               # LM POSITION VECTOR AT 2(24)M.
+                STCALL  R1S             # = R + PGUIDE(V + DELV + GDT1/2).
+                        MUNGRAV
+## Page 885
+                VAD     VAD
+                VAD                     #                                     (0)
+                        V               # LM VELOCITY VECTOR AT 2(+7)M/CS.
+                STORE   V1S             # = V + GDT1/2 + DELV
+                ABVAL
+                STOVL   ABVEL           # STORE SPEED FOR LR AND DISPLAYS.
+                        WM
+                VXV     VSL2
+                        R1S
+                STODL   VSURFACE        # SURFACE VELOCITY IN UNITS OF 2(5) M/CS
+                        36D
+                DSU     RTB
+                        /LAND/
+                        SGNAGREE
+                STCALL  HCALC           # FOR NOW, DISPLAY WHETHER POS OR NEG
+                        MUNRETRN        # GO TO LR UPDATES ROUTINE, R12.
 
+MUNGRAV         UNIT                    # AT 36D HAVE ABVAL(R), AT 34D R.R
+                STODL   UNIT/R/
+                        34D
+                SL      BDDV
+                        6D
+                        -MUDTMUN
+                DMP     VXSC
+                        SHIFT11
+                        UNIT/R/
+                STORE   GDT1/2          # 1/2GDT SCALED AT 2(7)M/CS.
+                RVQ
+
+BITS6+7         EQUALS  SUPER110        # LR POSITION DISCRETES
+2SEC(18)        2DEC    200 B-18
+
+2SEC(28)        2OCT    0000000310      # 2SEC AT 2(28)
+
+4SEC(28)        2DEC    400 B-28
+
+BITS4-7         OCT     110
+1-30KFT         2DEC    16768072 B-24   # DPPOSMAX-30KFT
+
+66DEC           DEC     66
+
+## Page 886
+UPDATCHK        CA      RNGEDBIT        # SEE IF ALT READING MADE
+## RNGEDBIT in the above line is circled
+                MASK    FLGWRD11
+                EXTEND
+                BZF     VMEASCHK        # NO ALT MEAS THIS CYCLE-CHECK FOR VEL
+
+POSUPDAT        TC      QUIKFAZ5
+                TC      POSINDEX        # SET X1 TO PROPER POSITION AND ZERO PLIST
+                TC      INTPRET
+                VLOAD*  VXM
+                        HBEAMNB,1
+                        XNBPIP          # HBEAM SM AT 2(1)
+                PDDL    SL              # STORE IN PUSHLIST AND SCALE HMEAS
+                        HMEAS
+                        6D
+                DMP     VXSC            # SLANT RANGE AT 2(22),PUSH UP FOR HBEAM
+                        HSCAL           # TO GET SLANT RANGE VECTOR AT 2(23) M
+                PUSH    DOT             # PUSH NEG OF RADAR ALTITUDE BEAM VECTOR
+                        UNIT/R/         # ALTITUDE AT 2(24) METERS
+                DSU     PDDL            # PUSH PARTIAL DELTA H, LOAD NEG OF BEAM Z
+                        HCALC
+
+## At the end of the 2nd divider below, the suffixed ':' was an '=' in the
+## original printout.  The replacement is a workaround for our proof-reading
+## system.
+# ========================================================================
+# TERRAIN MODEL
+# =======================================================================:
+
+                SR1     DAD
+                        LAND +4
+                BDSU    SL              # SCALE RANGE TO UNITS OF 2(18) METERS
+                        R1S +4
+                        6D
+                BOVB    EXIT
+                        SIGNMPAC        # PICK UP NEGMAX UPON OVERFLOW
+
+                CS      FLAGWRD1        # IS NOTERFLG SET (BY P66 OR V68)?
+                MASK    NOTERBIT
+                EXTEND
+                BZF     TERSKIP         # Y: SKIP TERRAIN BUT TRANSFER DELTA H
+
+                CA      EBANK5          # N: PREPARE TO ACCESS TERRAIN TABLE
+                TS      EBANK
+                EBANK=  END-E5
+
+                CA      ZERO            # INITIALIZE MINUS LAST ABSCISSA FOR
+                TS      TEM2            # TERLOOP WHICH ADDS THE CONTRIBUTIONS
+                CA      FOUR            # OF FIVE TERRAIN SEGMENTS TO DELTA H
+TERLOOP         TS      TEM5
+## Page 887
+                CA      MPAC            # PICK UP CURRENT RANGE (NEG BEFORE SITE)
+                TS      L
+                INDEX   TEM5
+                CS      ABSC0           # TERRAIN ABSCISSAE UNITS: 2(18) METERS
+                TC      BANKCALL        # LIMIT GIVEN LIMITSUB MUST BE POSITIVE
+                FCADR   LIMITSUB        # LIMIT |RANGE| <= |CURRENT ABSCISSA|
+                TS      TEM4            # SAVE TO COMPARE WITH CURRENT ABSCISSA
+
+                AD      TEM2            # SUBTRACT LAST ABSCISSA
+                EXTEND
+                INDEX   TEM5
+                MP      SLOPE0          # SLOPE UNITS: 2(6) RADIANS. RESOL: 3.9 MR
+
+                INDEX   FIXLOC          # ADD CONTRIBUTION OF SEGMENT TO YIELD
+                DAS     4               # CORRECTED DELTA H IN UNITS 2(24) METERS
+
+                CA      TEM1            # RETRIEVE MINUS CURR ABSC FROM LIMITSUB*
+                TS      TEM2            # STORE AS MINUS LAST ABSC FOR NEXT SEG
+
+# * NOTE:  IF WE HAVE FLOWN BEYOND THE LANDING SITE BY MORE THAN THE
+#          LENGTH OF THE SEGMENT ADJACENT TO THE LANDING SITE, CA TEM1
+#          WILL RETRIEVE - INSTEAD OF MINUS THE CURRENT ABSCISSA -
+#          A ZERO OR POSITIVE REMAINDER OF THE DIVISION DONE BY LIMITSUB.
+#          THIS RETRIEVAL WILL CAUSE AN IMMEDIATE BRANCH TO TEREND,
+#          WHICH IS THE DESIRED RESULT.  HOWEVER, FLYING PAST THE LANDING
+#          SITE IS IMPOSSIBLE EXCEPT IN P66 WHEN THE TERRAIN MODEL IS OFF.
+
+                AD      TEM4            # HAS LM FLOWN PAST CURRENT ABSCISSA?
+                EXTEND
+                BZF     +2
+                TCF     TEREND          # Y: IGNORE FURTHER ABSCISSAE
+                CCS     TEM5            # N: IS CURRENT ABSCISSA THE LAST?
+                TCF     TERLOOP         # N: REPEAT TERRAIN LOOP
+
+TEREND          CA      EBANK7          # Y: RESTORE EBANK AND DEPART
+                TS      EBANK
+                EBANK=  END-E7
+
+TERSKIP         INHINT                  # SO DOWNLINK DATA WILL BE TIME HOMOGENEOU
+                INDEX   FIXLOC          # TRANSFER COMPLETED DELTA H HOME
+                DXCH    4               # TO BE ACCESSED BY DISPLAYS, TELEMETRY,
+                DXCH    DELTAH          # AND POSITION UPDATE.
+
+                RELINT
+
+                CA      FIXLOC          # RESTORE PUSHDOWN POINTER TO ZERO
+                TS      PUSHLOC
+
+## Page 888
+                CA      FLGWRD11        # IS PSTHIBIT SET (BY HIGATASK)?
+                MASK    PSTHIBIT
+                EXTEND                  # DO NOT PERFORM DATA REASONABLENESS TEST
+                BZF     NOREASON        # UNTIL AFTER HIGATE
+
+                TC      INTPRET
+                DLOAD   ABS
+                        DELTAH
+                DSU     SL3             # ABS(DELTAH) - DQFIX
+                        DELQFIX
+                DSU     EXIT            # ABS(DELTAH) - (DQFIX + HCALC/8) AT 2(21)
+                        HCALC
+
+                INCR    LRLCTR
+                TC      BRANCH
+                TCF     HFAIL           # DELTA H TOO LARGE
+                TCF     HFAIL           # DELTA H TOO LARGE
+                TC      DOWNFLAG        # RESET HFAIL FLAG
+                ADRES   HFAILFLG
+                TC      DOWNFLAG        # TURN OFF ALT FAIL LAMP
+                ADRES   HFLSHFLG
+
+NOREASON        CS      FLGWRD11
+                MASK    LRINHBIT
+                CCS     A
+                TCF     VMEASCHK        # UPDATE INHIBITED - TEST VELOCITY ANYWAY
+
+                TC      INTPRET
+POSUP           DLOAD   SR4
+                        HCALC           # RESCALE H TO 2(28)M
+                EXIT
+                EXTEND
+                DCA     DELTAH          # STORE DELTAH IN MPAC AND
+                DXCH    MPAC            # BRING HCALC INTO A,L
+                TC      ALSIGNAG
+                EXTEND                  # IF HIGH PART OF HCALC IS NON ZERO, THEN
+                BZF     +2              # HCALC > HMAX,
+                TCF     VMEASCHK        # SO UPDATE IS BYPASSED
+                TS      MPAC +2         #   FOR LATER SHORTMP
+
+                CS      L               # -H AT 2(14)M
+                AD      LRHMAX          # HMAX - H
+                EXTEND
+                BZMF    VMEASCHK        # IF H >HMAX, BYPASS UPDATE
+                EXTEND
+                MP      LRWH            # WH(HMAX - H)
+                EXTEND
+                DV      LRHMAX          # WH(1 - H/HMAX)
+                TS      MPTEMP
+                TC      SHORTMP2        # DELTAH (WH)(1 - H/HMAX) IN MPAC
+## Page 889
+                TC      INTPRET         # MODE IS DP FROM ABOVE
+                SL1
+                VXSC    VAD
+                        UNIT/R/         # DELTAR = DH(WH)(1 - H/HMAX) UNIT/R/
+                        R1S
+                STORE   GNUR
+                EXIT
+
+                TC      QUIKFAZ5
+
+                CA      ZERO
+RUPDATED        TC      GNURVST
+
+VMEASCHK        TC      QUIKFAZ5        # RESTART AT NEXT LOCATION
+R12THRU?        CS      FLGWRD11        # IS RADAREAD THROUGH ?
+                MASK    R12RDBIT
+                CCS     A
+                TCF     VELDATA?        # YES:GO ON WITH UPDATE
+                CCS     NEWJOB          # NO-WAIT
+                TC      CHANG1
+                TCF     R12THRU?
+VELDATA?        CS      FLGWRD11
+                MASK    VELDABIT        # IS V READING AVAILABLE?
+                CCS     A
+                TCF     VALTCHK         # NO   SEE IF V READING TO BE TAKEN
+
+VELUPDAT        TC      POSINDEX        # SET X1 AND X2 AND ZERO PUSHLIST
+                CS      VSELECT
+                TS      L
+                ADS     L               # -2 VSELECT IN L
+                AD      L
+                AD      L               # -6 VSELECT IN A
+                INDEX   FIXLOC
+                DAS     X1              # X1 = -6 VSELECT(POS), X2 = -2 VSELECT
+
+                TC      INTPRET
+                VLOAD*  VXM
+                        VZBEAMNB,1      # CONVERT PROPER VBEAM FROM NB TO SM
+                        XNBPIP          # SCALED AT 2(1)
+                PDDL    SL              # STORE IN PD 0-5
+                        VMEAS           # LOAD VELOCITY MEASUREMENT
+                        12D
+                DMP*    PDVL            # SCALE TO M/CS AT 2(6)
+                        VZSCAL,2        # AND STORE IN PD 6-7
+                        V1S             # VELOCITY AT TIME OF READING
+                VSL2    VSU             # SCALE TO 2(5) M/CS AND SUBTRACT
+                        VSURFACE        #               MOON ROTATION.
+                PUSH    ABVAL           # STORE IN PD
+                SR4     DAD             # ABS(VM)/8 + VELBIAS AT 2(6)
+                        VELBIAS
+## Page 890
+                STOVL   20D             # STORE IN 20D AND PICK UP VM
+                DOT     BDSU
+                        0               # DELTAV = VMEAS - V(EST)
+                PUSH    ABS
+                DSU     EXIT            # ABS(DV) - (7.5 + ABS(VM)/8))
+                        20D
+
+                INCR    LRMCTR
+                TC      BRANCH
+                TCF     VFAIL           # DELTA V TOO LARGE     ALARM
+                TCF     VFAIL           # DELTA V TOO LARGE     ALARM
+
+                TC      DOWNFLAG        # RESET HFAIL FLAG
+                ADRES   VFAILFLG
+                TC      DOWNFLAG        # TURN OFF VEL FAIL LAMP
+                ADRES   VFLSHFLG
+## The above line is circled.
+
+                CA      FLGWRD11
+                MASK    VXINHBIT
+                EXTEND
+                BZF     VUPDAT          # IF VX INHIBIT RESET, INCORPORATE DATA.
+
+                TC      DOWNFLAG
+                ADRES   VXINH           # RESET VX INHIBIT
+
+                CA      VSELECT
+                AD      NEG2            # IF VSELECT = 2 (X AXIS),
+                EXTEND                  # BYPASS UPDATE
+                BZF     ENDVDAT
+
+VUPDAT          CS      FLGWRD11
+                MASK    LRINHBIT
+                CCS     A
+                TCF     VALTCHK         # UPDATE INHIBITED
+
+                TS      MPAC +1
+
+                CA      ABVEL           # STORE E7 ERASABLES NEEDED IN TEMPS
+                TS      ABVEL*
+                CA      VSELECT
+                TS      VSELECT*
+                CA      EBANK5
+                TS      EBANK           # CHANGE EBANKS
+
+                EBANK=  LRVF
+                CS      LRVF
+                AD      ABVEL*          # IF V < VF, USE WVF
+                EXTEND
+                BZMF    USEVF
+
+## Page 891
+                CS      ABVEL*
+                AD      LRVMAX          # VMAX - V
+                EXTEND
+                BZMF    WSTOR -1        # IF V > VMAX, W = 0
+
+                EXTEND
+                INDEX   VSELECT*
+                MP      LRWVZ           # WV(VMAX - V)
+
+                EXTEND
+                DV      LRVMAX          # WV( 1 - V/VMAX )
+                TCF     WSTOR
+
+USEVF           INDEX   VSELECT*
+                CA      LRWVFZ          # USE APPROPRIATE CONSTANT WEIGHT
+                TCF     WSTOR
+
+ -1             CA      ZERO
+WSTOR           TS      MPAC
+                CS      BIT7            # (=64D)
+                AD      MODREG
+                EXTEND
+                BZMF    GETGNUV         # IF IN P66 USE ANOTHER CONSTANT
+                CA      LRWVFF
+                TS      MPAC
+
+GETGNUV         CA      EBANK7
+                TS      EBANK           # CHANGE EBANKS
+
+                EBANK=  ABVEL
+                TC      INTPRET
+                DMP     VXSC            # W(DELTA V)(VBEAMSM)  UP 6-7, 0-5
+                VAD
+                        V1S             # ADD WEIGHTED DELTA V TO VELOCITY
+                STORE   GNUV
+                EXIT
+
+                TC      QUIKFAZ5        # DO NOT RE-UPDATE
+
+                CA      SIX
+VUPDATED        TC      GNURVST         # STORE NEW VELOCITY VECTOR
+ENDVDAT         =       VALTCHK
+
+VALTCHK         TC      QUIKFAZ5        # DO NOT REPEAT ABOVE
+
+HIGATCHK        CS      FLGWRD11        # IS PSTHIBIT SET (BY HIGATASK)?
+                MASK    PSTHIBIT
+                EXTEND
+                BZF     CONTSERV        # YES:  BYPASS HIGATE CHECK
+
+## Page 892
+                CA      TTF/8
+                AD      RPCRTIME
+                EXTEND
+                BZMF    CONTSERV
+
+                CA      EBANK4
+                XCH     EBANK
+                TS      L
+
+                EBANK=  XNBPIP
+                CS      XNBPIP
+                EBANK=  DVCNTR
+                LXCH    EBANK
+                AD      RPCRTQSW
+                EXTEND
+                BZMF    HIGATASK
+                TCF     CONTSERV
+
+
+GNURVST         TS      BUF             # STORE GNUR (=GNUV) IN R1S OR V1S
+                EXTEND                  # A = 0 FOR R, A = 6 FOR V
+                DCA     GNUR
+                INDEX   BUF
+                DXCH    R1S
+                EXTEND
+                DCA     GNUR +2
+                INDEX   BUF
+                DXCH    R1S +2
+                EXTEND
+                DCA     GNUR +4
+                INDEX   BUF
+                DXCH    R1S +4
+                TC      Q
+
+
+QUIKFAZ5        CA      EBANK3
+                XCH     EBANK           # SET EBANK 3
+                DXCH    L               # Q TO A, A TO L
+                EBANK=  PHSNAME5
+                TS      PHSNAME5
+                LXCH    EBANK
+                EBANK=  DVCNTR
+                TC      A
+
+
+POSINDEX        CA      FIXLOC          # SET PUSHLIST TO ZERO
+                TS      PUSHLOC
+
+                CA      BIT1
+                MASK    LRPOS           # *NOTE - LRPOS = 1 FOR POS 2 & VICE VERSA
+## Page 893
+                CCS     A
+                CS      OCT30           # POS 2 , INDEX = -24D
+                ZL                      # POS 1 , INDEX = 0 , X2 = 0 FOR BOTH
+                INDEX   FIXLOC
+                DXCH    X1              # SET X1,X2
+                TC      Q
 HFAIL           TC      UPFLAG          # SET HFAIL FLAG FOR DOWNLINK
                 ADRES   HFAILFLG
                 CS      LRRCTR
@@ -1336,26 +1459,27 @@ NORLITE         CA      LRLCTR
 
                 TCF     VMEASCHK
 
-
-#          ENTER VFAIL FROM MAIN-LINE SERVICER IF VELOCITY REASONABLENESS TEST IS FAILED.
-
-VFAIL           TC      UPFLAG          # SET VFAIL FLAG FOR DOWNLINK
-                ADRES   VFAILFLG
+VFAIL           TC      UPFLAG
+                ADRES   VFAILFLG        # SET VFAIL FLAG FOR DOWNLINK
+## The above instruction and address are circled in red.
                 CS      LRSCTR
                 EXTEND                  # IF S = 0, DO NOT TURN ON TRACKER FAIL
                 BZF     NOLITE
                 AD      LRMCTR          # M-S
                 MASK    NEG3            # TEST FOR M-S > 3
                 EXTEND                  # IF M-S > 3, THEN TWO OR MORE OF THE
+## In the above comment, "THEN TWO ORE MORE OF THE" is crossed out in green.
                 BZF     +2              #   LAST FOUR V READINGS WERE BAD,
+## In the above comment, a 3 has been written over FOUR, and "BAD," has been crossed out
+## with "GOOD," written next to it.
                 TCF     NOLITE          #   SO TURN ON VELOCITY FAIL LIGHT
+## "DON'T" is written under "SO TURN", indicating the line should read "SO DON'T TURN ON..."
 
-## The following two instructions are surrounded by drawn-in parentheses.
                 TC      UPFLAG          # AND SET BIT TO TURN ON TRACKER FAIL LITE
                 ADRES   VFLSHFLG
+## The above instruction and address are circled.
 
 NOLITE          CA      LRMCTR          # SET S = M
-## Page 876
                 TS      LRSCTR
 
                 CCS     VSELECT         # TEST FOR Z COMPONENT
@@ -1363,68 +1487,23 @@ NOLITE          CA      LRMCTR          # SET S = M
 
                 TC      UPFLAG          # Z COMPONENT - SET FLAG TO SKIP X
                 ADRES   VXINH           # COMPONENT,AS ERROR MAY BE DUE TO CROSS
-                TCF     ENDVDAT         # LOBE LOCK UP NOT DETECTED ON X AXIS
+                TCF     ENDVDAT         # LOBE LOCK UP NOT DETECTED ON X AXIS.
 
-# ********************************
-# HIGATASK
-# ********************************
-
-#          HIGATASK IS ENTERED APPROXIMATELY 6 SECONDS BEFORE HIGATE IN THE DESCENT PHASE.   HIGATASK SETS THE 
-# HIGATE FLAG (BIT11) AND THE NO LR READ FLAG (BIT10) OF LRSTAT ALIAS FLAGWORD 11.   THE HIGATJOB IS SET UP TO 
-# REPOSITION THE LR ANTENNA FROM POSITION 1 TO POSITION 2.   IF THE REPOSITIONING IS SUCESSFUL THE ALT BEAM AND
-# VELOCITY BEAMS ARE TRANSFORMED TO THE NEW ORIENTATION IN NB COORDINATES AND STORED IN ERASABLE.   THIS
-# TRANSFORMATION IS PERFORMED AT SETPOS2.
-
-HIGATASK        CS      FLGWRD11        # SET PSTHIGAT AND NOLRREAD FLAGS
-                MASK    PRIO3
-                ADS     FLGWRD11
-
-                CCS     PHASE1          # AVOID MULTIPLE HIGATJOBS
-                TCF     CONTSERV
-
-                TC      PHASCHNG        # 1.5SPOT FOR HIGATJOB
-                OCT     51
-
-                CA      PRIO32
-                TC      FINDVAC         # COULD IT BE NOVAC NOW THAT SETPOS2 OUT
-                EBANK=  HMEAS
-                2CADR   HIGATJOB
-
-
-                TCF     CONTSERV
-
-# ********************************
-# POSINDEX
-# ********************************
-
-#     THIS ROUTINE SETS X1 ACCORDING TO CURRENT ANTENNA POSITION AS INDICATED BY LRPOS.   IT ALSO ZEROES X2
-# AND THE PUSHDOWN POINTER.   IT IS CALLED BY POSUPDAT AND VELUPDAT.
-
-POSINDEX        CA      FIXLOC          # ZERO PUSHDOWN POINTER
-                TS      PUSHLOC
-                CAF     BIT1
-                MASK    LRPOS           # NOTE: LRPOS = 1 FOR POS 2 AND VICE VERSA
-                CCS     A
-                CS      OCT30           # POS 2: INDEX = -24D
-## Page 877
-                ZL                      # POS 1: INDEX = 0; X2 = 0 FOR BOTH
-                INDEX   FIXLOC
-                DXCH    X1              # SET X1 AND X2
-                TC      Q
-
-# ********************************
-# HIGATJOB
-# ********************************
-
-#     HIGATJOB IS SET UP WHEN BOTH THE TIME AND ANGLE CRITERIA FOR ANTENNA REPOSITIONING ARE MET.   THIS JOB
-# INITIATES THE LANDING RADAR ANTENNA REPOSITIONING ROUTINE.   DURING THE REPOSITIONING R12 IS INHIBITED BY THE
-# NOLRREAD FLAG, WHICH IS SET BY HIGATASK OR IN CASE OF A RESTART POSSIBLY BY REREPOS.   UPON COMPLETION OF
-# REPOSITIONING, WHETHER SUCESSFUL OR NOT, NOLRREAD FLAG IS CLEARED AND R1
-
-                SETLOC  SERV2
+## Page 894
+# ********************************************************************************************************
+                BANK    33
+                SETLOC  SERVICES
                 BANK
-                EBANK=  END-E7
+
                 COUNT*  $$/SERV
+
+                EBANK=  DVCNTR
+
+
+# HIGATJOB IS BEGUN WHEN BOTH THE TIME AND ANGLE CRITERIA FOR ANTENNA REPOSITIONING ARE MET. THE JOB INITIATES THE
+# LANDING RADAR ANTENNA REPOSITIONING ROUTINE. DURING THE REPOSITIONING, R12 IS INHIBITTED BY THE NOLRREAD FLAG.
+# UPON COMPLETION OF THE REPOSITIONING,(SUCCESSFUL OR NOT),THE NOLRREAD   FLAG IS CLEARED AND R12 CONTINUES.
+
 
 REREPOS         INHINT                  # ON RESTART, SET FLAGS AGAIN
                 CS      FLGWRD11
@@ -1446,589 +1525,4 @@ HIGATJOB        TC      BANKCALL        # INITIATE REPOSITIONING ROUTINE
                 TC      PHASCHNG        # CLEAR RESTART PROTECTION
                 OCT     1
                 TC      ENDOFJOB
-
-# ********************************
-# RDGIMS
-# ********************************
-
-#          RDGIMS IS SET UP TO SNATCH THE PIPAS AND CDUS AT THE MIDPOINT OF THE COMBINED ALTITUDE AND VELOCITY
-# LANDING RADAR READ.
-
-                EBANK=  LRTIME
-                
-RDGIMS          EXTEND
-## Page 878
-                DCA     TIME2
-                DXCH    LRTIME
-
-                EXTEND
-                DCA     CDUX
-                DXCH    LRXCDU
-
-                CA      CDUZ
-                TS      LRZCDU
-
-                CA      PIPAX
-                TS      PIPTEM
-
-                EXTEND
-                DCA     PIPAY
-                DXCH    PIPTEM   +1
-
-                TC      TASKOVER
-
-# ****************************************************************************************************************
-# GRAVITY CALCULATION SUBROUTINES
-# ****************************************************************************************************************
-
-                EBANK=  DVCNTR
-
-# ********************************
-# CALCGRAV
-# ********************************
-
-CALCGRAV        UNIT    PUSH            # SAVE UNIT/R/ IN PUSHLIST            (18)
-                STORE   UNIT/R/
-                LXC,1   SLOAD           # RTX2 = 0 IF EARTH ORBIT, =2 IF LUNAR.
-                        RTX2
-                        X1
-                BMN
-                        CALCGRV1
-                VLOAD   DOT             #                                     (12)
-                        UNITZ
-                        UNIT/R/
-                SL1     PUSH            #                                     (14)
-                DSQ     BDSU
-                        DP1/20
-                PDDL    DDV
-                        RESQ
-                        34D             # (RN)SQ
-                STORE   32D             # TEMP FOR (RE/RN)SQ
-                DMP     DMP
-                        20J
-                VXSC    PDDL
-                        UNIT/R/
-## Page 879
-                DMP     DMP
-                        2J
-                        32D
-                VXSC    VSL1
-                        UNITZ
-                VAD     STADR
-                STORE   UNITGOBL
-                VAD     PUSH            # MPAC CONTAINS UNIT GRAVITY VECTOR
-CALCGRV1        DLOAD   NORM            # PERFORM A NORMALIZATION ON RMAGSQ IN
-                        34D             # ORDER TO BE ABLE TO SCALE THE MU FOR
-                        X2              # MAXIMUM PRECISION.
-                BDDV*   SLR*
-                        -MUEARTH,1
-                        0 -15D,2
-                VXSC    STADR
-                STORE   G1              # ACCELERATION IN UNITS OF 2(-6) M/CS/CS
-                RVQ
-
-# ********************************
-# MUNGRAV
-# ********************************
-
-                SETLOC  SERV1
-                BANK
-                EBANK=  G
-                COUNT*  $$/SERV
-
-MUNGRAV         UNIT
-                STODL   28D
-                        34D
-                SL      BDDV
-                        5
-                        -MUMOON
-                VXSC
-                        28D
-                STORE   G1              # ACCELERATION IN UNITS OF 2(-6) M/CS/CS
-                RVQ
-
-# ****************************************************************************************************************
-# SERVICER SUBROUTINES (PIPASR APPEARS SEPARATELY)
-# ****************************************************************************************************************
-
-# ********************************
-# PIPSRINE
-# ********************************
-
-#          SINCE SERVICER'S PIPA READING IS NOW IN-LINE, THIS PIPA READER IS PROVIDED FOR THE USE OF P57.
-# PIPSRINE IS NOT RESTART PROTECTED BECAUSE P57 ONLY CARES ABOUT DIRECTION, NOT MAGNITUDE, OF DELV.
-
-PIPAREAD        INHINT
-
-## Page 880
-                CS      ZERO
-                XCH     PIPAX
-                ZL
-                DXCH    DELVX
-                CS      ZERO
-                XCH     PIPAY
-                ZL
-                DXCH    DELVY
-                CS      ZERO
-                XCH     PIPAZ
-                ZL
-                DXCH    DELVZ
-                RELINT
-                TC      Q
-
-# ********************************
-# SERVCHNG
-# ********************************
-
-#          SERVCHNG REPLACES THE 2CADR AT PHSNAME5 WITH THE 2CADR OF THE LOCATION SPECIFIED BY Q AND THE CURRENT
-# BBANK.   THE OTHER GROUP 5 INFORMATION IS NOT TOUCHED.   SERVCHNG SHOULD BE USED WHEREVER POSSIBLE BY ROUTINES
-# RUNNING AS PART OF THE SERVICER JOB.
-
-                SETLOC  FFSERV
-                BANK
-                EBANK=  PHSNAME5
-                COUNT*  $$/SERV
-
-SERVCHNG        CAF     THREE           # FBANK 0, EBANK 3
-                XCH     BBANK
-                DXCH    L               # A --> L,  Q --> A
-                DXCH    PHSNAME5
-                EXTEND                  # PICK UP RETURN ADDRESS WHERE IT SURVIVES
-                DCA     PHSNAME5
-                DXCH    Z               # RETURN
-
-                SETLOC  SERVICES
-                BANK
-                EBANK=  DVCNTR
-                COUNT*  $$/SERV
-
-# ********************************
-# COPYCYC
-# ********************************
-
-COPYCYC         CAF     TWNTYTWO
- +1             INHINT
- +2             MASK    NEG1            # REDUCE BY 1 IF ODD
-                TS      ITEMP1
-                EXTEND
-## Page 881
-                INDEX   ITEMP1
-                DCA     RN1
-                INDEX   ITEMP1
-                DXCH    RN
-                CCS     ITEMP1
-                TCF     COPYCYC +2
-                TC      Q               # RETURN UNDER INHINT
-
-
-# ********************************
-# TMPTOSPT
-# ********************************
-
-TMPTOSPT        CA      CDUTEMPY        # THIS SUBROUTINE LOADS THE CDUS
-                TS      CDUSPOTY        #   CORRESPONDING TO PIPTIME1 INTO THE
-                CA      CDUTEMPZ        #   CDUSPOT VECTOR.   TMPTOSPT CAN BE
-                TS      CDUSPOTZ        #   CALLED FROM INTERPRETIVE WITH AN RTB.
-                CA      CDUTEMPX
-                TS      CDUSPOTX
-                TC      Q
-
-# ********************************
-# PIPNORM
-# ********************************
-
-#          PIPNORM, WHICH CORRECTS THE PIPA DIFFERENCE FOR POSSIBLE PIPA OVERFLOW, IS SEPARATE FROM PIPASR TO
-# MAKE IT AVAILABLE TO ROUTINES WHICH READ THE PIPAS ASYNCHRONOUSLY, SUCH AS R10 AND THE R.O.D. EQUATION.
-
-#          FUNCTIONAL DESCRIPTION OF PIPNORM:-
-
-#          INPUT:         IN A - DIFFERENCE BETWEEN CURRENT AND PREVIOUS PIPA READING
-
-#          OUTPUTS:       IN A - INPUT CORRECTED FOR POSSIBLE PIPA OVERFLOW BETWEEN READINGS
-#                         IN L - ZERO
-
-#          ASSUMPTIONS:   THAT A DELV OF NO MORE THAN 81.91 M/S WAS ACCUMULATED BETWEEN THE PIPA READINGS
-#                         THAT PIPNORM IS CALLED IN INTERRUPT OR UNDER INHINT
-
-PIPNORM         XCH     ITEMP1          # TO CLEAR POSSIBLE OVERFLOW
-                CA      ITEMP1
-                MASK    BIT14
-                EXTEND
-                BZF     +5
-                CA      ITEMP1          # POS > 8191 OR NEG > -8192
-                AD      NEG1/2
-                AD      NEG1/2
-                TCF     +4
- +5             CA      ITEMP1          # POS < 8192 OR NEG < -8191
-                AD      HALF
-                AD      HALF
-## Page 882
- +4             ZL
-                XCH     L               # CLEAR PROBABLE OVERFLOW
-                XCH     L
-                TC      Q
-
-# ****************************************************************************************************************
-# SERVICER CONSTANTS (EXCEPT THOSE IN THE CONTROLLED CONSTANTS SECTION)
-# ****************************************************************************************************************
-                EBANK=  DVCNTR
-CYCLEADR        2CADR   PIPCYCLE
-
-
-
-                EBANK=  DVCNTR
-AVOUTCAD        2CADR   AVGEND
-
-
-
-GETABADR        ADRES   GETABVAL
-
-
-XNBPIPAD        ECADR   XNBPIP
-
-
-XNBRADAD        ECADR   XNBRAD
-
-
-PGMIN           =       2SECS
-
-
-PGMAX           DEC     500
-
-
-2SEC(18)        2DEC    200 B-18
-
-
-
-4SEC(18)        2DEC    400 B-28
-
-
-
-DP1/20          2DEC    0.05
-
-
-
-1-30KFT         2DEC    16768072 B-24   # DPPOSMAX-30KFT
-
-## Page 883
-BIASFACT        2DEC    .0064           # SCALES PBIAS TO UNITS OF 2(-9) M/CS/CS
-
-
-
-OCT21           =       ND1
-
-
-OCT523          OCT     00523
-
-
-BITS4-7         OCT     110
-
-
-BITS6+7         =       SUPER110
-
-
-66DEC           DEC     66
-
-
-TWNTYTWO        DEC     22
-
-
-1/200DP         2DEC    .005
-
-
-
-# ****************************************************************************************************************
-# QUARTASK (ALSO KNOWN AS R10,R11) AN AUXILLIARY OF SERVICER WHICH RUNS EVERY QUARTER OF A SECOND
-# ****************************************************************************************************************
-
-                SETLOC  R11
-                BANK
-                EBANK=  END-E7
-                COUNT*  $$/R11
-
-R10,R11         =       QUARTASK
-
-QUARTASK        CA      FLAGWRD7        # IS SERVICER STILL RUNNING?
-                MASK    AVEGFBIT
-                EXTEND
-                BZF     TASKOVER        # NO:   BUT LET AVGEND KILL GROUP 2
-
-                CA      OCT31           # YES:  SET UP NEXT QUARTASK
-                TC      TWIDDLE
-                ADRES   QUARTASK
-
-# ************************************************************************
-# FLASH LANDING RADAR LIGHTS
-# ************************************************************************
-
-## Page 884
-FLASHH?         CA      FLGWRD11
-                MASK    HFLSHBIT
-                EXTEND
-                BZF     FLASHV?         # H FLASK OFF, SO LEAVE ALONE
-
-                CA      HLITE
-                TS      L
-                TC      FLIP            # FLIP H LITE
-
-FLASHV?         CA      FLGWRD11        # VFLASHBIT MUST BE BIT 2
-                MASK    VFLSHBIT
-                EXTEND
-                BZF     10,11           # V FLASH OFF
-
-                CA      VLITE
-                TS      L
-                TC      FLIP
-
-# ************************************************************************
-# CHECK FOR ABORT OR ABORT-STAGE
-# ************************************************************************
-
-10,11           CA      FLAGWRD9        # IS THE LETABORT FLAG SET?
-                MASK    LETABBIT
-                EXTEND
-                BZF     VVCOMP          # NO:   GO ON TO THE VELOCITY COMPUTATION
-
-P71NOW?         CS      MODREG          # ARE WE IN P71 NOW?
-                AD      1DEC71
-                EXTEND
-                BZF     VVCOMP          # YES:  PROCEED TO VELOCITY COMPUTATION
-
-                EXTEND                  # NO:   IS AN ABORT STAGE COMMANDED
-                READ    CHAN30
-                COM
-                TS      L
-                MASK    BIT4
-                CCS     A
-                TCF     P71A            # YES
-
-P70NOW?         CS      MODREG          # NO:   ARE WE IN P70 NOW?
-                AD      1DEC70
-                EXTEND
-                BZF     VVCOMP          # YES:  PROCEED TO VELOCITY COMPUTATION
-
-                CA      L               # NO:   IS AN ABORT COMMANDED?
-                MASK    BIT1
-                CCS     A
-                TCF     P70A            # YES
-
-## Page 885
-# ************************************************************************
-# COMPUTE VELOCITY VECTOR
-# ************************************************************************
-
-# ONLY IF SWANDISP IS SET ARE ALL THE NUMBERS AVAILABLE NEEDED IN VVCOMP.
-
-VVCOMP          CS      FLAGWRD7        # IS LANDING ANALOG DISPLAYS FLAG SET?
-                MASK    SWANDBIT
-                CCS     A
-                TCF     DISPRSET +1     # NO:   GO RESET
-
-# DO EVERYTHING POSSIBLE BEFORE READING PIPAS.
-
-                EXTEND                  # YES:  COMPUTE VELOCITY VECTOR
-                DCS     VSURFACE
-                DXCH    VVECTX
-                EXTEND
-                DCA     V
-                DDOUBL
-                DDOUBL
-                DAS     VVECTX
-
-                EXTEND
-                DCS     VSURFACE +2
-                DXCH    VVECTY
-                EXTEND
-                DCA     V        +2
-                DDOUBL
-                DDOUBL
-                DAS     VVECTY
-
-                EXTEND
-                DCS     VSURFACE +4
-                DXCH    VVECTZ
-                EXTEND
-                DCA     V        +4
-                DDOUBL
-                DDOUBL
-                DAS     VVECTZ
-
-# PICK UP TIME.
-
-# COMPUTE TIME SINCE PIPTIME.
-
-                CS      PIPTIME  +1
-                AD      TIME1
-                AD      HALF
-                AD      HALF
-                XCH     DT              # DT IN UNITS OF 2(14) CS
-
-## Page 886
-# ADD IN PIPA PULSES.
-
-                CS      PIPAXOLD
-                AD      PIPAX
-                TC      NORMPIP
-                EXTEND
-                MP      LANAKPIP
-                DAS     VVECTX
-
-                CS      PIPAYOLD
-                AD      PIPAY
-                TC      NORMPIP
-                EXTEND
-                MP      LANAKPIP
-                DAS     VVECTY
-
-                CS      PIPAZOLD
-                AD      PIPAZ
-                TC      NORMPIP
-                EXTEND
-                MP      LANAKPIP
-QUARDUMP        DAS     VVECTZ
-
-#     THE FOLLOWING CODING REFERS THE X-PIPA READING TO THE CENTER-OF-MASS OF THE SPACECRAFT BY SUBTRACTING
-# THOSE PIPA COUNTS PRODUCED BY VERTICAL IMU MOTION RELATIVE TO THE CENTER-OF-MASS.  THE SPACECRAFT X-AXIS IS
-# ASSUMED TO BE APPROXIMATELY VERTICAL (PARALLEL TO THE SM X-AXIS).  THE EQUATION IS:
-
-#                                 P66PIPX = P66PIPX - OMEGAQ RIMUZ
-
-# WHERE P66PIPX IS THE X-PIPA READING, OMEGAQ IS THE ATTITUDE-RATE ABOUT THE Q (Y) AXIS, AND RIMUZ IS THE
-# Z-COORDINATE OF THE IMU.
-
-# FINALLY, ADD IN CONTRIBUTIONS OF GRAVITY AND PIPA BIAS.
-
-                CS      BIASACCX        # BIASACCX IS IN UNITS OF 2(-9) M/CS/CS
-                AD      GRAVACCX        # GRAVACCX IS IN UNITS OF 2(-9) M/CS/CS
-                EXTEND
-                MP      DT
-                DAS     VVECTX          # VVECTX IN UNITS OF 2(5) M/CS
-
-                CS      BIASACCY        # BIASACCY IS IN UNITS OF 2(-9) M/CS/CS
-                AD      GRAVACCY        # GRAVACCY IS IN UNITS OF 2(-9) M/CS/CS
-                EXTEND
-                MP      DT
-                DAS     VVECTY          # VVECTY IN UNITS OF 2(5) M/CS
-
-                CS      BIASACCZ        # BIASACCZ IS IN UNITS OF 2(-9) M/CS/CS
-                AD      GRAVACCZ        # GRAVACCZ IS IN UNITS OF 2(-9) M/CS/CS
-                EXTEND
-                MP      DT
-## Page 887
-                DAS     VVECTZ          # VVECTZ IN UNITS OF 2(5) M/CS
-
-# ************************************************************************
-# SHOULD P66JOB BE SET UP?
-# ************************************************************************
-
-GUILDEN         CS      MODREG          # ARE WE IN P66?
-STERN           AD      DEC66
-                EXTEND
-                BZF     P66SETUP        # YES:  OFF TO IT THEN
-
-                CA      FLAGWRD1        # NO:   IS P66 SELECTION LOCKED OUT
-                MASK    ALW66BIT
-                EXTEND
-                BZF     GUILDRET        # YES
-
-                CCS     FLPASS0         # NO:   IS FLPASS0 = 0?
-                TCF     ATTHOLD?        # NO:   GO CHECK UN-ATTITUDE-HOLD DISCRETE
-
-                CS      WCHPHASE        # YES:  IS WCHPHASE = 2?
-                AD      TWO
-                EXTEND
-                BZF     STARTP66        # YES:  GO START P66
-
-ATTHOLD?        CAF     BIT13           # NO: IS UN-ATTITUDE-HOLD DISCRETE HERE?
-                EXTEND
-                RAND    CHAN31
-                CCS     A
-                TCF     GUILDRET        # YES: ALL'S WELL, OR AT LEAST AUTOMATIC
-
-                CA      RODCOUNT        # NO:   HAS ROD SWITCH BEEN CLICKED?
-                EXTEND
-                BZF     GUILDRET        # NO:   STICK IN THERE, LANDING
-
-STARTP66        EXTEND                  # YES:  INITIALIZE DESIRED ALTITUDE-RATE
-                DCA     VVECTX          #   (FURTHER INITIALIZATION IS IN P66JOB)
-                DXCH    VDGVERT
-
-                CS      ZERO            # CANCEL LEFT-OVER P64 THROTTLE COMMAND
-                TS      THRUST          #   (NEVER, NEVER LOAD THRUST WITH +0)
-
-                INCR    FLPASS0
-
-                EXTEND                  # DISCONNECT ALL GUIDANCE FROM SERVICER
-                DCA     ADRPIPCY
-                DXCH    AVGEXIT
-
-                TC      UPFLAG          # SET FLAG TO CONTINUE P66 HORIZONTAL
-                ADRES   P66PROFL        #   UNTIL "PROCEED" AFTER TOUCHDOWN
-
-## Page 888
-                TC      DOWNFLAG        # PERMIT X-AXIS OVERRIDE DESPITE THE
-                ADRES   XOVINFLG        #   POSSIBILITY OF PITCH-ROLL CROSS-FEED
-
-                TC      UPFLAG          # TERMINATE TERRAIN MODEL
-                ADRES   NOTERFLG
-
-P66SETUP        CCS     PHASE3          # AVOID MULTIPLE P66JOBS AFTER RESTART
-                TCF     PRELAD
-
-                CAF     PRIO24
-                TC      FINDVAC
-                EBANK=  TAURODL
-P662CADR        2CADR   P66JOB
-
-
-                CAF     EBANK3          # RESTART PROTECT BY HAND TO SAVE TIME
-                TS      EBANK
-                EBANK=  PHSNAME3
-                CAF     PRIO24
-                TS      PHSPRDT3
-                EXTEND
-                DCA     P662CADR
-                DXCH    PHSNAME3
-                CAF     TWO
-                TS      L
-                COM
-                DXCH    -PHASE3
-                CAF     EBANK7
-                TS      EBANK
-                EBANK=  END-E7
-
-                TCF     PRELAD
-
-GUILDRET        CAF     ZERO
-                TS      RODCOUNT
-
-PRELAD          CS      TIME1           # UPDATE TBASE2 AND PROCEED TO LANADISP
-                TS      TBASE2
-                TCF     LANADISP
-
-# ************************************************************************
-# QUARTASK CONSTANTS
-# ************************************************************************
-
-DEC66           DEC     66
-
-
-                EBANK=  DVCNTR
-ADRPIPCY        2CADR   PIPCYCLE
-
-## Page 889
-# ****************************************************************************************************************
-# ****************************************************************************************************************
-
-#     TEMPORARY DEFINITIONS TO AVOID CUSSES UNTIL CHANGES OUTSIDE OF ZFLY AND ZERASE CAN BE MADE.
-
-REREADAC        =       TASKOVER
-
-
-REDO5.5         =       TASKOVER
-
-
-GDT/2           =       G
-
-
-PIPASR          =       PIPAREAD -3     # SO PIPSRINE WILL EQUAL PIPAREAD
+## Below, in the comment column, is written "NEG3 = 77774"
