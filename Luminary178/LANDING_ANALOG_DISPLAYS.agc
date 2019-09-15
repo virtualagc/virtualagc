@@ -19,12 +19,10 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-14 MAS  Re-based on Luminary 210. Restored check
+##                              of channel 30 bit 6 at LANACONT.
 
-## Page 890
-# ****************************************************************************************************************
-# LANADISP:  DISPLAY INERTIAL DATA ROUTINE FOR DESCENT AND ABORTS                            THIS VERSION BY EYLES
-# ****************************************************************************************************************
-
+## Page 895
                 BANK            21
                 SETLOC          R10
                 BANK
@@ -32,10 +30,105 @@
                 EBANK=          END-E7
                 COUNT*          $$/R10
 
+# ****************************************************************************************************************
+# LANADISP:  DISPLAY INERTIAL DATA ROUTINE FOR DESCENT AND ABORTS                            THIS VERSION BY EYLES
+# ****************************************************************************************************************
+
+LANADISP        LXCH            PIPCTR1                 # UPDATE TBASE2 AND PIPCTR SIMULTANEOUSLY
+                CS              TIME1
+                DXCH            TBASE2
+
+                CS              FLAGWRD7                # IS LANDING ANALOG DISPLAYS FLAG SET?
+                MASK            SWANDBIT
+                CCS             A
+                TCF             DISPRSET        +1      # NO:   GO RESET
+
+# ************************************************************************
+# COMPUTE VELOCITY VECTOR
+# ************************************************************************
+
+# DO EVERYTHING POSSIBLE BEFORE READING PIPAS.
+
+                EXTEND
+                DCS             VSURFACE
+                DXCH            VVECTX
+                EXTEND
+                DCA             V
+                DDOUBL
+                DDOUBL
+                DAS             VVECTX
+
+                EXTEND
+                DCS             VSURFACE        +2
+                DXCH            VVECTY
+                EXTEND
+                DCA             V               +2
+                DDOUBL
+                DDOUBL
+                DAS             VVECTY
+
+                EXTEND
+                DCS             VSURFACE        +4
+                DXCH            VVECTZ
+                EXTEND
+                DCA             V               +4
+                DDOUBL
+
+## Page 896
+                DDOUBL
+                DAS             VVECTZ
+
+# COMPUTE TIME SINCE PIPTIME.
+
+                CS              PIPTIME         +1
+                AD              TIME1
+                AD              HALF
+                AD              HALF
+                XCH             DT                      # DT SINCE PIPTIME IN UNITS 0F 2(14) CS
+
+# ADD IN PIPA PULSES.
+
+                CA              PIPATMPX
+                AD              PIPAX
+                EXTEND
+                MP              LANAKPIP
+                DAS             VVECTX
+
+                CA              PIPATMPY
+                AD              PIPAY
+                EXTEND
+                MP              LANAKPIP
+                DAS             VVECTY
+
+                CA              PIPATMPZ
+                AD              PIPAZ
+                EXTEND
+                MP              LANAKPIP
+QUARDUMP        DAS             VVECTZ                  # TAG IS FOR EDITS
+
+# FINALLY, ADD IN CONTRIBUTIONS OF GRAVITY AND PIPA BIAS.
+
+                CA              G-VBIASX                # G-VBIASX IS IN UNITS OF 2(-9) M/CS/CS
+                EXTEND
+                MP              DT
+                DAS             VVECTX                  # VVECTX IN UNITS OF 2(5) M/CS
+
+                CA              G-VBIASY                # G-VBIASY IS IN UNITS OF 2(-9) M/CS/CS
+                EXTEND
+                MP              DT
+                DAS             VVECTY                  # VVECTY IN UNITS OF 2(5) M/CS
+
+                CA              G-VBIASZ                # G-VBIASZ IS IN UNITS OF 2(-9) M/CS/CS
+                EXTEND
+                MP              DT
+                DAS             VVECTZ                  # VVECTZ IN UNITS OF 2(5) M/CS
+
 # ************************************************************************
 # COMPUTE ALTITUDE AND ALTITUDE-RATE
+
+## Page 897
 # ************************************************************************
-LANADISP        CA              RUNITX                  # COMPUTE RADIAL VELOCITY
+ALTSTUFF        CA              RUNITX                  # COMPUTE RADIAL VELOCITY
                 EXTEND
                 MP              VVECTX
                 DXCH            ALTRATE
@@ -70,7 +163,6 @@ LANADISP        CA              RUNITX                  # COMPUTE RADIAL VELOCIT
 
                 CA              DT
                 EXTEND
-## Page 891
                 MP              BIT4
                 CA              L                       # FETCH DT FROM L IN UNITS OF 2(11) CS
                 EXTEND
@@ -84,6 +176,7 @@ LANADISP        CA              RUNITX                  # COMPUTE RADIAL VELOCIT
 # SEND OUT ALTITUDE-RATE IF POSSIBLE
 # ************************************************************************
 
+## Page 898
 LANACONT        CAF             BIT6                    # IS THE METER MODE SWITCH IN PGNCS?
                 EXTEND
                 RAND            CHAN30
@@ -100,7 +193,6 @@ LANACONT        CAF             BIT6                    # IS THE METER MODE SWIT
                 RAND            CHAN12
                 EXTEND
                 BZF             DISPRSET                # NO:   REINITIALIZE DISPLAYS
-
 ALTRROUT        EXTEND                                  # YES:  SIGNIFY ALTITUDE-RATE (BIT2 IN A)
                 WOR             CHAN14
 
@@ -121,7 +213,6 @@ ALTRROUT        EXTEND                                  # YES:  SIGNIFY ALTITUDE
                 AD              NEGMAX
                 TS              L
                 TCF             +3
-## Page 892
                 AD              L
                 COM
  +3             XCH             ALTM
@@ -130,8 +221,10 @@ ALTRROUT        EXTEND                                  # YES:  SIGNIFY ALTITUDE
                 EXTEND
                 WOR             CHAN14
 
-                CA              TWELVE                  # PAUSE 12 CS FOR ALTRATE TO BE READ OUT
-                TC              VARDELAY                #   (MUST BE > 100 MS TO WORK ON THE LMS)
+                CA              TWELVE                  # DELAY 120 MS FOR DATA OUTPUT
+                                                        # NOTE - THIS DELAY MUST BE GREATER THAN
+                                                        # 100 MS FOR COMPATIBILITY WITH THE LMS
+                TC              VARDELAY
 
 ALTROUT         CS              BIT2                    # SIGNIFY ALTITUDE
                 EXTEND
@@ -140,6 +233,8 @@ ALTROUT         CS              BIT2                    # SIGNIFY ALTITUDE
                 CA              ALTITUDE        +1
                 EXTEND
                 MP              ALTCONV
+
+## Page 899
                 TS              L
                 CAF             ZERO
                 DXCH            ALTTEMP
@@ -172,7 +267,6 @@ ALTROUT         CS              BIT2                    # SIGNIFY ALTITUDE
 # SEND OUT FORWARD AND LATERAL VELOCITIES
 # ************************************************************************
 
-## Page 893
                 TC              CROSCOMP                # FIRST CALL SUBROUTINE TO COMPUTE THEM
 
                 CAF             BIT10                   # 1/32 TO ITEMP2 FOR USE AS DIVISOR BELOW
@@ -191,6 +285,8 @@ ALTROUT         CS              BIT2                    # SIGNIFY ALTITUDE
                 TS              Q
                 TCF             FORVOUT
                 ADS             L
+
+## Page 900
 FORVOUT         CS              FORVMETR                # SUBTRACT METER INDICATOR TO GET CHANGE
                 ADS             L
                 CA              MAXDBITS
@@ -224,7 +320,6 @@ LATVOUT         CS              LATVMETR                # SUBTRACT METER INDICAT
                 EXTEND
                 WOR             CHAN14
 
-## Page 894
 LANADEND        TC              TASKOVER
 
 # ************************************************************************
@@ -242,6 +337,8 @@ LANADEND        TC              TASKOVER
 CROSCOMP        CS              FLAGWRD0                # IS R10FLAG SET TO INDICATE ASCENT?
                 MASK            R10FLBIT
                 EXTEND
+
+## Page 901
                 BZF             APSLAD                  # YES:  DISPLAY LATVEL IN INERTIAL AXES
 
                 CS              RUNITZ                  # NO:   COMPUTE DOWNRANGE VELOCITY
@@ -276,7 +373,6 @@ CROSCOMP        CS              FLAGWRD0                # IS R10FLAG SET TO INDI
                 MP              VHY
                 DAS             FORVTEMP
 
-## Page 895
                 CA              M32                     # COS(AOG)
                 EXTEND
                 MP              VHZ             +1
@@ -293,6 +389,8 @@ CROSCOMP        CS              FLAGWRD0                # IS R10FLAG SET TO INDI
                 EXTEND
                 MP              VHZ
                 DXCH            LATVEL
+
+## Page 902
                 CA              M32                     # COS(AOG)
                 EXTEND
                 MP              VHY
@@ -327,7 +425,6 @@ APSLAD          TS              FORVTEMP                # DURING ASCENT AND ABOR
                 DXCH            LATVEL
                 EXTEND                                  # ADD SURFACE VELOCITY BACK IN SO APS
                 DCA             VSURFACE        +2      #   LATVEL DISPLAY WILL BE IN TRUE
-## Page 896
                 DAS             LATVEL                  #   STABLE-MEMBER COORDINATES
 
                 TCF             CROSSOUT                # REJOIN THE MAINSTREAM
@@ -344,6 +441,8 @@ DISPINIT        TC              CROSCOMP               # FIRST COMPUTE BUT NOT O
 
                 CAF             BIT8                    # SET DISPLAY INERTIAL DATA OUTBIT
                 EXTEND
+
+## Page 903
                 WOR             CHAN12
 
                 CS              ZERO                    # ZERO METER INDICATORS
@@ -378,7 +477,6 @@ DISPRSET        TC              CROSCOMP                # FIRST COMPUTE BUT NOT 
                 MASK            IMODES33
                 CCS             A
                 CAF             BIT2                    # YES:  DISABLE RR ERROR COUNTER AND
-## Page 897
                 AD              BIT8                    # NO:   RESET DISPLAY INERTIAL DATA OUTBIT
                 COM
                 EXTEND
@@ -395,31 +493,24 @@ DISPRSET        TC              CROSCOMP                # FIRST COMPUTE BUT NOT 
 
 # CONSTANTS ON A-CARDS ARE FOUND IN THE CONTROLLED CONSTANTS SECTION
 
-
+## Page 904
 # LANAKPIP        DEC             .0512                 SCALES PIPAS TO UNITS OF 2(5) M/CS
-
 
 # MAXVEL          OCT             00466                 198.645 F/S IN UNITS OF 2(5) M/CS
 
-
 # MAXDBITS        OCT             01034                 ABOUT 300 F/S
-
 
 # VELCONV         DEC             .03594                SCALES VEL AT ONE M/CS TO .5571 F/S/BIT
 
-
 # ALTRCONV        DEC             .16020                SCALES ALTR AT 2(2) M/CS TO .5 F/S/BIT
 
-
 # ALTCONV         DEC             .69954                SCALES ALTITUDE AT 2(15) M TO 9.38 F/BIT
-
 
 BITSET          =               PRIO6                	# CROSS-POINTER DRIVE BITS
 
 # ************************************************************************
 # SUBROUTINES
 # ************************************************************************
-
 LADLIMIT        TS              ITEMP1
                 CAF             ZERO
                 EXTEND
@@ -428,27 +519,9 @@ LADLIMIT        TS              ITEMP1
                 LXCH            ITEMP1
                 TCF             +2
                 TCF             +3
-## Page 898
                 CA              L
                 TC              Q
                 CS              ITEMP1
-                TC              Q
-
-NORMPIP         XCH             ITEMP1
-                CA              ITEMP1
-                MASK            BIT14
-                EXTEND
-                BZF             +5
-                CA              ITEMP1
-                AD              NEG1/2
-                AD              NEG1/2
-                TCF             +4
- +5             CA              ITEMP1
-                AD              HALF
-                AD              HALF
- +4             ZL
-                XCH             L
-                XCH             L
                 TC              Q
 
 # ************************************************************************
