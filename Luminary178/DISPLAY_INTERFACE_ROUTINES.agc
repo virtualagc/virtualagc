@@ -19,6 +19,9 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-15 MAS  Restored definitions for erasables DSPFLG,
+##                              MARKFLAG, and SAVEFLAG. Put back in code
+##                              that uses R1SAVE.
 
 ## Page 1330
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -1309,6 +1312,12 @@ FLASHSUB        TC      FLASHON
                 TC      UPENT2
 ITISMASK        OCT     40040           # *** ENDIDLE ALLOW *** DONT MOVE
 
+                CA      R1SAVE          # IS THIS A REPEAT AND RETURN DISPLAY
+                INDEX   COPINDEX
+                MASK    BIT3
+                CCS     A
+                TCF     UNSETR1         # YES
+
                 CCS     CADRSTOR        # SEE IF SOMEONE ALREADY IN ENDIDLE
                 TCF     ISITPRIO
                 TCF     +2
@@ -1372,6 +1381,20 @@ ENDIT           CA      USERPRIO        # RETURN TO USERS PRIORITY
                 MASK    PRIO37
                 TC      PRIOCHNG
                 CA      MPAC +3
+                TCF     BANKJUMP
+
+UNSETR1         INDEX   COPINDEX        # RESET REPEAT AND RETURN REQUEST
+                CS      BIT3
+
+                MASK    R1SAVE
+                TS      R1SAVE
+
+                CAF     ZERO            # *** 205 ONLY MARKBRAN USERS IN
+                TC      SUPERSW         # SUPERBANK 0
+
+ -1             CAF     THREE           # RETURN TO USERS IMMEDIATE RETURN LOC
+IMMEDRET        INDEX   COPINDEX
+                AD      CADRFLSH
                 TCF     BANKJUMP
 
 TERMATE         CAF     ZERO            # ASTRONAUT TERMINATE (V34) RETURNS TO
@@ -1503,6 +1526,9 @@ MPERFMSK        OCT     40030           # BIT 15,5,4 FOR MARK,PERFORM,FLASH
 OCT34300        OCT     34300
 BITS15+7        OCT     40100
 BITS7+4         OCT     110
+DSPFLG          EQUALS  EBANKSAV
+MARKFLAG        EQUALS  MARKEBAN
+SAVEFLAG        EQUALS  EBANKTEM
 BITS5+11        OCT     2020            # * DONT MOVE
 BITS4+10        OCT     1010            # * DONT MOVE
 LOWLOAD         DEC     22
