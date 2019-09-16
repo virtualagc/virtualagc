@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-15 MAS  Replaced references to ABDVACC with ABDELV
+##                              and restored the definition of DBVAL1.
 
 ## Page 1473
 # PROGRAM NAME: 1/ACCS
@@ -269,8 +271,7 @@ JACCUV          CS              COEFFQ
 #      L = PIVOT TO CG DISTANCE OF ENGINE
 #      I = MOMENT OF INERTIA
 
-## The following line is marked as having changed between ZLMDAP.000 and ZLMDAP.001.
-LRESC           CAE             ABDVACC                 # SCALED AT 2(13) CM/SEC/SESC
+LRESC           CAE             ABDELV                  # SCALED AT 2(13) CM/SEC(2)
                 EXTEND
                 MP              MASS                    # SCALED AT B+16 KGS
                 TC              DVOVSUB                 # GET QUOTIENT WITH OVERFLOW PROTECTION
@@ -553,8 +554,7 @@ TORQCONS        2DEC            0.51443         B-14    # CORRESPONDS TO 500 LB-
                 EXTEND
                 MP              MPAC                    # SCALED AT 4 PI RAD-CM/SEC
                 EXTEND
-## The following line is marked as having changed between ZLMDAP.000 and ZLMDAP.001.
-                MP              ABDVACC                 # SCALED AT 2(13) CM/SEC/SEC
+                MP              ABDELV                  # SCALED AT 2(13) CM/SEC(2)
                 TC              DVOVSUB                 # GET QUOTIENT WITH OVERFLOW PROTECTION
 ## Page 1484
                 ADRES           MPAC +1
@@ -1056,6 +1056,7 @@ FLATEMP         EQUALS          1/ATEM1         +22D
 Z3TEM           EQUALS          1/ATEM1         +23D    # MUST FOLLOW FLATEMP
 
 ## Page 1494
+DBVAL1          EQUALS          DB
 DBVAL2          EQUALS          INTB15+
 DBVAL3          EQUALS          INTB15+         +1
 
