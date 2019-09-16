@@ -19,6 +19,7 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-15 MAS  Restored the definition of OLDSENSE.
 
 ## Page 1495
 # PROGRAM NAME:  SPSRCS
@@ -97,101 +98,102 @@
 # OUTPUT:     TJP, TJV, TJU
 #
 
-		BANK	21
-		SETLOC	DAPS4
-		BANK
+                BANK    21
+                SETLOC  DAPS4
+                BANK
 
-		COUNT*	$$/DAPBU
+                COUNT*  $$/DAPBU
 
-		EBANK=	TJU
-RATELIM2	OCT	00632		# 1.125 DEG/SEC
-POSTHRST	CA	HALF
+                EBANK=  TJU
+RATELIM2        OCT     00632           # 1.125 DEG/SEC
+POSTHRST        CA      HALF
 
-		NDX	AXISCTR
-		TS	TJU
-		CCS	OLDSENSE
-		TCF	POSCHECK	# JETS FIRING POSITIVELY
-		TCF	CTRCHECK	# JETS OFF. CHECK INHIBITION CTR
-NEGCHECK	INDEX	AXISCTR		# JETS FIRING NEGATIVELY
-		CS	TJU
-		CCS	A
-		TC	Q		# RETURN
-		TCF	+2
-		TCF	+1		# JETS COMMANDED OFF.SET CTR AND RETURN
-SETCTR		INDEX	AXISCTR		# JET FIRING REVERSAL COMMANDED. SET CTR,
-		CA	UTIME		# SET JET TIME TO ZERO,AND RETURN
+                NDX     AXISCTR
+                TS      TJU
+                CCS     OLDSENSE
+                TCF     POSCHECK        # JETS FIRING POSITIVELY
+                TCF     CTRCHECK        # JETS OFF. CHECK INHIBITION CTR
+NEGCHECK        INDEX   AXISCTR         # JETS FIRING NEGATIVELY
+                CS      TJU
+                CCS     A
+                TC      Q               # RETURN
+                TCF     +2
+                TCF     +1              # JETS COMMANDED OFF.SET CTR AND RETURN
+SETCTR          INDEX   AXISCTR         # JET FIRING REVERSAL COMMANDED. SET CTR,
+                CA      UTIME           # SET JET TIME TO ZERO,AND RETURN
 ## Page 1497
-		INDEX	AXISCTR
-		TS	UJETCTR
-ZAPTJ		CA	ZERO
-		INDEX	AXISCTR
-		TS	TJU
-		TC	Q
-POSCHECK	INDEX	AXISCTR
-		CA	TJU
-		TCF	NEGCHECK +2
-CTRCHECK	INDEX	AXISCTR		# CHECK JET INHIBITION COUNTER
-		CCS	UJETCTR
-		TCF	+2
-		TC	Q		# CTR IS NOT POSITIVE. RETURN
-		TCF	ZAPTJ		# CTR IS POSITIVE.INHIBIT FIRINGS
-		TC	Q		# CTR IS NOT POSITIVE.RETURN
-		OCT	00004
-UTIME		OCT	00012
-		OCT	00012
-NEGFIRE		CS	ONE		# JETS FIRING NEGATIVELY
-		TS	OLDSENSE
-		CA	EDOT
-		TCF	+4
-PLUSFIRE	CA	ONE
-		TS	OLDSENSE
-		CS	EDOT		# RATE DEAD BAND TEST
-		LXCH	A
-		CS	DAPBOOLS	# IF DRIFTBIT = 1, USE ZERO TARGET RATE
-		MASK	DRIFTBIT	# IF DRIFTBIT = 0, USE 0.10 RATE TARGET
-		CCS	A
-		CA	RATEDB1
-		AD	L
-		EXTEND
-		BZMF	SPSSTART
-		TCF	POSTHRST +3
+                INDEX   AXISCTR
+                TS      UJETCTR
+ZAPTJ           CA      ZERO
+                INDEX   AXISCTR
+                TS      TJU
+                TC      Q
+POSCHECK        INDEX   AXISCTR
+                CA      TJU
+                TCF     NEGCHECK +2
+CTRCHECK        INDEX   AXISCTR         # CHECK JET INHIBITION COUNTER
+                CCS     UJETCTR
+                TCF     +2
+                TC      Q               # CTR IS NOT POSITIVE. RETURN
+                TCF     ZAPTJ           # CTR IS POSITIVE.INHIBIT FIRINGS
+                TC      Q               # CTR IS NOT POSITIVE.RETURN
+                OCT     00004
+UTIME           OCT     00012
+                OCT     00012
+OLDSENSE        EQUALS  DAPTREG1
+NEGFIRE         CS      ONE             # JETS FIRING NEGATIVELY
+                TS      OLDSENSE
+                CA      EDOT
+                TCF     +4
+PLUSFIRE        CA      ONE
+                TS      OLDSENSE
+                CS      EDOT            # RATE DEAD BAND TEST
+                LXCH    A
+                CS      DAPBOOLS        # IF DRIFTBIT = 1, USE ZERO TARGET RATE
+                MASK    DRIFTBIT        # IF DRIFTBIT = 0, USE 0.10 RATE TARGET
+                CCS     A
+                CA      RATEDB1
+                AD      L
+                EXTEND
+                BZMF    SPSSTART
+                TCF     POSTHRST +3
 
-SPSRCS		INDEX	AXISCTR		# JET SENSE TEST
-		CCS	TJU
-		TCF	PLUSFIRE	# JETS FIRING POSITIVELY
-		TCF	+2
-		TCF	NEGFIRE		# JETS FIRING NEGATIVELY
-		TS	OLDSENSE	# JETS OFF
-SPSSTART	CA	EDOT		# OUTER RATE LIMIT TEST
-		EXTEND
-		MP	RATELIM1
-		CCS	A
-		TCF	NEGTHRST	# OUTER RATE LIMIT EXCEEDED
-		TCF	+2
-		TCF	POSTHRST	# OUTER RATE LIMIT EXCEEDED
-		CA	EDOT		# COAST ZONE TEST
-		AD	E
+SPSRCS          INDEX   AXISCTR         # JET SENSE TEST
+                CCS     TJU
+                TCF     PLUSFIRE        # JETS FIRING POSITIVELY
+                TCF     +2
+                TCF     NEGFIRE         # JETS FIRING NEGATIVELY
+                TS      OLDSENSE        # JETS OFF
+SPSSTART        CA      EDOT            # OUTER RATE LIMIT TEST
+                EXTEND
+                MP      RATELIM1
+                CCS     A
+                TCF     NEGTHRST        # OUTER RATE LIMIT EXCEEDED
+                TCF     +2
+                TCF     POSTHRST        # OUTER RATE LIMIT EXCEEDED
+                CA      EDOT            # COAST ZONE TEST
+                AD      E
 ## Page 1498
-		EXTEND
-		MP	DKDB		# PAD LOADED DEADBAND. FRESHSTART: 1.4 DEG
-		EXTEND
-		BZF	TJZERO
+                EXTEND
+                MP      DKDB            # PAD LOADED DEADBAND. FRESHSTART: 1.4 DEG
+                EXTEND
+                BZF     TJZERO
 
-		EXTEND
-		BZMF	+7
-		CA	EDOT
-		AD	RATELIM2
-		EXTEND
-		BZMF	TJZERO
-NEGTHRST	CS	HALF
-		TCF	POSTHRST +1
- +7		CS	RATELIM2
-		AD	EDOT
-		EXTEND
-		BZMF	POSTHRST
-TJZERO		CA	ZERO
-		TCF	POSTHRST +1
+                EXTEND
+                BZMF    +7
+                CA      EDOT
+                AD      RATELIM2
+                EXTEND
+                BZMF    TJZERO
+NEGTHRST        CS      HALF
+                TCF     POSTHRST +1
+ +7             CS      RATELIM2
+                AD      EDOT
+                EXTEND
+                BZMF    POSTHRST
+TJZERO          CA      ZERO
+                TCF     POSTHRST +1
 
 
-RATELIM1	=	CALLCODE	# = 00032, CORRESPONDING TO 1.73 DEG/SEC
-RATEDB1		=	TBUILDFX	#  = 00045, CORRESPONDS TO 0.101 DEG/SEC
+RATELIM1        =       CALLCODE        # = 00032, CORRESPONDING TO 1.73 DEG/SEC
+RATEDB1         =       TBUILDFX        #  = 00045, CORRESPONDS TO 0.101 DEG/SEC
