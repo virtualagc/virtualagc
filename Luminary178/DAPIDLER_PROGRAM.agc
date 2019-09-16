@@ -19,6 +19,9 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-15 MAS  Removed NONEEDLE tag and changed CHEKBITS
+##                              to branch to MOREIDLE. Also removed/changed
+##                              back some comments.
 
 ## Page 1398
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.             THE DAPIDLER PROGRAM IS DONE 10 TIMES
@@ -32,31 +35,19 @@
 
                 COUNT*  $$/DAPID
 
-#    CHEKBITS IS CALLED EVERY 0.1 SEC AT THE BEGINNING OF THE DAP PASS, WHETHER THE AUTOPILOT IS ACTIVE OR IDLING.
-# IT CHECKS FOR THE FOLLOWING
-#          A. IS THE PGNCS MODE SELECT SWITCH TURNED TO "OFF"?
-#          B. IS THE IMU UNAVAILABLE AS AN ATTITUDE REFERENCE?
-#          C. IS THE SPACECRAFT UNDER AGS CONTROL?
-
-#     IF A OR B HOLD, THE FDAI NEEDLES CANNOT BE UPDATED AND A BIT IS SET TO INITIALIZE THE UPDATE ROUTINE.  OTHER
-# WISE, THE NEEDLES ARE UPDATED.
-
-#    IF A OR B OR C ARE TRUE, THE DAP IS MADE TO IDLE THIS PASS.  OTHERWISE, CONTROL IS TRANSFERRED BACK TO THE
-# CALLER OF CHEKBITS.
-
 CHEKBITS        EXTEND
                 READ    CHAN31          # IF BOTH BIT13 AND BIT14 ARE ONE, THEN
                 COM                     # THE MODE SELECT SWITCH IS IN THE OFF
                 MASK    BIT13-14        # POSITION, AND SO THE DAP SHOULD BE OFF,
                 EXTEND                  # WITH NO ATTITUDE ERROR DISPLAY.
-                BZF     NONEEDLE
+                BZF     MOREIDLE
 
-                CS      IMODES33        # IF IMU NOT USABLE, DAP SHOULD IDLE WITH
-                MASK    BIT6            #  NO FDAI NEEDLE DISPLAY.
+                CS      IMODES33
+                MASK    BIT6
                 CCS     A
                 TCF     JUMPDSP
-NONEEDLE        CS      RCSFLAGS        # SET FLAG TO INITIALIZE NEEDLE DISPLAY.
-                MASK    BIT3
+                CS      RCSFLAGS        # IMU NOT USABLE.  SET UP INITIALIZATION
+                MASK    BIT3            # FLAG FOR ATT ERROR DISPLAY ROUTINE.
                 ADS     RCSFLAGS
                 TCF     SHUTDOWN
 
