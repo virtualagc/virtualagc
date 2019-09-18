@@ -198,7 +198,7 @@
 # certain changes that *may* allow building with clang rather than gcc.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2017-08-16\\\"
+NVER:=\\\"2019-09-18\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
