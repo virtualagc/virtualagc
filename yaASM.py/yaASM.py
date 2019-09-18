@@ -28,14 +28,48 @@
 #				the LVDC-206RAM transcription is now available.
 #				Specifically, began adding preprocessor pass.
 #		2019-08-22 RSB	I think the preprocessor and discovery passes
-#				are essentially working, except for auto-allocation
-#				of =... constants.
+#				are essentially working, except for 
+#				auto-allocation of =... constants.
+#		2019-09-18 RSB	Now outputs .sym and .sch files in addition to
+#				the .tsv file that was already being output.
 #
 # The usage is just
 #              yaASM.py [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing
-# Regardless of whether or not the assembly is successful, an octal-listing
-# file called yaASM.tsv is created.  It is also possible to optionally have
-# an octal-listing file (OCTALS.tsv) as in input.  If so, it does not affect
+# Regardless of whether or not the assembly is successful, the following
+# additional files are produced at the end of the assembly process:
+#
+#	yaASM.tsv	An octal-listing file.
+#
+#	yaASM.sym	A symbol file.
+#
+#	yaASM.src	A source file.
+#
+# These 3 output files basically duplicate the information in the output
+# assembly-listing file, but are formatted more-suitably for machine-reading.
+# They are intended for use by the yaLVDC program, which as an LVDC emulator.
+# In spite of the naming, they are *all* TSV files, and what they provide will
+# be pretty obvious in examining one of them.  The only tricky aspects are
+# these:
+#   1.	The fields in the .tsv file are empty for unused locations.
+#   2.  The fields in the .tsv file that define the value of a memory location
+#	(when not empty) have either the format "%05o %05o" (for instructions) 
+#	or " %09o " (for data), so the parser must detect which format is 
+#	used in order to interpret the data.
+#   3.  In the .sym file, symbols for code areas have either syllable 0 or 1,
+#	while those for data areas have syllable 2 (which means that the
+#	value spans both syllables 0 and 1).
+#   4.	In addition to symbols, the .sym file also gives the locations for 
+#	automatically-allocated nameless constants, using their "%09o"
+#	representations as symbol names.  Since the same nameless constant may
+#	appear in several sectors, they may also appear multiple times in the
+#	file, whereas actual symbolic names can only appear once.
+#   5.  The .src file gives source lines that are post-preprocessing; moreover,
+#	their tabs are expanded to the appropriate number of spaces, so even
+#	though the original source lines may have included tabs, each of them
+#	nevertheless appears in the .src file as a single field.
+#
+# It is also possible to optionally have an octal-listing file -- i.e, a
+# file formatted like yaASM.tsv -- as in input.  If so, it does not affect
 # the assembly process at all, but is used for checking purposes and for 
 # marking lines in the output assembly listing which disagree with OCTALS.tsv.
 # No separate binary file of octals is produced; the yaASM.tsv file, which 
@@ -208,7 +242,7 @@ for n in range(8):
 
 lines = sys.stdin.readlines()
 for n in range(0,len(lines)):
-	lines[n] = lines[n].rstrip()
+	lines[n] = lines[n].expandtabs().rstrip()
 
 #----------------------------------------------------------------------------
 #	Definitions of utility functions
@@ -1055,7 +1089,7 @@ if False:
 			#print("")
 
 #----------------------------------------------------------------------------
-#   	Assembly pass, printout of assembly listing
+#   	Assembly pass, printout of assembly listing, saving .src file
 #----------------------------------------------------------------------------
 # At this point we have a dictionary called inputFile in which the entire 
 # input source file has been parsed into a relatively simple structure.  The
@@ -1089,6 +1123,7 @@ if False:
 #		is a macro invocation and does generate something visually in the assembly
 #		listing, but is not itself assembled.  Only the lines in expandedLines[n][]
 #		actually need to be assembled.
+f = open("yaASM.src", "w")
 if False:
 	for key in sorted(nameless):
 		print(key + " " + ("%03o" % nameless[key]))
@@ -1356,6 +1391,7 @@ for entry in inputFile:
 		# Put the assembled value wherever it's supposed to 
 		storeAssembled(lineNumber, assembled, inputLine["hop"])
 	elif operator in operators:
+		print("%o\t%02o\t%o\t%03o\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], inputLine["raw"]), file=f)
 		inDataMemory = False
 		loc = 0
 		residual = 0
@@ -1688,6 +1724,7 @@ for entry in inputFile:
 					lineText += n + "\t"
 				print(("%40s" % "") + "\t" + lineText)
 			print(("%40s" % "") + "\t\tENDMAC")
+f.close()
 
 if checkTheOctals:
 	# While we have now checked all of the assembed values against the 
@@ -1717,8 +1754,9 @@ print("\tOther:      %d" % countOthers)
 
 
 #----------------------------------------------------------------------------
-#   	Print a symbol table
+#   	Print a symbol table and save as a .sym file too
 #----------------------------------------------------------------------------
+f = open("yaASM.sym", "w")
 print("\n\nSymbol Table:")
 print("")
 for key in sorted(symbols):
@@ -1726,18 +1764,23 @@ for key in sorted(symbols):
 	if "inDataMemory" in symbols[key] and symbols[key]["inDataMemory"]:
 		print("%o %02o   %03o" % (hop["IM"], hop["IS"], 
 							hop["LOC"]) + "  " + key)
+		syl = 2
 	else:
 		print("%o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
 							hop["LOC"]) + "  " + key)
+		syl = hop["S"]
+	print("%s\t%o\t%02o\t%o\t%03o" % (key, hop["IM"], hop["IS"], syl, hop["LOC"]), file=f)
 lastKey = ""
 for key in sorted(nameless):
 	loc = nameless[key]
 	fields = key.split("_")
+	print("%s\t%s\t%s\t2\t%03o" % (fields[2], fields[0], fields[1], loc), file=f)
 	newKey = fields[0] + "_" + fields[1]
 	if newKey != lastKey:
 		print("")
 		lastKey = newKey
 	print(fields[0] + " " + fields[1] + "   " + ("%03o" % loc) + "  " + fields[2])
+f.close()
 
 #----------------------------------------------------------------------------
 #   	Print octal listing and save as a .tsv file too

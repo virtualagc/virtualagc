@@ -17,7 +17,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # Filename:	Makefile
-# Purpose:	Makefile for the yaOBC assembler.
+# Purpose:	Makefile for the yaOBC emulator.
 # Mods:		2011-12-23 RSB	Adapted from yaASM Makefile.
 #
 # The default is to build using the native gcc. To cross build from 

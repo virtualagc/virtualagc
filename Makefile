@@ -180,6 +180,7 @@
 #		2019-07-31 RSB	Added COMANCHE051.
 #		2019-08-16 RSB	Added Artemis071.
 #		2019-09-17 MAS	Added Luminary 178.
+#		2019-09-18 RSB	Added yaOBC and yaASM targets.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -560,6 +561,10 @@ VirtualAGC-installer: all
 
 .PHONY: yaASM
 yaASM:
+	$(BUILD) -C $@
+
+.PHONY: yaOBC
+yaOBC:
 	$(BUILD) -C $@
 
 # This target is for making HTML assembly listings for the website.
