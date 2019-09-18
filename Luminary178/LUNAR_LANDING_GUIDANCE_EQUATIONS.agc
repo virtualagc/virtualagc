@@ -15,9 +15,6 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
 ##              2019-09-10 MAS  Initial attempt at updating for Luminary
 ##                              178, based on 131, 210, flowcharts, and

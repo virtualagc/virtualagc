@@ -15,9 +15,6 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
 ##              2019-08-31 MAS  Removed ALW66FLG, SERVOVER, and LPOS2FLG.
 ##                              Added R12RDFLG and restored comments on
