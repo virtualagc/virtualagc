@@ -25,6 +25,8 @@
 ##                              displays in LRON, restored original coding
 ##                              for TRMTRAK1, and moved DSPRRLOS and V16N56
 ##                              back to their original bank.
+##              2019-09-17 MAS  Added in a reconstructed remode check for
+##                              verb 44.
 
 ## Page 268
                 BANK    7
@@ -357,7 +359,15 @@ RRDESEND        CCS     RADMODES                # TERMINATE CONTINUOUS DESIGNATE
                 TCF     GOPIN
                 TCF     GOPIN
                 TCF     +1
-                TC      CLRADMOD
+REMODCHK        CS      RADMODES                # CHECK FOR REMODE
+                MASK    REMODBIT
+                CCS     A
+                TCF     NOREMODE                # NO
+                CAF     1SEC                    # YES- WAIT 1 SECOND AND CHECK AGAIN
+                TC      BANKCALL
+                CADR    DELAYJOB
+                TC      REMODCHK
+NOREMODE        TC      CLRADMOD
                 CAF     1SEC
                 TC      BANKCALL
                 CADR    DELAYJOB

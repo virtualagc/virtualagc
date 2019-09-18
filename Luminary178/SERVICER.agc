@@ -26,6 +26,8 @@
 ##                              definition of DVCNTR1, removed storing of
 ##                              TEMDELH and TRUDELH, and changed an SL2 to an
 ##                              SL3 in TERSKIP.
+##              2019-09-17 MAS  Removed the INHINT/RELINT at the beginning of
+##                              TERSKIP. They were added with TEMDELH/TRUDELH.
 
 ## Page 860
                 BANK    37
@@ -1167,12 +1169,9 @@ TEREND          CA      EBANK7          # Y: RESTORE EBANK AND DEPART
                 TS      EBANK
                 EBANK=  END-E7
 
-TERSKIP         INHINT                  # SO DOWNLINK DATA WILL BE TIME HOMOGENEOU
-                INDEX   FIXLOC          # TRANSFER COMPLETED DELTA H HOME
+TERSKIP         INDEX   FIXLOC          # TRANSFER COMPLETED DELTA H HOME
                 DXCH    4               # TO BE ACCESSED BY DISPLAYS, TELEMETRY,
                 DXCH    DELTAH          # AND POSITION UPDATE.
-
-                RELINT
 
                 CA      FIXLOC          # RESTORE PUSHDOWN POINTER TO ZERO
                 TS      PUSHLOC
