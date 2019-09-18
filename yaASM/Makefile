@@ -55,7 +55,11 @@ SampleCodeASM.lst: yaASM SampleCodeASM.obc
 	mv yaASM.lst SampleCodeASM.lst
 
 yaASM: yaASM.c yaASM.h Makefile
-	${cc} ${CFLAGS} -m32 -o $@ $< -lm
+	# The following used to have a -m32 switch, but that
+	# stopped working for some reason, probably because
+	# the I no longer had the necessary 32-bit libraries.
+	# But I don't know why the switch was ever there.
+	${cc} ${CFLAGS} -o $@ $< -lm
 
 yaASM.exe: yaASM.c yaASM.h Makefile
 	i386-mingw32-${cc} ${CFLAGS} -o $@ $< -lm
