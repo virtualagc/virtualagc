@@ -19,6 +19,10 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-17 MAS  Updated for Luminary 178. Changed program name
+##                              and subroutine names. Removed CHECK EQUALS log
+##                              section. Corrected noun 70 and 78. Removed
+##                              Zerlina-only -BBB- and 00555 alarm definitions.
 
 ## Page 2
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
@@ -35,7 +39,7 @@
 # SPACECRAFT CENTER OF THE NATIONAL AERONAUTICS AND SPACE ADMINISTRATION, CONTRACT NAS 9-4065.
 
 
-# THIS PROGRAM IS A VERSION OF LUMINARY FOR DEVELOPING A NEW VARIABLE GUIDANCE PERIOD SERVICER.
+#                  THIS PROGRAM IS REFERRED TO AS LUMINARY 1D
 
 # TABLE OF LOG CARDS
 
@@ -49,9 +53,9 @@
 
 
 # TABLE OF SUBROUTINE LOG SECTIONS
-#          ZERASE  
+#          LUMERASE
 #                 ERASABLE ASSIGNMENTS
-#          ZERLAID 
+#          LEMONAID
 #                 INTERRUPT LEAD INS
 #                 T4RUPT PROGRAM
 #                 RCS FAILURE MONITOR
@@ -75,7 +79,7 @@
 #                 PINBALL GAMES BUTTONS AND LIGHTS
 #                 R60,R62
 #                 S-BAND ANTENNA FOR LM
-#          ZLEMP20S
+#          LEMP20S
 #                 RADAR LEADIN ROUTINES
 #                 P20-P25
 #          LEMP30S
@@ -87,7 +91,7 @@
 #                 R31
 #                 P76
 #                 R30
-#          ZFLY
+#          FLY
 #                 BURN, BABY, BURN -- MASTER IGNITION ROUTINE
 #                 P40-P47
 #                 THE LUNAR LANDING
@@ -131,7 +135,7 @@
 #                 ALARM AND ABORT
 #                 UPDATE PROGRAM
 #                 RTB OP CODES
-#          ZLMDAP1
+#          LMDAP
 #                 T6-RUPT PROGRAMS
 #                 DAP INTERFACE SUBROUTINES
 #                 DAPIDLER PROGRAM
@@ -395,7 +399,7 @@
 #     DELTA V TPI                                    XXXX.X FT/SEC
 #     DELTA V TPF                                    XXXX.X FT/SEC
 # 59  DELTA VELOCITY LOS                     3COMP   XXXX.X FT/SEC FOR EA.               DEC ONLY
-# 60  FORWARD VELOCITY - LPD ANGLE           3COMP   XXBXX                                       NO LOAD, DEC ONLY
+# 60  FORWARD VELOCITY                       3COMP  XXXX.X FT/SEC                        DEC ONLY
 #     ALTITUDE RATE                                  XXXX.X FT/SEC
 #     COMPUTED ALTITUDE                              XXXXX. FEET
 # 61  TIME TO GO IN BRAKING PHASE            3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
@@ -443,7 +447,7 @@
 # 77  TIME TO ENGINE CUTOFF                  2COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     VELOCITY NORMAL TO CSM PLANE                   XXXX.X FT/SEC 
 # 78  RR RANGE                               3COMP   XXX.XX NAUT MI                      NO LOAD, DEC ONLY
-#        RANGE RATE                                  XXXX.X FT/SEC
+#        RANGE RATE                                  XXXXX. FT/SEC
 #     TIME FROM  IGNITION                            XXBXX  MIN/SEC
 # 79  CURSOR ANGLE                           3COMP   XXX.XX DEG                          DEC ONLY
 #     SPIRAL ANGLE                                   XXX.XX DEG
@@ -583,7 +587,7 @@
 # 60       1      FORVEL          ZZ
 ## Page 15
 #          2      HDOTDISP        S
-#          3      ALTITUDE        BBB
+#          3      HCALC1          RR
 # 61       1      TTFDISP         L
 #          2      TTOGO           L
 #          3      OUTOFPLN        QQ
@@ -798,7 +802,7 @@
 #                      LOADED.)
 
 # -V-
-# RENDEZVOUS           XXXX.X FEET/SEC       SP USES 15 BITS FOR UNSIGNED
+# RENDEZVOUS           XXXXX. FEET/SEC       SP USES 15 BITS FOR UNSIGNED
 # RADAR RANGE RATE     (DECIMAL ONLY.           MAGNITUDE.
 #                      DISPLAY OR MONITOR       BIT 1 = -.6278 FEET/SEC
 #                      ONLY. CANNOT BE
@@ -913,10 +917,6 @@
 #                      (MAX 31.999)              -9
 #                                               2   RADIANS
 
-# -BBB-
-# COMPUTED ALTITUDE 2  XXXXX. FEET           DP BIT 1 OF HIGH REGISTER =
-#                                               2 METERS
-
 # THAT-S ALL ON THE NOUNS.
 
 ## Page 23
@@ -965,7 +965,6 @@
 #          OR VEHICLE MANEUVER REQUIRED              R24 (20)
 # 00530  P LOS NOT IN MODE2 COVERAGE                 R21
 #          ON LUNAR SURFACE AFTER 600 SECS.
-# 00555    SERVICER LOOP EXCEEDED 4 SECONDS          SERVICER
 # 00600    IMAGINARY ROOTS ON FIRST ITERATION        P32, P72
 # 00601    PERIGEE ALTITUDE CSI LT PMIN1             P32,P72,
 # 00602    PERIGEE ALTITUDE CDH LT PMIN2             P32,P72,

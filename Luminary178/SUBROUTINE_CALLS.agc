@@ -19,15 +19,21 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 178.
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2019-09-17 MAS  Changed subroutine names to match those
+##                              of Luminary proper.
 
 ## Page 90
-                SUBRO           ZERASE
-                SUBRO           ZERLAID
-                SUBRO           ZLEMP20S
+## Luminary 178, as a release version, likely had explicit version numbers for
+## all of the subroutines hardcoded. Since this has been reconstructed from
+## multiple distant versions, the exact version numbers of each subroutine are
+## unknown, and so they have been left blank.
+                SUBRO           LUMERASE
+                SUBRO           LEMONAID
+                SUBRO           LEMP20S
                 SUBRO           LEMP30S
                 SUBRO           KISSING
-                SUBRO           ZFLY
+                SUBRO           FLY
                 SUBRO           LEMP50S
                 SUBRO           SKIPPER
-                SUBRO           ZLMDAP
+                SUBRO           LMDAP
 
