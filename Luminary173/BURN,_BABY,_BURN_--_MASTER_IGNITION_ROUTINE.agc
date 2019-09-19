@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
-## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+## Mod history: 2019-09-18 MAS  Created from Luminary 178. Changed
+##                              P42TABLE +6 back to 2390.
 
 ## Page 717
                 BANK            36
@@ -99,7 +100,7 @@ P42TABLE        VN              0640                    # (0)
                 TCF             GOPOST                  # (3)
                 TCF             TASKOVER                # (4)
                 TCF             P42SPOT                 # (5)
-                DEC             2390                    # (6) ULLAGE ON AT TIG-6 SECS.
+                DEC             2640                    # (6)
                 EBANK=          OMEGAQ
                 2CADR           STEERING                # (7)
 

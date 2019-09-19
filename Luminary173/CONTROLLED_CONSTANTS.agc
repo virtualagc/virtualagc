@@ -19,7 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178. Gave THROTLAG
-##                              its original value of 0.2s.
+##                              its original value of 0.2s. Changed K1VAL
+##                              back to 124.55 B-23.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -58,7 +59,7 @@ FRCS2           2DEC            0.08896         B-7     # 200 LBS FORCE IN NEWTO
 
 # *** APS IMPULSE DATA FOR P42 *******************************************
 
-K1VAL           2DEC            140.12          B-23    # 3150 LB.SEC APS IMPULSE (WET)
+K1VAL           2DEC            124.55          B-23    # 2800 LB-SEC
 
 K2VAL           2DEC            31.138          B-24    # 700  LB-SEC
 

@@ -18,7 +18,10 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
-## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+## Mod history: 2019-09-18 MAS  Created from Luminary 178. Changed S40.13
+##                              to call FRCS2 instead of FRCS4, with 4SEC(17)
+##                              as the duration instead of 6.5SECS. Removed
+##                              the definition of 6.5SECS.
 
 ## Page 738
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -1036,8 +1039,8 @@ S40.13          TC      INTPRET
                 VLOAD   ABVAL
                         VGTIG           # VELOCITY TO BE GAINED AT +7
                 PDDL    DMP             # 00D = MAG OF VGTIG AT +7
-                        6.5SECS         # CORRECT VG FOR 6.5 SECONDS OF ULLAGE
-                        FRCS4           # ASSUME 4 JET ULLAGE
+                        4SEC(17)        # CORRECT VG FOR 4 SECS OF 2 JET ULLAGE
+                        FRCS2
                 DDV     SL1             # SCALE
                         WEIGHT/G
                 BDSU    PUSH
@@ -1141,8 +1144,6 @@ APSTGO          DDV     SL2
 6SEC            2DEC    600.0 B-14      # 600.0 CS AT +14
 
 89SECS          2DEC    8900.0 B-14
-
-6.5SECS         2DEC    650. B-17       # ASSUME 6.5 SECONDS OF ULLAGE
 
 # FUNCTION    (1) GENERATES REQUIRED VELOCITY AND VELOCITY-TO-BE-GAINED
 #             VECTORS FOR USE DURING AIMPOINT MANEUVERS EVERY TWO
