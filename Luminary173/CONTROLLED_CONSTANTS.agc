@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
-## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+## Mod history: 2019-09-18 MAS  Created from Luminary 178. Gave THROTLAG
+##                              its original value of 0.2s.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -141,7 +142,7 @@ FMAXODD         DEC             +3841                     # FSAT          +4.814
 
 FMAXPOS         DEC             +3467                     # FMAX          +4.34546769 E+ 4
 
-THROTLAG        DEC             +8                        # TAU (TH)       +0.08 SECONDS
+THROTLAG        DEC             +20                       # TAU (TH)      +1.99999999 E-1
 SCALEFAC        2DEC*           +7.97959872     E+2 B-16* # BITPERF       +7.97959872E- 2
 
                 SETLOC          F2DPS*32
