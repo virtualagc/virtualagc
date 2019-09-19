@@ -47,9 +47,34 @@ typedef struct {
   uint8_t loc;
 } symbol_t;
 symbol_t *symbols;
+symbol_t *symbolsByName;
 int numSymbols;
+int numSymbolsByName;
+typedef struct {
+  char *line;
+  uint8_t module;
+  uint8_t sector;
+  uint8_t syllable; // 0,1 instructions, 2 data.
+  uint8_t loc;
+} sourceLine_t;
+sourceLine_t *sourceLines;
+int numSourceLines;
+int rope[8][16][3][256];
 int
 readAssemblies(char *assemblyNames[], int maxAssemblies);
+int
+cmpSourceByAddress (const void *r1, const void *r2);
+int
+cmpSymbolsByAddress (const void *r1, const void *r2);
+int
+cmpSymbolsByName (const void *r1, const void *r2);
+
+// See pushErrorMessage.c
+#define MAX_ERROR_MESSAGES 32
+char *errorMessageStack[MAX_ERROR_MESSAGES];
+int numErrorMessages;
+int
+pushErrorMessage (char *part1, char *part2);
 
 
 #endif // yaLVDC_h

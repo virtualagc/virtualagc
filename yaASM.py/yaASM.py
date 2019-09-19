@@ -1820,7 +1820,7 @@ for module in range(8):
 			for loc in range(row, row + 8):
 				if not (used[module][sector][0][loc] or used[module][sector][1][loc]):
 					rowList.append("           ")
-					rowList.append("")
+					rowList.append(" ")
 				elif octals[module][sector][2][loc] != None:
 					rowList.append(" %09o " % octals[module][sector][2][loc])
 					rowList.append("D")
@@ -1842,7 +1842,7 @@ for module in range(8):
 					if usedEntry:
 						rowList.append("D")
 					else:
-						rowList.append("")
+						rowList.append(" ")
 			print(formatLine % tuple(rowList))
 			print(formatFileLine % tuple(rowList), file=f)
 f.close()

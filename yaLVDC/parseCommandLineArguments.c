@@ -66,20 +66,18 @@ parseCommandLineArguments (int argc, char *argv[])
 	{
 	  if (jAssembly >= MAX_PROGRAMS)
 	    {
-	      fprintf (stderr, "Too many --assembly arguments.\n");
+	      pushErrorMessage ("Too many --assembly arguments", NULL);
 	      goto help;
 	    }
 	  assemblyBasenames[jAssembly++] = &argv[i][11];
 	}
       else if (!strncmp (argv[i], "--core=", 7))
-	{
-	  coreRopeFilename = &argv[i][7];
-	}
+	coreRopeFilename = &argv[i][7];
       else if (!strcmp (argv[i], "--help"))
 	goto help;
       else
 	{
-	  fprintf (stderr, "Unrecognized argument: %s\n", argv[i]);
+	  pushErrorMessage ("Unrecognized command-line argument:", argv[i]);
 	  help: ;
 	  fprintf (stderr, "%s", helpMessage);
 	  goto done;
