@@ -33,14 +33,14 @@ static char helpMessage[] = "Usage:\n"
     "--assembly=B  Provides a base name for the output of an assembly\n"
     "              performed by the program yaASM.py.  B defaults to yaLVDC.\n"
     "              The program will try to read the files B.tsv, B.sym, and\n"
-    "              B.src.  Respectively, these are the core rope, symbol\n"
+    "              B.src.  Respectively, these are the core memory, symbol\n"
     "              table, and source lines (vs address).  The B.tsv file\n"
-    "              defines the initial contents of rope memory, unless\n"
+    "              defines the initial contents of core memory, unless\n"
     "              a --core file (see below) overrides it.  The B.sym and\n"
     "              B.src files are used for symbolic debugging. Multiple\n"
     "              --assembly arguments can be used if several programs are\n"
     "              overlaid in core memory.\n"
-    "--core=F      The initial core-rope image is in filename F. The default\n"
+    "--core=F      The initial core-memory image is filename F. The default\n"
     "              is yaLVDC.core.  Note that the file will be periodically\n"
     "              modified during emulation as core memory changes.  If the\n"
     "              file does not exist initially, then the initial state is\n"
@@ -50,7 +50,7 @@ static char helpMessage[] = "Usage:\n"
 
 char *assemblyBasenames[MAX_PROGRAMS] =
   { "yaLVDC" };
-char *coreRopeFilename = "yaLVDC.core";
+char *coreFilename = "yaLVDC.core";
 
 // Parse a set of command-line arguments and set global variables based
 // on them.
@@ -72,7 +72,7 @@ parseCommandLineArguments (int argc, char *argv[])
 	  assemblyBasenames[jAssembly++] = &argv[i][11];
 	}
       else if (!strncmp (argv[i], "--core=", 7))
-	coreRopeFilename = &argv[i][7];
+	coreFilename = &argv[i][7];
       else if (!strcmp (argv[i], "--help"))
 	goto help;
       else

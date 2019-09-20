@@ -29,94 +29,99 @@
 #include <stdio.h>
 #include "yaLVDC.h"
 
+//////////////////////////////////////////////////////////////////////////////
+// Cross-platform timekeeping stuff.  Use *NIX-style functions times() and
+// sysconf(_SC_CLK_TCK) for measuring time passage, and use sleepMilliseconds()
+// to sleep for a while.  Note that sleepMilliseconds(0) actually does nothing,
+// and does not relinquish any control.
+
+#ifdef WIN32
+
+#include <windows.h>
+struct tms
+  {
+    clock_t tms_utime; /* user time */
+    clock_t tms_stime; /* system time */
+    clock_t tms_cutime; /* user time of children */
+    clock_t tms_cstime; /* system time of children */
+  };
+#define _SC_CLK_TCK (1000)
+#define sysconf(x) (x)
+#define times(p) (clock_t)GetTickCount ()
+
+void
+sleepMilliseconds(unsigned Milliseconds)
+{
+  if (Milliseconds == 0)
+    return;
+  Sleep (Milliseconds);
+}
+
+#else // *NIX.
+
+#include <sys/times.h>
+void
+sleepMilliseconds(unsigned Milliseconds)
+{
+  struct timespec Req, Rem;
+  if (Milliseconds == 0)
+    return;
+  Req.tv_sec = Milliseconds / 1000;
+  Req.tv_nsec = (Milliseconds % 1000) * 1000 * 1000; // 10 milliseconds.
+  nanosleep(&Req, &Rem);
+}
+
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+// Main program.
+
+// Length of an LVDC CPU's "computer cycle".
+#define SECONDS_PER_CYCLE (168.0/2048000) // About 82us.
+double cyclesPerTick;
+
 int
 main (int argc, char *argv[])
 {
   int retVal = 1;
   int i;
+  clock_t startingTime, currentTime;
+  unsigned long cycleCount = 0;
 
+  // Setup and initialization.
   if (parseCommandLineArguments (argc, argv))
     goto done;
+  // Note that readCore() must occur after readAssemblies(), since if present,
+  // the core-memory file overrides the core-memory image from the assembler.
   if (readAssemblies (assemblyBasenames, MAX_PROGRAMS))
     goto done;
+  if (readCore())
+    goto done;
+  dPrintouts(); // Some optional printouts for debugging.
 
-#define DEBUG
-#ifdef DEBUG
-  if (0)
+  cyclesPerTick = 1.0 / (SECONDS_PER_CYCLE * sysconf(_SC_CLK_TCK));
+  startingTime = times(&TmsStruct);
+  state.hop = state.core[0][0][2][0];
+
+  // Emulation.
+  while (1)
     {
-      int i;
-      for (i = 0; i < numSymbols; i++)
+      unsigned long targetCycles;
+
+      currentTime = times(&TmsStruct);
+      targetCycles = (currentTime - startingTime) * cyclesPerTick;
+      while (cycleCount < targetCycles)
 	{
-	  printf ("%d\t%o\t%02o\t%o\t%03o\t%s\n", i, symbols[i].module,
-		  symbols[i].sector, symbols[i].syllable, symbols[i].loc,
-		  symbols[i].name);
+	  int cyclesUsed = 0;
+	  if (runOneInstruction(&cyclesUsed))
+	    goto done;
+	  cycleCount += cyclesUsed;
 	}
+
+      // Sleep for a little to avoid hogging 100% CPU time.  The amount
+      // we choose doesn't really matter.
+      sleepMilliseconds(10);
     }
-  if (0)
-    {
-      int i;
-      for (i = 0; i < numSymbolsByName; i++)
-	{
-	  printf ("%d\t%o\t%02o\t%o\t%03o\t%s\n", i, symbolsByName[i].module,
-		  symbolsByName[i].sector, symbolsByName[i].syllable,
-		  symbolsByName[i].loc, symbolsByName[i].name);
-	}
-    }
-  if (0)
-    {
-      int i;
-      for (i = 0; i < numSourceLines; i++)
-	{
-	  printf ("%d\t%o\t%02o\t%o\t%03o\t%s\n", i, sourceLines[i].module,
-		  sourceLines[i].sector, sourceLines[i].syllable,
-		  sourceLines[i].loc, sourceLines[i].line);
-	}
-    }
-  if (1)
-    {
-      int module, sector, syllable, loc;
-      for (module = 0; module <= 7; module++)
-	for (sector = 0; sector <= 017; sector++)
-	  {
-	    int empty = 1, offset;
-	    // Check if the sector is completely empty.
-	    for (syllable = 0; empty && syllable <= 2; syllable++)
-	      for (loc = 0; empty && loc <= 0377; loc++)
-		if (rope[module][sector][syllable][loc] != -1)
-		  empty = 0;
-	    if (empty)
-	      continue;
-	    // Sector not completely empty, so print it out.
-	    printf ("SECTOR\t%o\t%02o\n", module, sector);
-	for (offset = 0; offset <= 0377; offset += 8)
-	  {
-	    printf ("%03o", offset);
-	    for (loc = offset; loc < offset + 8; loc++)
-	      {
-		if (rope[module][sector][2][loc] != -1)
-		  {
-		    printf ("\t %09o \tD", rope[module][sector][2][loc]);
-		    continue;
-		  }
-		if (rope[module][sector][0][loc] == -1 && rope[module][sector][1][loc] == -1)
-		  {
-		    printf ("\t           \t ");
-		    continue;
-		  }
-		if (rope[module][sector][1][loc] == -1)
-		  printf ("\t      ");
-		else
-		  printf ("\t%05o ", rope[module][sector][1][loc]);
-		if (rope[module][sector][0][loc] == -1)
-		  printf ("     \tD");
-		else
-		  printf ("%05o\tD", rope[module][sector][0][loc]);
-	      }
-	    printf ("\n");
-	  }
-      }
-}
-#endif
 
 retVal = 0;
 done: ;

@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 #include "yaLVDC.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -81,7 +82,7 @@ checkAddress (unsigned module, unsigned sector, unsigned syllable, unsigned loc)
 // Read the .tsv file.
 
 static int firstPass = 1;
-int rope[8][16][3][256]; // Initializes to all -1, meaning "unoccupied".
+state_t state = { 0 };
 static int
 readOctalListing (int count, char *filename)
 {
@@ -99,7 +100,7 @@ readOctalListing (int count, char *filename)
 	for (j = 0; j < 16; j++)
 	  for (k = 0; k < 3; k++)
 	    for (n = 0; n < 256; n++)
-	      rope[i][j][k][n] = -1;
+	      state.core[i][j][k][n] = -1;
     }
 
   fp = fopen (filename, "r");
@@ -270,9 +271,9 @@ readOctalListing (int count, char *filename)
 	      if (pd == 11)
 		{
 		  sscanf (vals[j], " %o", &syl2);
-		  rope[currentModule][currentSector][2][loc] = syl2;
-		  if (rope[currentModule][currentSector][0][loc] != -1
-		      || rope[currentModule][currentSector][1][loc] != -1)
+		  state.core[currentModule][currentSector][2][loc] = syl2;
+		  if (state.core[currentModule][currentSector][0][loc] != -1
+		      || state.core[currentModule][currentSector][1][loc] != -1)
 		    {
 		      pushErrorMessage (
 			  "Conflict between instruction and data memory", NULL);
@@ -282,8 +283,8 @@ readOctalListing (int count, char *filename)
 	      else if (pi10 == 11)
 		{
 		  sscanf (vals[j], "%o", &syl1);
-		  rope[currentModule][currentSector][1][loc] = syl1;
-		  if (rope[currentModule][currentSector][2][loc] != -1)
+		  state.core[currentModule][currentSector][1][loc] = syl1;
+		  if (state.core[currentModule][currentSector][2][loc] != -1)
 		    {
 		      pushErrorMessage (
 			  "Conflict between instruction and data memory", NULL);
@@ -293,8 +294,8 @@ readOctalListing (int count, char *filename)
 	      else if (pi01 == 11)
 		{
 		  sscanf (vals[j], "      %o", &syl0);
-		  rope[currentModule][currentSector][0][loc] = syl0;
-		  if (rope[currentModule][currentSector][2][loc] != -1)
+		  state.core[currentModule][currentSector][0][loc] = syl0;
+		  if (state.core[currentModule][currentSector][2][loc] != -1)
 		    {
 		      pushErrorMessage (
 			  "Conflict between instruction and data memory", NULL);
@@ -304,9 +305,9 @@ readOctalListing (int count, char *filename)
 	      else if (pi11 == 11)
 		{
 		  sscanf (vals[j], "%o %o", &syl1, &syl0);
-		  rope[currentModule][currentSector][1][loc] = syl1;
-		  rope[currentModule][currentSector][0][loc] = syl0;
-		  if (rope[currentModule][currentSector][2][loc] != -1)
+		  state.core[currentModule][currentSector][1][loc] = syl1;
+		  state.core[currentModule][currentSector][0][loc] = syl0;
+		  if (state.core[currentModule][currentSector][2][loc] != -1)
 		    {
 		      pushErrorMessage (
 			  "Conflict between instruction and data memory", NULL);
