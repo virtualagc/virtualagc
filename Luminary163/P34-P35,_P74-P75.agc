@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed zeroing of
+##                              ELEV from P34/P74A.
 
 ## Page 653
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -203,17 +204,9 @@ P34/P74A        TC              P20FLGON                # SET UPDATFLG, TRACKFLG
                 EXTEND
                 DCA             130DEG
                 DXCH            CENTANG
-                CAF             EBANK4
-                TS              L
-                CAF             P30ZERO                 # INITIALIZE DISPLAYED REGISTERS TO ZERO
-                TS              NN                      # R1: NN -- NUMBER OF OFFSETS
-                EBANK=          ELEV
-                LXCH            EBANK
-                TS              ELEV                    # R2: ELEV (D.P.) -- ELEVATION ANGLE
-                TS              ELEV            +1
-                LXCH            EBANK
-                EBANK=          SUBEXIT                 # CHNG BACK TO WHAT IT WAS BEFORE
-                TC              DISPLAYE                # V06N55 GOFLASH CALL: NN,ELEV,CENTANG
+                CAF             P30ZERO
+                TS              NN
+                TC              DISPLAYE                # ELEV AND CENTANG
                 TC              INTPRET
                 CLEAR           DLOAD
                                 ETPIFLAG

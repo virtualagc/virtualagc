@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Moved AT to share
+##                              with GSAV.
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -1270,7 +1271,7 @@ ANGTERM         EQUALS  GSAV            # I(6) GUIDANCE
 
 # ASCENT GUIDANCE FOR LUNAR LANDING             (54D)
 
-AT              EQUALS  UP1 +2          # I(2)TMP ENGINE DATA -- THRUST ACC*2(9)
+AT              EQUALS  GSAV            # I(2)TMP ENGINE DATA -- THRUST ACC*2(9)
 VE              EQUALS  AT +2           # I(2)TMP EXHAUST VELOCITY * 2(7)M/CS.
 TTO             EQUALS  VE +2           # I(2)TMP TAILOFF TIME * 2(17)CS.
 TBUP            EQUALS  TTO +2          # I(2)TMP (M/MDOT) * 2(17)CS.
