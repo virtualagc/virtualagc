@@ -19,6 +19,10 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Added calculation of VBIAS back to STRTP66A.
+##                              Moved the setting of RODFLAG into interpretive
+##                              alongside VBIAS calculation. Also added back
+##                              the definition of BIASFACT.
 
 ## Page 794
                 EBANK=          E2DPS
@@ -131,7 +135,7 @@ LUNLAND         TC              PHASCHNG
                 COUNT*          $$/R13
 
 # THE PHILOSOPHY OF GUILDENSTERN:  ON EVERY APPEARANCE OF THE ATTITUDE-HOLD DISCRETE CHECK TO SEE IF THE ROD SWITCH
-# HAS BEEN CLICKED.  IF SO, SELECT P66.  IF THE DAP IS IN AUTO AND THE					   PRESENT
+# HAS BEEN CLICKED.  IF SO, SELECT P66.  IF THE DAP IS IN AUTO AND THE                                     PRESENT
 # 9PROGRAM IN PROGRESS IS P66, CHECK FOR A
 # RESTART. IF ONE HAS OCCURED RE-INITIALIZE P66 AND CONTINUE OTHERWISE YOUCONTINUE WITH PRESENT DATA IN P66.TO
 # SELECT P66 THE ATTITUDE-HOLD DISCRETE MUST BE PRESENT AND THE ROD SWITCH MUST HAVE BEEN CLICKED. OTHERWISE THE
@@ -170,7 +174,17 @@ STRTP66A        TC              INTPRET
                 VLOAD           VXV                     # COMPUTE HORIZONTAL VELOCITY COMMAND
                                 WM                      # MOON'S ANGULAR RATE IN 2(-17)RAD/CS
                                 R                       # LM POSITION IN 2(24)M
-                STOVL           VHZC
+                STORE           VHZC
+                SLOAD           PUSH                    # COMPUTE PIPA BIAS VECTOR FOR USE BY
+                                PBIASZ                  #   P66ROD AND LANDING ANALOG DISPLAYS
+                SLOAD           PUSH
+                                PBIASY
+                SLOAD           VDEF
+                                PBIASX
+                VXSC            SET
+                                BIASFACT
+                                RODFLAG
+                STOVL           VBIAS                   # ONE SECOND'S BIAS IN UNITS OF 2(7) M/CS
                                 TEMX
                 VCOMP
                 STOVL           OLDPIPAX
@@ -204,9 +218,6 @@ STRTP66A        TC              INTPRET
 
                 TC              UPFLAG                  # TERMINATE TERRAIN MODEL
                 ADRES           NOTERFLG                # SHOULD DO INTERPRETIVELY TO SAVE A WORD
-
-                TC              UPFLAG                  # P66 INITIALIZATION COMPLETE
-                ADRES           RODFLAG
 
                 TCF             P66
 
@@ -1291,6 +1302,7 @@ GHZ             DEC             1.62292         E-4 B+4 # GRAVITY IN 2(-4)M/CS/C
 
 BIT1H           OCT             00001                   # MUST PRECEDE A ZERO
 SHFTFACT        2DEC            1               B-17    # SCALES P66 PERIOD TO 2(1))CS
+BIASFACT        2DEC            655.36 B-26
 RIMUZ           DEC             99.486          B-14    # 1.2667 M IN UNITS (180/PI 45) 2(14) CM
 
 ## Page 822

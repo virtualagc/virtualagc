@@ -19,6 +19,14 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Replaced calculation of VBIAS in NORMLIZE
+##                              with calculation of UHYP, and moved NORMLIZE
+##                              back to bank 23. Replaced implementation of
+##                              COPYCYC1 with that from Luminary 131. Removed
+##                              definitions of GSCALE1 and BIASFACT. Changed
+##                              MUNRVG to match 131, except with the addition
+##                              of a call to SGNAGREE. Changed VELUPDAT to
+##                              add DELVS instead of subtract VSURFACE.
 
 ## Page 860
                 BANK    37
@@ -463,6 +471,12 @@ SERVEXIT        TC      PHASCHNG
 
                 TCF     ENDOFJOB
 
+                BANK    23
+                SETLOC  NORMLIZ
+                BANK
+
+                COUNT*  $$/SERV
+
 ## Page 871
 # NORMLIZE AND COPYCYCL
 
@@ -479,16 +493,11 @@ NORMLIZE        TC      INTPRET
                         VN1
                 MXV
                         REFSMMAT
-                STORE   V               # LM VEL VECTOR IN SM COORD AT 2(+7)M/CS.
-                SLOAD   PUSH            # COMPUTE PIPA BIAS VECTOR FOR USE BY
-                        PBIASZ          #   P66ROD AND LANDING ANALOG DISPLAYS
-                SLOAD   PUSH
-                        PBIASY
-                SLOAD   VDEF
-                        PBIASX
-                VXSC
-                        BIASFACT
-                STORE   VBIAS           # ONE SECOND'S BIAS IN UNITS OF 2(7) M/CS
+                STOVL   V
+                        V(CSM)
+                VXV     UNIT
+                        R(CSM)
+                STORE   UHYP
 ASCSPOT         EXIT
                 EXTEND                  # MAKE SURE GOUP 2 IS OFF.
                 DCA     NEG0
@@ -792,91 +801,51 @@ CONTSERV        INHINT
 ## Page 879
 COPYCYC1        TC      QUIKFAZ5
 
-                CA      FIXLOC          # BATTEN DOWN THE HATCHES
-                TS      PUSHLOC
-
-                TC      INTPRET
-                VLOAD   ABVAL
+                TC      INTPRET         # INTPRET DOES A RELINT.
+                VLOAD   ABVAL           # MPAC = ABVAL( NEW SM. POSITION VECTOR )
                         R1S
-                PUSH    DSU
+                PUSH    DSU             #                               (2)
                         /LAND/
-                STORE   HCALC           # ALTITUDE IN UNITS OF 2(24) METERS
+                STORE   HCALC           # NEW HCALC*2(24)M.
                 STORE   HCALC1
-                SL      PDVL            # STORE HCALCLAD AT PD 2
-                        9D
+                DMPR    RTB
+                        ALTCONV
+                        SGNAGREE
+                STOVL   ALTBITS         # ALTITUDE FOR R10 IN BIT UNITS.
                         UNIT/R/
-                VXV     ABVAL
-                        V1S
-                DSQ     DDV
-                        0
-                SL1     PDVL            # STORE DALTRATE AT PD 4
-                        UNIT/R/
-                DOT     SL1
-                        V1S
-                STORE   HDOTDISP        # HDOT IN UNITS OF 2(7) M/CS
-                SL2     PDVL            # STORE HDOTLAD AT PD 6
+                VXV     UNIT
+                        UHYP
+                STOVL   UHZP            # DOWNRANGE HALF-UNIT VECTOR FOR R10.
                         R1S
                 VXM     VSR4
                         REFSMMAT
-                STOVL   RN1             # POSITION IN REFERENCE COORDINATES
+                STOVL   RN1             # TEMP. REF. POSITION VECTOR*2(29)M.
                         V1S
                 VXM     VSL1
                         REFSMMAT
-                STOVL   VN1             # VELOCITY IN REFERENCE COORDINATES
-                        GDT1/2
-                VSU     V/SC
-                        VBIAS
-                        GSCALE1
-                EXIT                    # G-VBIAS IN MPAC UNITS OF 2(-9) M/CS/CS
-
+                STOVL   VN1             # TEMP. REF. VELOCITY VECTOR*2(7)M/CS.
+                        UNIT/R/
+                VXV     ABVAL
+## Page 872
+                        V1S
+                SL1     DSQ
+                DDV
+                DMPR    RTB
+                        ARCONV1
+                        SGNAGREE
+COPYCYC2        EXIT                    # LEAVE ALTITUDE RATE COMPENSATION IN MPAC
                 INHINT
-
-                INDEX   FIXLOC          # FETCH HCALCLAD FROM PD 2
-                DXCH    2
-                DXCH    HCALCLAD        # ALTITUDE IN UNITS OF 2(15) METERS
-
-                INDEX   FIXLOC          # FETCH DALTRATE FROM PD 4
-                CA      4
-                TS      DALTRATE        # DALTRATE IN UNITS OF 2(-9) M/CS/CS
-    
-## Page 880
-                INDEX   FIXLOC          # FETCH HDOTLAD FROM PD 6
-                DXCH    6
-                DXCH    HDOTLAD         # HDOTLAD IN UNITS OF 2(5) M/CS
-
-                CA      MPAC            # FETCH G-VBIAS FROM MPAC
-                TS      G-VBIASX
-                CA      MPAC +3
-                TS      G-VBIASY
-                CA      MPAC +5
-                TS      G-VBIASZ        # G-VBIAS IN UNITS OF 2(-9) M/CS/CS
+                CA      UNIT/R/         # UPDATE RUNIT FOR R10.
+                TS      RUNIT
+                CA      UNIT/R/ +2
+                TS      RUNIT +1
+                CA      UNIT/R/ +4
+                TS      RUNIT +2
+                CA      MPAC            # LOAD NEW DALTRATE FOR R10.
+                TS      DALTRATE
 
                 EXTEND
-                DCA     UNIT/R/
-                DDOUBL                  # SCALE FULL-SIZE BUT WATCH FOR OVERFLOW
-                OVSK
-                TCF     +2
-                CAF     POSMAX
- +2             XCH     RUNITX
-
-                EXTEND
-                DCA     UNIT/R/ +2
-                DDOUBL                  # SCALE FULL-SIZE, OVERFLOW MOST UNLIKELY
-                XCH     RUNITY
-
-                EXTEND
-                DCA     UNIT/R/ +4
-                DDOUBL                  # SCALE FULL-SIZE, OVERFLOW MOST UNLIKELY
-                XCH     RUNITZ
-
-                CS      FLAGWRD7        # INDICATE TO LANADISP THAT THE NUMBERS IT
-                MASK    SWANDBIT        #   NEEDS FROM SERVICER HAVE BEEN PROVIDED
-                ADS     FLAGWRD7
-
-
-                EXTEND
-                DCA     R1S             # LOAD NEW NAVIGATED STATE VECTOR INTO R,V
-                                        # VECTORS, FOR GUIDANCE.
+                DCA     R1S
                 DXCH    R
                 EXTEND
                 DCA     R1S +2
@@ -891,18 +860,10 @@ COPYCYC1        TC      QUIKFAZ5
                 DCA     V1S +2
                 DXCH    V +2
                 EXTEND
-## Page 881
                 DCA     V1S +4
                 DXCH    V +4
 
                 TCF     COPYCYCL        # COMPLETE THE COYPCYCL.
-
-# COPYCYC1 CONSTANTS:
-
-GSCALE1         2DEC    100 B-16
-
-
-BIASFACT        2DEC    .01 B-10
 
 ## Page 882
 # *********************************************************************************************************
@@ -1035,10 +996,14 @@ MUNRVG          VLOAD   VXSC
                 STORE   V1S             # = V + GDT1/2 + DELV
                 ABVAL
                 STOVL   ABVEL           # STORE SPEED FOR LR AND DISPLAYS.
-                        WM
-                VXV     VSL2
+                        UNIT/R/
+                DOT     SL1
+                        V1S
+                STOVL   HDOTDISP        # HDOT = V. UNIT(R)*2(7) M/CS.
                         R1S
-                STODL   VSURFACE        # SURFACE VELOCITY IN UNITS OF 2(5) M/CS
+                VXV     VSL2
+                        WM
+                STODL   DELVS           # LUNAR ROTATION CORRECTION TERM*2(5)M/CS.
                         36D
                 DSU     RTB
                         /LAND/
@@ -1264,8 +1229,8 @@ VELUPDAT        TC      POSINDEX        # SET X1 AND X2 AND ZERO PUSHLIST
                 DMP*    PDVL            # SCALE TO M/CS AT 2(6)
                         VZSCAL,2        # AND STORE IN PD 6-7
                         V1S             # VELOCITY AT TIME OF READING
-                VSL2    VSU             # SCALE TO 2(5) M/CS AND SUBTRACT
-                        VSURFACE        #               MOON ROTATION.
+                VSL2    VAD             # SCALE TO 2(5) M/CS AND SUBTRACT
+                        DELVS           #               MOON ROTATION.
                 PUSH    ABVAL           # STORE IN PD
                 SR4     DAD             # ABS(VM)/8 + VELBIAS AT 2(6)
                         VELBIAS

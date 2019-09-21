@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Removed VELOCITY5, and changed noun 60
+##                              scaling back to what it was in 131.
 
 ## Page 306
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -108,7 +110,6 @@
 # 11010                           POSITION9 (XXXXX. FT)       USE ARITHDP3
 # 11011                           VELOCITY4 (XXXX.X FT/SEC)   USE ARITHDP2
 # 11100                           RADIANS (XX.XXX RADIANS)    USE ARITHDP4
-# 11101                           VELOCITY5 (XXXX.X FT/SEC)   USE ARITHDP3
 # END OF SF CONSTANT CODE NUMBERS
 
 
@@ -460,7 +461,7 @@ NNTYPTAB        OCT     00000                   # 00 NOT IN USE
                                                 #           (DEC ONLY)
                 OCT     24512                   # 59 3COMP  VEL3 FOR EACH
                                                 #           (DEC ONLY)
-                OCT     60535                   # 60 3COMP  VEL5, VEL3, COMP ALT
+                OCT     60521                   # 60 3COMP  FOR/LAT VEL, VEL3, COMP ALT
                                                 #           (DEC ONLY)
                 OCT     54000                   # 61 3COMP  MIN/SEC, MIN/SEC, POS7
                                                 #           (NO LOAD, DEC ONLY)
@@ -588,8 +589,6 @@ SFINTAB         OCT     00006                   # WHOLE, DP TIME (SEC)
                 2DEC    100 B-8                 # RADIANS
 
 ## Page 318
-                2DEC    .3048 E2 B-5            # VELOCITY5
-                
                                                 # END OF SFINTAB
 
 
@@ -652,9 +651,6 @@ SFOUTAB         OCT     05174                   # WHOLE, DP TIME (SEC)
                 
                 2DEC    .32                     # RADIANS
 
-## The following line is circled in blue pencil.
-                2DEC*   3.280839896 E-2 B-2 *   # VELOCITY5
-                
                                                 # END OF SFOUTAB
 
 
@@ -721,7 +717,7 @@ IDADDTAB        ECADR   TTOGO                   # 40 MIN/SEC                    
                 ECADR   DVLOS                   # 59 VEL3                             DP3
                 ECADR   DVLOS +2                # 59 VEL3                             DP3
                 ECADR   DVLOS +4                # 59 VEL3                             DP3
-                ECADR   FORVEL                  # 60 VEL5                             DP1
+                ECADR   FORVEL                  # 60 FOR/LAT VEL                      ARTH
                 ECADR   HDOTDISP                # 60 VEL3                             DP3
                 ECADR   HCALC1                  # 60 COMP ALT                         DP1
                 ECADR   TTFDISP                 # 61 MIN/SEC                          M/S
@@ -869,7 +865,7 @@ RUTMXTAB        OCT     16351                   # 40 M/S, DP3, DP3
                 OCT     0                       # 57 SPARE
                 OCT     16347                   # 58 DP3, DP3, DP3
                 OCT     16347                   # 59 DP3, DP3, DP3
-                OCT     10347                   # 60 DP3, DP3, DP1
+                OCT     10343                   # 60 ARTH, DP3, DP1
                 OCT     24451                   # 61 M/S, M/S, DP4
                 OCT     16447                   # 62 DP3, M/S, DP3
                 OCT     10347                   # 63 DP3, DP3, DP1

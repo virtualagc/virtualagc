@@ -19,6 +19,7 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Added back initialization of ZAXIS1.
 
 ## Page 829
                 BANK    24
@@ -124,7 +125,11 @@ NEWLOAD         CAF     V06N76          # FLASH CROSS-RANGE AND APOLUNE VALUES.
 ## Page 831
                 DOT     SL1
                         UNIT/R/
-                STCALL  RDOT            # RDOT * 2(-7)
+                STOVL   RDOT            # RDOT * 2(-7)
+                        UNIT/R/
+                VXV     UNIT
+                        QAXIS
+                STCALL  ZAXIS1
                         ASCENT
 P12RET          DLOAD
                         ATP             # ATP(2)*2(18)

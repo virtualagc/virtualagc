@@ -19,6 +19,9 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Moved PIPCTR1 to share with LADQSAVE. Changed
+##                              LANADISP calls to LANDISP. Changed back comments
+##                              on setting of R10FLAG.
 
 ## Page 831
                 BANK    21
@@ -41,7 +44,7 @@ R10,R11         CS      FLAGWRD7        # IS SERVICER STILL RUNNING?
 
 STORPCTR        TS      PIPCTR1
 
-PIPCTR1         =       VVECTY
+PIPCTR1         =       LADQSAVE
 PIPCTR          =       PHSPRDT2
                 CAF     OCT31
                 TC      TWIDDLE
@@ -68,13 +71,13 @@ FLASHV?         CA      VFLSHBIT        # VFLASHBIT MUST BE BIT 2.
 10,11           CA      FLAGWRD9        # IS THE LETABORT FLAG SET ?
                 MASK    LETABBIT
                 EXTEND
-                BZF     LANADISP        # NO. PROCEED TO R10.
+                BZF     LANDISP         # NO. PROCEED TO R10.
 
 P71NOW?         CS      MODREG          # YES.  ARE WE IN P71 NOW?
                 AD      1DEC71
                 EXTEND
 ## Page 832
-                BZF     LANADISP        # YES.  PROCEED TO R10.
+                BZF     LANDISP         # YES.  PROCEED TO R10.
 
                 EXTEND                  # NO. IS AN ABORT STAGE COMMANDED?
                 READ    CHAN30
@@ -87,13 +90,13 @@ P71NOW?         CS      MODREG          # YES.  ARE WE IN P71 NOW?
 P70NOW?         CS      MODREG          # NO. ARE WE IN P70 NOW?
                 AD      1DEC70
                 EXTEND
-                BZF     LANADISP        # YES.  PROCEED TO R10.
+                BZF     LANDISP         # YES.  PROCEED TO R10.
 
                 CA      L               # NO.  IS AN ABORT COMMANDED?
                 MASK    BIT1
                 CCS     A
                 TCF     P70A            # YES.
-                TCF     LANADISP        # NO.  PROCEED TO R10.
+                TCF     LANDISP         # NO.  PROCEED TO R10.
 
                 COUNT*  $$/P70
 
@@ -162,9 +165,10 @@ ABRTJASK        CAF     OCTAL27
                 CAF     LRBYBIT         # TERMINATE R12.
                 TS      FLGWRD11
 
-                CS      FLAGWRD0        # SIGNAL THE LAD TO DISPLAY LATVEL IN
-                MASK    R10FLBIT        #   INERTIAL COORDINATES AND FORVEL ZERO
-                ADS     FLAGWRD0
+                CS      FLAGWRD0        # SET R10FLAG TO SUPPRESS OUTPUTS TO THE
+                MASK    R10FLBIT        # CROSS-POINTER DISPLAY.
+                ADS     FLAGWRD0        # THE FOLLOWING ENEMA WILL REMOVE THE
+                                        # DISPLAY INERTIAL DATA OUTBIT.
 
                 EXTEND                  # LOAD TEVENT FOR THE DOWNLINK.
                 DCA     TIME2

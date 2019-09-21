@@ -19,6 +19,7 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Changed LATVMETR/FORVMETR to LATVEL/FORVEL.
 
 ## Page 199
                 BANK            22
@@ -325,7 +326,7 @@ LMDSAS07       -1DNADR          HMEASDL                 # HMEASDL,+1
                 1DNADR          VMEAS                   # VMEAS,+1
                 1DNADR          AIG                     # AIG,AMG
                 1DNADR          AOG                     # AOG,VSELECT
-                1DNADR          LATVMETR                # LATVMETR,FORVMETR
+                1DNADR          LATVEL                  # LATVEL, FORVEL
                 1DNADR          SERVDURN                # SERVDURN,DUMLOOPS
                -1DNADR          MKTIME                  # MKTIME,+1
 

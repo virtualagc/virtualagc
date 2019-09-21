@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Moved initialization of ZAXIS1 back to P12.
+##                              Changed ASCSAVE to share with CG.
 
 ## Page 834
                 BANK    34
@@ -86,10 +88,7 @@ BIT3H           OCT     4
 ASCENT          VLOAD   ABVAL
                         R
                 STOVL   /R/MAG
-                        UNIT/R/
-                VXV     UNIT
-                        QAXIS
-                STORE   ZAXIS1
+                        ZAXIS1
                 DOT     SL1
                         V               # Z.V = ZDOT*2(-8).
                 STOVL   ZDOT            # ZDOT*2(-7)
@@ -633,7 +632,7 @@ THETCOMP        VLOAD   UNIT
                         30D
                 RVQ
 
-ASCSAVE         EQUALS  DLAND +6
+ASCSAVE         =       CG
 
                 BANK    27
                 SETLOC  ASENT1

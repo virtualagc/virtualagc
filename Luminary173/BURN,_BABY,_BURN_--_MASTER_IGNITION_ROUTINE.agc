@@ -20,6 +20,8 @@
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178. Changed
 ##                              P42TABLE +6 back to 2390.
+##              2019-09-21 MAS  Added back setting of SWANDISP in
+##                              P63IGN and ABTIGN.
 
 ## Page 717
                 BANK            36
@@ -455,6 +457,10 @@ P63IGN          EXTEND                                  # (13)      INITIATE BUR
                 MASK            LETABBIT
                 ADS             FLAGWRD9
 
+                CS              FLAGWRD7                # SET SWANDISP TO ENABLE R10.
+                MASK            SWANDBIT
+                ADS             FLAGWRD7
+
                 EXTEND                                  # INITIALIZE TIG FOR P70 AND P71.
                 DCA             TIME2
                 DXCH            TIG
@@ -501,6 +507,10 @@ ABRTIGN         CA              Z                       # (13) KILL CLOKTASK
                 EXTEND                                  # CONNECT ASCENT GYIDANCE TO SERVICER.
                 DCA             ATMAGADR
                 DXCH            AVGEXIT
+
+                CS              FLAGWRD7                # ENABLE R10.
+                MASK            SWANDBIT
+                ADS             FLAGWRD7
 
 P42IGN          CS              DRIFTBIT                # ENSURE THAT POWERED-FLIGHT SWITCHING
                 MASK            DAPBOOLS                #   CURVES ARE USED.

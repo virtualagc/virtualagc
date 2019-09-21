@@ -19,6 +19,10 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Restored the original analog displays erasables
+##                              from Luminary 131. Moved ZAXIS1 to share with
+##                              UHZP. Moved JPARM to share with R60VSAVE.
+##                              Moved RODCOUNT to share with RUNIT +3.
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -1280,6 +1284,7 @@ ZDOTD           EQUALS  YDOTD +2        # I(2)TMP
 
 /R/MAG          EQUALS  ZDOTD +2        # I(2)TMP
 LAXIS           EQUALS  /R/MAG +2       # I(6)TMP
+ZAXIS1          =       UHZP
 RDOT            =       HDOTDISP
 YDOT            =       LAXIS +6        # I(2)TMP VEL. NORMAL TO REF. PLANE*2(-7)
 ZDOT            EQUALS  YDOT +2         # I(2)TMP  DOWN RANGE VEL * 2(-7).
@@ -1421,11 +1426,9 @@ DLANDY          EQUALS  DLAND   +2
 DLANDZ          EQUALS  DLAND   +4
 VBIAS           EQUALS  R60VSAVE        # I(6) PIPA BIAS EQUIV. VELOCITY VECTOR.
 #          OVERLAYS OF THE BLOCK ABOVE (ASCENT AND DESCENT)
-JPARM           EQUALS  CG              # I(2) JPARM WILL EQUAL J1PARM OR J2PARM.
+JPARM           EQUALS  R60VSAVE        # I(2) JPARM WILL EQUAL J1PARM OR J2PARM.
 KPARM           EQUALS  JPARM   +2      # I(2) KPARM WILL EQUAL K1PARM OR K2PARM
 RP              EQUALS  KPARM   +2      # I(2) PREDICTED BURNOUT RADIUS-M*2(-24)
-QAXIS           EQUALS  RP +2           # I(6) ASCENT CROSSRANGE HALF-UNIT VECTOR
-ZAXIS1          EQUALS  QAXIS +6        # I(6) ASCENT DOWNRANGE HALF-UNIT VECTOR
 L*WCR*T         =       BUF
 H*GHCR*T        =       BUF     +1
 
@@ -2618,42 +2621,36 @@ STILBADV        EQUALS  STILBADH +1     # B(1)
 
 #          LANDING ANALOGS DISPLAY STORAGE.              (32D)
 
-G-VBIASX        =       STILBADV +1     # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
-G-VBIASY        =       G-VBIASX +1     # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
-G-VBIASZ        =       G-VBIASY +1     # B(1)    ACC DUE TO GRAVITY AND PIPA BIAS
-VSURFACE        =       G-VBIASZ +1     # B(6)    LUNAR SURFACE VELOCITY
-HCALCLAD        =       VSURFACE +6     # B(2)    ALTITUDE IN UNITS OF 2(15) M
-HDOTLAD         =       HCALCLAD +2     # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
-DALTRATE        =       HDOTLAD +2      # B(1)    DALTRATE UNITS OF 2(-9) M/CS/CS
-RUNITX          =       DALTRATE +1     # B(1)    X-COMPONENT OF UNIT/R/ FULL-SIZE
-RUNITY          =       RUNITX +1       # B(1)    Y-COMPONENT OF UNIT/R/ FULL-SIZE
-RUNITZ          =       RUNITY +1       # B(1)    Z-COMPONENT OF UNIT/R/ FULL-SIZE
-DT              =       RUNITZ +1       # B(1)    TIME SINCE LAST PIPTIME
-VVECTX          =       DT +1           # B(2)    X-COMPONENT OF SM REL. VELOCITY
+LATVMETR        EQUALS  STILBADV +1     # B(1)PRM LATVEL MONITOR METER (AN ORDER)
+FORVMETR        EQUALS  LATVMETR +1     # B(1)PRM FORVEL MONITOR METER (-ED PAIR)
+LATVEL          EQUALS  FORVMETR +1     # B(1)PRM LATERAL VELOCITY (AN ORDER)
+FORVEL          EQUALS  LATVEL +1       # B(1)PRM FORWARD VELOCITY (-ED PAIR)
+TRAKLATV        EQUALS  FORVEL +1       # B(1)PRM MONITOR FLG 4 LATVEL (AN ORDER)
+TRAKFWDV        EQUALS  TRAKLATV +1     # B(1)PRM MONIT. FLAG FOR FORVEL (ED PAIR)
+VHY             EQUALS  TRAKFWDV +1     # B(1)PRM VHY=VMP.UHYP (AN ORDER)
 
 ## Page 158
-VVECTY          =       VVECTX +2       # B(2)    Y-COMPONENT OF SM REL. VELOCITY
-VVECTZ          =       VVECTY +2       # B(2)    Z-COMPONENT OF SM REL. VELOCITY
-ALTRATE         =       VVECTZ +2       # B(2)    ALTRATE IN UNITS OF 2(5) M/CS
-ALTITUDE        =       ALTRATE  +2     # B(2)    ALTITUDE IN UNITS OF 2(15) M
-LATVMETR        =       ALTITUDE +2     # B(1)    LATERAL VELOCITY METER INDICATOR
-FORVMETR        =       LATVMETR +1     # B(1)    FORWARD VELOCITY METER INDICATOR
-FORVEL          =       FORVMETR +1     # B(2)    FORWARD VELOCITY FOR DSKY (N60)
-
-
-ALTRTEMP        =       ITEMP3          # B(2)    ALTITUDE-RATE TEMPORARY
-ALTTEMP         =       ITEMP3          # B(2)    ALTITUDE TEMPORARY
-VHY             =       ITEMP3          # B(2)    VELOCITY ALONG UHYP (I.E. SM-Y)
-VHZ             =       ITEMP5          # B(2)    VELOCITY ALONG UHZP
-FORVTEMP        =       RUPTREG1        # B(2)    FORWARD VELOCITY TEMPORARY
-LATVEL          =       RUPTREG3        # B(2)    LATERAL VELOCITY TEMPORARY
+VHZ             EQUALS  VHY +1          # B(1)PRM VHZ=VMP.UHZP (-ED PAIR)
+VVECT           EQUALS  VHZ +1          # B(3)PRM UPDATED S.P. VELOCITY VECTOR
+ALTRATE         EQUALS  VVECT +3        # B(1)PRM ALTITUDE RATE IN BIT UNITS
+ALTSAVE         EQUALS  ALTRATE +1      # B(2)PRM ALTITUDE IN BIT UNITS
+LADQSAVE        EQUALS  ALTSAVE +2      # B(1)PRM SAVE Q IN LANDISP
+DT              EQUALS  LADQSAVE +1     # B(1)PRM TIME 1 MINUS (PIPTIME +1)
+DALTRATE        EQUALS  DT +1           # B(1)PRM ALTITUDE RATE ERROR CORRECTION
+UHYP            EQUALS  DALTRATE +1     # B(6)PRM SM UNIT VECTOR
+QAXIS           =       UHYP
+UHZP            EQUALS  UHYP +6         # B(6)PRM SM UNIT VECTOR
+DELVS           EQUALS  UHZP +6         # B(6)PRM DELVS = WMXR
+ALTBITS         EQUALS  DELVS +6        # B(2)PRM ALTITUDE IN BIT UNITS, 2.34 FT/BT
+RUNIT           EQUALS  ALTBITS +2      # B(3)PRM SM HALF-UNIT R VECTOR
+LASTLADW        EQUALS  RUNIT +2        # ONLY A TAG TO SIGNIFY LAST L.A.D. WORD
 
 # P66 ERASABLES (HORIZONTAL VELOCITY NULLING GUIDANCE)
 VHZC            EQUALS  DELVLVC         # B(6) VELOCITY HORIZONTAL COMMAND
 
 # P66 ERASABLES (R.O.D.)                        (1D)
 
-RODCOUNT        EQUALS  R65CNTR +1      # B(1)    ROD CLICK COUNTER
+RODCOUNT        EQUALS  RUNIT +3        # B(1)    ROD CLICK COUNTER
 
 # P66 ERASABLES (R.O.D.)                        (14D)
 

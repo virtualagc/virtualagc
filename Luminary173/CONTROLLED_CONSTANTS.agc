@@ -21,6 +21,8 @@
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178. Gave THROTLAG
 ##                              its original value of 0.2s. Changed K1VAL
 ##                              back to 124.55 B-23.
+##              2019-09-21 MAS  Restored the original landing analog displays
+##                              constants from Luminary 131.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -251,26 +253,24 @@ KPIP1           2DEC            .0128                   # SCALES DELV TO UNITS O
 ## Page 43
 KPIP2           2DEC            .0064                   # SCALES DELV TO UNITS OF 2(8) M/CS.
 
+ALTCONV         2DEC            1.399078846 B-4         # CONVERTS M*2(-24) TO BIT UNITS *2(-28).
+ARCONV1         2DEC            656.167979 B-10         # CONV. ALTRATE COMP. TO BIT UNITS<
+
                 SETLOC          R10
                 BANK
                 COUNT*          $$/R10
 
-LANAKPIP        DEC             .0512                   # SCALES PIPAS TO UNITS OF 2(5) M/CS
+ARCONV          OCT             24402                   # 656.1679798B-10 CONV ALTRATE TO BIT UNIT
 
+ARTOA           DEC             .1066098 B-1            # .25/2.345 B-1 4X/SEC CYCLE RATE.
 
-MAXVEL          OCT             00466                   # 198.645 F/S IN UNITS OF 2(5) M/CS
+ARTOA2          DEC             .0021322 B8             # (.5)/(2.345)(100)
 
+VELCONV         OCT             22316                   # 588.914 B-10 CONV VEL. TO BIT UNITS.
 
-MAXDBITS        OCT             01034                   # ABOUT 300 F/S
+KPIP1(5)        DEC             .0512                   # SCALES DELV TO M/CS*2(-5).
 
-
-VELCONV         DEC             .03594                  # SCALES VFL AT ONE M/CS TO .5571 F/S/BIT
-
-
-ALTRCONV        DEC             .16020                  # SCALES ALTR AT 2(2) M/CS TO .5 F/S/BIT
-
-
-ALTCONV         DEC             .69954                  # SCALES ALTITUDE AT 2(15) M TO 9.38 F/BIT
+MAXVBITS        OCT             00547                   # MAX. DISPLAYED VELOCITY 199.9989 FT/SEC.
 
 
                 SETLOC          DAPS3
