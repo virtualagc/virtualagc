@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed checking of
+##                              R12RDFLG (and NEWJOB) from VMEASCHK.
 
 ## Page 860
                 BANK    37
@@ -1190,14 +1191,7 @@ POSUP           DLOAD   SR4
 RUPDATED        TC      GNURVST
 
 VMEASCHK        TC      QUIKFAZ5        # RESTART AT NEXT LOCATION
-R12THRU?        CS      FLGWRD11        # IS RADAREAD THROUGH ?
-                MASK    R12RDBIT
-                CCS     A
-                TCF     VELDATA?        # YES:GO ON WITH UPDATE
-                CCS     NEWJOB          # NO-WAIT
-                TC      CHANG1
-                TCF     R12THRU?
-VELDATA?        CS      FLGWRD11
+                CS      FLGWRD11
                 MASK    VELDABIT        # IS V READING AVAILABLE?
                 CCS     A
                 TCF     VALTCHK         # NO   SEE IF V READING TO BE TAKEN

@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed the
+##                              definition of R12RDFLG.
 
 ## Page 62
 #         FLAGWORDS 0-11 ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -195,7 +196,6 @@
 # RVSW          111             BIT 9  FLAG 7           RVSWBIT
 # R04FLAG       051             BIT 9  FLAG 3           R04FLBIT
 # R10FLAG       013             BIT 2  FLAG 0           R10FLBIT
-# R12RDFLG      177D            BIT 3  FLAG 11          R12RDBIT
 # R61FLAG       020             BIT 10 FLAG 1           R61FLBIT
 # R77FLAG       079             BIT 11 FLAG 5           R77FLBIT
 # SLOPESW       027             BIT 3  FLAG 1           SLOPEBIT
@@ -1229,9 +1229,8 @@ RNGEDBIT        =               BIT4                    # MEASUREMENT MADE    NO
 #
 
 #                               BIT 3 FLAG 11
-R12RDFLG        =               177D                    # WAIT UNTIL ALL VEL  ALLOW R12 PROCESS-
-R12RDBIT        =               BIT3                    # READS DONE BEFORE   ING OF VELDATA;
-                                                        # R12 PROCESSING      LR VEL READ DONE
+#               =               177D
+#               =               BIT3
 #
 
 #                               BIT 2 FLAG 11             (L)(R12)

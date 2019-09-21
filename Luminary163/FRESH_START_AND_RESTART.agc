@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed clearing
+##                              of R12RDFLG.
 
 ## Page 218
                 BANK            10
@@ -445,10 +446,6 @@ STARTSB2        CAF             OCT30001                # DURING SOFTWARE RESTAR
                 WAND            CHAN12                  # IMU CDUS, ENABLE IMU COUNTER) AND GIMBAL
                                                         # TRIM DRIVES. LEAVE RR LOCKON ENABLE
                                                         # ALONE.
-
-                CS              R12RDBIT                # R12RDFLG CLEARED TO ESCAPE FROM POSSIBLE
-                MASK            FLGWRD11                #  "CCS NEWJOB" LOOP IN VUPDAT SEC. OF R12
-                TS              FLGWRD11
 
                 CS              NORRMBIT                # ENABLE R25.
                 MASK            FLAGWRD5

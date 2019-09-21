@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed setting and
+##                              clearing of R12RDFLG from R12READ.
 
 ## Page 500
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -2725,10 +2726,6 @@ R12READ         CS      FLGWRD11
                 EXTEND
                 BZF     TASKOVER
 
-R12RDSET        CS      FLGWRD11        # STOP R12 FROM
-                MASK    R12RDBIT        #   ATTEMPTING UPDATE
-                ADS     FLGWRD11        #       BEFORE R12 READS ARE DONE
-
                 INDEX   VSELECT
                 CA      VBITS
                 TC      PRERADAR
@@ -3025,10 +3022,6 @@ R12DL           CCS     VSELECT         # UPDATE VSELECT
                 TC      RADLITES        # UPDATE DSKY VEL LIGHT
                 CA      ZERO
                 TS      RADUSE
-
-OKUPDATE        CS      R12RDBIT        # R12 READ IS DONE SO ALLOW R12 UPDATE
-                MASK    FLGWRD11
-                TS      FLGWRD11
 
                 TC      RESUME
 
