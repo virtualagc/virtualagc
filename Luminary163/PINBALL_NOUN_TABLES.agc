@@ -18,7 +18,11 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Reintroduced a bug
+##                              in the original implementation of ACB L-20:
+##                              the SFINTAB entry for forward/lateral velocity
+##                              had been accidentally changed to 5.571 instead
+##                              of the SFOUTAB entry, which was wrongly 5.517.
 
 ## Page 306
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -562,7 +566,7 @@ SFINTAB         OCT     00006                   # WHOLE, DP TIME (SEC)
                 OCT     23224
                 OCT     00014                   # ALTITUDE RATE
                 OCT     06500
-                2DEC*   1.79500987 E4 B-28*     # FORWARD/LATERAL VELOCITY
+                2DEC    5.571 E-5 B14           # FORWARD/LATERAL VELOCITY
                 
                 OCT     04256                   # ROT HAND CONT ANGLE RATE
                 OCT     07071
@@ -624,7 +628,7 @@ SFOUTAB         OCT     05174                   # WHOLE, DP TIME (SEC)
                 OCT     31757
                 OCT     02476                   # ALTITUDE RATE
                 OCT     05531
-                2DEC    5.571 E-5 B14           # FORWARD/LATERAL VELOCITY
+                2DEC    5.517 E-5 B14           # FORWARD/LATERAL VELOCITY
                 
                 OCT     00007                   # ROT HAND CONT ANGLE RATE
                 OCT     13734
