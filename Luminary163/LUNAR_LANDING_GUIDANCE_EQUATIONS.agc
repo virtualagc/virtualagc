@@ -18,7 +18,8 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Moved STRTP66A
+##                              up four instructions, per PCR 988.
 
 ## Page 794
                 EBANK=          E2DPS
@@ -160,13 +161,13 @@ DEC66           DEC             66
                 DCA             HDOTDISP                # SET DESIRED ALTITUDE RATE = CURRENT
                 DXCH            VDGVERT                 #       ALTITUDE RATE.
 
-                TC              UPFLAG                  # SET FLAG TO CONTINUE P66 HORIZONTAL
+STRTP66A        TC              UPFLAG                  # SET FLAG TO CONTINUE P66 HORIZONTAL
                 ADRES           P66PROFL                #    UNTIL 'PROCEED' AFTER TOUCHDOWN
 
                 CS              TOOFEW                  # INITIALIZE CNTTHROT TO -TOOFEW
                 TS              CNTTHROT
 
-STRTP66A        TC              INTPRET
+                TC              INTPRET
                 VLOAD           VXV                     # COMPUTE HORIZONTAL VELOCITY COMMAND
                                 WM                      # MOON'S ANGULAR RATE IN 2(-17)RAD/CS
                                 R                       # LM POSITION IN 2(24)M
