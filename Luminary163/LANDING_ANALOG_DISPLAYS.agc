@@ -18,7 +18,9 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Implemented ACB L-11
+##                              by moving three checks as shown in the
+##                              Luminary 173 flowcharts.
 
 ## Page 891
                 BANK    21
@@ -139,11 +141,6 @@ NEWDATA         CCS     ALTSAVE +1
                 TCF     DATAOUT         # DISPATCH UNSIGNED BITS TO ALTM REG.
 DISINDAT        EXTEND
                 QXCH    LADQSAVE        # SAVE RETURN TO ALTROUT +1 OR ALTOUT +1
-                CAF     BIT6
-                EXTEND                  # WISHETH THE ASTRONAUT THE ANALOG
-                RAND    CHAN30          # DISPLAYS?  I.E.,
-                CCS     A               # IS THE MODE SELECT SWITCH IN PGNCS?
-                TCF     DISPRSET        # NO.  ASTRONAUT REQUESTS NO INERTIAL DATA
                 CS      FLAGWRD1        # YES.  CHECK STATUS OF DIDFLAG.
                 MASK    DIDFLBIT
                 EXTEND
@@ -248,19 +245,6 @@ SPEEDRUN        CS      PIPTIME +1      # UPDATE THE VELOCITY VECTOR
                 CAF     BIT3            # PAUSE 40 MS TO LET OTHER RUPTS IN.
                 TC      VARDELAY
 
-                CS      FLAGWRD0        # ARE WE IN DESCENT TRAJECTORY?
-                MASK    R10FLBIT
-                CCS     A
-                TCF     +2              # YES.
-                TC      LADQSAVE        # NO.
-
-                CAF     BIT2            # CHECK TO SEE IF RR ERROR COUNTERS
-                EXTEND                  # ARE ENABLED.
-                RAND    CHAN12
-                CCS     A               # IF NOT.
-                TCF     +2
-                TCF     DISPRSET        # RE-INITIALIZE LANDING ANALOG DISPLAYS
-
                 CA      DELVS           # HI X OF VELOCITY CORRECTION TERM.
                 AD      VVECT           # HI X OF UPDATED VELOCITY VECTOR.
                 TS      ITEMP1          # = VX - DVX M/CS *2(-5).
@@ -339,6 +323,18 @@ LADFWDV         CA      ITEMP4          # COMPUTE LATERAL AND FORWARD VELOCITIES
                 MP      RUPTREG1
                 DDOUBL
                 XCH     FORVEL          # FORWARD VELOCITY IN BIT UNITS *2(-14).
+
+                CAF     BIT6
+                EXTEND                  # WISHETH THE ASTRONAUT THE ANALOG
+                RAND    CHAN30          # DISPLAYS?  I.E.,
+                CCS     A               # IS THE MODE SELECT SWITCH IN PGNCS?
+                TCF     DISPRSET        # NO.  ASTRONAUT REQUESTS NO INERTIAL DATA
+
+                CS      FLAGWRD0        # ARE WE IN DESCENT TRAJECTORY?
+                MASK    R10FLBIT
+                CCS     A
+                TCF     +2              # YES.
+                TC      LADQSAVE        # NO.
 
                 CS      MAXVBITS        # ACC.=-199.9989 FT./SEC.
                 TS      ITEMP6          # -547 BIT UNITS (OCTAL) AT 0.5571 FPS/BIT
@@ -495,6 +491,13 @@ ZEROLSTY        INDEX   ITEMP5
                 ADS     LATVMETR
                 CCS     ITEMP5          # FIRST MONITOR FORWARD THEN LATERAL VEL.
                 TCF     VMONITOR
+
+                CAF     BIT2            # CHECK TO SEE IF RR ERROR COUNTERS
+                EXTEND                  # ARE ENABLED.
+                RAND    CHAN12
+                CCS     A               # IF NOT.
+                TCF     +2
+                TCF     DISPRSET        # RE-INITIALIZE LANDING ANALOG DISPLAYS
 
                 CAF     BITSET          # DRIVE THE X-POINTER DISPLAY.
                 EXTEND
