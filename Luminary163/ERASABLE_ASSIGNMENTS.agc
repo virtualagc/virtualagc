@@ -19,7 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
 ## Mod history: 2019-08-21 MAS  Created from Luminary 173. Moved AT to share
-##                              with GSAV.
+##                              with GSAV. Moved TOOFEW to share with QSAVED,
+##                              and stuck a "FILLER" where it was.
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -808,12 +809,11 @@ WHCHREAD        ERASE                   # B(1)TMP MEASUREMENT BEING PROCESSED.
 
 ELBIAS          EQUALS  WHCHREAD        # B(1) PL LPD ELEVATION BIAS. PI RADIANS.
 
-#          P66 PADLOAD                                   (1D)
-
-TOOFEW          ERASE                   # B(1) TOO FEW THROTTLINGS PER OMISSION:
-                                        #  ONE LESS THAN NO. THROTTLES REQUIRED
-                                        #   BETWEEN SKIPPED THROTTLES
-                                        #    1466 ALARM IF THROTTLINGS <= TOOFEW
+## In Luminary 164 (or so) and later, TOOFEW is defined here. However for
+## Luminary 152 (or so) through 163, location 1354 was unassigned. I've
+## inserted a "FILLER" erasable here to take its place, and ensure SERVDURN
+## and DUMLOOPS assemble to the correct locations.
+FILLER          ERASE
 
 #          TLOSS INDICATORS FOR DOWNLINK                 (2D)
 
@@ -2219,6 +2219,14 @@ WHOCARES        EQUALS  E7OVERLA        # DUMMY FOR EBANK INSENSITIVE 2CADRS
 /AFC/           EQUALS  NORMEX          # B(2)TMP THROTTLE
 FCODD           EQUALS  /AFC/ +2        # B(2)TMP THROTTLE
 FP              EQUALS  FCODD +2        # B(2)TMP THROTTLE
+
+#          P66 PADLOAD                                   (1D)
+
+TOOFEW          EQUALS  QSAVED          # B(1) TOO FEW THROTTLINGS PER OMISSION:
+                                        #  ONE LESS THAN NO. THROTTLES REQUIRED
+                                        #   BETWEEN SKIPPED THROTTLES
+                                        #    1466 ALARM IF THROTTLINGS <= TOOFEW
+
 
 ## Page 143
 # ******* OVERLAY NUMBER 0 IN EBANK 7 *******
