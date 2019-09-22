@@ -18,10 +18,11 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Moved RADSAMP back
+##                              to bank 25.
 
 ## Page 498
-                BANK            15
+                BANK            25
                 SETLOC          RRLEADIN
                 BANK
 
@@ -48,11 +49,6 @@ RADSAMP         CCS             RSAMPDT                 # TIMES NORMAL ONCE-PER-
                 TS              RTSTDEX
                 TCF             TASKOVER
 
-                BANK            25
-                SETLOC          DRSAMP
-                BANK
-
-                EBANK=          RSTACK
 # DO THE ACTUAL RADAR SAMPLE.
 
 DORSAMP         TC              VARADAR                 # SELECTS VARIABLE RADAR CHANNEL.

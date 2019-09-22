@@ -19,6 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
 ## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed S40BNK tag.
+##                              Moved RRLEADIN tag from bank 25 to bank 15.
+##                              Added a new tag, DRSAMP, to bank 25.
 
 ## Page 28
                 COUNT           BANKSUM
@@ -146,7 +148,6 @@ ASENT4          EQUALS
                 BANK            15
 P50S            EQUALS
 EPHEM           EQUALS
-RRLEADIN        EQUALS
                 BNKSUM          15
 
 
@@ -215,7 +216,7 @@ P20S            EQUALS
 P20S1           EQUALS
 P20S2           EQUALS
 RADARUPT        EQUALS
-DRSAMP          EQUALS
+RRLEADIN        EQUALS
 PLANTIN3        EQUALS
                 BNKSUM          25
 
