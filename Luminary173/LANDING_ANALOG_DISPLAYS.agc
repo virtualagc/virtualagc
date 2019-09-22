@@ -15,9 +15,6 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
 ##              2019-09-21 MAS  Re-based on Luminary 131. Implemented ACB L-11
 ##                              by moving three checks as shown in the

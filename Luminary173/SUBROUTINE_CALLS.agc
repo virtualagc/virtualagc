@@ -15,13 +15,10 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
 
 ## Page 90
-## Luminary 178, as a release version, likely had explicit version numbers for
+## Luminary 173, as a release version, likely had explicit version numbers for
 ## all of the subroutines hardcoded. Since this has been reconstructed from
 ## multiple distant versions, the exact version numbers of each subroutine are
 ## unknown, and so they have been left blank.

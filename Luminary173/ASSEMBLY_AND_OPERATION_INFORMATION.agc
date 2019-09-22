@@ -15,10 +15,9 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LUMINARY 173.
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2019-09-21 MAS  Removed VELOCITY5 (ZZ) scaling and gave
+##                              FORVEL its original CC scaling.
 
 ## Page 2
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
@@ -580,7 +579,7 @@
 # 59       1      DVLOS           S
 #          2      DVLOS +2        S
 #          3      DVLOS +4        S
-# 60       1      FORVEL          ZZ
+# 60       1      FORVEL          CC
 ## Page 15
 #          2      HDOTDISP        S
 #          3      HCALC1          RR
@@ -902,11 +901,6 @@
 # -YY-
 # VELOCITY 4           XXXX.X FEET/SEC       DP FRACTIONAL PART OF
 #                      (MAX 328.0)              METERS/CENTI-SEC
-
-# -ZZ-
-# VELOCITY5            XXXX.X FT/SEC         DP BIT 1 OF HIGH REGISTER =
-#                                                -9
-#                                               2   METERS/CENTI-SEC
 
 # -AAA-
 # RADIANS              XX.XXX RADIANS        DP BIT 1 OF HIGH REGISTER =
