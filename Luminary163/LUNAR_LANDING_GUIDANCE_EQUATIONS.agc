@@ -18,8 +18,12 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173. Moved STRTP66A
-##                              up four instructions, per PCR 988.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Moved STRTP66A up
+##                              four instructions, per PCR 988. Removed the
+##                              DEIMUBOB subroutine and its constant RIMUZ.
+##                              Removed calls to that routine (and replaced
+##                              the one in RODCOMPA with a CA OLDPIPAX).
+##                              
 
 ## Page 794
                 EBANK=          E2DPS
@@ -196,9 +200,6 @@ STRTP66A        TC              UPFLAG                  # SET FLAG TO CONTINUE P
                 STORE           LASTTPIP
 
                 EXIT
-
-                TC              BANKCALL                # REFER CURRENT PIPAX READING TO THE CM:
-                FCADR           DEIMUBOB                #    ALAS, OMEGAQ AT PIPTIME NOT AVAILABLE
 
                 CAF             ZERO
                 TS              FCOLD
@@ -1128,18 +1129,15 @@ RODCOMPA        EXTEND
                 DCA             TIME2
                 DXCH            THISTPIP
 
-                TC              DEIMUBOB                # REFER CURRENT PIPAX READING TO THE CM
-
-# COMPUTE DELV SINCE PIPTIME. RETURN FROM DEIMUBOB WITH CORRECTED OLDPIPAX IN A
-                                                        # CURRENT P66 PIPA
-                AD              PIPATMPX                # + PIPA BY PIPASR IF B4 COPYCYCL, 0 AFTER
-                TS              MPAC                    # = DELV SINCE VALIDITY OF V, 2(14)CM/SEC
+                CA              OLDPIPAX
+                AD              PIPATMPX
+                TS              MPAC                    # MPAC(X) = PIPAX + PIPATMPX
                 CA              OLDPIPAY
                 AD              PIPATMPY
-                TS              MPAC            +3
+                TS              MPAC            +3      # MPAC(Y) = PIPAY + PIPATMPY
                 CA              OLDPIPAZ
                 AD              PIPATMPZ
-                TS              MPAC            +5
+                TS              MPAC            +5      # MPAC(Z) = PIPAZ + PIPATMPZ
 
 # COMPUTE DELV SINCE THE LAST P66 PASS
 
@@ -1270,27 +1268,6 @@ ITRPNT2         EXIT
                 TC              POSTJUMP
                 FCADR           THROT66
 
-# THE FOLLOWING SUBROUTINE REFERS THE X PIPA READING TO THE CENTER OF MASS
-# BY SUBTRACTING THOSE PIPA COUNTS PRODUCED BY VERTICAL IMU MOTION
-# RELATIVE TO THE CENTER OF MASS.  THE SPACECRAFT X AXIS IS ASSUMED
-# APPROXIMATELY VERTICAL.  THE EQUATION IS:
-
-#          OLDPIPAX = OLDPIPAX - OMEGAQ RIMUZ
-
-# WHERE OLDPIPAX IS THE CURRENT P66 PIPA READING, OMEGAQ IS THE ATTITUDE
-# RATE ABOUT THE Q (Y) AXIS, AND RIMUZ IS THE Z COORDINATE OF THE IMU.
-
-DEIMUBOB        CA              EBANK6
-                TS              EBANK
-                EBANK=          END-E6
-                CS              OMEGAQ                  # PITCH RATE IN UNITS 45 DEG/SEC
-                INCR            BBANK
-                EBANK=          END-E7
-                EXTEND
-                MP              RIMUZ                   # IMU Z IN UNITS (180/PI 45) 2(14) CM
-                ADS             OLDPIPAX                # CURRENT P66 PIPA X IN UNITS 2(14) CM/SEC
-                TC              Q
-
 ## Page 821
 # CONSTANTS FOR P66
 
@@ -1300,7 +1277,6 @@ GHZ             DEC             1.62292         E-4 B+4 # GRAVITY IN 2(-4)M/CS/C
 BIT1H           OCT             00001                   # MUST PRECEDE A ZERO
 SHFTFACT        2DEC            1               B-17    # SCALES P66 PERIOD TO 2(1))CS
 BIASFACT        2DEC            655.36 B-26
-RIMUZ           DEC             99.486          B-14    # 1.2667 M IN UNITS (180/PI 45) 2(14) CM
 
 ## Page 822
 # ****************************************************************************************************************
