@@ -15,9 +15,6 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LUMINARY 163.
 ## Mod history: 2019-08-21 MAS  Created from Luminary 173.
 
 ## Page 1283

@@ -15,9 +15,6 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
-##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
-##              LUMINARY 163.
 ## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed clearing of
 ##                              R12RDFLG. Re-added OCT7777. Changed call to
 ##                              RESTARTS from BANKCALL to SWCALL, and added
