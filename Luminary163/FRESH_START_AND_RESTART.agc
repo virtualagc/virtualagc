@@ -18,8 +18,12 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed clearing
-##                              of R12RDFLG.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed clearing of
+##                              R12RDFLG. Re-added OCT7777. Changed call to
+##                              RESTARTS from BANKCALL to SWCALL, and added
+##                              definition of RACTCADR. Removed OCT6200, and
+##                              changed initialization of SWINIT +8 to add
+##                              individual bits instead of using it.
 
 ## Page 218
                 BANK            10
@@ -154,7 +158,9 @@ DOFSTRT1        CAF             FOUR
                 EXTEND
                 DCA             SWINIT          +6
                 DXCH            STATE           +6
-                CA              OCT6200                 # CMOONFLG, LMOONFLG, SURFFLAG
+                CA              SURFFBIT                # DO NOT ALTER  SURFFLAG ON FRESH START.
+                AD              CMOONBIT                #               CMOONFLG
+                AD              LMOONBIT                #               LMOONFLG
                 MASK            STATE           +8D
                 AD              SWINIT          +8D
                 TS              STATE           +8D
@@ -325,8 +331,9 @@ NXTRST          TS              MPAC            +5
 PACTIVE         TS              MPAC
                 INCR            MPAC                    # ABS OF PHASE.
                 INCR            MPAC            +6      # INDICATE GROUP DEMANDS PRESENT.
-                TC              BANKCALL
-                CADR            RESTARTS
+                CA              RACTCADR
+                TC              SWCALL                  # MUST RETURN TO SWRETURN.
+
 PINACT          CCS             MPAC            +5      # PROCESS ALL RESTART GROUPS.
                 TCF             NXTRST
 
@@ -348,9 +355,10 @@ PTBAD           TC              ALARM                   # SET ALARM TO SHOW PHAS
 
 OCT10000        =               BIT13
 OCT30000        =               PRIO30
-OCT6200         OCT             6200                    # SURFBIT, CMOONBIT, LMOONBIT FOR SWINITS
+OCT7777         OCT             7777
 STIKSTRT        DEC             0.825268                # 20 D/S MAXIMUM COMMANDED RATE
 RATESTRT        DEC             -218
+RACTCADR        CADR            RESTARTS
 BOOLSTRT        OCT             21322
 77001OCT        OCT             77001                   # .14 DEG SCALED AT 4.5 DEG
 60DEC           DEC             60
