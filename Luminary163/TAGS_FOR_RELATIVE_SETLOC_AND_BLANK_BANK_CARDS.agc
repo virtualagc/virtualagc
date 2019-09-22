@@ -18,7 +18,7 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed S40BNK tag.
 
 ## Page 28
                 COUNT           BANKSUM
@@ -208,7 +208,6 @@ RODTRAP         EQUALS
                 BANK            24
 PLANTIN         EQUALS
 P20S            EQUALS
-S40BNK          EQUALS
                 BNKSUM          24
 
 

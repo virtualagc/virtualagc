@@ -18,7 +18,12 @@
 ## Warning:     THIS PROGRAM IS STILL UNDERGOING RECONSTRUCTION
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
-## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+## Mod history: 2019-08-21 MAS  Created from Luminary 173. Removed S40RET tag
+##                              in UPDATEVG. Changed references to S40RET to
+##                              QPRET. Removed GOFIND tag in ALARMIT, changed
+##                              the CALL FINDCDUW -2 to GOTO, and removed the
+##                              GOTO S40RET. Moved ALARMIT back to bank 27.
+##                              Changed reference to GOFIND to FINDCDUW -2.
 
 ## Page 738
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -511,7 +516,7 @@ COASTSET        TC      IBNKCALL        # DO DAP COASTING INITIALIZATION
 UPDATEVG        STQ     CALL
                         QTEMP1
                         S40.8           # X-PRODUCT STEERING
-S40RET          BON     BON             # WILL RETURN HERE FROM S40.8
+                BON     BON             # WILL RETURN HERE FROM S40.8
                         XDELVFLG
                         QTEMP1
                         NORMSW
@@ -947,7 +952,7 @@ TGDCALC         SETPD   VLOAD
                         DELVREF
                 BOFF    VCOMP
                         STEERSW
-                        S40RET          # LOCATION FOLLOWING CALL TO S40.8
+                        QPRET
                 UNIT
                 DOT     PUSH
                         VG
@@ -969,30 +974,20 @@ TGDCALC         SETPD   VLOAD
                         TGO
                 DSU     BPL
                         FOURSECS        # 400 CS
-                        GOFIND          # CALL TO FINDCDUW -2
+                        FINDCDUW -2
                 SET     CLRGO
                         IMPULSW
                         STEERSW
-                        S40RET          # LOCATION FOLLOWING CALL TO S40.8
+                        QPRET
 
 ## Page 758
-                BANK    24
-                SETLOC  S40BNK
-                BANK
-                
 ALARMIT         EXIT
                 TC      ALARM
-                OCT     01407           # SKIP TGO COMPUTATION BUT CALL FINDCDUW.
+                OCT     01407
                 TC      INTPRET
-GOFIND          CALL            
-                        FINDCDUW -2
                 GOTO
-                        S40RET          # LOCATION FOLLOWING CALL TO S40.8
+                        FINDCDUW -2
                         
-                BANK    27
-                SETLOC  P40S1
-                BANK
-
 -FOURDT         2DEC    -800 B-18       # -4 (200 CS.)  B (-18)
 
 FOURSECS        2DEC    400             # 400 CS SCALED AT 2(+28) CS
