@@ -181,6 +181,7 @@
 #		2019-08-16 RSB	Added Artemis071.
 #		2019-09-17 MAS	Added Luminary 178.
 #		2019-09-18 RSB	Added yaOBC and yaASM targets.
+#		2019-09-22 RSB	Added Luminary163 and 173 missions.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -199,7 +200,7 @@
 # certain changes that *may* allow building with clang rather than gcc.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2019-09-18\\\"
+NVER:=\\\"2019-09-22\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -427,7 +428,7 @@ MISSIONS += Luminary099 Artemis072 Colossus237 Luminary130
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
 MISSIONS += Retread50 SundialE LUM69R2 Luminary097 Luminary098
-MISSIONS += Comanche051 Artemis071 Luminary178
+MISSIONS += Comanche051 Artemis071 Luminary178 Luminary163 Luminary173
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif
