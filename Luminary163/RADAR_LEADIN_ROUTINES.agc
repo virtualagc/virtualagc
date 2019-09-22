@@ -19,7 +19,8 @@
 ##              AND DOES NOT YET REFLECT THE ORIGINAL CONTENTS OF
 ##              LUMINARY 163.
 ## Mod history: 2019-08-21 MAS  Created from Luminary 173. Moved RADSAMP back
-##                              to bank 25.
+##                              to bank 25. Changed the TWIDDLE to RADSAMP to
+##                              a WAITLIST call.
 
 ## Page 498
                 BANK            25
@@ -35,8 +36,10 @@ RADSAMP         CCS             RSAMPDT                 # TIMES NORMAL ONCE-PER-
                 TCF             +2
                 TCF             TASKOVER                # +0 INSERTED MANUALLY TERMINATES TEST.
 
-                TC              TWIDDLE
-                CADR            RADSAMP
+                TC              WAITLIST
+                EBANK=          RSTACK
+                2CADR           RADSAMP
+
                 CAF             PRIO25
                 TC              NOVAC
                 EBANK=          RSTACK
