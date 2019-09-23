@@ -75,6 +75,7 @@ typedef struct {
   int32_t hop;
   int32_t acc;
   int32_t pq;
+  int32_t returnAddress;
   // Note that the values are stored in core[] are stored in the same form
   // they appear in assembly listings --- in particular, with instructions in
   // syllable 1 and syllable 0 shifted by different amounts, and with data
@@ -138,9 +139,20 @@ typedef struct {
   uint8_t dupin;
   uint8_t dupdn;
 } hopStructure_t;
+int instructionFromDataMemory;
+int dataFromInstructionMemory;
+int dataOverwritesInstructionMemory;
 int
 runOneInstruction (int *cyclesUsed);
 int
 parseHopConstant (int hopConstant, hopStructure_t *hopStructure);
+int
+formHopConstant (hopStructure_t *hopStructure, int *hopConstant);
+int
+fetchData (int module, int residual, int sector, int loc, int16_t *data,
+	   int *dataFromInstructionMemory);
+int
+storeData (int module, int residual, int sector, int loc, int16_t data,
+	   int *dataOverwritesInstructionMemory);
 
 #endif // yaLVDC_h

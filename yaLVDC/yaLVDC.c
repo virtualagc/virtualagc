@@ -59,6 +59,8 @@ sleepMilliseconds(unsigned Milliseconds)
 
 #else // *NIX.
 
+#include <unistd.h>
+#include <time.h>
 #include <sys/times.h>
 void
 sleepMilliseconds(unsigned Milliseconds)
@@ -87,6 +89,7 @@ main (int argc, char *argv[])
   int i;
   clock_t startingTime, currentTime;
   unsigned long cycleCount = 0;
+  struct tms TmsStruct;
 
   // Setup and initialization.
   if (parseCommandLineArguments (argc, argv))

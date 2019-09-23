@@ -18,7 +18,8 @@
  *
  * Filename:    runOneInstruction.c
  * Purpose:     Emulates one instruction for yaLVDC.c, using the global state
- * 		structure.
+ * 		structure. Also provides various related utility functions that
+ * 		I think might be useful for an LVDC debugger.
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-20 RSB  Began.
@@ -40,7 +41,7 @@ parseHopConstant (int hopConstant, hopStructure_t *hopStructure)
 
   if ((hopConstant & ~777577776) != 0)
     {
-      pushErrorMessage("Corrupted HOP constant", NULL);
+      pushErrorMessage ("Corrupted HOP constant", NULL);
       goto done;
     }
   hopStructure->im = ((hopConstant >> 26) & 1) | (hopConstant & 6);
@@ -53,7 +54,7 @@ parseHopConstant (int hopConstant, hopStructure_t *hopStructure)
   hopStructure->ds = (hopConstant >> 25) & 1;
 
   retVal = 0;
-  done:;
+  done: ;
   return (retVal);
 }
 
@@ -75,42 +76,65 @@ formHopConstant (hopStructure_t *hopStructure, int *hopConstant)
   *hopConstant |= hopStructure->dupin << 25;
 
   retVal = 0;
-  done:;
+  //done: ;
   return (retVal);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Fetch a data word from core memory.  Because it is "data", we first try to
 // fetch it from data memory, and only fall back to fetching it from
-// instruction memory if that fails.  If that happens, we set a global flag
+// instruction memory if that fails.  If that happens, we set a flag
 // (dataFromInstructinMemory) so that the calling code can deal with it if
 // appropriate, but it's not treated as an error.  If location is treated as
 // empty in both data and instruction memory, however, it is treated as an
 // error.
 
-int dataFromInstructionMemory = 0;
-static int
-fetchData(int module, int residual, int sector, int loc, int *data)
+int
+fetchData (int module, int residual, int sector, int loc, int16_t *data,
+	   int *dataFromInstructionMemory)
 {
   int retVal = 1;
 
-  dataFromInstructionMemory = 0;
+  *dataFromInstructionMemory = 0;
   if (residual)
-	sector = 017;
+    sector = 017;
   *data = state.core[module][sector][2][loc];
   if (*data == -1)
-	{
-	  int16_t fetch1, fetch0;
-	  fetch1 = state.core[module][sector][1][loc];
-	  fetch0 = state.core[module][sector][0][loc];
-	  if (fetch0 == -1 || fetch1 == -1)
-	    goto done;
-	  *data = (fetch1 << 12) + fetch0;
-	  dataFromInstructionMemory = 1;
-	}
+    {
+      int16_t fetch1, fetch0;
+      fetch1 = state.core[module][sector][1][loc];
+      fetch0 = state.core[module][sector][0][loc];
+      if (fetch0 == -1 || fetch1 == -1)
+	goto done;
+      *data = (fetch1 << 12) + fetch0;
+      *dataFromInstructionMemory = 1;
+    }
 
   retVal = 0;
-  done:;
+  done: ;
+  return (retVal);
+}
+
+// And similarly, write a word to data memory.
+int
+storeData (int module, int residual, int sector, int loc, int16_t data,
+	   int *dataOverwritesInstructionMemory)
+{
+  int retVal = 1;
+
+  *dataOverwritesInstructionMemory = 0;
+  if (residual)
+    sector = 017;
+  state.core[module][sector][2][loc] = data;
+  if (state.core[module][sector][1][loc] != -1 || state.core[module][sector][0][loc] != -1)
+    {
+      state.core[module][sector][1][loc] = -1;
+      state.core[module][sector][0][loc] = -1;
+      *dataOverwritesInstructionMemory = 1;
+    }
+
+  retVal = 0;
+  //done: ;
   return (retVal);
 }
 
@@ -120,8 +144,9 @@ fetchData(int module, int residual, int sector, int loc, int *data)
 // The return value is 0 on success, non-zero on failure.  The cyclesUsed
 // argument is used to report the number of computer cycles actually used while
 // emulating the instruction, which is usually 1.
-int returnAddress = -2;
 int instructionFromDataMemory = 0;
+int dataFromInstructionMemory = 0;
+int dataOverwritesInstructionMemory = 0;
 int
 runOneInstruction (int *cyclesUsed)
 {
@@ -136,11 +161,12 @@ runOneInstruction (int *cyclesUsed)
   instructionFromDataMemory = 0;
 
   // Find current instruction address and data-sector environment.
-  if (parseHopConstant(state.hop, &hopStructure))
+  if (parseHopConstant (state.hop, &hopStructure))
     {
-      pushErrorMessage("Cannot interpret current instruction address", NULL);
+      pushErrorMessage ("Cannot interpret current instruction address", NULL);
       goto done;
     }
+  nextAddress = hopStructure.loc;
   if (hopStructure.loc == 0377)
     nextAddress = -2;
   else
@@ -149,14 +175,17 @@ runOneInstruction (int *cyclesUsed)
   // Fetch the instruction itself.  First try getting it from instruction
   // memory; if that fails, get it from data memory and set a flag
   // (instructionFromDataMemory) for optional use by the calling code.
-  instruction = state.core[hopStructure.im][hopStructure.is][hopStructure.s][hopStructure.loc];
+  instruction =
+      state.core[hopStructure.im][hopStructure.is][hopStructure.s][hopStructure.loc];
   if (instruction == -1)
     {
       int fetchedData;
-      fetchedData = state.core[hopStructure.im][hopStructure.is][2][hopStructure.loc];
+      fetchedData =
+	  state.core[hopStructure.im][hopStructure.is][2][hopStructure.loc];
       if (fetchedData == -1)
 	{
-	  pushErrorMessage("Cannot fetch instruction from empty address", NULL);
+	  pushErrorMessage ("Cannot fetch instruction from empty address",
+			    NULL);
 	  goto done;
 	}
       instructionFromDataMemory = 1;
@@ -190,135 +219,164 @@ runOneInstruction (int *cyclesUsed)
     }
 
   // Execute the instruction.
-  switch (op) {
+  switch (op)
+    {
     int16_t fetchedFromMemory;
-    case 000:  // HOP
-      if (fetchData(hopStructure.dm, residual, hopStructure.dm, operand, &fetchedFromMemory))
-	{
-	  pushErrorMessage("HOP to empty location", NULL);
-	  goto done;
-	}
-      state.hop = fetchedFromMemory;
-      returnAddress = nextAddress;
-      break;
-    case 001:  // MPY
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 002:  // SUB
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 003:  // DIV
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 004:  // TNZ
-      if (state.acc == 0)
-	state.hop = nextAddress;
-      else
-	{
-	  hopStructure.loc = operand;
-	  hopStructure.s = residual;
-	  if (formHopConstant(&hopStructure, &state.hop))
-	    goto done;
-	}
-      returnAddress = -2;
-      break;
-    case 005:  // MPH
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 006:  // AND
-      if (fetchData(hopStructure.dm, residual, hopStructure.dm, operand, &fetchedFromMemory))
-	{
-	  pushErrorMessage("Fetching data from empty location", NULL);
-	  goto done;
-	}
-      state.acc &= fetchedFromMemory;
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 007:  // ADD
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 010:  // TRA
-      hopStructure.loc = operand;
-      hopStructure.s = residual;
-      if (formHopConstant(&hopStructure, &state.hop))
+  case 000:  // HOP
+    if (fetchData (hopStructure.dm, residual, hopStructure.dm, operand,
+		   &fetchedFromMemory, &dataFromInstructionMemory))
+      {
+	pushErrorMessage ("HOP to empty location", NULL);
 	goto done;
-      returnAddress = -2;
-      break;
-    case 011:  // XOR
-      if (fetchData(hopStructure.dm, residual, hopStructure.dm, operand, &fetchedFromMemory))
-	{
-	  pushErrorMessage("Fetching data from empty location", NULL);
+      }
+    state.hop = fetchedFromMemory;
+    state.returnAddress = nextAddress;
+    break;
+  case 001:  // MPY
+
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 002:  // SUB
+    if (fetchData (hopStructure.dm, residual, hopStructure.dm, operand,
+		   &fetchedFromMemory, &dataFromInstructionMemory))
+      {
+	pushErrorMessage ("Fetching data from empty location", NULL);
+	goto done;
+      }
+    state.acc = (state.acc - fetchedFromMemory) & 0777777776;
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 003:  // DIV
+
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 004:  // TNZ
+    if (state.acc == 0)
+      state.hop = nextAddress;
+    else
+      {
+	hopStructure.loc = operand;
+	hopStructure.s = residual;
+	if (formHopConstant (&hopStructure, &state.hop))
 	  goto done;
-	}
-      state.acc = (state.acc ^ fetchedFromMemory) & 0777777776;
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 012:  // PIO
+      }
+    state.returnAddress = -2;
+    break;
+  case 005:  // MPH
 
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 013:  // STO
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 014:  // TMI
-      if (state.acc >= 0)
-	state.hop = nextAddress;
-      else
-	{
-	  hopStructure.loc = operand;
-	  hopStructure.s = residual;
-	  if (formHopConstant(&hopStructure, &state.hop))
-	    goto done;
-	}
-      returnAddress = -2;
-      break;
-    case 015:  // RSU
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 016:  // CDS
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 017:  // CLA
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 036:  // SHF
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    case 076:  // EXM
-
-      state.hop = nextAddress;
-      returnAddress = -2;
-      break;
-    default:
-      pushErrorMessage("Implementation error", NULL);
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 006:  // AND
+    if (fetchData (hopStructure.dm, residual, hopStructure.dm, operand,
+		   &fetchedFromMemory, &dataFromInstructionMemory))
+      {
+	pushErrorMessage ("Fetching data from empty location", NULL);
+	goto done;
+      }
+    state.acc &= fetchedFromMemory;
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 007:  // ADD
+    if (fetchData (hopStructure.dm, residual, hopStructure.dm, operand,
+		   &fetchedFromMemory, &dataFromInstructionMemory))
+      {
+	pushErrorMessage ("Fetching data from empty location", NULL);
+	goto done;
+      }
+    state.acc = (state.acc + fetchedFromMemory) & 0777777776;
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 010:  // TRA
+    hopStructure.loc = operand;
+    hopStructure.s = residual;
+    if (formHopConstant (&hopStructure, &state.hop))
       goto done;
+    state.returnAddress = -2;
+    break;
+  case 011:  // XOR
+    if (fetchData (hopStructure.dm, residual, hopStructure.dm, operand,
+		   &fetchedFromMemory, &dataFromInstructionMemory))
+      {
+	pushErrorMessage ("Fetching data from empty location", NULL);
+	goto done;
+      }
+    state.acc = (state.acc ^ fetchedFromMemory) & 0777777776;
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 012:  // PIO
+
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 013:  // STO
+    storeData (hopStructure.dm, residual, hopStructure.dm, operand,
+		   state.acc, &dataOverwritesInstructionMemory);
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 014:  // TMI
+    if (state.acc >= 0)
+      state.hop = nextAddress;
+    else
+      {
+	hopStructure.loc = operand;
+	hopStructure.s = residual;
+	if (formHopConstant (&hopStructure, &state.hop))
+	  goto done;
+      }
+    state.returnAddress = -2;
+    break;
+  case 015:  // RSU
+    if (fetchData (hopStructure.dm, residual, hopStructure.dm, operand,
+		   &fetchedFromMemory, &dataFromInstructionMemory))
+      {
+	pushErrorMessage ("Fetching data from empty location", NULL);
+	goto done;
+      }
+    state.acc = (fetchedFromMemory - state.acc) & 0777777776;
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 016:  // CDS
+
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 017:  // CLA
+    if (fetchData (hopStructure.dm, residual, hopStructure.dm, operand,
+		   &fetchedFromMemory, &dataFromInstructionMemory))
+      {
+	pushErrorMessage ("Fetching data from empty location", NULL);
+	goto done;
+      }
+    state.acc = fetchedFromMemory;
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 036:  // SHF
+
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  case 076:  // EXM
+
+    state.hop = nextAddress;
+    state.returnAddress = -2;
+    break;
+  default:
+    pushErrorMessage ("Implementation error", NULL);
+    goto done;
   }
 
-  *cyclesUsed = cycleCount;
-  retVal = 0;
-  done:;
-  return (retVal);
+*cyclesUsed = cycleCount;
+retVal = 0;
+done: ;
+return (retVal);
 }
