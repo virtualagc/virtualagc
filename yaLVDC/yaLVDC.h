@@ -75,13 +75,7 @@ typedef struct {
   int32_t hop;
   int32_t acc;
   int32_t pq;
-  int32_t returnAddress;
-  // Note that the values are stored in core[] are stored in the same form
-  // they appear in assembly listings --- in particular, with instructions in
-  // syllable 1 and syllable 0 shifted by different amounts, and with data
-  // memory occupying syllable "2" --- rather than in the most-convenient form
-  // for usage by the emulator.  It remains to be seen whether or not those are
-  // sensible choices.
+  int32_t returnAddress; // -2 except immediately after a HOP instruction.
   int32_t core[8][16][3][256];
   int32_t pio[512];
 } state_t;
