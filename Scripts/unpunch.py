@@ -28,9 +28,8 @@
 #
 # This script doesn't actually rename the files, but itself just 
 # produces a script that you can run to rename the files:
-#	cd FolderOfScannedCardPDFs
-#	ls -1 *.PDF | unpunch.py "DestFolder_images" >RenamingScript.sh 2>IndexTable.html
 #	cd DestFolder_images
+#	ls -1 *.png | unpunch.py DestFolder_images >RenamingScript.sh 2>IndexTable.html
 #	bash RenamingScript.sh
 #
 # Additional steps you'd usually take after all this are:
@@ -54,7 +53,9 @@ dupList = {}
 htmlList = {}
 for line in sys.stdin:
 	line = line.strip()
-	rawLine = line
+	if line[-8:] == "-000.png":
+		line = line[:-8]
+	rawLine = line.strip()
 	line = re.sub(r".*Box [0-9]+/", "", line)
 	copy = ""
 	if line[-7] == "(" and line[-5:] == ").PDF":
