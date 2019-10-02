@@ -1,33 +1,39 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    BANK11.agc
-## Purpose:     Part of the source code for AGC program Retread 50. 
+## Purpose:     Part of the source code for AGC program Retread 50.
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/Restoration.html
 ## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's
 ##				physical core-rope modules.
+##              2019-10-01 MAS  Completed disassembly.
+
+## This entire section was added between Retread 44 and Retread 50. As such, all labels, variable names,
+## and comments (and even the name of the section itself!) are not original and have been added as part
+## of the disassembly process. Labels and comments were taken from similar code in later programs where
+## possible, and created anew by VirtualAGC where not.
 
                 SETLOC          32000
                 EBANK=          COMMAND
 
-BANK11          CA              BIT5
+VBZERO          CA              BIT5                            # ROUTINE TO ZERO ICDUS.
                 EXTEND
                 WOR             12
 
-                CA              UNK2342
+                CA              20MSEC                          # WAIT 20 MS.
                 INHINT
                 TC              WAITLIST
                 2CADR           ZEROICDU
 
                 TC              ENDOFJOB
 
-ZEROICDU        CAF             ZERO
+ZEROICDU        CAF             ZERO                            # ZERO ICDU COUNTERS.
                 TS              CDUX
                 TS              CDUY
                 TS              CDUZ
 
-                CS              BIT5
+                CS              BIT5                            # REMOVE ZERO DISCRETE.
                 EXTEND
                 WAND            12
 
@@ -35,18 +41,18 @@ ZEROICDU        CAF             ZERO
 
 # IMU COARSE ALIGN MODE.
 
-IMUCOARS        CAF             BIT4
+IMUCOARS        CAF             BIT4                            # SEND COARSE ALIGN ENABLE DISCRETE
                 EXTEND
                 WOR             12
 
-                CA              UNK2344
+                CAF             50MSEC
                 INHINT
                 TC              WAITLIST
                 2CADR           COARS
 
                 TC              ENDOFJOB
 
-COARS           CAF             BIT6
+COARS           CAF             BIT6                            # ENABLE ALL THREE ISS CDU ERROR COUNTERS
                 EXTEND
                 WOR             12
 
@@ -71,7 +77,7 @@ COARS1          TS              CDUIND
                 CCS             CDUIND
                 TC              COARS1
 
-                CA              UNK2342
+                CA              20MSEC
                 TC              WAITLIST
                 2CADR           COARS2
 
@@ -133,184 +139,212 @@ SENDPULS        CAF             13,14,15
                 2CADR           COARS2
                 TC              TASKOVER
 
-IMUFINE         CS              BITS4-6                         # RESET ZERO, COARSE, AND ECTR ENABLE.
+# KEYBOARD REQUEST TO PULSE TORQUE IRIGA
+
+TORQGYRS        CS              BITS4-6                         # RESET ZERO, COARSE, AND ECTR ENABLE.
                 EXTEND
                 WAND            12
 
-                CAF             TWO
-                TS              UNK1205
+                CAF             TWO                             # INITIALIZE THE GYRO INDEX ERASABLES.
+                TS              GYRONUM
                 DOUBLE
-                TS              UNK1206
+                TS              GYCMDIDX
                 AD              ONE
-                TS              UNK1207
+                TS              GYCMDIDX        +1
 
-                CAF             BIT6
+                CAF             BIT6                            # ENABLE THE POWER SUPPLY.
                 EXTEND
                 WOR             14
 
-                CA              UNK2343
+                CAF             30MSEC
                 INHINT
                 TC              WAITLIST
-                2CADR           UNK2165
+                2CADR           IMUPULSE
 
                 TC              ENDOFJOB
 
-UNK2165         INDEX           UNK1206
-                CCS             UNK1210
-                TC              +4
-                TC              UNK2220
-                TC              +2
-                TC              UNK2220
+#          THE FOLLOWING ROUTINE TORQUES THE IRIGS ACCORDING TO DOUBLE PRECISION INPUTS IN THE SIX REGISTERS
+# BEGINNING AT LOCATION OGC. THE MINIMUM SIZE OF ANY PULSE TRAIN IS 16 PULSES (.25 CDU COUNTS). THE
+# UNSENT PORTION OF THE COMMAND IS LEFT INTACT IN THE INPUT COMMAND REGISTERS.
 
- +4             INDEX           UNK1206
-                TS              UNK1210
+IMUPULSE        INDEX           GYCMDIDX
+                CCS             OGC                             # SEE IF MORE THAN ONE PULSE TRAIN NEEDED
+                TC              LONGGYRO                        # (MORE THAN 16383 PULSES).
+                TC              LASTSEG
+                TC              LONGGYRO
+                TC              LASTSEG
 
-                INDEX           UNK1207
-                INCR            UNK1210
+LONGGYRO        INDEX           GYCMDIDX                        # SEND MAXIMUM 16383 PULSES.
+                TS              OGC
+
+                INDEX           GYCMDIDX        +1
+                INCR            OGC
 
                 CAF             POSMAX
                 TS              GYROCTR
-                CA              UNK2352
+
+                CA              5.13SEC                         # WAIT FOR FULL PULSE TRAIN TO GO OUT.
                 TC              +1
                 TC              WAITLIST
-                2CADR           UNK2165
+                2CADR           IMUPULSE
 
-UNK2206         INDEX           UNK1207
-                CCS             UNK1210
+STRTGYRO        INDEX           GYCMDIDX        +1              # DETERMINE POLARITY OF COMMAND.
+                CCS             OGC
                 CAF             ZERO
                 TCF             +2
                 CAF             BIT9
-                
-                INDEX           UNK1205
-                AD              UNK2361
+
+                INDEX           GYRONUM                         # SEND PULSE COMMAND TO GYRO.
+                AD              GYBITTAB
                 EXTEND
                 WRITE           14
 
                 TC              TASKOVER
 
-UNK2220         INDEX           UNK1207
-                CCS             UNK1210
+LASTSEG         INDEX           GYCMDIDX        +1              # ENTIRE COMMAND.
+                CCS             OGC
                 TC              +4
-                TC              UNK2244
+                TC              GYROEXIT
                 TC              +2
-                TC              UNK2244
+                TC              GYROEXIT
 
                 AD              ONE
                 TS              GYROCTR
 
-                AD              UNK2353
-                EXTEND
-                BZMF            UNK2244
+                AD              -GYROMIN                        # SMALL GYRO COMMAND. SEE IF AT LEAST
+                EXTEND                                          # 16 GYRO PULSES.
+                BZMF            GYROEXIT
 
-                CAF             BIT10
-                EXTEND
+                CAF             BIT10                           # GET WAITLIST DT TO TIME WHEN TRAIN IS
+                EXTEND                                          # ALMOST OUT.
                 MP              GYROCTR
                 AD              TWO
                 TC              +1
                 TC              WAITLIST
-                2CADR           UNK2244
+                2CADR           GYROEXIT
 
-                TC              UNK2206
+                TC              STRTGYRO
 
-UNK2244         CCS             UNK1205
-                TCF             +5
-                CS              BIT6
+GYROEXIT        CCS             GYRONUM
+                TCF             NEXTGYRO
+
+                CS              BIT6                            # RESET GYRO ENABLE.
                 EXTEND
                 WAND            14
 
                 TC              TASKOVER
 
-                TS              UNK1205
+NEXTGYRO        TS              GYRONUM
                 DOUBLE
-                TS              UNK1206
+                TS              GYCMDIDX
                 AD              ONE
-                TS              UNK1207
-                TC              UNK2165
+                TS              GYCMDIDX        +1
+                TC              IMUPULSE
 
-UNK2260         CS              BIT15
+# KEYBOARD REQUEST TO TURN ON INERTIAL SUBSYSTEM
+
+ISSUP           CS              BIT15                           # REMOVE IMU DELAY COMPLETE DISCRETE.
                 EXTEND
                 WAND            12
 
-                CAF             BIT14
+                CAF             BIT14                           # SEE IF ISS HAS TURNED ON.
                 EXTEND
                 RAND            30
+
                 CCS             A
                 TC              +2
-                TC              +6
-                CA              UNK2346
+                TC              CAGESUB
+
+                CAF             1SEC                            # CHECK AGAIN IN ONE SECOND.
                 TC              WAITLIST
-                2CADR           UNK2260
+                2CADR           ISSUP
 
                 TC              TASKOVER
 
-                CA              UNK2356
+CAGESUB         CA              BITS4&5                         # SEND ZERO AND COARSE.
                 EXTEND
                 WOR             12
-                CA              UNK2347
+
+                CA              90SECS
                 TC              +1
                 TC              WAITLIST
-                2CADR           UNK2307
+                2CADR           ENDTNON
 
                 TC              TASKOVER
 
-UNK2307         CAF             BIT15
+ENDTNON         CAF             BIT15                           # SEND ISS DELAY COMPLETE.
                 EXTEND
                 WOR             12
 
-UNK2312         CAF             BIT14
+ENDTNON2        CAF             BIT14
                 EXTEND
                 RAND            30
-                CCS             A
-                TC              +2
-                TC              +8
-                CS              UNK2357
+
+                CCS             A                               # IS TURN-ON COMPLETE?
+                TC              +2                              # YES.
+                TC              ENDTNON3                        # NO. TRY AGAIN IN 10 MS.
+
+                CS              BITS5&15                        # REMOVE IMU ZERO AND DELAY COMPLETE.
                 EXTEND
                 WAND            12
-                CAF             BIT6
+
+                CAF             BIT6                            # ENABLE ERROR COUNTERS.
                 EXTEND
                 WOR             12
 
                 TC              TASKOVER
 
-                CA              UNK2341
+ENDTNON3        CAF             10MSEC
                 TC              +1
                 TC              WAITLIST
-                2CADR           UNK2312
+                2CADR           ENDTNON2
 
                 TC              TASKOVER
 
-UNK2335         CS              BITS4-6
+# IMU FINE ALIGN MODE SWITCH.
+
+IMUFINE         CS              BITS4-6                         # RESET ZERO, COARSE, AND ECTR ENABLE.
                 EXTEND
                 WAND            12
                 TC              ENDOFJOB
 
-UNK2341         OCT             1
-UNK2342         OCT             2
-UNK2343         OCT             3
-UNK2344         OCT             5
+
+# WAITLIST DELAY TIME CONSTANTS
+
+10MSEC          DEC             1
+20MSEC          DEC             2
+30MSEC          DEC             3
+50MSEC          DEC             5
 600MS           DEC             60
-UNK2346         OCT             144
-UNK2347         OCT             21450
+1SEC            DEC             100
+90SECS          DEC             9000
+
+# CONSTANTS FOR MODE SWITCHING ROUTINES
+
 -COMMAX         DEC             -191
 -COMMAX-        DEC             -192
-UNK2352         OCT             1001
-UNK2353         OCT             77757
-UNK2354         OCT             50
+
+5.13SEC         DEC             513
+-GYROMIN        DEC             -16                             # MAY BE ADJUSTED TO SPECIFY MINIMUM CMD.
+
+BITS4&6         OCT             00050
 BITS4-6         OCT             00070
-UNK2356         OCT             30
-UNK2357         OCT             40020
+BITS4&5         OCT             00030
+BITS5&15        OCT             40020
 13,14,15        OCT             70000
-UNK2361         OCT             1140
-                OCT             1340
+
+GYBITTAB        OCT             1140                            # POWER SUPPLY ENABLE, GYRO SELECT,
+                OCT             1340                            # GYRO COMMAND OUT.
                 OCT             1240
 
-LST2FAN         TC              BANK11
-                TC              IMUCOARS
-                TC              UNK2335
-                TC              IMUFINE
+# FAN-OUT
 
-                INHINT
+LST2FAN         TC              VBZERO                          # VB40 ZERO ISS CDU
+                TC              IMUCOARS                        # VB41 COARSE ALIGN IMU
+                TC              IMUFINE                         # VB42 FINE ALIGN IMU
+                TC              TORQGYRS                        # VB43 PULSE TORQUE GYROS
+ITURNON         INHINT                                          # VB44 ISS TURN ON
                 CAF             ONE
                 TC              WAITLIST
-                2CADR           UNK2260
+                2CADR           ISSUP
                 TC              ENDOFJOB
