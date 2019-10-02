@@ -7,6 +7,7 @@
 ## Website:     www.ibiblio.org/apollo/Restoration.html
 ## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's
 ##				physical core-rope modules.
+##              2019-10-01 MAS  Added Retread 50's new extended verbs.
 
 ## Page 1
 
@@ -48,6 +49,17 @@
 # 36  FRESH START
 # 37  CHANGE MAJOR MODE
 # END OF REGULAR VERBS
+
+## !! START CHANGE FOR RETREAD 50 !!
+
+# EXTENDED VERBS
+# 40  ZERO ISS CDU
+# 41  COARSE ALIGN IMU
+# 42  FINE ALIGN IMU
+# 43  PULSE TORQUE GYROS
+# 44  ISS TURN-ON
+
+## !! END CHANGE FOR RETREAD 50 !!
 
 ## Page 3
 # NORMAL NOUNS                                       SCALE AND DECIMAL POINT
