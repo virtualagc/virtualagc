@@ -24,7 +24,10 @@
 # Aside from the renaming, this script also creates an HTML index of the 
 # drawings, in which you afterward have to replace the string BASEURL
 # with the appropriate name at which the drawings are going to be
-# uploaded to archive.org.
+# uploaded to archive.org.  In the instructions below, I'll refer to
+# BASEURL instead as DestFolder_images, since archive.org requires the
+# literal "_images" in the uploaded tarball or zipfile ... but DestFolder
+# should be something different and unique for each upload.
 #
 # This script doesn't actually rename the files, but itself just 
 # produces a script that you can run to rename the files:
