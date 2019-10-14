@@ -613,6 +613,7 @@ def makeHtml(findTable):
 					and "SPECIFICATION CONTROL DRAWING" not in thisTitle \
 					and "SPECIFICATION CONTROL DWG" not in thisTitle \
 					and "SOURCE CONTROL DRAWING" not in thisTitle \
+					and "SOURCE CONTROL DWG" not in thisTitle \
 					and "SCD" not in thisTitle:
 					if "ASSEMBLY" in thisTitle or "ASSY" in thisTitle or "GROUP" in thisTitle or " KIT" in thisTitle:
 						markAsAssembly = True
