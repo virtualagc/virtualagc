@@ -609,13 +609,17 @@ def makeHtml(findTable):
 				thisTitle = findTable[key]["TITLE"].replace("&", " & ").replace("  ", " ")
 				markAsAssembly = False
 				ref = False
-				if qty != "" and qty.isdigit() and int(qty) > 0 \
+				if 	qty != "" and qty.isdigit() and int(qty) > 0 \
 					and "SPECIFICATION CONTROL DRAWING" not in thisTitle \
 					and "SPECIFICATION CONTROL DWG" not in thisTitle \
 					and "SOURCE CONTROL DRAWING" not in thisTitle \
 					and "SOURCE CONTROL DWG" not in thisTitle \
 					and "SCD" not in thisTitle:
-					if "ASSEMBLY" in thisTitle or "ASSY" in thisTitle or "GROUP" in thisTitle or " KIT" in thisTitle:
+					if 	"ASSEMBLY" in thisTitle \
+						or "ASSY" in thisTitle \
+						or "ASS'Y" in thisTitle \
+						or "GROUP" in thisTitle \
+						or " KIT" in thisTitle:
 						markAsAssembly = True
 				else:
 					ref = True
