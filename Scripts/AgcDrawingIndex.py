@@ -251,6 +251,17 @@ for key, value in sorted(parser.allData.iteritems()):
 	lastDrawing[type] = drawing
 	lastTitle[type] = title
 
+##############################################################################
+# NOTE: The motivation of the following "compression" code is to save 
+# bandwidth.  But it's pointless for that purpose.  I didn't realize that
+# in most cases the server and browser are going to negotiate and then 
+# transparently gzip the content (and specifically tipuesearch_content.js) 
+# if necessary.  So anything my additional "compression" saves is minimal.
+# (And I've confirmed that background gzipping actually happens with ibiblio.org
+# and Chrome.)  However, it still saves quite a few bytes at GitHub, so I 
+# suppose it's still worthwhile, and I don't intend to remove stuff that's
+# working okay.
+##############################################################################
 # Let's do a little bit of compression on the output.  The URLs for archive.org (which are
 # _most_ of them by far) are quite long but mostly follow a simple pattern of
 #	PREFIX/PAGENUMBER/mode/1up
