@@ -26,7 +26,7 @@ do
 		INDIR="Box $BOX"
 		OUTDIR="apertureCardBox$BOX"NARASW_images
 	fi 
-	if [[ ! -d "INDIR" ]]
+	if [[ ! -d "$INDIR" ]]
 	then
 		echo "The input folder ($INDIR) does not exist."
 		exit 1
