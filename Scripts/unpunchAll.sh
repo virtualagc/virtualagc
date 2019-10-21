@@ -36,11 +36,11 @@ do
 	mkdir $OUTDIR
 	for n in *.PDF
 	do
-		pdfimages -png $n $OUTDIR
-		optipng $OUTDIR/$n-000.png
+		pdfimages -png "$n" $OUTDIR
+		optipng "$OUTDIR/$n-000.png"
 	done
 	cd $OUTDIR
-	bach ../RenamingScript.sh
+	bash ../RenamingScript.sh
 	cd -
 	tar -cf $OUTDIR.tar $OUTDIR
 	cd "$DIR"
