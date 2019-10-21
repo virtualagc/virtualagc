@@ -36,7 +36,7 @@ do
 	mkdir $OUTDIR
 	for n in *.PDF
 	do
-		pdfimages -png $n $OUTDIR/$n
+		pdfimages -png $n $OUTDIR
 		optipng $OUTDIR/$n-000.png
 	done
 	cd $OUTDIR
