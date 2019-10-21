@@ -18,7 +18,7 @@ do
 	shift
 	PART=$2
 	shift
-	if [[ "$PART" == "0" ]]
+	if [[ "$PART" != "0" ]]
 	then
 		INDIR="Box $BOX part $PART"
 		OUTDIR="apertureCardBox$BOX"Part$PART"NARASW_images"
