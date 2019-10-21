@@ -16,7 +16,7 @@ do
 	DIR=`pwd`
 	BOX=$1
 	shift
-	PART=$2
+	PART=$1
 	shift
 	if [[ "$PART" != "0" ]]
 	then
