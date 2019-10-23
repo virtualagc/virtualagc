@@ -89,6 +89,6 @@ do
 	bash ../RenamingScript.sh
 	cd -
 	tar -cf $OUTDIR.tar $OUTDIR
-	cd "$DIR"
 	rm RenamingScript.sh $OUTDIR -rf
+	cd "$DIR"
 done
