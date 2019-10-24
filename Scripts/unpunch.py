@@ -49,8 +49,12 @@ baseURL = "BASEURL"
 if len(sys.argv) > 1:
 	baseURL = sys.argv[1]
 correctMetadata = True
+mh = False
 if len(sys.argv) > 2:
-	correctMetadata = False
+	if sys.argv[2] == "mh":
+		mh = True
+	else:
+		correctMetadata = False
 
 dupList = {}
 htmlList = {}
@@ -72,8 +76,12 @@ for line in sys.stdin:
 	numFrames = line[4:6].strip()
 	if numFrames == "":
 		numFrames = "1"
-	docNumber = line[6:13]
-	sheetNum = line[14:17]
+	if mh:
+		docNumber = "MH01-" + line[6:15]
+		sheetNum = "001"
+	else:
+		docNumber = line[6:13]
+		sheetNum = line[14:17]
 	if sheetNum[1] != " " and sheetNum[2] == " ":
 		sheetNum = sheetNum[:2] + "8"
 	if sheetNum[1] == " ":
