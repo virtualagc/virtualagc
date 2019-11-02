@@ -48,6 +48,10 @@ for rawLine in sys.stdin:
 			continuation = True
 		else:
 			continuation = False
+			while cellEntry[-6:] == " </td>":
+				cellEntry = cellEntry[:-6] + "</td>"
+			while cellEntry[-9:] == "<br></td>":
+				cellEntry = cellEntry[:-9] + "</td>"
 			if inRow == 2:
 				docNumber = cellEntry[4:-5]
 			elif inRow == 4:
