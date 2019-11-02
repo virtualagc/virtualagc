@@ -83,6 +83,7 @@ You
 
 
 
+
                     will be prompted for a password, which is
                     "virtualagc".]</font></li>
               </ul>
@@ -151,6 +152,7 @@ the
 
 
 
+
               VM</a><br>
             <br>
             or <br>
@@ -166,6 +168,7 @@ the
           </td>
           <td valign="middle"><a
               href="Downloads/VirtualAGC-Ubuntu-14.04-32-2017-08-31.tar.xz">2017-08-31,
+
 
 
 
@@ -200,6 +203,7 @@ the
           </td>
           <td valign="middle"><a
               href="Downloads/VirtualAGC-Windows-2017-08-31.tar.xz">2017-08-31,
+
 
 
 
@@ -245,6 +249,7 @@ the
 
 
 
+
               21MB</a></td>
           <td valign="top"><a
               href="#Installer_for_Ubuntu_14.04_32-bit_x86">Using Ubuntu
@@ -261,11 +266,13 @@ the
 
 
 
+
               23MB</a><br>
           </td>
           <td valign="top"><a
               href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
 Ubuntu
+
 
 
 
@@ -284,11 +291,13 @@ Ubuntu
 
 
 
+
               42MB</a><br>
           </td>
           <td valign="top"><a
               href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
 Ubuntu
+
 
 
 
@@ -311,6 +320,7 @@ Ubuntu
 
 
 
+
                 installer</a><br>
             </font> </td>
         </tr>
@@ -321,6 +331,7 @@ Ubuntu
           </td>
           <td valign="top"><a
               href="Downloads/VirtualAGC-Raspbian-2017-03-29.tar.xz">2017-03-29,
+
 
 
 
@@ -354,6 +365,7 @@ Ubuntu
 
 
 
+
               23MB</a></td>
           <td valign="top"><a href="#Installer_for_Windows">Using
               Windows tarball</a></td>
@@ -379,6 +391,7 @@ Ubuntu
       <ul>
         <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Characteristics
 of
+
 
 
 
@@ -446,6 +459,7 @@ to
 
 
 
+
           this page</a>) FreeBSD as well even though the latter is not
         obvious from the VirtualBox website.<br>
       </li>
@@ -466,6 +480,7 @@ to
           href="#Downloading_and_Building_Virtual_AGC">download the
           Virtual AGC source code, and perhaps build it yourself</a>.&nbsp;
 This
+
 
 
 
@@ -507,6 +522,7 @@ This
     <p>The virtual-machine approach should work with any host system
       supported by <a href="http://www.virtualbox.org">VirtualBox</a>:&nbsp;
 namely,
+
 
 
 
@@ -669,6 +685,7 @@ namely,
 
 
 
+
           4.3.40</a>, but it should work with later versions as
         well.&nbsp; If you have a different version, you may find
         yourself wanting to reinstall VirtualBox's "guest additions"; if
@@ -752,6 +769,7 @@ a
 
 
 
+
         script</a> that does the same thing.&nbsp; Just put it somewhere
       (say in the "home" directory, /home/virtualagc/), and then from a
       command-line run the following command:<br>
@@ -811,6 +829,7 @@ about
 
 
 
+
           configuring it</a>.<br>
       </li>
     </ol>
@@ -845,6 +864,7 @@ about
       <li> The popup window that appears will ask you for the location
         of the program you want to run.&nbsp; It is C:\Users\<i>YourNameHere</i>\VirtualAGC\bin\VirtualAGC.exe.</li>
       <li> After the shortcut has been created on the desktop, <i>right</i>-click
+
 
         it and select Properties.&nbsp; Change the "Start in" or
         "Working directory" to be C:\Users\<i>YourNameHere</i>\VirtualAGC\Resources.</li>
@@ -883,10 +903,12 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
 
 
 
@@ -907,11 +929,13 @@ the
 
 
 
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
 
 
 
@@ -931,6 +955,7 @@ href="https://github.com/virtualagc/virtualagc/archive/master.zip">in a
     to run Virtual AGC on, and that's the topic of the next few
     sections.&nbsp; It's also possible that <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
 
 
 
@@ -1048,6 +1073,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
                 </b> <small><small><small><i>Last verified (Raspbian
                         Jessie): 2017-11-20<br>
                         Last verified (Raspbian Stretch): 2018-05-11<br>
+                        See notes below for Raspbian Buster<br>
                       </i></small></small></small> </big></big></td>
         </tr>
       </tbody>
@@ -1070,21 +1096,33 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
         git clone --depth 1 https://github.com/virtualagc/virtualagc</p>
     </blockquote>
     <p>The "sudo apt-get install ..." step given above is inadequate in
-      certain versions of Raspbian, and may need modifications:<br>
+      some versions of Raspbian, and may need modifications:<br>
     </p>
     <ul>
       <li>If libsdl1.2debian is pre-installed on your system, it may
         conflict with the installation of libsdl-dev described
         above.&nbsp; Simply omit libsdl-dev.&nbsp; If there is a
         libsdl1.2debian-dev package, you may need to install it. </li>
-      <li>Sometimes there is a problem with the wxWidgets 2.8 library
-        that allows applications apparently to be built properly, but
-        not to be runnable afterward, with a complaint about mismatched
-        "ABI" versions.&nbsp; The workaround is to install wxWidgets 3.0
-        instead of 2.8, in which case use the following command rather
-        than the one given above:&nbsp; "sudo apt-get install
-        wx3.0-headers libwxgtk3.0-dev libsdl-dev libncurses5-dev
-        liballegro4-dev git".</li>
+      <li>Raspbian Buster (as opposed to Jessie and Stretch).&nbsp; I've
+        not yet tried Raspbian Buster myself, but I'm told the following
+        mods are necessary:<br>
+      </li>
+      <ul>
+        <li>Compilation:&nbsp; There may be a problem with the wxWidgets
+          2.8 library that allows applications apparently to be built
+          properly, but not to be runnable afterward, with a complaint
+          about mismatched "ABI" versions.&nbsp; The workaround is to
+          install wxWidgets 3.0 instead of 2.8, in which case use the
+          following command rather than the one given above:&nbsp; "sudo
+          apt-get install wx3.0-headers libwxgtk3.0-dev libsdl-dev
+          libncurses5-dev liballegro4-dev git".</li>
+        <li>Running:&nbsp; It may be that Tcl/Tk isn't installed, and
+          while that those aren't needed for the most common
+          configuration of VirtualAGC (AGC+DSKY+Telemetry), it is needed
+          for certain advanced features.&nbsp; Install with "sudo
+          apt-get install tcl tk".<br>
+        </li>
+      </ul>
     </ul>
     <p>Building Virtual AGC:<br>
     </p>
@@ -1117,6 +1155,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
 That
+
 
 
 
@@ -1198,6 +1237,7 @@ That
     <ol>
       <li><a
 href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads/index.html">Install
+
 
 
 
@@ -1290,6 +1330,7 @@ version
 
 
 
+
           of Xcode for your version of Mac OS X</a> ... of course!&nbsp;
         I use Xcode 4.6.3.<br>
       </li>
@@ -1337,6 +1378,7 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
 
 
 
@@ -1586,7 +1628,7 @@ word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
 inline !important; float: none; background-color: rgb(255, 255,
 255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons No Rights Reserved License</a></span><br><i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-2019-09-22.<br><br><a href="http://www.ibiblio.org"><img style="border: 0px solid
+2019-11-01.<br><br><a href="http://www.ibiblio.org"><img style="border: 0px solid
 ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
 by ibiblio.org" src="hosted.png" width="300" height="100"></a><br></font></i> </center><br>
 </body></html>
