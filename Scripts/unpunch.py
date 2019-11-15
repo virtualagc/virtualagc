@@ -79,6 +79,9 @@ for line in sys.stdin:
 	if mh:
 		docNumber = "MH01-" + line[6:15]
 		sheetNum = "001"
+	elif line[6:10] == "JDC ":
+		docNumber = "JDC" + line[10:15]
+		sheetNum = "001"
 	else:
 		docNumber = line[6:13]
 		sheetNum = line[14:17]
