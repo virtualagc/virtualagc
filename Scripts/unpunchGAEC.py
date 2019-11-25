@@ -8,6 +8,43 @@
 # in ways that specialize it instead to GAEC LEM drawings.  The difference
 # between these scenarios is that the punched metadata on the aperture
 # cards is very different in the two cases.
+# 
+# As far as I can see, the GAEC punched metadata (as reflected but not
+# literally reproduced in the filenames of the scans), follows two 
+# separate patterns, depending on what's in column 1 of the *card*.  
+# And fortunately the cards themselves largely describe those formats.  
+# I'll call them the "primary" format (" " in column 1 of the card)
+# and the "secondary" format ("E" in column 1 of the card, but I'm 
+# not sure what the actual distinction is.  In terms of that cards, what
+# you have is this:
+#
+#	If primary:
+#		1 col		Space
+#		1 col		Drawing size (can be a space)
+#	If secondary:
+#		2 cols		"EO"
+#	15 cols		Drawing number (right-filled with space)
+#	5 cols		Code identification number (5 digits)
+#	3 cols		Sheet number (usually spaces)
+#	2 cols		Revision (letter, left-padded with space; usually spaces for secondary)
+#	3 cols		Number of sheets (3 digits; usually spaces for secondary)
+#	2 cols		Frame number (2 digits)
+#	2 cols		Number of frames (2 digits)
+#	9 cols		Subdivided as follows:
+#		1 col	Camera number (1 digit; usually spaces for secondary)
+#		5 cols	Roll number (digits, terminated by ".", right-filled with space; usually spaces for secondary)
+#		3 cols	Frame sequence number (letter plus 2 digits; usually spaces for primary)
+#	2 cols		Project code (digits, left-padded with space)
+#	2 cols		TBD (spaces) (possibly having something to do with rejection or revision)
+#	2 cols 		Control activity (usually spaces for primary)
+#	2 cols		Card code (usually spaces for primary)
+#	1 col		Sec(urity?) class (N)
+#	3 cols		Deck code (usually spaces)
+#
+# Notice that there are no drawing/document titles.  I further find that
+# the slides themselves typically have no title either, except on the 
+# very first sheet/slide for any given drawing number.
+
 #	DocNumPlusRev-DocType-Sheet-Frame-Title.png
 # The naming assumes that the PDFs created by the C400 have actually
 # been pre-converted to PNGs.  The steps I envisage for doing that
