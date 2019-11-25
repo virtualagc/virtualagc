@@ -111,11 +111,11 @@ for line in sys.stdin:
 	if line[-7] == "(" and line[-5:] == ").PDF":
 		copy = " (copy " + line[-6:-4]
 	
-	if prefix == "EO":
+	if prefix in ["EO", "E "]:
 		docType = "02"
-	elif prefix == "  ":
+	elif prefix == "LD":
 		docType = "01"
-		line = "  " + line 
+		line = "  " + line
 	else:
 		docType = "01"
 		line = " " + line
@@ -151,7 +151,7 @@ for line in sys.stdin:
 		dup += 1
 	print("mv '" + rawLine + "-000.png' '" + basename + ".png'")
 	htmlList[basename] = {
-		"docNumber" : docNumber,
+		"docNumber" : docNumber.replace("_", "-"),
 		"revision" : revision,
 		"docType" : docType,
 		"sheetNum" : sheetNum,

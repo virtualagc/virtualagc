@@ -75,7 +75,7 @@ do
 	fi
 	cd "$INDIR"
 	ls -1 *.PDF | unpunchGAEC.py $OUTDIR >RenamingScript.sh 2>IndexTable.html
-	exit 1
+	#exit 1
 	mkdir $OUTDIR
 	count=0
 	total="`ls -1 *.PDF | wc -l`"
