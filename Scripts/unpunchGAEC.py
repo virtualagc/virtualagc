@@ -25,21 +25,21 @@
 #		2 cols		"EO"
 #2	15 cols		Drawing number (right-filled with space)
 #17	5 cols		Code identification number (5 digits)
-#22	3 cols		Sheet number (usually spaces)
+#22	3 cols		Sheet number (usually spaces; only used, I think, for secondary))
 #25	2 cols		Revision (letter, left-padded with space; usually spaces for secondary)
 #27	3 cols		Number of sheets (3 digits; usually spaces for secondary)
 #30	2 cols		Frame number (2 digits)
 #32	2 cols		Number of frames (2 digits)
-#	9 cols		Subdivided as follows:
-#		1 col	Camera number (1 digit; usually spaces for secondary)
-#		5 cols	Roll number (digits, terminated by ".", right-filled with space; usually spaces for secondary)
-#		3 cols	Frame sequence number (letter plus 2 digits; usually spaces for primary)
-#	2 cols		Project code (digits, left-padded with space)
-#	2 cols		TBD (spaces) (possibly having something to do with rejection or revision)
-#	2 cols 		Control activity (usually spaces for primary)
-#	2 cols		Card code (usually spaces for primary)
-#	1 col		Sec(urity?) class (N)
-#	3 cols		Deck code (usually spaces)
+#34	9 cols		Subdivided as follows:
+#34		1 col	Camera number (1 digit; usually spaces for secondary)
+#35		5 cols	Roll number (digits, terminated by ".", right-filled with space; usually spaces for secondary)
+#40		3 cols	Frame sequence number (letter plus 2 digits; usually spaces for primary)
+#43	2 cols		Project code (digits, left-padded with space)
+#45	2 cols		TBD (spaces) (possibly having something to do with rejection or revision)
+#47	2 cols 		Control activity (usually spaces for primary)
+#49	2 cols		Card code (usually spaces for primary)
+#51	1 col		Sec(urity?) class (N)
+#52	3 cols		Deck code (usually spaces)
 #
 # Notice that there are no drawing/document titles.  I further find that
 # the slides themselves typically have no title either, except on the 
@@ -122,19 +122,32 @@ for line in sys.stdin:
 	frameNumber = line[30:32].strip()
 	if frameNumber == "":
 		frameNumber = "1"
+	while len(frameNumber) < 2:
+		frameNumber = "0" + frameNumber
 	numFrames = line[32:34].strip()
 	if numFrames == "":
 		numFrames = "1"
 	docNumber = line[2:17].strip().replace("-","_")
-	sheetNum = line[22:25].strip()
-	if sheetNum == "":
-		sheetNum = "001"
-	while len(sheetNum) < 3:
-		sheetNum = "0" + sheetNum
+	if docType = "02":
+		sheetNum = line[22:25].strip()
+		if sheetNum == "":
+			sheetNum = "001"
+		while len(sheetNum) < 3:
+			sheetNum = "0" + sheetNum
+	else:
+		sheetNum = line[35:40].strip()
+		if sheetNum == "":
+			sheetNum = "001"
+		elif sheetNum[:1].isdigit():
+			while len(sheetNum) < 3:
+				sheetNum = "0" + sheetNum
+		else:
+			while len(sheetNum) < 3:
+				sheetNum = sheetNum[0] + "0" + sheetNum[1:]
 	revision = line[25:27].strip()
 	if revision == "":
 		revision = "-"
-	if len(revision) == 1:
+	while len(revision) < 2:
 		revision = "-" + revision
 	revision_ = revision.replace("-", "_")
 	numSheets = line[27:30].strip()
