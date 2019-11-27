@@ -14,8 +14,8 @@
 # separate patterns, depending on what's in column 1 of the *card*.  
 # And fortunately the cards themselves largely describe those formats.  
 # I'll call them the "primary" format (" " in column 1 of the card)
-# and the "secondary" format ("E" in column 1 of the card, but I'm 
-# not sure what the actual distinction is.  In terms of that cards, what
+# and the "secondary" format ("EO" in columns 1-2 of the card.  The 
+# latter is an "engineering order".  In terms of that cards, what
 # you have is this:
 #
 #0	If primary:
@@ -33,7 +33,7 @@
 #34	9 cols		Subdivided as follows:
 #34		1 col	Camera number (1 digit; usually spaces for secondary)
 #35		5 cols	Roll number (digits, terminated by ".", right-filled with space; usually spaces for secondary)
-#40		3 cols	Frame sequence number (letter plus 2 digits; usually spaces for primary)
+#40		3 cols	Frame sequence number (2 digits; usually spaces for primary)
 #43	2 cols		Project code (digits, left-padded with space)
 #45	2 cols		TBD (spaces) (possibly having something to do with rejection or revision)
 #47	2 cols 		Control activity (usually spaces for primary)
@@ -112,38 +112,37 @@ for line in sys.stdin:
 		copy = " (copy " + line[-6:-4]
 	
 	if prefix in ["EO", "E "]:
-		docType = "02"
+		engineeringOrder = True
 	elif prefix == "LD":
-		docType = "01"
+		engineeringOrder = False
 		line = "  " + line
 	else:
-		docType = "01"
+		engineeringOrder = False
 		line = " " + line
+	numFrames = line[32:34].strip()
+	if numFrames == "":
+		numFrames = "1"
+	docNumber = line[2:17].strip().replace("-","_")
+	if False and engineeringOrder:
+		sheetNum = line[22:25].strip()
+		if sheetNum == "":
+			sheetNum = "1"
+	else:
+		sheetNum = line[35:43].strip()
+		if sheetNum == "":
+			sheetNum = "1"
+		fields = sheetNum.split(".")
+		if len(fields) == 2:
+			while len(fields[0]) < 3:
+				fields[0] = "0" + fields[0]
+			while len(fields[1]) < 4:
+				fields[1] = fields[1] + "0"
+			sheetNum = fields[0] + "." + fields[1]
 	frameNumber = line[30:32].strip()
 	if frameNumber == "":
 		frameNumber = "1"
 	while len(frameNumber) < 2:
 		frameNumber = "0" + frameNumber
-	numFrames = line[32:34].strip()
-	if numFrames == "":
-		numFrames = "1"
-	docNumber = line[2:17].strip().replace("-","_")
-	if docType == "02":
-		sheetNum = line[22:25].strip()
-		if sheetNum == "":
-			sheetNum = "001"
-		while len(sheetNum) < 3:
-			sheetNum = "0" + sheetNum
-	else:
-		sheetNum = line[35:40].strip()
-		if sheetNum == "":
-			sheetNum = "001"
-		elif sheetNum[:1].isdigit():
-			while len(sheetNum) < 3:
-				sheetNum = "0" + sheetNum
-		else:
-			while len(sheetNum) < 3:
-				sheetNum = sheetNum[0] + "0" + sheetNum[1:]
 	#print(line)
 	#print(sheetNum)
 	revision = line[25:27].strip()
@@ -158,6 +157,10 @@ for line in sys.stdin:
 	while len(numSheets) < 2:
 		numSheets += "0" + numSheets
 
+	if engineeringOrder:
+		docType = "EO"
+	else:
+		docType = "DW"
 	basename_ = docNumber + revision_ + "_" + docType + "_" + sheetNum + "_" + frameNumber + "_" + line.replace(".PDF", "") + copy
 	basename = basename_
 	dup = 1
