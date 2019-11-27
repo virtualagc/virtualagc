@@ -128,7 +128,7 @@ for line in sys.stdin:
 	if numFrames == "":
 		numFrames = "1"
 	docNumber = line[2:17].strip().replace("-","_")
-	if docType = "02":
+	if docType == "02":
 		sheetNum = line[22:25].strip()
 		if sheetNum == "":
 			sheetNum = "001"
@@ -144,8 +144,8 @@ for line in sys.stdin:
 		else:
 			while len(sheetNum) < 3:
 				sheetNum = sheetNum[0] + "0" + sheetNum[1:]
-	print(line)
-	print(sheetNum)
+	#print(line)
+	#print(sheetNum)
 	revision = line[25:27].strip()
 	if revision == "":
 		revision = "-"
