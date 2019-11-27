@@ -144,6 +144,8 @@ for line in sys.stdin:
 		else:
 			while len(sheetNum) < 3:
 				sheetNum = sheetNum[0] + "0" + sheetNum[1:]
+	print(line)
+	print(sheetNum)
 	revision = line[25:27].strip()
 	if revision == "":
 		revision = "-"
