@@ -163,12 +163,33 @@ for line in sys.stdin:
 		docType = "DW"
 	basename_ = docNumber + revision_ + "_" + docType + "_" + sheetNum + "_" + frameNumber + "_" + line.replace(".PDF", "") + copy
 	basename = basename_
+	# "key" in what follows is distinct from "basename" (which it 
+	# was identical to in unpunch.py), because I've discovered 
+	# archive.org uses a sorting order in which something like
+	# LDW12345_... follows LDW2345_....  In other words, the 
+	# sorting order isn't strictly alphabetic, but at least partially
+	# numeric.  I don't know if numeric fields other than the first are
+	# involved or not.  Consequently, I need to pad the number 
+	# following the LDW (and possibly other alphabetic
+	# prefixes later) so that they all have the same number of digits.
+	key = basename
+	key_ = basename_
+	match = re.search(r'^([A-Z]+)([0-9]+)(.+)$', key)
+	if match:
+		prefix = match.group(1)
+		numeric = match.group(2)
+		suffix = match.group(3)
+		if numeric.isdigit() and len(numeric) < 5:
+			while len(numeric) < 5:
+				numeric = "0" + numeric
+			key = prefix + numeric + suffix
+			key_ = key
 	dup = 1
-	while basename in htmlList:
+	while key in htmlList:
+		key = key_ + "_d" + str(dup)
 		basename = basename_ + "_d" + str(dup)
 		dup += 1
-	print("mv '" + rawLine + "-000.png' '" + basename + ".png'")
-	htmlList[basename] = {
+	htmlList[key] = {
 		"docNumber" : docNumber.replace("_", "-"),
 		"revision" : revision,
 		"docType" : docType,
@@ -181,22 +202,24 @@ for line in sys.stdin:
 		"numSheets" : numSheets,
 		"tdrr" : "", 
 		"group" : "",
-		"line" : rawLine
+		"line" : rawLine,
+		"basename" : basename
 	}
 	if dup > 1:
-		if basename_ in dupList:
-			dupList[basename_].append(htmlList[basename])
+		if key_ in dupList:
+			dupList[key_].append(htmlList[key])
 		else:
-			dupList[basename_] = [htmlList[basename_], htmlList[basename]]
+			dupList[key_] = [htmlList[key_], htmlList[key]]
 
-print(": '")
-count = 1
-for n in dupList:
-	print("# " + str(count) + ": " + n)
-	count += 1
-	for m in dupList[n]:
-		print("xreader '" + m["line"] + "' &")
-print("'")
+if False:
+	print(": '")
+	count = 1
+	for n in dupList:
+		print("# " + str(count) + ": " + n)
+		count += 1
+		for m in dupList[n]:
+			print("xreader '" + m["line"] + "' &")
+	print("'")
 
 sys.stderr.write("<table class=\"gaecIndex\"><tbody>\n<tr>")
 sys.stderr.write("<td><b>Link</b></td>")
@@ -228,6 +251,7 @@ for key in sorted(htmlList):
 	else:
 		sys.stderr.write("<td>Copy number " + str(dup) + "</td>")
 	sys.stderr.write("</tr>\n")
+	print("mv '" + htmlList[key]["line"] + "-000.png' '" + ("%04d" % pageNumber) + "_" + htmlList[key]["basename"] + ".png'")
 	pageNumber += 1
 
 sys.stderr.write("</tbody></table>\n")
