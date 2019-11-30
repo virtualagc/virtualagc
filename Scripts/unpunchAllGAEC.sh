@@ -75,6 +75,17 @@ do
 	fi
 	cd "$INDIR"
 	ls -1 *.PDF | unpunchGAEC.py $OUTDIR >RenamingScript.sh 2>IndexTable.html
+	OUTHTML=~/git/virtualagc-web/LemDrawingIndexBox$BOX.html
+	if [[ -f "$OUTHTML" ]]
+	then
+		echo "$OUTHTML already exists ... skipping."
+	else
+		DATE="`date +%Y-%m-%d`"
+		cat ../LemDrawingIndexBoxHeader.html IndexTable.html ../LemDrawingIndexBoxFooter.html \
+			| sed -e "s/@BOX_TBD@/$BOX/" -e "s/@TBD_DATE@/$DATE/" \
+			> "$OUTHTML"
+	fi
+	exit 1
 	mkdir $OUTDIR
 	count=0
 	total="`ls -1 *.PDF | wc -l`"
