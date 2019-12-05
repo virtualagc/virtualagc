@@ -85,7 +85,7 @@ do
 			| sed -e "s/@BOX_TBD@/$BOX/" -e "s/@TBD_DATE@/$DATE/" \
 			> "$OUTHTML"
 	fi
-	exit 1
+	#exit 1
 	mkdir $OUTDIR
 	count=0
 	total="`ls -1 *.PDF | wc -l`"
