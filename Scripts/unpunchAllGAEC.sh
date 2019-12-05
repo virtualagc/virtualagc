@@ -81,7 +81,7 @@ do
 		echo "$OUTHTML already exists ... skipping."
 	else
 		DATE="`date +%Y-%m-%d`"
-		cat ../LemDrawingIndexBoxHeader.html IndexTable.html ../LemDrawingIndexBoxFooter.html \
+		cat ../LemDrawingIndexBoxHeader.htm IndexTable.html ../LemDrawingIndexBoxFooter.htm \
 			| sed -e "s/@BOX_TBD@/$BOX/" -e "s/@TBD_DATE@/$DATE/" \
 			> "$OUTHTML"
 	fi
