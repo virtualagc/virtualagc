@@ -25,6 +25,7 @@ cellEntry = ""
 continuation = False
 titles = {}
 
+firstChar = ""
 for rawLine in sys.stdin:
 	line = rawLine.strip()
 	if line == "": # Eliminate blank lines.
@@ -42,6 +43,7 @@ for rawLine in sys.stdin:
 		if line[:4] == "<td>":
 			inRow += 1
 			cellEntry = line
+			firstChar = cellEntry[4:5]
 		else:
 			cellEntry += " " + line
 		if cellEntry[-5:] != "</td>":
@@ -59,9 +61,14 @@ for rawLine in sys.stdin:
 			elif inRow == 7:
 				key = docNumber + "_" + docType
 				if key in titles:
-					print(titles[key])
-					continue
-				titles[key] = cellEntry
+					if firstChar != "*":
+						print(titles[key])
+						continue
+				else:
+					if firstChar != "*":
+						titles[key] = cellEntry
+					else:
+						titles[key] = "<td>" + cellEntry[5:].strip()
 			print(cellEntry)
 		continue
 	print(rawLine, end='')
