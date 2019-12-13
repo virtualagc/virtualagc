@@ -24,6 +24,8 @@ inRow = 0   # Counts <td> tags in a table row to determine proper column
 cellEntry = ""
 continuation = False
 titles = {}
+lastTitle = "<td></td>"
+leo = False
 
 for rawLine in sys.stdin:
     line = rawLine.strip()
@@ -57,15 +59,23 @@ for rawLine in sys.stdin:
             elif inRow == 4:
                 docType = cellEntry[4:-5]
             elif inRow == 7:
+                leo = (docNumber[:3] == "LEO")
+                if cellEntry == "<td></td>" and leo:
+                    cellEntry = lastTitle
+                elif cellEntry != "<td></td>":
+                    lastTitle = cellEntry
                 if cellEntry == "<td></td>":
-                    key = docNumber + "_" + docType
+                    key = docNumber # + "_" + docType
                     if key in titles:
+                        lastTitle = titles[key]
                         print(titles[key])
                         continue
-                    titles[key] = cellEntry
+                    if not leo:
+                        titles[key] = cellEntry
                 else:
-                    key = docNumber + "_" + docType 
-                    titles[key] = cellEntry # set new entry for the key
+                    key = docNumber # + "_" + docType 
+                    if not leo:
+                        titles[key] = cellEntry # set new entry for the key
             print(cellEntry)
         continue
     print(rawLine, end='')
