@@ -56,6 +56,13 @@ for rawLine in sys.stdin:
                 cellEntry = cellEntry[:-9] + "</td>"
             if inRow == 2:
                 docNumber = cellEntry[4:-5]
+                while '<' in docNumber and '>' in docNumber:
+                  startTag = docNumber.index('<')
+                  endTag = docNumber.index('>')
+                  if startTag == 0:
+                  	docNumber = docNumber[endTag+1:]
+                  else:
+                  	docNumber = docNumber[:startTag]
             elif inRow == 4:
                 docType = cellEntry[4:-5]
             elif inRow == 7:
