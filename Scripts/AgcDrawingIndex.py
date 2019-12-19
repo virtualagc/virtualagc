@@ -82,6 +82,8 @@ from HTMLParser import HTMLParser
 import sys
 import re
 
+gaec = False
+
 class HTMLTableParser(HTMLParser):
     valid_table = False
     header_row = False
@@ -101,13 +103,15 @@ class HTMLTableParser(HTMLParser):
         self.cell_delim = cell_delim
 
     def handle_starttag(self, tag, attrs):
+        global gaec
         self.data_interrupt = True
         if tag == "table":
             self.first_row = True
             self.first_cell = True
             self.valid_table = False
             for var in attrs:
-            	if var[0] == "class" and var[1] == "drawingIndex":
+            	if var[0] == "class" and var[1] in ["drawingIndex", "gaecIndex"]:
+            		gaec = (var[1] == "gaecIndex")
             		self.valid_table = True
         elif tag == "tr":
             self.row = []
@@ -224,7 +228,10 @@ lastDrawing = ["", "", ""]
 lastTitle = ["", "", ""]
 for key, value in sorted(parser.allData.iteritems()):
 	drawing = value["drawing"].replace("-", "_")
-	type = int(value["type"])
+	if value["type"] in ["DW", "EO"]:
+		type = value["type"]
+	else:
+		type = int(value["type"])
 	title = value["title"]
 	sheet = value["sheet"]
 	frame = value["frame"]
@@ -246,7 +253,7 @@ for key, value in sorted(parser.allData.iteritems()):
 		prefix = prefix + " *** CHECK ME (non-digit sheet number) *** "
 	if any((c not in digits) for c in frame):
 		prefix = prefix + " *** CHECK ME (non-digit frame number) *** "
-	if prefix != "":
+	if prefix != "" and not gaec:
 		value["note"] = prefix + value["note"]
 	lastDrawing[type] = drawing
 	lastTitle[type] = title
@@ -271,7 +278,7 @@ for key, value in sorted(parser.allData.iteritems()):
 prefixesMode1Up = []
 for key, value in sorted(parser.allData.iteritems()):
 	url = value["url"]
-	if url[-9:] == "/mode/1up":
+	if url[-9:] == "/mode/1up" and not gaec:
 		n = url.find("#page/n")
 		if n >= 0:
 			n += 7
@@ -283,7 +290,11 @@ for key, value in sorted(parser.allData.iteritems()):
 			value["url"] = "@" + str(i) + "@" + url[n:-9]
 
 # Finally, output the drawings.csv file.
+if gaec:
+	print "Link\tDrawing\tRef\tType\tSheet\tFrame\tTitle\tNotes"
 for key, value in sorted(parser.allData.iteritems()):
+	if gaec and value["url"][:4] != "http":
+		value["url"] = "http://www.ibiblio.org/apollo/" + value["url"]
 	print value["url"] + "\t" + value["drawing"] + "\t" + value["revision"] + \
 	      "\t" + value["type"] + "\t" + value["sheet"] + "\t" + value["frame"] + \
 	      "\t" + value["title"] + "\t" + value["note"]
