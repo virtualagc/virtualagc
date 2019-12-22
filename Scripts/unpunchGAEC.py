@@ -100,7 +100,7 @@ if len(sys.argv) > 2:
 
 dupList = {}
 htmlList = {}
-eoPrefix = { "1": "A", "2": "B", "3": C" }
+eoPrefix = { "1": "A", "2": "B", "3": "C", "4": "D", "5": "E" }
 for line in sys.stdin:
 	prefix = line[:2]
 	line = line.strip()
