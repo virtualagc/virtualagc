@@ -153,6 +153,8 @@ for line in sys.stdin:
 	revision = line[25:27].strip()
 	if revision == "":
 		revision = "-"
+	elif revision in eoPrefix:
+		revision = eoPrefix[revision]
 	while len(revision) < 2:
 		revision = "-" + revision
 	revision_ = revision.replace("-", "_")
