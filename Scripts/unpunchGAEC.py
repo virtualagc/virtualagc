@@ -100,6 +100,7 @@ if len(sys.argv) > 2:
 
 dupList = {}
 htmlList = {}
+eoPrefix = { "1": "A", "2": "B", "3": C" }
 for line in sys.stdin:
 	prefix = line[:2]
 	line = line.strip()
@@ -131,7 +132,10 @@ for line in sys.stdin:
 		sheetNum = line[35:43].strip()
 		if sheetNum == "":
 			sheetNum = "1"
-		sheetNum = sheetNum.replace("#", ".")
+		if engineeringOrder and len(sheetNumber) == 3 and sheetNumber[:1] in eoPrefix and sheetNumber[1:].isdigit():
+			sheetNum = eoPrefix[sheetNumber[:1]] + sheetNumber[1:]
+		else:
+			sheetNum = sheetNum.replace("#", ".")
 		fields = sheetNum.split(".")
 		if len(fields) == 2:
 			while len(fields[0]) < 3:
