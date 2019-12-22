@@ -131,6 +131,7 @@ for line in sys.stdin:
 		sheetNum = line[35:43].strip()
 		if sheetNum == "":
 			sheetNum = "1"
+		sheetNum = sheetNum.replace("#", ".")
 		fields = sheetNum.split(".")
 		if len(fields) == 2:
 			while len(fields[0]) < 3:
