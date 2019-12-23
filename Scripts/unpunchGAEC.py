@@ -130,6 +130,9 @@ for line in sys.stdin:
 			sheetNum = "1"
 	else:
 		sheetNum = line[35:43].strip()
+		if engineeringOrder and " " in sheetNum:
+			sheetFields = sheetNum.split()
+			sheetNum = sheetFields[0]
 		if sheetNum == "":
 			sheetNum = "1"
 		if engineeringOrder and len(sheetNumber) == 3 and sheetNumber[:1] in eoPrefix and sheetNumber[1:].isdigit():

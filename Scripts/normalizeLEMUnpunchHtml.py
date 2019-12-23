@@ -72,7 +72,11 @@ for rawLine in sys.stdin:
                 docType = cellEntry[4:-5]
             elif inRow == 5:
             	sheet = cellEntry[4:-5]
-            	if len(sheet) and sheet.isdigit() and sheet[:1] in eoPrefix:
+            	if docType == "EO" and " " in sheet:
+            		sheetFields = sheet.split()
+            		sheet = sheetFields[0]
+            		cellEntry = "<td>" + sheet + "</td>"
+            	if len(sheet) == 3 and sheet.isdigit() and sheet[:1] in eoPrefix:
             		cellEntry = "<td>" + eoPrefix[sheet[:1]] + sheet[1:] + "</td>"
             elif inRow == 7:
                 leo = (docNumber[:3] == "LEO")
