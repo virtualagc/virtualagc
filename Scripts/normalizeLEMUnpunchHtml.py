@@ -26,6 +26,7 @@ continuation = False
 titles = {}
 lastTitle = "<td></td>"
 leo = False
+eoPrefix = { "1": "A", "2": "B", "3": "C", "4": "D", "5": "E" }
 
 for rawLine in sys.stdin:
     line = rawLine.strip()
@@ -63,8 +64,16 @@ for rawLine in sys.stdin:
                   	docNumber = docNumber[endTag+1:]
                   else:
                   	docNumber = docNumber[:startTag]
+            elif inRow == 3:
+            	revision = cellEntry[4:-5]
+            	if revision in eoPrefix:
+            		cellEntry = "<td>" + eoPrefix[revision] + "</td>"
             elif inRow == 4:
                 docType = cellEntry[4:-5]
+            elif inRow == 5:
+            	sheet = cellEntry[4:-5]
+            	if len(sheet) and sheet.isdigit() and sheet[:1] in eoPrefix:
+            		cellEntry = "<td>" + eoPrefix[sheet[:1]] + sheet[1:] + "</td>"
             elif inRow == 7:
                 leo = (docNumber[:3] == "LEO")
                 if cellEntry == "<td></td>" and leo:
