@@ -12,7 +12,14 @@
 # also appears in the files, but it doesn't do that right now.
 #
 # The program does not attempt to parse arbitrary HTML, and relies on the 
-# uniformity of the construction of the files.
+# uniformity of the construction of the files.  It *ASSUMES* that the file 
+# has been saved at least once by SeaMonkey or by some other program that 
+# performs similar gratuitous changes to the HTML.  Specifically, it relies
+# on the fact that each <tr> or <td> tag is the first non-white thing on its
+# line (which is not true of files created by unpunchGAEC.py that haven't yet
+# been massaged by SeaMonkey ... or at least isn't true at this moment, though
+# I could easily change unpunchGAEC.py to enforce that restructuring if I 
+# needed to.)
 #
 # Usage:
 #   normalizeUnpunchHtml.py <INPUT.html >OUTPUT.html
@@ -76,6 +83,17 @@ for rawLine in sys.stdin:
             		sheetFields = sheet.split()
             		sheet = sheetFields[0]
             		cellEntry = "<td>" + sheet + "</td>"
+            	if "#" in sheet:
+	            	sheetFields = sheet.split("#")
+	            	if len(sheetFields) < 3:
+	            		while len(sheetFields[0]) < 3:
+	            			sheetFields[0] = "0" + sheetFields[0]
+	            		if len(sheetFields) < 2:
+	            			sheetFields.append("0000")
+	            		while len(sheetFields[1]) < 4:
+	            			sheetFields[1] = sheetFields[1] + "0"
+	            		sheet = sheetFields[0] + "." + sheetFields[1]
+	            		cellEntry = "<td>" + sheet + "</td>"
             	if len(sheet) == 3 and sheet.isdigit() and sheet[:1] in eoPrefix:
             		cellEntry = "<td>" + eoPrefix[sheet[:1]] + sheet[1:] + "</td>"
             elif inRow == 7:
