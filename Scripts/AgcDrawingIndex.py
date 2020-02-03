@@ -145,7 +145,7 @@ class HTMLTableParser(HTMLParser):
         elif tag == "tr":
             if self.valid_table and not self.header_row:
                 if len(self.row) != 8:
-                    sys.stdout.write(str(len(self.row)) + " " + str(self.row) + "\n")
+                    sys.stderr.write(str(len(self.row)) + " " + str(self.row) + "\n")
                 else:
                     url = self.row[0]
                     drawingNumber = self.row[1] + self.row[2]
