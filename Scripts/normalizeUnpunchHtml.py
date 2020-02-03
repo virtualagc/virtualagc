@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# The idea of this program is that it takes one of my AgcDrawingIndexXXX.html
+# The idea of this program is that it takes one of my AgcDrawingIndexBoxXXX.html
 # files, and for each DRAWINGNUMBER/DOCTYPE pair, duplicates the title of the
 # first instance found into all of the other instances (for different revs,
 # sheet numbers, frame numbers, and copies).  The point of this is that it 
