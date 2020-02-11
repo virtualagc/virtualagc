@@ -75,7 +75,8 @@ do
 	fi
 	cd "$INDIR"
 	ls -1 *.PDF | unpunchGAEC.py $OUTDIR >RenamingScript.sh 2>IndexTable.html
-	OUTHTML=~/git/virtualagc-web/LemDrawingIndexBox$BOX.html
+	#OUTHTML=~/git/virtualagc-web/LemDrawingIndexBox$BOX.html
+	OUTHTML=LemDrawingIndexBox$BOX.html
 	if [[ -f "$OUTHTML" ]]
 	then
 		echo "$OUTHTML already exists ... skipping."
