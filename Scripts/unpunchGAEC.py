@@ -74,7 +74,7 @@
 # This script doesn't actually rename the files, but itself just 
 # produces a script that you can run to rename the files:
 #	cd DestFolder_images
-#	ls -1 *.png | unpunch.py DestFolder_images >RenamingScript.sh 2>IndexTable.html
+#	ls -1 *.png | unpunchGAEC.py DestFolder_images >RenamingScript.sh 2>IndexTable.html
 #	bash RenamingScript.sh
 #
 # Additional steps you'd usually take after all this are:
@@ -135,8 +135,8 @@ for line in sys.stdin:
 			sheetNum = sheetFields[0]
 		if sheetNum == "":
 			sheetNum = "1"
-		if engineeringOrder and len(sheetNumber) == 3 and sheetNumber[:1] in eoPrefix and sheetNumber[1:].isdigit():
-			sheetNum = eoPrefix[sheetNumber[:1]] + sheetNumber[1:]
+		if engineeringOrder and len(sheetNum) == 3 and sheetNum[:1] in eoPrefix and sheetNum[1:].isdigit():
+			sheetNum = eoPrefix[sheetNum[:1]] + sheetNum[1:]
 		else:
 			sheetNum = sheetNum.replace("#", ".")
 		fields = sheetNum.split(".")
