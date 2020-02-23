@@ -71,6 +71,10 @@ for rawLine in sys.stdin:
                   	docNumber = docNumber[endTag+1:]
                   else:
                   	docNumber = docNumber[:startTag]
+                if docNumber[:1] == '`':
+                  docNumber = "LEO280-" + docNumber[1:]
+                  tickIndex = cellEntry.index('`')
+                  cellEntry = cellEntry[:tickIndex] + "LEO280-" + cellEntry[tickIndex + 1:]
             elif inRow == 3:
             	revision = cellEntry[4:-5]
             	if revision in eoPrefix:
