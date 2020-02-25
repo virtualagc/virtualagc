@@ -17,7 +17,7 @@
 #   1.	An index table from an index HTML file is cut-and-pasted into
 #	Google Sheets.  (The workflow requires that this be an HTML
 #	file created from unpunch.py or unpunchGAEC.py, since it 
-#	requires that column 1 of the table consides of page-number
+#	requires that column 1 of the table consists of page-number
 #	references at archive.org.  In other words the workflow won't 
 #	work on tables from either the file AgcDrawingIndex.html or 
 #	AgcDrawingIndexMilSpec.html, but should work for all other
