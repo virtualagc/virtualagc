@@ -58,6 +58,9 @@ for line in sys.stdin:
 		sys.exit(1)
 	url = 'https://archive.org/stream/apertureCardBox' + boxNumber + partNumber + 'NARASW_images#page/n' + fields[0] + '/mode/1up'
 	line = '<tr><td><a href="' + url + '">' + fields[0] + '</a></td>'
+	if fields[7] == "***RESCAN***":
+		fields[7] = ""
+		fields[1] = '<font color="#ff0000">' + fields[1] + '</font>'
 	for n in range(1, 8):
 		line += '<td>' + fields[n] + '</td>'
 	line += '</tr>'
