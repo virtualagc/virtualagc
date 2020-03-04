@@ -35,6 +35,9 @@ lastTitle = "<td></td>"
 leo = False
 eoPrefix = { "1": "A", "2": "B", "3": "C", "4": "D", "5": "E" }
 
+print('<table class="gaecIndex"><tbody><tr><td><b>Link</b></td><td><b>Drawing</b></td><td><b>Rev</b></td><td><b>Type</b></td><td><b>Sheet</b></td><td><b>Frame</b></td><td><b>Title</b></td><td><b>Notes</b></td></tr>', file=sys.stderr)
+isHighlighted = False
+
 for rawLine in sys.stdin:
     line = rawLine.strip()
     if line == "": # Eliminate blank lines.
@@ -42,7 +45,19 @@ for rawLine in sys.stdin:
     if line == "<tbody>":
         inTable = 0
     elif line == "<tr>":
+        if isHighlighted:
+        	print('<tr>', file=sys.stderr)
+        	print(' <td></td>', file=sys.stderr)
+        	print(' <td>' + docNumber + '</td>', file=sys.stderr)
+        	print(' <td>' + revision + '</td>', file=sys.stderr)
+        	print(' <td>' + docType + '</td>', file=sys.stderr)
+        	print(' <td>' + sheet + '</td>', file=sys.stderr)
+        	print(' <td>' + frame + '</td>', file=sys.stderr)
+        	print(' <td>' + title + '</td>', file=sys.stderr)
+        	print(' <td></td>', file=sys.stderr)
+        	print('</tr>', file=sys.stderr)
         inTable += 1
+        isHighlighted = False
         continuation = False
         if inTable == 1:
             inRow = 1000
@@ -62,8 +77,12 @@ for rawLine in sys.stdin:
                 cellEntry = cellEntry[:-6] + "</td>"
             while cellEntry[-9:] == "<br></td>":
                 cellEntry = cellEntry[:-9] + "</td>"
-            if inRow == 2:
+            if inRow == 1:
+            	link = cellEntry
+            elif inRow == 2:
                 docNumber = cellEntry[4:-5]
+                if "font" in docNumber:
+                	isHighlighted = True
                 while '<' in docNumber and '>' in docNumber:
                   startTag = docNumber.index('<')
                   endTag = docNumber.index('>')
@@ -100,7 +119,10 @@ for rawLine in sys.stdin:
 	            		cellEntry = "<td>" + sheet + "</td>"
             	if len(sheet) == 3 and sheet.isdigit() and sheet[:1] in eoPrefix:
             		cellEntry = "<td>" + eoPrefix[sheet[:1]] + sheet[1:] + "</td>"
+            elif inRow == 6:
+            	frame = cellEntry[4:-5]
             elif inRow == 7:
+                title = cellEntry[4:-5]
                 leo = (docNumber[:3] == "LEO")
                 if cellEntry == "<td></td>" and leo:
                     cellEntry = lastTitle
@@ -110,6 +132,7 @@ for rawLine in sys.stdin:
                     key = docNumber # + "_" + docType
                     if key in titles:
                         lastTitle = titles[key]
+                        title = titles[key]
                         print(titles[key])
                         continue
                     if not leo:
@@ -121,3 +144,5 @@ for rawLine in sys.stdin:
             print(cellEntry)
         continue
     print(rawLine, end='')
+
+print('</tbody></table>', file=sys.stderr)
