@@ -257,6 +257,7 @@ def splitPartNumber(assembly):
 standardKeys = [ "level", "drawing", "title", "configuration", "assembly", "parents", "exists", "empty", "subbedFor" ]
 findTables = [] # Every FIND table or component we actually locate.
 findTablesAttempted = [] # Every FIND table we *attempt* to locate.
+lastBaseDrawing = ""
 def readFindTable(drawing, configuration, assembly, level, title):
 	if drawing not in findTablesAttempted:
 		findTablesAttempted.append(str(drawing))
@@ -365,6 +366,21 @@ def readFindTable(drawing, configuration, assembly, level, title):
 							if headings[n] == "DRAWING":
 								drawingField = (fields[n].split(" THRU "))[0]
 								currentDrawing = drawingField.split(" or ")
+								# The following code deals with a shortcut that
+								# can be used when there's a bunch of successive
+								# entries in the DRAWING column such as "1006750-124",
+								# "1006750-32", "1006750-24", ....  With the shortcut,
+								# only the first entry (in this case 1006750-124" 
+								# needs to appear in full; the successive entries 
+								# can appear simply as "-32", "-24", and so on.
+								if "-" in fields[n]:
+									dashSplit = fields[n].split("-")
+									if len(dashSplit) == 2 and dashSplit[1] != "" and dashSplit[1].isdigit():
+										if dashSplit[0] != "":
+											lastBaseDrawing = dashSplit[0]
+										else:
+											drawingField = lastBaseDrawing + "-" + dashSplit[1]
+											currentDrawing = [drawingField]
 							row[headings[n]] = fields[n]
 						elif int(headings[n]) == configuration or (numConfigs == 1 and configuration in [0, -11]):
 							row["CELL"] = fields[n]
