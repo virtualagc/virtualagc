@@ -823,6 +823,7 @@ f.close()
 noFinds = list(set(findTablesAttempted) - set(findTables))
 if len(warnMS) > 0:
 	print("Missing mil-specs: ", file=sys.stderr)
+	print(warnMS)
 	for w in sorted(warnMS):
 		fields = w.split()
 		star = ""
