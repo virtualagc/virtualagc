@@ -4,5 +4,5 @@ The PTC ADAPT Self-Test Program is software for the Launch Vehicle Digital Compu
 
 The ADAPT ("Aerospace Data Adapter/Processor Tester") was equipment for evaluating the LVDA, thus the PTC ADAPT Self-Test Program illuminates the interaction between the LVDC and LVDA.
 
-Additional documentation may be found on [the Virtual AGC Project main website's LVDC page](https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-Program), which links documents for the PTC and ADAPT.  In particular, there is [a zipfile of the scanned page images of the assembly listing for the PTC ADAPT Self-Test Program](http://www.ibiblio.org/apollo/ScansForConversion/PTC%20ADAPT%20Self-Test%20Program.zip). These scanned images are the basis for the transcribed source code.
+Additional documentation may be found on [the Virtual AGC Project main website's LVDC page](http://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program), which links documents for the PTC and ADAPT.  In particular, there is [a zipfile of the scanned page images of the assembly listing for the PTC ADAPT Self-Test Program](http://www.ibiblio.org/apollo/ScansForConversion/PTC%20ADAPT%20Self-Test%20Program.zip). These scanned images are the basis for the transcribed source code.
 
