@@ -149,6 +149,12 @@ Launch
 
 
 
+
+
+
+
+
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -268,6 +274,12 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
+
+
+
+
 
 
 
@@ -572,6 +584,12 @@ Launch
 
 
 
+
+
+
+
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="LVDC_Software"></a>LVDC Software</h2>
@@ -683,6 +701,12 @@ Launch
 
 
 
+
+
+
+
+
+
         Flight Program</a>, however, I do have a couple of reasons to
       believe that the AS-206RAM Flight Program would have been used in
       conjunction with a Preflight Program:<br>
@@ -712,9 +736,21 @@ href="http://www.ibiblio.org/apollo/Documents/AstrionicsSystemsHandbook_Nov69.pd
 
 
 
+
+
+
+
+
+
         15 1969 release</a> (see section 11.2.1 in particular), but does
       not even mention the ECP at all in its <a
 href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">November
+
+
+
+
+
+
 
 
 
@@ -870,6 +906,12 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
 
 
 
+
+
+
+
+
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -898,6 +940,12 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
       images, since you can do things like text searches on it, or even
       assemble it using the nifty new LVDC assembler I've written (<a
         href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>).&nbsp;
+
+
+
+
+
+
 
 
 
@@ -944,6 +992,12 @@ href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identificati
     restricted by ITAR, if they do not pertain to guidance, control, or
     other technical aspects of the launch vehicle.&nbsp; <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">Such
+
+
+
+
+
+
 
 
 
@@ -1178,6 +1232,12 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         <p><i>Huh?</i>&nbsp; Could I have possibly written two <i>more</i>-confusing
 
 
+
+
+
+
+
+
           sentences than that to introduce this program to you?&nbsp; So
           let me explain what I mean.<br>
         </p>
@@ -1198,14 +1258,17 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         <p><a href="Documents/19730064346_1973064346.pdf">The PTC is
             documented here</a>, while <a
             href="Documents/19730064186_1973064186.pdf">the ADAPT and
-            ASTEC are documented here</a>.<br>
+            ASTEC are documented here</a>.&nbsp; The former document
+          (Chapter 7) helpfully includes a printout of the assembly
+          listing of a large chunk of software that it calls the "PTC
+          ADAPT Self-Test Program".<br>
         </p>
-        <p>For our purposes, however, the important things to note about
-          the PTC are:<br>
+        <p>But it's not necessary to go into great detail about most of
+          that at the moment.&nbsp; For our immediate purposes, the only
+          important things to note about the PTC and ADAPT are:<br>
         </p>
         <ol>
-          <li>The PTC contains a CPU ... and <i>the PTC's CPU is a
-              modified LVDC</i>.</li>
+          <li>The PTC contains a CPU ... <i>which is a modified LVDC</i>.</li>
           <li>The PTC's CPU runs software — in this case, the ADAPT
             self-test program — which is essentially LVDC software, able
             to be assembled by the LVDC assembler, and potentially to be
@@ -1214,20 +1277,20 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         <p>In particular, we would expect the PTC ADAPT Self-Test
           program to match LVDC Flight Program syntax.&nbsp; Indeed, its
           assembly listing has clearly been produced by the LVDC
-          assembler program.&nbsp; (I know that those of you who haven't
-          obtained the AS206-RAM Flight Program's listing from me can't
-          verify that for yourself, so you'll just have to take my word
-          for it.)&nbsp; On the other hand, the PTC included peripheral
-          devices (accessed by i/o instructions) not present in the
-          LVDC.&nbsp; For example, while at this writing the program is
-          still being evaluated, it appears that part of the CPU
-          modification is that multiplications and divisions cannot be
-          performed natively, and hence their instructions do not appear
-          within the software, but are instead handled by peripheral
-          devices.<br>
+          assembler program, although there are a few differences in the
+          way some of the output is formatted.&nbsp; (I know that those
+          of you who haven't obtained the AS206-RAM Flight Program's
+          listing from me can't verify that for yourself, so you'll just
+          have to take my word for it.)&nbsp; On the other hand, the PTC
+          included peripheral devices (accessed by i/o instructions) not
+          present in the LVDC.&nbsp; For example, the CPU's <tt>MPY</tt>
+          and <tt>MPH</tt> (multiply) instructions have been replaced
+          by the <tt>PRS</tt> (printer operation) and <tt>CIO</tt>
+          (CPU i/o control) instructions, respectively, while the <tt>DIV</tt>
+          and <tt>EXM</tt> instructions are simply omitted.<br>
         </p>
         <p>The PTC ADAPT Self-Test Program is quite significant in terms
-          of size and complexity, since it is about 56% the size of the
+          of size and complexity, since it is nearly 60% the size of the
           AS206-RAM Flight Program covered in the preceding section
           above.&nbsp; But most significantly, the PTC ADAPT Self-Test
           Program is not <i>guidance</i> software, nor can it even run
@@ -1245,13 +1308,42 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
           massaging, the PTC ADAPT Self-Test Program is a mature,
           debugged, working program.<br>
         </p>
-        <p>I expect there will be an effort soon to transcribe the PTC
-          ADAPT Self-Test Program into source-code files, so that it can
-          be assembled by the yaASM.py assembler.&nbsp; As that occurs,
-          you'll be able to find it online:<br>
+        <p>As far as the versioning of the software, there is nothing
+          embedded within the assembly listing itself which dates
+          it.&nbsp; However, given that it is printed in the PTC
+          document mentioned above, which is dated 5 MARCH 1965, I think
+          we can tentatively suppose that the software too is from early
+          1965.&nbsp; (Whereas the AS206-RAM program is from late 1967.)<br>
+        </p>
+        <p>Beyond that, there's also the academic question of the
+          versioning of the LVDC assembler used.&nbsp; The format of the
+          octal-listing table output in the PTC assembly seems more
+          primitive than that for the AS206-RAM assembly, in that it
+          does not distinguish between data words and instruction
+          words.&nbsp; Moreover, the PTC software source code does not
+          seem to avail itself of some of the convenience features
+          exploited by the later AS206-RAM source code, such as
+          arithmetical formulas in definitions of constants, automated
+          allocation of certain data constants, transparent insertion of
+          jump instructions at the ends of memory sectors, and so
+          on.&nbsp; For all these reasons, it's also fair to infer that
+          an earlier version of the assembler was used for the PTC
+          assembly, in which these more-advanced convenience features
+          did not yet exist.<br>
+        </p>
+        <p>The PTC ADAPT Self-Test Program will be transcribed into
+          source-code files Real Soon Now, so that it can be assembled
+          by the yaASM.py assembler.&nbsp; That has not yet occurred,
+          but you can observe its progress online if you like:<br>
         </p>
         <p align="center"><a
 href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-Program">Folder
+
+
+
+
+
+
             in our GitHub repository for PTC ADAPT Self-Test Program
             source-code files</a></p>
         <p>For now, though, only the <i>scanned</i> assembly listing is
@@ -1264,6 +1356,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
           <blockquote>
             <p><a
                 href="ScansForConversion/PTC%20ADAPT%20Self-Test%20Program.zip">Zipfile
+
+
+
+
+
+
                 of scanned page images for the PTC ADAPT Self-Test
                 Program</a></p>
           </blockquote>
@@ -1287,6 +1385,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
     </div>
     <h2><a name="Architecture_of_the_LVDC" id="Architecture_of_the_LVDC"></a>Architecture
 of
+
+
+
+
+
+
 
 
 
@@ -1449,6 +1553,12 @@ This
 
 
 
+
+
+
+
+
+
         is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp; <br>
@@ -1524,9 +1634,21 @@ Astrionics
 
 
 
+
+
+
+
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
+
+
+
+
 
 
 
@@ -1841,6 +1963,12 @@ of
 
 
 
+
+
+
+
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -1890,6 +2018,12 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
+
+
+
+
+
 
 
 
@@ -2152,6 +2286,12 @@ Incidentally,
 
 
 
+
+
+
+
+
+
                 HIGTHR<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
@@ -2207,7 +2347,9 @@ Incidentally,
             (results<br>
             available after 4)<br>
           </td>
-          <td>This is a multiplication instruction.&nbsp; It multiplies
+          <td>LVDC only ... <i>not</i> PTC.<br>
+            <br>
+            This is a multiplication instruction.&nbsp; It multiplies
             two 24-bit numbers to produce a 26-bit product.&nbsp; The
             accumulator provides the address of one operand, and the
             address embedded in the instruction points to the other
@@ -2296,11 +2438,82 @@ However,
 
 
 
+
+
+
+
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
             or <span style="font-family: Courier
               New,Courier,monospace;">DIV</span>.&nbsp;</td>
+        </tr>
+        <tr>
+          <td valign="middle"><font face="Courier New, Courier,
+              monospace">PRS</font><br>
+          </td>
+          <td valign="middle">X<br>
+          </td>
+          <td valign="middle">X<br>
+          </td>
+          <td valign="middle">0<br>
+          </td>
+          <td valign="middle">0<br>
+          </td>
+          <td valign="middle">0<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle" align="center">TBD<br>
+          </td>
+          <td valign="middle">PTC only ... <i>not</i> LVDC<br>
+            <br>
+            This is a "print store" operation.&nbsp; Here's what <a
+              href="Documents/19730064346_1973064346.pdf">the PTC
+              documentation (see p. V-2-22)</a> has to say about
+            it:&nbsp; Initiates a printer operation. The
+            printer operation performed is specified by the operand
+            address.
+            <br>
+            <blockquote>
+              <table cellspacing="2" cellpadding="2" align="center">
+                <tbody>
+                  <tr>
+                    <td valign="middle" align="center"><u>Address</u><br>
+                    </td>
+                    <td valign="middle" align="center"><u>Operation</u><br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="middle" align="center">000<sub>8</sub>
+                      to 773<sub>8</sub><br>
+                    </td>
+                    <td valign="middle">Data in memory address specified
+                      is transferred to the printer.<br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="middle" align="center">774<sub>8</sub><br>
+                    </td>
+                    <td valign="middle">A group markword mark is sent to
+                      the printer.<br>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td valign="middle" align="center">775<sub>8</sub><br>
+                    </td>
+                    <td valign="middle">Data in the accumulator is
+                      transferred to the printer.<br>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </blockquote>
+            I believe that the data transferred to the printer is often
+            buffered by the <tt>BCI</tt> pseudo-op.<br>
+          </td>
         </tr>
         <tr>
           <td style="font-family: Courier New,Courier,monospace;"> SUB<br>
@@ -2352,8 +2565,10 @@ However,
             (results<br>
             available<br>
             after 8)</td>
-          <td>This is the division instruction.&nbsp; The contents of
-            the accumulator are divided by the operand pointed to by the
+          <td>LVDC only ... <i>not</i> PTC.<br>
+            <br>
+            This is the division instruction.&nbsp; The contents of the
+            accumulator are divided by the operand pointed to by the
             address A1-A9 embedded within the instruction to produce a
             24-bit quotient.&nbsp; Recall that A1-A8 select the offset
             within a 256-word sector, and A9 is the "residual bit" that
@@ -2433,6 +2648,12 @@ However,
 
 
 
+
+
+
+
+
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -2463,7 +2684,9 @@ However,
           </td>
           <td style="text-align: center;">5<br>
           </td>
-          <td>This is a multiplication instruction.&nbsp; It is exactly
+          <td>LVDC only ... <i>not</i> PTC.<br>
+            <br>
+            This is a multiplication instruction.&nbsp; It is exactly
             like <span style="font-family: Courier
               New,Courier,monospace;">MPY</span> except that the program
             "holds" until the multiplication is complete, so that the
@@ -2539,12 +2762,51 @@ However,
 
 
 
+
+
+
+
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
             or <span style="font-family: Courier
               New,Courier,monospace;">DIV</span>.<br>
           </td>
+        </tr>
+        <tr>
+          <td valign="middle"><font face="Courier New, Courier,
+              monospace">CIO</font><br>
+          </td>
+          <td valign="middle">X<br>
+          </td>
+          <td valign="middle">X<br>
+          </td>
+          <td valign="middle">0<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">0<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle" align="center">TBD<br>
+          </td>
+          <td valign="middle">PTC only ... <i>not</i> LVDC.<br>
+            <br>
+            Here's what <a href="Documents/19730064346_1973064346.pdf">the
+              PTC documentation (see figure 2-10)</a> has to say about
+            it:
+            <meta http-equiv="content-type" content="text/html;
+              charset=UTF-8">
+            "Controls the input, output operations of the CPU. The
+            operand address bits specify the
+            operation to be performed
+            <meta http-equiv="content-type" content="text/html;
+              charset=UTF-8">
+            (see figure 2-11 for CIO
+            codes used by PTC)."</td>
         </tr>
         <tr>
           <td style="font-family: Courier New,Courier,monospace;"> AND<br>
@@ -2843,6 +3105,12 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
+
+
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>0775 (octal) stores into the Product-Quotient register
@@ -3030,6 +3298,12 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
+
+
+
                 The difference between <tt>CDSD</tt> and <tt>CDSS</tt>
                 is that the former selects duplex memory while the later
                 selects simplex memory.<br>
@@ -3181,23 +3455,25 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </td>
           <td style="text-align: center;">1<br>
           </td>
-          <td style="vertical-align: top;"> "Execute modified".&nbsp;
-            This instruction takes an instruction stored at a specified
-            memory location, forms a modified A1-A9 field for that
-            instruction, executes that instruction, and then continues
-            with the next instruction following the <span
-              style="font-family: Courier New,Courier,monospace;">EXM</span>
-            (unless the program counter has been modified).&nbsp; For
-            this instruction, A8 and A9 form a part of the instruction
-            code, so only A1-A7 are significant.&nbsp; Only 4 different
-            target words are allowed, 0600, 0640, 0700, and 0740, and
-            they are all in the "residual sector".&nbsp; Many of the
-            bits in A1-A7 represent various types of modifications to
-            the embedded address at the target address rather than being
-            address bits themselves.&nbsp;&nbsp; Here are the
-            interpretations of bits A1-A7 in the <span
-              style="font-family: Courier New,Courier,monospace;">EXM</span>
-            instruction:<br>
+          <td style="vertical-align: top;"> LVDC only ... <i>not</i>
+            PTC.<br>
+            <br>
+            "Execute modified".&nbsp; This instruction takes an
+            instruction stored at a specified memory location, forms a
+            modified A1-A9 field for that instruction, executes that
+            instruction, and then continues with the next instruction
+            following the <span style="font-family: Courier
+              New,Courier,monospace;">EXM</span> (unless the program
+            counter has been modified).&nbsp; For this instruction, A8
+            and A9 form a part of the instruction code, so only A1-A7
+            are significant.&nbsp; Only 4 different target words are
+            allowed, 0600, 0640, 0700, and 0740, and they are all in the
+            "residual sector".&nbsp; Many of the bits in A1-A7 represent
+            various types of modifications to the embedded address at
+            the target address rather than being address bits
+            themselves.&nbsp;&nbsp; Here are the interpretations of bits
+            A1-A7 in the <span style="font-family: Courier
+              New,Courier,monospace;">EXM</span> instruction:<br>
             <ul>
               <li>A1-A4 modify the address embedded in the target
                 instruction as described below.<br>
@@ -3248,6 +3524,12 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                     A9<br>
                   </th>
                   <th style="vertical-align: top; font-weight: bold;">Data
+
+
+
+
+
+
 
 
 
@@ -3465,6 +3747,12 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
+
+
+
             I/O Ports<br>
           </th>
         </tr>
@@ -3525,6 +3813,12 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               of that topic</a>.&nbsp; Page-number references are to the
             AS-206RAM LVDC source code or to its <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">abridged
+
+
+
+
+
+
 
 
 
@@ -4887,6 +5181,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
+
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -4970,6 +5270,12 @@ Only
 
 
 
+
+
+
+
+
+
     those special addresses work.&nbsp; So a typical subroutine linkage
     would look like this:<br>
     <br>
@@ -4979,6 +5285,12 @@ Only
       </span> </div>
     <div style="margin-left: 40px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; ... <i>return
+
+
+
+
+
+
 
 
 
@@ -5133,6 +5445,12 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
+
+
+
+
 
 
 
@@ -5472,6 +5790,12 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
 
 
 
+
+
+
+
+
+
     bits.)&nbsp; The LVDA combines this pair of bits (in some manner
     unknown to me), and thus the LVDC receives a single OM/D bit.&nbsp;
     The LVDC recognizes two types of commands, <i>mode commands words</i>
@@ -5614,6 +5938,12 @@ Assembly
 
 
 
+
+
+
+
+
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -5625,6 +5955,12 @@ Assembly
     writing my own LVDC assembler.&nbsp; The description is intended to
     be authoritative only in the sense that it describes how my own
     assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
+
+
+
+
+
+
 
 
 
@@ -5670,6 +6006,12 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
+
+
+
+
 
 
 
@@ -5785,12 +6127,24 @@ Assembly
 
 
 
+
+
+
+
+
+
         In other words, a decimal integer encoded as <i>N</i> bits
         would be sign-extended on the left by 26-<i>N</i> bits.</li>
       <li>Decimal non-integer constants are treated as being in the
         range -1.0 &lt; <i>constant</i> &lt; 1.0.&nbsp;</li>
     </ul>
     <p><i><a name="AngleUnits"></a>Units of angular measurement</i>:&nbsp;
+
+
+
+
+
+
 
 
 
@@ -6098,6 +6452,12 @@ Assembly
 
 
 
+
+
+
+
+
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -6138,6 +6498,12 @@ Assembly
         current instruction, respectively.&nbsp; (I say that the literal
         constant is <i>decimal</i> because yaASM.py implements it in
         that way.&nbsp; However, there are no instances of <tt><i>n</i></tt>&gt;7
+
+
+
+
+
+
 
 
 
@@ -6249,6 +6615,12 @@ Assembly
 
 
 
+
+
+
+
+
+
         where <tt><i>target</i></tt>, <tt><i>syllable</i></tt>, and <tt><i>modifier</i></tt>
         are all small literal octal integer constants.&nbsp; These
         fields may be interpreted as follows:</li>
@@ -6273,9 +6645,10 @@ Assembly
         enforce that restriction.<br>
       </li>
     </ul>
-    <i>Pseudo-ops</i>:&nbsp; The following table shows every type of
-    pseudo-op I've encountered in the AS-206RAM program listing, and
-    what I've been able to infer about them:<br>
+    <i><a name="Pseudo-ops"></a>Pseudo-ops</i>:&nbsp; The following
+    table shows every type of pseudo-op I've encountered in the
+    AS-206RAM and PTC ADAPT Self-Test program listings, and what I've
+    been able to infer about them:<br>
     <br>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
       <tbody>
@@ -6284,6 +6657,33 @@ Assembly
           </th>
           <th valign="middle" align="left">Description<br>
           </th>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>BCI <i>text</i></tt><br>
+          </td>
+          <td valign="top">This pseudo-op appears only in PTC code.<br>
+            <br>
+            Its function is TBD, but I believe it encodes the <i><tt>text</tt></i>
+            argument into 8 consecutive memory locations.&nbsp; The <i><tt>text</tt></i>
+            always seems to end with a $ character.&nbsp; So perhaps $
+            represents an end-of-buffer marker; or perhaps it represents
+            a carriage-return/line-feed.&nbsp; These 8-location buffers
+            could then be output later under program control to the
+            PTC's printer peripheral device.&nbsp; The PTC source code
+            contains a table of 64 patterns which could presumably be
+            sent to the printer as character codes, and thus can be
+            represented by 5 bits each.&nbsp; (The table appears
+            left-hand symbol <tt>CHAR</tt> in the source code).&nbsp;
+            Thus I suspect that each 26-bit buffer location could hold
+            indices to as many as 5 characters, plus an extra bit for
+            some other purpose, and the full output buffer would contain
+            a total of 40 characters.&nbsp; In all samples of the <tt>BCI</tt>
+            pseudo-op, <i><tt>text</tt></i> is indeed 40 characters or
+            less.&nbsp; However, this is just speculation, and I have
+            not yet worked out the details of the encoding scheme.<br>
+            <br>
+            See also the <tt>PRS</tt> CPU instruction.<br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap"><tt>BSS</tt><tt> <i>n</i><br>
@@ -6351,20 +6751,29 @@ Assembly
             should make it clear what those changes are. </td>
         </tr>
         <tr>
-          <td valign="middle" nowrap="nowrap"><tt>DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,</tt><tt><i>DLOC</i></tt><tt><br>
+          <td valign="middle" nowrap="nowrap"><tt>DOG <i>DM,DS,DLOC</i><br>
+            </tt><i>&nbsp;&nbsp; or</i><tt><br>
+              DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,</tt><tt><i>DLOC</i></tt><tt><br>
             </tt><i>&nbsp;&nbsp; or</i><br>
             <tt>DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,</tt></td>
-          <td valign="middle">Abbreviated form of <tt>ORGDD</tt> (see
-            below) that only modifies the assembler's current
-            data-memory pointer, leaving the instruction-memory pointer
-            untouched.&nbsp; It does not allocate any memory.&nbsp; The
-            location parameter <tt><i>DLOC</i></tt> is treated as a
-            suggestion rather than as a hard specification of the offset
-            into the data-memory sector, since if the assembler finds
-            that the requested <tt><i>DLOC</i></tt> has already been
-            used, it will search upward through the data sector until it
-            finds a location that hasn't already been used.&nbsp; If <tt><i>DLOC</i></tt>
-            is omitted entirely, it is taken to be 000.<br>
+          <td valign="middle">Of the LVDC source code available to us,
+            the <tt>DOG</tt> form appears only in the PTC ADAPT
+            Self-Test Program, while the <tt>DOGD</tt> form appears
+            only in the AS206-RAM Flight Program.&nbsp; It isn't known
+            whether the two always remained available as synonyms or
+            whether the one was deprecated in favor of the other.<br>
+            <br>
+            Abbreviated form of <tt>ORGDD</tt> (see below) that only
+            modifies the assembler's current data-memory pointer,
+            leaving the instruction-memory pointer untouched.&nbsp; It
+            does not allocate any memory.&nbsp; The location parameter <tt><i>DLOC</i></tt>
+            is treated as a suggestion rather than as a hard
+            specification of the offset into the data-memory sector,
+            since if the assembler finds that the requested <tt><i>DLOC</i></tt>
+            has already been used, it will search upward through the
+            data sector until it finds a location that hasn't already
+            been used.&nbsp; If <tt><i>DLOC</i></tt> is omitted
+            entirely, it is taken to be 000.<br>
             <br>
             Presumably there is a <tt>DOGS</tt> pseudo-op as well
             (differing in that it pertains to a simplex memory
@@ -6493,7 +6902,7 @@ Assembly
           </td>
         </tr>
         <tr>
-          <td valign="top"><tt>MAT</tt><br>
+          <td valign="middle"><tt>MAT</tt><br>
           </td>
           <td valign="top">Forces alignment for the next memory
             allocated to a 020-word (octal, or 16 decimal) boundary, and
@@ -6510,26 +6919,43 @@ Assembly
           </td>
         </tr>
         <tr>
-          <td valign="middle"><tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,<br>
-              </i></tt><i>&nbsp;&nbsp; or</i><tt><i><br>
-              </i></tt><tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,DLOC</i></tt><br>
+          <td valign="middle"><tt><tt>ORG <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,DLOC<br>
+                </i></tt><i>&nbsp;&nbsp; or</i><tt><i><br>
+                </i></tt></tt><tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,DLOC</i></tt><br>
           </td>
-          <td valign="middle">Set the instruction-memory and the
-            data-memory assumptions for the next code or data lines to
-            be assembled.&nbsp; The fields within the operand relate to
-            those within the HOP constants, except while the HOP
-            constant has a single LOC field, the assembler internally
-            maintains separate LOC fields for instruction memory (<i><tt>LOC</tt></i>)
-            and data memory (<tt><i>DLOC</i></tt>).<br>
+          <td valign="middle">Of the LVDC source code available to us,
+            the <tt>ORG</tt> form appears only in the PTC ADAPT
+            Self-Test Program, while the <tt>ORGDD</tt> form appears
+            only in the AS206-RAM Flight Program.&nbsp; It isn't known
+            whether the two always remained available as synonyms or
+            whether the one was deprecated in favor of the other.<br>
             <br>
-            If the optional <tt><i>DLOC</i></tt> is not present, then
-            the first previously-unused location in the select data
-            module/sector is used.&nbsp; Actually, specifying <tt><i>DLOC</i></tt>
-            does not necessarily imply that the data location is set to
-            <i><tt>DLOC</tt></i>, since if that location has already
-            been used, the next unused location after that will be
-            selected instead, and the assembler generates a warning
-            message.<br>
+            Sets the instruction-memory and the data-memory assumptions
+            for the next code or data lines to be assembled.&nbsp; The
+            fields within the operand relate to those within the HOP
+            constants, except while the HOP constant has a single LOC
+            field, the assembler internally maintains separate LOC
+            fields for instruction memory (<i><tt>LOC</tt></i>) and data
+            memory (<tt><i>DLOC</i></tt>).<br>
+            <br>
+            Some of the fields may be left empty, and those values are
+            presumably left unchanged ... or rather kept as whatever
+            their natural values would be if the <tt>ORG</tt> or <tt>ORGDD</tt>
+            were not present.<br>
+            <br>
+            For example, with <tt>ORGDD</tt>, the trailing <tt><i>DLOC</i></tt>
+            is sometimes not specified, so that we are left simply with
+            "<tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,</i></tt>".&nbsp;
+
+
+            In that case, the first previously-unused location in the
+            select data module/sector is used.&nbsp; Actually, even
+            specifying <tt><i>DLOC</i></tt> explicitly does not
+            necessarily imply that the data location is set to <i><tt>DLOC</tt></i>,
+            since if that location has already been used, the next
+            unused location after that will be selected instead, and the
+            assembler generates a warning message.&nbsp; With <tt>ORG</tt>,
+            we find lots and lots of combinations of omitted fields.<br>
             <br>
             There may be an <tt>ORGDS</tt> variant as well, specifying
             a simplex memory configuration rather than a duplex
@@ -6542,6 +6968,12 @@ Assembly
           <td valign="middle">This pseudo-op requires a left-hand symbol
             to precede the <tt>SYN</tt> on the line.&nbsp; It tells the
             assembler to treat the left-hand symbol as a synonym for <tt><i>symbol</i></tt>.&nbsp;
+
+
+
+
+
+
 
 
 
@@ -6618,6 +7050,12 @@ Assembly
 
 
 
+
+
+
+
+
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -6631,6 +7069,12 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
+
+
+
+
+
 
 
 
@@ -7017,6 +7461,12 @@ Assembly
 
 
 
+
+
+
+
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unHOP.py">unHOP.py</a>)
@@ -7183,6 +7633,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
+
 
 
 
@@ -7655,6 +8111,12 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
+
+
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -7696,7 +8158,19 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
+
+
+
     and produces as output a human-readable assembly listing (<i>OUTPUT</i>.lst).&nbsp;
+
+
+
+
+
+
 
 
 
@@ -7894,6 +8368,12 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
+
+
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -7923,6 +8403,12 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
+
+
+
+
+
 
 
 
