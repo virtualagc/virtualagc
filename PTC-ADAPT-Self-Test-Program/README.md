@@ -1,1 +1,8 @@
-TBD
+# Introduction
+
+The PTC ADAPT Self-Test Program is software for the Launch Vehicle Digital Computer (LVDC) which, along with the companion Launch Vehicle Data Adapter (LVDA), was used in Apollo's Saturn rockets.  The PTC ("Programmable Test Controller") was _ground-based_ equipment, so this particular software was not use onboard the rocket; i.e., it is presented as an example of software for the LVDC computer, and not as flight software.  The reason it is presented as LVDC software, is that the PTC contained a modified LVDC, and thus that is the CPU on which this software runs.  The nature of the modifications to the CPU relate to use of differing peripheral devices and to the migration of some facilities supported natively by the LVDC to peripheral devices in the PTC; examples include multiplication and division.  However, such modifications do not prevent the PTC software from being syntatically-correct LVDC software, nor do they prevent use of the LVDC assembler for PTC software.
+
+The ADAPT ("Aerospace Data Adapter/Processor Tester") was equipment for evaluating the LVDA, thus the PTC ADAPT Self-Test Program illuminates the interaction between the LVDC and LVDA.
+
+Additional documentation may be found on [the Virtual AGC Project main website's LVDC page](https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-Program), which links documents for the PTC and ADAPT.  In particular, there is [a zipfile of the scanned page images of the assembly listing for the PTC ADAPT Self-Test Program](http://www.ibiblio.org/apollo/ScansForConversion/PTC%20ADAPT%20Self-Test%20Program.zip). These scanned images are the basis for the transcribed source code.
+
