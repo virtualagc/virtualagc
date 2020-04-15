@@ -6,3 +6,13 @@ The ADAPT ("Aerospace Data Adapter/Processor Tester") was equipment for evaluati
 
 Additional documentation may be found on [the Virtual AGC Project main website's LVDC page](http://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program), which links documents for the PTC and ADAPT.  In particular, there is [a zipfile of the scanned page images of the assembly listing for the PTC ADAPT Self-Test Program](http://www.ibiblio.org/apollo/ScansForConversion/PTC%20ADAPT%20Self-Test%20Program.zip). These scanned images are the basis for the transcribed source code.
 
+# Files
+
+- PTC-ADAPT-Self-Test-Program.tsv &mdash; this is a transcription of the program's octal listing, which begins at p. 221 of the scanned pages and proceeds to the end of the scans.  The octal listing is the assembled form of the PTC ADAPT Self-Test Program.  The modern LVDC assembler also creates its own octal listing, of course, but this transcribed octal listing can be read by the assembler and used as a cross-check to validate that the modern assembler's results compares with the original assembler's results.
+- PTC-ADAPT-Self-Test-Program.lvdc &mdash; this is a transcription of the program's assembly-language source code.  It can be used as an input to the modern LVDC assembler.
+
+# Assembly Using the Modern LVDC Assembler (yaASM.py)
+
+TBD
+
+
