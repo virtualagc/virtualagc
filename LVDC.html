@@ -33,7 +33,7 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         <li><a href="#Evolution_of_the_Flight_Software">AS-206RAM Flight
             Program Specifically</a></li>
         <li><a href="#PTC_ADAPT_Self-Test_Program">PTC ADAPT Self-Test
-            Program</a><br>
+            (PAST) Program</a><br>
         </li>
       </ul>
       <li><a href="#Architecture_of_the_LVDC">Architecture of the LVDC</a></li>
@@ -81,6 +81,9 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         src="lvdc_upper-small.jpg" style="border: 2px solid ; width:
         288px; height: 165px;" width="288" height="165" align="right"></a>The
 Launch
+
+
+
 
 
 
@@ -277,6 +280,9 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
+
 
 
 
@@ -599,6 +605,9 @@ Launch
 
 
 
+
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="LVDC_Software"></a>LVDC Software</h2>
@@ -719,6 +728,9 @@ Launch
 
 
 
+
+
+
         Flight Program</a>, however, I do have a couple of reasons to
       believe that the AS-206RAM Flight Program would have been used in
       conjunction with a Preflight Program:<br>
@@ -757,9 +769,15 @@ href="http://www.ibiblio.org/apollo/Documents/AstrionicsSystemsHandbook_Nov69.pd
 
 
 
+
+
+
         15 1969 release</a> (see section 11.2.1 in particular), but does
       not even mention the ECP at all in its <a
 href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">November
+
+
+
 
 
 
@@ -819,15 +837,18 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
     </h3>
     To a computer programmer, the most important thing about any
     computer program is its source code, and at present a single
-    revision of the flight program is available to us.&nbsp; It is an
-    engineering revision of the software, from September 1967,
-    designated "AS-206RAM LVDC FLIGHT PROGRAM".&nbsp; If you were to
-    Google this (<b>don't do it!</b>), you may unnecessarily excite
-    yourself by noting that Saturn IB launch vehicle AS-206 was used for
-    the Skylab 2 mission (Conrad/Weitz/Kerwin).&nbsp; You may then be
-    chagrined to realize that the Skylab 2 mission was in 1973, far past
-    the 1967 time frame in which this revision of the program is
-    developed.&nbsp; What gives?&nbsp; The answer, is that AS-206 was <i>originally</i>
+    revision of the flight program is available to us.&nbsp; (For
+    non-flight software, though, see the PAST program described in <a
+      href="#PTC_ADAPT_Self-Test_Program">the next section</a>.)&nbsp;
+    The flight program at issue is an engineering revision of the
+    software, from September 1967, designated "AS-206RAM LVDC FLIGHT
+    PROGRAM".&nbsp; If you were to Google this (<b>don't do it!</b>),
+    you may unnecessarily excite yourself by noting that Saturn IB
+    launch vehicle AS-206 was used for the Skylab 2 mission
+    (Conrad/Weitz/Kerwin).&nbsp; You may then be chagrined to realize
+    that the Skylab 2 mission was in 1973, far past the 1967 time frame
+    in which this revision of the program is developed.&nbsp; What
+    gives?&nbsp; The answer, is that AS-206 was <i>originally</i>
     intended for an unmanned mission that was canceled after the Apollo
     1 fire.&nbsp; The software we have is not even for that canceled
     early AS-206 mission, but rather for a proposed backup to the
@@ -933,6 +954,9 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
 
 
 
+
+
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -961,6 +985,9 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
       images, since you can do things like text searches on it, or even
       assemble it using the nifty new LVDC assembler I've written (<a
         href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>).&nbsp;
+
+
+
 
 
 
@@ -1037,6 +1064,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
       an abridged transcription of the source code does indeed appear in
       our software repository</a>. &nbsp; The transcribed code, unlike
     the full program, assembles without error and could actually be run
@@ -1044,6 +1074,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
     flesh it out enough to do something useful.&nbsp; That's an evolving
     effort, so feel free to take or leave the abridged LVDC code as you
     see fit.<br>
+    <br>
+    (Alternately, some of the points I make in the following discussion
+    are probably illustrated equally well by the non-flight PAST program
+    discussed in <a href="#PTC_ADAPT_Self-Test_Program">the next
+      section</a>, which is not restricted by ITAR and hence can be
+    viewed in full by everybody.&nbsp; Unfortunately, I didn't have a
+    copy of the PAST program, or even know of its existence, when I
+    wrote the following description.)<br>
     <br>
     Since the abridged source code is, as I mentioned, a work in
     progress, I can't really base a discussion on it without the burden
@@ -1245,19 +1283,33 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         all jumps into no-man's land is made, it's impossible to know
         yet whether all of them can be worked around so easily.<br>
         <h3><a name="PTC_ADAPT_Self-Test_Program"></a>PTC ADAPT
-          Self-Test Program</h3>
+          Self-Test (PAST) Program</h3>
         <p><i>(This section is under construction.&nbsp; Its contents
             may not yet be reliable.)</i><br>
         </p>
-        <p>This section concerns the "PTC ADAPT Self-Test
-          Program".&nbsp; Strictly speaking, this program is not LVDC
-          software, and it is certainly not LVDC <i>flight</i>
-          software.&nbsp; But it fills in an important gaps in our
-          understanding of the LVDC and it is technically so close to
-          being "LVDC software" that it's really a matter of opinion as
-          to whether you want to call it that or not.&nbsp; (Hint:&nbsp;
-          I <i>do</i> want to call it that.)&nbsp; Let's begin the
-          explanation with a little terminology:<br>
+        <p>This section concerns the "PTC ADAPT Self-Test Program", the
+          only other LVDC program of which we have a copy.&nbsp; Since
+          "PTC ADAPT Self-Test Program" is quite a mouthful, I'll just
+          refer to it as the PAST program.&nbsp; Not only is that nice
+          and short, it's also apt since the PAST program
+          chronologically preceded the AS206-RAM Flight Program
+          discussed in the preceding section. &nbsp;<img
+            src="smiley.png" alt="" width="16" height="16">&nbsp; But
+          beware:&nbsp; The acronym "PAST" is mine, and doesn't come
+          from the contemporary Apollo documentation.<br>
+        </p>
+        <p>Strictly speaking, the PAST program is actually not "LVDC"
+          software, and it is certainly not <i>flight</i>
+          software.&nbsp; But it's really quite significant in spite of
+          that, and shouldn't be ignored if you're interested
+          technically in the LVDC itself, rather than merely how the
+          LVDC fits into the context of the launch vehicle.&nbsp; The
+          PAST program fills in an important gaps in our understanding
+          of the LVDC and it is technically so close to being "LVDC
+          software" that it's really a matter of opinion as to whether
+          you want to label it as LVDC software or not.&nbsp;
+          (Hint:&nbsp; I <i>do</i> want to call it that.)&nbsp; Let's
+          begin the explanation with a little acronym-rich terminology:<br>
         </p>
         <ul>
           <li>The PTC ("Programmable Test Controller") was ground-based
@@ -1274,32 +1326,34 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         <p><a href="Documents/19730064346_1973064346.pdf">The PTC is
             documented here</a>, while <a
             href="Documents/19730064186_1973064186.pdf">the ADAPT and
-            ASTEC are documented here</a>.&nbsp; The former document
-          (Chapter 7) helpfully includes a printout of the assembly
-          listing of a large chunk of software that it calls the "PTC
-          ADAPT Self-Test Program".<br>
+            ASTEC are documented here</a>.&nbsp; The former document (in
+          Chapter 7) includes a printout of the assembly listing of the
+          PAST program and is our only-known source for it.<br>
         </p>
-        <p>But it's not necessary to go into great detail about most of
-          that at the moment.&nbsp; For our immediate purposes, the only
-          important things to note about the PTC and ADAPT are:<br>
+        <p>But it's not necessary to go into great detail about the PTC,
+          ADAPT, and ASTEC at the moment.&nbsp; For our immediate
+          purposes, we can ignore the ASTEC entirely and the only
+          important things to know about the PTC and ADAPT are:<br>
         </p>
         <ol>
           <li>The PTC contains a CPU ... <i>which is a modified LVDC</i>.</li>
-          <li>The PTC's CPU runs software — in this case, the ADAPT
-            self-test program — which is essentially LVDC software, able
-            to be assembled by the LVDC assembler, and potentially to be
-            run in an LVDC simulator.</li>
+          <li>The PTC's CPU runs software ... in this case, the PAST
+            program.</li>
         </ol>
-        <p>In particular, we would expect the PTC ADAPT Self-Test
-          program to match LVDC Flight Program syntax.&nbsp; Indeed, its
-          assembly listing has clearly been produced by the LVDC
-          assembler program, although there are a few differences in the
-          way some of the output is formatted.&nbsp; In terms of how the
-          PTC's CPU has been "modified" relative to the LVDC, here's a
-          list of some of the differences visible at the software level,
-          though admittedly it may not be too meaningful to you until
-          you study more about how the LVDC works (and particularly its
-          instruction set) later on:<br>
+        <p>It's the fact that the PTC's CPU is a "modified" LVDC which
+          means the PAST program not strictly LVDC software.&nbsp;
+          Rather, it's modified-LVDC software.&nbsp; Still, except for
+          very slight differences in the instruction set and
+          assembly-language pseudo-ops, the PAST program matches LVDC
+          Flight Program syntax.&nbsp; Indeed, its assembly listing has
+          clearly been produced by the LVDC assembler program, although
+          there are a few differences in the way some of the output is
+          formatted.&nbsp; In terms of how the PTC's CPU has been
+          "modified" relative to the LVDC, here's a list of some of the
+          differences visible at the software level, though admittedly
+          it may not be too meaningful to you until you study more about
+          how the LVDC works (and particularly its instruction set)
+          later on:<br>
         </p>
         <ul>
           <li>LVDC CPU instructions eliminated in the PTC CPU:&nbsp; <tt>MPY</tt>
@@ -1311,55 +1365,64 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
             (CPU i/o control).<br>
           </li>
         </ul>
-        <p>As self-test software, significant chunks of the program are
-          devoted to testing the CPU instructions itself ... i.e., deep,
-          system-level self-test code which is not present in the LVDC
-          Flight Program.&nbsp; This is obviously a very significant
-          feature in terms of helping to test any eventual LVDC CPU
-          emulator we may be able to come up with.&nbsp; Unfortunately,
-          experience with the AGC suggests that the most-interesting
-          CPU-instruction testing we could have would be extensive
-          checks of the <tt>DIV</tt> instruction, and probably of the
-          behaviorally very-complex <tt>EXM</tt> instruction.&nbsp;
-          These are the very instructions which the PTC omits from its
-          repertoire, and naturally it cannot test them.&nbsp; Oh, well!<br>
-        </p>
-        <p>The PTC ADAPT Self-Test Program is also quite significant in
-          terms of size, since it is nearly 60% the size of the
-          AS206-RAM Flight Program covered in the preceding section
-          above.&nbsp; On the other hand, much more of the program is
-          explicitly devoted to routine bookkeeping, which in the LVDC
-          program would instead be implicitly handled by the assembler,
-          which means that not all of the bulk is related to complexity.
-          But most significantly, there's no question of the PTC ADAPT
-          Self-Test Program's "export" being restricted by ITAR:&nbsp;
-          It isn't!&nbsp; So it can be freely provided to you, and you
-          need not (please don't!) apply personally to me to get access
-          to it.&nbsp; An additional bonus is that while the AS206-RAM
-          assembly listing we have is simply a snapshot of work of
-          ancient work in progress, which cannot even be assembled
-          error-free without a bit of massaging, the PTC ADAPT Self-Test
-          Program is a mature, debugged, working program.<br>
+        <p>How can I justify my claim that the PAST program is
+          "significant" and thus deserves your attention?&nbsp; There
+          are several reasons.&nbsp; As self-test software, significant
+          chunks of the program are devoted to testing the CPU
+          instructions themselves; i.e., deep, system-level self-test
+          code which is not present in the AS206-RAM Flight
+          Program.&nbsp; In AGC terms, the PAST program most resembles
+          our "Validation Test Suite" program ... except that being
+          instead of being written by the Virtual AGC Project (as the
+          Validation Test Suite was, because MIT/IL itself hadn't left
+          us any AGC self-test software as far as we could determine at
+          the time), the PAST program was actually supplied by the IBM
+          Federal Systems Division itself.&nbsp; This will obviously be
+          very helpful in validating any eventual LVDC CPU emulator we
+          may be able to come up with, since developers of emulations
+          are always faced with uncomfortable questions about the
+          accuracy those emulations.&nbsp; Unfortunately, experience
+          with the AGC suggests that the <i>most</i>-interesting CPU
+          instructions to check would have been the very instructions
+          which the PTC omits from its repertoire, and therefore the
+          PAST software cannot test them.&nbsp; But that's a minor
+          quibble.&nbsp; Nor is the PAST program a light-weight in terms
+          of size, being nearly 60% the size of the AS206-RAM Flight
+          Program.&nbsp; On the other hand, the structure of the PAST
+          program is quite simple, which means that much of its bulk is
+          related to repetition and variation of simple blocks of code
+          rather than to complexity of structure.&nbsp; There's no
+          question of the PAST program's "export" being restricted by
+          ITAR:&nbsp; It isn't, since it can't even be run within the
+          launch vehicle itself!&nbsp; So it can be freely provided to
+          you, and you need not (please don't!) apply personally to me
+          to get access to it (as you still have to do for the AS206-RAM
+          Flight Program).&nbsp; An additional bonus is that while the
+          AS206-RAM assembly listing we have is simply a snapshot of
+          work of ancient work in progress, which cannot even be
+          assembled error-free without a bit of massaging, the PAST
+          program is a mature, debugged, working program.<br>
         </p>
         <p>As far as the versioning of the software, there is nothing
           embedded within the assembly listing itself which dates
           it.&nbsp; However, given that it is printed in the PTC
           document mentioned above, which is dated 5 MARCH 1965, I think
-          we can tentatively suppose that the software too is from early
-          1965.&nbsp; (Whereas the AS206-RAM program is from late 1967.)<br>
+          we can tentatively suppose that the PAST program too is from
+          early 1965.&nbsp; (Whereas the AS206-RAM program is from late
+          1967.)<br>
         </p>
         <p>Beyond that, there's also the academic question of the
           versioning of the LVDC assembler used.&nbsp; Both the feature
-          set and the format of the output is more primitive in the PTC
+          set and the format of the output is more primitive in the PAST
           assembly than in the AS206-RAM assembly.&nbsp; For all these
           reasons, it's fair to infer that an earlier version of the
-          assembler was used for the PTC assembly, in which these
+          assembler was used for the PTC assembly, in which various
           more-advanced convenience features did not yet exist.<br>
         </p>
-        <p>The PTC ADAPT Self-Test Program will be transcribed into
-          source-code files Real Soon Now, so that it can be assembled
-          by the yaASM.py assembler.&nbsp; That has not yet occurred,
-          but you can observe its progress online if you like:<br>
+        <p>The PAST program will be transcribed into source-code files
+          Real Soon Now, so that it can be assembled by the yaASM.py
+          assembler.&nbsp; That has not yet occurred, but you can
+          observe its progress online if you like:<br>
         </p>
         <p align="center"><a
 href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-Program">Folder
@@ -1372,8 +1435,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
 
 
 
-            in our GitHub repository for PTC ADAPT Self-Test Program
-            source-code files</a></p>
+
+
+
+            in our GitHub repository for PAST program source-code files</a></p>
         <p>For now, though, only the <i>scanned</i> assembly listing is
           available.&nbsp; To make it a little more convenient to work
           with, I've extracted the listing from the original scanned PTC
@@ -1393,8 +1458,10 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
 
 
 
-                of scanned page images for the PTC ADAPT Self-Test
-                Program</a></p>
+
+
+
+                of scanned page images for the PAST program</a></p>
           </blockquote>
         </div>
         <p>Here's a quick index to the zipfile:<br>
@@ -1416,6 +1483,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
     </div>
     <h2><a name="Architecture_of_the_LVDC" id="Architecture_of_the_LVDC"></a>Architecture
 of
+
+
+
 
 
 
@@ -1596,6 +1666,9 @@ This
 
 
 
+
+
+
         is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp; <br>
@@ -1680,9 +1753,15 @@ Astrionics
 
 
 
+
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
+
 
 
 
@@ -2015,6 +2094,9 @@ of
 
 
 
+
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -2064,6 +2146,9 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
+
+
 
 
 
@@ -2344,6 +2429,9 @@ Incidentally,
 
 
 
+
+
+
                 HIGTHR<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
@@ -2499,6 +2587,9 @@ However,
 
 
 
+
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -2566,6 +2657,10 @@ However,
             </blockquote>
             I believe that the data transferred to the printer is often
             buffered by the <tt>BCI</tt> pseudo-op.<br>
+            <br>
+            In assembly language, the operand of the instruction is
+            always a literal 3-digit octal number or else a symbolic
+            label representing a memory address in the range 000 to 773.<br>
           </td>
         </tr>
         <tr>
@@ -2680,6 +2775,9 @@ However,
                 instruction-memory sector, find an unallocated memory
                 location.</li>
               <li>In that newly-allocated memory location, put a "<tt>HOP
+
+
+
 
 
 
@@ -2827,6 +2925,9 @@ However,
 
 
 
+
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -2858,6 +2959,9 @@ However,
 
 
 
+
+
+
               PTC documentation (see figure 2-10)</a> has to say about
             it:
             <meta http-equiv="content-type" content="text/html;
@@ -2866,7 +2970,15 @@ However,
             operand address bits specify the operation to be performed
             <meta http-equiv="content-type" content="text/html;
               charset=UTF-8">
-            (see figure 2-11 for CIO codes used by PTC)."</td>
+            (see figure 2-11 for CIO codes used by PTC)."<br>
+            <br>
+            Given that this instruction doesn't appear in the true LVDC,
+            I won't detail its operation further here — just look at the
+            documentation link above if you're interested — except to
+            mention the practical detail that in assembly language the
+            operand of the instruction is always a literal 3-digit octal
+            number.<br>
+          </td>
         </tr>
         <tr>
           <td style="font-family: Courier New,Courier,monospace;"> AND<br>
@@ -3174,6 +3286,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>0775 (octal) stores into the Product-Quotient register
@@ -3333,6 +3448,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 In terms of assembly-language syntax, there are the
                 following variations:<br>
                 <blockquote><tt>CDS&nbsp;&nbsp;&nbsp;&nbsp; <i></i><i>SYMBOLNAME</i></tt><tt><br>
+                    CDS&nbsp;&nbsp;&nbsp;&nbsp; <i>DM,DS</i><br>
                   </tt><tt>CDSD&nbsp;&nbsp;&nbsp; <i>DM,DS</i></tt><tt><br>
                   </tt><tt>CDSS&nbsp;&nbsp;&nbsp; <i>DM,DS</i></tt><br>
                 </blockquote>
@@ -3370,9 +3486,18 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
                 The difference between <tt>CDSD</tt> and <tt>CDSS</tt>
                 is that the former selects duplex memory while the later
                 selects simplex memory.<br>
+                <br>
+                I've only seen the variant "<tt>CDS <i>DM,DS</i></tt>"
+                used for the PTC, and I've only seen the other variants
+                used for the LVDC.&nbsp; I have no idea whether those
+                are meaningful differences, or merely accidents of
+                usage.<br>
                 <br>
                 In the usage I've seen, usage of <tt>CDSS</tt> is
                 confined almost entirely to the context of <tt>USE DAT</tt>
@@ -3667,6 +3792,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -3825,6 +3953,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
             I/O Ports<br>
           </th>
         </tr>
@@ -3885,6 +4016,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               of that topic</a>.&nbsp; Page-number references are to the
             AS-206RAM LVDC source code or to its <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">abridged
+
+
+
 
 
 
@@ -5265,6 +5399,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -5357,6 +5494,9 @@ Only
 
 
 
+
+
+
     those special addresses work.&nbsp; So a typical subroutine linkage
     would look like this:<br>
     <br>
@@ -5366,6 +5506,9 @@ Only
       </span> </div>
     <div style="margin-left: 40px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; ... <i>return
+
+
+
 
 
 
@@ -5529,6 +5672,9 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
+
 
 
 
@@ -5886,6 +6032,9 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
 
 
 
+
+
+
     bits.)&nbsp; The LVDA combines this pair of bits (in some manner
     unknown to me), and thus the LVDC receives a single OM/D bit.&nbsp;
     The LVDC recognizes two types of commands, <i>mode commands words</i>
@@ -6037,6 +6186,9 @@ Assembly
 
 
 
+
+
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -6048,6 +6200,9 @@ Assembly
     writing my own LVDC assembler.&nbsp; The description is intended to
     be authoritative only in the sense that it describes how my own
     assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
+
+
+
 
 
 
@@ -6102,6 +6257,9 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
+
 
 
 
@@ -6235,12 +6393,18 @@ Assembly
 
 
 
+
+
+
         In other words, a decimal integer encoded as <i>N</i> bits
         would be sign-extended on the left by 26-<i>N</i> bits.</li>
       <li>Decimal non-integer constants are treated as being in the
         range -1.0 &lt; <i>constant</i> &lt; 1.0.&nbsp;</li>
     </ul>
     <p><i><a name="AngleUnits"></a>Units of angular measurement</i>:&nbsp;
+
+
+
 
 
 
@@ -6566,6 +6730,9 @@ Assembly
 
 
 
+
+
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -6628,6 +6795,9 @@ Assembly
 
 
 
+
+
+
         in the existing LVDC source code, so I really have no way of
         knowing whether the original assembler accepted decimal
         constants or octal ones.)<br>
@@ -6668,6 +6838,9 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>target</i>,<i>syllable</i>,<i>modifier</i></tt>",
+
+
+
 
 
 
@@ -7063,6 +7236,9 @@ Assembly
 
 
 
+
+
+
             In that case, the first previously-unused location in the
             select data module/sector is used.&nbsp; Actually, even
             specifying <tt><i>DLOC</i></tt> explicitly does not
@@ -7096,6 +7272,9 @@ Assembly
           <td valign="middle">This pseudo-op requires a left-hand symbol
             to precede the <tt>SYN</tt> on the line.&nbsp; It tells the
             assembler to treat the left-hand symbol as a synonym for <tt><i>symbol</i></tt>.&nbsp;
+
+
+
 
 
 
@@ -7190,6 +7369,9 @@ Assembly
 
 
 
+
+
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -7203,6 +7385,9 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
+
+
 
 
 
@@ -7607,6 +7792,9 @@ Assembly
 
 
 
+
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unHOP.py">unHOP.py</a>)
@@ -7773,6 +7961,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -8263,6 +8454,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -8313,7 +8507,13 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
     and produces as output a human-readable assembly listing (<i>OUTPUT</i>.lst).&nbsp;
+
+
+
 
 
 
@@ -8529,6 +8729,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -8558,6 +8761,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
+
+
 
 
 
