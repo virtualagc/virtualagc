@@ -73,13 +73,13 @@
 #	octal-table format in the AS206-RAM assembly listing.
 #		Field 1:	Octal starting address of the line within the sector
 #				(0, 10, 20, ..., 370).
-#		8 field groups:	13-character field formatted as "%013o".  The rightmost 
+#		8 field groups:	12-character field formatted as "%012o".  The rightmost 
 #				3 digits are some sort of semantic data produced by the 
 #				assembler.  Considered in binary, I think the scheme is
 #				something like this:  000 000 0ba, where:
 #					a = 1 if syllable 0 is used, 0 if not used.
 #					b = 1 if syllable 1 is used, 0 if not used.
-#				Regarding the leftmost 10 digits, this value is identical
+#				Regarding the leftmost 9 digits, this value is identical
 #				to the 26-bit data constant or packed dual 13-bit instructions
 #				assembled at the two syllables of the corresponding addresses.
 #
