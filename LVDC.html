@@ -164,6 +164,8 @@ Launch
 
 
 
+
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -283,6 +285,8 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
 
 
 
@@ -617,6 +621,8 @@ Launch
 
 
 
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="LVDC_Software"></a>LVDC Software</h2>
@@ -743,6 +749,8 @@ Launch
 
 
 
+
+
         Flight Program</a>, however, I do have a couple of reasons to
       believe that the AS-206RAM Flight Program would have been used in
       conjunction with a Preflight Program:<br>
@@ -787,9 +795,13 @@ href="http://www.ibiblio.org/apollo/Documents/AstrionicsSystemsHandbook_Nov69.pd
 
 
 
+
+
         15 1969 release</a> (see section 11.2.1 in particular), but does
       not even mention the ECP at all in its <a
 href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">November
+
+
 
 
 
@@ -978,6 +990,8 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
 
 
 
+
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -1006,6 +1020,8 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
       images, since you can do things like text searches on it, or even
       assemble it using the nifty new LVDC assembler I've written (<a
         href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>).&nbsp;
+
+
 
 
 
@@ -1067,6 +1083,8 @@ href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identificati
     restricted by ITAR, if they do not pertain to guidance, control, or
     other technical aspects of the launch vehicle.&nbsp; <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">Such
+
+
 
 
 
@@ -1326,6 +1344,8 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
           AS206-RAM Flight Program discussed in the preceding section.
           &nbsp;<img src="smiley.png" alt="" width="16" height="16">&nbsp;
 
+
+
           But beware:&nbsp; The acronym "PAST" is mine, and doesn't come
           from the contemporary Apollo documentation.<br>
         </p>
@@ -1370,6 +1390,8 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         <ol>
           <li>The PTC contains a CPU ... <i>which is a modified LVDC</i>.&nbsp;
 
+
+
             In saying this, I don't mean that the PTC has a modified
             LVDC mounted in it, but rather that the PTC's CPU is a
             reimplementation (albeit modified) of an LVDC CPU.<br>
@@ -1410,53 +1432,70 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         </ul>
         <p>How can I justify my claim that the PAST program is
           "significant" and thus deserves your attention?&nbsp; There
-          are several reasons.&nbsp; As self-test software, significant
-          chunks of the program are devoted to testing the CPU
-          instructions themselves; i.e., deep, system-level self-test
-          code which is not present in the AS206-RAM Flight
-          Program.&nbsp; In AGC terms, the PAST program most resembles
-          our "Validation Test Suite" program ... except that being
-          instead of being written by the Virtual AGC Project (as the
-          Validation Test Suite was, because MIT/IL itself hadn't left
-          us any AGC self-test software as far as we could determine at
-          the time), the PAST program was actually supplied by the IBM
-          Federal Systems Division itself.&nbsp; This will obviously be
-          very helpful in validating any eventual LVDC CPU emulator we
-          may be able to come up with, since developers of emulations
-          are always faced with uncomfortable questions about the
-          accuracy those emulations.&nbsp; Unfortunately, experience
-          with the AGC suggests that the <i>most</i>-interesting CPU
-          instructions to check would have been the very instructions
-          which the PTC omits from its repertoire, and therefore the
-          PAST software cannot test them.&nbsp; But that's a minor
-          quibble.&nbsp; Indeed, speaking of emulation, running the PAST
-          program in an LVDC emulation should in some ways be even more
-          convenient than running an LVDC flight program, since (as a
-          black box) the LVDC has no user interface (unless you count
-          telemetered data streams as being a "user interface").&nbsp;
-          Whereas the PTC <i>does</i> have a user interface of sorts,
-          with its CPU being able to interact both with printers and
-          plotters.&nbsp; Thus the learning curve for seeing an emulated
-          LVDC actually <i>do something</i> is much gentler for the
-          PAST program than it would be for an LVDC flight
-          program.&nbsp; Nor is the PAST program a light-weight in terms
-          of size, being nearly 60% the size of the AS206-RAM Flight
-          Program.&nbsp; On the other hand, the structure of the PAST
-          program is quite simple, which means that much of its bulk is
-          related to repetition and variation of simple blocks of code
-          rather than to complexity of structure.&nbsp; And there's no
-          question of the PAST program's "export" being restricted by
-          ITAR:&nbsp; It isn't, since it can't even be run within the
-          launch vehicle itself!&nbsp; So it can be freely provided to
-          you, and you need not (please don't!) apply personally to me
-          to get access to it (as you still have to do for the AS206-RAM
-          Flight Program).&nbsp; An additional bonus is that while the
-          AS206-RAM assembly listing we have is simply a snapshot of
-          work of ancient work in progress, which cannot even be
-          assembled error-free without a bit of massaging, the PAST
-          program is a mature, debugged, working program.&nbsp; And so
-          on.<br>
+          are actually quite a few reasons to think so:<br>
         </p>
+        <ul>
+          <li>As self-test software, significant chunks of the program
+            are devoted to testing the CPU instructions themselves;
+            i.e., deep, system-level self-test code which is not present
+            in the AS206-RAM Flight Program.&nbsp; In AGC terms, the
+            PAST program most resembles our "Validation Test Suite"
+            program ... except that being instead of being written by
+            the Virtual AGC Project (as the Validation Test Suite was,
+            because MIT/IL itself hadn't left us any AGC self-test
+            software as far as we could determine at the time), the PAST
+            program was actually supplied by the IBM Federal Systems
+            Division itself.&nbsp; This will obviously be very helpful
+            in validating any eventual LVDC CPU emulator we may be able
+            to come up with, since developers of emulations are always
+            faced with uncomfortable questions about the accuracy those
+            emulations.&nbsp; Unfortunately, experience with the AGC
+            suggests that the <i>most</i>-interesting CPU instructions
+            to check would have been the very instructions which the PTC
+            omits from its repertoire, and therefore the PAST software
+            cannot test them.&nbsp; But that's a minor quibble.&nbsp; <br>
+          </li>
+          <li>Indeed, speaking of LVDC-CPU emulation, running the PAST
+            program in an LVDC emulation should in some ways be even
+            more convenient than running an LVDC flight program, since
+            (as a black box) the LVDC itself has no user interface as
+            such, although you could consider its telemetered data
+            streams as being a kind of "user interface".&nbsp; Whereas
+            the PTC <i>does</i> have a user interface of sorts,
+            including a plotter, printer, typewriter (keyboard), various
+            electronic displays, and switches. Thus the learning curve
+            for seeing an emulated LVDC actually <i>do something</i> is
+            much gentler for the PAST program than it would be for an
+            LVDC flight program, since the normal behavior of the PAST
+            program is already to interact with the test
+            technician.&nbsp; <br>
+          </li>
+          <li>Nor is the PAST program a light-weight in terms of size,
+            being nearly 60% the size of the AS206-RAM Flight Program,
+            both in terms of page-count of source code and in terms of
+            the size of the assembled executable.&nbsp; The structure of
+            the PAST program is quite simple, which means that much of
+            its bulk is related to repetition and variation of simple
+            blocks of code rather than to complexity of software
+            structure.&nbsp; Pedagogically, I suppose you could argue
+            the latter point as being either an disadvantage or an
+            advantage, depending on your point of view.<br>
+          </li>
+          <li>And there's no question of the PAST program's "export"
+            being restricted by ITAR:&nbsp; It isn't, since it can't
+            even be run within the launch vehicle's computer!&nbsp; So
+            it can be freely provided to you, and you need not (please
+            don't!) apply personally to me to get access to it (as you
+            still have to do for the AS206-RAM Flight Program).&nbsp;
+            Just follow the links given below.<br>
+          </li>
+          <li>An additional bonus is that while the AS206-RAM assembly
+            listing we've obtained is simply a snapshot of work of
+            ancient work in progress, which cannot even be assembled
+            error-free without a bit of massaging, the PAST program is
+            unambiguously a mature, debugged, working program.&nbsp; <br>
+          </li>
+        </ul>
         <p>As far as the versioning of the software, there is nothing
           embedded within the assembly listing itself which dates
           it.&nbsp; However, given that it is printed in the PTC
@@ -1474,7 +1513,7 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
           more-advanced convenience features did not yet exist.<br>
         </p>
         <p>The PAST program is in the process of being transcribed to
-          source code right, so that it can be read more easily,
+          source code right now, so that it can be read more easily,
           cut/pasted, searched, assembled by our yaASM.py assembler, and
           so on.&nbsp; While that process is not yet 100% complete, you
           can track its progress online if you like:<br>
@@ -1496,17 +1535,21 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
 
 
 
+
+
             in our GitHub repository for PAST program source-code files</a></p>
         <p>For now, though, only the <i>scanned</i> assembly listing is
-          available.&nbsp; To make it a little more convenient to work
-          with, I've extracted the listing from the original scanned PTC
-          document linked above, so that it can be viewed as a set of
-          image files, one per scanned page of the listing:<br>
+          100% available.&nbsp; To make it a little more convenient to
+          work with, I've extracted the listing from the original
+          scanned PTC document linked above, so that it can be viewed as
+          a set of image files, one per scanned page of the listing:<br>
         </p>
         <div align="center">
           <blockquote>
             <p><a
                 href="ScansForConversion/PTC%20ADAPT%20Self-Test%20Program.zip">Zipfile
+
+
 
 
 
@@ -1540,10 +1583,30 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
           detailed information about the PTC CPU and its peripheral
           devices.<br>
         </p>
+        <p>Regarding emulation, several of the PTC's peripherals are
+          commercial products (from IBM, CalComp, and possibly other
+          companies), and thus a creating a full PTC emulation <i>may</i>
+          (or may not) require additional documentation of those
+          commercial products as well.&nbsp; For example, I've looked at
+          a number of manuals for the IBM 1403 printer and related
+          devices ... but so far I've found all of them severely lacking
+          in any useful information regarding a programming interface to
+          the printer.&nbsp; In other words, so far I can't recommend
+          any of the commercial documentation for the peripheral
+          devices.&nbsp; In lieu of such additional documentation,
+          however, I'd point out section 2-326 ("Input/Output
+          Processor") and succeeding sections of the PTC document as
+          providing lots of useful information about programming
+          interfaces to the printer, typewriter, plotter, and so on, and
+          thus the PTC documentation may turn out to be an adequate
+          reference.<br>
+        </p>
       </div>
     </div>
     <h2><a name="Architecture_of_the_LVDC" id="Architecture_of_the_LVDC"></a>Architecture
 of
+
+
 
 
 
@@ -1736,6 +1799,8 @@ This
 
 
 
+
+
         is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp; <br>
@@ -1826,9 +1891,13 @@ Astrionics
 
 
 
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -2173,6 +2242,8 @@ of
 
 
 
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -2222,6 +2293,8 @@ of
     addressed.&nbsp; <span style="font-style: italic;">The "residual
       sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
 Incidentally,
+
+
 
 
 
@@ -2514,6 +2587,8 @@ Incidentally,
 
 
 
+
+
                 HIGTHR<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
@@ -2592,6 +2667,8 @@ Incidentally,
             (more accurately, 4 computer cycles) following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
 
 
 
@@ -2896,6 +2973,8 @@ However,
 
 
 
+
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -3019,6 +3098,8 @@ However,
 
 
 
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -3047,6 +3128,8 @@ However,
           <td valign="middle">PTC only ... <i>not</i> LVDC.<br>
             <br>
             Here's what <a href="Documents/19730064346_1973064346.pdf">the
+
+
 
 
 
@@ -3086,11 +3169,15 @@ However,
 href="https://en.wikipedia.org/wiki/IBM_1400_series#Field_and_character_coding">IBM
 
 
+
+
                   1400 series printers</a>.&nbsp; <br>
               </li>
             </ul>
             The BA8421 encoding scheme itself can be found at <a
 href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_code">this
+
+
 
 
               wikipedia link</a>, but it has the codes in a hexadecimal
@@ -3102,6 +3189,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             example, in the table below the code for 'A' is 61, whereas
             if you look at the CHAR table on page 2 of the PAST
             program's source code you'll find that it is given as <tt>OCT
+
+
 
 
               610000000</tt>.<br>
@@ -3304,9 +3393,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                 concave sides) was "used as a command delimiter in some
                 very old computers".</li>
               <li>Code 32, the "double dagger" character (a vertical
-                line with two horizontal hashes) remains a
-                mystery.&nbsp; I haven't found an possible hidden
-                meaning that justifies its inclusion.<br>
+                line with two horizontal hashes) is possibly used as an
+                error indicator.<br>
               </li>
             </ul>
             <p>
@@ -3627,6 +3715,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>0775 (octal) stores into the Product-Quotient register
@@ -3795,6 +3885,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 or <tt>DEQS</tt> pseudo-ops (see below), whereas the
                 module number and sector number are simply supplied with
                 octal numeric literals in <tt>CDSD</tt> or <tt>CDSS</tt>.&nbsp;
+
+
 
 
 
@@ -4139,6 +4231,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -4303,6 +4397,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
             I/O Ports<br>
           </th>
         </tr>
@@ -4363,6 +4459,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               of that topic</a>.&nbsp; Page-number references are to the
             AS-206RAM LVDC source code or to its <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">abridged
+
+
 
 
 
@@ -5755,6 +5853,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -5853,6 +5953,8 @@ Only
 
 
 
+
+
     those special addresses work.&nbsp; So a typical subroutine linkage
     would look like this:<br>
     <br>
@@ -5862,6 +5964,8 @@ Only
       </span> </div>
     <div style="margin-left: 40px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; ... <i>return
+
+
 
 
 
@@ -6031,6 +6135,8 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -6400,6 +6506,8 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
 
 
 
+
+
     bits.)&nbsp; The LVDA combines this pair of bits (in some manner
     unknown to me), and thus the LVDC receives a single OM/D bit.&nbsp;
     The LVDC recognizes two types of commands, <i>mode commands words</i>
@@ -6557,6 +6665,8 @@ Assembly
 
 
 
+
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -6568,6 +6678,8 @@ Assembly
     writing my own LVDC assembler.&nbsp; The description is intended to
     be authoritative only in the sense that it describes how my own
     assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
+
+
 
 
 
@@ -6628,6 +6740,8 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
 
 
 
@@ -6773,12 +6887,16 @@ Assembly
 
 
 
+
+
         In other words, a decimal integer encoded as <i>N</i> bits
         would be sign-extended on the left by 26-<i>N</i> bits.</li>
       <li>Decimal non-integer constants are treated as being in the
         range -1.0 &lt; <i>constant</i> &lt; 1.0.&nbsp;</li>
     </ul>
     <p><i><a name="AngleUnits"></a>Units of angular measurement</i>:&nbsp;
+
+
 
 
 
@@ -7116,6 +7234,8 @@ Assembly
 
 
 
+
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -7156,6 +7276,8 @@ Assembly
         current instruction, respectively.&nbsp; (I say that the literal
         constant is <i>decimal</i> because yaASM.py implements it in
         that way.&nbsp; However, there are no instances of <tt><i>n</i></tt>&gt;7
+
+
 
 
 
@@ -7297,6 +7419,8 @@ Assembly
 
 
 
+
+
         where <tt><i>target</i></tt>, <tt><i>syllable</i></tt>, and <tt><i>modifier</i></tt>
         are all small literal octal integer constants.&nbsp; These
         fields may be interpreted as follows:</li>
@@ -7350,6 +7474,8 @@ Assembly
             The encoding in the assembled octals uses the BA8421 coding
             scheme, which was described above (<a
               href="#CPU_Instructions">see the <tt>CIO</tt> instruction</a>).&nbsp;
+
+
 
 
             Each of the 8 memory locations allocated by the pseudo-op
@@ -7695,6 +7821,8 @@ Assembly
 
 
 
+
+
             In that case, the first previously-unused location in the
             select data module/sector is used.&nbsp; Actually, even
             specifying <tt><i>DLOC</i></tt> explicitly does not
@@ -7728,6 +7856,8 @@ Assembly
           <td valign="middle">This pseudo-op requires a left-hand symbol
             to precede the <tt>SYN</tt> on the line.&nbsp; It tells the
             assembler to treat the left-hand symbol as a synonym for <tt><i>symbol</i></tt>.&nbsp;
+
+
 
 
 
@@ -7834,6 +7964,8 @@ Assembly
 
 
 
+
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -7847,6 +7979,8 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
+
 
 
 
@@ -8263,6 +8397,8 @@ Assembly
 
 
 
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unHOP.py">unHOP.py</a>)
@@ -8429,6 +8565,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -8931,6 +9069,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -8987,7 +9127,11 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
     and produces as output a human-readable assembly listing (<i>OUTPUT</i>.lst).&nbsp;
+
+
 
 
 
@@ -9215,6 +9359,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -9244,6 +9390,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
+
 
 
 
