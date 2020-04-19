@@ -1255,7 +1255,7 @@ P1007              TABLE OF RECOGNIZED FIRST WORDS IN YUL DIRECTOR CARDS.
  1038   W CONTROL  ALF          CONTROL
  1039              M,A,         A,            A,            CONTROL             BAR REVISION OR DELETION OF SUBROUTINE.
  1041   W DECONTR  ALF          DECONTRO
- 1042              M,A,         A,            A,            DECONTR             ALLOW REVISION OR DELETION OF SUBROUTINE.
+ 1042              M,A,L        A,            A,            DECONTR             ALLOW REVISION OR DELETION OF SUBROUTINE.
  1044   W TRANSFR  ALF          TRANSFER
  1045              M,A,         A,            A,            XFER PSR            MAKE CARD IMAGE DISC FILE OF PRG OR SUB.
  1047   W PRINT    ALF          PRINT
@@ -2078,14 +2078,14 @@ R1982   PUTS THE SENTENCE INTO STANDARD FORM AND RETURNS ONLY IF IT IS SYNTACTIC
  2006              TS           6,55          COMMON        COVER UP       C    COVER ITS OLD PLACE IN THE LIST.
  2008              TX           COLON C1      -             COMMON
  2009              WA           Z,X6          OCTAL 20      Z,S2                FORM ADDRESS EQUIVALENT TO 6,16.
- 2011              SSL, D12     6,18          12            PUT CHAR       C    APPEND COLON TO COMPITER NAME.
+ 2011              SSL, D12     6,18          12            PUT CHAR       C    APPEND COLON TO COMPUTER NAME.
 
  2013              TN           6,16          2             COMMON
  2014   PUT CN C6  TS           L TKMSG P1    Z,S2          PUT CHAR +5    C    1ST CHAR OF COMPUTER NAME TO TASK MSG.
  2016              SWE, D12     6,18          12            Z,S0                COUNT OF CHARACTERS MINUS 1.
  2018              TS           Z,SC          Z,S1          MOVE CARS           MOVE REST OF COMPUTER NAME TO TASK MSG.
 
- 2020              TS           Z,SC          Z,S2          DECOD PSR           DECODE "PROGRAM' OR "SUBROUTINE".
+ 2020              TS           Z,SC          Z,S2          DECOD PSR           DECODE "PROGRAM" OR "SUBROUTINE".
  2022              NA           N,X5          ONES          C,+2                ABOVE ALSO STORED PROG OR SUBRO NAME.
 
  2024   CUSS NAUT  S, YUL TYPER NAUTH MSG     AMTF +3       REJEC DIR           COMPLAIN ABOUT MISSING AUTHOR NAME.
@@ -2393,7 +2393,7 @@ R2339              TS           Z,SC          Z,S3          WRIT OBJC
 
 
 
-R2352              SUBROUTINE IN PASS 0 TO MOVE THE CHARACTERS OF A WORD, ASSUMING A PREVIOUS EBTRY TO PUT CHAR.  WITH
+R2352              SUBROUTINE IN PASS 0 TO MOVE THE CHARACTERS OF A WORD, ASSUMING A PREVIOUS ENTRY TO PUT CHAR.  WITH
 R2354   THE WORD IN COMMON AND COMMON+1 AND THE FIRST CHARACTER MOVED, ENTRY IS:
 
 R2355              TS           Z,SC          Z,S1          MOVE CARS

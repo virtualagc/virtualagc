@@ -747,7 +747,7 @@ R05515  TURNS OFF RENUMBERING.  IF "RENUMBER" SUBDIRECTOR WAS USED, IT RESUMES A
  0587              NA           TAPE CDNO     BIT 6         SEND CCNO           IF SEQ. BR., SET EXTERNAL CARD NUMBER TO
  0588              SM           TAPE CARD     W SQBRMIN     TAPE CARD           SEQBRK AND SET BIT 43.
 
- 0589   SEND CCNO  TS           SOURCE        Z,X0          SEND POP       C    SEND "CARDNO", "CARDNS", OR "DELETE".
+ 0589   SEND CCNO  TS           SOURCE        Z,X0          SEND POPO      C    SEND "CARDNO", "CARDNS", OR "DELETE".
  0590              NA, C2T7     REAL CARD +2  W CARDNO      C,+2                BRANCH IF A SECTION WAS RENUMBERED.
  05901             TS, C2T7     TAPE CDNO     REAL CDNO     MARK CARD +2        NEW NUMBER IS CRITERION FOR NEXT REAL.
  059014            LA           SWITCH        BIT 1         C,+2                IF RENUMBERING IS NOW UNDER WAY, COMPARE
@@ -768,7 +768,7 @@ R05515  TURNS OFF RENUMBERING.  IF "RENUMBER" SUBDIRECTOR WAS USED, IT RESUMES A
 
 P06031  PROCEDURE TO DETECT AND PROCESS "DELETE" CARDS.
 
- 0604   DELETE CQ  NA, C2T7     REAL CARD +2  W DELETE      INSERT CD           BRANCH IF NOT A "DELETE" CODE.
+ 0604   DELETE CQ  NA, C2T7     REAL CARD +2  W DELETE      INSERT CQ           BRANCH IF NOT A "DELETE" CODE.
  0606              NA           REAL CARD +1  W OUTOSEQ     C,+4                BRANCH IF LOCATION FIELD NOT "OUTOFSEQ".
  0608              SM           SWITCH        CORRECT       SWITCH              SET UP SEARCH FOR BAD CARD NUMBER.
  0610              TS           ZERO          RL CD HLTH    C,+4                NEVER CUSS THIS CARD NUMBER.
@@ -1005,7 +1005,7 @@ R0729   PROCESSING OF ALL BUT MERGE CONTROL CARDS BEGINS HERE.
 
  07492             TS           (ACCEPT)      HEALTH        SEND POPO      C    SEND A DUMMY ACCEPTOR AHEAD OF A MARKED
  07494  UNMKD LOG  TS           (REMARK)      HEALTH        XMIT RTRN           LOG CARD ENTERING AS A MEMBER OF A
- 07496             NA, KNOWSJBS SWITCH        ZERO          C,-2                CALLED SUBRO; PASS 2 MARK WILL BE "@".
+ 07496             NA, KNOWSUBS SWITCH        ZERO          C,-2                CALLED SUBRO; PASS 2 MARK WILL BE "@".
  07498             TS           (REMARK)      HEALTH        XMIT RTRN
 
  0750   NOT 9RAPL  NA           CARDNO WD     END OF 1      C,+2                CHECK FOR "END OF" INFORMATION FROM TAPE
@@ -1033,7 +1033,7 @@ P0762   TWO PAGES OF PROCESSING FOR FIXED MEMORY, ERASABLE MEMORY, OR SPEC/NON M
  0777              TS           ADR WD        ADR WD +1     WHICH MEM           UPPER AND LOWER LIMITS ARE EQUAL.
  0782              NA, BIT 5    FIELD COD +1  ZERO          WHICH MEM -1        MINUS MEANS THRU IN THIS CASE.
 
- 0784              LA, FIX MAG  LOW LIM       LOW LIM       WHICH MEM           NEW NAMES FOR ADR WD AND ADR WD +1.
+ 0784              LA, FIX MAG  LOW LIM       HI LIM        WHICH MEM           NEW NAMES FOR ADR WD AND ADR WD +1.
  0786   BAD MEM AD TS, BIT 11   ONES          HEALTH        MEM EXIT            PROCEDURE WHEN ADDRESS IS MEANINGLESS.
  0788              TS, BIT 12   ONES          HEALTH        MEM EXIT            PROCEDURE WHEN ADDRESS IS TOO BIG.
 
@@ -1195,7 +1195,7 @@ R0898   GENERAL OPERATION CODE CHECKING BEGINS HERE.
  0902              LA           FIELD COD     ZERO          OP SEARCH
 
  0903              NA           FIELD COD     BIT 1         NON SYM OP          BRANCH IF OP FIELD NOT SYMBOLIC.
- 0905              TS           N L CAR 6     Z,S3          SYMBOL OP           INITIALIZE ASTERISK SEARCH.
+ 0905              TS           N L CHAR 6    Z,S3          SYMBOL OP           INITIALIZE ASTERISK SEARCH.
 
  0907   NON SYM OP NA, BIT6     FIELD COD     ONES          ILLEGOP             SIGNED NUMERIC OP IS ILLEGAL.
  0909   SHIFT NOP  SPS, B22T32  COMMON +1     0             HEALTH              SHIFT COUNT IS FILLED IN WHEN LOADING.
@@ -1518,7 +1518,7 @@ P1207   CHECK ADDRESS VALUES FOR SIZE, MEMORY TYPE, AND CONFLICT WITH OTHER ERAS
  1252              TS           COMMON        COMMON +1     FIND XFRM -1   C    SAVE SYMBOL, ISOLATE OLD HEALTH.
  1253              WA           Z,S0          L XFORMS      Z,S0                GET ADDRESS OF LOCATION TRANSFORMS.
  1255              NA, BIT11    HEALTH        ONES          C,+2
- 1256              TS, D8       ONES          COMMON +2     END TS              SYMBOL HEALTH BECOMES G IF ILLEG. ADR.
+ 1256              TS, D8       ONES          COMMON +2     END IS              SYMBOL HEALTH BECOMES G IF ILLEG. ADR.
 
 # Page 183
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  31        PAGE  31
@@ -1654,7 +1654,7 @@ R1356   IF THERE IS ONE, MUST BE A VALID BLOCK NUMBER IN FIXED OR ERASABLE.
  13627             TX           LOC CTR       -             LOC VALUE
  13628             SS           ZERO          BLOK ONES     LOC VALUE           SET LOC VALUE TO BEGINNING OF BANK.
  13629             TS           FIELD COD     FIELD COD +1  BLOK SHIF +1        SHOW WHETHER MODIFIER IS PRESENT.
- 1363              NA, B2B6     FIELD COD     ONES          ILFO BLOK           WHEN THERE IS NI NUMERIC PART.
+ 1363              NA, B2B6     FIELD COD     ONES          ILFO BLOK           WHEN THERE IS NO NUMERIC PART.
 
  1365   BLOK SHIF  SPE, FIX MAG ADR WD        0             LOC VALUE           SHIFT AMOUNT SUPPLIED BY INITIALIZATION.
  1367              LA           FIELD COD +1  ZERO          CH BL SIZE          BRANCH IF THERE IS NO MODIFIER.
@@ -2320,7 +2320,7 @@ P18345  CHECK OTHER QUALITIES OF A LOCATION VALUE OF USABLE SIZE.
 # Page 199
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  47        PAGE  47
 
-P18671  EVERY SYMBOL DEFINED OR NEARLY DEFINED IN PASS 1 COMES THROUGH MY DEF XIT.
+P18671  EVERY SYMBOL DEFINED OR NEARLY DEFINED IN PASS 1 COMES THROUGH SY DEF XIT.
 
  18672  SY DEF XIT TN           COMMON +1     2             COMMON
  18674             LA           N,X2          CAC3          ONLY DEF            BRANCH IF THIS IS THE FIRST DEFINITION.
@@ -2458,7 +2458,7 @@ R1976   MINOR SUBROUTINES TO SHIFT TWO OR THREE WORDS RIGHT BY ONE CHARACTER.
  1979   2SRT 1C    SWS, ONES    AFIELD +1     A,1           AFIELD +1      C
  1980              SWS, ONES    AFIELD        A,1           AFIELD         C
  1981              SS           AFIELD        CHAR1         AFIELD +1      C
- 1982              SS           BLANKS        CHAR1         AFIELD         C
+ 1982              SS           BLANKS        CHAR1         AFIELD
 
 # Page 202
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  50        PAGE  50
@@ -2534,7 +2534,7 @@ P2026
  2049              NA, CHAR8    AFIELD +1     BLANKS        BAD ADRES           ERROR IF SYMBOL IS TOO LONG.
  2051              NA           AFIELD        BLANKS        BAD ADRES           ERROR IF SYMBOL IS TOO LONG.
 
- 2053              SWS, CHAR8   AFIELD +2     A,1,L         AFIELD +1           FIONISH BACKTRACKING.
+ 2053              SWS, CHAR8   AFIELD +2     A,1,L         AFIELD +1           FINISH BACKTRACKING.
  2055              NA, CHAR1    AFIELD +1     BLANKS        PLACE HED +1        BRANCH WHEN SYMBOL IS NORMALIZED.
  2057              SWS, ONES    AFIELD +1     A,1,L         AFIELD +1
  2058              TS           -             -             C,-2
