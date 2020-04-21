@@ -11,6 +11,8 @@ Additional documentation may be found on [the Virtual AGC Project main website's
 - PTC-ADAPT-Self-Test-Program.tsv &mdash; this is a transcription of the program's octal listing, which begins at p. 221 of the scanned pages and proceeds to the end of the scans.  The octal listing is the assembled form of the PTC ADAPT Self-Test Program.  The modern LVDC assembler also creates its own octal listing, of course, but this transcribed octal listing can be read by the assembler and used as a cross-check to validate that the modern assembler's results compares with the original assembler's results.
 - PTC-ADAPT-Self-Test-Program.lvdc &mdash; this is a transcription of the program's assembly-language source code.  It can be used as an input to the modern LVDC assembler.
 
+Status:  Both files mentioned above have been transcribed.  The octal-listing file has also been through one round of proof-readinging, but likely still requires additional error-correction.  The source-code file has not so far been subjected to any proof-reading.
+
 # Assembly Using the Modern LVDC Assembler (yaASM.py)
 
 TBD
