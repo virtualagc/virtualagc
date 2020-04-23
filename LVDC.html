@@ -169,6 +169,7 @@ Launch
 
 
 
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -288,6 +289,7 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
 
 
 
@@ -632,6 +634,7 @@ Launch
 
 
 
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="LVDC_Software"></a>LVDC Software</h2>
@@ -763,6 +766,7 @@ Launch
 
 
 
+
         Flight Program</a>, however, I do have a couple of reasons to
       believe that the AS-206RAM Flight Program would have been used in
       conjunction with a Preflight Program:<br>
@@ -812,9 +816,11 @@ href="http://www.ibiblio.org/apollo/Documents/AstrionicsSystemsHandbook_Nov69.pd
 
 
 
+
         15 1969 release</a> (see section 11.2.1 in particular), but does
       not even mention the ECP at all in its <a
 href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">November
+
 
 
 
@@ -1013,6 +1019,7 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
 
 
 
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -1041,6 +1048,7 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
       images, since you can do things like text searches on it, or even
       assemble it using the nifty new LVDC assembler I've written (<a
         href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>).&nbsp;
+
 
 
 
@@ -1107,6 +1115,7 @@ href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identificati
     restricted by ITAR, if they do not pertain to guidance, control, or
     other technical aspects of the launch vehicle.&nbsp; <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">Such
+
 
 
 
@@ -1376,6 +1385,7 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
 
 
 
+
           But beware:&nbsp; The acronym "PAST" is mine, and doesn't come
           from the contemporary Apollo documentation.<br>
         </p>
@@ -1425,6 +1435,7 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
 
 
 
+
             In saying this, I don't mean that the PTC has a modified
             LVDC mounted in it, but rather that the PTC's CPU is a
             reimplementation (albeit modified) of an LVDC CPU.<br>
@@ -1447,21 +1458,41 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
           assembly listing has clearly been produced by the LVDC
           assembler program, although there are a few differences in the
           way some of the output is formatted.&nbsp; In terms of how the
-          PTC's CPU has been "modified" relative to the LVDC, here's a
-          list of some of the differences visible at the software level,
-          though admittedly it may not be too meaningful to you until
-          you study more about how the LVDC works (and particularly its
+          PTC's CPU has been "modified" relative to the LVDC, those
+          changes are described in detail later but here's a list of
+          some of the differences visible at the software level, though
+          admittedly it may not be too meaningful to you until you study
+          more about how the LVDC works (and particularly its
           instruction set) later on:<br>
         </p>
         <ul>
+          <li>The HOP register is parsed into fields slightly
+            differently.<br>
+          </li>
           <li>LVDC CPU instructions eliminated in the PTC CPU:&nbsp; <tt>MPY</tt>
             and <tt>MPH</tt> (both of which are multiplication
             instructions), <tt>DIV</tt> (divide), and <tt>EXM</tt>
             ("execute modified").</li>
           <li> Instructions added to the PTC but not present in
             LVDC:&nbsp; <tt>PRS</tt> (printer operation) and <tt>CIO</tt>
-            (CPU i/o control).<br>
-          </li>
+            (CPU i/o control).</li>
+          <li>Instructions that are a little different:</li>
+          <ul>
+            <li><tt>CDS</tt> (set data sector) has the same function,
+              but its instruction word appears to be coded slightly
+              differently.</li>
+            <li><tt>SHF</tt> (logical shift) remains similar, but no
+              longer has a "clear accumulator" function and can shift by
+              up to 6 positions (rather than just by 1 or 2).</li>
+          </ul>
+          <li>Other:</li>
+          <ul>
+            <li>Boot:&nbsp; Execution begins at memory module 0, sector
+              0, syllable 0, location 0.&nbsp; (Whereas for the LVDC,
+              module 0, sector 0, location 0 contains an address at
+              which execution should begin.)<br>
+            </li>
+          </ul>
         </ul>
         <p>How can I justify my claim that the PAST program is
           "significant" and thus deserves your attention?&nbsp; There
@@ -1573,6 +1604,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
 
 
 
+
             in our GitHub repository for PAST program source-code files</a></p>
         <p>For now, though, only the <i>scanned</i> assembly listing is
           100% available.&nbsp; To make it a little more convenient to
@@ -1584,6 +1616,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
           <blockquote>
             <p><a
                 href="ScansForConversion/PTC%20ADAPT%20Self-Test%20Program.zip">Zipfile
+
 
 
 
@@ -1644,6 +1677,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
     </div>
     <h2><a name="Architecture_of_the_LVDC" id="Architecture_of_the_LVDC"></a>Architecture
 of
+
 
 
 
@@ -1846,6 +1880,7 @@ This
 
 
 
+
         is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp; <br>
@@ -1941,9 +1976,11 @@ Astrionics
 
 
 
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -2206,10 +2243,18 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
         instruction (see below).</li>
       <li>0776, 0777 are used for the "HOP save" feature (see below).</li>
     </ul>
-    Finally, address 000—I believe, in module 0 sector 0 but am not
-    sure—stores a HOP Register code loaded at reset.<br>
+    Finally, at boot-up time:<br>
+    <ul>
+      <li>LVDC:&nbsp; Address 000—I believe, in module 0 sector 0 but am
+        not sure—stores a HOP Register code loaded at reset. <br>
+      </li>
+      <li> PTC:&nbsp; Execution seems to simply begin at module 0,
+        sector 0, syllable 0, location 0.<br>
+      </li>
+    </ul>
     <h3><a name="Layout_of_Memory_Words" id="Layout_of_Memory_Words"></a>Layout
 of
+
 
 
 
@@ -2435,6 +2480,7 @@ Incidentally,
 
 
 
+
     the "residual sector" can only be used for addressing memory, and
     there's no way to access instructions in it unless it happens to be
     the currently-selected instruction sector as explained in the
@@ -2443,11 +2489,24 @@ Incidentally,
     sector is good for storing local variables.<br>
     <br>
     Memory-sector selection and the "residual sector" become clearer
-    when contemplating the HOP Register mentioned earlier:<br>
+    when contemplating the HOP Register mentioned earlier.&nbsp; Here is
+    the LVDC's version of the HOP Register:<br>
     <br>
     <div style="text-align: center;"> <img style="width: 868px; height:
         293px;" alt="" src="LVDC-HopRegister.jpg" width="868"
         height="293"><br>
+    </div>
+    <br>
+    The PTC is simpler than the LVDC, in that it contains a maximum of 2
+    memory modules, and has no duplex vs simplex configuration.&nbsp;
+    The LVDC's and PTC's HOP Registers are compatible, though at first
+    glance it may not seem that they are, due to different numbering
+    conventions for the positioning — sign bit vs no sign bit — in the
+    images above and below.&nbsp; Here is the PTC's version of the HOP
+    Register:<br>
+    <br>
+    <div align="center"><img src="PTC-HOP.png" alt="" width="846"
+        height="163"><br>
     </div>
     <br>
     The meanings of these fields may already be clear to you, but just
@@ -2455,7 +2514,8 @@ Incidentally,
     <ul>
       <li>Bits IM1-IM3 (not contiguous) select the memory module from
         which instructions are fetched.&nbsp; (Recall that there are up
-        to 8 memory modules installed in the LVDC.)</li>
+        to 8 memory modules installed in the LVDC.&nbsp; The PTC has
+        only 2.)</li>
       <li>Bit DUPIN selects whether the portion of memory from which
         instructions are fetched is accessed in duplex mode or in
         simplex mode.&nbsp; (Recall that in duplex mode there is only
@@ -2649,6 +2709,7 @@ Incidentally,
 
 
 
+
                 HIGTHR<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
@@ -2727,6 +2788,7 @@ Incidentally,
             (more accurately, 4 computer cycles) following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -3041,6 +3103,7 @@ However,
 
 
 
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -3081,6 +3144,7 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
 
 
 
@@ -3211,6 +3275,7 @@ However,
 
 
 
+
               PTC documentation (see figure 2-10)</a> has to say about
             it:
             <meta http-equiv="content-type" content="text/html;
@@ -3246,11 +3311,13 @@ href="https://en.wikipedia.org/wiki/IBM_1400_series#Field_and_character_coding">
 
 
 
+
                   1400 series printers</a>.&nbsp; <br>
               </li>
             </ul>
             The BA8421 encoding scheme itself can be found at <a
 href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_code">this
+
 
 
 
@@ -3267,6 +3334,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             example, in the table below the code for 'A' is 61, whereas
             if you look at the CHAR table on page 2 of the PAST
             program's source code you'll find that it is given as <tt>OCT
+
 
 
 
@@ -3801,6 +3869,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>0775 (octal) stores into the Product-Quotient register
@@ -3944,11 +4013,13 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </td>
           <td style="text-align: center;">1<br>
           </td>
-          <td style="vertical-align: top;"> Change the
-            currently-selected 256-word data sector.&nbsp; For this
-            instruction, A9 forms a part of the instruction itself, so
-            only A1-A8 are significant.&nbsp; The partially overwrite
-            the HOP Register as follows:<br>
+          <td style="vertical-align: top;"> LVDC only ... <i>not</i>
+            PTC.<br>
+            <br>
+            Change the currently-selected 256-word data sector.&nbsp;
+            For this instruction, A9 forms a part of the instruction
+            itself, so only A1-A8 are significant.&nbsp; The partially
+            overwrite the HOP Register as follows:<br>
             <br>
             <div style="text-align: center;"> <img style="width: 345px;
                 height: 283px;" alt="" src="LVDC-CdsInstruction.jpg"
@@ -3960,7 +4031,6 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 In terms of assembly-language syntax, there are the
                 following variations:<br>
                 <blockquote><tt>CDS&nbsp;&nbsp;&nbsp;&nbsp; <i></i><i>SYMBOLNAME</i></tt><tt><br>
-                    CDS&nbsp;&nbsp;&nbsp;&nbsp; <i>DM,DS</i><br>
                   </tt><tt>CDSD&nbsp;&nbsp;&nbsp; <i>DM,DS</i></tt><tt><br>
                   </tt><tt>CDSS&nbsp;&nbsp;&nbsp; <i>DM,DS</i></tt><br>
                 </blockquote>
@@ -4009,21 +4079,57 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
                 The difference between <tt>CDSD</tt> and <tt>CDSS</tt>
                 is that the former selects duplex memory while the later
                 selects simplex memory.<br>
-                <br>
-                I've only seen the variant "<tt>CDS <i>DM,DS</i></tt>"
-                used for the PTC, and I've only seen the other variants
-                used for the LVDC.&nbsp; I have no idea whether those
-                are meaningful differences, or merely accidents of
-                usage.<br>
                 <br>
                 In the usage I've seen, usage of <tt>CDSS</tt> is
                 confined almost entirely to the context of <tt>USE DAT</tt>
                 (see below).<br>
               </div>
             </div>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><font face="Courier New, Courier,
+              monospace">CDS</font><br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">0<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">0<br>
+          </td>
+          <td valign="middle" align="center">TBD<br>
+          </td>
+          <td valign="top">PTC only ... <i>not</i> LVDC.&nbsp; This
+            functionally identical to the identically-named LVDC
+            instruction above, but is slightly different both
+            syntactically and in the encoding of the assembled
+            instruction.<br>
+            <br>
+            Changes the currently-selected 256-word data sector by
+            partially overwriting the HOP Register as follows:<br>
+            <br>
+            <div align="center"><img alt="" src="PTC-CDS.png"
+                width="313" height="157"><br>
+            </div>
+            <br>
+            See also <span style="font-family: Courier
+              New,Courier,monospace;">HOP</span>.<br>
+            <br>
+            In terms of assembly-language syntax:<br>
+            <blockquote><tt>CDS&nbsp;&nbsp;&nbsp;&nbsp; <i>DM,DS</i></tt><br>
+            </blockquote>
+            <i><tt>DM</tt></i> is limited to 0 or 1, while <i><tt>DS</tt></i>
+            is an octal literal from 0 to 17.<br>
           </td>
         </tr>
         <tr>
@@ -4043,11 +4149,12 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </td>
           <td style="text-align: center;">1<br>
           </td>
-          <td style="vertical-align: top;"> Performs a logical shift
-            operation on the accumulator.&nbsp; For this instruction,
-            bits A8 and A9 form a part of the instruction itself, but of
-            the remaining bits only A1, A2, A5, and A6 are actually
-            used, as follows:<br>
+          <td style="vertical-align: top;"> LVDC only ... not PTC.<br>
+            <br>
+            Performs a logical shift operation on the accumulator.&nbsp;
+            For this instruction, bits A8 and A9 form a part of the
+            instruction itself, but of the remaining bits only A1, A2,
+            A5, and A6 are actually used, as follows:<br>
             <br>
             <table summary="" style="text-align: left; margin-left:
               auto; margin-right: auto;" cellspacing="2" cellpadding="2"
@@ -4145,9 +4252,172 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             0, 1, or 2, even those are all that <tt>SHF</tt> directly
             supports.&nbsp; If an operand <i><tt>N</tt></i>&gt;2 is
             encountered, the assembler transparently replaces it with an
-            appropriates sequence of shift-by-2 and shift-by-1
+            appropriate <i>sequence</i> of shift-by-2 and shift-by-1
             instructions.<br>
           </td>
+        </tr>
+        <tr>
+          <td valign="middle"><font face="Courier New, Courier,
+              monospace">SHF</font></td>
+          <td valign="middle">0<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle" align="center">TBD<br>
+          </td>
+          <td valign="top">PTC only ... not LVDC.<br>
+            <br>
+            Functionally similar to the identically-named LVDC
+            instruction, but differs in detail.&nbsp; It does not
+            provide a "clear accumulator" function, but allows a shift
+            of up to 6 bit-positions (rather than up to 2 as in the
+            LVDC).<br>
+            <br>
+            As far as the encoding is concerned: A7 determines the
+            direction of the shift:&nbsp; 0 = left shift (with 0's
+            appearing at the right), 1 = right shift (with the sign bit
+            being duplicated at the left).&nbsp; As for A6-A1:<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1"
+              align="center">
+              <tbody>
+                <tr>
+                  <th valign="top">A1<br>
+                  </th>
+                  <th valign="top">A2<br>
+                  </th>
+                  <th valign="top">A3<br>
+                  </th>
+                  <th valign="top">A4<br>
+                  </th>
+                  <th valign="top">A5<br>
+                  </th>
+                  <th valign="top">A6<br>
+                  </th>
+                  <th valign="top">Description of operation<br>
+                  </th>
+                </tr>
+                <tr>
+                  <td valign="top">1<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">Shift by one position (left or right
+                    as determined by A7)<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">1<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">Shift by two positions (left or right
+                    as determined by A7)</td>
+                </tr>
+                <tr>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">1<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">Shift by three positions (left or
+                    right as determined by A7)</td>
+                </tr>
+                <tr>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">1<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">Shift by four positions (left or
+                    right as determined by A7)</td>
+                </tr>
+                <tr>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">1<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">Shift by five positions (left or
+                    right as determined by A7)</td>
+                </tr>
+                <tr>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">0<br>
+                  </td>
+                  <td valign="top">1<br>
+                  </td>
+                  <td valign="top">Shift by six positions (left or right
+                    as determined by A7)</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <br>
+            In terms of assembly-language syntax, I have never seen <tt>SHF</tt>
+            itself used.&nbsp; The only variations actually used are<br>
+            <blockquote><tt>SHL <i>N</i></tt><tt><br>
+              </tt><tt>SHR <i>N</i></tt><br>
+            </blockquote>
+            where <i><tt>N</tt></i> is a literal decimal numerical
+            constant.&nbsp; However, <tt>N</tt> is not limited to just
+            1 through 6, even those are all that <tt>SHF</tt> directly
+            supports.&nbsp; If an operand <i><tt>N</tt></i>&gt;6 is
+            encountered, the assembler transparently replaces it with an
+            appropriate <i>sequence</i> of shift-by-6 (or less)
+            instructions.</td>
         </tr>
         <tr>
           <td style="font-family: Courier New,Courier,monospace;"> EXM<br>
@@ -4235,6 +4505,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                     A9<br>
                   </th>
                   <th style="vertical-align: top; font-weight: bold;">Data
+
 
 
 
@@ -4492,6 +4763,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
             I/O Ports<br>
           </th>
         </tr>
@@ -4552,6 +4824,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               of that topic</a>.&nbsp; Page-number references are to the
             AS-206RAM LVDC source code or to its <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">abridged
+
 
 
 
@@ -5954,6 +6227,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -6057,6 +6331,7 @@ Only
 
 
 
+
     those special addresses work.&nbsp; So a typical subroutine linkage
     would look like this:<br>
     <br>
@@ -6066,6 +6341,7 @@ Only
       </span> </div>
     <div style="margin-left: 40px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; ... <i>return
+
 
 
 
@@ -6240,6 +6516,7 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
 
 
 
@@ -6619,6 +6896,7 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
 
 
 
+
     bits.)&nbsp; The LVDA combines this pair of bits (in some manner
     unknown to me), and thus the LVDC receives a single OM/D bit.&nbsp;
     The LVDC recognizes two types of commands, <i>mode commands words</i>
@@ -6781,6 +7059,7 @@ Assembly
 
 
 
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -6792,6 +7071,7 @@ Assembly
     writing my own LVDC assembler.&nbsp; The description is intended to
     be authoritative only in the sense that it describes how my own
     assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
+
 
 
 
@@ -6857,6 +7137,7 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
 
 
 
@@ -7012,12 +7293,14 @@ Assembly
 
 
 
+
         In other words, a decimal integer encoded as <i>N</i> bits
         would be sign-extended on the left by 26-<i>N</i> bits.</li>
       <li>Decimal non-integer constants are treated as being in the
         range -1.0 &lt; <i>constant</i> &lt; 1.0.&nbsp;</li>
     </ul>
     <p><i><a name="AngleUnits"></a>Units of angular measurement</i>:&nbsp;
+
 
 
 
@@ -7367,6 +7650,7 @@ Assembly
 
 
 
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -7389,8 +7673,34 @@ Assembly
         reference the same memory location (2-06-076).&nbsp; Note that
         if the literal numerical constant begins with the character 'O'
         (alphabetic, not digit) then the number is octal, while if the
-        leading 'O' is not present then the number is decimal.<br>
+        leading 'O' is not present then the number is decimal.</li>
+      <li>For PTC <i>only</i>:&nbsp; The PTC version of the assembler
+        had an extraordinarily dangerous "feature", which thankfully had
+        been removed by the time of the LVDC version of the
+        assembler.&nbsp; If an operand was encountered which would
+        ordinarily be the name of a variable, but for which no actual
+        variable with that name was explicitly allocated in the source
+        code, then the assembler would <i>automatically</i> <i>silently</i>
+        allocate one in unused memory, in the same manner as for
+        operands like <tt>=O<i>octal</i></tt> <i>constants</i>
+        described in the item above.&nbsp; For example, if you had the
+        following code, you'd think the <tt>CLA</tt> was accessing <tt>ARGX12</tt>
+        (with the value 12345 octal), when in reality a new variable <tt>ARCX12</tt>
+        (with the value 0) had been created, and the <tt>CLA</tt> would
+        be accessing that instead. <br>
       </li>
+    </ol>
+    <blockquote>
+      <blockquote>
+        <p><tt>ARGX12&nbsp; OCT&nbsp;&nbsp;&nbsp;&nbsp; 12345<br>
+            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ...<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            CLA&nbsp;&nbsp;&nbsp;&nbsp; ARCX12&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp; MISTYPED "ARGX12" AS "ARCX12"<br>
+          </tt></p>
+      </blockquote>
+    </blockquote>
+    <ol>
     </ol>
     <p>Except for the <tt>HOP</tt><tt></tt> instructions, the other CPU
       instructions that transfer program control target a location in
@@ -7407,6 +7717,7 @@ Assembly
         current instruction, respectively.&nbsp; (I say that the literal
         constant is <i>decimal</i> because yaASM.py implements it in
         that way.&nbsp; However, there are no instances of <tt><i>n</i></tt>&gt;7
+
 
 
 
@@ -7558,6 +7869,7 @@ Assembly
 
 
 
+
         where <tt><i>target</i></tt>, <tt><i>syllable</i></tt>, and <tt><i>modifier</i></tt>
         are all small literal octal integer constants.&nbsp; These
         fields may be interpreted as follows:</li>
@@ -7596,68 +7908,73 @@ Assembly
           </th>
         </tr>
         <tr>
-          <td valign="middle"><tt>BCI <i>text</i>$</tt><br>
+          <td valign="middle"><tt>BCI ^<i>text</i>$</tt><br>
           </td>
           <td valign="top">This pseudo-op appears only in PTC code.<br>
             <br>
             This pseudo-op encodes the <i><tt>text</tt></i> argument
             into consecutive memory locations.&nbsp; The <i><tt>text</tt></i>
-            operand is terminated by '$', which is treated as an
-            end-of-string and is not itself encoded into memory.&nbsp;
-            The assembler right-pads the <i><tt>text</tt></i> to a
-            multiple of 8 characters, using spaces.&nbsp; For example, a
-            <tt><i>text</i></tt> string of 9 characters would be
-            right-padded to 16 characters.<br>
+            operand is delimited by a leading '^' and trailing '$',
+            which are not themselves encoded into memory.&nbsp; The
+            assembler right-pads the <i><tt>text</tt></i> to a multiple
+            of 8 characters, using spaces.&nbsp; For example, a <tt><i>text</i></tt>
+            string of 9 characters would be right-padded with 7 spaces
+            to 16 characters. <br>
             <br>
-            <b>Note</b>:&nbsp; Because the <tt><i>text</i></tt>
-            argument could (and sometimes did) include a leading space
-            character, the assembler requires <tt><i>text</i></tt> to
-            have strict columnar alignment.&nbsp; This is the only
-            instruction or pseudo-op for which columnar alignment is an
-            issue using the modern assembler (yaASM.py).&nbsp;
-            Specifically, for the modern assembler, the <i><tt>text</tt></i>
-            must begin precisely at column 17.&nbsp; The column counts
-            are computed by assuming that tab characters advance the
-            column count to the next multiple of 8, plus 1, whereas
-            other characters (including normal spaces) contribute 1 to
-            the column count.&nbsp; That perhaps sounds tricky, but
-            really it's not:&nbsp; If editing is performed using
-            tab-settings of 8, and if the input line is "<tab>&lt;tab&gt;<tt>BCI</tt><tab>&lt;tab&gt;<i><tt>text</tt></i><tt>$</tt>"
-                or "<tt><i>label</i></tt><tab>&lt;tab&gt;<tt>BCI</tt><tab>&lt;tab&gt;<tt><i>text</i>$</tt>",
-
-                    then</tab></tab></tab></tab> the required alignment
-            happens automatically.&nbsp; (I specify the <i>modern</i>
-            assembler, because for the original assembler, accepting
-            punch cards as input, there would be no such thing as
-            embedded tab characters in the punch cards, and the <tt><i>text</i></tt>
-            operand would have to begin at column 16 rather than 17.)<br>
+            <b>Note</b>:&nbsp; The leading carat character (<tt>^</tt>)
+            in <tt><i>text</i></tt> was not used in the original
+            Apollo-era source code.&nbsp; It has been added to the
+            assembly-language syntax for the convenience of the <i>modern</i>
+            assembler (yaASM.py).&nbsp; That's because the <tt><i>text</i></tt>
+            argument sometimes begins with a space character, and since
+            the modern assembler does not enforce strict columnar
+            alignment, it would otherwise have no way to ascertain where
+            <tt><i>text</i></tt> begins.&nbsp; The original assembler,
+            on the other hand, did enforce strict columnar alignment,
+            and therefore required no delimiter at the beginning.<br>
             <br>
-            The encoding in the assembled octals uses the BA8421 coding
-            scheme, which was described above (<a
-              href="#CPU_Instructions">see the <tt>CIO</tt> instruction</a>).&nbsp;
-
-
-
-
-
-
-
-            Each of the memory locations allocated by the pseudo-op
-            encodes exactly 4 characters of the message.&nbsp; The first
-            character of the string occupies the two most-significant
-            octal digits of the first memory location, the next
-            character occupies the next lower two octal digits of that
-            memory location, and so on. Thus, encoding 4 characters
-            requires 24 bits per 26-bit memory word.&nbsp; The
-            least-significant bits of each memory word are always unused
-            and are 0.&nbsp; For example, when the following is
+            I think that the set of allowed characters for <tt><i>text</i></tt>
+            is the intersection of the printable characters from the
+            BA8421 set, which was described above (<a
+              href="#CPU_Instructions">see the <tt>CIO</tt> instruction</a>),
+            and the EBCDIC character set.&nbsp; Unless I'm mistaken,
+            that's just:<br>
+            <ul>
+              <li>Digits:&nbsp; 0 1 2 3 4 5 6 7 8 9<br>
+              </li>
+              <li>Upper case alphabetic:&nbsp; A B C D E F G H I J K L M
+                N O P Q R S T U V W X Y Z</li>
+              <li>A blank space<br>
+              </li>
+              <li>Other:&nbsp; / , % - * &amp; .<br>
+              </li>
+            </ul>
+            The reason for this restriction is that the input
+            assembly-language source files and the printed assembly
+            listing are encoded in EBCDIC while the encoding of the
+            output assembled octals for the <tt>BCI</tt> pseudo-op uses
+            the BA8421 coding scheme.&nbsp; Therefore, only characters
+            available simultaneously in both characters are meaningful
+            from input through output of the assembler.<br>
+            <br>
+            As far as the octals assembled for <tt>BCI</tt> are
+            concerned, each of the memory locations allocated by the
+            pseudo-op encodes exactly 4 characters of the message.&nbsp;
+            The first character of the string occupies the two
+            most-significant octal digits of the first memory location,
+            the next character occupies the next lower two octal digits
+            of that memory location, and so on. Thus, encoding 4
+            characters requires 24 bits per 26-bit memory word.&nbsp;
+            The least-significant bits of each memory word are always
+            unused and are 0.&nbsp; For example, when the following is
             assembled,<br>
-            <blockquote>&nbsp;<tt>BCI&nbsp;&nbsp; TYPE OCTAL CHARACTERS$</tt><br>
+            <blockquote>&nbsp;<tt>BCI&nbsp;&nbsp; ^TYPE OCTAL
+                CHARACTERS$</tt><br>
             </blockquote>
-            the assembler notes that "TYPE..." has the BA8421 character
-            octal character codes 23, 30, 47, 65, ..., and thus the
-            assembled octal encoding of the string is 233047650,
-            ....&nbsp; That's pretty straightforward.<br>
+            the assembler notes that "<tt>TYPE...</tt>" has the BA8421
+            character octal character codes 23, 30, 47, 65, ..., and
+            thus the assembled octal encoding of the string is
+            233047650, ....&nbsp; That's pretty straightforward.<br>
             <br>
             In the <i>printed</i> assembly listing output, though,
             things are much less straightforward.&nbsp; While the
@@ -7686,12 +8003,9 @@ Assembly
               </li>
               <li>Interpret this latter value as the <a
                   href="https://en.wikipedia.org/wiki/EBCDIC#Code_page_layout">EBCDIC</a>
-                code for a character and print it.&nbsp; (Why
-                EBCDIC?&nbsp; The IBM printer that printed out the
-                assembly listing would have used EBDIC character
-                coding.)&nbsp; For example, in EBCDIC, octal 303 (hex
-                C3) is 'C', and that's why 'C' ends up being printed out
-                in place of 'T'.<br>
+                code for a character and print it.&nbsp; For example, in
+                EBCDIC, octal 303 (hex C3) is 'C', and that's why 'C'
+                ends up being printed out in place of 'T'.<br>
               </li>
               <li>Steps 1-3 are the usual algorithm, but for <i>some</i>
                 characters in <tt><i>text</i></tt>, this procedure can
@@ -7804,9 +8118,7 @@ Assembly
           <td valign="middle">Of the LVDC source code available to us,
             the <tt>DOG</tt> form appears only in the PTC ADAPT
             Self-Test Program, while the <tt>DOGD</tt> form appears
-            only in the AS206-RAM Flight Program.&nbsp; It isn't known
-            whether the two always remained available as synonyms or
-            whether the one was deprecated in favor of the other.<br>
+            only in the AS206-RAM Flight Program.&nbsp; <br>
             <br>
             Abbreviated form of <tt>ORGDD</tt> (see below) that only
             modifies the assembler's current data-memory pointer,
@@ -7817,8 +8129,8 @@ Assembly
             since if the assembler finds that the requested <tt><i>DLOC</i></tt>
             has already been used, it will search upward through the
             data sector until it finds a location that hasn't already
-            been used.&nbsp; If <tt><i>DLOC</i></tt> is omitted
-            entirely, it is taken to be 000.<br>
+            been used.&nbsp; If any field is left empty, it defaults to
+            000.<br>
             <br>
             Presumably there is a <tt>DOGS</tt> pseudo-op as well
             (differing in that it pertains to a simplex memory
@@ -7964,16 +8276,9 @@ Assembly
           </td>
         </tr>
         <tr>
-          <td valign="middle"><tt><tt>ORG <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,DLOC<br>
-                </i></tt><i>&nbsp;&nbsp; or</i><tt><i><br>
-                </i></tt></tt><tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,DLOC</i></tt><br>
+          <td valign="middle"><tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,DLOC</i></tt><br>
           </td>
-          <td valign="middle">Of the LVDC source code available to us,
-            the <tt>ORG</tt> form appears only in the PTC ADAPT
-            Self-Test Program, while the <tt>ORGDD</tt> form appears
-            only in the AS206-RAM Flight Program.&nbsp; It isn't known
-            whether the two always remained available as synonyms or
-            whether the one was deprecated in favor of the other.<br>
+          <td valign="middle">LVDC only ... not PTC.<br>
             <br>
             Sets the instruction-memory and the data-memory assumptions
             for the next code or data lines to be assembled.&nbsp; The
@@ -7983,12 +8288,9 @@ Assembly
             fields for instruction memory (<i><tt>LOC</tt></i>) and data
             memory (<tt><i>DLOC</i></tt>).<br>
             <br>
-            Some of the fields may be left empty, and those values are
-            presumably left unchanged ... or rather kept as whatever
-            their natural values would be if the <tt>ORG</tt> or <tt>ORGDD</tt>
-            were not present.&nbsp; For example, with <tt>ORGDD</tt>,
-            the trailing <tt><i>DLOC</i></tt> is sometimes not
+            The trailing <tt><i>DLOC</i></tt> is sometimes not
             specified, so that we are left simply with "<tt>ORGDD <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,</i></tt>".&nbsp;
+
 
 
 
@@ -8011,25 +8313,43 @@ Assembly
             necessarily imply that the data location is set to <i><tt>DLOC</tt></i>,
             since if that location has already been used, the next
             unused location after that will be selected instead, and the
-            assembler generates a warning message.&nbsp; With <tt>ORG</tt>,
-            we find lots and lots of combinations of omitted fields.<br>
+            assembler generates a warning message.&nbsp; <br>
             <br>
             In general, the assembler will reject a <tt><i>LOC</i></tt>
             field to an address that has already been allocated:&nbsp;
             the assembler will always advance the counters until
-            reaching the first unused location.&nbsp; (There's reason to
-            believe that the PTC's <tt>ORG</tt> pseudo-op did <i>not</i>
-            have this automatic avoidance capability, since there are
-            workarounds — see p. 10 of the PTC ADAPT Self-Test Program
-            source code — providing a different, less-efficient method
-            of avoiding already-allocated memory regions.&nbsp; However,
-            the modern assembler does not treat <tt>ORG</tt> separately
-            from <tt>ORGDD</tt>, since the mentioned workarounds work
-            well in either case.)<br>
+            reaching the first unused location.<br>
             <br>
             There may be an <tt>ORGDS</tt> variant as well, specifying
             a simplex memory configuration rather than a duplex
             configuration, but I have not encountered it in practice.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt><tt>ORG <i>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i>,<i>DM</i>,<i>DS,DLOC<br>
+                </i></tt></tt></td>
+          <td valign="top">PTC only ... not LVDC.<br>
+            <br>
+            This is functionally almost identical to the LVDC <tt>ORGDD</tt>
+            pseudo-op, though differing slightly syntactically.<br>
+            <br>
+            Sets the instruction-memory and the data-memory assumptions
+            for the next code or data lines to be assembled.&nbsp; The
+            fields within the operand relate to those within the HOP
+            constants, except that while the HOP constant has a single
+            LOC field, the assembler internally maintains separate LOC
+            fields for instruction memory (<i><tt>LOC</tt></i>) and data
+            memory (<tt><i>DLOC</i></tt>).<br>
+            <br>
+            Any of the fields may be left empty, in which case they
+            default to 0 ... or in the case of <i><tt>DLOC</tt></i>, to
+            the first unused location.&nbsp; For example, here's a
+            selection of actual uses found in PTC software:<br>
+            <blockquote><tt>ORG&nbsp;&nbsp;&nbsp; ,,,,,13,0</tt><tt><br>
+              </tt><tt>ORG&nbsp;&nbsp;&nbsp; ,1,,2,,1,</tt><tt><br>
+              </tt><tt>ORG&nbsp;&nbsp;&nbsp; ,2,1,0,,2,1<br>
+                ORG&nbsp;&nbsp;&nbsp; 1,2,,2,1,2,3<br>
+              </tt></blockquote>
           </td>
         </tr>
         <tr>
@@ -8038,6 +8358,7 @@ Assembly
           <td valign="middle">This pseudo-op requires a left-hand symbol
             to precede the <tt>SYN</tt> on the line.&nbsp; It tells the
             assembler to treat the left-hand symbol as a synonym for <tt><i>symbol</i></tt>.&nbsp;
+
 
 
 
@@ -8154,6 +8475,7 @@ Assembly
 
 
 
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -8167,6 +8489,7 @@ Assembly
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
 
 
 
@@ -8593,6 +8916,7 @@ Assembly
 
 
 
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unHOP.py">unHOP.py</a>)
@@ -8759,6 +9083,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -9271,6 +9596,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -9332,7 +9658,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
     and produces as output a human-readable assembly listing (<i>OUTPUT</i>.lst).&nbsp;
+
 
 
 
@@ -9570,6 +9898,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -9687,10 +10016,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2020-04-19.<br>
+          2020-04-22.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
