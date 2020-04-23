@@ -18,10 +18,7 @@
 #
 # Filename:    	yaASM.py
 # Purpose:     	An LVDC assembler, intended to replace yaASM.c for LVDC
-#              	(but not for OBC) assemblies.  It's actually just something
-#              	I'm playing around with to see if I can get something a
-#              	little cleaner and thus easier for me to maintain than yaASM.c, 
-#              	so I shouldn't really say I _intend_ it as a replacement.
+#              	(but not for OBC) assemblies. 
 # Reference:   	http://www.ibibio.org/apollo
 # Mods:        	2019-07-10 RSB  Began playing around with the concept.
 #		2019-08-14 RSB	Began working on this more seriously since
@@ -32,9 +29,8 @@
 #				auto-allocation of =... constants.
 #		2019-09-18 RSB	Now outputs .sym and .sch files in addition to
 #				the .tsv file that was already being output.
+#		2020-04-21 RSB	Added the --ptc and --help command-line options.
 #
-# The usage is just
-#              yaASM.py [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
 #
@@ -85,14 +81,44 @@ from expression import *
 #----------------------------------------------------------------------------
 # Array for keeping track of which memory locations have been used already.
 used = [[[[False for offset in range(256)] for syllable in range(2)] for sector in range(16)] for module in range(8)]
-	
+
+# BA8421 character set in its native encoding.  All of the unprintable
+# characters are replaced by '?', which isn't a legal character anyway.
+# Used only for --ptc.
+BA8421 = [
+	' ', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', '0', '#', '@', '?', '?', '?',
+	'?', '/', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', '‡', ',', '%', '?', '?', '?',
+	'-', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', '?', '$', '*', '?', '?', '?',
+	'&', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', '?', '.', '⌑', '?', '?', '?'
+]
+# EBCDIC-like character table.  The table has been massaged in a way to make
+# it convenient for the purposes of this program, so it's not really EBCDIC
+# any longer.  Only the 0x40-0x7F and 0xC0-0xFF ranges have been reproduced.
+# They have been merged (with printable characters overriding unprintable ones) 
+# into a single 0x00-0x3F range.  All unprintable positions left over after 
+# that have been set to '!'.  Used only for --ptc.
+EBCDIClike = [
+	' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', '!', '.', '<', '(', '+', '!',
+	'&', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', '!', '!', '*', ')', ';', '!',
+	'-', '/', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', ',', '%', '_', '>', '?',
+	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '!', '!', "'", '=', '"'
+]
+# Characters which are printable in both BA8421 and EBCDIC.
+legalCharsBCI = set(BA8421).intersection(set(EBCDIClike))
+
 operators = {
     "HOP": { "opcode":0b0000 }, 
     "MPY": { "opcode":0b0001 }, 
+    "PRS": { "opcode":0b0101 }, 
     "SUB": { "opcode":0b0010 }, 
     "DIV": { "opcode":0b0011 }, 
     "TNZ": { "opcode":0b0100 }, 
     "MPH": { "opcode":0b0101 }, 
+    "CIO": { "opcode":0b0101 }, 
     "AND": { "opcode":0b0110 }, 
     "ADD": { "opcode":0b0111 },
     "TRA": { "opcode":0b1000 }, 
@@ -164,59 +190,89 @@ countOthers = 0
 countRollovers = 0
 
 checkFilename = ""
-if len(sys.argv) > 1:
-	try:
-		checkFilename = sys.argv[1]
-		f = open(checkFilename, "r")
-		module = -1
-		sector = -1
-		for line in f:
-			line = line.strip()
-			if line[:1] == "#" or len(line) == 0:
-				continue
-			fields = line.split("\t")
-			if len(fields) == 0:
-				continue
-			if fields[0] == "SECTOR":
-				module = int(fields[1], 8)
-				sector = int(fields[2], 8)
-				if module > 7 or sector > 15:
-					raise("Warning: module or sector out of range")
-				continue
-			offset = int(fields[0], 8)
-			ptr = 1
-			for count in range((len(fields) - 1) // 2):
-				if len(fields[ptr]) != 11:
-					raise("Warning: wrong field length")
-				elif fields[ptr].strip() == "" and fields[ptr + 1].strip() == "":
-					# An unused word.
-					pass
-				elif fields[ptr + 1] == "D" and fields[ptr][0] == " " and fields[ptr][-1] == " " and fields[ptr][1:-2].isdigit():
-					# A data word.
-					value = int(fields[ptr].strip(), 8)
-					octalsForChecking[module][sector][2][offset] = value
-				elif fields[ptr + 1] == "D" and (fields[ptr][:5] == "     " or fields[ptr][:5].isdigit()) \
-					and fields[ptr][5] == " " and (fields[ptr][6:] == "     " or fields[ptr][6:].isdigit()):
-					# An instruction-pair word.
-					syl1 = fields[ptr][:5]
-					syl0 = fields[ptr][6:]
-					if syl1.strip() != "":
-						value = int(syl1, 8)
-						octalsForChecking[module][sector][1][offset] = value
-					if syl0.strip() != "":
-						value = int(syl0, 8)
-						octalsForChecking[module][sector][0][offset] = value
-				else:
-					raise("Warning: unrecognized format: " + line)	
-				ptr += 2
-				offset += 1
-		f.close()
-		checkTheOctals = True
-	except:
-		countWarnings += 1
-		print("Warning: Cannot open octal-comparison file " + checkFilename + " or file is corrupted")
-		checkFilename = ""
+ptc = False
+for arg in sys.argv[1:]:
+	if arg[:2] == "--":
+		if arg == "--ptc":
+			ptc = True
+		elif arg == "--help":
+			print("Usage:", file=sys.stderr)
+			print("\tyaASM.py [OCTALS.tsv] [OPTIONS] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
+			print("The OPTIONS are --help (to print this message you are reading)", file=sys.stderr)
+			print("or --ptc (to use PTC source/octal input rather than the default", file=sys.stderr)
+			print("LVDC source/octal input).  Files produced by the assembly are:", file=sys.stderr)
+			print("\tyaASM.tsv\tAn octal-listing file.", file=sys.stderr)
+			print("\tyaASM.sym\tA symbol file.", file=sys.stderr)
+			print("\tyaASM.src\tA source file.", file=sys.stderr)
+			print("All outputs, particularly the assembly listing, are in LVDC", file=sys.stderr)
+			print("format rather than PTC format.", file=sys.stderr)
+			sys.exit(0)
+		else:
+			print("Unknown command-line option " + arg, file=sys.stderr)
+			sys.exit(1)
+	else:
+		try:
+			checkFilename = arg
+			f = open(checkFilename, "r")
+			module = -1
+			sector = -1
+			for line in f:
+				line = line.strip()
+				if line[:1] == "#" or len(line) == 0:
+					continue
+				fields = line.split("\t")
+				if len(fields) == 0:
+					continue
+				if fields[0] == "SECTOR":
+					module = int(fields[1], 8)
+					sector = int(fields[2], 8)
+					if module > 7 or sector > 15:
+						raise("Warning: module or sector out of range")
+					continue
+				offset = int(fields[0], 8)
+				ptr = 1
+				for count in range((len(fields) - 1) // 2):
+					if len(fields[ptr]) != 11:
+						raise("Warning: wrong field length")
+					elif fields[ptr].strip() == "" and fields[ptr + 1].strip() == "":
+						# An unused word.
+						pass
+					elif fields[ptr + 1] == "D" and fields[ptr][0] == " " and fields[ptr][-1] == " " and fields[ptr][1:-2].isdigit():
+						# A data word.
+						value = int(fields[ptr].strip(), 8)
+						octalsForChecking[module][sector][2][offset] = value
+					elif fields[ptr + 1] == "D" and (fields[ptr][:5] == "     " or fields[ptr][:5].isdigit()) \
+						and fields[ptr][5] == " " and (fields[ptr][6:] == "     " or fields[ptr][6:].isdigit()):
+						# An instruction-pair word.
+						syl1 = fields[ptr][:5]
+						syl0 = fields[ptr][6:]
+						if syl1.strip() != "":
+							value = int(syl1, 8)
+							octalsForChecking[module][sector][1][offset] = value
+						if syl0.strip() != "":
+							value = int(syl0, 8)
+							octalsForChecking[module][sector][0][offset] = value
+					else:
+						raise("Warning: unrecognized format: " + line)	
+					ptr += 2
+					offset += 1
+			f.close()
+			checkTheOctals = True
+		except:
+			countWarnings += 1
+			print("Warning: Cannot open octal-comparison file " + checkFilename + " or file is corrupted")
+			checkFilename = ""
 #print(octalsForChecking)
+if ptc:
+	del operators["MPY"]
+	del operators["MPH"]
+	del operators["DIV"]
+	del operators["EXM"]
+	maxSHF = 6
+else:
+	del operators["PRS"]
+	del operators["CIO"]
+	maxSHF = 2
 
 # The following structures are used for tracking instructions transparently
 # inserted at the ends of syllable 1 of memory sectors by the assembler when
@@ -243,6 +299,16 @@ for n in range(8):
 lines = sys.stdin.readlines()
 for n in range(0,len(lines)):
 	lines[n] = lines[n].expandtabs().rstrip()
+	if ptc and 'BCI' in lines[n] and '^' in lines[n] and '$' in lines[n]:
+		# Convert all spaces within a BCI pseudo-op's operand to
+		# '_', so that the line can be parsed properly into
+		# fields later.  Any character not in the BA8421 character
+		# set could be used.
+		p = lines[n].index('BCI')
+		a = lines[n].index('^')
+		b = lines[n].index('$')
+		if p < a and a < b:
+			lines[n] = lines[n][:a] + lines[n][a:b].replace(' ', '_') + lines[n][b:]
 
 #----------------------------------------------------------------------------
 #	Definitions of utility functions
@@ -511,7 +577,8 @@ def checkLOC(extra = 0):
 # Disassembles the two syllables of a word into instructions.  Useful only for debugging
 # DFW pseudo-ops, and now that DFW is working properly, I've actually commented its use out.  
 # However, I like the function definition, so I'll leave it here for a while in case I think
-# of something else to use it for.  The code was adapted from unOP.py.
+# of something else to use it for.  The code was adapted from unOP.py.  It has not been 
+# adapted yet for --ptc.
 def unassemble(word):
 	instructions = [ "HOP", "MPY", "SUB", "DIV", "TNZ", "MPH", "AND", "ADD", "TRA", "XOR", "PIO", "STO", "TMI", "RSU", "", "CLA" ]
 	syllables = [(word & 0o777740000) >> 13 , word & 0o37776]
@@ -606,10 +673,12 @@ def storeAssembled(lineNumber, value, hop, data = True):
 def formConstantHOP(hop):
 	hopConstant = 0
 	hopConstant |= (hop["IM"] & 1) << 25
-	hopConstant |= 1 << 24
+	if not ptc:
+		hopConstant |= 1 << 24
 	hopConstant |= hop["DS"] << 20
 	hopConstant |= hop["DM"] << 17
-	hopConstant |= 1 << 16
+	if not ptc:
+		hopConstant |= 1 << 16
 	hopConstant |= hop["LOC"] << 7
 	hopConstant |= hop["S"] << 6
 	hopConstant |= hop["IS"] << 2
@@ -711,7 +780,11 @@ for n in range(0, len(lines)):
 		expandedLines[-1] = []
 	elif len(fields) >= 3 and fields[0] != "" and fields[1] in ["DEQD", "DEQS"]:
 		constants[fields[0]] = [fields[1]] + fields[2].split(",")
-	elif len(fields) >= 3 and fields[1] == "CDS" and fields[2] in constants and type(constants[fields[2]]) == type([]) and len(constants[fields[2]]) >= 3:
+	elif ptc and len(fields) >= 3 and fields[1] == "CDS" and 2 == len(fields[2].split(",")):
+		subfields = fields[2].split(",")
+		line = "%-8s%-8s%s" % (fields[0], fields[1], "%s,%s" % (subfields[0], subfields[1]))
+		expandedLines[n] = [line]
+	elif (not ptc) and len(fields) >= 3 and fields[1] == "CDS" and fields[2] in constants and type(constants[fields[2]]) == type([]) and len(constants[fields[2]]) >= 3:
 		constant = constants[fields[2]]
 		op = fields[1]
 		if constant[0] == "DEQS":
@@ -747,9 +820,9 @@ for n in range(0, len(lines)):
 			expandedLines[n].append("%-8s%-8s0" % (thisLabel, operator))
 		else:
 			while count > 0:
-				thisCount = 2
+				thisCount = maxSHF
 				if thisCount > count:
-					thisCount = 1
+					thisCount = count
 				expandedLines[n].append("%-8s%-8s%d" % (thisLabel, operator, thisCount))
 				thisLabel = ""
 				count -= thisCount
@@ -916,7 +989,7 @@ for lineNumber in range(0, len(expandedLines)):
 				if fields[0] in forms:
 					addError(n, "Error: Form already defined")
 				forms[fields[0]] = ofields
-			elif fields[1] == "ORGDD":
+			elif (not ptc) and fields[1] == "ORGDD":
 				lastORG = True
 				if len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORGDD arguments")
@@ -927,17 +1000,56 @@ for lineNumber in range(0, len(expandedLines)):
 					LOC = int(ofields[3], 8)
 					DM = int(ofields[4], 8)
 					DS = int(ofields[5], 8)
-					if ofields[6] != "":
+					if ofields[6].strip() != "":
 						DLOC = int(ofields[6], 8)
 					else:
 						DLOC = 0
-			elif fields[1] == "DOGD":
+			elif ptc and fields[1] == "ORG":
+				lastORG = True
+				if len(ofields) != 7:
+					addError(lineNumber, "Error: Wrong number of ORG arguments")
+				else:
+					if ofields[0].strip() != "":
+						IM = int(ofields[0], 8)
+					else:
+						IM = 0
+					if ofields[1].strip() != "":
+						IS = int(ofields[1], 8)
+					else:
+						IS = 0
+					if ofields[2].strip() != "":
+						S = int(ofields[2], 8)
+					else:
+						S = 0
+					if ofields[3].strip() != "":
+						LOC = int(ofields[3], 8)
+					else:
+						LOC = 0
+					if ofields[4].strip() != "":
+						DM = int(ofields[4], 8)
+					else:
+						DM = 0
+					if ofields[5].strip() != "":
+						DS = int(ofields[5], 8)
+					else:
+						DS = 0
+					if ofields[6].strip() != "":
+						DLOC = int(ofields[6], 8)
+					else:
+						DLOC = 0
+			elif (fields[1] == "DOGD" and not ptc) or (fields[1] == "DOG" and ptc):
 				if len(ofields) != 3:
 					addError(lineNumber, "Error: Wrong number of DOGD arguments")
 				else:
-					DM = int(ofields[0], 8)
-					DS = int(ofields[1], 8)
-					if ofields[2] != "":
+					if ofields[0].strip() != "":
+						DM = int(ofields[0], 8)
+					else:
+						DM = 0
+					if ofields[1].strip() != "":
+						DS = int(ofields[1], 8)
+					else:
+						DS = 0
+					if ofields[2].strip() != "":
 						DLOC = int(ofields[2], 8)
 					else:
 						DLOC = 0
@@ -954,6 +1066,15 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["operand"] = fields[2]
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				incDLOC(int(fields[2]))
+			elif ptc and fields[1] == "BCI":
+				textLength = ((len(fields[2]) - 2 + 7) // 8) * 2
+				checkDLOC(textLength)
+				if fields[0] != "":
+					inputLine["lhs"] = fields[0]
+				inputLine["operator"] = fields[1]
+				inputLine["operand"] = fields[2]
+				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				incDLOC(textLength)
 			elif fields[1] in ["DEC", "OCT", "HPC", "HPCDD", "DFW"] or fields[1] in forms:
 				checkDLOC()
 				if fields[0] != "":
@@ -1263,6 +1384,10 @@ for entry in inputFile:
 		for n in range(int(operand)):
 			storeAssembled(lineNumber, 0, bssHop)
 			bssHop["DLOC"] += 1
+	elif ptc and operator == "BCI":
+		bciHop = hop.copy()
+		textLen = ((len(operand) - 2 + 7) // 8) * 2
+		#for c in operand[1:-1]:
 	elif operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
 		assembled = 0
 		if operator in forms:
@@ -1423,14 +1548,22 @@ for entry in inputFile:
 			except:
 				addError(lineNumber, "Error: Illegal operands")
 		elif operator in ["SHR", "SHL"]:
-			if loc == 0:
-				pass
-			elif operator == "SHR" and loc <= 2:
-				pass
-			elif operator == "SHL" and loc <= 2:
-				loc = loc << 4
+			if ptc:
+				if loc < 1 or loc > 6:
+					addError(lineNumber, "Error: Shift count must be 1, 2, 3, 4, 5, or 6")
+				else:
+					loc = 1 < (loc - 1)
+					if operator == "SHR":
+						loc |= 0o1000000
 			else:
-				addError(lineNumber, "Error: Shift count must be 0, 1, or 2")
+				if loc == 0:
+					pass
+				elif operator == "SHR" and loc <= 2:
+					pass
+				elif operator == "SHL" and loc <= 2:
+					loc = loc << 4
+				else:
+					addError(lineNumber, "Error: Shift count must be 0, 1, or 2")
 		elif operator in ["TRA", "TNZ", "TMI"]:
 			if operand == "*":
 				loc = LOC
@@ -1595,7 +1728,14 @@ for entry in inputFile:
 							"DS": ds,
 							"DLOC": loc
 						})
-		elif operator == "CDS":
+		elif ptc and operator == "CDS":
+			ofields = operand.split(",")
+			if len(ofields) != 2 or not ofields[0].isdigit() or not ofields[1].isdigit() or int(ofields[0],8) > 1 or int(ofields[1],8) > 15:
+				loc = 0
+				addError(lineNumber, "Error: Illegal operand for CDS")
+			loc = (int(ofields[0], 8) << 4) | int(ofields[1], 8)
+			residual = 0
+		elif (not ptc) and operator == "CDS":
 			if operand not in symbols:
 				addError(lineNumber, "Error: Symbol not found")
 				loc = 0
