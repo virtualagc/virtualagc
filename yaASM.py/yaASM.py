@@ -271,6 +271,7 @@ if ptc:
 	del operators["MPH"]
 	del operators["DIV"]
 	del operators["EXM"]
+	operators["TRA*"] = operators["TRA"]
 	maxSHF = 6
 	if pastBugs:
 		operators["XOR"] = operators["RSU"]
@@ -333,12 +334,12 @@ def addError(n, msg):
 			countOthers += 1
 		errors[n].append(msg) 
 
-def incDLOC(increment = 1):
+def incDLOC(increment = 1, mark = True):
 	global DLOC
 	global errors
 	while increment > 0:
 		increment -= 1
-		if DLOC < 256:
+		if DLOC < 256 and mark:
 			used[DM][DS][0][DLOC] = True
 			used[DM][DS][1][DLOC] = True
 		DLOC += 1
@@ -475,6 +476,10 @@ def convertNumericLiteral(n, isOctal = False):
 # sector).
 # Later: Use has been extended, for --ptc, to automatic allocation of 
 # named variables from their implicit usage as operands in some instructions.
+# Still later:  No, automatic allocation of named variables for --ptc has to be done
+# earlier in the process than this, since if it's done here, the locations the
+# variables are supposed to go into have already been allocated.  Fortunately,
+# there's no code here that needs to be backed out.
 allocationRecords = []	# For debugging ordering of named and nameless allocationis.
 def allocateNameless(lineNumber, constantString, useResidual = True):
 	global nameless, allocationRecords
@@ -485,7 +490,11 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 		valueR = "%o_17_%s" % (DM, constantString)
 		if valueR in nameless:
 			return nameless[valueR],1
-	for loc in range(0, 256):
+	if ptc:
+		start = DLOC
+	else:
+		start = 0
+	for loc in range(start, 256):
 		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
 			if False:
 				addError(lineNumber, "Info: Allocation of nameless " + value)
@@ -497,7 +506,7 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 				"DM": DM, "DS": DS, "LOC": loc })
 			return loc,0
 	if useResidual and DS != 0o17:
-		for loc in range(0, 256):
+		for loc in range(start, 256):
 			if not used[DM][0o17][0][loc] and not used[DM][0o17][1][loc]:
 				if False:
 					addError(lineNumber, "Info: Allocation of nameless " + valueR)
@@ -951,7 +960,8 @@ if False:
 # of the elements of expandedLines[n][].
 
 page = 0
-ptcDLOC = [[{ "start": 1, "end": 0 } for sector in range(16)] for module in range(8)]
+ptcDLOC = [[{ "start": 0, "end": 0 } for sector in range(16)] for module in range(8)]
+tempSymbols = []
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
 		lFields = line.split()
@@ -1035,7 +1045,7 @@ for lineNumber in range(0, len(expandedLines)):
 				if len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORG arguments")
 				else:
-					ptcDLOC[DM][DS]["start"] = max(DLOC, ptcDLOC[DM][DS]["end"])
+					ptcDLOC[DM][DS]["start"] = DLOC+1 #max(DLOC, ptcDLOC[DM][DS]["end"])
 					if ofields[0].strip() != "":
 						IM = int(ofields[0], 8)
 					else:
@@ -1064,6 +1074,10 @@ for lineNumber in range(0, len(expandedLines)):
 						DLOC = int(ofields[6], 8)
 					else:
 						DLOC = ptcDLOC[DM][DS]["start"]
+						# In the extra 1's in the next couple of instructions relate
+						# to bugs in the PTC's assembler's implementation of ORG.
+						if DLOC == 0:
+							DLOC = 1
 						ptcDLOC[DM][DS]["end"] = DLOC + 1
 			elif (fields[1] == "DOGD" and not ptc) or (fields[1] == "DOG" and ptc):
 				if len(ofields) != 3:
@@ -1112,6 +1126,23 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				incDLOC()	
 			elif fields[1] in operators:
+				if ptc and fields[1] in ["SUB", "AND", "ADD", "XOR", "RSU", "CLA", "STO", "TRA*"]:
+					# If the operand is an unknown variable name, need to set it up
+					# for auto-allocation.
+					tempName = "%o_%2o_%s" % (DM, DS, fields[2])
+					if fields[2][0].isalpha() and fields[2].isalnum() and fields[2] not in tempSymbols:
+						checkDLOC()
+						if "*" not in fields[1]:
+							inputLine["autoVariable"] = fields[2]
+							addError(lineNumber, "Here: %s" % fields[2])
+						inputLine["incDLOC"] = True
+						tempSymbols.append(fields[2])
+						addError(lineNumber, "Info: Leaving space for %s" % fields[2])
+					elif fields[2][:2] == "=O" and fields[2][2:].isdigit() and tempName not in tempSymbols:
+						checkDLOC()
+						inputLine["incDLOC"] = True
+						tempSymbols.append(tempName)
+						addError(lineNumber, "Info: Leaving space for %s" % tempName)
 				inDataMemory = False
 				extra = 0
 				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
@@ -1140,6 +1171,8 @@ for lineNumber in range(0, len(expandedLines)):
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				incLOC()
+				if ptc and "incDLOC" in inputLine:
+					incDLOC(mark = False)
 				if fields[1] in ["CDS", "CDSD", "CDSS"]:
 					# I should be doing something here with the simplex vs duplex info, but I don't
 					# know what, so I'll just ignore it for now.
@@ -1175,8 +1208,15 @@ for lineNumber in range(0, len(expandedLines)):
 					elif len(ofields) != 2:
 						addError(lineNumber, "Error: Wrong number of CDS/CDSD arguments")
 					elif not useDat:
+						if ptc:
+							ptcDLOC[DM][DS]["start"] = DLOC + 1 #max(DLOC, ptcDLOC[DM][DS]["end"])
+							addError(lineNumber, "Info: A %o-%02o-%03o" % (DM, DS, DLOC))
 						DM = int(ofields[0], 8)
 						DS = int(ofields[1], 8)
+						if ptc:
+							DLOC = ptcDLOC[DM][DS]["start"]
+							ptcDLOC[DM][DS]["end"] = DLOC
+							addError(lineNumber, "Info: B %o-%02o-%03o" % (DM, DS, DLOC))
 			elif fields[1] in preprocessed:
 				pass
 			elif fields[1] in pseudos:
@@ -1188,6 +1228,8 @@ for lineNumber in range(0, len(expandedLines)):
 		inputLine["inDataMemory"] = inDataMemory
 		inputLine["useDat"] = useDat
 		inputLine["isCDS"] = isCDS
+		if ptc and "lhs" in inputLine:
+			tempSymbols.append(inputLine["lhs"])
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
 
 # Create a table to quickly look up addresses of symbols.
@@ -1195,8 +1237,8 @@ for entry in inputFile:
 	inputLine = entry["expandedLine"]
 	lineNumber = entry["lineNumber"]
 	if "lhs" in inputLine:
+		lhs = inputLine["lhs"]
 		if "hop" in inputLine:
-			lhs = inputLine["lhs"]
 			if lhs in symbols:
 				addError(lineNumber, "Error: Symbol already defined")
 			symbols[lhs] = inputLine["hop"]
@@ -1207,7 +1249,19 @@ for entry in inputFile:
 					"inputLine": inputLine, "DM": inputLine["hop"]["DM"], 
 					"DS": inputLine["hop"]["DS"], "LOC": inputLine["hop"]["LOC"] })
 		else:
-			addError(lineNumber, "Error: Symbol location unknown")
+			addError(lineNumber, "Error: Symbol location unknown (%s)" % lhs)
+	if "autoVariable" in inputLine:
+		autoVariable = inputLine["autoVariable"]
+		if "hop" in inputLine:
+			symbols[autoVariable] = inputLine["hop"]
+			symbols[autoVariable]["inDataMemory"] = True
+			symbols[autoVariable]["isCDS"] = False
+			addError(lineNumber, "Info: Auto-allocation of variable %s" % autoVariable)
+			allocationRecords.append({ "symbol": autoVariable, "lineNumber": lineNumber, 
+				"inputLine": inputLine, "DM": inputLine["hop"]["DM"], 
+				"DS": inputLine["hop"]["DS"], "LOC": inputLine["hop"]["DLOC"] })
+		else:
+			addError(lineNumber, "Error: Symbol location unknown (%s)" % autoVariable)
 
 # A mini-pass to set up SYN symbols.
 for n in range(0, len(lines)):
@@ -1666,7 +1720,7 @@ for entry in inputFile:
 					loc = loc << 4
 				else:
 					addError(lineNumber, "Error: Shift count must be 0, 1, or 2")
-		elif operator in ["TRA", "TNZ", "TMI"]:
+		elif operator[:3] in ["TRA", "TNZ", "TMI"]:
 			if operand == "*":
 				loc = LOC
 				residual = S
@@ -1695,7 +1749,7 @@ for entry in inputFile:
 				# misinterpreting what's going on.
 				loc = symbols[operand]["LOC"]
 				residual = symbols[operand]["S"]
-			elif operator == "TRA":
+			elif operator in ["TRA", "TRA*"]:
 				# The target location exists, but is not in this IM/IS/DM/DS.
 				# We must therefore substituted a HOP instruction instead,
 				# and allocate a HOP constant nameless variable.
@@ -1895,7 +1949,8 @@ for entry in inputFile:
 						residual = 1
 			elif operand not in symbols:
 				if ptc:
-					loc,residual = allocateNameless(lineNumber, operand, useResidual = False)
+					#loc,residual = allocateNameless(lineNumber, operand, useResidual = False)
+					addError(lineNumber, "Error: Symbol (" + operand + ") from operand not found")
 				else:
 					addError(lineNumber, "Error: Symbol (" + operand + ") from operand not found")
 			else: 
