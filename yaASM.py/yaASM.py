@@ -1083,6 +1083,7 @@ for lineNumber in range(0, len(expandedLines)):
 				if len(ofields) != 3:
 					addError(lineNumber, "Error: Wrong number of DOGD/DOG arguments")
 				else:
+					#ptcDLOC[DM][DS]["start"] = DLOC+1 #max(DLOC, ptcDLOC[DM][DS]["end"])
 					if ofields[0].strip() != "":
 						DM = int(ofields[0], 8)
 					else:
@@ -1094,7 +1095,7 @@ for lineNumber in range(0, len(expandedLines)):
 					if ofields[2].strip() != "":
 						DLOC = int(ofields[2], 8)
 					else:
-						DLOC = 0
+						DLOC = 1
 			elif fields[1] in ["DEQS", "DEQD"] and fields[0] in constants:
 				symbols[fields[0]] = {	"IM":IM, "IS":IS, "S":S, 
 								"LOC":LOC, "DM":int(constants[fields[0]][1], 8), 
