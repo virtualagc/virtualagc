@@ -3736,7 +3736,18 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             embedded within the instruction and places the result in the
             accumulator.&nbsp;Recall that A1-A8 select the offset within
             a 256-word sector, and A9 is the "residual bit" that selects
-            between the current sector and the "residual sector".</td>
+            between the current sector and the "residual sector".<br>
+            <br>
+            <i>Regarding PTC assembly</i>:&nbsp; At the time of the PAST
+            program, the original assembler had a <i>bug</i> in which <tt>XOR</tt>
+            is incorrectly assembled as <tt>RSU</tt>.&nbsp; Needless to
+            say, this bug is <i>not</i> reproduced in the modern
+            assembler (yaASM.py).&nbsp; However, the modern assembler
+            has a command-line switch, --past-bugs, which allows the bug
+            to be reproduced, thus allowing exact octal-for-octal
+            assembly of the PAST program for the purpose of validating
+            the assembler.<br>
+          </td>
         </tr>
         <tr>
           <td style="font-family: Courier New,Courier,monospace;"> PIO<br>
@@ -8341,10 +8352,54 @@ Assembly
             fields for instruction memory (<i><tt>LOC</tt></i>) and data
             memory (<tt><i>DLOC</i></tt>).<br>
             <br>
-            Any of the fields may be left empty, in which case they
-            default to 0 ... or in the case of <i><tt>DLOC</tt></i>, to
-            the first unused location.&nbsp; For example, here's a
-            selection of actual uses found in PTC software:<br>
+            Any of the fields may be left empty.&nbsp; As far as I can
+            tell, any field left empty defaults to 0, except for <tt><tt><i>DLOC</i></tt></tt>.&nbsp;
+            In the case of <tt><tt><i>DLOC</i></tt></tt>, it appears to
+            me that it defaults to the <i>next</i> location after the
+            previous one allocated in the sector.&nbsp; For example,
+            consider the following example code:<br>
+            <blockquote><tt>ORG&nbsp;&nbsp;&nbsp; 1,2,0,3,0,16,20</tt><tt><br>
+              </tt><tt>OCT&nbsp;&nbsp;&nbsp; 1234</tt><tt><br>
+              </tt><tt>OCT&nbsp;&nbsp;&nbsp; 2345</tt><tt><br>
+              </tt><tt>OCT&nbsp;&nbsp;&nbsp; 3456</tt><tt><br>
+                ORG&nbsp;&nbsp;&nbsp; ... to some other memory sector
+                ...<br>
+                ...<br>
+              </tt><tt>ORG&nbsp;&nbsp;&nbsp; 1,2,0,3,0,16,</tt><tt><br>
+              </tt><tt>OCT&nbsp;&nbsp;&nbsp; 4567</tt><tt> </tt><br>
+            </blockquote>
+            The first 3 <tt>OCT</tt>s would be at addresses 0-16-20,
+            0-16-21, and 0-16-22.&nbsp; The final <tt>OCT</tt> would be
+            address 0-16-23.&nbsp; It should not be inferred that the
+            addresses 0-16-0 through 0-16-17 are completely filled up
+            (as they would be for a similar LVDC pseudo-op <tt>ORGDD</tt>),
+            because <tt>ORG</tt> merely increments the preceding
+            address (rather than searching for the first unallocated
+            address as in the LVDC's <tt>ORGDD</tt>).&nbsp; In fact, it
+            appears to me that <tt>ORG</tt> with <tt>DLOC</tt> left
+            empty never goes to <tt>DLOC</tt>=0, and instead starts
+            with <tt>DLOC</tt>=1. <br>
+            <br>
+            Moreover, it appears to me that the original assembler had a
+            bug, which we intentionally reproduce in the modern
+            assembler (yaASM.py).&nbsp; The bug is that even if no data
+            words had been allocated between one ORG and the next, the
+            assembler still assumed that a <i>minimum</i> of 1 word had
+            been allocated anyway.&nbsp; Suppose, for example, we were
+            to append the following code to the sample above:<br>
+            <blockquote><tt>ORG&nbsp;&nbsp;&nbsp; 1,2,0,3,0,16,</tt><br>
+              <tt>
+              </tt><tt><tt>ORG&nbsp;&nbsp;&nbsp; 1,2,0,3,0,16,</tt><br>
+                <tt>
+                </tt></tt><tt><tt>ORG&nbsp;&nbsp;&nbsp; 1,2,0,3,0,16,</tt><br>
+                <tt>
+                </tt>OCT&nbsp;&nbsp;&nbsp; 5670</tt><tt> </tt><br>
+            </blockquote>
+            The <tt>OCT</tt> would be at address 0-16-26, because each
+            of the final 2 <tt>ORG</tt>s would incorrectly have assumed
+            that at least one word had been allocated prior to it. <br>
+            <br>
+            Here's a selection of actual uses found in PTC software:<br>
             <blockquote><tt>ORG&nbsp;&nbsp;&nbsp; ,,,,,13,0</tt><tt><br>
               </tt><tt>ORG&nbsp;&nbsp;&nbsp; ,1,,2,,1,</tt><tt><br>
               </tt><tt>ORG&nbsp;&nbsp;&nbsp; ,2,1,0,,2,1<br>
