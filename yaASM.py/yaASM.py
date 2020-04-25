@@ -95,17 +95,22 @@ BA8421 = [
 	'&', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
 	'H', 'I', '?', '.', '⌑', '?', '?', '?'
 ]
-# EBCDIC-like character table.  The table has been massaged in a way to make
+# EBCDIC-like character table.  The table has been massaged, and in particular 
+# shifted to a different numerical range, in such a way to as timake
 # it convenient for the purposes of this program, so it's not really EBCDIC
 # any longer.  Only the 0x40-0x7F and 0xC0-0xFF ranges have been reproduced.
 # They have been merged (with printable characters overriding unprintable ones) 
 # into a single 0x00-0x3F range.  All unprintable positions left over after 
-# that have been set to '!'.  Used only for --ptc.
+# that have been set to '!'.  I guess that it probably makes more sense to 
+# consider it as just a substitution table representing buggy original-assembler
+# printout, rather than thinking of it as EBCDIC at all, although there are 
+# entries in the table (deriving from EBCDIC) that are not actually used by
+# the assembler.  Used only for --ptc --past-bugs.
 EBCDIClike = [
+	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '!', '!', "'", '=', '"',
 	' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', '!', '.', '<', '(', '+', '!',
 	'&', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', '!', '!', '*', ')', ';', '!',
-	'-', '/', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', ',', '%', '_', '>', '?',
-	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '!', '!', "'", '=', '"'
+	'-', '/', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', ',', '%', '_', '>', '?'
 ]
 # Characters which are printable in both BA8421 and EBCDIC.
 legalCharsBCI = set(BA8421).intersection(set(EBCDIClike))
@@ -1543,8 +1548,42 @@ for entry in inputFile:
 			bssHop["DLOC"] += 1
 	elif ptc and operator == "BCI":
 		bciHop = hop.copy()
-		textLen = ((len(operand) - 2 + 7) // 8) * 2
-		#for c in operand[1:-1]:
+		textLen = ((len(operand) - 2 + 7) // 8) * 8
+		# Recall that the test-string operand had previously had
+		# its spaces replaced by underlines, and that it needs to
+		# both have its delimiters removed and to be padded on the
+		# right with spaces to be the proper length for assembly.
+		operand = operand[1:-1].replace("_", " ")
+		opLen = len(operand)
+		while opLen < textLen:
+			opLen += 1
+			operand += " "
+		# Now assemble it in blocks of 4 characters per assembled
+		# word.  At the same time, create the message that will
+		# ultimately be printed in the assembly listing, and 
+		# store it back into the input-file array so that it
+		# will be available at printout time.
+		printArray = []
+		for n in range(0, opLen, 4):
+			printLine = ""
+			octal = 0
+			for i in range(4):
+				char = operand[n+i]
+				if char not in legalCharsBCI:
+					addError(lineNumber, "Error: Character %c not legal for BCI" % char)
+					char = " "
+					printLine += "?"
+				else:
+					ba8421 = BA8421.index(char)
+					if pastBugs:
+						printLine += EBCDIClike[ba8421]
+					else:
+						printLine += char
+					octal |= ba8421 << (21 - 6 * i)
+			printArray.append(printLine)
+			storeAssembled(lineNumber, octal, bciHop)
+			bciHop["DLOC"] += 1
+		inputFile[lineNumber]["bciLines"] = printArray	
 	elif operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
 		assembled = 0
 		if operator in forms:
@@ -1709,7 +1748,7 @@ for entry in inputFile:
 				if loc < 1 or loc > 6:
 					addError(lineNumber, "Error: Shift count must be 1, 2, 3, 4, 5, or 6")
 				else:
-					loc = 1 < (loc - 1)
+					loc = 1 << (loc - 1)
 					if operator == "SHR":
 						loc |= 0o1000000
 			else:
@@ -1890,8 +1929,9 @@ for entry in inputFile:
 			if len(ofields) != 2 or not ofields[0].isdigit() or not ofields[1].isdigit() or int(ofields[0],8) > 1 or int(ofields[1],8) > 15:
 				loc = 0
 				addError(lineNumber, "Error: Illegal operand for CDS")
-			loc = (int(ofields[0], 8) << 4) | int(ofields[1], 8)
+			loc = 0x80 | (int(ofields[0], 8) << 4) | int(ofields[1], 8)
 			residual = 0
+			#lineFields[adrField] = "%03o" % loc
 		elif (not ptc) and operator == "CDS":
 			if operand not in symbols:
 				addError(lineNumber, "Error: Symbol not found")
@@ -2016,15 +2056,33 @@ for entry in inputFile:
 			print(header)
 		
 	else:
+		if "bciLines" in entry:
+			clearLineFields()
 		lineFields[opField] = op
 		lineFields[constantField] = "%9s" % constantString
 		lineFields[expansionField] = expansionMarker
+		if "bciLines" in entry and "BCI" in raw and "^" in raw and "$" in raw:
+			iBCI = raw.index("BCI")
+			iCarat = raw.index("^")
+			iDollar = raw.index("$")
+			if iBCI < iCarat and iCarat < iDollar:
+				raw = raw[:iCarat] + raw[iCarat:iDollar].replace("_", " ") + raw[iDollar:]
 		lineFields[rawField] = raw
 		if a9 == "1" or not ptc:
 			lineFields[a9Field] = a9
 		if lineFields[adrField] == "":
 			lineFields[adrField] = a81
 		printLineFields()
+		if "bciLines" in entry:
+			hop = entry["expandedLine"]["hop"]
+			for n in range(len(entry["bciLines"])):
+				bciLine = entry["bciLines"][n]
+				clearLineFields()
+				lineFields[dmField] = "%o" % hop["DM"]
+				lineFields[dsField] = "%02o" % hop["DS"]
+				lineFields[adrField] = "%03o" % (hop["DLOC"] + n)
+				lineFields[constantField] = "%-9s" % bciLine
+				printLineFields()
 		if len(fields) > 1 and fields[1] == "MACRO" and fields[0] in macros:
 			macroLines = macros[fields[0]]["lines"]
 			clearLineFields()
