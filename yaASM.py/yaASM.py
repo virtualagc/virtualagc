@@ -290,7 +290,6 @@ if ptc:
 	del operators["MPH"]
 	del operators["DIV"]
 	del operators["EXM"]
-	operators["TRA*"] = operators["TRA"]
 	operators["SHF"]["a9"] = 0
 	operators["SHL"]["a9"] = 0
 	operators["SHR"]["a9"] = 0
@@ -369,10 +368,8 @@ def incDLOC(increment = 1, mark = True):
 # This function checks to see if a block of the desired size is 
 # available at the currently selected DM/DS/DLOC, and if not,
 # increments DLOC until it finds the space.
-def checkDLOC(increment = 1):
-	global DLOC
+def findDLOC(start = 0, increment = 1):
 	global errors
-	start = DLOC
 	n = start
 	length = 0
 	reuse = False
@@ -390,7 +387,11 @@ def checkDLOC(increment = 1):
 		addError(lineNumber, "Warning: Skipping memory locations already used")
 	if length < increment:
 		addError(lineNumber, "Error: No space of size " + str(increment) + " found in memory bank")
-	DLOC = start
+	return start
+	
+def checkDLOC(increment = 1):
+	global DLOC
+	DLOC = findDLOC(start=DLOC, increment=increment)
 
 def incLOC():
 	global LOC
@@ -512,13 +513,10 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 		valueR = "%o_17_%s" % (DM, constantString)
 		if valueR in nameless:
 			return nameless[valueR],1
-	if ptc:
-		start = DLOC
-	else:
-		start = 0
+	start = 0
 	for loc in range(start, 256):
 		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
-			if False:
+			if ptc:
 				addError(lineNumber, "Info: Allocation of nameless " + value)
 			used[DM][DS][0][loc] = True
 			used[DM][DS][1][loc] = True
@@ -712,11 +710,11 @@ def storeAssembled(lineNumber, value, hop, data = True):
 		if octals[module][sector][checkSyl][location] != octalsForChecking[module][sector][checkSyl][location]:
 			msg = "Mismatch: Octal mismatch, "
 			if checkSyl == 2:
-				fmt = "%09o != %09o, xor = %09o" 
+				fmt = "%o,%02o,%o,%03o, %09o != %09o, xor = %09o" 
 			else:
-				fmt = "%05o != %05o, xor = %05o"
+				fmt = "%o,%02o,%o,%03o, %05o != %05o, xor = %05o"
 			xor = octals[module][sector][checkSyl][location] ^ octalsForChecking[module][sector][checkSyl][location]
-			msg += fmt % (octals[module][sector][checkSyl][location], octalsForChecking[module][sector][checkSyl][location], xor)
+			msg += fmt % (module, sector, checkSyl, location, octals[module][sector][checkSyl][location], octalsForChecking[module][sector][checkSyl][location], xor)
 			#msg += ", disassembly   " + unassemble(octals[module][sector][checkSyl][location])
 			#msg += "   !=   " + unassemble(octalsForChecking[module][sector][checkSyl][location])
 			addError(lineNumber, msg)
@@ -972,20 +970,31 @@ if False:
 #----------------------------------------------------------------------------
 # The object of this pass is to discover all addresses for left-hand symbols,
 # or in other words, to assign an address (HOP constant) to each line of code.
-# As far as I know right now, it looks like we can do this in a single pass.   
+  
 # The result of the pass is a hopefully easy-to-understand dictionary called 
 # inputFile. It also buffers the lhs, operator, and operand fields, so they 
 # don't have to be parsed out again on the next pass.
 
-# For this pass, we can just loop through all of the lines of code by having an 
-# outer loop on all of the elements of expandedLines[], and an inner loop on all 
-# of the elements of expandedLines[n][].
+# For either discovery pass, we can just loop through all of the lines of code by 
+# having an outer loop on all of the elements of expandedLines[], and an inner 
+# loop on all of the elements of expandedLines[n][].
 
 page = 0
-ptcDLOC = [[{ "start": 0, "end": 0 } for sector in range(16)] for module in range(8)]
+ptcDLOC = [[1 for sector in range(16)] for module in range(8)]
+IM = 0
+IS = 0
+S = 1
+LOC = 0
+DM = 0
+DS = 0
+dS = 0
+DLOC = 0
+useDat = False
 tempSymbols = []
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
+		if ptc:
+			ptcDLOC[DM][DS] = DLOC
 		lFields = line.split()
 		if len(lFields) >= 3 and lFields[0] == "#" and lFields[1] == "PAGE" and lFields[2][:-1].isdigit():
 			page = int(lFields[2][:-1])
@@ -1067,10 +1076,6 @@ for lineNumber in range(0, len(expandedLines)):
 				if len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORG arguments")
 				else:
-					# I tried changing the following to DLOC+1, but it just messes up
-					# the ORGs on PAGE 9.  (Of course, logically it should just be 
-					# DLOC.)
-					ptcDLOC[DM][DS]["start"] = max(DLOC, ptcDLOC[DM][DS]["end"])
 					if ofields[0].strip() != "":
 						IM = int(ofields[0], 8)
 					else:
@@ -1098,17 +1103,11 @@ for lineNumber in range(0, len(expandedLines)):
 					if ofields[6].strip() != "":
 						DLOC = int(ofields[6], 8)
 					else:
-						DLOC = ptcDLOC[DM][DS]["start"]
-						# In the extra 1's in the next couple of instructions relate
-						# to bugs in the PTC's assembler's implementation of ORG.
-						if DLOC == 0:
-							DLOC = 1
-						ptcDLOC[DM][DS]["end"] = DLOC + 1
+						DLOC = ptcDLOC[DM][DS]
 			elif (fields[1] == "DOGD" and not ptc) or (fields[1] == "DOG" and ptc):
 				if len(ofields) != 3:
 					addError(lineNumber, "Error: Wrong number of DOGD/DOG arguments")
 				else:
-					#ptcDLOC[DM][DS]["start"] = DLOC+1 #max(DLOC, ptcDLOC[DM][DS]["end"])
 					if ofields[0].strip() != "":
 						DM = int(ofields[0], 8)
 					else:
@@ -1119,8 +1118,10 @@ for lineNumber in range(0, len(expandedLines)):
 						DS = 0
 					if ofields[2].strip() != "":
 						DLOC = int(ofields[2], 8)
+					elif ptc:
+						DLOC = ptcDLOC[DM][DS]
 					else:
-						DLOC = 1
+						DLOC = 0
 			elif fields[1] in ["DEQS", "DEQD"] and fields[0] in constants:
 				symbols[fields[0]] = {	"IM":IM, "IS":IS, "S":S, 
 								"LOC":LOC, "DM":int(constants[fields[0]][1], 8), 
@@ -1153,23 +1154,6 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				incDLOC()	
 			elif fields[1] in operators:
-				if ptc and fields[1] in ["SUB", "AND", "ADD", "XOR", "RSU", "CLA", "STO", "TRA*"]:
-					# If the operand is an unknown variable name, need to set it up
-					# for auto-allocation.
-					tempName = "%o_%2o_%s" % (DM, DS, fields[2])
-					if fields[2][0].isalpha() and fields[2].isalnum() and fields[2] not in tempSymbols:
-						checkDLOC()
-						if "*" not in fields[1]:
-							inputLine["autoVariable"] = fields[2]
-							addError(lineNumber, "Here: %s" % fields[2])
-						inputLine["incDLOC"] = True
-						tempSymbols.append(fields[2])
-						addError(lineNumber, "Info: Leaving space for %s" % fields[2])
-					elif fields[2][:2] == "=O" and fields[2][2:].isdigit() and tempName not in tempSymbols:
-						checkDLOC()
-						inputLine["incDLOC"] = True
-						tempSymbols.append(tempName)
-						addError(lineNumber, "Info: Leaving space for %s" % tempName)
 				inDataMemory = False
 				extra = 0
 				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
@@ -1235,15 +1219,10 @@ for lineNumber in range(0, len(expandedLines)):
 					elif len(ofields) != 2:
 						addError(lineNumber, "Error: Wrong number of CDS/CDSD arguments")
 					elif not useDat:
-						if ptc:
-							ptcDLOC[DM][DS]["start"] = DLOC + 1 #max(DLOC, ptcDLOC[DM][DS]["end"])
-							addError(lineNumber, "Info: A %o-%02o-%03o" % (DM, DS, DLOC))
 						DM = int(ofields[0], 8)
 						DS = int(ofields[1], 8)
-						if ptc:
-							DLOC = ptcDLOC[DM][DS]["start"]
-							ptcDLOC[DM][DS]["end"] = DLOC
-							addError(lineNumber, "Info: B %o-%02o-%03o" % (DM, DS, DLOC))
+					if ptc:
+						DLOC = ptcDLOC[DM][DS]
 			elif fields[1] in preprocessed:
 				pass
 			elif fields[1] in pseudos:
@@ -1816,7 +1795,7 @@ for entry in inputFile:
 				# misinterpreting what's going on.
 				loc = symbols[operand]["LOC"]
 				residual = symbols[operand]["S"]
-			elif operator in ["TRA", "TRA*"]:
+			elif operator == "TRA":
 				# The target location exists, but is not in this IM/IS/DM/DS.
 				# We must therefore substituted a HOP instruction instead,
 				# and allocate a HOP constant nameless variable.
@@ -2017,8 +1996,8 @@ for entry in inputFile:
 						residual = 1
 			elif operand not in symbols:
 				if ptc:
-					#loc,residual = allocateNameless(lineNumber, operand, useResidual = False)
-					addError(lineNumber, "Error: Symbol (" + operand + ") from operand not found")
+					loc,residual = allocateNameless(lineNumber, operand, useResidual = False)
+					#addError(lineNumber, "Error: Symbol (" + operand + ") from operand not found")
 				else:
 					addError(lineNumber, "Error: Symbol (" + operand + ") from operand not found")
 			else: 
