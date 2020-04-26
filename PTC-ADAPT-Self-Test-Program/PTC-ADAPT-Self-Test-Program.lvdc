@@ -460,6 +460,11 @@ L4P3	CLA	ZERO
 	TRA*	L9P2
 L4P4	CLA	ZERO
 	STO	LCR5
+# ***FIXME*** The following line was not present in the original code.
+# It's just here temporarily until I figure out why the original
+# assembler skipped past addresses 0-13-140 and 0-13-141 for the 
+# automatic allocation in the TRA instruction.	
+	DOG	0,13,142
 	TRA*	L20P2
 L4P5	CLA	ZERO
 
@@ -491,6 +496,10 @@ L5P1	CLA	LCR1
 *	BEGINNING OF ROUTINE ONE
 *	CHECK COMPUTER FOR ABILITY TO HOP TO ALL SECTORS.
 L5P2	HOP	HP1
+# ***FIXME*** The following line was not present in the original code.
+# It's here until I figure out why the original assembler allocated
+# HP1 at 0-13-131 instead of the next sequential address (0-13-152).
+	DOG	0,13,131
 HP1	HPC	L5P2A
 *	SECTOR 1.
 	ORG	,1,,2,,1,
@@ -646,6 +655,10 @@ HP32	HPC	L5P3
 	TRA	L5P7A
 *	TEST TRA TO SYLL 1
 	ORG	,,1,373,,13,
+# ***FIXME*** The following line was not present in the original code.
+# It's here until I figure out why the original assembler auto-allocated
+# at 0-13-152 instead of the next sequential address (0-13-134).
+	DOG	0,13,152
 L5P7	CLA	=O500000000
 	TRA	L5P7A
 *	TEST TMI INSTRUCTION.

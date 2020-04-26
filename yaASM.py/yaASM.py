@@ -89,11 +89,11 @@ BA8421 = [
 	' ', '1', '2', '3', '4', '5', '6', '7',
 	'8', '9', '0', '#', '@', '?', '?', '?',
 	'?', '/', 'S', 'T', 'U', 'V', 'W', 'X',
-	'Y', 'Z', '‡', ',', '%', '?', '?', '?',
+	'Y', 'Z', '‡', ',', '(', '?', '?', '?',
 	'-', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
 	'Q', 'R', '?', '$', '*', '?', '?', '?',
-	'&', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
-	'H', 'I', '?', '.', '⌑', '?', '?', '?'
+	'+', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', '?', '.', ')', '?', '?', '?'
 ]
 # EBCDIC-like character table.  The table has been massaged, and in particular 
 # shifted to a different numerical range, in such a way to as timake
@@ -107,13 +107,24 @@ BA8421 = [
 # entries in the table (deriving from EBCDIC) that are not actually used by
 # the assembler.  Used only for --ptc --past-bugs.
 EBCDIClike = [
-	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '!', '!', "'", '=', '"',
-	' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', '!', '.', '<', '(', '+', '!',
-	'&', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', '!', '!', '*', ')', ';', '!',
-	'-', '/', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', ',', '%', '_', '>', '?'
+	'0', '1', '2', '3', '4', '5', '6', '7', 
+	'8', '9', '0', '!', '!', "'", '=', '"',
+	' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 
+	'H', 'I', '!', '.', ')', '(', '+', '!',
+	'&', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+	'Q', 'R', '!', '!', '*', ')', ';', '!',
+	' ', '/', 'S', 'T', 'U', 'V', 'W', 'X', 
+	'Y', 'Z', '!', ',', '(', '_', '>', '?'
 ]
 # Characters which are printable in both BA8421 and EBCDIC.
 legalCharsBCI = set(BA8421).intersection(set(EBCDIClike))
+
+def bciPad(string):
+	while len(string) % 4 != 0:
+		string = string + " "
+	if string[-2:] != "  ":
+		string = string + "    "
+	return string
 
 operators = {
     "HOP": { "opcode":0b0000 }, 
@@ -1050,7 +1061,10 @@ for lineNumber in range(0, len(expandedLines)):
 				if len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORG arguments")
 				else:
-					ptcDLOC[DM][DS]["start"] = DLOC+1 #max(DLOC, ptcDLOC[DM][DS]["end"])
+					# I tried changing the following to DLOC+1, but it just messes up
+					# the ORGs on PAGE 9.  (Of course, logically it should just be 
+					# DLOC.)
+					ptcDLOC[DM][DS]["start"] = max(DLOC, ptcDLOC[DM][DS]["end"])
 					if ofields[0].strip() != "":
 						IM = int(ofields[0], 8)
 					else:
@@ -1115,7 +1129,8 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				incDLOC(int(fields[2]))
 			elif ptc and fields[1] == "BCI":
-				textLength = ((len(fields[2]) - 2 + 7) // 8) * 2
+				text = bciPad(fields[2][1:-1])
+				textLength = len(text) / 4
 				checkDLOC(textLength)
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
@@ -1548,16 +1563,17 @@ for entry in inputFile:
 			bssHop["DLOC"] += 1
 	elif ptc and operator == "BCI":
 		bciHop = hop.copy()
-		textLen = ((len(operand) - 2 + 7) // 8) * 8
+		text = bciPad(operand[1:-1])
+		textLen = len(text)
 		# Recall that the test-string operand had previously had
 		# its spaces replaced by underlines, and that it needs to
 		# both have its delimiters removed and to be padded on the
 		# right with spaces to be the proper length for assembly.
-		operand = operand[1:-1].replace("_", " ")
+		operand = text.replace("_", " ")
 		opLen = len(operand)
-		while opLen < textLen:
-			opLen += 1
-			operand += " "
+		#while opLen < textLen:
+		#	opLen += 1
+		#	operand += " "
 		# Now assemble it in blocks of 4 characters per assembled
 		# word.  At the same time, create the message that will
 		# ultimately be printed in the assembly listing, and 
@@ -1584,6 +1600,8 @@ for entry in inputFile:
 			storeAssembled(lineNumber, octal, bciHop)
 			bciHop["DLOC"] += 1
 		inputFile[lineNumber]["bciLines"] = printArray	
+		entry["bciLines"] = printArray
+		#addError(lineNumber, "Info: " + str(printArray))
 	elif operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
 		assembled = 0
 		if operator in forms:
