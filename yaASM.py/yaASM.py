@@ -126,6 +126,9 @@ def bciPad(string):
 		string = string + "    "
 	return string
 
+# Some modifications to the following are made later,
+# after the command line arguments have been parsed
+# to detect presence or absence of --ptc.
 operators = {
     "HOP": { "opcode":0b0000 }, 
     "MPY": { "opcode":0b0001 }, 
@@ -288,6 +291,9 @@ if ptc:
 	del operators["DIV"]
 	del operators["EXM"]
 	operators["TRA*"] = operators["TRA"]
+	operators["SHF"]["a9"] = 0
+	operators["SHL"]["a9"] = 0
+	operators["SHR"]["a9"] = 0
 	maxSHF = 6
 	if pastBugs:
 		operators["XOR"] = operators["RSU"]
@@ -1538,6 +1544,9 @@ for entry in inputFile:
 			lineFields[isField] = "%02o" % IS
 			lineFields[sylField] = "%1o" % S
 			lineFields[locField] = "%03o" % LOC
+			if ptc:
+				lineFields[dmField] = "%2o" % DM
+				lineFields[dsField] = "%02o" % DS
 		elif operator in ["DEQD", "DEQS"]:
 			pass
 		else:
@@ -1768,7 +1777,7 @@ for entry in inputFile:
 				else:
 					loc = 1 << (loc - 1)
 					if operator == "SHR":
-						loc |= 0o1000000
+						loc |= 0o100
 			else:
 				if loc == 0:
 					pass
