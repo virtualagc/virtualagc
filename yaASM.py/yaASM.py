@@ -1158,9 +1158,12 @@ for lineNumber in range(0, len(expandedLines)):
 				extra = 0
 				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
 					extra = int(fields[2][2:])
-				oldLocation = checkLOC(extra)
-				if oldLocation != []:
-					inputLine["switchSectorAt"] = oldLocation
+				if ptc and fields[1] in ["TRA", "HOP"] and not used[IM][IS][S][LOC]:
+					pass
+				else:
+					oldLocation = checkLOC(extra)
+					if oldLocation != []:
+						inputLine["switchSectorAt"] = oldLocation
 				lastORG = False
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
