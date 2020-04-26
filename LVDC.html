@@ -3328,21 +3328,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
               wikipedia link</a>, but it has the codes in a hexadecimal
             form that are a bit confusing to relate to the octal codes
             used in LVDC assembly language, so below I've reformulated
-            the table in terms of two-digit octal codes instead.&nbsp;
-            Note that this data is much like the data in the array
-            called CHAR in the PAST program source code.&nbsp; For
-            example, in the table below the code for 'A' is 61, whereas
-            if you look at the CHAR table on page 2 of the PAST
-            program's source code you'll find that it is given as <tt>OCT
-
-
-
-
-
-
-
-
-              610000000</tt>.<br>
+            the table in terms of two-digit octal codes instead.&nbsp; <br>
             <br>
             <table cellspacing="2" cellpadding="2" border="1"
               align="center">
@@ -3399,16 +3385,16 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                   </td>
                   <td valign="middle" align="center">@<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">:<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">&gt;<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">√<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
                 </tr>
                 <tr>
                   <th valign="middle" align="center">2_</th>
-                  <td valign="middle" bgcolor="#cccccc" align="center">¢<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
                   <td valign="middle" align="center">/<br>
                   </td>
@@ -3435,13 +3421,13 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                   </td>
                   <td valign="middle" align="center">,<br>
                   </td>
-                  <td valign="middle" align="center">%<br>
+                  <td valign="middle" bgcolor="#ffff99" align="center">(<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">=<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">'<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">"<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
                 </tr>
                 <tr>
@@ -3469,22 +3455,22 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                   </td>
                   <td valign="middle" align="center">R<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">!<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
                   <td valign="middle" align="center">$<br>
                   </td>
                   <td valign="middle" align="center">*<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">)<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">;<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">Δ<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
                 </tr>
                 <tr>
                   <th valign="middle" align="center">6_</th>
-                  <td valign="middle" align="center">&amp;<br>
+                  <td valign="middle" bgcolor="#ffff99" align="center">+<br>
                   </td>
                   <td valign="middle" align="center">A<br>
                   </td>
@@ -3511,28 +3497,27 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                   </td>
                   <td valign="middle" align="center">.<br>
                   </td>
-                  <td valign="middle" align="center">⌑<br>
+                  <td valign="middle" bgcolor="#ffff99" align="center">)<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">(<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">&lt;<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">⯒<br>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
                   </td>
                 </tr>
               </tbody>
             </table>
             <p>In case it isn't obvious from the table above, code 00 is
-              a blank space.&nbsp; The shaded codes are non-printable,
-              so it's not immediately clear what their visual
-              representations mean; they are <i>not</i> what the CHAR
-              table in the PAST program refers to as "SPECIAL
-              CHARACTERS", which are rather the printable symbols like
-              '#', '/', and so on.&nbsp; I googled some of weirder
+              a blank space.&nbsp; The yellow-shaded characters have
+              encodings in the PAST program octal listing that don't
+              match the BA8421 encoding for some reason, so the table
+              above matches the assembler.&nbsp; The gray-background
+              codes are non-printable.&nbsp; I googled some of weirder
               characters, since it wasn't obvious why they would be
               included in such a limited repertoire of symbols, and
               unexpectedly got some historical information about them
-              that may actually be applicable to their usage in the PTC:<br>
+              that may actually be applicable to their usage in the PTC:
             </p>
             <ul>
               <li>Code 77, the "group mark" character (a vertical line
@@ -3703,8 +3688,25 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                 assembler, it noted it in the assembly listing by
                 replacing "<tt>TRA</tt>" with "<tt>TRA*</tt>".&nbsp;
                 However, I think that "<tt>TRA</tt>" is always what
-                would have originally been used on the punch card.<br>
-              </li>
+                would have originally been used on the punch card.</li>
+              <li><i>Workaround for PTC</i>:&nbsp; For the PTC version
+                of the original assembler, I've unfortunately been
+                forced to provide hints to the modern assembler
+                (yaASM.py) by <i>explicitly</i> using "<tt>TRA*</tt>"
+                in the source code when necessary.&nbsp; With either of
+                "<tt>TRA</tt>" or "<tt>TRA*</tt>", the modern assembler
+                provides a behaviorally-correct fixup, but when "<tt>TRA</tt>"
+                is used rather than "<tt>TRA*</tt>", the
+                automatically-allocated memory words are at different
+                addresses than originally, thus preventing validation of
+                the assembler.&nbsp; Deducing the original PTC algorithm
+                and thus allowing universal use of "<tt>TRA</tt>" in PTC
+                source code is a reverse-engineering problem I have been
+                unable to solve so far.&nbsp; (Although, for all <i>I</i>
+                know, the PTC programmers may themselves have had to
+                explicitly use "<tt>TRA*</tt>" as well.&nbsp; There's no
+                available original documentation to answer that question
+                one way or the other.)</li>
             </ul>
             This in so far as the assembly-language source code is
             concerned, it seems that one may as well always use <tt>TRA</tt>
@@ -7927,10 +7929,9 @@ Assembly
             into consecutive memory locations.&nbsp; The <i><tt>text</tt></i>
             operand is delimited by a leading '^' and trailing '$',
             which are not themselves encoded into memory.&nbsp; The
-            assembler right-pads the <i><tt>text</tt></i> to a multiple
-            of 8 characters, using spaces.&nbsp; For example, a <tt><i>text</i></tt>
-            string of 9 characters would be right-padded with 7 spaces
-            to 16 characters. <br>
+            assembler right-pads the <i><tt>text</tt></i>, if
+            necessary, until it is a multiple of 4 characters ending in
+            at least 2 spaces. <br>
             <br>
             <b>Note</b>:&nbsp; The leading carat character (<tt>^</tt>)
             in <tt><i>text</i></tt> was not used in the original
@@ -7989,13 +7990,14 @@ Assembly
             <br>
             In the <i>printed</i> assembly listing output, though,
             things are much less straightforward.&nbsp; While the
-            assembler does print out a representation of how the <tt><i>text</i></tt>
-            string assembles, presumably intended to be helpful to the
-            programmer, what it ends up printing is a pretty goofy
-            representation of the original text.&nbsp; For example,
-            consider the example <tt>BCI</tt> usage mentioned above,
-            which comes from page 3 of the PAST program.&nbsp; The
-            assembly listing displays the assembled memory locations as<br>
+            original assembler did print out a representation of how the
+            <tt><i>text</i></tt> string assembled, presumably intended
+            to be helpful to the programmer, what it ended up printing
+            was a pretty goofy representation of the original
+            text.&nbsp; For example, consider the example <tt>BCI</tt>
+            usage mentioned above, which comes from page 3 of the PAST
+            program.&nbsp; The assembly listing displays the assembled
+            memory locations as<br>
             <blockquote><tt>CHPV</tt><tt><br>
               </tt><tt>0OTC</tt><tt><br>
               </tt><tt>/L0T</tt><tt><br>
@@ -8048,9 +8050,9 @@ Assembly
               suspect it's just a bug, but it seems ridiculous that a
               bug as ridiculous as printing out "CHPV..." in place of
               "TYPE..." went unnoticed back in the day!&nbsp; The modern
-              assembler (yaAGC.py) does its best to slavishly duplicate
-              this silly behavior, and you can blame me for <i>that</i>
-              decision if you like.<br>
+              assembler (yaAGC.py) by default <i>does not</i> reproduce
+              this behavior, but does so if the --past-bugs command-line
+              switch is used.<br>
             </p>
             See also the <tt>PRS</tt> CPU instruction.<br>
           </td>
