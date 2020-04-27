@@ -29,7 +29,8 @@
 #				auto-allocation of =... constants.
 #		2019-09-18 RSB	Now outputs .sym and .sch files in addition to
 #				the .tsv file that was already being output.
-#		2020-04-21 RSB	Added the --ptc and --help command-line options.
+#		2020-04-21 RSB	Began adding the --ptc command-line options
+#				along with --past-bugs and --help.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -219,7 +220,7 @@ for arg in sys.argv[1:]:
 			pastBugs = True
 		elif arg == "--help":
 			print("Usage:", file=sys.stderr)
-			print("\tyaASM.py [OCTALS.tsv] [OPTIONS] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
+			print("\tyaASM.py [OPTIONS] [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
 			print("The OPTIONS are", file=sys.stderr)
 			print("\t--help -- to print this message.", file=sys.stderr)
 			print("\t--ptc -- to use PTC source/octal input rather than the default LVDC.", file=sys.stderr)
@@ -238,6 +239,7 @@ for arg in sys.argv[1:]:
 			f = open(checkFilename, "r")
 			module = -1
 			sector = -1
+			offset = -1
 			for line in f:
 				line = line.strip()
 				if line[:1] == "#" or len(line) == 0:
@@ -252,37 +254,80 @@ for arg in sys.argv[1:]:
 						raise("Warning: module or sector out of range")
 					continue
 				offset = int(fields[0], 8)
-				ptr = 1
-				for count in range((len(fields) - 1) // 2):
-					if len(fields[ptr]) != 11:
-						raise("Warning: wrong field length")
-					elif fields[ptr].strip() == "" and fields[ptr + 1].strip() == "":
-						# An unused word.
-						pass
-					elif fields[ptr + 1] == "D" and fields[ptr][0] == " " and fields[ptr][-1] == " " and fields[ptr][1:-2].isdigit():
-						# A data word.
-						value = int(fields[ptr].strip(), 8)
-						octalsForChecking[module][sector][2][offset] = value
-					elif fields[ptr + 1] == "D" and (fields[ptr][:5] == "     " or fields[ptr][:5].isdigit()) \
-						and fields[ptr][5] == " " and (fields[ptr][6:] == "     " or fields[ptr][6:].isdigit()):
-						# An instruction-pair word.
-						syl1 = fields[ptr][:5]
-						syl0 = fields[ptr][6:]
-						if syl1.strip() != "":
-							value = int(syl1, 8)
-							octalsForChecking[module][sector][1][offset] = value
-						if syl0.strip() != "":
-							value = int(syl0, 8)
-							octalsForChecking[module][sector][0][offset] = value
-					else:
-						raise("Warning: unrecognized format: " + line)	
-					ptr += 2
-					offset += 1
+				# Note that the format of the data lines from the input file differs
+				# depending on whether the file is based on the PAST program listing
+				# (PTC) or the AS206-RAM Flight Program listing (LVDC).
+				if ptc:
+					if len(fields) != 9:
+						raise("Warning: wrong number of fields (must be 9)")
+					for n in range(1, 9):
+						entry = fields[n].strip()
+						if entry == "":
+							continue
+						if len(entry) != 12 or not entry.isdigit():
+							raise("Warning: octal value is corrupted")
+						value = int(entry, 8)
+						valid = value & 0o777
+						value = value >> 9
+						if valid > 3:
+							raise("Validity bits incorrect")
+						# Unfortunately, the PTC octal format cannot distinguish between
+						# data areas vs instruction areas as the LVDC octal format can,
+						# so we have to treat the octals as both.  While we can correctly
+						# deduce _some_ of that, we can't correctly deduce all of it, so
+						# we just have to rely on some fancier test logic farther down
+						# in the process.  (Specifically, if both syl0 and syl1 are valid,
+						# we can't tell if that's one data value or two instructions. I
+						# think all other cases are distinguishable.)
+						if valid != 3:
+							octalsForChecking[module][sector][2][offset] = None
+						else:
+							octalsForChecking[module][sector][2][offset] = value
+						syl1 = (value >> 12) & 0o77774
+						syl0 = value & 0o37776
+						if (valid & 2) == 0:
+							if syl1 != 0:
+								raise("Warning: syllable 2 should be 0")
+							syl1 = None
+						if (valid & 1) == 0:
+							if syl0 != 0:
+								raise("Warning: syllable 1 should be 0")
+							syl0 = None
+						octalsForChecking[module][sector][1][offset] = syl1
+						octalsForChecking[module][sector][0][offset] = syl0
+						offset += 1
+				else:
+					ptr = 1
+					for count in range((len(fields) - 1) // 2):
+						if len(fields[ptr]) != 11:
+							raise("Warning: wrong field length")
+						elif fields[ptr].strip() == "" and fields[ptr + 1].strip() == "":
+							# An unused word.
+							pass
+						elif fields[ptr + 1] == "D" and fields[ptr][0] == " " and fields[ptr][-1] == " " and fields[ptr][1:-2].isdigit():
+							# A data word.
+							value = int(fields[ptr].strip(), 8)
+							octalsForChecking[module][sector][2][offset] = value
+						elif fields[ptr + 1] == "D" and (fields[ptr][:5] == "     " or fields[ptr][:5].isdigit()) \
+							and fields[ptr][5] == " " and (fields[ptr][6:] == "     " or fields[ptr][6:].isdigit()):
+							# An instruction-pair word.
+							syl1 = fields[ptr][:5]
+							syl0 = fields[ptr][6:]
+							if syl1.strip() != "":
+								value = int(syl1, 8)
+								octalsForChecking[module][sector][1][offset] = value
+							if syl0.strip() != "":
+								value = int(syl0, 8)
+								octalsForChecking[module][sector][0][offset] = value
+						else:
+							raise("Warning: unrecognized format: " + line)	
+						ptr += 2
+						offset += 1
 			f.close()
 			checkTheOctals = True
 		except:
 			countWarnings += 1
-			print("Warning: Cannot open octal-comparison file " + checkFilename + " or file is corrupted")
+			print("Warning (%o %02o %03o): Cannot open octal-comparison file %s or file is corrupted" % (module, sector, offset, checkFilename))
 			checkFilename = ""
 #print(octalsForChecking)
 if ptc:
@@ -295,7 +340,8 @@ if ptc:
 	operators["SHR"]["a9"] = 0
 	maxSHF = 6
 	if pastBugs:
-		operators["XOR"] = operators["RSU"]
+		operators["XOR"] = operators["RSU"].copy()
+	operators["RSU"]["opcode"] = 0b0011
 else:
 	del operators["PRS"]
 	del operators["CIO"]
@@ -340,8 +386,10 @@ for n in range(0,len(lines)):
 #----------------------------------------------------------------------------
 #	Definitions of utility functions
 #----------------------------------------------------------------------------
-def addError(n, msg):
+def addError(n, msg, trigger=-1):
 	global errors, countInfos, countWarnings, countErrors, countMismatches, countOthers
+	if trigger != -1 and trigger != n:
+		return
 	if msg not in errors[n]:
 		if msg[:5] == "Info:":
 			countInfos += 1
@@ -707,16 +755,25 @@ def storeAssembled(lineNumber, value, hop, data = True):
 			else:
 				octals[module][sector][syllable][location] = (value << 1) & 0o37776
 	if checkTheOctals and checkSyl >= 0:
-		if octals[module][sector][checkSyl][location] != octalsForChecking[module][sector][checkSyl][location]:
+		assembledOctal = octals[module][sector][checkSyl][location]
+		checkOctal = octalsForChecking[module][sector][checkSyl][location]
+		if assembledOctal != checkOctal:
 			msg = "Mismatch: Octal mismatch, "
-			if checkSyl == 2:
-				fmt = "%o,%02o,%o,%03o, %09o != %09o, xor = %09o" 
+			if checkOctal == None:
+				if checkSyl == 2:
+					fmt = "%o,%02o,%o,%03o, %09o != None" 
+				else:
+					fmt = "%o,%02o,%o,%03o, %05o != None"
+				msg += fmt % (module, sector, checkSyl, location, assembledOctal)
 			else:
-				fmt = "%o,%02o,%o,%03o, %05o != %05o, xor = %05o"
-			xor = octals[module][sector][checkSyl][location] ^ octalsForChecking[module][sector][checkSyl][location]
-			msg += fmt % (module, sector, checkSyl, location, octals[module][sector][checkSyl][location], octalsForChecking[module][sector][checkSyl][location], xor)
-			#msg += ", disassembly   " + unassemble(octals[module][sector][checkSyl][location])
-			#msg += "   !=   " + unassemble(octalsForChecking[module][sector][checkSyl][location])
+				if checkSyl == 2:
+					fmt = "%o,%02o,%o,%03o, %09o != %09o, xor = %09o" 
+				else:
+					fmt = "%o,%02o,%o,%03o, %05o != %05o, xor = %05o"
+				xor = assembledOctal ^ checkOctal
+				msg += fmt % (module, sector, checkSyl, location, assembledOctal, checkOctal, xor)
+				#msg += ", disassembly   " + unassemble(assembledOctal)
+				#msg += "   !=   " + unassemble(checkOctal)
 			addError(lineNumber, msg)
 
 # Form a HOP constant from a hop dictionary.
@@ -1155,15 +1212,23 @@ for lineNumber in range(0, len(expandedLines)):
 				incDLOC()	
 			elif fields[1] in operators:
 				inDataMemory = False
-				extra = 0
-				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
-					extra = int(fields[2][2:])
-				if ptc and fields[1] in ["TRA", "HOP"] and not used[IM][IS][S][LOC]:
-					pass
-				else:
-					oldLocation = checkLOC(extra)
-					if oldLocation != []:
-						inputLine["switchSectorAt"] = oldLocation
+				if True:
+					# This code is intended for inserting extra jumps around memory
+					# already allocated for something else.  I don't see how it could
+					# be effective here in the discovery pass, because some of the 
+					# memory it's trying to jump around won't have been allocated yet. 
+					# Nevertheless, it seems to work for LVDC AS206-RAM, and fails
+					# sometimes for PTC PAST program.  Perhaps the AS206-RAM program
+					# just by chance avoids the problematic situations.
+					extra = 0
+					if fields[2][:2] == "*+" and fields[2][2:].isdigit():
+						extra = int(fields[2][2:])
+					if ptc and fields[1] in ["TRA", "HOP"] and not used[IM][IS][S][LOC]:
+						pass
+					else:
+						oldLocation = checkLOC(extra)
+						if oldLocation != []:
+							inputLine["switchSectorAt"] = oldLocation
 				lastORG = False
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
@@ -1800,7 +1865,7 @@ for entry in inputFile:
 				residual = symbols[operand]["S"]
 			elif operator == "TRA":
 				# The target location exists, but is not in this IM/IS/DM/DS.
-				# We must therefore substituted a HOP instruction instead,
+				# We must therefore substitute a HOP instruction instead,
 				# and allocate a HOP constant nameless variable.
 				hopConstant = formConstantHOP(symbols[operand])
 				constantString = "%09o" % hopConstant
@@ -1896,6 +1961,8 @@ for entry in inputFile:
 					loc = hop2["DLOC"]
 					if hop2["DS"] == 0o17:
 						residual = 1
+					if ptc and DS == 0o17 and hop2["DS"] == 0o17:
+						residual = 0
 				else:
 					# The operand is an LHS in instruction space.  If that's within the 
 					# current instruction sector, we should be able to convert the HOP 
@@ -2016,6 +2083,8 @@ for entry in inputFile:
 						loc -= operandModifier
 					if hop2["DS"] == 0o17:
 						residual = 1
+					if ptc and DS == 0o17 and hop2["DS"] == 0o17:
+						residual = 0
 				else:
 					if hop2["IM"] != DM or hop2["IS"] != DS:
 						if not useDat or S == 1:
@@ -2117,8 +2186,16 @@ if checkTheOctals:
 					assembledOctal = octals[module][sector][syllable][location]
 					checkOctal = octalsForChecking[module][sector][syllable][location]
 					if assembledOctal == None and checkOctal != None:
+						# This is an adequate test for LVDC, but for PTC it's
+						# still possible to have gotten to this point and to have
+						# a false positive, because the PTC octal listing doesn't
+						# distinguish between an entry containg 1 valid data value
+						# vs 2 valid instructions.  So we need to apply an additional
+						# test to check for that.
+						if ptc and syllable == 2:
+							continue
 						countMismatches += 1
-						print("Mismatch: Octal mismatch at %o,%02o,%o,%03o" %(module,sector,syllable,location))
+						print("Mismatch: Octal mismatch B at %o,%02o,%o,%03o" %(module,sector,syllable,location))
 print("")
 print("Assembly-message summary:")
 print("\tErrors:     %d" % countErrors)
