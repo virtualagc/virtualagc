@@ -133,7 +133,7 @@ def bciPad(string):
 operators = {
     "HOP": { "opcode":0b0000 }, 
     "MPY": { "opcode":0b0001 }, 
-    "PRS": { "opcode":0b0101 }, 
+    "PRS": { "opcode":0b0001 }, 
     "SUB": { "opcode":0b0010 }, 
     "DIV": { "opcode":0b0011 }, 
     "TNZ": { "opcode":0b0100 }, 
@@ -212,12 +212,15 @@ countRollovers = 0
 checkFilename = ""
 ptc = False
 pastBugs = False
+ignoreResiduals = False
 for arg in sys.argv[1:]:
 	if arg[:2] == "--":
 		if arg == "--ptc":
 			ptc = True
 		elif arg == "--past-bugs":
 			pastBugs = True
+		elif arg == "--ignore-residuals":
+			ignoreResiduals = True
 		elif arg == "--help":
 			print("Usage:", file=sys.stderr)
 			print("\tyaASM.py [OPTIONS] [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
@@ -225,6 +228,7 @@ for arg in sys.argv[1:]:
 			print("\t--help -- to print this message.", file=sys.stderr)
 			print("\t--ptc -- to use PTC source/octal input rather than the default LVDC.", file=sys.stderr)
 			print("\t--past-bugs -- only with --ptc, reproduces some original assembler bugs.", file=sys.stderr)
+			print("\t--ignore-residuals -- (debug) for --ptc octal checks, ignore residual flag.", file=sys.stderr)
 			print("Files produced by the assembly are:", file=sys.stderr)
 			print("\tyaASM.tsv\tAn octal-listing file.", file=sys.stderr)
 			print("\tyaASM.sym\tA symbol file.", file=sys.stderr)
@@ -401,6 +405,7 @@ def addError(n, msg, trigger=-1):
 			countMismatches += 1
 		else:
 			countOthers += 1
+		#msg = str(n) + ": " + msg
 		errors[n].append(msg) 
 
 def incDLOC(increment = 1, mark = True):
@@ -432,7 +437,7 @@ def findDLOC(start = 0, increment = 1):
 		n += 1
 		length += 1
 	if reuse:
-		addError(lineNumber, "Warning: Skipping memory locations already used")
+		addError(lineNumber, "Warning: Skipping memory locations already used", trigger = -2)
 	if length < increment:
 		addError(lineNumber, "Error: No space of size " + str(increment) + " found in memory bank")
 	return start
@@ -564,10 +569,11 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 	start = 0
 	for loc in range(start, 256):
 		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
-			if ptc:
+			if False:
 				addError(lineNumber, "Info: Allocation of nameless " + value)
 			used[DM][DS][0][loc] = True
 			used[DM][DS][1][loc] = True
+			octals[DM][DS][2][loc] = 0
 			nameless[value] = loc
 			allocationRecords.append({ "symbol": value, "lineNumber":lineNumber, 
 				"inputLine": inputFile[lineNumber]["expandedLine"], 
@@ -580,6 +586,7 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 					addError(lineNumber, "Info: Allocation of nameless " + valueR)
 				used[DM][0o17][0][loc] = True
 				used[DM][0o17][1][loc] = True
+				octals[DM][0o17][2][loc] = 0
 				nameless[valueR] = loc
 				allocationRecords.append({ "symbol": valueR, "lineNumber":lineNumber, 
 					"inputLine": inputFile[lineNumber]["expandedLine"], 
@@ -609,7 +616,7 @@ def checkLOC(extra = 0):
 		 	addError(lineNumber, "Error: No room left in memory sector")
 		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]):
 			tLoc = DLOC
-			addError(lineNumber, "Warning: Skipping memory locations already used")
+			addError(lineNumber, "Warning: Skipping memory locations already used", trigger = -2)
 			while tLoc < 256 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc]):
 				tLoc += 1
 			if tLoc >= 256:
@@ -632,7 +639,7 @@ def checkLOC(extra = 0):
 			# to find address for the TRA or HOP to take us to, always searching
 			# upward.
 			if lastORG:
-				addError(lineNumber, "Warning: Skipping memory locations already used")
+				addError(lineNumber, "Warning: Skipping memory locations already used", trigger = -2)
 			else:
 				used[IM][IS][S][LOC] = True
 				autoSwitch = True
@@ -759,6 +766,7 @@ def storeAssembled(lineNumber, value, hop, data = True):
 		checkOctal = octalsForChecking[module][sector][checkSyl][location]
 		if assembledOctal != checkOctal:
 			msg = "Mismatch: Octal mismatch, "
+			xor = 0
 			if checkOctal == None:
 				if checkSyl == 2:
 					fmt = "%o,%02o,%o,%03o, %09o != None" 
@@ -774,7 +782,8 @@ def storeAssembled(lineNumber, value, hop, data = True):
 				msg += fmt % (module, sector, checkSyl, location, assembledOctal, checkOctal, xor)
 				#msg += ", disassembly   " + unassemble(assembledOctal)
 				#msg += "   !=   " + unassemble(checkOctal)
-			addError(lineNumber, msg)
+			if not (ptc and ignoreResiduals and ((checkSyl == 0 and xor == 0o100) or (checkSyl == 1 and xor == 0o100))):
+				addError(lineNumber, msg)
 
 # Form a HOP constant from a hop dictionary.
 def formConstantHOP(hop):
@@ -1455,6 +1464,19 @@ def printLineFields():
 		line += lineFieldFormats[n] % lineFields[n]
 	print(line)
 
+# Determine if module dm, sector ds is reachable from the global 
+# module DM, sector DS.  Return True if so, False if not.
+def inSectorOrResidual(dm, ds, DM, DS):
+	if ptc:
+		if ds == 0o17:
+			return True
+		if dm == DM and ds == DS:
+			return True
+	else:
+		if dm == DM and (ds == DS or ds == 0o17):
+			return True
+	return False
+
 useDat = False
 errorsPrinted = []
 lastLineNumber = -1
@@ -1862,6 +1884,10 @@ for entry in inputFile:
 				# Which seems pretty convoluted, though pragmatically reasonable, so I may be
 				# misinterpreting what's going on.
 				loc = symbols[operand]["LOC"]
+				if operandModifierOperation == "+":
+					loc += operandModifier
+				elif operandModifierOperation == "-":
+					loc -= operandModifier
 				residual = symbols[operand]["S"]
 			elif operator == "TRA":
 				# The target location exists, but is not in this IM/IS/DM/DS.
@@ -1955,13 +1981,18 @@ for entry in inputFile:
 					addError(lineNumber, "Error: Cannot apply + or - in HOP operand")
 				elif "inDataMemory" in hop2 and hop2["inDataMemory"]:
 					# The operand is a variable, as it ought to be.
-					if hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17):
-						if not useDat or S == 1:
-							addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
+					#if (not ptc and hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17)):
+					#	if not useDat: # or S == 1:
+					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS):
+						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (hop2["DM"], hop2["DS"]))
 					loc = hop2["DLOC"]
-					if hop2["DS"] == 0o17:
+					#addError(lineNumber, "here A %d" % residual, trigger = 1469)
+					if hop2["DS"] == 0o17 and not (ptc and DS == 0o17):
+						# Fixup residual.
 						residual = 1
-					if ptc and DS == 0o17 and hop2["DS"] == 0o17:
+					#addError(lineNumber, "here B %d" % residual, trigger = 1469)
+					if False and ptc and DS == 0o17 and hop2["DS"] == 0o17:
+						# Fixup residual.
 						residual = 0
 				else:
 					# The operand is an LHS in instruction space.  If that's within the 
@@ -2058,8 +2089,9 @@ for entry in inputFile:
 				dm = int(constants[operand][1], 8)
 				ds = int(constants[operand][2], 8)
 				dloc = int(constants[operand][3], 8)
-				if DM != DM or DS != DS:
-					addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
+				#if (not ptc and (dm != DM or (ds != DS and ds != 0o17)) or (ptc and ds != 0o17 and not (dm == DM and ds == DS))):
+				if not inSectorOrResidual(dm, ds, DM, DS):
+					addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (dm, ds))
 				else:
 					loc = dloc
 					if ds == 0o17:
@@ -2073,9 +2105,10 @@ for entry in inputFile:
 			else: 
 				hop2 = symbols[operand]
 				if hop2["inDataMemory"]:
-					if hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17):
-						if not useDat or S == 1:
-							addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector")
+					#if (not ptc and hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17)):
+					#	if not useDat: # or S == 1:
+					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS):
+						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (hop2["DM"], hop2["DS"]))
 					loc = hop2["DLOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier
@@ -2083,22 +2116,25 @@ for entry in inputFile:
 						loc -= operandModifier
 					if hop2["DS"] == 0o17:
 						residual = 1
-					if ptc and DS == 0o17 and hop2["DS"] == 0o17:
+					if False and ptc and DS == 0o17 and hop2["DS"] == 0o17 and IS != 0o17:
+						# Fixup residual
 						residual = 0
 				else:
 					if hop2["IM"] != DM or hop2["IS"] != DS:
 						if not useDat or S == 1:
-							addError(lineNumber, "Error: Operand not in current data-memory sector")
+							addError(lineNumber, "Error: Operand not in current data-memory sector (%o %02o)" % (hop2["IM"], hop2["IS"]))
 					loc = hop2["LOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier
 					elif operandModifierOperation == "-":
 						loc -= operandModifier
-					if hop2["DS"] == 0o17:
+					if hop2["DS"] == 0o17 and not (ptc and DS == 0o17):
+						# Fixup residual.
 						residual = 1
 		if loc > 0o377:
 			loc = loc & 0o377
 			residual = 1
+		#addError(lineNumber, "here C %d" % residual, trigger = 1469)
 		if "a8" in operators[operator]:
 			loc = (loc & 0o177) | (operators[operator]["a8"] << 7)
 		a81 = "%03o" % loc
@@ -2183,6 +2219,8 @@ if checkTheOctals:
 		for sector in range(16):
 			for syllable in range(3):
 				for location in range(0o400):
+					if ptc and syllable < 2 and octals[module][sector][2][location] != None:
+						continue
 					assembledOctal = octals[module][sector][syllable][location]
 					checkOctal = octalsForChecking[module][sector][syllable][location]
 					if assembledOctal == None and checkOctal != None:
