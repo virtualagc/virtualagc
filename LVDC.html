@@ -1478,8 +1478,9 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
             (CPU i/o control).</li>
           <li>Instructions that are a little different:</li>
           <ul>
-            <li><tt>CDS</tt> (set data sector) has the same function,
-              but its instruction word appears to be coded slightly
+            <li><tt>CDS</tt> (set data sector) and <tt>RSU</tt>
+              (reverse subtract) have the same functionality as for
+              LVDC, but their instruction words coded slightly
               differently.</li>
             <li><tt>SHF</tt> (logical shift) remains similar, but no
               longer has a "clear accumulator" function and can shift by
@@ -1487,6 +1488,11 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
           </ul>
           <li>Other:</li>
           <ul>
+            <li>There is a single "residual" memory sector, in memory
+              module 0, serving all memory modules.&nbsp; (Whereas the
+              LVDC has a separate residual sector for each memory
+              module.)<br>
+            </li>
             <li>Boot:&nbsp; Execution begins at memory module 0, sector
               0, syllable 0, location 0.&nbsp; (Whereas for the LVDC,
               module 0, sector 0, location 0 contains an address at
@@ -1557,7 +1563,7 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
             listing we've obtained is simply a snapshot of work of
             ancient work in progress, which cannot even be assembled
             error-free without a bit of massaging, the PAST program is
-            unambiguously a mature, debugged, working program.&nbsp; <br>
+            unambiguously a mature, debugged, working program.<br>
           </li>
         </ul>
         <p>As far as the versioning of the software, there is nothing
@@ -2390,103 +2396,17 @@ of
     A9 is 0, the currently-selected sector is being addressed, while
     when A9 is 1 a special sector called the "residual sector" is being
     addressed.&nbsp; <span style="font-style: italic;">The "residual
-      sector" is always sector 017 (octal) in the current memory module</span>.&nbsp;
-Incidentally,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    the "residual sector" can only be used for addressing memory, and
-    there's no way to access instructions in it unless it happens to be
-    the currently-selected instruction sector as explained in the
-    paragraph that follows.&nbsp; In essence, the "residual sector" is
-    good for storing global variables whilst the currently-selected data
-    sector is good for storing local variables.<br>
+      sector" is always sector 017 (octal)</span>, in the current memory
+    module for LVDC, or in module 0 for PTC.&nbsp; (I.e., the LVDC has a
+    separate residual sector in each module, whereas the PTC simply has
+    a single residual sector, in module 0, no matter which memory module
+    is selected.)&nbsp; Incidentally, the "residual sector" can only be
+    used for addressing memory, and there's no way to access
+    instructions in it unless it happens to be the currently-selected
+    instruction sector as explained in the paragraph that follows.&nbsp;
+    In essence, the "residual sector" is good for storing global
+    variables whilst the currently-selected data sector is good for
+    storing local variables.<br>
     <br>
     Memory-sector selection and the "residual sector" become clearer
     when contemplating the HOP Register mentioned earlier.&nbsp; Here is
@@ -3724,12 +3644,16 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           <td><br>
           </td>
           <td>1<br>
+            1<br>
           </td>
           <td>0<br>
+            1<br>
           </td>
           <td>0<br>
+            0<br>
           </td>
           <td>1<br>
+            1<br>
           </td>
           <td style="text-align: center;">1<br>
           </td>
@@ -3740,15 +3664,12 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             a 256-word sector, and A9 is the "residual bit" that selects
             between the current sector and the "residual sector".<br>
             <br>
-            <i>Regarding PTC assembly</i>:&nbsp; At the time of the PAST
-            program, the original assembler had a <i>bug</i> in which <tt>XOR</tt>
-            is incorrectly assembled as <tt>RSU</tt>.&nbsp; Needless to
-            say, this bug is <i>not</i> reproduced in the modern
-            assembler (yaASM.py).&nbsp; However, the modern assembler
-            has a command-line switch, --past-bugs, which allows the bug
-            to be reproduced, thus allowing exact octal-for-octal
-            assembly of the PAST program for the purpose of validating
-            the assembler.<br>
+            <b>Note</b>: The opcode bits for <tt>XOR</tt> are 1001 (11<sub>8</sub>)
+            for LVDC, but 1101 (15<sub>8</sub>) for PTC.&nbsp; However,
+            the PTC documentation <i>incorrectly</i> indicates that the
+            coding is 1001.&nbsp; (Either that, or the assembler
+            assembled the instruction incorrectly; take your pick of
+            explanations.)<br>
           </td>
         </tr>
         <tr>
@@ -3992,17 +3913,25 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           <td><br>
           </td>
           <td>1<br>
+            0<br>
           </td>
           <td>1<br>
+            0<br>
           </td>
           <td>0<br>
+            1<br>
           </td>
           <td>1<br>
+            1<br>
           </td>
           <td style="text-align: center;">1<br>
           </td>
           <td style="vertical-align: top;">Same as SUB, except that the
             order of the operands in the subtraction is reversed.<br>
+            <br>
+            <b>Note</b>: The opcode bits for <tt>RSU</tt> are 1101 (15<sub>8</sub>)
+            for LVDC, but 0011 (03) for PTC.&nbsp; (0011 in LVDC is for
+            the <tt>DIV</tt> instruction, which is missing from PTC.)<br>
           </td>
         </tr>
         <tr>
