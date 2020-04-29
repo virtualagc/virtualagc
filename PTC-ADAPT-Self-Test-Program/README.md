@@ -15,7 +15,7 @@ The transcribed source-code file assembles correctly and its assembled executabl
 
 # Assembly Using the Modern LVDC Assembler (yaASM.py)
 
-The original assembler program used during the Apollo Project is not available to us, but what we refer to as the _modern assembler_ has been created from scratch and can be used to assemble either the limited amount of LVDC source code or PTC source code available to us.  The assembler, found in this software repository at ../yaASM.py/yaASM.py requires Python3 to run.  You should be able to put it in your PATH; it is not dependent on any other files to run.
+The original assembler program used during the Apollo Project is not available to us, but what we refer to as the _modern assembler_ has been created from scratch and can be used to assemble either the limited amount of LVDC source code or PTC source code available to us.  The assembler, found in this software repository at ../yaASM.py/yaASM.py requires Python3 to run.  You should be able to put it in your PATH; the file expression.py is also required.
 
 The recommended syntax for assembling the PTC ADAPT Self-Test Program is one of the following:
 
