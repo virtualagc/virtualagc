@@ -1,6 +1,6 @@
 # Introduction
 
-The PTC ADAPT Self-Test Program is software for the Launch Vehicle Digital Computer (LVDC) which, along with the companion Launch Vehicle Data Adapter (LVDA), was used in Apollo's Saturn rockets.  The PTC ("Programmable Test Controller") was _ground-based_ equipment, so this particular software was not use onboard the rocket; i.e., it is presented as an example of software for the LVDC computer, and not as flight software.  The reason it is presented as LVDC software, is that the PTC contained a modified LVDC, and thus that is the CPU on which this software runs.  The nature of the modifications to the CPU relate to use of differing peripheral devices and to the migration of some facilities supported natively by the LVDC to peripheral devices in the PTC; examples include multiplication and division.  However, such modifications do not prevent the PTC software from being syntatically-correct LVDC software, nor do they prevent use of the LVDC assembler for PTC software.
+The PTC ADAPT Self-Test Program is software for the Launch Vehicle Digital Computer (LVDC) which, along with the companion Launch Vehicle Data Adapter (LVDA), was used in Apollo's Saturn rockets.  More accurately, it is softwre for the PTC ("Programmable Test Controller"), which was _ground-based_ equipment.  Thus this particular software was not use onboard the rocket; i.e., it is presented as an example of software for the LVDC computer, and not as flight software.  The reason it is presented as LVDC software, is that the PTC contained a modified LVDC, and thus that is the CPU on which this software runs.  The nature of the modifications to the CPU are significant, in the sense that software written for the LVDC may not be able to run directly on the PTC without changes, and vice-versa, but are nevertheless the differences are relatively small in the larger scheme of things. 
 
 The ADAPT ("Aerospace Data Adapter/Processor Tester") was equipment for evaluating the LVDA, thus the PTC ADAPT Self-Test Program illuminates the interaction between the LVDC and LVDA.
 
@@ -8,13 +8,37 @@ Additional documentation may be found on [the Virtual AGC Project main website's
 
 # Files
 
-- PTC-ADAPT-Self-Test-Program.tsv &mdash; this is a transcription of the program's octal listing, which begins at p. 221 of the scanned pages and proceeds to the end of the scans.  The octal listing is the assembled form of the PTC ADAPT Self-Test Program.  The modern LVDC assembler also creates its own octal listing, of course, but this transcribed octal listing can be read by the assembler and used as a cross-check to validate that the modern assembler's results compares with the original assembler's results.
+- PTC-ADAPT-Self-Test-Program.tsv &mdash; this is a transcription of the program's _octal listing_, which begins at p. 221 of the scanned pages and proceeds to the end of the scans.  The octal listing is the assembled form of the PTC ADAPT Self-Test Program.  The modern LVDC assembler also creates its own octal listing, of course, but this transcribed octal listing can be read by the assembler and used as a cross-check to validate that the modern assembler's results compares with the original assembler's results.
 - PTC-ADAPT-Self-Test-Program.lvdc &mdash; this is a transcription of the program's assembly-language source code.  It can be used as an input to the modern LVDC assembler.
 
-Status:  Both files mentioned above have been transcribed.  The octal-listing file has also been through one round of proof-readinging, but likely still requires additional error-correction.  The source-code file has not so far been subjected to any proof-reading.
+The transcribed source-code file assembles correctly and its assembled executable octals correspond 100% to those in the transcribed octal listing.  While the source code and the assembler undoubtedly still contain errors, they are nevertheless likely correct enough for practical purposes.
 
 # Assembly Using the Modern LVDC Assembler (yaASM.py)
 
-TBD
+The original assembler program used during the Apollo Project is not available to us, but what we refer to as the _modern assembler_ has been created from scratch and can be used to assemble either the limited amount of LVDC source code or PTC source code available to us.  The assembler, found in this software repository at ../yaASM.py/yaASM.py requires Python3 to run.  You should be able to put it in your PATH; it is not dependent on any other files to run.
 
+The recommended syntax for assembling the PTC ADAPT Self-Test Program is one of the following:
+
+    cd /to/the/folder/containing/this/file
+    yaASM.py --ptc PTC-ADAPT-Self-Test-Program.tsv <PTC-ADAPT-Self-Test-Program.lvdc >listing.txt
+   
+or
+
+    cd /to/the/folder/containing/this/file
+    yaASM.py --ptc --past-bugs PTC-ADAPT-Self-Test-Program.tsv <PTC-ADAPT-Self-Test-Program.lvdc >listing.txt
+
+The difference between these two forms is that the original Apollo-era assembler displayed buggy messages (but created correct executable octals) for a pseudo-op named "BCI".  By default (upper command), the modern assembler instead produces correct messages in the output assembly listing, but if --past-bugs is added to the command line (lower command), the modern assembler instead mimics the original operation and prints out the buggy messages.
+
+The --ptc command-line switch must be used, as shown, or else the assembler will attempt to assemble the source code as an LVDC program rather than as a PTC program, and will fail to produce a usable result.
+
+The files output by the process are:
+
+- listing.txt &mdash; an assembly listing similar to the original scanned assembly listing, but not attempting to precisely duplicate the old format.
+- yaASM.txt &mdash; an octal listing similar to the octal listing from the original scanned assembly listing, but conforming the (superior) LVDC format rather than the (inferior) original PTC format.  The data in this file is generated by the assembly process, and is _compared_ by the assembler to the transcribed octal listing, but none of the data in this output file comes from the transcribed octal listing.  This is a tab-delimited file, intended to be used as input to a PTC emulator program.
+- yaASM.src &mdash; a listing of all source code, on an address by address basis, intended to be used as input to a PTC emulator program.
+- yaASM.sym &mdash; a listing of all symbols in the software, on an address by address basis.  This is a tab-delimited file intended to be used as input to a PTC emulator program.
+
+# Emulation, Using PTC/LVDC Emulator Software
+
+Useful PTC/LVDC emulation software does not presently exist.
 
