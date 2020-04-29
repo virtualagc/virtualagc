@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2019-20 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -21,6 +21,7 @@
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-18 RSB  Began.
+ *              2020-04-29 RSB  Added the --ptc switch.
  */
 
 #include <stdio.h>
@@ -46,11 +47,13 @@ static char helpMessage[] = "Usage:\n"
     "              file does not exist initially, then the initial state is\n"
     "              instead taken from the --assembly file, but the --core\n"
     "              file will still be created and periodically updated.\n"
+    "--ptc         Emulate a PTC target rather than an LVDC target.\n"
     "";
 
 char *assemblyBasenames[MAX_PROGRAMS] =
   { "yaLVDC" };
 char *coreFilename = "yaLVDC.core";
+int ptc = 0;
 
 // Parse a set of command-line arguments and set global variables based
 // on them.
@@ -73,6 +76,8 @@ parseCommandLineArguments (int argc, char *argv[])
 	}
       else if (!strncmp (argv[i], "--core=", 7))
 	coreFilename = &argv[i][7];
+      else if (!strcmp (argv[i], "--ptc"))
+        ptc = 1;
       else if (!strcmp (argv[i], "--help"))
 	goto help;
       else

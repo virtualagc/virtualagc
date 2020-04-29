@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2019-20 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -21,6 +21,7 @@
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-18 RSB  Began.
+ *              2020-04-29 RSB  Added the --ptc switch.
  */
 
 #ifndef yaLVDC_h
@@ -62,6 +63,7 @@ dPrintouts (void);
 #define MAX_PROGRAMS 5
 char *assemblyBasenames[MAX_PROGRAMS];
 char *coreFilename;
+int ptc;
 int
 parseCommandLineArguments(int argc, char *argv[]);
 
