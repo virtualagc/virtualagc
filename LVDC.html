@@ -649,12 +649,16 @@ Launch
       basic features of the software when those features happened to be
       outside their narrow specialization.&nbsp; Plus the set of LVDC
       programmers available to me is limited, so I don't have
-      representatives of all of those specializations to consult with.<br>
+      representatives of all of those specializations to consult
+      with.&nbsp; Of course, it's also possible that the many decades
+      between the time they spent working on the project and the time I
+      was able to quiz them about it may also have acted to erase some
+      of the information.<br>
     </p>
     <p>In short, important aspects of my descriptions in these sections
       concerning the gross structure of&nbsp; the software are based on
-      my own inferences and on the recollections of developers
-      unfamiliar with the details.&nbsp; So my comments about the
+      my own inferences and on the recollections of developers not
+      entirely familiar with the details.&nbsp; So my comments about the
       program structure with a large grain of salt.<br>
     </p>
     <p>With that said, let's contrast the overall structure of the LVDC
@@ -1103,12 +1107,7 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
     listing, you must obtain it from me personally and provide <a
 href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identification-when-applying-a-job">proof</a>
     that you are a United States person as just described. I will retain
-    a record of everyone to whom I the program listing.&nbsp; The
-    easiest way I've thought of so far of doing this, without forcing
-    you to come to me physically, is to have a video call (say, using
-    Skype) in which you present a U.S. passport or some other suitable
-    picture ID that lists your citizenship, so that I can compare it to
-    your actual face. <br>
+    a record of everyone to whom I the program listing.&nbsp; <br>
     <br>
     With all that unpleasantness out of the way, it doesn't seem to me
     that suitably-abridged subsets of the assembly listing would be
@@ -1353,40 +1352,31 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         ... for which we have no source code and no description
         whatsoever.<br>
         <br>
-        That's not to say that AS-206RAM cannot be run.&nbsp; One
-        workaround for this specific problem is to simply modify the
-        interrupt-vector table to contain a <tt>HOP HCIRTN</tt>
-        instruction in place of the <tt>HOP HCCMDC</tt> instruction it
-        contains now.&nbsp; Another workaround would be to simply
-        disable the command-upload interrupt.&nbsp; But alas, that's
-        just one example of the potential range of problems the missing
-        Preflight Program might cause.&nbsp; Until a complete survey of
-        all jumps into no-man's land is made, it's impossible to know
-        yet whether all of them can be worked around so easily.<br>
+        That's not to say that AS-206RAM cannot be run, if LVDC emulator
+        software were to become available.&nbsp; One workaround for this
+        specific problem is to simply modify the interrupt-vector table
+        to contain a <tt>HOP HCIRTN</tt> instruction in place of the <tt>HOP
+          HCCMDC</tt> instruction it contains now.&nbsp; Another
+        workaround would be to simply disable the command-upload
+        interrupt.&nbsp; But alas, that's just one example of the
+        potential range of problems the missing Preflight Program might
+        cause.&nbsp; Until a complete survey of all jumps into no-man's
+        land is made, it's impossible to know yet whether all of them
+        can be worked around so easily.<br>
         <h3><a name="PTC_ADAPT_Self-Test_Program"></a>PTC ADAPT
           Self-Test (PAST) Program</h3>
         <p><i><a href="PTC.jpg"><img src="PTC-small.jpg" title="Click to
                 enlarge" alt="Programmable Test Controller" width="427"
-                height="351" border="2" align="right"></a>(This section
-            is under construction.&nbsp; Its contents may not yet be
-            reliable.)</i><br>
-        </p>
-        <p>This section concerns the "PTC ADAPT Self-Test Program", the
-          only LVDC program other than the AS206-RAM Flight Program of
-          which we have a copy.&nbsp; Since "PTC ADAPT Self-Test
-          Program" is quite a mouthful, I'll just refer to it as the
-          PAST program.&nbsp; Not only is that nice and short, it's also
-          apt since the PAST program chronologically preceded the
-          AS206-RAM Flight Program discussed in the preceding section.
-          &nbsp;<img src="smiley.png" alt="" width="16" height="16">&nbsp;
-
-
-
-
-
-
-
-          But beware:&nbsp; The acronym "PAST" is mine, and doesn't come
+                height="351" border="2" align="right"></a></i>This
+          section concerns the "PTC ADAPT Self-Test Program", the only
+          LVDC program other than the AS206-RAM Flight Program of which
+          we have a copy.&nbsp; Since "PTC ADAPT Self-Test Program" is
+          quite a mouthful, I'll just refer to it as the PAST
+          program.&nbsp; Not only is that nice and short, it's also apt
+          since the PAST program chronologically preceded the AS206-RAM
+          Flight Program discussed in the preceding section. &nbsp;<img
+            src="smiley.png" alt="" width="16" height="16">&nbsp; But
+          beware:&nbsp; The acronym "PAST" is mine, and doesn't come
           from the contemporary Apollo documentation.<br>
         </p>
         <p>Strictly speaking, the PAST program is actually not "LVDC"
@@ -1452,18 +1442,17 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
           Logic Circuits".)&nbsp; It's the fact that the PTC's CPU is a
           "modified" LVDC which means the PAST program is not strictly
           LVDC software.&nbsp; Rather, it's modified-LVDC
-          software.&nbsp; Still, except for very slight differences in
-          the instruction set and assembly-language pseudo-ops, the PAST
-          program matches LVDC Flight Program syntax.&nbsp; Indeed, its
-          assembly listing has clearly been produced by the LVDC
-          assembler program, although there are a few differences in the
-          way some of the output is formatted.&nbsp; In terms of how the
-          PTC's CPU has been "modified" relative to the LVDC, those
-          changes are described in detail later but here's a list of
-          some of the differences visible at the software level, though
-          admittedly it may not be too meaningful to you until you study
-          more about how the LVDC works (and particularly its
-          instruction set) later on:<br>
+          software.&nbsp; Still, except for small list of differences
+          I'll list in a minute, the PAST program matches LVDC Flight
+          Program syntax.&nbsp; Indeed, its assembly listing has clearly
+          been produced by the LVDC assembler program, although there
+          are a few differences in the way some of the output is
+          formatted.&nbsp; In terms of how the PTC's CPU has been
+          "modified" relative to the LVDC, those changes are described
+          in detail later but here's a list of some of the differences
+          visible at the software level, though admittedly it may not be
+          too meaningful to you until you study more about how the LVDC
+          works (and particularly its instruction set) later on:<br>
         </p>
         <ul>
           <li>The HOP register is parsed into fields slightly
@@ -1485,6 +1474,10 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
             <li><tt>SHF</tt> (logical shift) remains similar, but no
               longer has a "clear accumulator" function and can shift by
               up to 6 positions (rather than just by 1 or 2).</li>
+            <li><tt>XOR</tt> and <tt>RSU</tt> (reverse subract) use
+              different opcodes than the LVDC does, but are otherwise
+              identical.<br>
+            </li>
           </ul>
           <li>Other:</li>
           <ul>
@@ -1496,7 +1489,12 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
             <li>Boot:&nbsp; Execution begins at memory module 0, sector
               0, syllable 0, location 0.&nbsp; (Whereas for the LVDC,
               module 0, sector 0, location 0 contains an address at
-              which execution should begin.)<br>
+              which execution should begin.)</li>
+            <li>The assembler has a few non-LVDC pseudo-ops it
+              recognizes, and few LVDC pseudo-ops which it does
+              not.&nbsp; For example, the PTC has an <tt>ORG</tt>
+              (origin) pseudo-op where the LVDC has the
+              functionally-equivalent <tt>ORGDD</tt> pseudo-op. <br>
             </li>
           </ul>
         </ul>
@@ -1582,11 +1580,10 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
           assembler was used for the PTC assembly, in which various
           more-advanced convenience features did not yet exist.<br>
         </p>
-        <p>The PAST program is in the process of being transcribed to
-          source code right now, so that it can be read more easily,
-          cut/pasted, searched, assembled by our yaASM.py assembler, and
-          so on.&nbsp; While that process is not yet 100% complete, you
-          can track its progress online if you like:<br>
+        <p>The PAST program's source code has been transcribed into
+          textual form, so that it can be <a
+            href="#yaLVDCASM_the_LVDC_Cross-Assembler">assembled</a>.&nbsp;
+          You can get that source code from our software repository:<br>
         </p>
         <p align="center"><a
 href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-Program">Folder
@@ -1612,11 +1609,25 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
 
 
             in our GitHub repository for PAST program source-code files</a></p>
-        <p>For now, though, only the <i>scanned</i> assembly listing is
-          100% available.&nbsp; To make it a little more convenient to
-          work with, I've extracted the listing from the original
-          scanned PTC document linked above, so that it can be viewed as
-          a set of image files, one per scanned page of the listing:<br>
+        <p>I should note that while this code assembles 100% correctly —
+          i.e., without errors, and producing octal executables 100%
+          identical to those of the original scanned assembly listing —
+          there were nevertheless some behaviors (and perhaps bugs) of
+          the original assembler that I've not yet been able to figure
+          out how to mimic in the modern assembler.&nbsp; Thus to get an
+          assembled output identical to the original, some workaround
+          code consisting of a handful of <tt>ORG</tt>, <tt>DOG</tt>,
+          and <tt>TRA</tt> pseudo-ops and instructions have been
+          inserted into the source code.&nbsp; Hopefully it will be
+          possible to update the modern assembler at some point in the
+          future, and thus eliminate the workarounds.<br>
+        </p>
+        <p>You can also look at the scanned assembly listing created by
+          the Apollo-era assembler.&nbsp; To make it a little more
+          convenient to work with, I've extracted the listing from the
+          original scanned PTC document linked earlier, so that it can
+          be viewed as a set of image files, one per scanned page of the
+          listing:<br>
         </p>
         <div align="center">
           <blockquote>
@@ -3213,244 +3224,9 @@ However,
             <br>
             I haven't fully digested the <tt>CIO</tt> material, so I
             won't go into a lot of detail trying to explain its
-            operation further yet.&nbsp; I'll just make notes here as I
-            learn stuff.&nbsp; Look at the documentation link above if
-            you're too keen to wait for me to figure it out and
-            predigest it. Here are some factoids:<br>
-            <ul>
-              <li>In assembly language the operand of the instruction is
-                always a literal 3-digit octal number.</li>
-              <li> Several of the <tt>CIO</tt> printer operations refer
-                to 6-bit "BA8421" codes.&nbsp; This relates to the
-                character encoding of <a
-href="https://en.wikipedia.org/wiki/IBM_1400_series#Field_and_character_coding">IBM
-
-
-
-
-
-
-
-
-                  1400 series printers</a>.&nbsp; <br>
-              </li>
-            </ul>
-            The BA8421 encoding scheme itself can be found at <a
-href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_code">this
-
-
-
-
-
-
-
-
-              wikipedia link</a>, but it has the codes in a hexadecimal
-            form that are a bit confusing to relate to the octal codes
-            used in LVDC assembly language, so below I've reformulated
-            the table in terms of two-digit octal codes instead.&nbsp; <br>
-            <br>
-            <table cellspacing="2" cellpadding="2" border="1"
-              align="center">
-              <tbody>
-                <tr>
-                  <th valign="middle" align="center"><br>
-                  </th>
-                  <th valign="middle" align="center">_0<br>
-                  </th>
-                  <th valign="middle" align="center">_1<br>
-                  </th>
-                  <th valign="middle" align="center">_2<br>
-                  </th>
-                  <th valign="middle" align="center">_3<br>
-                  </th>
-                  <th valign="middle" align="center">_4<br>
-                  </th>
-                  <th valign="middle" align="center">_5<br>
-                  </th>
-                  <th valign="middle" align="center">_6<br>
-                  </th>
-                  <th valign="middle" align="center">_7<br>
-                  </th>
-                </tr>
-                <tr>
-                  <th valign="middle" align="center">0_<br>
-                  </th>
-                  <td valign="middle" align="center">&nbsp;<br>
-                  </td>
-                  <td valign="middle" align="center">1<br>
-                  </td>
-                  <td valign="middle" align="center">2<br>
-                  </td>
-                  <td valign="middle" align="center">3<br>
-                  </td>
-                  <td valign="middle" align="center">4<br>
-                  </td>
-                  <td valign="middle" align="center">5<br>
-                  </td>
-                  <td valign="middle" align="center">6<br>
-                  </td>
-                  <td valign="middle" align="center">7<br>
-                  </td>
-                </tr>
-                <tr>
-                  <th valign="middle" align="center">1_</th>
-                  <td valign="middle" align="center">8<br>
-                  </td>
-                  <td valign="middle" align="center">9<br>
-                  </td>
-                  <td valign="middle" align="center">0<br>
-                  </td>
-                  <td valign="middle" align="center">#<br>
-                  </td>
-                  <td valign="middle" align="center">@<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                </tr>
-                <tr>
-                  <th valign="middle" align="center">2_</th>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" align="center">/<br>
-                  </td>
-                  <td valign="middle" align="center">S<br>
-                  </td>
-                  <td valign="middle" align="center">T<br>
-                  </td>
-                  <td valign="middle" align="center">U<br>
-                  </td>
-                  <td valign="middle" align="center">V<br>
-                  </td>
-                  <td valign="middle" align="center">W<br>
-                  </td>
-                  <td valign="middle" align="center">X<br>
-                  </td>
-                </tr>
-                <tr>
-                  <th valign="middle" align="center">3_</th>
-                  <td valign="middle" align="center">Y<br>
-                  </td>
-                  <td valign="middle" align="center">Z<br>
-                  </td>
-                  <td valign="middle" align="center">‡<br>
-                  </td>
-                  <td valign="middle" align="center">,<br>
-                  </td>
-                  <td valign="middle" bgcolor="#ffff99" align="center">(<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                </tr>
-                <tr>
-                  <th valign="middle" align="center">4_</th>
-                  <td valign="middle" align="center">-<br>
-                  </td>
-                  <td valign="middle" align="center">J<br>
-                  </td>
-                  <td valign="middle" align="center">K<br>
-                  </td>
-                  <td valign="middle" align="center">L<br>
-                  </td>
-                  <td valign="middle" align="center">M<br>
-                  </td>
-                  <td valign="middle" align="center">N<br>
-                  </td>
-                  <td valign="middle" align="center">O<br>
-                  </td>
-                  <td valign="middle" align="center">P<br>
-                  </td>
-                </tr>
-                <tr>
-                  <th valign="middle" align="center">5_</th>
-                  <td valign="middle" align="center">Q<br>
-                  </td>
-                  <td valign="middle" align="center">R<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" align="center">$<br>
-                  </td>
-                  <td valign="middle" align="center">*<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                </tr>
-                <tr>
-                  <th valign="middle" align="center">6_</th>
-                  <td valign="middle" bgcolor="#ffff99" align="center">+<br>
-                  </td>
-                  <td valign="middle" align="center">A<br>
-                  </td>
-                  <td valign="middle" align="center">B<br>
-                  </td>
-                  <td valign="middle" align="center">C<br>
-                  </td>
-                  <td valign="middle" align="center">D<br>
-                  </td>
-                  <td valign="middle" align="center">E<br>
-                  </td>
-                  <td valign="middle" align="center">F<br>
-                  </td>
-                  <td valign="middle" align="center">G<br>
-                  </td>
-                </tr>
-                <tr>
-                  <th valign="middle" align="center">7_</th>
-                  <td valign="middle" align="center">H<br>
-                  </td>
-                  <td valign="middle" align="center">I<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" align="center">.<br>
-                  </td>
-                  <td valign="middle" bgcolor="#ffff99" align="center">)<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p>In case it isn't obvious from the table above, code 00 is
-              a blank space.&nbsp; The yellow-shaded characters have
-              encodings in the PAST program octal listing that don't
-              match the BA8421 encoding for some reason, so the table
-              above matches the assembler.&nbsp; The gray-background
-              codes are non-printable.&nbsp; I googled some of weirder
-              characters, since it wasn't obvious why they would be
-              included in such a limited repertoire of symbols, and
-              unexpectedly got some historical information about them
-              that may actually be applicable to their usage in the PTC:
-            </p>
-            <ul>
-              <li>Code 77, the "group mark" character (a vertical line
-                with three horizontal hashes) was "formerly used as a
-                separator character for i/o operations".</li>
-              <li>Code 74, the "square lozenge" character (a square with
-                concave sides) was "used as a command delimiter in some
-                very old computers".</li>
-              <li>Code 32, the "double dagger" character (a vertical
-                line with two horizontal hashes) is possibly used as an
-                error indicator.<br>
-              </li>
-            </ul>
+            operation further yet.&nbsp; I'll just note that in assembly
+            language the operand of the instruction is always a literal
+            3-digit octal number.<br>
             <p>
               <meta http-equiv="content-type" content="text/html;
                 charset=UTF-8">
@@ -7907,17 +7683,246 @@ Assembly
             assembler (yaASM.py).&nbsp; That's because the <tt><i>text</i></tt>
             argument sometimes begins with a space character, and since
             the modern assembler does not enforce strict columnar
-            alignment, it would otherwise have no way to ascertain where
-            <tt><i>text</i></tt> begins.&nbsp; The original assembler,
-            on the other hand, did enforce strict columnar alignment,
-            and therefore required no delimiter at the beginning.<br>
+            alignment of the operand, it would otherwise have no way to
+            ascertain where <tt><i>text</i></tt> begins.&nbsp; The
+            original assembler, on the other hand, did enforce strict
+            columnar alignment, and therefore required no delimiter at
+            the beginning.<br>
             <br>
+            Encoding of the <i><tt>text</tt></i> strings involves both
+            BA8421 encoding, used for <a
+href="https://en.wikipedia.org/wiki/IBM_1400_series#Field_and_character_coding">IBM
+
+
+
+
+
+
+
+
+              1400 series printers</a>, and EBCDIC encoding, used for
+            later IBM printers like the ones that printed the original
+            LVDC and PTC assembly listings.&nbsp; The BA8421 encoding
+            scheme can be found at <a
+href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_code">this
+
+
+
+
+
+
+
+
+              wikipedia link</a>, but it has the codes in a hexadecimal
+            form that are a bit confusing to relate to the octal codes
+            used in LVDC assembly language, so below I've reformulated
+            the table in terms of two-digit octal codes instead.&nbsp; <br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1"
+              align="center">
+              <tbody>
+                <tr>
+                  <th valign="middle" align="center"><br>
+                  </th>
+                  <th valign="middle" align="center">_0<br>
+                  </th>
+                  <th valign="middle" align="center">_1<br>
+                  </th>
+                  <th valign="middle" align="center">_2<br>
+                  </th>
+                  <th valign="middle" align="center">_3<br>
+                  </th>
+                  <th valign="middle" align="center">_4<br>
+                  </th>
+                  <th valign="middle" align="center">_5<br>
+                  </th>
+                  <th valign="middle" align="center">_6<br>
+                  </th>
+                  <th valign="middle" align="center">_7<br>
+                  </th>
+                </tr>
+                <tr>
+                  <th valign="middle" align="center">0_<br>
+                  </th>
+                  <td valign="middle" align="center">&nbsp;<br>
+                  </td>
+                  <td valign="middle" align="center">1<br>
+                  </td>
+                  <td valign="middle" align="center">2<br>
+                  </td>
+                  <td valign="middle" align="center">3<br>
+                  </td>
+                  <td valign="middle" align="center">4<br>
+                  </td>
+                  <td valign="middle" align="center">5<br>
+                  </td>
+                  <td valign="middle" align="center">6<br>
+                  </td>
+                  <td valign="middle" align="center">7<br>
+                  </td>
+                </tr>
+                <tr>
+                  <th valign="middle" align="center">1_</th>
+                  <td valign="middle" align="center">8<br>
+                  </td>
+                  <td valign="middle" align="center">9<br>
+                  </td>
+                  <td valign="middle" align="center">0<br>
+                  </td>
+                  <td valign="middle" align="center">#<br>
+                  </td>
+                  <td valign="middle" align="center">@<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                </tr>
+                <tr>
+                  <th valign="middle" align="center">2_</th>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" align="center">/<br>
+                  </td>
+                  <td valign="middle" align="center">S<br>
+                  </td>
+                  <td valign="middle" align="center">T<br>
+                  </td>
+                  <td valign="middle" align="center">U<br>
+                  </td>
+                  <td valign="middle" align="center">V<br>
+                  </td>
+                  <td valign="middle" align="center">W<br>
+                  </td>
+                  <td valign="middle" align="center">X<br>
+                  </td>
+                </tr>
+                <tr>
+                  <th valign="middle" align="center">3_</th>
+                  <td valign="middle" align="center">Y<br>
+                  </td>
+                  <td valign="middle" align="center">Z<br>
+                  </td>
+                  <td valign="middle" align="center">‡<br>
+                  </td>
+                  <td valign="middle" align="center">,<br>
+                  </td>
+                  <td valign="middle" bgcolor="#ffff99" align="center">(<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                </tr>
+                <tr>
+                  <th valign="middle" align="center">4_</th>
+                  <td valign="middle" align="center">-<br>
+                  </td>
+                  <td valign="middle" align="center">J<br>
+                  </td>
+                  <td valign="middle" align="center">K<br>
+                  </td>
+                  <td valign="middle" align="center">L<br>
+                  </td>
+                  <td valign="middle" align="center">M<br>
+                  </td>
+                  <td valign="middle" align="center">N<br>
+                  </td>
+                  <td valign="middle" align="center">O<br>
+                  </td>
+                  <td valign="middle" align="center">P<br>
+                  </td>
+                </tr>
+                <tr>
+                  <th valign="middle" align="center">5_</th>
+                  <td valign="middle" align="center">Q<br>
+                  </td>
+                  <td valign="middle" align="center">R<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" align="center">$<br>
+                  </td>
+                  <td valign="middle" align="center">*<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                </tr>
+                <tr>
+                  <th valign="middle" align="center">6_</th>
+                  <td valign="middle" bgcolor="#ffff99" align="center">+<br>
+                  </td>
+                  <td valign="middle" align="center">A<br>
+                  </td>
+                  <td valign="middle" align="center">B<br>
+                  </td>
+                  <td valign="middle" align="center">C<br>
+                  </td>
+                  <td valign="middle" align="center">D<br>
+                  </td>
+                  <td valign="middle" align="center">E<br>
+                  </td>
+                  <td valign="middle" align="center">F<br>
+                  </td>
+                  <td valign="middle" align="center">G<br>
+                  </td>
+                </tr>
+                <tr>
+                  <th valign="middle" align="center">7_</th>
+                  <td valign="middle" align="center">H<br>
+                  </td>
+                  <td valign="middle" align="center">I<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" align="center">.<br>
+                  </td>
+                  <td valign="middle" bgcolor="#ffff99" align="center">)<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                  <td valign="middle" bgcolor="#cccccc" align="center">?<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <p>In case it isn't obvious from the table above, code 00 is
+              a blank space.&nbsp; The yellow-shaded characters have
+              encodings in the PAST program octal listing that don't
+              match the BA8421 encoding from wikipedia for some reason,
+              so the table above has been doctored to match the
+              assembler.&nbsp; The gray-background codes are
+              non-printable.&nbsp; I googled some of weirder characters,
+              since it wasn't obvious why they would be included in such
+              a limited repertoire of symbols, and unexpectedly got some
+              historical information about them that may actually be
+              applicable to their usage in the PTC: </p>
+            <ul>
+              <li>Code 77, the "group mark" character (a vertical line
+                with three horizontal hashes) was "formerly used as a
+                separator character for i/o operations".</li>
+              <li>Code 74, the "square lozenge" character (a square with
+                concave sides) was "used as a command delimiter in some
+                very old computers".</li>
+              <li>Code 32, the "double dagger" character (a vertical
+                line with two horizontal hashes) is possibly used as an
+                error indicator.</li>
+            </ul>
             I think that the set of allowed characters for <tt><i>text</i></tt>
             is the intersection of the printable characters from the
-            BA8421 set, which was described above (<a
-              href="#CPU_Instructions">see the <tt>CIO</tt> instruction</a>),
-            and the EBCDIC character set.&nbsp; Unless I'm mistaken,
-            that's just:<br>
+            BA8421 set listed above and the EBCDIC character set.&nbsp;
+            Unless I'm mistaken, that's just:<br>
             <ul>
               <li>Digits:&nbsp; 0 1 2 3 4 5 6 7 8 9<br>
               </li>
@@ -7925,7 +7930,7 @@ Assembly
                 N O P Q R S T U V W X Y Z</li>
               <li>A blank space<br>
               </li>
-              <li>Other:&nbsp; / , % - * &amp; .<br>
+              <li>Other:&nbsp; / . , - + * ( ).<br>
               </li>
             </ul>
             The reason for this restriction is that the input
@@ -7934,7 +7939,7 @@ Assembly
             output assembled octals for the <tt>BCI</tt> pseudo-op uses
             the BA8421 coding scheme.&nbsp; Therefore, only characters
             available simultaneously in both characters are meaningful
-            from input through output of the assembler.<br>
+            from input through output of the assembler..<br>
             <br>
             As far as the octals assembled for <tt>BCI</tt> are
             concerned, each of the memory locations allocated by the
@@ -7945,8 +7950,9 @@ Assembly
             of that memory location, and so on. Thus, encoding 4
             characters requires 24 bits per 26-bit memory word.&nbsp;
             The least-significant bits of each memory word are always
-            unused and are 0.&nbsp; For example, when the following is
-            assembled,<br>
+            unused and are 0. <br>
+            <br>
+            For example, when the following is assembled,<br>
             <blockquote>&nbsp;<tt>BCI&nbsp;&nbsp; ^TYPE OCTAL
                 CHARACTERS$</tt><br>
             </blockquote>
@@ -7987,15 +7993,15 @@ Assembly
                 EBCDIC, octal 303 (hex C3) is 'C', and that's why 'C'
                 ends up being printed out in place of 'T'.<br>
               </li>
-              <li>Steps 1-3 are the usual algorithm, but for <i>some</i>
-                characters in <tt><i>text</i></tt>, this procedure can
-                produce an encoded value that doesn't represent any
-                character in EBCDIC, and which therefore can't be
-                printed as-is.&nbsp; In that case, the procedure seems
-                to be to hunt around by adding or subtracting multiples
-                of octal 100 (0x40) to the EBCDIC code until a printable
-                character is obtained.&nbsp; Here's how that works out
-                in detail in a few examples:</li>
+              <li>For <i>some</i> characters in <tt><i>text</i></tt>,
+                this procedure can produce an encoded value that doesn't
+                represent any character in EBCDIC, and which therefore
+                can't be printed as-is.&nbsp; In that case, the
+                procedure seems to be to hunt around by
+                adding/subtracting multiples of octal 100 (0x40) to the
+                EBCDIC code until a printable character is
+                obtained.&nbsp; Here's how that works out in detail in a
+                few examples:</li>
               <ul>
                 <li>Space character:&nbsp; ' ' → 0<sub>8</sub> (BA8421)
                   → 0xB0 (EBCDIC) → undefined.&nbsp; The only printable
@@ -9523,8 +9529,8 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
           LVDC CPU Emulation</big></small></h2>
     <div style="text-align: center;">
       <div style="text-align: left;"> The inclusion of this section is
-        an act of pure optimism.&nbsp; We don't have a working LVDC CPU
-        emulator as of yet.<br>
+        an act of pure optimism.&nbsp; <i>We don't have a working LVDC
+          CPU emulator as of yet</i>.<br>
         <br>
         <div style="text-align: center;"> <img style="width: 770px;
             height: 236px;" alt="" src="Saturn-GuidanceEquations.jpg"
@@ -9566,10 +9572,10 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
     itself is no longer available 50+ years later ... or at least, not
     available to <i>us</i>.&nbsp; So I've written an LVDC assembler
     completely from scratch.&nbsp; It's capable of accepting the
-    original LVDC source code without any modifications, and producing
-    an assembly listing similar to the original one, as well as a rope
-    image that's 100% identical to the octal rope listing from the
-    original printouts.&nbsp; <br>
+    original LVDC AS206-RAM Flight Program or the PTC ADAPT Self-Test
+    Program, and producing an assembly listing similar to the original
+    one, as well as a rope image that's 100% identical to the octal rope
+    listing from the original printouts.&nbsp; <br>
     <br>
     In saying this, I suppose it's important to reiterate that while we
     have decent contemporaneous documentation of the LVDC instruction
@@ -9579,10 +9585,11 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
     new assembler works with the LVDC language documentation as
     described on this web page, this web page's documentation is based
     entirely on what I've personally inferred from reading the specific
-    LVDC program printout available to me.&nbsp; Thus a listing of a
-    different version of the original LVDC software, were one to become
-    available, could easily have features which I've never seen before
-    and which therefore are not yet accounted for in the new assembler.<br>
+    LVDC program printout available to me.&nbsp; A listing of a
+    different version of the original LVDC or PTC software, were one to
+    become available, could easily have features which I've never seen
+    before and which therefore are not yet accounted for in the new
+    assembler.<br>
     <br>
     With that warning out of the way, <a
       href="https://github.com/virtualagc/virtualagc/tree/master/yaASM.py">the
@@ -9644,174 +9651,70 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
     for the LVDC was abandoned.)<br>
     <br>
     Usage of the LVDC assembler is quite simple:<br>
-    <blockquote><tt>yaASM.py [<i>OCTALS</i>.tsv] &lt;<i>INPUT</i>.lvdc
+    <blockquote><tt>yaASM.py [<i>OPTIONS</i>] [<i>OCTALS</i>.tsv] &lt;<i>INPUT</i>.lvdc
+
         &gt;<i>OUTPUT</i>.lst</tt><br>
     </blockquote>
-    The assembler simply takes an input file of LVDC source code (<i>INPUT</i>.lvdc),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    and produces as output a human-readable assembly listing (<i>OUTPUT</i>.lst).&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    Additionally, it produces a file containing an octal listing of the
-    assembled code, which is always called yaASM.tsv.&nbsp; This file is
-    produced whether or not there were fatal errors in the assembly
-    process, so don't take the existence of the yaASM.tsv file as an
-    indication that assembly succeeded.&nbsp; yaASM.tsv is what would be
-    used to create an octal rope, if you had an LVDC, or which would be
-    used as input to a software-based emulator for the LVDC CPU.&nbsp;
-    The format of the file will be discussed in a moment.<br>
+    By default the assembler targets the LVDC and expect LVDC-specific
+    source code as input.&nbsp; To target the PTC instead, the
+    command-line switch --ptc is required.&nbsp; Specifically, I'd
+    recommend the following commands for the AS206-RAM Flight Program
+    and the PTC ADAPT Self-Test Program:<br>
+    <blockquote><tt>yaASM.py LVDC-AS206RAM.tsv &lt;LVDC-AS206RAM.lvdc
+        &gt;</tt><tt><i>assembly.listing</i></tt><tt><br>
+      </tt><tt>yaASM.py --ptc [--past-bugs]
+        PTC-ADAPT-Self-Test-Program.tsv
+        &lt;PTC-ADAPT-Self-Test-Program.lvdc &gt;</tt><tt><i>assembly.listing</i></tt><br>
+    </blockquote>
+    Notice that the <tt>--past-bugs</tt> switch is shown as
+    optional.&nbsp; If present, it mimics a bug in the original PTC
+    assembler which botched messages in the output assembly listing
+    associated with the <tt>BCI</tt> pseudo-op.&nbsp; If the <tt>--past-bugs</tt>
+    switch is omitted, more-helpful non-botched messages appear
+    instead.&nbsp; The octal executable is not affected by the use or
+    disuse of <tt>--past-bugs</tt>.<br>
     <br>
-    There is also an optional input file (<i>OCTALS</i>.tsv) for the
-    assembly process.&nbsp; <i>OCTALS</i>.tsv, if available, is an
-    octal listing of an LVDC rope in the same format as the output
-    yaASM.tsv file.&nbsp; If present, the assembler performs a
+    The assembler simply takes an input file of LVDC or PTC source code
+    (<i>INPUT</i>.lvdc), and produces as output a human-readable
+    assembly listing (<i>OUTPUT</i>.lst).&nbsp; Additionally, it
+    produces the following files:<br>
+    <ul>
+      <li>yaASM.tsv — an octal listing of the assembled code</li>
+      <li>yaASM.sym&nbsp; — a symbol table</li>
+      <li>yaASM.src — an address-by-address listing of source code</li>
+    </ul>
+    <p>Each of these files is ASCII, with tabs delimiting fields.&nbsp;
+      (Or in the case of the .src file, UTF-8 rather than ASCII if any
+      non-ASCII characters appear in the input LVDC/PTC source-code
+      comments.)&nbsp; They are intended to be easily machine readable,
+      for use as the inputs to our (eventual) LVDC/PTC emulator
+      software.&nbsp; The files are produced whether or not there are
+      fatal errors in the assembly process, so don't take their
+      existence as an indication that assembly succeeded.&nbsp; The
+      format of the files will be discussed in a moment.<br>
+    </p>
+    There is also an optional <i>input</i> file (<i>OCTALS</i>.tsv) for
+    the assembly process.&nbsp; <i>OCTALS</i>.tsv, if available, is a
+    tab-delimited octal listing of an LVDC rope in the same format as
+    the original LVDC/PTC assembly listing.&nbsp; Note, by the way, that
+    the original LVDC and PTC assemblers used somewhat different formats
+    for octal fields, thus the input files for LVDC octals and PTC
+    octals differ somewhat.&nbsp; If present, OCTALS.tsv is not used for
+    generating the assembled output; rather, the assembler performs a
     comparison during the assembly process of the contents of the input
     file <i>OCTALS</i>.tsv against that of the eventual output file
     yaASM.tsv, and provides messages indicating mismatches between the
-    two.&nbsp; This can be helpful in debugging LVDC source code or in
-    debugging the assembler itself.&nbsp; Of course, it's also possible
-    to simply compare the two files directly with tools such as <b>diff</b>,
-    but it's significantly more convenient to allow yaASM.py to do the
-    comparison instead.&nbsp; For one thing, <i>OCTALS</i>.tsv can
-    contain user-supplied comments; these would show up as differences
-    from yaASM.tsv when using diff, but not when using yaASM.py.&nbsp;
-    More importantly, when mismatches are found, messages generated by
-    yaASM.py appear along with the lines of assembly-language code that
-    generate the associated data.&nbsp; With tools similar to diff,
-    matching the differences to the associated LVDC source code is a
-    much more inconvenient process.<br>
+    two.&nbsp; This can be helpful in validating the transcription of
+    the input source code or the action of the assembler.<br>
     <br>
-    As for the format of <i>OCTALS</i>.tsv or yaASM.tsv, the naming is
-    intended to indicate that the files are tab-delimited ASCII files,
-    which is largely true.<br>
-    <ul>
-      <li>Comments can be added by using the "#" character in column
-        1.&nbsp; They are ignored during comparisons.<br>
-      </li>
-      <li>Empty lines are also ignored, and can be added for
-        beatification purposes.</li>
-      <li>Lines with 17 tab-delimited fields contain octal data for up
-        to 8 memory words.&nbsp; Exactly 17 fields are always present,
-        even if some of the memory locations are unused.<br>
-      </li>
-      <ul>
-        <li>Field 1 is a 3-digit 0-padded octal number in the range
-          000-377 (octal) that gives the starting memory offset of the
-          line.&nbsp; Thus the number is always divisible by 8.</li>
-        <li>The remaining 16 fields are pairs of 2 fields each:</li>
-        <ul>
-          <li>The first field contains one of the following:</li>
-          <ul>
-            <li>A 9-digit octal number (actual format " %09o% ") for a
-              data word.&nbsp; Notice that the 9-digit number is
-              bracketed by a space character on both the right and left,
-              so the field is actually 11 characters wide.&nbsp; It can
-              also be a string of 11 spaces
-              ("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ") if
-              the memory location is not used.<br>
-            </li>
-            <li>A pair of 5-digit octal numbers (actual format "%5o
-              %5o") for two assembled instructions.&nbsp; The left-hand
-              number is the assembled instruction for syllable 1 and the
-              right-hand number is the instruction for syllable 0.&nbsp;
-              Either the left-hand or right-hand number can also be 5
-              spaces ("&nbsp;&nbsp;&nbsp;&nbsp; ") if not used.</li>
-          </ul>
-          <li>The second field contains just the character "D" for a
-            memory word that is used, or just a space " " for a word
-            that is not used. <br>
-          </li>
-        </ul>
-      </ul>
-      <li>Lines with 3 or more fields whose first field is the word
-        "SECTOR" mark the beginning of a memory sector ... i.e., the
-        next location will be 000.</li>
-      <ul>
-        <li>Field 1, as already mentioned, is the word "SECTOR".</li>
-        <li>Field 2 is the number of the memory module, and is in the
-          range 0-7.</li>
-        <li>Field 3 is the number of the memory sector within the
-          module.&nbsp; It is a 0-padded 2-digit octal number in the
-          range 00-17 (octal).</li>
-        <li>Fields 4+ are ignored.&nbsp; However, field 4 is often an
-          encoded description of the proof-reading processes that have
-          been undertaken to insure the correctness of the sector's
-          data.</li>
-      </ul>
-    </ul>
-    <p>Completely-empty memory sectors do not need to appear in the file
-      at all.&nbsp; However, if any portion of a memory sector is used,
-      the sector appears fully in the file.&nbsp; I.e., all of the lines
-      with location fields 000, 010, ..., 370 will appear, even if most
-      of their fields are blank.<br>
-    </p>
+    In contrast, the <i>output</i> octal listing file (yaASM.tsv)
+    always conforms to the (superior) LVDC format, even if the input
+    files were in PTC format. <br>
+    <br>
+    Rather than describe any of these tab-delimited file formats in
+    detail here, I'd suggest that they're reasonably straightforward,
+    and you can simply look at the files themselves to get a better idea
+    of how they work.<br>
     <div style="text-align: center;">
       <div style="text-align: left;">
         <h2><a name="Plea_for_Data" id="Plea_for_Data"></a>Plea for Data</h2>
@@ -10044,7 +9947,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2020-04-26.<br>
+          2020-04-29.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
