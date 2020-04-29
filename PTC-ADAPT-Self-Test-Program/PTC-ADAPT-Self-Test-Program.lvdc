@@ -3,21 +3,50 @@
 # Purpose:      This is LVDC ground test software "PTC ADAPT Self-Test
 #		Program" (1965) for the Programmable Test Controller, as 
 #               transcribed directly from the assembly listing. 
-#               The transcription does not include individual line 
-#               numbers, but does indicate the range of card sequence 
-#               numbers for each page of the listing.
-# Assembler:    yaASM.py
+# Assembler:    yaASM.py --ptc [--past-bugs]
 # Contact:      Ron Burkey <info@sandroid.org>.
-# Website:     	http://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program
+# Octals:	(Transcribed from scans) PTC-ADAPT-Self-Test-Program.lvdc
+# Web page:    	http://www.ibiblio.org/apollo/LVDC.html#PTC_ADAPT_Self-Test_Program
 # Page scans: 	http://www.ibiblio.org/apollo/ScansForConversion/PTC%20ADAPT%20Self-Test%20Program.zip
 # Executable:	https://github.com/virtualagc/virtualagc/blob/master/PTC-ADAPT-Self-Test-Program/PTC-ADAPT-Self-Test-Program.tsv
 # Documentation:http://www.ibiblio.org/apollo/Documents/19730064346_1973064346.pdf,
 #		particularly Chapter 7 ("Calibration"), from which the page scans and
 #		executable (assembled octals) mentioned above were taken.  Figure 7-12 
-#		is this complete software in flowchart form.
+#		is this complete software in flowchart form.  The web page linked above
+#		also covers known errors in the documentation.
 # Mod history:  2020-04-12 RSB  Began transcribing from page images.
 #		2020-04-21 RSB	Finished transcribing, rough draft.  
 #				Haven't done any proofing yet.
+#		2020-04-29 RSB	Now assembles 100% error/warning free,
+#				and the assembled octals agree with 
+#				those from the transcribed octal file.
+#				Some workarounds were necessary in the
+#				source code.  I have not proofed the
+#				comments, so perhaps some errors remain
+#				there.
+#
+# At this writing (2020-04-29), there are some behaviors (or bugs) in
+# the original assembler which so far have not been duplicated in the 
+# modern assembler.  A small number of workarounds (search for the 
+# comment "workaround") have been added to the source code to insure 
+# that the assembly remains octal-for-octal identical to the original.  
+# These are all ORG/DOG pseudo-ops or extra TRA instructions.  Hopefully 
+# these can be removed at some point if the assembler is updated.  The 
+# assembler's command-line switch --past-bugs determines whether or not 
+# the assembler attempts to mimic those original bugs.  For example, in 
+# the assembly listing printout, the original assembler printed incorrect 
+# information for the BCI pseudo-op (although it assembled correct octals 
+# for it); the modern assembler by default prints correct information on 
+# the listing, but reverts to printing the original incorrect information
+# if --past-bugs is used.
+#
+# Regarding the BCI pseudo-op:  In the original assembly language, BCI's
+# operands were terminated by $ character.  In the modern assembly 
+# language, the operands are additionally initiated by ^ characters not
+# present in the original assembly language.  This is due to a requirement
+# of the modern assembler (yaASM.py) to relax strict columnar alignment of
+# the source code.  Thus what would have been "BCI string$" originally
+# is "BCI ^string$" in this source file used with the modern assembler.
 #
 # White space (blank lines and spaces within lines) in this transcript
 # are not necessarily the same as for the original punch cards.  
@@ -65,14 +94,6 @@
 # Instead, the figure captions from the document, list a "sheet" number
 # for each page, and those sheet numbers have been used here as the PAGE
 # numbers.
-#
-# Regarding the BCI pseudo-op:  In the original assembly language, BCI's
-# operands were terminated by $ character.  In the modern assembly 
-# language, the operands are additionally initiated by ^ characters not
-# present in the original assembly language.  This is due to a requirement
-# of the modern assembler (yaASM.py) to relax strict columnar alignment of
-# the source code.  Thus what would have been "BCI string$" originally
-# is "BCI ^string$" in this source file.
 
 # PAGE 1, SEQUENCE 20-580
 

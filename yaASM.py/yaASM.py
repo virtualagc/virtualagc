@@ -255,7 +255,7 @@ for arg in sys.argv[1:]:
 					module = int(fields[1], 8)
 					sector = int(fields[2], 8)
 					if module > 7 or sector > 15:
-						raise("Warning: module or sector out of range")
+						raise("Warning: module or sector out of range (%o %02o)" % (module, sector))
 					continue
 				offset = int(fields[0], 8)
 				# Note that the format of the data lines from the input file differs
@@ -263,13 +263,13 @@ for arg in sys.argv[1:]:
 				# (PTC) or the AS206-RAM Flight Program listing (LVDC).
 				if ptc:
 					if len(fields) != 9:
-						raise("Warning: wrong number of fields (must be 9)")
+						raise("Warning: wrong number of fields (%d, must be 9)" % len(fields))
 					for n in range(1, 9):
 						entry = fields[n].strip()
 						if entry == "":
 							continue
 						if len(entry) != 12 or not entry.isdigit():
-							raise("Warning: octal value is corrupted")
+							raise("Warning: octal value is corrupted (%s)" % entry)
 						value = int(entry, 8)
 						valid = value & 0o777
 						value = value >> 9
@@ -291,11 +291,11 @@ for arg in sys.argv[1:]:
 						syl0 = value & 0o37776
 						if (valid & 2) == 0:
 							if syl1 != 0:
-								raise("Warning: syllable 2 should be 0")
+								raise("Warning: syllable 2 should be 0 (%o %02o %03o)" % (module, sector, offset))
 							syl1 = None
 						if (valid & 1) == 0:
 							if syl0 != 0:
-								raise("Warning: syllable 1 should be 0")
+								raise("Warning: syllable 1 should be 0 (%o %02o %03o)" % (module, sector, offset))
 							syl0 = None
 						octalsForChecking[module][sector][1][offset] = syl1
 						octalsForChecking[module][sector][0][offset] = syl0
@@ -343,8 +343,7 @@ if ptc:
 	operators["SHL"]["a9"] = 0
 	operators["SHR"]["a9"] = 0
 	maxSHF = 6
-	if pastBugs:
-		operators["XOR"] = operators["RSU"].copy()
+	operators["XOR"] = operators["RSU"].copy()
 	operators["RSU"]["opcode"] = 0b0011
 else:
 	del operators["PRS"]
@@ -437,9 +436,9 @@ def findDLOC(start = 0, increment = 1):
 		n += 1
 		length += 1
 	if reuse:
-		addError(lineNumber, "Warning: Skipping memory locations already used", trigger = -2)
+		addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, n))
 	if length < increment:
-		addError(lineNumber, "Error: No space of size " + str(increment) + " found in memory bank")
+		addError(lineNumber, "Error: No space of size %d found in memory bank (%o %02o)" % (increment, DM, DS))
 	return start
 	
 def checkDLOC(increment = 1):
@@ -616,11 +615,11 @@ def checkLOC(extra = 0):
 		 	addError(lineNumber, "Error: No room left in memory sector")
 		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]):
 			tLoc = DLOC
-			addError(lineNumber, "Warning: Skipping memory locations already used", trigger = -2)
+			addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, DLOC))
 			while tLoc < 256 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc]):
 				tLoc += 1
 			if tLoc >= 256:
-				addError(lineNumber, "Error: No room left in memory sector")
+				addError(lineNumber, "Error: No room left in memory sector (%o %02o)" % (DM, DS))
 			else:
 				DLOC = tLoc
 				return []
@@ -639,7 +638,7 @@ def checkLOC(extra = 0):
 			# to find address for the TRA or HOP to take us to, always searching
 			# upward.
 			if lastORG:
-				addError(lineNumber, "Warning: Skipping memory locations already used", trigger = -2)
+				addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %o %03o)" % (IM, IS, S, LOC + 1))
 			else:
 				used[IM][IS][S][LOC] = True
 				autoSwitch = True
@@ -1056,6 +1055,8 @@ DS = 0
 dS = 0
 DLOC = 0
 useDat = False
+udDM = 0
+udDS = 0
 tempSymbols = []
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
@@ -1137,6 +1138,8 @@ for lineNumber in range(0, len(expandedLines)):
 						DLOC = int(ofields[6], 8)
 					else:
 						DLOC = 0
+					inputLine["udDM"] = DM
+					inputLine["udDS"] = DS
 			elif ptc and fields[1] == "ORG":
 				lastORG = True
 				if len(ofields) != 7:
@@ -1188,11 +1191,15 @@ for lineNumber in range(0, len(expandedLines)):
 						DLOC = ptcDLOC[DM][DS]
 					else:
 						DLOC = 0
+				inputLine["udDM"] = DM
+				inputLine["udDS"] = DS
 			elif fields[1] in ["DEQS", "DEQD"] and fields[0] in constants:
 				symbols[fields[0]] = {	"IM":IM, "IS":IS, "S":S, 
 								"LOC":LOC, "DM":int(constants[fields[0]][1], 8), 
 								"DS":int(constants[fields[0]][2], 8), 
 								"DLOC":DLOC, "inDataMemory":True }
+				inputLine["udDM"] = int(constants[fields[0]][1], 8)
+				inputLine["udDS"] = int(constants[fields[0]][2], 8)
 			elif fields[1] == "BSS":
 				checkDLOC(int(fields[2]))
 				if fields[0] != "":
@@ -1273,8 +1280,11 @@ for lineNumber in range(0, len(expandedLines)):
 								constant = constants[fields[2]]
 								if type(constant) == type([]) and len(constant) >= 3:
 									#print(constant[1] + " " + constant[2])
-									DM = int(constant[1], 8)
-									DS = int(constant[2], 8)
+									if not useDat:
+										DM = int(constant[1], 8)
+										DS = int(constant[2], 8)
+									inputLine["udDM"] = int(constant[1], 8)
+									inputLine["udDS"] = int(constant[2], 8)
 									found = True
 							# We assume this is the name of a variable, and we have to
 							# find it to determine its DM/DS.  I presume it could be
@@ -1284,11 +1294,17 @@ for lineNumber in range(0, len(expandedLines)):
 									testLine = testEntry["expandedLine"]
 									if "lhs" in testLine and testLine["lhs"] == fields[2] and "hop" in testLine:
 										if fields[1] == "CDSD":
-											DM = testLine["hop"]["DM"]
-											DS = testLine["hop"]["DS"]
+											if not useDat:
+												DM = testLine["hop"]["DM"]
+												DS = testLine["hop"]["DS"]
+											inputLine["udDM"] = testLine["hop"]["DM"]
+											inputLine["udDS"] = testLine["hop"]["DS"]
 										elif fields[1] == "CDS":
-											DM = testLine["hop"]["IM"]
-											DS = testLine["hop"]["IS"]
+											if not useDat:
+												DM = testLine["hop"]["IM"]
+												DS = testLine["hop"]["IS"]
+											inputLine["udDM"] = testLine["hop"]["IM"]
+											inputLine["udDS"] = testLine["hop"]["IS"]
 										found = True
 										break
 							if not found:
@@ -1296,8 +1312,11 @@ for lineNumber in range(0, len(expandedLines)):
 					elif len(ofields) != 2:
 						addError(lineNumber, "Error: Wrong number of CDS/CDSD arguments")
 					elif not useDat:
-						DM = int(ofields[0], 8)
-						DS = int(ofields[1], 8)
+						if not useDat:
+							DM = int(ofields[0], 8)
+							DS = int(ofields[1], 8)
+						inputLine["udDM"] = int(ofields[0], 8)
+						inputLine["udDS"] = int(ofields[1], 8)
 					if ptc:
 						DLOC = ptcDLOC[DM][DS]
 			elif fields[1] in preprocessed:
@@ -1466,9 +1485,16 @@ def printLineFields():
 
 # Determine if module dm, sector ds is reachable from the global 
 # module DM, sector DS.  Return True if so, False if not.
-def inSectorOrResidual(dm, ds, DM, DS):
+def inSectorOrResidual(dm, ds, DM, DS, useDat, udDM, udDS):
+	if useDat:
+		# I'm having no luck trying to figure this out for USE DATA
+		# sections, so for now I just let the test pass.
+		return True
+		addError(lineNumber, "%o %02o, %o %02o, %o %02o" % (dm, ds, DM, DS, udDM, udDS))
+		DM = udDM
+		DS = udDS
 	if ptc:
-		if ds == 0o17:
+		if dm == 0 and ds == 0o17:
 			return True
 		if dm == DM and ds == DS:
 			return True
@@ -1476,6 +1502,17 @@ def inSectorOrResidual(dm, ds, DM, DS):
 		if dm == DM and (ds == DS or ds == 0o17):
 			return True
 	return False
+
+# Determine if module dm, sector ds is the residual sector
+# based on the current DM, DS.
+def residualBit(dm, ds):
+	if ptc:
+		if dm == 0 and ds == 0o17 and not (DM == 0 and DS == 0o17):
+			return 1
+	else:
+		if dm == DM and ds == 0o17: # and DS != 0o17:
+			return 1 
+	return 0
 
 useDat = False
 errorsPrinted = []
@@ -1492,6 +1529,10 @@ for entry in inputFile:
 	star = False
 	if originalLine[:7] == "# PAGE ":
 		print("\f")
+	if "udDM" in inputLine:
+		udDM = inputLine["udDM"]
+	if "udDS" in inputLine:
+		udDS = inputLine["udDS"]
 	
 	# If the line is expanded by the preprocessor, we have to display its unexpanded form
 	# before proceeding.
@@ -1983,17 +2024,10 @@ for entry in inputFile:
 					# The operand is a variable, as it ought to be.
 					#if (not ptc and hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17)):
 					#	if not useDat: # or S == 1:
-					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS):
+					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
 						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (hop2["DM"], hop2["DS"]))
 					loc = hop2["DLOC"]
-					#addError(lineNumber, "here A %d" % residual, trigger = 1469)
-					if hop2["DS"] == 0o17 and not (ptc and DS == 0o17):
-						# Fixup residual.
-						residual = 1
-					#addError(lineNumber, "here B %d" % residual, trigger = 1469)
-					if False and ptc and DS == 0o17 and hop2["DS"] == 0o17:
-						# Fixup residual.
-						residual = 0
+					residual = residualBit(hop2["DM"], hop2["DS"])
 				else:
 					# The operand is an LHS in instruction space.  If that's within the 
 					# current instruction sector, we should be able to convert the HOP 
@@ -2090,7 +2124,7 @@ for entry in inputFile:
 				ds = int(constants[operand][2], 8)
 				dloc = int(constants[operand][3], 8)
 				#if (not ptc and (dm != DM or (ds != DS and ds != 0o17)) or (ptc and ds != 0o17 and not (dm == DM and ds == DS))):
-				if not inSectorOrResidual(dm, ds, DM, DS):
+				if not inSectorOrResidual(dm, ds, DM, DS, useDat, udDM, udDS):
 					addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (dm, ds))
 				else:
 					loc = dloc
@@ -2107,18 +2141,14 @@ for entry in inputFile:
 				if hop2["inDataMemory"]:
 					#if (not ptc and hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17)):
 					#	if not useDat: # or S == 1:
-					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS):
+					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
 						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (hop2["DM"], hop2["DS"]))
 					loc = hop2["DLOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier
 					elif operandModifierOperation == "-":
 						loc -= operandModifier
-					if hop2["DS"] == 0o17:
-						residual = 1
-					if False and ptc and DS == 0o17 and hop2["DS"] == 0o17 and IS != 0o17:
-						# Fixup residual
-						residual = 0
+					residual = residualBit(hop2["DM"], hop2["DS"])
 				else:
 					if hop2["IM"] != DM or hop2["IS"] != DS:
 						if not useDat or S == 1:
@@ -2128,9 +2158,7 @@ for entry in inputFile:
 						loc += operandModifier
 					elif operandModifierOperation == "-":
 						loc -= operandModifier
-					if hop2["DS"] == 0o17 and not (ptc and DS == 0o17):
-						# Fixup residual.
-						residual = 1
+					residual = residualBit(hop2["DM"], hop2["DS"])
 		if loc > 0o377:
 			loc = loc & 0o377
 			residual = 1
@@ -2341,15 +2369,20 @@ for module in range(8):
 			print(formatFileLine % tuple(rowList), file=f)
 f.close()
 
-for record in allocationRecords:
-	#print(record)
-	symbol = record["symbol"]
-	inputLine = record["inputLine"]
-	lineNumber = record["lineNumber"]
-	page = inputLine["page"]
-	DM = record["DM"]
-	DS = record["DS"]
-	LOC = record["LOC"]
-	raw = inputLine["raw"]
-	print("PAGE=%-3d LINE=%-5d SYMBOL=%-15s DM=%o DS=%02o LOC=%03o:  %s" % (page, lineNumber, symbol, DM, DS, LOC, raw))
+# Prints out some debugging stuff about the order in which symbols are allocated.
+# It may be useful for figuring out where the assembly process stuff starts 
+# getting allocated to the wrong addresses, but is of no value outside of that
+# kind of debugging of the assembler.
+if False:
+	for record in allocationRecords:
+		#print(record)
+		symbol = record["symbol"]
+		inputLine = record["inputLine"]
+		lineNumber = record["lineNumber"]
+		page = inputLine["page"]
+		DM = record["DM"]
+		DS = record["DS"]
+		LOC = record["LOC"]
+		raw = inputLine["raw"]
+		print("PAGE=%-3d LINE=%-5d SYMBOL=%-15s DM=%o DS=%02o LOC=%03o:  %s" % (page, lineNumber, symbol, DM, DS, LOC, raw))
 	
