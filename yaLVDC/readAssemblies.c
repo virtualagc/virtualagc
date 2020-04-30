@@ -470,20 +470,20 @@ readSourceLines (int count, char *filename)
       int i;
       buffer[MAX_LINE] = 0;
       trim (buffer);
-      i = sscanf (buffer, "%o\t\%o\t%o\t%o\t%[^\n]", &module, &sector,
+      i = sscanf (buffer, "%o%o%o%o%[^\n]", &module, &sector,
 		  &syllable, &loc, rawline);
       if (i != 5)
 	{
 	  pushErrorMessage ("Ill-formed source-table line:", buffer);
 	  goto done;
 	}
-      line = malloc (strlen (rawline) + 1);
+      line = malloc (strlen (rawline));
       if (line == NULL)
 	{
 	  pushErrorMessage ("Out of memory", NULL);
 	  goto done;
 	}
-      strcpy (line, rawline);
+      strcpy (line, rawline + 1);
       if (checkAddress (module, sector, syllable, loc))
 	goto done;
       if (numSourceLines >= maxSourceLines)

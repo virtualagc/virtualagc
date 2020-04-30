@@ -98,13 +98,18 @@ main (int argc, char *argv[])
   // the core-memory file overrides the core-memory image from the assembler.
   if (readAssemblies (assemblyBasenames, MAX_PROGRAMS))
     goto done;
-  if (readCore())
-    goto done;
+  if (coldStart == 0)
+    if (readCore())
+      goto done;
   dPrintouts(); // Some optional printouts for debugging.
+  fflush(stdout);
 
   cyclesPerTick = 1.0 / (SECONDS_PER_CYCLE * sysconf(_SC_CLK_TCK));
   startingTime = times(&TmsStruct);
-  state.hop = state.core[0][0][2][0];
+  if (ptc)
+    state.hop = 0;
+  else
+    state.hop = state.core[0][0][2][0];
 
   // Emulation.
   while (1)
@@ -116,9 +121,13 @@ main (int argc, char *argv[])
       while (cycleCount < targetCycles)
 	{
 	  int cyclesUsed = 0;
-	  if (runOneInstruction(&cyclesUsed))
-	    goto done;
-	  cycleCount += cyclesUsed;
+	  if (runNextN == 0)
+	    if (gdbInterface ())
+	      goto done;
+	  if (!runOneInstruction(&cyclesUsed))
+	    cycleCount += cyclesUsed;
+	  if (runNextN > 0)
+	    runNextN--;
 	}
 
       // Sleep for a little to avoid hogging 100% CPU time.  The amount
@@ -126,9 +135,9 @@ main (int argc, char *argv[])
       sleepMilliseconds(10);
     }
 
-retVal = 0;
-done: ;
-for (i = 0; i < numErrorMessages; i++)
-fprintf (stderr, "%s\n", errorMessageStack[i]);
-return (retVal);
+  retVal = 0;
+  done: ;
+  for (i = 0; i < numErrorMessages; i++)
+  fprintf (stderr, "%s\n", errorMessageStack[i]);
+  return (retVal);
 }

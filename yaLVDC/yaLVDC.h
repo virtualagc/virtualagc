@@ -64,6 +64,8 @@ dPrintouts (void);
 char *assemblyBasenames[MAX_PROGRAMS];
 char *coreFilename;
 int ptc;
+int coldStart;
+int runNextN; // # of LVDC/PTC instructions left to run until pausing. -1 is unlimited.
 int
 parseCommandLineArguments(int argc, char *argv[]);
 
@@ -80,6 +82,7 @@ typedef struct {
   int32_t returnAddress; // -2 except immediately after a HOP instruction.
   int32_t core[8][16][3][256];
   int32_t pio[512];
+  int32_t cio[01000]; // PTC only.
 } state_t;
 state_t state;
 typedef struct {
@@ -150,5 +153,9 @@ fetchData (int module, int residual, int sector, int loc, int16_t *data,
 int
 storeData (int module, int residual, int sector, int loc, int16_t data,
 	   int *dataOverwritesInstructionMemory);
+
+// See gdbInterface.c
+int
+gdbInterface (void);
 
 #endif // yaLVDC_h

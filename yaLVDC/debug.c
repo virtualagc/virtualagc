@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2019-20 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -23,6 +23,8 @@
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-20 RSB  Began
+ *              2020-04-30 RSB  Fixed DEBUG_CORE, which referenced a
+ *                              non-existent structure.
  */
 
 #include <stdio.h>
@@ -38,6 +40,7 @@ dPrintouts (void)
 #if (DEBUG_FLAGS & DEBUG_SYMBOLS) != 0
     {
       int i;
+      printf ("\n*** TABLE OF SYMBOLS AND AUTO-ALLOCATED CONSTANTS BY ADDRESS ***\n");
       for (i = 0; i < numSymbols; i++)
 	{
 	  printf ("%d\t%o\t%02o\t%o\t%03o\t%s\n", i, symbols[i].module,
@@ -49,6 +52,7 @@ dPrintouts (void)
 #if (DEBUG_FLAGS & DEBUG_SYMBOLS_BY_NAME) != 0
     {
       int i;
+      printf ("\n*** TABLE OF SYMBOLS AND AUTO-ALLOCATED CONSTANTS BY NAME/VALUE ***\n");
       for (i = 0; i < numSymbolsByName; i++)
 	{
 	  printf ("%d\t%o\t%02o\t%o\t%03o\t%s\n", i, symbolsByName[i].module,
@@ -60,6 +64,7 @@ dPrintouts (void)
 #if (DEBUG_FLAGS & DEBUG_SOURCE_LINES) != 0
     {
       int i;
+      printf ("\n*** TABLE OF SOURCE CODE ***\n");
       for (i = 0; i < numSourceLines; i++)
 	{
 	  printf ("%d\t%o\t%02o\t%o\t%03o\t%s\n", i, sourceLines[i].module,
@@ -71,6 +76,7 @@ dPrintouts (void)
 #if (DEBUG_FLAGS & DEBUG_CORE) != 0
     {
       int module, sector, syllable, loc;
+      printf ("\n*** TABLE OF CORE MEMORY ***\n");
       for (module = 0; module <= 7; module++)
 	for (sector = 0; sector <= 017; sector++)
 	  {
@@ -78,7 +84,7 @@ dPrintouts (void)
 	    // Check if the sector is completely empty.
 	    for (syllable = 0; empty && syllable <= 2; syllable++)
 	      for (loc = 0; empty && loc <= 0377; loc++)
-		if (core[module][sector][syllable][loc] != -1)
+		if (state.core[module][sector][syllable][loc] != -1)
 		  empty = 0;
 	    if (empty)
 	      continue;
@@ -89,24 +95,24 @@ dPrintouts (void)
 	    printf ("%03o", offset);
 	    for (loc = offset; loc < offset + 8; loc++)
 	      {
-		if (core[module][sector][2][loc] != -1)
+		if (state.core[module][sector][2][loc] != -1)
 		  {
-		    printf ("\t %09o \tD", core[module][sector][2][loc]);
+		    printf ("\t %09o \tD", state.core[module][sector][2][loc]);
 		    continue;
 		  }
-		if (core[module][sector][0][loc] == -1 && core[module][sector][1][loc] == -1)
+		if (state.core[module][sector][0][loc] == -1 && state.core[module][sector][1][loc] == -1)
 		  {
 		    printf ("\t           \t ");
 		    continue;
 		  }
-		if (core[module][sector][1][loc] == -1)
+		if (state.core[module][sector][1][loc] == -1)
 		  printf ("\t      ");
 		else
-		  printf ("\t%05o ", core[module][sector][1][loc]);
-		if (core[module][sector][0][loc] == -1)
+		  printf ("\t%05o ", state.core[module][sector][1][loc]);
+		if (state.core[module][sector][0][loc] == -1)
 		  printf ("     \tD");
 		else
-		  printf ("%05o\tD", core[module][sector][0][loc]);
+		  printf ("%05o\tD", state.core[module][sector][0][loc]);
 	      }
 	    printf ("\n");
 	  }

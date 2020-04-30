@@ -21,7 +21,7 @@
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-18 RSB  Began.
- *              2020-04-29 RSB  Added the --ptc switch.
+ *              2020-04-29 RSB  Resumed development (including --ptc).
  */
 
 #include <stdio.h>
@@ -41,6 +41,8 @@ static char helpMessage[] = "Usage:\n"
     "              B.src files are used for symbolic debugging. Multiple\n"
     "              --assembly arguments can be used if several programs are\n"
     "              overlaid in core memory.\n"
+    "--cold-start  If used, does not load a core-memory image (see --core)\n"
+    "              upon startup.\n"
     "--core=F      The initial core-memory image is filename F. The default\n"
     "              is yaLVDC.core.  Note that the file will be periodically\n"
     "              modified during emulation as core memory changes.  If the\n"
@@ -48,12 +50,16 @@ static char helpMessage[] = "Usage:\n"
     "              instead taken from the --assembly file, but the --core\n"
     "              file will still be created and periodically updated.\n"
     "--ptc         Emulate a PTC target rather than an LVDC target.\n"
+    "--run         Start the LVDC/PTC program running freely.  By default,\n"
+    "              (without --run), will simply pause without running.\n"
     "";
 
 char *assemblyBasenames[MAX_PROGRAMS] =
   { "yaLVDC" };
 char *coreFilename = "yaLVDC.core";
 int ptc = 0;
+int coldStart = 0;
+int runNextN = 0;
 
 // Parse a set of command-line arguments and set global variables based
 // on them.
@@ -78,6 +84,10 @@ parseCommandLineArguments (int argc, char *argv[])
 	coreFilename = &argv[i][7];
       else if (!strcmp (argv[i], "--ptc"))
         ptc = 1;
+      else if (!strcmp (argv[i], "--cold-start"))
+        coldStart = 1;
+      else if (!strcmp (argv[i], "--run"))
+        runNextN = -1;
       else if (!strcmp (argv[i], "--help"))
 	goto help;
       else

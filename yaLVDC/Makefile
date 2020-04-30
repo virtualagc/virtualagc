@@ -1,24 +1,13 @@
-# Copyright 2019 Ronald S. Burkey <info@sandroid.org>
-# 
-# This file is part of yaAGC.
-#
-# yaAGC is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# yaAGC is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with yaAGC; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# I, the author, Ron Burkey, declare this Makefile to be in the
+# Public Domain under U.S. law.
 #
 # Filename:	Makefile
 # Purpose:	Makefile for the yaLVDC emulator.
 # Mods:		2011-12-23 RSB	Adapted from yaASM Makefile.
+#		2020-04-30 RSB	Removed the compiler -m32 switch, which
+#				doesn't work for my current gcc setup.
+#				I don't even recall why it had been there.
+#				Also made the Makefile public domain. 
 #
 # The default is to build using the native gcc. To cross build from 
 # Linux to get Win32 and Mac OS X executables as well (make all-archs), 
@@ -44,7 +33,7 @@ default: ${TARGET}
 all-archs: ${TARGET}
 
 ${TARGET}: ${SOURCE} yaLVDC.h Makefile
-	${cc} ${CFLAGS} -m32 -o $@ *.c
+	${cc} ${CFLAGS} -o $@ *.c
 
 .PHONY:	clean
 clean:
