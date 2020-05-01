@@ -47,7 +47,7 @@
 #define DEBUG_SOURCE_LINES 	4
 #define DEBUG_CORE		8
 
-#define DEBUG_FLAGS DEBUG_NONE
+#define DEBUG_FLAGS DEBUG_SOURCE
 #if DEBUG_FLAGS != DEBUG_NONE
 #define DEBUG
 #endif
@@ -102,6 +102,7 @@ typedef struct {
   uint8_t sector;
   uint8_t syllable; // 0,1 instructions, 2 data.
   uint8_t loc;
+  int lineNumber;
 } sourceLine_t;
 sourceLine_t *sourceLines;
 int numSourceLines;

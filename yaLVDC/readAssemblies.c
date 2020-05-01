@@ -458,6 +458,7 @@ readSourceLines (int count, char *filename)
   char *buffer = NULL;
   char *rawline = NULL;
   char *line = NULL;
+  int lineNumber;
 
   fp = fopen (filename, "r");
   if (fp == NULL)
@@ -479,9 +480,9 @@ readSourceLines (int count, char *filename)
       int i;
       buffer[MAX_LINE] = 0;
       trim (buffer);
-      i = sscanf (buffer, "%o%o%o%o%[^\n]", &module, &sector,
-		  &syllable, &loc, rawline);
-      if (i != 5)
+      i = sscanf (buffer, "%o%o%o%o%d%[^\n]", &module, &sector,
+		  &syllable, &loc, &lineNumber, rawline);
+      if (i != 6)
 	{
 	  pushErrorMessage ("Ill-formed source-table line:", buffer);
 	  goto done;
@@ -512,6 +513,7 @@ readSourceLines (int count, char *filename)
       sourceLines[numSourceLines].sector = sector;
       sourceLines[numSourceLines].syllable = syllable;
       sourceLines[numSourceLines].loc = loc;
+      sourceLines[numSourceLines].lineNumber = lineNumber;
       numSourceLines++;
     }
 

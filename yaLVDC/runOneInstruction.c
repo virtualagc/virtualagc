@@ -44,7 +44,7 @@ parseHopConstant(int hopConstant, hopStructure_t *hopStructure)
 {
   int retVal = 1;
 
-  if ((hopConstant & ~0377677773) != 0)
+  if ((!ptc && (hopConstant & 0100000) != 0) || (ptc && (hopConstant & 03300003) != 0))
     {
       //pushErrorMessage("Corrupted HOP constant", NULL);
       goto done;
@@ -213,13 +213,11 @@ storeData(int module, int residual, int sector, int loc, int data,
 // memory; if that fails, get it from data memory and set a flag
 // (instructionFromDataMemory) for optional use by the calling code.
 int
-fetchInstruction(int module, int residual, int sector, int syllable, int loc,
+fetchInstruction(int module, int sector, int syllable, int loc,
     uint16_t *instruction, int *instructionFromDataMemory)
 {
   int retVal = 1;
   *instructionFromDataMemory = 0;
-  if (residual)
-    sector = 017;
   *instruction = state.core[module][sector][syllable][loc];
   if (*instruction == -1)
     {
@@ -288,7 +286,7 @@ runOneInstruction(int *cyclesUsed)
   if (hopStructure.loc != 0377)
     nextLOC += 1;
 
-  if (fetchInstruction(hopStructure.im, 0, hopStructure.is, hopStructure.s,
+  if (fetchInstruction(hopStructure.im, hopStructure.is, hopStructure.s,
       hopStructure.loc, &instruction, &instructionFromDataMemory))
     goto done;
 
@@ -454,13 +452,13 @@ runOneInstruction(int *cyclesUsed)
   else if (op == 014)
     {
       // TMI
-      // Since the accumulator is only 27 bits, it won't fill the int32_t
+      // Since the accumulator is only 26 bits, it won't fill the int32_t
       // it's stored in, and hence we can't just check if it's negative.
       // However, it's stored in 2's-complement form, and if we assume that the
       // CPU running the emulator is also 2's-complement (which has been a good
       // assumption for at least the last 40 years), we can simply check its
-      // most-significant (27th) bit.
-      if ((state.acc & 0400000000) != 0)
+      // most-significant (26th) bit.
+      if ((state.acc & 0200000000) != 0)
         {
           nextLOC = operand;
           nextS = residual;
@@ -591,7 +589,7 @@ runOneInstruction(int *cyclesUsed)
           //modOperand = operand & 017;
           syllable = (operand >> 4) & 1;
           loc = locs[(operand >> 5) & 3];
-          if (fetchInstruction(hopStructure.im, 1, hopStructure.is, syllable,
+          if (fetchInstruction(hopStructure.im, hopStructure.is, syllable,
               loc, &instruction, &instructionFromDataMemory))
             goto done;
           goto reenterForEXM;

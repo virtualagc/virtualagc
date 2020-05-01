@@ -49,19 +49,19 @@ formHopDescription(int hopConstant, int module, int sector, int location,
       if (module < 0 || module > 7 || sector < 0 || sector > 017 || location < 0
           || location > 0377)
         {
-          sprintf(buffer, "%-30s", "illegal address");
+          sprintf(buffer, "????????? (%-19s", "illegal address");
           return (1);
         }
       if (state.core[module][sector][2][location] == -1)
         {
-          sprintf(buffer, "%-30s", "empty address");
+          sprintf(buffer, "????????? (%-19s", "empty address");
           return (1);
         }
       hopConstant = state.core[module][sector][2][location];
     }
   if (parseHopConstant(hopConstant, hs))
     {
-      sprintf(buffer, "%-30s", "invalid HOP constant");
+      sprintf(buffer, "%09o (%-19s", hopConstant, "invalid HOP constant");
       return (1);
     }
   sprintf(buffer, "%09o (ADR=%o-%02o-%o-%03o/%o-%02o", hopConstant, hs->im, hs->is,
@@ -81,7 +81,7 @@ gdbInterface(unsigned long instructionCount)
 {
   int retVal = 1;
   hopStructure_t hs;
-  char lineBuffer[128], fields[3][sizeof(lineBuffer)], hopBuffer[32], c;
+  char lineBuffer[128], fields[3][sizeof(lineBuffer)], hopBuffer[32];
   size_t count;
   int value;
 
@@ -107,10 +107,10 @@ gdbInterface(unsigned long instructionCount)
             printf("%05o)", value);
         }
       printf("  ACC=%09o", state.acc);
-      c = formHopDescription(-1, 0, 17, 0377, hopBuffer, &hs) ? ' ' : ')';
-      printf("  (777)=%s%c", hopBuffer, c);
-      c = formHopDescription(-1, 0, 17, 0376, hopBuffer, &hs) ? ' ' : ')';
-      printf("  (776)=%s%c", hopBuffer, c);
+      formHopDescription(-1, 0, 017, 0377, hopBuffer, &hs);
+      printf("  (777)=%s%c", hopBuffer, ')');
+      formHopDescription(-1, 0, 017, 0376, hopBuffer, &hs);
+      printf("  (776)=%s%c", hopBuffer, ')');
       if (ptc == 0)
         printf("  PQ=%09o", state.pq);
       printf("\n");
@@ -131,7 +131,7 @@ gdbInterface(unsigned long instructionCount)
                 continue;
               if (sourceLines[i].loc != hs.loc)
                 continue;
-              printf("%s\n", sourceLines[i].line);
+              printf("%-6d %s\n", sourceLines[i].lineNumber, sourceLines[i].line);
               found = 1;
               break;
             }
