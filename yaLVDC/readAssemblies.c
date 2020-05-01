@@ -22,6 +22,15 @@
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-18 RSB  Began.
+ *              2020-05-01 RSB  Decided that the octals need to be stored
+ *                              in RAM in a natural form for usage internally
+ *                              by the emulator, as opposed to in the form
+ *                              they were stored in the input file.
+ *                              They'll now be aligned to the LSb.  I had
+ *                              found that otherwise, it was just too
+ *                              confusing for maintaining the software,
+ *                              since I could never get it straight in my
+ *                              head how much shifting needed to occur.
  */
 
 #include <stdlib.h>
@@ -271,7 +280,7 @@ readOctalListing (int count, char *filename)
 	      if (pd == 11)
 		{
 		  sscanf (vals[j], " %o", &syl2);
-		  state.core[currentModule][currentSector][2][loc] = syl2;
+		  state.core[currentModule][currentSector][2][loc] = syl2 >> 1;
 		  if (state.core[currentModule][currentSector][0][loc] != -1
 		      || state.core[currentModule][currentSector][1][loc] != -1)
 		    {
@@ -283,7 +292,7 @@ readOctalListing (int count, char *filename)
 	      else if (pi10 == 11)
 		{
 		  sscanf (vals[j], "%o", &syl1);
-		  state.core[currentModule][currentSector][1][loc] = syl1;
+		  state.core[currentModule][currentSector][1][loc] = syl1 >> 2;
 		  if (state.core[currentModule][currentSector][2][loc] != -1)
 		    {
 		      pushErrorMessage (
@@ -294,7 +303,7 @@ readOctalListing (int count, char *filename)
 	      else if (pi01 == 11)
 		{
 		  sscanf (vals[j], "      %o", &syl0);
-		  state.core[currentModule][currentSector][0][loc] = syl0;
+		  state.core[currentModule][currentSector][0][loc] = syl0 >> 1;
 		  if (state.core[currentModule][currentSector][2][loc] != -1)
 		    {
 		      pushErrorMessage (
@@ -305,8 +314,8 @@ readOctalListing (int count, char *filename)
 	      else if (pi11 == 11)
 		{
 		  sscanf (vals[j], "%o %o", &syl1, &syl0);
-		  state.core[currentModule][currentSector][1][loc] = syl1;
-		  state.core[currentModule][currentSector][0][loc] = syl0;
+		  state.core[currentModule][currentSector][1][loc] = syl1 >> 2;
+		  state.core[currentModule][currentSector][0][loc] = syl0 >> 1;
 		  if (state.core[currentModule][currentSector][2][loc] != -1)
 		    {
 		      pushErrorMessage (

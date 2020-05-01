@@ -90,6 +90,7 @@ main (int argc, char *argv[])
   clock_t startingTime, currentTime;
   unsigned long cycleCount = 0;
   struct tms TmsStruct;
+  unsigned long instructionCount = 0;
 
   // Setup and initialization.
   if (parseCommandLineArguments (argc, argv))
@@ -122,12 +123,15 @@ main (int argc, char *argv[])
 	{
 	  int cyclesUsed = 0;
 	  if (runNextN == 0)
-	    if (gdbInterface ())
+	    if (gdbInterface (instructionCount))
 	      goto done;
 	  if (!runOneInstruction(&cyclesUsed))
 	    cycleCount += cyclesUsed;
 	  if (runNextN > 0)
-	    runNextN--;
+	    {
+	      instructionCount++;
+	      runNextN--;
+	    }
 	}
 
       // Sleep for a little to avoid hogging 100% CPU time.  The amount

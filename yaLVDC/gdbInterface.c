@@ -33,6 +33,43 @@
 #include "yaLVDC.h"
 
 ////////////////////////////////////////////////////////////////////////////////
+// Utility functions.
+
+// Create a descriptive string for a HOP constant, specified either by giving
+// the constant itself, or else by module/sector/location if the constant is given
+// as -1.  A char buffer[32] to store the string is one of the arguments.
+// Returns 0 if successful, 1 otherwise.  The string is still created in
+// case of failure.
+static int
+formHopDescription(int hopConstant, int module, int sector, int location,
+    char *buffer, hopStructure_t *hs)
+{
+  if (hopConstant == -1)
+    {
+      if (module < 0 || module > 7 || sector < 0 || sector > 017 || location < 0
+          || location > 0377)
+        {
+          sprintf(buffer, "%-30s", "illegal address");
+          return (1);
+        }
+      if (state.core[module][sector][2][location] == -1)
+        {
+          sprintf(buffer, "%-30s", "empty address");
+          return (1);
+        }
+      hopConstant = state.core[module][sector][2][location];
+    }
+  if (parseHopConstant(hopConstant, hs))
+    {
+      sprintf(buffer, "%-30s", "invalid HOP constant");
+      return (1);
+    }
+  sprintf(buffer, "%09o (ADR=%o-%02o-%o-%03o/%o-%02o", hopConstant, hs->im, hs->is,
+      hs->s, hs->loc, hs->dm, hs->ds);
+  return (0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 // The top-level function in this file.  It assumes that the LVDC/PTC program
 // has been paused.  Information about the current register values is printed,
@@ -40,11 +77,11 @@
 
 // The return value is 0 on success, non-zero on failure.
 int
-gdbInterface(void)
+gdbInterface(unsigned long instructionCount)
 {
   int retVal = 1;
   hopStructure_t hs;
-  char lineBuffer[128], fields[3][sizeof(lineBuffer)];
+  char lineBuffer[128], fields[3][sizeof(lineBuffer)], hopBuffer[32], c;
   size_t count;
   int value;
 
@@ -55,33 +92,30 @@ gdbInterface(void)
     {
 
       // Display registers.
-      printf("\n");
-      printf("HOP=%09o (", state.hop >> 1);
-      if (parseHopConstant(state.hop, &hs))
+      printf("\nHOP=");
+      if (formHopDescription(state.hop, 0, 0, 0, hopBuffer, &hs))
         {
-          printf("ADR=%-15s", "illegal");
-          printf(" VAL=%-5s", "n/a");
+          printf("%s VAL=%-5s)", hopBuffer, "n/a");
         }
       else
         {
-          printf("ADR=%o-%02o-%o-%03o %o-%02o", hs.im, hs.is, hs.s, hs.loc,
-              hs.ds, hs.dm);
+          printf("%s VAL=", hopBuffer);
           value = state.core[hs.im][hs.is][hs.s][hs.loc];
           if (value == -1)
-            printf(" VAL=%-5s", "empty");
+            printf("%-5s)", "empty");
           else
-            {
-              if (hs.s == 0)
-                value = value >> 1;
-              else
-                value = value >> 2;
-              printf(" VAL=%05o", value);
-            }
+            printf("%05o)", value);
         }
-      printf(")  ACC=%09o", state.acc);
+      printf("  ACC=%09o", state.acc);
+      c = formHopDescription(-1, 0, 17, 0377, hopBuffer, &hs) ? ' ' : ')';
+      printf("  (777)=%s%c", hopBuffer, c);
+      c = formHopDescription(-1, 0, 17, 0376, hopBuffer, &hs) ? ' ' : ')';
+      printf("  (776)=%s%c", hopBuffer, c);
       if (ptc == 0)
         printf("  PQ=%09o", state.pq);
       printf("\n");
+
+      printf("%12lu: ", instructionCount);
 
       // Search for the matching source line.
       if (state.core[hs.im][hs.is][hs.s][hs.loc] != -1)

@@ -25,6 +25,8 @@
  * Mods:        2019-09-20 RSB  Began
  *              2020-04-30 RSB  Fixed DEBUG_CORE, which referenced a
  *                              non-existent structure.
+ *              2020-05-01 RSB  Corrected shift for new way of buffering
+ *                              octals in RAM.
  */
 
 #include <stdio.h>
@@ -97,7 +99,7 @@ dPrintouts (void)
 	      {
 		if (state.core[module][sector][2][loc] != -1)
 		  {
-		    printf ("\t %09o \tD", state.core[module][sector][2][loc]);
+		    printf ("\t %09o \tD", state.core[module][sector][2][loc] << 1);
 		    continue;
 		  }
 		if (state.core[module][sector][0][loc] == -1 && state.core[module][sector][1][loc] == -1)
@@ -108,11 +110,11 @@ dPrintouts (void)
 		if (state.core[module][sector][1][loc] == -1)
 		  printf ("\t      ");
 		else
-		  printf ("\t%05o ", state.core[module][sector][1][loc]);
+		  printf ("\t%05o ", state.core[module][sector][1][loc] << 2);
 		if (state.core[module][sector][0][loc] == -1)
 		  printf ("     \tD");
 		else
-		  printf ("%05o\tD", state.core[module][sector][0][loc]);
+		  printf ("%05o\tD", state.core[module][sector][0][loc] << 1);
 	      }
 	    printf ("\n");
 	  }

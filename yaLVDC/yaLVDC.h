@@ -148,14 +148,14 @@ parseHopConstant (int hopConstant, hopStructure_t *hopStructure);
 int
 formHopConstant (hopStructure_t *hopStructure, int *hopConstant);
 int
-fetchData (int module, int residual, int sector, int loc, int16_t *data,
+fetchData (int module, int residual, int sector, int loc, int32_t *data,
 	   int *dataFromInstructionMemory);
 int
-storeData (int module, int residual, int sector, int loc, int16_t data,
+storeData (int module, int residual, int sector, int loc, int32_t data,
 	   int *dataOverwritesInstructionMemory);
 
 // See gdbInterface.c
 int
-gdbInterface (void);
+gdbInterface (unsigned long instructionCount);
 
 #endif // yaLVDC_h
