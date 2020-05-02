@@ -4924,51 +4924,68 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           <td style="vertical-align: top;"> LVDC only ... <i>not</i>
             PTC.<br>
             <br>
-            "Execute modified".&nbsp; This instruction takes an
-            instruction stored at a specified memory location, forms a
-            modified A1-A9 field for that instruction, executes that
+            "Execute modified".&nbsp; In baseball terms, this is the
+            "infield fly rule" of the LVDC: it clearly does something,
+            but upon first acquaintance it's hard to grasp exactly what
+            it does.<br>
+            <br>
+            The <tt>EXM</tt> instruction takes a target instruction
+            stored at a different memory location, forms a modified
+            operand for that instruction, executes the modified
             instruction, and then continues with the next instruction
-            following the <span style="font-family: Courier
-              New,Courier,monospace;">EXM</span> (unless the program
-            counter has been modified).&nbsp; For this instruction, A8
-            and A9 form a part of the instruction code, so only A1-A7
-            are significant.&nbsp; Only 4 different target words are
-            allowed, 0600, 0640, 0700, and 0740, and they are all in the
-            "residual sector".&nbsp; Many of the bits in A1-A7 represent
-            various types of modifications to the embedded address at
-            the target address rather than being address bits
-            themselves.&nbsp;&nbsp; Here are the interpretations of bits
-            A1-A7 in the <span style="font-family: Courier
-              New,Courier,monospace;">EXM</span> instruction:<br>
+            following the <tt>EXM</tt> (unless the program counter has
+            been changed by the modified instruction).&nbsp; For this
+            instruction, A8 and A9 form a part of the instruction code,
+            so only A1-A7 are significant.&nbsp; <br>
+            <br>
+            It is important to understand that the target instruction is
+            not modified within the LVDC memory; rather, it is modified
+            and executed without the modified form of it being stored in
+            memory at all.<br>
+            <br>
+            Only 4 different choices of memory address are allowed to
+            contain the target instruction which is to be modified,
+            namely 0200, 0240, 0300, and 0340 in the "residual sector"
+            in the memory module selected by the current DM (data
+            module) bit.&nbsp; (The original documentation does not
+            actually indicate whether it is the IM or DM bit that
+            selects the particular memory module in which the target
+            instruction is stored, and I think that it would be very
+            reasonable to suppose that the IM bit is used.&nbsp; But
+            from the actual AS206-RAM Flight Program source code, it is
+            obvious that DM is the bit which is used.)<br>
+            <br>
+            Some of the bits in A1-A7 of the <tt>EXM</tt> instruction
+            represent various types of modifications to the embedded
+            address at the target address rather than themselves being
+            address bits.&nbsp;&nbsp; Here are the interpretations of
+            bits A1-A7 found in the <tt>EXM</tt> instruction:<br>
             <ul>
               <li>A1-A4 modify the address embedded in the target
                 instruction as described below.<br>
               </li>
               <li>A5 indicates the syllable in which the target
-                instruction resides.</li>
+                instruction resides in residual memory.</li>
               <li>A7,A6 selects the target address, as follows:</li>
               <ul>
-                <li>0,0 for target address 0600</li>
-                <li>0,1 for target address 0640</li>
-                <li>1,0 for target address 0700</li>
-                <li>1,1 for target address 0740</li>
+                <li>0,0 for target address 0200</li>
+                <li>0,1 for target address 0240</li>
+                <li>1,0 for target address 0300</li>
+                <li>1,1 for target address 0340</li>
               </ul>
             </ul>
-            When the target instruction is executed, its A1-A9 bits are
-            formed as follows:<br>
+            To modify the target instruction, its A1-A9 bits are formed
+            as follows:<br>
             <ul>
               <li>A1-A2 come from A1-A2 of the <span
                   style="font-family: monospace;">EXM</span>
                 instruction.</li>
               <li>A3 is the logical OR of the A3 of the target
-                instruction and A3 of the <span style="font-family:
-                  Courier New,Courier,monospace;">EXM</span>
-                instruction.</li>
+                instruction and A3 of the <tt>EXM</tt> instruction.</li>
               <li>A4 is the logical OR of the A4 of the target
-                instruction and A4 of the <span style="font-family:
-                  Courier New,Courier,monospace;">EXM</span>
-                instruction.</li>
-              <li>A5-A8 come from A5-A8 of the target instruction.</li>
+                instruction and A4 of the <tt>EXM</tt> instruction.</li>
+              <li>A5-A8 come from A5-A8 of the target instruction, and
+                replace those bits from the original target instruction.</li>
             </ul>
             The data sector used when the target instruction is executed
             is also changed for the duration of that one instruction, as
@@ -5167,9 +5184,14 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               </tbody>
             </table>
             <br>
-            In baseball terms, this is the "infield fly rule" of the
-            LVDC: it clearly does something, but it's hard to grasp
-            exactly what it does.<br>
+            The assembly-language syntax is<br>
+            <blockquote><tt>EXM&nbsp;&nbsp;&nbsp; <i>adr,syl,mod</i></tt><br>
+            </blockquote>
+            where <i><tt>adr</tt></i> (0, 1, 2, or 3) selects target
+            address 200, 240, 300, or 340, respectively; <i><tt>syl</tt></i>
+            (0 or 1) is the syllable of the target address; and <i><tt>mod</tt></i>
+            (00-17 octal) is the 4-bit modification to be applied to
+            bits A1-A4 of the target instruction's operand.<br>
           </td>
         </tr>
         <tr>
