@@ -194,7 +194,7 @@ storeData(int module, int residual, int sector, int loc, int data,
           state.pq = data;
           return (0);
         }
-      else if (state.returnAddress != -2 && (loc == 0376 || loc == 0377))
+      else if (loc == 0376 || loc == 0377)
         data = state.returnAddress;
       sector = 017;
     }
@@ -303,43 +303,53 @@ runOneInstruction(int *cyclesUsed)
   dataFromInstructionMemory = 0;
   instructionFromDataMemory = 0;
 
-  // Find current instruction address and data-sector environment, by parsing
-  // the HOP register to find its various fields.
-  if (parseHopConstant(state.hop, &hopStructure))
+  reenterForEXM:;
+  if (state.pendingEXM.pending)
     {
-      //pushErrorMessage("Cannot interpret current instruction address", NULL);
-      printf("Cannot interpret current instruction address (HOP=%09o)\n",
-          state.hop >> 1);
-      runNextN = 0;
-      goto done;
+      state.pendingEXM.pending = 0;
+      state.hop = state.pendingEXM.pendingHop;
+      if (parseHopConstant(state.hop, &hopStructure))
+        {
+          printf("Cannot interpret current instruction address (HOP=%09o)\n",
+              state.hop);
+          runNextN = 0;
+          goto done;
+        }
+      if (parseHopConstant(state.pendingEXM.nextHop, &rawHopStructure))
+        {
+          printf("Cannot interpret next instruction address (HOP=%09o)\n",
+              state.pendingEXM.nextHop);
+          runNextN = 0;
+          goto done;
+        }
+      nextLOC = rawHopStructure.loc;
+      nextS = rawHopStructure.s;
+      instruction = state.pendingEXM.pendingInstruction;
     }
-  memcpy(&rawHopStructure, &hopStructure, sizeof(hopStructure_t));
-  // What would the next instruction location be in the normal course of events?
-  // Only the LOC field of the HOP constant is involved, but we'll track the S
-  // field as well, to facilitate working with TRA, TNZ, and TMI later.
-  nextLOC = hopStructure.loc;
-  nextS = hopStructure.s;
-  if (hopStructure.loc != 0377)
-    nextLOC += 1;
-
-  if (fetchInstruction(hopStructure.im, hopStructure.is, hopStructure.s,
-      hopStructure.loc, &instruction, &instructionFromDataMemory))
-    goto done;
-
-  // Do not delete this block, even though it's "if (0)"!  There's an entry point.
-  // If this instruction turns out to be an EXM, it means that we'll have to
-  // repeat all the steps below for the instruction EXM will want to execute,
-  // so an EXM will end up just jumping back to here.
-  if (0)
+  else
     {
-      const uint8_t dss[] =
-        { 004, 014, 005, 015, 006, 016, 007, 017 };
-      reenterForEXM: ;
-      cycleCount += 1;
-      // Note that hopStructure is used for executing the instruction, but
-      // not for generating the hopConstant beyond this one instruction, so
-      // we can change it temporarily here without side effects.
-      hopStructure.ds = dss[(instruction >> 4) & 7];
+      // Find current instruction address and data-sector environment, by parsing
+      // the HOP register to find its various fields.
+      if (parseHopConstant(state.hop, &hopStructure))
+        {
+          //pushErrorMessage("Cannot interpret current instruction address", NULL);
+          printf("Cannot interpret current instruction address (HOP=%09o)\n",
+              state.hop);
+          runNextN = 0;
+          goto done;
+        }
+      memcpy(&rawHopStructure, &hopStructure, sizeof(hopStructure_t));
+      // What would the next instruction location be in the normal course of events?
+      // Only the LOC field of the HOP constant is involved, but we'll track the S
+      // field as well, to facilitate working with TRA, TNZ, and TMI later.
+      nextLOC = hopStructure.loc;
+      nextS = hopStructure.s;
+      if (hopStructure.loc != 0377)
+        nextLOC += 1;
+
+      if (fetchInstruction(hopStructure.im, hopStructure.is, hopStructure.s,
+          hopStructure.loc, &instruction, &instructionFromDataMemory))
+        goto done;
     }
 
   // Parse instruction into fields.
@@ -366,6 +376,7 @@ runOneInstruction(int *cyclesUsed)
           runNextN = 0;
           goto done;
         }
+      printf("Here %o-%02o-%o-%02o %09o\n", hopStructure.dm, residual, hopStructure.ds, operand, fetchedFromMemory);
       state.hop = fetchedFromMemory;
     }
   else if (!ptc && (op == 001 || op == 005))
@@ -430,7 +441,8 @@ runOneInstruction(int *cyclesUsed)
       // larger action is required.
 
       // The following is based on Figure 2-11 in the PTC documentation.
-      if (operand == 0154 || operand == 0204 || operand == 0214 || operand == 0220)
+      if (operand == 0154 || operand == 0204 || operand == 0214
+          || operand == 0220)
         state.acc = state.cio[operand];
       else
         {
@@ -572,6 +584,7 @@ runOneInstruction(int *cyclesUsed)
       // CDS
       rawHopStructure.dm = (operand >> 4) & 1;
       rawHopStructure.ds = operand & 017;
+      printf("CDS %o,%02o\n", rawHopStructure.dm, rawHopStructure.ds);
     }
   else if (!ptc && op == 016 && a8 == 0 && a9 == 0)
     {
@@ -678,14 +691,46 @@ runOneInstruction(int *cyclesUsed)
       // EXM
       const uint8_t locs[] =
         { 0200, 0240, 0300, 0340 };
-      int syllable;
+      const uint8_t secs[] =
+        { 004, 014, 005, 015, 006, 016, 007, 017 };
+      int syllable, modBits, dsIndex;
       uint8_t loc;
-      //modOperand = operand & 017;
+      hopStructure_t pendingHop;
+      modBits = operand & 017;
       syllable = (operand >> 4) & 1;
       loc = locs[(operand >> 5) & 3];
-      if (fetchInstruction(hopStructure.im, hopStructure.is, syllable, loc,
+      if (fetchInstruction(hopStructure.dm, 017, syllable, locs[loc],
           &instruction, &instructionFromDataMemory))
         goto done;
+      dsIndex = (instruction >> 4) & 7;
+      instruction = (instruction & ~023) | modBits;
+      state.pendingEXM.pendingInstruction = instruction;
+      rawHopStructure.loc = nextLOC;
+      rawHopStructure.s = nextS;
+      if (formHopConstant(&rawHopStructure, &state.pendingEXM.nextHop))
+        goto done;
+      pendingHop.im = hopStructure.dm;
+      pendingHop.is = 017;
+      pendingHop.s = syllable;
+      pendingHop.loc = locs[loc];
+      pendingHop.dm = hopStructure.dm;
+      pendingHop.ds = secs[dsIndex];
+      pendingHop.dupdn = hopStructure.dupdn;
+      pendingHop.dupin = hopStructure.dupin;
+      if (formHopConstant(&pendingHop, &state.pendingEXM.pendingHop))
+        goto done;
+      state.pendingEXM.pending = 1;
+      // We're just going to jump back up to the start of this function
+      // to executed the modified instruction.  Because all the info
+      // for doing this is in the state.pendingEXM structure, we could
+      // instead exit the function normally and count on the parent code
+      // to just call runOneInstruction() again later.  The problem is
+      // that I'm not sure how all that affects stuff the parent code is
+      // doing (such as the debugger interface), so for right now I'm
+      // taking the simpler route of not returning until after the modified
+      // instruction is executed.  But if all the details were worked out,
+      // I think exiting the function normally would be better.
+      cycleCount++;
       goto reenterForEXM;
     }
   else if (op == 017)
@@ -717,7 +762,7 @@ runOneInstruction(int *cyclesUsed)
     {
       if (formHopConstant(&rawHopStructure, &state.hop))
         goto done;
-      state.returnAddress = -2;
+      state.returnAddress = -1;
     }
 
   *cyclesUsed = cycleCount;

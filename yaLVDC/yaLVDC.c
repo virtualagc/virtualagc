@@ -104,6 +104,7 @@ main (int argc, char *argv[])
       goto done;
   dPrintouts(); // Some optional printouts for debugging.
   fflush(stdout);
+  state.returnAddress = -1;
 
   cyclesPerTick = 1.0 / (SECONDS_PER_CYCLE * sysconf(_SC_CLK_TCK));
   startingTime = times(&TmsStruct);
@@ -122,7 +123,7 @@ main (int argc, char *argv[])
       while (cycleCount < targetCycles)
 	{
 	  int cyclesUsed = 0;
-	  if (runNextN == 0)
+	  if (runNextN <= 0)
 	    if (gdbInterface (instructionCount))
 	      goto done;
 	  if (!runOneInstruction(&cyclesUsed))

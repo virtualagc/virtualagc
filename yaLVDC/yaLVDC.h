@@ -84,6 +84,12 @@ typedef struct {
   int32_t pio[512];
   int32_t cio[01000]; // PTC only.
   int32_t prs; // PTC only.
+  struct {
+    int pending; // True or False, if last instruction was EXM or not.
+    int32_t nextHop; // HOP constant for next instruction (as if no pending EXM-modified instruction).
+    int32_t pendingHop; // HOP constant for the pending EXM-modified instruction.
+    int16_t pendingInstruction; // the EXM-modified instruction.
+  } pendingEXM; // LVDC only.
   // The following three are reset at the start of a runOneInstruction()
   // invocation, but changed if the associated pio[], cio[], or prs
   // change during the runOneInstruction().  That's because

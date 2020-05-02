@@ -49,22 +49,22 @@ formHopDescription(int hopConstant, int module, int sector, int location,
       if (module < 0 || module > 7 || sector < 0 || sector > 017 || location < 0
           || location > 0377)
         {
-          sprintf(buffer, "????????? (%-19s", "illegal address");
+          sprintf(buffer, "????????? (%-19s)", "illegal address");
           return (1);
         }
       if (state.core[module][sector][2][location] == -1)
         {
-          sprintf(buffer, "????????? (%-19s", "empty address");
+          sprintf(buffer, "????????? (%-19s)", "empty address");
           return (1);
         }
       hopConstant = state.core[module][sector][2][location];
     }
   if (parseHopConstant(hopConstant, hs))
     {
-      sprintf(buffer, "%09o (%-19s", hopConstant, "invalid HOP constant");
+      sprintf(buffer, "%09o (%-19s)", hopConstant, "invalid HOP constant");
       return (1);
     }
-  sprintf(buffer, "%09o (ADR=%o-%02o-%o-%03o/%o-%02o", hopConstant, hs->im, hs->is,
+  sprintf(buffer, "%09o (ADR=%o-%02o-%o-%03o/%o-%02o)", hopConstant, hs->im, hs->is,
       hs->s, hs->loc, hs->dm, hs->ds);
   return (0);
 }
@@ -80,7 +80,7 @@ int
 gdbInterface(unsigned long instructionCount)
 {
   int retVal = 1;
-  hopStructure_t hs;
+  hopStructure_t hs, hs2;
   char lineBuffer[128], fields[3][sizeof(lineBuffer)], hopBuffer[32];
   size_t count;
   int value;
@@ -92,28 +92,30 @@ gdbInterface(unsigned long instructionCount)
     {
 
       // Display registers.
-      printf("\nHOP=");
+      printf("\n HOP = ");
       if (formHopDescription(state.hop, 0, 0, 0, hopBuffer, &hs))
         {
-          printf("%s VAL=%-5s)", hopBuffer, "n/a");
+          printf("%s   VAL = %-5s", hopBuffer, "n/a");
         }
       else
         {
-          printf("%s VAL=", hopBuffer);
+          printf("%s   VAL = ", hopBuffer);
           value = state.core[hs.im][hs.is][hs.s][hs.loc];
           if (value == -1)
-            printf("%-5s)", "empty");
+            printf("%-5s", "empty");
           else
-            printf("%05o)", value);
+            printf("%05o", value);
         }
-      printf("  ACC=%09o", state.acc);
-      formHopDescription(-1, 0, 017, 0377, hopBuffer, &hs);
-      printf("  (777)=%s%c", hopBuffer, ')');
-      formHopDescription(-1, 0, 017, 0376, hopBuffer, &hs);
-      printf("  (776)=%s%c", hopBuffer, ')');
+      printf("   ACC = %09o", state.acc);
       if (ptc == 0)
-        printf("  PQ=%09o", state.pq);
+        printf("  P-Q = %09o", state.pq);
       printf("\n");
+      formHopDescription(-1, 0, 017, 0377, hopBuffer, &hs2);
+      printf("(777)= %s", hopBuffer);
+      formHopDescription(-1, 0, 017, 0376, hopBuffer, &hs2);
+      printf("  (776)= %s\n", hopBuffer);
+      formHopDescription(state.returnAddress, 0, 0, 0, hopBuffer, &hs2);
+      printf(" RET = %s\n", hopBuffer);
 
       printf("%12lu: ", instructionCount);
 
