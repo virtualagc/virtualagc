@@ -3238,19 +3238,715 @@ However,
 
 
 
-              PTC documentation (see figure 2-10)</a> has to say about
-            it:
+              PTC documentation (see figure 2-10)</a> has to say about <tt>CIO</tt>:
             <meta http-equiv="content-type" content="text/html;
               charset=UTF-8">
             "Controls the input, output operations of the CPU. The
             operand address bits specify the operation to be performed
             <meta http-equiv="content-type" content="text/html;
               charset=UTF-8">
-            (see figure 2-11 for CIO codes used by PTC)."&nbsp; The
-            accumulator has to be loaded, prior to the <tt>CIO</tt>
-            itself, with any additional data the specific operation
-            requires.&nbsp; Many of the operations relate to inhibiting
-            or enabling interrupts, sending commands to the PTC's
+            (see figure 2-11 for <tt>CIO</tt> codes used by
+            PTC)."&nbsp; Unfortunately, some 137 different <tt>CIO</tt>
+            ports are used just within the PAST program, while figure
+            2-11 lists only 35 of them.&nbsp; The following is a table
+            of the <tt>CIO</tt> ports <i>not</i> listed in figure
+            2-11, with some of their functionality inferred from
+            comments within the PAST program.&nbsp;&nbsp; <br>
+            <br>
+            <table cellspacing="2" cellpadding="2" border="1"
+              align="center">
+              <tbody>
+                <tr>
+                  <td valign="middle" align="center"><b>CIO Operand
+                      Address</b><b><br>
+                    </b></td>
+                  <td valign="middle" align="center"><b>Operation</b><b><br>
+                    </b></td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">001<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 3
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">002<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 1
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">003<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">005<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 4
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">006<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 2
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">007<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">011<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 5
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">012<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 3
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">015<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 6
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">016<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 4
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">017<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">021<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 7
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">022<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 5
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">023<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">025<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 8
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">026<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 6
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">031<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 9
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">032<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 7
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">035<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 10
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">036<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 8
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">037<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">041<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 11
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">042<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 9
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">045<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 12
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">046<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 10
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">051<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 13
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">052<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 11
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">055<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 14
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">056<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt 12
+                    latch<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">057<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">061<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    15<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">062<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    13<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">065<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    9</td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">066<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    14</td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">071<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    10<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">072<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    15<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">075<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    1<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">076<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    11<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">077<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">101<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    2<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">102<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    13<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">105<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    3<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">106<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    1<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">111<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    4<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">112<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    2<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">115<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    5<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">116<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    3<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">117<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">121<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    6<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">122<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    4<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">125<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    7<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">126<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    5<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">131<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    8<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">132<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    6<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">135<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    9<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">136<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    7<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">137<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">141<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    10<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">142<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    8<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">145<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    11<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">146<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    9<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">151<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    12<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">152<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    10<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">155<br>
+                  </td>
+                  <td valign="middle" align="center">Spare<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">156<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    11</td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">161<br>
+                  </td>
+                  <td valign="middle" align="center">Spare<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">162<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    12</td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">165<br>
+                  </td>
+                  <td valign="middle" align="center">Spare<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">166<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    13<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">171<br>
+                  </td>
+                  <td valign="middle" align="center">Spare<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">172<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    14<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">174<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">175<br>
+                  </td>
+                  <td valign="middle" align="center">Spare<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">176<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    15<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">177<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">200<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">202<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    12<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">206<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    14<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">212<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    1<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">216<br>
+                  </td>
+                  <td valign="middle" align="center">Set interrupt latch
+                    2<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">223<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">224<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">230<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">233<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">234<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">240<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">243<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">250<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">253<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">263<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">264<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">303<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">313<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">323<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">333<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">343<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">353<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">453<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">603<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">613<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">623<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">633<br>
+                  </td>
+                  <td valign="middle" align="center"><br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            As far as I know, only ports 154, 204, 214, and 220 are for
+            input, and they load the accumulator when used.&nbsp; Other
+            ports are for output only, and the accumulator should to be
+            loaded, prior to the <tt>CIO</tt> itself, with any
+            additional data the specific operation requires.&nbsp; Note
+            that most output operations do not require any such
+            supplemental data, and therefore ignore whatever value is
+            stored in the accumulator.&nbsp; Many of the operations
+            relate to inhibiting or enabling interrupts (as you can see
+            from the table above!), sending commands to the PTC's
             printer or plotter, etc.<br>
             <br>
             I haven't fully digested the <tt>CIO</tt> material, so I
