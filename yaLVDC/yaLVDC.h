@@ -83,6 +83,17 @@ typedef struct {
   int32_t core[8][16][3][256];
   int32_t pio[512];
   int32_t cio[01000]; // PTC only.
+  int32_t prs; // PTC only.
+  // The following three are reset at the start of a runOneInstruction()
+  // invocation, but changed if the associated pio[], cio[], or prs
+  // change during the runOneInstruction().  That's because
+  // runOneInstruction() itself does not do anything other than to change
+  // those values, without performed any of the explicit actions they're
+  // associated with in peripheral space, so it has to convey that some
+  // action is necessary by external code.
+  int pioChange;
+  int cioChange;
+  int prsChange;
 } state_t;
 state_t state;
 typedef struct {
@@ -158,5 +169,21 @@ storeData (int module, int residual, int sector, int loc, int32_t data,
 // See gdbInterface.c
 int
 gdbInterface (unsigned long instructionCount);
+
+// See processPIO.c
+int
+processPIO(void);
+
+// See processCIO.c
+int
+processCIO(void);
+
+// See processPRS.c
+int
+processPRS(void);
+
+// See processInterrupts.c
+int
+processInterrupts(void);
 
 #endif // yaLVDC_h

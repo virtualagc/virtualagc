@@ -127,6 +127,10 @@ main (int argc, char *argv[])
 	      goto done;
 	  if (!runOneInstruction(&cyclesUsed))
 	    cycleCount += cyclesUsed;
+	  if (processPIO() || processCIO() || processPRS())
+	    goto done;
+	  if (processInterrupts())
+	    goto done;
 	  if (runNextN > 0)
 	    {
 	      instructionCount++;
