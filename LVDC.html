@@ -43,9 +43,13 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
             Characteristics of the Computer</a></li>
         <li><a href="#Layout_of_Memory_Words">Layout of Memory Words</a></li>
         <li><a href="#CPU_Instructions">CPU Instructions</a></li>
-        <li><a href="#IO_Ports_For_PIO_Instruction">I/O Ports (for <span
-              style="font-family: Courier New,Courier,monospace;">PIO</span>
-            Instructions)</a></li>
+        <li><a href="#IO_Ports_For_PIO_Instruction">I/O Ports (for
+            LVDC/PTC <span style="font-family: Courier
+              New,Courier,monospace;">PIO</span> Instructions)</a></li>
+        <li><a href="#IO_Ports_for_PTC_CIO_Instruction">I/O Ports (for
+            PTC <font face="Courier New, Courier, monospace">CIO</font>
+            Instructions)</a><br>
+        </li>
         <li><a href="#Subroutine_Linkage">Subroutine Linkage</a><br>
         </li>
         <li><a href="#Interrupts">Interrupts</a></li>
@@ -72,9 +76,9 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
           Instrumentation Laboratory vs IBM Federal Systems Division</a></li>
       <li><big><a href="#yaLVDC_the_LVDC_CPU_Emulation"><small><small><big><small><big><span
                         style="font-weight: bold;">yaLVDC</span>, the
-                      LVDC CPU Emulation</big></small></big></small></small></a></big></li>
+                      LVDC/PTC CPU Emulation</big></small></big></small></small></a></big></li>
       <li><a href="#yaLVDCASM_the_LVDC_Cross-Assembler"><span
-            style="font-weight: bold;">yaASM.py</span>, the LVDC
+            style="font-weight: bold;">yaASM.py</span>, the LVDC/PTC
           Cross-Assembler</a></li>
       <li><a href="#Plea_for_Data">Plea for Data</a></li>
       <li><a href="#Homage">Homage</a><br>
@@ -3219,741 +3223,35 @@ However,
           </td>
           <td valign="middle" align="center">TBD<br>
           </td>
-          <td valign="middle">PTC only ... <i>not</i> LVDC.<br>
+          <td valign="middle">PTC only ... <i>not</i> LVDC.&nbsp; There
+            is no LVDC equivalent for this instruction, which can be
+            viewed as a way of extending the LVDC/PTC <tt>PIO</tt>
+            instruction (see below) to a wider range of uses.<br>
             <br>
-            Here's what <a href="Documents/19730064346_1973064346.pdf">the
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              PTC documentation (see figure 2-10)</a> has to say about <tt>CIO</tt>:
+            Here's what the original PTC documentation has to say about
+            <tt>CIO</tt>:
             <meta http-equiv="content-type" content="text/html;
               charset=UTF-8">
             "Controls the input, output operations of the CPU. The
-            operand address bits specify the operation to be performed
-            <meta http-equiv="content-type" content="text/html;
-              charset=UTF-8">
-            (see figure 2-11 for <tt>CIO</tt> codes used by
-            PTC)."&nbsp; Unfortunately, some 137 different <tt>CIO</tt>
-            ports are used just within the PAST program, while figure
-            2-11 lists only 35 of them.&nbsp; The following is a table
-            of the <tt>CIO</tt> ports <i>not</i> listed in figure
-            2-11, with some of their functionality inferred from
-            comments within the PAST program.&nbsp;&nbsp; <br>
+            operand address bits specify the operation to be
+            performed."&nbsp; <br>
             <br>
-            <table cellspacing="2" cellpadding="2" border="1"
-              align="center">
-              <tbody>
-                <tr>
-                  <td valign="middle" align="center"><b>CIO Operand
-                      Address</b><b><br>
-                    </b></td>
-                  <td valign="middle" align="center"><b>Operation</b><b><br>
-                    </b></td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">001<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 3
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">002<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 1
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">003<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">005<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 4
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">006<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 2
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">007<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">011<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 5
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">012<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 3
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">015<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 6
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">016<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 4
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">017<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">021<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 7
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">022<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 5
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">023<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">025<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 8
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">026<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 6
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">031<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 9
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">032<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 7
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">035<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 10
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">036<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 8
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">037<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">041<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 11
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">042<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 9
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">045<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 12
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">046<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 10
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">051<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 13
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">052<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 11
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">055<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 14
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">056<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt 12
-                    latch<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">057<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">061<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    15<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">062<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    13<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">065<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    9</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">066<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    14</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">071<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    10<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">072<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    15<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">075<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    1<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">076<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    11<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">077<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">101<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    2<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">102<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    13<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">105<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    3<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">106<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    1<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">111<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    4<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">112<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    2<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">115<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    5<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">116<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    3<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">117<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">121<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    6<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">122<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    4<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">125<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    7<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">126<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    5<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">131<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    8<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">132<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    6<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">135<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    9<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">136<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    7<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">137<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">141<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    10<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">142<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    8<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">145<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    11<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">146<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    9<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">151<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    12<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">152<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    10<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">155<br>
-                  </td>
-                  <td valign="middle" align="center">Spare<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">156<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    11</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">161<br>
-                  </td>
-                  <td valign="middle" align="center">Spare<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">162<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    12</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">165<br>
-                  </td>
-                  <td valign="middle" align="center">Spare<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">166<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    13<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">171<br>
-                  </td>
-                  <td valign="middle" align="center">Spare<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">172<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    14<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">174<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">175<br>
-                  </td>
-                  <td valign="middle" align="center">Spare<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">176<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    15<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">177<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">200<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">202<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    12<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">206<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    14<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">212<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    1<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">216<br>
-                  </td>
-                  <td valign="middle" align="center">Set interrupt latch
-                    2<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">223<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">224<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">230<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">233<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">234<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">240<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">243<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">250<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">253<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">263<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">264<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">303<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">313<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">323<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">333<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">343<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">353<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">453<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">603<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">613<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">623<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">633<br>
-                  </td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <a href="#IO_Ports_for_PTC_CIO_Instruction">A list of the <tt>CIO</tt>
+              i/o ports is given below</a>.&nbsp; As far as I know, only
+            ports 154, 204, 214, and 220 are for input, and they load
+            the accumulator when used.&nbsp; Other ports are for output
+            only, and the accumulator should to be loaded, prior to the
+            <tt>CIO</tt> itself, with any additional data the specific
+            operation requires, but is not affected by the
+            operation.&nbsp; Note that most output operations do not
+            require any such supplemental data, and therefore ignore
+            whatever value is stored in the accumulator.&nbsp; Many of
+            the operations relate to inhibiting or enabling interrupts
+            (as you can see from the table above!), sending commands to
+            the PTC's printer or plotter, etc.<br>
             <br>
-            As far as I know, only ports 154, 204, 214, and 220 are for
-            input, and they load the accumulator when used.&nbsp; Other
-            ports are for output only, and the accumulator should to be
-            loaded, prior to the <tt>CIO</tt> itself, with any
-            additional data the specific operation requires.&nbsp; Note
-            that most output operations do not require any such
-            supplemental data, and therefore ignore whatever value is
-            stored in the accumulator.&nbsp; Many of the operations
-            relate to inhibiting or enabling interrupts (as you can see
-            from the table above!), sending commands to the PTC's
-            printer or plotter, etc.<br>
-            <br>
-            I haven't fully digested the <tt>CIO</tt> material, so I
-            won't go into a lot of detail trying to explain its
-            operation further yet.&nbsp; I'll just note that in assembly
-            language the operand of the instruction is always a literal
-            3-digit octal number.<br>
+            In assembly language, the operand of the instruction is
+            always a literal 3-digit octal number.<br>
             <p>
               <meta http-equiv="content-type" content="text/html;
                 charset=UTF-8">
@@ -4985,7 +4283,15 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               <li>A4 is the logical OR of the A4 of the target
                 instruction and A4 of the <tt>EXM</tt> instruction.</li>
               <li>A5-A8 come from A5-A8 of the target instruction, and
-                replace those bits from the original target instruction.</li>
+                remain unchanged.</li>
+              <li>A9 becomes 0, thus the target instruction cannot be
+                either <tt>EXM</tt> or <tt>SHF/SHR/SHL</tt>.&nbsp;
+                (The original documentation does not actually say
+                anything about how the target instruction's A9 is
+                modified, but if it were allowed to remain 1, the
+                data-sector discussion which immediately follows would
+                not make sense.)<br>
+              </li>
             </ul>
             The data sector used when the target instruction is executed
             is also changed for the duration of that one instruction, as
@@ -5222,7 +4528,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
     </table>
     <br>
     <h3><a name="IO_Ports_For_PIO_Instruction"
-        id="IO_Ports_For_PIO_Instruction"></a>I/O Ports (For <span
+        id="IO_Ports_For_PIO_Instruction"></a>I/O Ports (For LVDC/PTC <span
         style="font-family: Courier New,Courier,monospace;">PIO</span>
       Instruction)</h3>
     My understanding of this is sketchy right now, so take anything I
@@ -6648,6 +5954,903 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         </tr>
       </tbody>
     </table>
+    <h3><a name="IO_Ports_for_PTC_CIO_Instruction"></a>I/O Ports (for
+      PTC <font face="Courier New, Courier, monospace">CIO</font>
+      Instruction)</h3>
+    <p>Figure 2-11 of <a href="Documents/19730064346_1973064346.pdf">the
+        original PTC documentation</a> gives a list of i/o ports
+      employed by the PTC's <tt>CIO</tt> instruction.&nbsp;
+      Unfortunately, some 137 different <tt>CIO</tt> ports are used
+      just within the PAST program, while the documentation lists only
+      35 of them.&nbsp; The following is a table of <i>all</i> known <tt>CIO</tt>
+      ports, including not only those listed in the original
+      documentation, but also those found in the source code of the PAST
+      program.&nbsp; Sometimes the functionality of a port referenced
+      only in the PAST program is easily inferred from comments in the
+      source code, while in other cases that functionality is not yet
+      known.&nbsp; Port numbers whose descriptions were pasted from the
+      original documentation are in <b>bold text</b>, to distinguish
+      them from those whose functionality has merely been inferred.<br>
+    </p>
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
+      <tbody>
+        <tr>
+          <td valign="middle" align="center"><b>CIO Operand Address</b><b><br>
+            </b></td>
+          <td valign="middle" align="left"><b>Operation</b><b><br>
+            </b></td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>000</b><b><br>
+            </b></td>
+          <td valign="middle" align="left">Enables the interrupt inhibit
+            register latches to be set under control of accumulator data
+            bits 11 through 25 (Data bit 11 sets interrupt inhibit latch
+            15, etc.)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">001<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 3 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">002<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 1 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">003<br>
+          </td>
+          <td valign="middle" align="left">TBD<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>004</b><br>
+          </td>
+          <td valign="middle" align="left">Enables the interrupt inhibit
+            register latches to be reset under control of accumulator
+            data bits 11 through 25 (Data bit 25 resets interrupt
+            inhibit latch 1, etc.)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">005<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 4 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">006<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 2 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">007<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>010</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 1 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">011<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 5 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">012<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 3 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>014</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 2 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">015<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 6 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">016<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 4 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">017<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>020</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 3 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">021<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 7 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">022<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 5 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">023<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>024</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 4 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">025<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 8 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">026<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 6 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>030</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 5 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">031<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 9 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">032<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 7 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>034</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 6 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">035<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 10 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">036<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 8 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">037<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>040</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 7 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">041<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 11 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">042<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 9 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>044</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 8 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">045<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 12 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">046<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 10 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>050</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 9 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">051<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 13 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">052<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 11 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>054</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 10 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">055<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 14 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">056<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt 12 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">057<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>060</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 11 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">061<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 15<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">062<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 13<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>064</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 12 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">065<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 9</td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">066<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 14</td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>070</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 13 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">071<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 10<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">072<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 15<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>074</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 14 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">075<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">076<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 11<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">077<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>100</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 15 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">101<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">102<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 13<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>104</b><br>
+          </td>
+          <td valign="middle" align="left">Reset interrupt 16 latch<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">105<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">106<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>110</b><br>
+          </td>
+          <td valign="middle" align="left">Resets the main interrupt
+            latch.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">111<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">112<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>114</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a PTC single step
+            command.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">115<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">116<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 3<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">117<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>120</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a type alpha
+            numeric command. Positions SIGN and 1 through 5,
+            respectively, of the accumulator data word contain the
+            "BA8421" code.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">121<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 6<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">122<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 4<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>124</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a type decimal
+            command. Positions SIGN, 1, 2, and 3, respectively, of the
+            accumulator data word contain the "8421" code.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">125<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 7<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">126<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 5<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>130</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a type octal
+            command. Positions SIGN, 1, and 2, respectively, of the
+            accumulator data word contain the "421" code.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">131<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 8<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">132<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 6<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>134</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a typewriter
+            control command. Positions SIGN and 1 through 5 of the
+            accumulator data word are decoded to perform one of six
+            operations.<br>
+            <br>
+            <table cellspacing="2" cellpadding="2" align="center">
+              <tbody>
+                <tr>
+                  <td valign="middle" align="center"><u>Data Bit</u><u><br>
+                    </u></td>
+                  <td valign="middle" align="center"><u>Operation</u><u><br>
+                    </u></td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">SIGN<br>
+                  </td>
+                  <td valign="middle" align="center">Space<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">1<br>
+                  </td>
+                  <td valign="middle" align="center">Black Ribbon<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">2<br>
+                  </td>
+                  <td valign="middle" align="center">Red Ribbon<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">3<br>
+                  </td>
+                  <td valign="middle" align="center">Index<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">4<br>
+                  </td>
+                  <td valign="middle" align="center">Return<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">5<br>
+                  </td>
+                  <td valign="middle" align="center">Tap<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">135<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 9<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">136<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 7<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">137<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>140</b><br>
+          </td>
+          <td valign="middle" align="left">Generates an X plot command.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">141<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 10<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">142<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 8<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>144</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a Y plot command<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">145<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 11<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">146<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 9<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>150</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a Z plot command.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">151<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 12<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">152<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 10<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>154</b><br>
+          </td>
+          <td valign="middle" align="left">Stores the configuration of
+            the interrupt latches in positions SIGN and 1 through 15 of
+            the accumulator data word. (Data bit 1 stores interrupt
+            latch 1 configuration,<br>
+            etc.)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">155<br>
+          </td>
+          <td valign="middle" align="left">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">156<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 11</td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>160</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a printer carriage
+            control command. Positions SIGN and 1 through 5,
+            respectively, of the accumulator data word contain the
+            "BA8421" code.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">161<br>
+          </td>
+          <td valign="middle" align="left">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">162<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 12</td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>164</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a print octal
+            command.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">165<br>
+          </td>
+          <td valign="middle" align="left">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">166<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 13<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>170</b><br>
+          </td>
+          <td valign="middle" align="left">Generates a print BCD
+            command.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">171<br>
+          </td>
+          <td valign="middle" align="left">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">172<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 14<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">174<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">175<br>
+          </td>
+          <td valign="middle" align="left">Spare<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">176<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 15<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">177<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">200<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">202<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 12<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>204</b><br>
+          </td>
+          <td valign="middle" align="left">Enables the program control
+            display register to be loaded. Positions 21 through 25 of
+            the accumulator data word are loaded into positions P40,
+            P20, P10, P4, P2 and PI, respectively, of the program
+            control display register.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">206<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 14<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>210</b><br>
+          </td>
+          <td valign="middle" align="left">Enables one of six output
+            discretes to be generated. Discretes 1 through 6,
+            respectively, are controlled by positions 25, 24, 23, 22,
+            21, and 20 of the accumulator data word.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">212<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 1<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>214</b><br>
+          </td>
+          <td valign="middle" align="left">Transfers the PROG REG A data
+            word into the accumulator.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">216<br>
+          </td>
+          <td valign="middle" align="left">Set interrupt latch 2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center"><b>220</b><br>
+          </td>
+          <td valign="middle" align="left">Transfers the PROG REG B data
+            word into the accumulator.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">223<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">224<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">230<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">233<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">234<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">240<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">243<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">250<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">253<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">263<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">264<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">303<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">313<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">323<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">333<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">343<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">353<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">453<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">603<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">613<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">623<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+        <tr>
+          <td valign="middle" align="center">633<br>
+          </td>
+          <td valign="middle" align="left">TBD </td>
+        </tr>
+      </tbody>
+    </table>
     <h3><a name="Subroutine_Linkage" id="Subroutine_Linkage"></a>Subroutine
 
 
@@ -7283,7 +7486,7 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
     <p>There are up to 16 external interrupt sources for the PTC.&nbsp;
       Interrupts of the first 15 types are generated by the circuitry of
       the PTC that corresponds to an LVDA, and is latched in the LVDA,
-      whereas the 16th type is generated by a pusbutton ("I16") on the
+      whereas the 16th type is generated by a pushbutton ("I16") on the
       PTC control panel.<br>
     </p>
     <p>When one of these interrupts occurs, assuming that interrupts
@@ -7646,9 +7849,10 @@ Assembly
     <br>
     This section is a compilation of my own inferences about those
     things from evaluating the available LVDC source code and from
-    writing my own LVDC assembler.&nbsp; The description is intended to
-    be authoritative only in the sense that it describes how my own
-    assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
+    writing my own LVDC assembler, and then subsequently updating for
+    PTC source code that was acquired later.&nbsp; The description is
+    intended to be authoritative only in the sense that it describes how
+    my own assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
 
 
 
@@ -8011,7 +8215,10 @@ Assembly
     </p>
     <p>The preprocessor itself operates in a single pass, and therefore
       any symbols or macros it uses must have been defined prior in the
-      source code to such use.<br>
+      source code to such use.&nbsp; I don't think that any of the
+      features mentioned in this section are used the PTC source code
+      available to us, so it's possible that the early versions of the
+      assembler used for PTC didn't have a preprocessor at all.<br>
     </p>
     <i>The </i><i><tt>CALL</tt></i><i> macro</i>:&nbsp; <tt>CALL</tt>
     is a macro hard-coded into the assembler itself.&nbsp; By a "macro",
@@ -8266,11 +8473,14 @@ Assembly
         code, then the assembler would <i>automatically</i> <i>silently</i>
         allocate one in unused memory, in the same manner as for
         operands like <tt>=O<i>octal</i></tt> <i>constants</i>
-        described in the item above.&nbsp; For example, if you had the
-        following code, you'd think the <tt>CLA</tt> was accessing <tt>ARGX12</tt>
-        (with the value 12345 octal), when in reality a new variable <tt>ARCX12</tt>
-        (with the value 0) had been created, and the <tt>CLA</tt> would
-        be accessing that instead. <br>
+        described in the item above.&nbsp; What makes this dangerous is
+        the possibility of a typo in a variable name at one place in a
+        program but not in other places.&nbsp; For example, if you had
+        the following code, you'd think the <tt>CLA</tt> was accessing
+        <tt>ARGX12</tt> (with the value 12345 octal), when in reality a
+        new variable <tt>ARCX12</tt> (with the value 0) had been
+        created, and the <tt>CLA</tt> would be accessing that instead.
+        <br>
       </li>
     </ol>
     <blockquote>
@@ -8356,15 +8566,15 @@ Assembly
         I'm not sure whether it would be octal or decimal or something
         else.&nbsp; <b>Note:</b>&nbsp; <tt>SHR</tt> and <tt>SHL</tt>
         are implemented as <tt>SHF</tt> operations, but <tt>SHF</tt>
-        can only shift by 1 or 2 positions.&nbsp; Therefore, if the
-        operand for <tt>SHR</tt> or <tt>SHL</tt> is greater than 2,
-        the assembler transparently converts the operation to a
-        minimum-length sequence of <tt>SHL</tt><tt> 2</tt>, <tt>SHL 1</tt>,
-        <tt>SHR 2</tt>, and <tt>SHR 1</tt> operations.&nbsp; For
-        example, <tt>SHL 5</tt> assembles to <tt>SHL 2</tt> / <tt>SHL
-          2</tt> / <tt>SHL 1</tt>.&nbsp; Consequently, depending on the
-        operand, any given <tt>SHR</tt> or <tt>SHL</tt> may assemble
-        to multiple executable words in memory rather than to a single
+        can only shift by 1 or 2 positions for LVDC, or 1 through 6
+        positions for PTC.&nbsp; Therefore, if the operand for <tt>SHR</tt>
+        or <tt>SHL</tt> is greater than 2 (6), the assembler
+        transparently converts the operation to a minimum-length
+        sequence of shorter shift operations.&nbsp; For example, for
+        LVDC a <tt>SHL 5</tt> assembles to <tt>SHL 2</tt> / <tt>SHL 2</tt>
+        / <tt>SHL 1</tt>.&nbsp; Consequently, depending on the operand,
+        any given <tt>SHR</tt> or <tt>SHL</tt> may assemble to
+        multiple executable words in memory rather than to a single
         word. </li>
       <li>The <tt>CDS</tt> instruction requires an operand of the form
         <tt><i>DM</i>,<i>DS</i>,<i>DUPDN</i></tt> where the three octal
@@ -8461,7 +8671,8 @@ Assembly
       <ul>
         <li><tt><i>target</i></tt> (0-3):&nbsp; Specifies offset in
           residual memory of target instruction:&nbsp; 0 for 600, 1 for
-          640, 2 for 700, 3 for 740.<br>
+          640, 2 for 700, 3 for 740. (I.e., 200, 240, 300, or 340 in the
+          residual memory sector.)<br>
         </li>
         <li><tt><i>syllable</i></tt> (0-1):&nbsp; Specifies syllable of
           the target instruction within the target word.<br>
@@ -8473,10 +8684,11 @@ Assembly
           <i>bitwise-OR</i> with the corresponding bits.<br>
         </li>
       </ul>
-      <li>The <tt>PIO</tt> instruction accepts only literal octal
-        constants (000-377).&nbsp; All of the examples I saw in the
-        original LVDC printout were 0-padded, though yaASM.py does not
-        enforce that restriction.<br>
+      <li>The <tt>PIO</tt> and <tt>CIO</tt> instructions accept only
+        literal octal constants (000-377 for <tt>PIO</tt>, 000-777 for
+        <tt>CIO</tt>).&nbsp; All of the examples I saw in the original
+        LVDC/PTC assembly listings were 0-padded, though yaASM.py does
+        not enforce that restriction.<br>
       </li>
     </ul>
     <h3> <i><a name="Pseudo-ops"></a></i>Pseudo-ops</h3>
@@ -10363,70 +10575,229 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
     <br>
     <h2><a name="yaLVDC_the_LVDC_CPU_Emulation"
         id="yaLVDC_the_LVDC_CPU_Emulation"></a><small><big>yaLVDC, the
-          LVDC CPU Emulation</big></small></h2>
+          LVDC/PTC CPU Emulation</big></small></h2>
     <div style="text-align: center;">
-      <div style="text-align: left;"> The inclusion of this section is
-        an act of pure optimism.&nbsp; <i>We don't have a working LVDC
-          CPU emulator as of yet</i>.<br>
+      <div style="text-align: left;"><i>The LVDC/PTC CPU emulator is a
+          work in progress, so the information in this section may not
+          yet be totally reliable.</i><br>
         <br>
-        <div style="text-align: center;"> <img style="width: 770px;
-            height: 236px;" alt="" src="Saturn-GuidanceEquations.jpg"
-            width="770" height="236"><br>
-        </div>
-        <br>
-        An important thing to understand, in terms of simulation, is
-        that the LVDC was not fast enough to keep up with the real-time
+        An important proviso regarding CPU emulation is that the
+        original physical LVDCs installed in the Saturn rockets were not
+        by themselves fast enough to keep up with the real-time
         calculations needed to directly control the rocket.&nbsp; The
-        results would have been too stair-steppy, too choppy.&nbsp; 25
-        outputs per second isn't enough!&nbsp; What happened instead is
-        that a separate unit — the LVD<i>A</i> — was needed to accept
-        the digital outputs from the LVDC and turn them into
+        LVDC could only update the control signals it was outputting
+        about 25 times a second ... and while that may <i>seem</i>
+        fast, it's not fast enough when you're controlling a powerful
+        beast like the Saturn V rocket.&nbsp; The control signals output
+        by the LVDC if used directly, as is, would have been too
+        stair-steppy, too choppy.&nbsp; 25 outputs per second isn't
+        enough!&nbsp; So the LVDC's output signals didn't directly
+        control the rocket.&nbsp; What happened instead is that a
+        separate unit — the LVD<i>A</i> — was needed to accept the
+        digital outputs from the LVDC and turn them into
         smoothly-changing controls for the rocket. And when I say
         smoothly-changing, I mean both smoothly in <i>time</i> as well
-        as in terms of electrical properties. Thus any decent simulation
-        would require simulation of not only the LVDC but also of the
-        LVDA, the latter of which is currently outside the scope of
-        what's being provided here.<br>
+        as in terms of electrical properties. Thus any emulation of the
+        LVDC that could acceptably control the rocket would additionally
+        require emulation of the LVDA.&nbsp; But the yaLVDC program does
+        <i>not</i> do that; it emulates the LVDC and nothing more!&nbsp;
+        If you want to emulate the LVDA or anything else connected to
+        the LVDC, additional emulation software is needed beyond just
+        yaLVDC.<br>
         <br>
-        An interesting aspect of the LVDC is that since it is
-        essentially a "black box" that outputs real-time control signals
-        in response to real-time inputs, it is possible to create a
-        reasonably satisfactory behavioral simulation for it in the
-        absence of the original software, if one simply knows the <a
+        Another interesting aspect of the LVDC is that since it was
+        essentially a "black box" that outputted real-time control
+        signals in response to real-time inputs, it is possible to
+        create a reasonably satisfactory behavioral simulation for it in
+        the absence of the original software, since we know the <a
           href="Documents/SaturnVLaunchVehicleGuidanceEquations.pdf">
           guidance equations</a> relating the outputs to the
-        inputs.&nbsp; While creating behavior simulations is not an
+        inputs.&nbsp; The yaLVDC software does <i>not</i> do that; it
+        emulates the LVDC or PTC CPU, whether you have loaded into it
+        any LVDC software that implements the guidance equations or
+        not.&nbsp; Perhaps all you load into the emulation is something
+        as trivial as LVDC software that just counts from 1 to
+        1000.&nbsp; No matter, yaLVDC doesn't care what the LVDC/PTC
+        software <i>does</i>, it will run it just the same!&nbsp; With
+        that said, while creating behavior simulations is not an
         objective of the Virtual AGC project as far as the Apollo CPUs
         are concerned, there are people engaged in creating such
         simulations for the <span style="font-weight: bold;">Orbiter</span>
         NASSP project and elsewhere.<br>
+        <div align="center"><img style="width: 770px; height: 236px;"
+            alt=""
+src="file:///home/rburkey/git/virtualagc-web/Saturn-GuidanceEquations.jpg"
+            width="770" height="236"><br>
+        </div>
       </div>
     </div>
+    <br>
+    The yaLVDC program currently has to be build from its <a
+      href="https://github.com/virtualagc/virtualagc/tree/master/yaLVDC">source
+      code</a>.&nbsp; Building it requires the GNU C compiler ("gcc")
+    and the GNU "make" program.&nbsp; Simply download the source code,
+    "cd" into the folder containing it, and run the command "make".<br>
+    <br>
+    In order to run an LVDC or PTC emulation, you first have have some
+    LVDC or PTC software to load into it, and that LVDC/PTC software
+    must have been assembled by <a
+      href="#yaLVDCASM_the_LVDC_Cross-Assembler">the yaASM.py assembler
+      which is covered in the next section</a>.&nbsp; In any given
+    assembly, the assembler produces 3 output files which are required
+    as input to yaLVDC.&nbsp; These are called yaASM.tsv (the octal
+    listing of the initial memory contents), yaASM.sym (the symbol
+    table), and yaASM.src (the source code, as related to specific
+    memory locations and source-code line numbers).&nbsp; These files
+    can be moved to any folder you like, and renamed anything you like,
+    as long as they retain the extensions .tsv, .sym, and .src.<br>
+    <br>
+    You invoke the LVDC/PTC emulator with the command<br>
+    <blockquote><tt>yaLVDC [<i>OPTIONS</i>] --assembly=<i>path/to/the/LVDC/or/PTC/executable</i></tt><br>
+    </blockquote>
+    For example, you might already be in the folder containing PTC
+    executables (which perhaps you've renamed PAST.tsv, PAST.sym, and
+    PAST.src), and yaLVDC might be in your PATH, and the command might
+    be<br>
+    <blockquote><tt>yaLVDC --ptc --cold-start --assembly=PAST</tt><br>
+    </blockquote>
+    Here's a list of the <tt><i>OPTIONS</i></tt> available right now,
+    though using the command "yaLVDC --help" might give a more
+    up-to-date list.<br>
+    <br>
+    <table width="80%" cellspacing="2" cellpadding="2" align="center">
+      <tbody>
+        <tr>
+          <th valign="top">OPTION<br>
+          </th>
+          <th valign="top">Description<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>--help</tt><tt><br>
+            </tt></td>
+          <td valign="middle">Displays a list of all available <tt><i>OPTIONS</i></tt>
+            for yaLVDC, and possibly other useful information.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>--assembly=<i>PATH</i><br>
+            </tt></td>
+          <td valign="middle">Specifies a full path to the executable
+            LVDC/PTC files, <i>minus</i> the filename extensions (.tsv,
+            .sym, .src).&nbsp; For example, if you hadn't renamed the
+            executable files output by the assembler, and if those were
+            in the current folder, it would just be <tt>--assembly=yaASM</tt>.&nbsp;
+            Or if you had renamed them (say) MyProgram.tsv,
+            MyProgram.sym, and MyProgram.src, and were in the folder
+            .../test/, then it would be <tt>--assembly=../test/MyProgram</tt>.&nbsp;
+            (Note that on Linux or MacOs, the forward-slash character
+            '/' is used to separate components of a path on the
+            filesystem.&nbsp; On Windows, I think that either '/' or the
+            usual Windows backslash separator '\' would be accepted.)<br>
+            <br>
+            Eventually, multiple <tt>--assembly</tt> switches would be
+            allowed on a single yaLVDC command line, allowing
+            simultaneous loading of separately assembled program
+            components at nonoverlapping locations in memory.&nbsp; This
+            is necessary because (as described above) the LVDC Flight
+            Program did not completely fill memory, and required the
+            presence of other programs (such as the Preflight Program)
+            to function properly.&nbsp; The PTC ADAPT Self Test Program,
+            on the other hand is complete and relies on no other
+            software.&nbsp; At present, though, the ability to have
+            multiple programs simultaneously loaded is not yet
+            implemented.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>--cold-start<br>
+            </tt></td>
+          <td valign="middle">Eventually, as the emulation runs, it will
+            automatically periodically save files (yaLVDC.core) which
+            act as snapshots of the internal state of the
+            emulation.&nbsp; Similarly upon startup, it will by default
+            automatically load the most-recent snapshot.&nbsp; This
+            action overrides the memory contents provided by the <tt>--assembly</tt>
+            switch(es) (while leaving intact their symbol tables and
+            source-code tables), essentially allowing execution to
+            proceed from the point where it had previously left
+            off.&nbsp; (This automatic saving of snapshot files, by the
+            way, is not yet implemented.)<br>
+            <br>
+            The <tt>--cold-start</tt> switch overrides the automatic
+            load of the snapshot which occurs at power-up, thus insuring
+            that the memory contents specified by the <tt>--assembly</tt>
+            switch(es) are in place.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>--core=<i>FILENAME</i><br>
+            </tt></td>
+          <td valign="middle">This switch overrides the filename for the
+            memory snapshot loaded at power-up, which would by default
+            otherwise be yaLVDC.core.&nbsp; It does not affect the
+            naming used for snapshots output by the emulation, which
+            remain yaLVDC.core.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>--run<br>
+            </tt></td>
+          <td valign="middle">By default, at startup, the emulation
+            pauses just prior to executing the first LVDC/PTC
+            instruction, and instead drops to a debugging interface
+            under user control.&nbsp; When <tt>--run</tt> is used, the
+            LVDC/PTC program instead runs freely without requiring any
+            user interaction, although it can be interrupted by hitting
+            any key on the keyboard.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>--ptc<br>
+            </tt></td>
+          <td valign="middle">By default, an LVDC CPU is emulated.&nbsp;
+            When the <tt>--ptc</tt> switch is used, a PTC CPU is
+            emulated instead.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    As mentioned above, by default the emulation runs in a debugging
+    interface intended to allow you do things like single-step the
+    LVDC/PTC software, set breakpoints, examine or change memory or
+    registers, etc.&nbsp; The interface is loosely based on the GNU
+    "gdb" debugger, but is a very limited form of it, so don't expect
+    any commands or variations of commands to work that aren't
+    specifically listed below:<br>
+    <br>
+    TBD<br>
     <h2><a name="yaLVDCASM_the_LVDC_Cross-Assembler"
-        id="yaLVDCASM_the_LVDC_Cross-Assembler"></a>yaASM.py, the LVDC
-      Cross-Assembler</h2>
+        id="yaLVDCASM_the_LVDC_Cross-Assembler"></a>yaASM.py, the
+      LVDC/PTC Cross-Assembler</h2>
     The original IBM 360 based LVDC assembler used during Project Apollo
     itself is no longer available 50+ years later ... or at least, not
     available to <i>us</i>.&nbsp; So I've written an LVDC assembler
     completely from scratch.&nbsp; It's capable of accepting the
     original LVDC AS206-RAM Flight Program or the PTC ADAPT Self-Test
     Program, and producing an assembly listing similar to the original
-    one, as well as a rope image that's 100% identical to the octal rope
-    listing from the original printouts.&nbsp; <br>
+    one, as well as an executable image (i.e., a list of the contents of
+    all memory locations) that's 100% identical to the memory contents
+    listed in the original printouts.&nbsp; <br>
     <br>
     In saying this, I suppose it's important to reiterate that while we
-    have decent contemporaneous documentation of the LVDC instruction
-    set, we have no contemporaneous documentation whatsoever of the
-    format of LVDC assembly language, and specifically of the pseudo-ops
-    or operand syntax of the language.&nbsp; In other words, while the
-    new assembler works with the LVDC language documentation as
-    described on this web page, this web page's documentation is based
-    entirely on what I've personally inferred from reading the specific
-    LVDC program printout available to me.&nbsp; A listing of a
-    different version of the original LVDC or PTC software, were one to
-    become available, could easily have features which I've never seen
-    before and which therefore are not yet accounted for in the new
-    assembler.<br>
+    have decent contemporaneous documentation of the LVDC/PTC
+    instruction set, we have no contemporaneous documentation whatsoever
+    of the format of LVDC assembly language, and specifically of the
+    pseudo-ops or operand syntax of the language.&nbsp; In other words,
+    while the new assembler works with the LVDC/PTC language
+    documentation as described on this web page, portions of this web
+    page's documentation are based on what I've personally inferred from
+    reading the specific LVDC/PTR program printouts available to
+    me.&nbsp; A listing of a different version of the original LVDC or
+    PTC software, were one to become available, could easily have
+    features which I've never seen before and which therefore are not
+    yet accounted for in the new assembler.<br>
     <br>
     With that warning out of the way, <a
       href="https://github.com/virtualagc/virtualagc/tree/master/yaASM.py">the
@@ -10788,7 +11159,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2020-04-29.<br>
+          2020-05-03.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
