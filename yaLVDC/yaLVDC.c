@@ -29,6 +29,9 @@
 #include <stdio.h>
 #include "yaLVDC.h"
 
+breakpoint_t breakpoints[MAX_BREAKPOINTS];
+int numBreakpoints = 0;
+
 //////////////////////////////////////////////////////////////////////////////
 // Cross-platform stuff.
 //
@@ -151,6 +154,7 @@ main(int argc, char *argv[])
   while (1)
     {
       unsigned long targetCycles;
+      hopStructure_t hs;
 
       // The emulator emulates LVDC/PTC instructions just as fast as it can,
       // until it catches up with real time in terms of the number of instructions
@@ -164,11 +168,25 @@ main(int argc, char *argv[])
       while (cycleCount < targetCycles)
         {
           int cyclesUsed = 0;
+          breakpoint_t *breakpoint;
+          // Check if a breakpoint hit.
+          if (!parseHopConstant(state.hop, &hs))
+            {
+              int i;
+              for (i = 0, breakpoint=breakpoints; i < numBreakpoints; i++, breakpoint++)
+                if (breakpoint->module == hs.im && breakpoint->sector == hs.is && breakpoint->syllable == hs.s && breakpoint->location == hs.loc)
+                  {
+                    runNextN = 0;
+                    break;
+                  }
+              if (i >= numBreakpoints)
+                breakpoint = NULL;
+            }
           if (runNextN <= 0)
             {
               clock_t start, end;
               start = times(&TmsStruct);
-              if (gdbInterface(instructionCount, cycleCount))
+              if (gdbInterface(instructionCount, cycleCount, breakpoint))
                 goto done;
               end = times(&TmsStruct);
               pausedTime += (end - start);

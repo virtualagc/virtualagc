@@ -63,6 +63,21 @@ dPrintouts (void);
 #define dPrintouts()
 #endif
 
+// See yaLVDC.c
+#define MAX_SYMBOL_LENGTH 10
+typedef struct {
+  int module;
+  int sector;
+  int syllable;
+  int location;
+  char name[MAX_SYMBOL_LENGTH];
+  int number;
+  int whichType;        // 0=name, 1=number, 2=address.
+} breakpoint_t;
+#define MAX_BREAKPOINTS 50
+breakpoint_t breakpoints[MAX_BREAKPOINTS];
+int numBreakpoints;
+
 // See parseCommandLineArguments.c
 #define MAX_PROGRAMS 5
 char *assemblyBasenames[MAX_PROGRAMS];
@@ -107,7 +122,7 @@ typedef struct {
 } state_t;
 state_t state;
 typedef struct {
-  char name[10];
+  char name[MAX_SYMBOL_LENGTH];
   uint8_t module;
   uint8_t sector;
   uint8_t syllable; // 0,1 instructions, 2 data.
@@ -178,7 +193,7 @@ storeData (int module, int residual, int sector, int loc, int32_t data,
 
 // See gdbInterface.c
 int
-gdbInterface (unsigned long instructionCount, unsigned long cycleCount);
+gdbInterface (unsigned long instructionCount, unsigned long cycleCount, breakpoint_t *breakpoint);
 
 // See processPIO.c
 int
