@@ -28,9 +28,13 @@
 #define yaLVDC_h
 
 #include <stdint.h>
+#include <limits.h>
 
 ///////////////////////////////////////////////////////////////////////
 // Function prototypes and any global variables that go with them.
+
+// Length of an LVDC CPU's "computer cycle".
+#define SECONDS_PER_CYCLE (168.0/2048000) // About 82us.
 
 // See debug.c
 // (Note that debug.c relates to debugging yaLVDC and not to the
@@ -47,7 +51,7 @@
 #define DEBUG_SOURCE_LINES 	4
 #define DEBUG_CORE		8
 
-#define DEBUG_FLAGS DEBUG_SOURCE
+#define DEBUG_FLAGS DEBUG_NONE
 #if DEBUG_FLAGS != DEBUG_NONE
 #define DEBUG
 #endif
@@ -65,7 +69,7 @@ char *assemblyBasenames[MAX_PROGRAMS];
 char *coreFilename;
 int ptc;
 int coldStart;
-int runNextN; // # of LVDC/PTC instructions left to run until pausing. -1 is unlimited.
+int runNextN; // # of LVDC/PTC instructions left to run until pausing. INT_MAX is unlimited.
 int
 parseCommandLineArguments(int argc, char *argv[]);
 
@@ -174,7 +178,7 @@ storeData (int module, int residual, int sector, int loc, int32_t data,
 
 // See gdbInterface.c
 int
-gdbInterface (unsigned long instructionCount);
+gdbInterface (unsigned long instructionCount, unsigned long cycleCount);
 
 // See processPIO.c
 int

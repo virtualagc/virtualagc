@@ -30,10 +30,14 @@
 #include "yaLVDC.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// Cross-platform timekeeping stuff.  Use *NIX-style functions times() and
+// Cross-platform stuff.
+//
+// For timekeeping:  Provides *NIX-style functions times() and
 // sysconf(_SC_CLK_TCK) for measuring time passage, and use sleepMilliseconds()
-// to sleep for a while.  Note that sleepMilliseconds(0) actually does nothing,
-// and does not relinquish any control.
+// to sleep for a while.
+//
+// For detecting a keypress:  Provides DOS-style function kbhit() (from conio.h,
+// which Linux doesn't have).
 
 #ifdef WIN32
 
@@ -51,11 +55,13 @@ struct tms
 
 void
 sleepMilliseconds(unsigned Milliseconds)
-{
-  if (Milliseconds == 0)
+  {
+    if (Milliseconds == 0)
     return;
-  Sleep (Milliseconds);
-}
+    Sleep (Milliseconds);
+  }
+
+#include <conio.h>
 
 #else // *NIX.
 
@@ -73,31 +79,59 @@ sleepMilliseconds(unsigned Milliseconds)
   nanosleep(&Req, &Rem);
 }
 
+// Return 0 if no keyboard key pressed, non-zero otherwise.
+#include <termios.h>
+#include <fcntl.h>
+int
+kbhit(void)
+{
+  struct termios oldt, newt;
+  int ch;
+  int oldf;
+
+  tcgetattr(STDIN_FILENO, &oldt);
+  newt = oldt;
+  newt.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+  oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+  fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+  ch = getchar();
+
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+  fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+  if (ch != EOF)
+    {
+      ungetc(ch, stdin);
+      return 1;
+    }
+
+  return 0;
+}
+
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Main program.
 
-// Length of an LVDC CPU's "computer cycle".
-#define SECONDS_PER_CYCLE (168.0/2048000) // About 82us.
-double cyclesPerTick;
-
 int
-main (int argc, char *argv[])
+main(int argc, char *argv[])
 {
   int retVal = 1;
   int i;
-  clock_t startingTime, currentTime;
+  clock_t startingTime, currentTime, pausedTime = 0;
+  double cyclesPerTick;
   unsigned long cycleCount = 0;
   struct tms TmsStruct;
   unsigned long instructionCount = 0;
 
   // Setup and initialization.
-  if (parseCommandLineArguments (argc, argv))
+  if (parseCommandLineArguments(argc, argv))
     goto done;
   // Note that readCore() must occur after readAssemblies(), since if present,
   // the core-memory file overrides the core-memory image from the assembler.
-  if (readAssemblies (assemblyBasenames, MAX_PROGRAMS))
+  if (readAssemblies(assemblyBasenames, MAX_PROGRAMS))
     goto done;
   if (coldStart == 0)
     if (readCore())
@@ -118,35 +152,60 @@ main (int argc, char *argv[])
     {
       unsigned long targetCycles;
 
+      // The emulator emulates LVDC/PTC instructions just as fast as it can,
+      // until it catches up with real time in terms of the number of instructions
+      // it is supposed to have executed.  "Real time" doesn't include the
+      // time spent paused at the debugger interface.  So if yaLVDC has been
+      // running for an hour, but has spent 59 minutes waiting for user input
+      // at the debugging interface, only 1 minute of "real time" has passed,
+      // and the number of instruction emulated is appropriate for 1 minute.
       currentTime = times(&TmsStruct);
-      targetCycles = (currentTime - startingTime) * cyclesPerTick;
+      targetCycles = (currentTime - startingTime - pausedTime) * cyclesPerTick;
       while (cycleCount < targetCycles)
-	{
-	  int cyclesUsed = 0;
-	  if (runNextN <= 0)
-	    if (gdbInterface (instructionCount))
-	      goto done;
-	  if (!runOneInstruction(&cyclesUsed))
-	    cycleCount += cyclesUsed;
-	  if (processPIO() || processCIO() || processPRS())
-	    goto done;
-	  if (processInterrupts())
-	    goto done;
-	  if (runNextN > 0)
-	    {
-	      instructionCount++;
-	      runNextN--;
-	    }
-	}
+        {
+          int cyclesUsed = 0;
+          if (runNextN <= 0)
+            {
+              clock_t start, end;
+              start = times(&TmsStruct);
+              if (gdbInterface(instructionCount, cycleCount))
+                goto done;
+              end = times(&TmsStruct);
+              pausedTime += (end - start);
+            }
+          if (!runOneInstruction(&cyclesUsed))
+            {
+              cycleCount += cyclesUsed;
+              instructionCount++;
+            }
+          if (processPIO() || processCIO() || processPRS())
+            goto done;
+          if (processInterrupts())
+            goto done;
+          if (runNextN > 0) // Number of instructions remaining.
+            {
+              // If a key hit at the keyboard, pause the emulation.
+              // Otherwise, update counters.
+              if (kbhit())
+                {
+                  runNextN = 0;
+                  getchar(); // Eliminate the keypress.
+                }
+              else
+                runNextN--;
+            }
+        }
 
       // Sleep for a little to avoid hogging 100% CPU time.  The amount
-      // we choose doesn't really matter.
+      // we choose doesn't really matter, as long as it's short.  This
+      // is not a delay between instructions; rather, it is a delay
+      // that's applied every time the loop above catches up with real time.
       sleepMilliseconds(10);
     }
 
   retVal = 0;
   done: ;
   for (i = 0; i < numErrorMessages; i++)
-  fprintf (stderr, "%s\n", errorMessageStack[i]);
+    fprintf(stderr, "%s\n", errorMessageStack[i]);
   return (retVal);
 }

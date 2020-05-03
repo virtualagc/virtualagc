@@ -87,7 +87,7 @@ parseCommandLineArguments (int argc, char *argv[])
       else if (!strcmp (argv[i], "--cold-start"))
         coldStart = 1;
       else if (!strcmp (argv[i], "--run"))
-        runNextN = -1;
+        runNextN = INT_MAX;
       else if (!strcmp (argv[i], "--help"))
 	goto help;
       else
