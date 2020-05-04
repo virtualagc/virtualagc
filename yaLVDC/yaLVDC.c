@@ -134,7 +134,7 @@ main(int argc, char *argv[])
     goto done;
   // Note that readCore() must occur after readAssemblies(), since if present,
   // the core-memory file overrides the core-memory image from the assembler.
-  if (readAssemblies(assemblyBasenames, MAX_PROGRAMS))
+  if (readAssemblies())
     goto done;
   if (coldStart == 0)
     if (readCore())

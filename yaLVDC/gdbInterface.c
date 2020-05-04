@@ -136,12 +136,17 @@ enum commandTokens
   ctSTEP,
   ctDELETE,
   ctCONTINUE,
+  ctLIST,
+  ctX,
   ctCLEAR,
   ctBREAK,
+  ctTBREAK,
   ctINFO,
   ctRUN,
   ctKILL,
   ctQUIT,
+  ctSET,
+  ctSHOW,
   ctHELP,
   ctNone
 };
@@ -153,20 +158,31 @@ typedef struct
 } commandAssociation_t;
 commandAssociation_t commandAssociations[] =
   {
-    { ctSTEP, "STEP", "STEP [n]\t\tStep n instructions, default n=1." },
-    { ctDELETE, "DELETE", "DELETE\t\t\tDelects all breakpoints." },
+    { ctSTEP, "STEPI", "STEPI [n]\t\tStep n instructions, default n=1." },
+    { ctDELETE, "DELETE", "DELETE\t\t\tDelete all breakpoints." },
     { ctDELETE, "DELETE", "DELETE n\t\tDelete breakpoint n." },
-    { ctCONTINUE, "CONTINUE", "CONTINUE\t\tContinue running the emulation." },
-    { ctCLEAR, "CLEAR", "CLEAR name\t\tDelete breakpoint set at code name." },
-    { ctCLEAR, "CLEAR", "CLEAR number\t\tDelete breakpoint at decimal line #." },
-    { ctBREAK, "BREAK", "BREAK name\t\tSet breakpoint at function name." },
-    { ctBREAK, "BREAK", "BREAK number\t\tSet breakpoint at decimal line #." },
+    { ctCONTINUE, "CONTINUE", "CONTINUE\t\tContinue running emulation." },
+    { ctLIST, "LIST", "LIST\t\t\tList following block of source code." },
+    { ctLIST, "LIST", "LIST -\t\t\tList preceding block source code." },
+    { ctLIST, "LIST", "LIST [asm:]n\t\tList source block at line #n." },
+    { ctLIST, "LIST", "LIST [asm:]name\t\tList source block at function." },
+    { ctX, "X", "X[/[n][b|d|o]] address\tShow n words at address." },
+    { ctX, "X", "X[/[n][b|d|o]] &[asm:]name\tShow n words at name." },
+    { ctCLEAR, "CLEAR", "CLEAR [asm:]name\tDelete breakpoint at function." },
+    { ctCLEAR, "CLEAR", "CLEAR [asm:]number\tDelete breakpoint at line #." },
+    { ctCLEAR, "CLEAR", "CLEAR *address\t\tDelete breakpoint at address." },
+    { ctBREAK, "BREAK", "BREAK [asm:]name\tSet breakpoint at function." },
+    { ctBREAK, "BREAK", "BREAK [asm:]number\tSet breakpoint at line #." },
     { ctBREAK, "BREAK", "BREAK *address\t\tSet breakpoint at address." },
-    { ctINFO, "INFO", "INFO breakpoints\tList breakpoints." },
-    { ctINFO, "INFO", "INFO break\t\tList breakpoint numbers." },
-    { ctRUN, "RUN", "RUN\t\t\tRun the LVDC/PTC program from the beginning." },
+    { ctTBREAK, "TBREAK", "TBREAK ...\t\tSame as BREAK, but temporary." },
+    { ctINFO, "INFO", "INFO ASSEMBLIES\t\tList all loaded assemblies." },
+    { ctINFO, "INFO", "INFO BREAKPOINTS\tList all breakpoints." },
+    { ctINFO, "INFO", "INFO BREAK\t\tList all breakpoint numbers." },
+    { ctRUN, "RUN", "RUN\t\t\tRun the LVDC/PTC program from beginning." },
     { ctKILL, "KILL", "KILL\t\t\tEnd the LVDC/PTC program emulation." },
     { ctQUIT, "QUIT", "QUIT\t\t\tQuit the LVDC/PTC emulator." },
+    { ctSET, "SET", "SET LISTSIZE n\t\tSets default size used for LIST." },
+    { ctSHOW, "SHOW", "SHOW LISTSIZE\t\tShow current size for LIST." },
     { ctHELP, "HELP", "HELP\t\t\tPrint this list of commands." },
     { ctNone, "" } };
 enum commandTokens
@@ -183,28 +199,268 @@ findCommandToken(void)
   return (commandAssociations[i].token);
 }
 
-// Find a code-name symbol in the symbol table.  Return a pointer to the symbol-table
-// entry or to NULL if not found.
-symbol_t *
-findCodeSymbol(char *name)
+// Find the assembly, given its name (from the --assembly switch).
+// The return value is NULL if there is no match.
+assembly_t *
+findAssemblyByName(char *assemblyName)
 {
   int i;
-  for (i = 0; i < numSymbolsByName; i++)
-    if (!strcmp(name, symbolsByName[i].name))
-      return (&symbolsByName[i]);
+  if (numAssemblies <= 0 || assemblyName == NULL)
+    return (NULL);
+  for (i = 0; i < numAssemblies; i++)
+    if (!strcmp(assemblies[i].name, assemblyName))
+      return (&assemblies[i]);
   return (NULL);
 }
 
-// Find a line number in the source table.  Return a pointer to the source-table
-// entry or NULL if not found.
-sourceLine_t *
-findLineNumber(int number)
+// Find a in the symbol table.  Accepts names of the form assembly:symbol
+// or just symbol.  Returns a pointer to the symbol-table entry or to NULL
+// if not found.  If the input assemblyName is missing, then all
+// assemblies are searched, but only the first match found is returned.
+assembly_t *symbolAssembly;
+symbol_t *
+findSymbol(char *symbolName, int code)
 {
-  int i;
-  for (i = 0; i < numSourceLines; i++)
-    if (sourceLines[i].lineNumber == number)
-      return (&sourceLines[i]);
-  return (NULL);
+  int i, start = 0, end = numAssemblies;
+  char *assemblyName = NULL, *ss;
+  assembly_t *assembly = assemblies;
+  symbol_t *symbol = NULL;
+
+  symbolAssembly = NULL;
+
+  ss = strstr(symbolName, ":");
+  if (ss != NULL)
+    {
+      *ss = 0;
+      assemblyName = symbolName;
+      symbolName = ss + 1;
+    }
+  if (assemblyName != NULL)
+    {
+      assembly = findAssemblyByName(assemblyName);
+      *ss = ':';
+      if (assembly == NULL)
+        {
+          printf("No such assembly.\n");
+          return (NULL);
+        }
+      start = assembly - assemblies;
+      end = start + 1;
+    }
+  for (; start < end; start++, assembly++)
+    for (i = 0; i < assembly->numSymbols; i++)
+      if (!strcmp(symbolName, assembly->symbols[i].name)
+          && ((code && assembly->symbols[i].syllable < 2)
+              || (!code && assembly->symbols[i].syllable == 2)))
+        {
+          if (symbol == NULL)
+            {
+              symbol = &assembly->symbols[i];
+              symbolAssembly = assembly;
+            }
+          else
+            printf("Symbol specification is not unique.\n");
+        }
+  return (symbol);
+}
+
+// Find a line number in the source table.  Return a pointer to the source-table
+// entry or NULL if not found.  The lineNumber string can include an assembly
+// name.
+assembly_t *lineNumberAssembly;
+sourceLine_t *
+findLineNumber(char *lineNumberString)
+{
+  int i, start = 0, end = numAssemblies, lineNumber;
+  char *ss, *assemblyName = NULL;
+  assembly_t *assembly = assemblies;
+  sourceLine_t *sourceLine = NULL;
+
+  lineNumberAssembly = NULL;
+
+  ss = strstr(lineNumberString, ":");
+  if (ss != NULL)
+    {
+      *ss = 0;
+      assemblyName = lineNumberString;
+      lineNumber = atoi(ss + 1);
+      *ss = ':';
+    }
+  else
+    lineNumber = atoi(lineNumberString);
+  if (assemblyName != NULL)
+    {
+      assembly = findAssemblyByName(assemblyName);
+      if (assembly == NULL)
+        {
+          printf("No such assembly.\n");
+          return (NULL);
+        }
+      start = assembly - assemblies;
+      end = start + 1;
+    }
+
+  for (; start < end; start++, assembly++)
+    for (i = 0; i < assembly->numSourceLines; i++)
+      if (assembly->sourceLines[i].lineNumber == lineNumber)
+        {
+          if (sourceLine == NULL)
+            {
+              sourceLine = &assembly->sourceLines[i];
+              lineNumberAssembly = assembly;
+            }
+          else
+            printf("Source line-number specification is not unique.\n");
+        }
+  return (sourceLine);
+
+}
+
+// Print block of source-code lines.  The start and end parameters
+// are not line numbers, but are indexes into the sourceLine_t array.
+void
+printSourceBlock(assembly_t *assembly, int start, int end)
+{
+  int i, j;
+  int module, sector, syllable, location;
+  sourceLine_t *sourceLine;
+  char c;
+  breakpoint_t *breakpoint;
+  if (start < 0)
+    start = 0;
+  if (end > assembly->numSourceLines)
+    end = assembly->numSourceLines;
+  printf("Assembly %s:\n", assembly->name);
+  for (i = start, sourceLine = &assembly->sourceLines[start]; i < end;
+      i++, sourceLine++)
+    {
+      module = sourceLine->module;
+      sector = sourceLine->sector;
+      syllable = sourceLine->syllable;
+      location = sourceLine->loc;
+      c = ' ';
+      for (j = 0, breakpoint = breakpoints; j < numBreakpoints;
+          j++, breakpoint++)
+        if (module == breakpoint->module && sector == breakpoint->sector
+            && syllable == breakpoint->syllable
+            && location == breakpoint->location)
+          {
+            c = '*';
+            break;
+          }
+      printf("%6d:%c   %o-%02o-%o-%03o   %s\n",
+          assembly->sourceLines[i].lineNumber, c, module, sector, syllable,
+          location, assembly->sourceLines[i].line);
+    }
+}
+
+// Parse an input address string.
+enum addressType_t
+{
+  atCode, atData, atPio, atCio, atNone
+};
+enum addressType_t
+parseInputAddress(char *string, int *module, int *sector, int *syllable,
+    int *location)
+{
+  char s[256];
+
+  if (4
+      == sscanf(string, "%o-%o-%o-%o%s", module, sector, syllable, location, s))
+    return (atCode);
+  if (3 == sscanf(string, "%o-%o-%o%s", module, sector, location, s))
+    return (atData);
+  if (strlen(string) > 3 && 1 == sscanf(&string[3], "-%o%s", location, s))
+    {
+      if (!strncasecmp(string, "PIO", 3))
+        return (atPio);
+      else if (!strncasecmp(string, "CIO", 3))
+        return (atCio);
+    }
+  return (atNone);
+}
+
+// Convert an integer to binary.  The output buffer must be
+// padTo+1 bytes or longer.  Returns 0 on success or 1 on failure.
+int
+toBinary(int value, int padTo, char *buffer)
+{
+  buffer[padTo] = 0;
+  while (padTo > 0)
+    {
+      padTo--;
+      if ((value & 1) == 0)
+        buffer[padTo] = '0';
+      else
+        buffer[padTo] = '1';
+      value = value >> 1;
+    }
+  return (value != 0);
+}
+
+// Format a value fetched from code or data memory, or PIO/CIO port.
+char formattedFetchedValue[64];
+void
+formatFetchedValue(int value, char type /* o, d, or b */,
+    int size /* 0 for code, 1 or anything else */, int syllable /* 0, 1, 2 */)
+{
+  strcpy(formattedFetchedValue, "unknown");
+  if (value == -1 && size)
+    strcpy(formattedFetchedValue, "not data value");
+  else if (value == -1 && !size)
+    strcpy(formattedFetchedValue, "not code value");
+  else if (type == 'o' && size)
+    sprintf(formattedFetchedValue, "%09o (%09o)", value, value << 1);
+  else if (type == 'o' && !size)
+    sprintf(formattedFetchedValue, "%05o (%05o)", value,
+        value << (syllable ? 2 : 1));
+  else if (type == 'd')
+    {
+      if (size && (value & 0200000000) != 0)
+        value = -(value & 0177777777);
+      sprintf(formattedFetchedValue, "%d", value);
+    }
+  else if (type == 'b')
+    {
+      int numBits = 26;
+      if (!size)
+        numBits = 13;
+      toBinary(value, numBits, formattedFetchedValue);
+    }
+}
+
+assembly_t *assemblySourceLineByAddress;
+int
+findSourceLineByAddress(int module, int sector, int syllable, int location)
+{
+
+  assemblySourceLineByAddress = NULL;
+
+  // Search for the matching source line.
+  if (state.core[module][sector][syllable][location] != -1)
+    {
+      int i;
+      assembly_t *assembly;
+      int assemblyNumber;
+      for (assemblyNumber = 0, assembly = assemblies;
+          assemblyNumber < numAssemblies; assemblyNumber++, assembly++)
+        {
+          for (i = 0; i < assembly->numSourceLines; i++)
+            {
+              if (assembly->sourceLines[i].module != module)
+                continue;
+              if (assembly->sourceLines[i].sector != sector)
+                continue;
+              if (assembly->sourceLines[i].syllable != syllable)
+                continue;
+              if (assembly->sourceLines[i].loc != location)
+                continue;
+              assemblySourceLineByAddress = assembly;
+              return (i);
+            }
+        }
+    }
+  return (-1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +478,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
   hopStructure_t hs, hs2;
   char hopBuffer[32];
   size_t count;
-  int value;
+  int value, lineIndexInAssembly;
+  static int listSize = 20;
 
   // runNextN is a global variable telling the LVDC/PTC instruction emulator
   // how many instructions to emulate (-1 is unlimited) before pausing next,
@@ -231,6 +488,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
     {
       int i, found = 0;
       enum commandTokens commandToken;
+      assembly_t *assembly;
 
       // Print breakpoint information.
       if (breakpoint != NULL)
@@ -241,16 +499,26 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
           switch (breakpoint->whichType)
             {
           case 0:
-            printf(" due to name match %s\n.", breakpoint->name);
+            printf(" due to name match %s.\n", breakpoint->name);
             break;
           case 1:
-            printf(" due to source line-number match %d\n", breakpoint->number);
+            printf(" due to source line-number match %d.\n",
+                breakpoint->number);
             break;
           case 2:
             printf(" due to address match.\n");
             break;
           default:
             printf(".\n");
+            }
+          if (breakpoint->temporary)
+            {
+              int i = breakpoint - breakpoints;
+              if (i < numBreakpoints - 1)
+                memmove(&breakpoints[i], &breakpoints[i + 1],
+                    (numBreakpoints - i - 1) * sizeof(breakpoint_t));
+              numBreakpoints--;
+              printf("Temporary breakpoint deleted.\n");
             }
         }
 
@@ -271,24 +539,12 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         }
 
       // Search for the matching source line.
-      if (state.core[hs.im][hs.is][hs.s][hs.loc] != -1)
-        {
-          for (i = 0; i < numSourceLines; i++)
-            {
-              if (sourceLines[i].module != hs.im)
-                continue;
-              if (sourceLines[i].sector != hs.is)
-                continue;
-              if (sourceLines[i].syllable != hs.s)
-                continue;
-              if (sourceLines[i].loc != hs.loc)
-                continue;
-              found = 1;
-              break;
-            }
-          if (found == 0)
-            printf("(source line not found)\n");
-        }
+      lineIndexInAssembly = findSourceLineByAddress(hs.im, hs.is, hs.s, hs.loc);
+      found = (lineIndexInAssembly != -1);
+      if (found)
+        assembly = assemblySourceLineByAddress;
+      else
+        printf("(source line not found)\n");
 
       printf("   ACC = %09o", state.acc);
       if (ptc == 0)
@@ -302,17 +558,17 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       printf(" RET = %s\n", hopBuffer);
       printf("Instructions: %lu", instructionCount);
       printf(", Cycles: %lu", cycleCount);
-      printf(", Elapsed time: %f seconds", cycleCount * SECONDS_PER_CYCLE);
+      printf(", Elapsed time: %f seconds\n", cycleCount * SECONDS_PER_CYCLE);
       if (found)
-        printf(", Source line #: %d", sourceLines[i].lineNumber);
+        printf("Source line: %s:%d\n", assembly->name,
+            assembly->sourceLines[lineIndexInAssembly].lineNumber);
       else
-        printf(", Source line not found");
-      printf("\n");
+        printf("Source line not found\n");
 
       if (found)
-        printf("%s\n", sourceLines[i].line);
+        printf("%s\n", assembly->sourceLines[lineIndexInAssembly].line);
 
-      nextCommand:;
+      nextCommand: ;
 
       // Get a user command.
       printf("> ");
@@ -340,14 +596,193 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         printf("1. Commands are not case sensitive.\n");
         printf("2. Command abbreviations (like S for STEP) are accepted.\n");
         printf("3. An empty command repeats previous command in some cases.\n");
-        printf("4. Code addresses are of the form M-SS-Y-LLL, where M is \n");
-        printf("   the memory module (0-7), SS is the sector (00-17 octal),\n");
-        printf("   Y is the syllable (0 or 1), and LLL is the offset \n");
-        printf("   within the sector (000-377 octal).\n");
-        printf("5. Source line numbers come from the input .src file, not\n");
-        printf("   from the original .lvdc source-code file.\n");
+        printf("4. Addresses have the following formats:\n");
+        printf("   * Code memory:  M-SS-Y-LLL, where M is the memory module\n");
+        printf(
+            "     (0-7), SS is the sector (00-17 octal), Y is the syllable\n");
+        printf("     (0 or 1), and LLL is the offset within the sector\n");
+        printf("     (000-377 octal).\n");
+        printf("   * Data memory:  M-SS-LLL, where M is the memory module\n");
+        printf("     (0-7), SS is the sector (00-17 octal), and LLL is the\n");
+        printf("     offset within the sector (000-377 octal).\n");
+        printf("   * PIO port:  PIO-LLL, where LLL is the port number\n");
+        printf("     (000-377 octal).\n");
+        printf("   * CIO port:  CIO-LLL, where LLL is the port number\n");
+        printf("     (000-777 octal).\n");
+        printf("5. Source line numbers (decimal) come from the input .src\n");
+        printf("   file, not from the original .lvdc source-code file.\n");
         printf("6. A free-running emulation can be paused by hitting any\n");
         printf("   key on the keyboard.\n");
+        printf("7. If optional assembly names ([asm:]) are omitted, then\n");
+        printf("   all loaded assemblies are searched, even though naming\n");
+        printf("   conflicts may occur.  Only the first match encountered\n");
+        printf("   is affected by the command.\n");
+        goto nextCommand;
+      case ctX:
+        if (count == 2 || (count >= 3 && fields[1][0] == '/'))
+          {
+            int module, sector, syllable, location, printCount = 1;
+            char formatType = 'o', ss[256], *adrField;
+            enum addressType_t at;
+            if (count >= 3 && fields[1][0] == '/')
+              {
+                adrField = fields[2];
+                if (2
+                    != sscanf(fields[1], "/%d%c%s", &printCount, &formatType,
+                        ss))
+                  {
+                    formatType = 'o';
+                    if (1 != sscanf(fields[1], "/%d%s", &printCount, ss))
+                      {
+                        printCount = 1;
+                        if (1 != sscanf(fields[1], "/%c%s", &formatType, ss))
+                          {
+                            printf("Unrecognized format %s\n", fields[1]);
+                            break;
+                          }
+                      }
+                  }
+                if (formatType != 'b' && formatType != 'd' && formatType != 'o')
+                  {
+                    printf("Unrecognized format %s\n", fields[1]);
+                    break;
+                  }
+              }
+            else
+              adrField = fields[1];
+            if (adrField[0] == '&')
+              {
+                symbol_t *symbol;
+                symbol = findSymbol(adrField + 1, 1);
+                if (symbol != NULL)
+                  {
+                    at = atCode;
+                    module = symbol->module;
+                    sector = symbol->sector;
+                    syllable = symbol->syllable;
+                    location = symbol->loc;
+                  }
+                else
+                  {
+                    symbol = findSymbol(adrField + 1, 0);
+                    if (symbol != NULL)
+                      {
+                        at = atData;
+                        module = symbol->module;
+                        sector = symbol->sector;
+                        location = symbol->loc;
+                      }
+                  }
+              }
+            else
+              at = parseInputAddress(adrField, &module, &sector, &syllable,
+                  &location);
+            for (; printCount > 0; printCount--)
+              {
+                switch (at)
+                  {
+                case atCode:
+                  if (module < 0 || module > 7 || sector < 0 || sector > 017
+                      || syllable < 0 || syllable > 1 || location < 0
+                      || location > 0377)
+                    goto badAddressX;
+                  formatFetchedValue(
+                      state.core[module][sector][syllable][location],
+                      formatType, 0, syllable);
+                  printf("%o-%02o-%o-%03o: %s\n", module, sector, syllable,
+                      location, formattedFetchedValue);
+                  location++;
+                  break;
+                case atData:
+                  if (module < 0 || module > 7 || sector < 0 || sector > 017
+                      || location < 0 || location > 0377)
+                    goto badAddressX;
+                  formatFetchedValue(state.core[module][sector][2][location],
+                      formatType, 1, 2);
+                  printf("%o-%02o-%03o: %s\n", module, sector, location,
+                      formattedFetchedValue);
+                  location++;
+                  break;
+                case atPio:
+                  if (location < 0 || location > 0377)
+                    goto badAddressX;
+                  formatFetchedValue(state.pio[location], formatType, 1, 2);
+                  printf("PIO-%03o: %s\n", location, formattedFetchedValue);
+                  location++;
+                  break;
+                case atCio:
+                  if (location < 0 || location > 0777)
+                    goto badAddressX;
+                  formatFetchedValue(state.cio[location], formatType, 1, 2);
+                  printf("CIO-%03o: %s\n", location, formattedFetchedValue);
+                  location++;
+                  break;
+                default:
+                  printf("Unrecognized format\n");
+                  break;
+                  }
+              }
+          }
+        else
+          printf("Unrecognized command\n");
+        if (0)
+          {
+            badAddressX: ;
+            printf("Nonexistent address.\n");
+          }
+        goto nextCommand;
+      case ctSET:
+        if (count >= 3 && !strcasecmp(fields[1], "listsize"))
+          listSize = atoi(fields[2]);
+        goto nextCommand;
+      case ctSHOW:
+        if (count >= 2 && !strcasecmp(fields[1], "listsize"))
+          printf("Default block size for LIST is %d lines.\n", listSize);
+        goto nextCommand;
+      case ctLIST:
+        {
+          char *colon = NULL;
+          if (count > 1)
+            colon = strstr(fields[1], ":");
+          if (count == 1 && found)
+            printSourceBlock(assembly, lineIndexInAssembly,
+                lineIndexInAssembly + listSize);
+          else if (count < 2)
+            {
+            }
+          else if (!strcmp(fields[1], "-") && found)
+            printSourceBlock(assembly, lineIndexInAssembly - listSize,
+                lineIndexInAssembly);
+          else if ((colon == NULL && isdigit(fields[1][0]))
+              || (colon != NULL && isdigit(colon[1])))
+            {
+              sourceLine_t *sourceLine;
+              sourceLine = findLineNumber(fields[1]);
+              if (sourceLine == NULL)
+                printf("Line number not found.\n");
+              else
+                printSourceBlock(lineNumberAssembly,
+                    sourceLine - lineNumberAssembly->sourceLines,
+                    sourceLine - lineNumberAssembly->sourceLines + listSize);
+            }
+          else if ((colon == NULL && isalpha(fields[1][0]))
+              || (colon != NULL && isalpha(colon[1])))
+            {
+              symbol_t *symbol;
+              symbol = findSymbol(fields[1], 1);
+              if (symbol == NULL)
+                printf("Symbol not found.\n");
+              else
+                {
+                  int index = findSourceLineByAddress(symbol->module,
+                      symbol->sector, symbol->syllable, symbol->loc);
+                  printSourceBlock(assemblySourceLineByAddress, index,
+                      index + listSize);
+                }
+            }
+          else
+            printf("Unrecognized command.\n");
+        }
         goto nextCommand;
       case ctKILL:
         lastLine[0] = 0;
@@ -371,16 +806,31 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
           {
             int i;
             breakpoint_t *breakpoint;
-            if (!strcasecmp(fields[1], "breakpoints"))
+            assembly_t *assembly;
+            if (!strcasecmp(fields[1], "assemblies"))
+              {
+                if (numAssemblies <= 0)
+                  printf("No assemblies are loaded.\n");
+                else
+                  for (i = 0, assembly = assemblies; i < numAssemblies;
+                      i++, assembly++)
+                    printf(
+                        "Assembly %s, %d symbols, %d source lines, %d code words, %d data words.\n",
+                        assembly->name, assembly->numSymbols,
+                        assembly->numSourceLines, assembly->codeWords,
+                        assembly->dataWords);
+              }
+            else if (!strcasecmp(fields[1], "breakpoints"))
               {
                 if (numBreakpoints <= 0)
                   printf("No breakpoints are set.\n");
                 for (i = 0, breakpoint = breakpoints; i < numBreakpoints;
                     i++, breakpoint++)
                   {
-                    printf("Breakpoint at %o-%02o-%o-%03o", breakpoint->module,
-                        breakpoint->sector, breakpoint->syllable,
-                        breakpoint->location);
+                    printf("Breakpoint (%s) at %o-%02o-%o-%03o",
+                        breakpoint->temporary ? "temporary" : "permanent",
+                        breakpoint->module, breakpoint->sector,
+                        breakpoint->syllable, breakpoint->location);
                     switch (breakpoint->whichType)
                       {
                     case 0:
@@ -405,9 +855,10 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 for (i = 0, breakpoint = breakpoints; i < numBreakpoints;
                     i++, breakpoint++)
                   {
-                    printf("%d: %o-%02o-%o-%03o\n", i, breakpoint->module,
+                    printf("%d: %o-%02o-%o-%03o (%s)\n", i, breakpoint->module,
                         breakpoint->sector, breakpoint->syllable,
-                        breakpoint->location);
+                        breakpoint->location,
+                        breakpoint->temporary ? "temporary" : "permanent");
                   }
               }
             else
@@ -415,14 +866,16 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
           }
         goto nextCommand;
       case ctBREAK:
+      case ctCLEAR:
+      case ctTBREAK:
         if (count >= 2)
           {
             int i, is, im, s, loc, ok = 0, whichType;
+            char *colon;
             breakpoint_t *breakpoint;
-            // Parse the argument to see how the breakpoint is being specified.
-            // If an address can be deduced from that, set im/is/s/loc appropriately
-            // and set ok=1.
-            if (fields[1][0] == '*')
+
+            colon = strstr(fields[1], ":");
+            if (colon == NULL && fields[1][0] == '*')
               {
                 whichType = 2;
                 if (4
@@ -432,11 +885,12 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 else
                   ok = 1;
               }
-            else if (isdigit(fields[1][0]))
+            else if ((colon == NULL && isdigit(fields[1][0]))
+                || (colon != NULL && isdigit(colon[1])))
               {
                 sourceLine_t *sourceLine;
                 whichType = 1;
-                sourceLine = findLineNumber(atoi(fields[1]));
+                sourceLine = findLineNumber(fields[1]);
                 if (sourceLine != NULL)
                   {
                     im = sourceLine->module;
@@ -445,12 +899,15 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                     loc = sourceLine->loc;
                     ok = 1;
                   }
+                else
+                  printf("Line number not found.\n");
               }
-            else if (isalpha(fields[1][0]))
+            else if ((colon == NULL && isalpha(fields[1][0]))
+                || (colon != NULL && isalpha(colon[1])))
               {
                 symbol_t *symbol;
                 whichType = 0;
-                symbol = findCodeSymbol(fields[1]);
+                symbol = findSymbol(fields[1], 1);
                 if (symbol != NULL)
                   {
                     im = symbol->module;
@@ -459,6 +916,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                     loc = symbol->loc;
                     ok = 1;
                   }
+                else
+                  printf("Symbol not found.\n");
               }
             else
               printf("Breakpoint type not recognized.\n");
@@ -466,16 +925,43 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
             // desired ...
             if (ok)
               {
-                // If a breakpoint already exists at the address, do nothing.
+                // Find existing breakpoint, if any.
                 for (i = 0, breakpoint = breakpoints; i < numBreakpoints;
                     i++, breakpoint++)
                   if (im == breakpoint->module && is == breakpoint->sector
                       && s == breakpoint->syllable
                       && loc == breakpoint->location)
                     {
-                      printf("Breakpoint already exists.\n");
+                      if (commandToken == ctCLEAR)
+                        {
+                          if (i < numBreakpoints - 1)
+                            memmove(&breakpoints[i], &breakpoints[i + 1],
+                                (numBreakpoints - i - 1)
+                                    * sizeof(breakpoint_t));
+                          numBreakpoints--;
+                          printf("Breakpoint #%d deleted.\n", i);
+                        }
+                      else if (breakpoint->temporary && commandToken == ctBREAK)
+                        {
+                          breakpoint->temporary = 0;
+                          printf(
+                              "Existing breakpoint changed from temporary to permanent\n");
+                        }
+                      else if (!breakpoint->temporary
+                          && commandToken == ctTBREAK)
+                        {
+                          breakpoint->temporary = 1;
+                          printf(
+                              "Existing breakpoint changed from permanent to temporary\n");
+                        }
+                      else
+                        printf("Breakpoint already exists.\n");
+                      ok = 0;
                       break;
                     }
+              }
+            if (ok && commandToken != ctCLEAR)
+              {
                 // If the breakpoint doesn't already exist ...
                 if (i >= numBreakpoints)
                   {
@@ -488,6 +974,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                         breakpoints[i].syllable = s;
                         breakpoints[i].location = loc;
                         breakpoints[i].whichType = whichType;
+                        breakpoints[i].temporary = (commandToken == ctTBREAK);
                         if (whichType == 1)
                           breakpoints[i].number = atoi(fields[1]);
                         if (whichType == 0)
@@ -495,6 +982,25 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                         numBreakpoints++;
                       }
                   }
+              }
+          }
+        goto nextCommand;
+      case ctDELETE:
+        if (count < 2)
+          {
+            numBreakpoints = 0;
+            printf("All breakpoints deleted.\n");
+          }
+        else
+          {
+            i = atoi(fields[1]);
+            if (i >= 0 && i < numBreakpoints)
+              {
+                if (i < numBreakpoints - 1)
+                  memmove(&breakpoints[i], &breakpoints[i + 1],
+                      (numBreakpoints - i - 1) * sizeof(breakpoint_t));
+                numBreakpoints--;
+                printf("Breakpoint #%d deleted.\n", i);
               }
           }
         goto nextCommand;

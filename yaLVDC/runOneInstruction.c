@@ -34,7 +34,7 @@
 #define signMask        0200000000
 #define dataWordMask    0377777777
 
-#define DEBUG_A_LOT
+//#define DEBUG_A_LOT
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -376,7 +376,9 @@ runOneInstruction(int *cyclesUsed)
           runNextN = 0;
           goto done;
         }
-      printf("Here %o-%02o-%o-%02o %09o\n", hopStructure.dm, residual, hopStructure.ds, operand, fetchedFromMemory);
+#ifdef DEBUG_A_LOT
+      printf("HOP %o-%02o-%o-%02o %09o\n", hopStructure.dm, residual, hopStructure.ds, operand, fetchedFromMemory);
+#endif
       state.hop = fetchedFromMemory;
     }
   else if (!ptc && (op == 001 || op == 005))
@@ -584,7 +586,9 @@ runOneInstruction(int *cyclesUsed)
       // CDS
       rawHopStructure.dm = (operand >> 4) & 1;
       rawHopStructure.ds = operand & 017;
+#ifdef DEBUG_A_LOT
       printf("CDS %o,%02o\n", rawHopStructure.dm, rawHopStructure.ds);
+#endif
     }
   else if (!ptc && op == 016 && a8 == 0 && a9 == 0)
     {
@@ -597,7 +601,9 @@ runOneInstruction(int *cyclesUsed)
     {
       int direction = operand & 0100;
       int sign = state.acc & signMask;
+#ifdef DEBUG_A_LOT
       printf("Shift %03o\n", operand);
+#endif
       if (direction)
         {
           switch (operand & 077)

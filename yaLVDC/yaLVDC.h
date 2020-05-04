@@ -47,9 +47,8 @@
 // normal case after yaLVDC is fully developed.
 #define DEBUG_NONE		0
 #define DEBUG_SYMBOLS 		1
-#define DEBUG_SYMBOLS_BY_NAME 	2
-#define DEBUG_SOURCE_LINES 	4
-#define DEBUG_CORE		8
+#define DEBUG_SOURCE_LINES 	2
+#define DEBUG_CORE		4
 
 #define DEBUG_FLAGS DEBUG_NONE
 #if DEBUG_FLAGS != DEBUG_NONE
@@ -66,6 +65,7 @@ dPrintouts (void);
 // See yaLVDC.c
 #define MAX_SYMBOL_LENGTH 10
 typedef struct {
+  int temporary; // 1=temporary, 0=permanent.
   int module;
   int sector;
   int syllable;
@@ -79,8 +79,6 @@ breakpoint_t breakpoints[MAX_BREAKPOINTS];
 int numBreakpoints;
 
 // See parseCommandLineArguments.c
-#define MAX_PROGRAMS 5
-char *assemblyBasenames[MAX_PROGRAMS];
 char *coreFilename;
 int ptc;
 int coldStart;
@@ -128,10 +126,6 @@ typedef struct {
   uint8_t syllable; // 0,1 instructions, 2 data.
   uint8_t loc;
 } symbol_t;
-symbol_t *symbols;
-symbol_t *symbolsByName;
-int numSymbols;
-int numSymbolsByName;
 typedef struct {
   char *line;
   uint8_t module;
@@ -140,16 +134,25 @@ typedef struct {
   uint8_t loc;
   int lineNumber;
 } sourceLine_t;
-sourceLine_t *sourceLines;
-int numSourceLines;
+#define MAX_ASSEMBLIES 16
+typedef struct {
+  char *name;
+  symbol_t *symbols;
+  int numSymbols;
+  sourceLine_t *sourceLines;
+  int numSourceLines;
+  int codeWords;
+  int dataWords;
+} assembly_t;
+assembly_t assemblies[MAX_ASSEMBLIES];
+int numAssemblies;
+int freezeAssemblies;
 int
-readAssemblies(char *assemblyNames[], int maxAssemblies);
+readAssemblies(void);
 int
 cmpSourceByAddress (const void *r1, const void *r2);
 int
 cmpSymbolsByAddress (const void *r1, const void *r2);
-int
-cmpSymbolsByName (const void *r1, const void *r2);
 
 // See pushErrorMessage.c
 #define MAX_ERROR_MESSAGES 32

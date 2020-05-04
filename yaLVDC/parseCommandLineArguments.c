@@ -54,8 +54,6 @@ static char helpMessage[] = "Usage:\n"
     "              (without --run), will simply pause without running.\n"
     "";
 
-char *assemblyBasenames[MAX_PROGRAMS] =
-  { "yaLVDC" };
 char *coreFilename = "yaLVDC.core";
 int ptc = 0;
 int coldStart = 0;
@@ -67,18 +65,18 @@ int
 parseCommandLineArguments (int argc, char *argv[])
 {
   int retVal = 1;
-  int i, jAssembly = 0;
+  int i;
 
   for (i = 1; i < argc; i++)
     {
       if (!strncmp (argv[i], "--assembly=", 11))
 	{
-	  if (jAssembly >= MAX_PROGRAMS)
+	  if (numAssemblies >= MAX_ASSEMBLIES)
 	    {
 	      pushErrorMessage ("Too many --assembly arguments", NULL);
 	      goto help;
 	    }
-	  assemblyBasenames[jAssembly++] = &argv[i][11];
+	  assemblies[numAssemblies++].name = &argv[i][11];
 	}
       else if (!strncmp (argv[i], "--core=", 7))
 	coreFilename = &argv[i][7];

@@ -51,18 +51,6 @@ dPrintouts (void)
 	}
     }
 #endif
-#if (DEBUG_FLAGS & DEBUG_SYMBOLS_BY_NAME) != 0
-    {
-      int i;
-      printf ("\n*** TABLE OF SYMBOLS AND AUTO-ALLOCATED CONSTANTS BY NAME/VALUE ***\n");
-      for (i = 0; i < numSymbolsByName; i++)
-	{
-	  printf ("%d\t%o\t%02o\t%o\t%03o\t%s\n", i, symbolsByName[i].module,
-		  symbolsByName[i].sector, symbolsByName[i].syllable,
-		  symbolsByName[i].loc, symbolsByName[i].name);
-	}
-    }
-#endif
 #if (DEBUG_FLAGS & DEBUG_SOURCE_LINES) != 0
     {
       int i;
