@@ -16,6 +16,16 @@
  * along with yaAGC; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
  * Filename:    gdbInterface.c
  * Purpose:     Provides a debugger interface for the LVDC/PTC emulator.
  *              in spite of the name, it's not necessarily a gdb-like
@@ -32,6 +42,11 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "yaLVDC.h"
+
+// From yaLVDC.c.
+int
+kbhit(void);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Utility functions.
@@ -559,7 +574,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       printf("(777)= %s", hopBuffer);
       formHopDescription(-1, 0, 017, 0376, hopBuffer, &hs2);
       printf("  (776)= %s\n", hopBuffer);
-      formHopDescription(state.returnAddress, 0, 0, 0, hopBuffer, &hs2);
+      formHopDescription(state.hopSaver, 0, 0, 0, hopBuffer, &hs2);
       printf(" RET = %s\n", hopBuffer);
       printf("Instructions: %lu", instructionCount);
       printf(", Cycles: %lu", cycleCount);
@@ -940,9 +955,13 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 break;
               case atPio:
                 destinationPointer = &state.pio[location];
+                state.pioChange = 1;
+                processInterruptsAndIO();
                 break;
               case atCio:
                 destinationPointer = &state.cio[location];
+                state.pioChange = 1;
+                processInterruptsAndIO();
                 break;
               default:
                 break;

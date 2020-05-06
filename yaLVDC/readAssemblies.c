@@ -16,6 +16,16 @@
  * along with yaAGC; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
  * Filename:    readAssemblies.c
  * Purpose:     Reads a set of assembly files (i.e., files created by
  * 		yaASM.py) for yaLVDC.c.
@@ -65,25 +75,25 @@ checkAddress(unsigned module, unsigned sector, unsigned syllable, unsigned loc)
   if (module > 07)
     {
       sprintf(buffer, "0%o", module);
-      pushErrorMessage("Module out of range:", buffer);
+      printf("Module out of range: %s\n", buffer);
       goto done;
     }
   if (sector > 017)
     {
       sprintf(buffer, "0%o", sector);
-      pushErrorMessage("Sector out of range:", buffer);
+      printf("Sector out of range: %s\n", buffer);
       goto done;
     }
   if (syllable > 2)
     {
       sprintf(buffer, "0%o", syllable);
-      pushErrorMessage("Syllable out of range:", buffer);
+      printf("Syllable out of range: %s\n", buffer);
       goto done;
     }
   if (loc > 0377)
     {
       sprintf(buffer, "0%o", loc);
-      pushErrorMessage("Location out of range:", buffer);
+      printf("Location out of range: %s\n", buffer);
       goto done;
     }
   retVal = 0;
@@ -111,13 +121,13 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
   fp = fopen(filename, "r");
   if (fp == NULL)
     {
-      pushErrorMessage("Cannot open file:", filename);
+      printf("Cannot open file: %s\n", filename);
       goto done;
     }
   buffer = malloc(MAX_LINE + 1);
   if (buffer == NULL)
     {
-      pushErrorMessage("Out of memory", NULL);
+      printf("Out of memory.\n");
       goto done;
     }
 
@@ -172,26 +182,26 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
               loc = offset + j;
               if (strlen(vals[j]) != 11)
                 {
-                  pushErrorMessage("Octal field is wrong length:", vals[j]);
+                  printf("Octal field is wrong length: %s\n", vals[j]);
                   goto done;
                 }
               if (types[j] == ' ')
                 {
                   if (strcmp(vals[j], "           "))
                     {
-                      pushErrorMessage("Octal should be empty:", vals[j]);
+                      printf("Octal should be empty: %s\n", vals[j]);
                       goto done;
                     }
                   continue;
                 }
               if (types[j] == 'S')
                 {
-                  pushErrorMessage("Simplex not supported", NULL);
+                  printf("Simplex not supported.\n");
                   goto done;
                 }
               if (types[j] != 'D')
                 {
-                  pushErrorMessage("Unknown octal field type", NULL);
+                  printf("Unknown octal field type.\n");
                   goto done;
                 }
               // Analyze vals[j] to determine its pattern.  There are 4 choices:
@@ -210,7 +220,7 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
                   octal = (c >= '0' && c <= '7');
                   if (!space && !octal)
                     {
-                      pushErrorMessage("Illegal octal pattern A:", vals[j]);
+                      printf("Illegal octal pattern A: %s\n", vals[j]);
                       goto done;
                     }
                   if (k == 0)
@@ -304,7 +314,7 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
                 }
               else
                 {
-                  pushErrorMessage("Illegal octal pattern B:", buffer);
+                  printf("Illegal octal pattern B: %s\n", buffer);
                   goto done;
                 }
               if (conflict)
@@ -342,7 +352,7 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
       for (j = 0; buffer[j] != 0; j++)
         if (!isspace(buffer[j]))
           {
-            pushErrorMessage("Corrupt octal-listing line:", buffer);
+            printf("Corrupt octal-listing line: %s\n", buffer);
             goto done;
           }
     }
@@ -375,14 +385,14 @@ readSymbolTable(assembly_t *assembly, int count, char *filename)
   fp = fopen(filename, "r");
   if (fp == NULL)
     {
-      pushErrorMessage("Cannot open file:", filename);
+      printf("Cannot open file: %s\n", filename);
       goto done;
     }
   buffer = malloc(MAX_LINE + 1);
   name = malloc(MAX_LINE + 1);
   if (buffer == NULL || name == NULL)
     {
-      pushErrorMessage("Out of memory", NULL);
+      printf("Out of memory.\n");
       goto done;
     }
 
@@ -396,13 +406,13 @@ readSymbolTable(assembly_t *assembly, int count, char *filename)
           &syllable, &loc);
       if (i != 5)
         {
-          pushErrorMessage("Ill-formed symbol table line:", buffer);
+          printf("Ill-formed symbol table line: %s\n", buffer);
           goto done;
         }
       i = strlen(name);
       if (i < 1 || i > 9 || (i > 6 && !isdigit(name[0])))
         {
-          pushErrorMessage("Symbol length wrong:", name);
+          printf("Symbol length wrong: %s\n", name);
           goto done;
         }
       if (checkAddress(module, sector, syllable, loc))
@@ -413,7 +423,7 @@ readSymbolTable(assembly_t *assembly, int count, char *filename)
           assembly->symbols = realloc(assembly->symbols, maxSymbols * sizeof(symbol_t));
           if (assembly->symbols == NULL)
             {
-              pushErrorMessage("Out of memory", NULL);
+              printf("Out of memory.\n");
               goto done;
             }
         }
@@ -466,14 +476,14 @@ readSourceLines(assembly_t *assembly, int count, char *filename)
   fp = fopen(filename, "r");
   if (fp == NULL)
     {
-      pushErrorMessage("Cannot open file:", filename);
+      printf("Cannot open file: %s\n", filename);
       goto done;
     }
   buffer = malloc(MAX_LINE + 1);
   rawline = malloc(MAX_LINE + 1);
   if (buffer == NULL || rawline == NULL)
     {
-      pushErrorMessage("Out of memory", NULL);
+      printf("Out of memory.\n");
       goto done;
     }
 
@@ -487,13 +497,13 @@ readSourceLines(assembly_t *assembly, int count, char *filename)
           &lineNumber, rawline);
       if (i != 6)
         {
-          pushErrorMessage("Ill-formed source-table line:", buffer);
+          printf("Ill-formed source-table line: %s\n", buffer);
           goto done;
         }
       line = malloc(strlen(rawline));
       if (line == NULL)
         {
-          pushErrorMessage("Out of memory", NULL);
+          printf("Out of memory.\n");
           goto done;
         }
       strcpy(line, rawline + 1);
@@ -506,7 +516,7 @@ readSourceLines(assembly_t *assembly, int count, char *filename)
               maxSourceLines * sizeof(sourceLine_t));
           if (assembly->sourceLines == NULL)
             {
-              pushErrorMessage("Out of memory", NULL);
+              printf("Out of memory.\n");
               goto done;
             }
         }
@@ -674,7 +684,7 @@ readAssemblies(void)
       filename = realloc(filename, strlen(assemblies[i].name) + 5);
       if (filename == NULL)
         {
-          pushErrorMessage("Out of memory", NULL);
+          printf("Out of memory.\n");
           goto done;
         }
       sprintf(filename, "%s.tsv", assemblies[i].name);

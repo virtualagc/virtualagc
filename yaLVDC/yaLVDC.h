@@ -16,6 +16,16 @@
  * along with yaAGC; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
  * Filename:    yaLVDC.h
  * Purpose:     Common header for yaLVDC.c and friends.
  * Compiler:    GNU gcc.
@@ -84,7 +94,8 @@ char *coreFilename;
 int ptc;
 int coldStart;
 int runStepN; // # of emulation steps left to run until pausing. INT_MAX is unlimited.
-int inNextNotStep, inNextHop, inNextHopIM, inNextHopIS, inNextHopS, inNextHopLOC;
+int inNextNotStep, inNextHop, inNextHopIM, inNextHopIS, inNextHopS,
+    inNextHopLOC;
 
 int
 parseCommandLineArguments(int argc, char *argv[]);
@@ -101,7 +112,7 @@ typedef struct
   int32_t hop;
   int32_t acc;
   int32_t pq;
-  int32_t returnAddress; // -2 except immediately after a HOP instruction.
+  int32_t hopSaver; // otherwise known as the "HOP saver" register.
   int32_t core[8][16][3][256];
   int32_t pio[512];
   int32_t cio[01000]; // PTC only.
@@ -163,13 +174,6 @@ cmpSourceByAddress(const void *r1, const void *r2);
 int
 cmpSymbolsByAddress(const void *r1, const void *r2);
 
-// See pushErrorMessage.c
-#define MAX_ERROR_MESSAGES 32
-char *errorMessageStack[MAX_ERROR_MESSAGES];
-int numErrorMessages;
-int
-pushErrorMessage(char *part1, char *part2);
-
 // See readWriteCore.c
 int
 readCore(void);
@@ -209,20 +213,26 @@ int
 gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
     breakpoint_t *breakpoint);
 
-// See processPIO.c
+// See processInterruptsAndIO.c
 int
-processPIO(void);
+processInterruptsAndIO(void);
 
-// See processCIO.c
+// See virtualWire.c
+#define MAX_LISTENERS 7
+int ServerBaseSocket;
+int PortNum;
+int virtualWireErrorCodes;
 int
-processCIO(void);
-
-// See processPRS.c
+InitializeSocketSystem(void);
+void
+UnblockSocket(int SocketNum);
 int
-processPRS(void);
-
-// See processInterrupts.c
+EstablishSocket(unsigned short portnum, int MaxClients);
 int
-processInterrupts(void);
+CallSocket(char *hostname, unsigned short portnum);
+void
+connectCheck(void);
+int
+pendingVirtualWireActivity(void);
 
 #endif // yaLVDC_h

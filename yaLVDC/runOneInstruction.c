@@ -16,6 +16,16 @@
  * along with yaAGC; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
  * Filename:    runOneInstruction.c
  * Purpose:     Emulates one instruction for yaLVDC.c, using the global state
  * 		structure. Also provides various related utility functions that
@@ -176,8 +186,8 @@ fetchData(int module, int residual, int sector, int loc, int *data,
 // Note that addresses 0775, 0776, and 0777 are treated as special cases.  For
 // 0775, the data destination is the CPU's PQ register rather than memory.
 // For 0776 or 0777, the data from the function argument is overridden and
-// state.returnAddress is used instead if appropriate.  This happens if the
-// preceding instruction was a HOP, and thus state.returnAddress holds the
+// state.hopSaver is used instead if appropriate.  This happens if the
+// preceding instruction was a HOP, and thus state.hopSaver holds the
 // return address of the HOP.
 int
 storeData(int module, int residual, int sector, int loc, int data,
@@ -195,7 +205,7 @@ storeData(int module, int residual, int sector, int loc, int data,
           return (0);
         }
       else if (loc == 0376 || loc == 0377)
-        data = state.returnAddress;
+        data = state.hopSaver;
       sector = 017;
     }
   state.core[module][sector][2][loc] = data;
@@ -285,7 +295,7 @@ runOneInstruction(int *cyclesUsed)
   int retVal = 1;
   int cycleCount = 1, nextLOC, nextS, isHOP = 0;
   int64_t dummy;  // For multiplication intermediate result.
-  hopStructure_t hopStructure, rawHopStructure;
+  hopStructure_t hopStructure, rawHopStructure, rawestHopStructure;
   uint16_t instruction;
   uint8_t op, operand, residual, a8, a9;
   int32_t fetchedFromMemory;
@@ -303,7 +313,7 @@ runOneInstruction(int *cyclesUsed)
   dataFromInstructionMemory = 0;
   instructionFromDataMemory = 0;
 
-  reenterForEXM:;
+  reenterForEXM: ;
   if (state.pendingEXM.pending)
     {
       state.pendingEXM.pending = 0;
@@ -351,6 +361,7 @@ runOneInstruction(int *cyclesUsed)
           hopStructure.loc, &instruction, &instructionFromDataMemory))
         goto done;
     }
+  memcpy(&rawestHopStructure, &rawHopStructure, sizeof(hopStructure_t));
 
   // Parse instruction into fields.
   op = instruction & 017;
@@ -755,21 +766,16 @@ runOneInstruction(int *cyclesUsed)
       goto done;
     }
 
-  // Fix up state.hop and state.returnAddress for the next instruction.
   rawHopStructure.loc = nextLOC;
   rawHopStructure.s = nextS;
-  if (isHOP)
-    {
-      // state.hop has already been set, above.
-      if (formHopConstant(&rawHopStructure, &state.returnAddress))
-        goto done;
-    }
-  else
+  if (!isHOP)
     {
       if (formHopConstant(&rawHopStructure, &state.hop))
         goto done;
-      state.returnAddress = -1;
     }
+  rawestHopStructure.loc++;
+  if (formHopConstant(&rawestHopStructure, &state.hopSaver))
+    state.hopSaver = -1;
 
   *cyclesUsed = cycleCount;
   retVal = 0;

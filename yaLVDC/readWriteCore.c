@@ -16,6 +16,16 @@
  * along with yaAGC; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
  * Filename:    readWriteCore.c
  * Purpose:     This file contains routines for reading and writing a file
  * 		containing snapshots of the core-memory.
@@ -51,7 +61,7 @@ readCore (void)
       int32_t value;
       if (1 != fread (&state, sizeof(state), 1, fp))
 	{
-	  pushErrorMessage ("Cannot read core-memory file:", coreFilename);
+	  printf ("Cannot read core-memory file: %s\n", coreFilename);
 	  goto done;
 	}
       // Do a sanity check.
@@ -98,7 +108,7 @@ readCore (void)
   if (0)
     {
       corrupted: ;
-      pushErrorMessage ("Core-memory file corrupted:", coreFilename);
+      printf ("Core-memory file corrupted: %s\n", coreFilename);
     }
   if (fp != NULL)
     fclose (fp);
@@ -114,12 +124,12 @@ writeCore (void)
   fp = fopen (coreFilename, "wb");
   if (fp == NULL)
     {
-      pushErrorMessage ("Cannot create core-memory file:", coreFilename);
+      printf ("Cannot create core-memory file: %s\n", coreFilename);
       goto done;
     }
   if (1 != fwrite (&state, sizeof(state), 1, fp))
     {
-      pushErrorMessage ("Cannot write to core-memory file:", coreFilename);
+      printf ("Cannot write to core-memory file: %s\n", coreFilename);
       goto done;
     }
 

@@ -16,6 +16,16 @@
  * along with yaAGC; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
  * Filename:    yaLVDC.c
  * Purpose:     Emulator for LVDC CPU
  * Compiler:    GNU gcc.
@@ -122,7 +132,6 @@ int
 main(int argc, char *argv[])
 {
   int retVal = 1;
-  int i;
   clock_t startingTime, currentTime, pausedTime = 0;
   double cyclesPerTick;
   unsigned long cycleCount = 0, nextSnapshot, snapshotIntervalCycles = 5.0
@@ -146,15 +155,25 @@ main(int argc, char *argv[])
     }
   nextSnapshot = cycleCount + snapshotIntervalCycles;
 
+  ServerBaseSocket = EstablishSocket(PortNum, MAX_LISTENERS);
+  if (ServerBaseSocket == -1)
+    {
+      printf("Cannot establish networking socket for virtual wiring.\n");
+      goto done;
+    }
+  connectCheck();
+
   // Note that readCore() must occur after readAssemblies(), since if present,
   // the core-memory file overrides the core-memory image from the assembler.
   if (readAssemblies())
     goto done;
   if (coldStart == 0)
     if (readCore())
-      goto done; dPrintouts(); // Some optional printouts for debugging.
+        goto done;
+  // Some optional printouts for debugging.
+  dPrintouts();
   fflush(stdout);
-  state.returnAddress = -1;
+  state.hopSaver = 0;
 
   cyclesPerTick = 1.0 / (SECONDS_PER_CYCLE * sysconf(_SC_CLK_TCK));
   startingTime = times(&TmsStruct);
@@ -213,8 +232,8 @@ main(int argc, char *argv[])
           // Doing NEXT?
           if (runStepN > 0 && inNextNotStep)
             {
-              entryNext:;
-              // If we've just returned after a HOP subroutine in a NEXT,
+              entryNext: ;
+              // If we've just returned after a HOP/TRA/TNZ/TMI subroutine in a NEXT,
               // detect our poor-man's breakpoint and clean up.
               if (inNextHop && inNextHopIM == hs.im && inNextHopIS == hs.is
                   && inNextHopS == hs.s && inNextHopLOC == hs.loc)
@@ -224,32 +243,41 @@ main(int argc, char *argv[])
                 }
               if (!inNextHop && runStepN > 0)
                 {
-                  int instruction, op, a9, a81, dataFromInstructionMemory, instructiond;
+                  int instruction, op, a9, a81, dataFromInstructionMemory,
+                      instructiond;
                   hopStructure_t hsd;
                   int32_t destHopConstant;
-                  // What we have to do now, if the current instruction is a HOP,
-                  // is to analyze it to determine if it's a subroutine.  We do
+                  // What we have to do now, if the current instruction is a transfer
+                  // instruction (HOP, TRA, TNZ, or TMI), is to analyze it to
+                  // determine if the target destination is a subroutine.  We do
                   // that by detecting STO 776 or STO 776 at the target destination
-                  // of the HOP.  If so, then we mark ourselves as being inNextHop
+                  // of the transfer.  If so, then we mark ourselves as being inNextHop
                   // and set a poor-man's breakpoint to detect the eventual return.
-                  // If not, though, we can just treat the HOP instructin like any
+                  // If not, though, we can just treat the transfer instruction like any
                   // other, for NEXT purposes.
                   instruction = state.core[hs.im][hs.is][hs.s][hs.loc];
                   if (instruction == -1)
                     goto badNext;
                   op = instruction & 017;
-                  if (op == 0) // Is indeed a HOP instruction.
+                  if (op == 000 || op == 010 || op == 004 || op == 014) // Is indeed a HOP, TRA, TNZ, or TMI instruction.
                     {
-                      // Fetch the HOP constant pointed to by the instruction's operand.
                       a9 = (instruction >> 4) & 1;
                       a81 = (instruction >> 5) & 0377;
-                      if (fetchData(hs.dm, a9, hs.ds, a81, &destHopConstant,
-                          &dataFromInstructionMemory))
-                        goto badNext;
-                       // Now fetch the first instruction from the destination of the HOP.
-                      if (parseHopConstant(destHopConstant, &hsd))
-                        goto badNext;
-                      instructiond = state.core[hsd.im][hsd.is][hsd.s][hsd.loc];
+                      if (op == 000) // HOP
+                        {
+                          // Fetch the HOP constant pointed to by the instruction's operand.
+                          if (fetchData(hs.dm, a9, hs.ds, a81, &destHopConstant,
+                              &dataFromInstructionMemory))
+                            goto badNext;
+                          // Now fetch the first instruction from the destination of the HOP.
+                          if (parseHopConstant(destHopConstant, &hsd))
+                            goto badNext;
+                          instructiond =
+                              state.core[hsd.im][hsd.is][hsd.s][hsd.loc];
+                        }
+                      else
+                        // TRA, TNZ, or TMI
+                        instructiond = state.core[hs.im][hs.is][a9][a81];
                       if (instructiond == -1)
                         goto badNext;
                       // Is the destination instruction a STO 776 or STO 777?
@@ -295,9 +323,7 @@ main(int argc, char *argv[])
               cycleCount += cyclesUsed;
               instructionCount++;
             }
-          if (processPIO() || processCIO() || processPRS())
-            goto done;
-          if (processInterrupts())
+          if (processInterruptsAndIO())
             goto done;
           if (runStepN > 0) // Number of instructions remaining.
             {
@@ -324,7 +350,5 @@ main(int argc, char *argv[])
 
   retVal = 0;
   done: ;
-  for (i = 0; i < numErrorMessages; i++)
-    fprintf(stderr, "%s\n", errorMessageStack[i]);
   return (retVal);
 }
