@@ -57,6 +57,7 @@ static char helpMessage[] = "Usage:\n"
 char *coreFilename = "yaLVDC.core";
 int ptc = 0;
 int coldStart = 0;
+int runStepN = 0;
 int runNextN = 0;
 
 // Parse a set of command-line arguments and set global variables based
@@ -85,7 +86,7 @@ parseCommandLineArguments (int argc, char *argv[])
       else if (!strcmp (argv[i], "--cold-start"))
         coldStart = 1;
       else if (!strcmp (argv[i], "--run"))
-        runNextN = INT_MAX;
+        runStepN = INT_MAX;
       else if (!strcmp (argv[i], "--help"))
 	goto help;
       else

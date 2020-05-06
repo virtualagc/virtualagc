@@ -151,7 +151,7 @@ fetchData(int module, int residual, int sector, int loc, int *data,
           //pushErrorMessage("Fetching data from empty location", NULL);
           printf("Fetching data from empty location %o-%02o-%03o\n", module,
               sector, loc);
-          runNextN = 0;
+          runStepN = 0;
           goto done;
         }
       *data = (fetch1 << 13) + fetch0;
@@ -312,14 +312,14 @@ runOneInstruction(int *cyclesUsed)
         {
           printf("Cannot interpret current instruction address (HOP=%09o)\n",
               state.hop);
-          runNextN = 0;
+          runStepN = 0;
           goto done;
         }
       if (parseHopConstant(state.pendingEXM.nextHop, &rawHopStructure))
         {
           printf("Cannot interpret next instruction address (HOP=%09o)\n",
               state.pendingEXM.nextHop);
-          runNextN = 0;
+          runStepN = 0;
           goto done;
         }
       nextLOC = rawHopStructure.loc;
@@ -335,7 +335,7 @@ runOneInstruction(int *cyclesUsed)
           //pushErrorMessage("Cannot interpret current instruction address", NULL);
           printf("Cannot interpret current instruction address (HOP=%09o)\n",
               state.hop);
-          runNextN = 0;
+          runStepN = 0;
           goto done;
         }
       memcpy(&rawHopStructure, &hopStructure, sizeof(hopStructure_t));
@@ -373,7 +373,7 @@ runOneInstruction(int *cyclesUsed)
         {
           //pushErrorMessage("HOP to empty location", NULL);
           printf("HOP to empty location\n");
-          runNextN = 0;
+          runStepN = 0;
           goto done;
         }
 #ifdef DEBUG_A_LOT
@@ -751,7 +751,7 @@ runOneInstruction(int *cyclesUsed)
     {
       //pushErrorMessage("Implementation error", NULL);
       printf("Implementation error\n");
-      runNextN = 0;
+      runStepN = 0;
       goto done;
     }
 

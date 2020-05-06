@@ -125,21 +125,34 @@ main(int argc, char *argv[])
   int i;
   clock_t startingTime, currentTime, pausedTime = 0;
   double cyclesPerTick;
-  unsigned long cycleCount = 0;
+  unsigned long cycleCount = 0, nextSnapshot, snapshotIntervalCycles = 5.0
+      / SECONDS_PER_CYCLE;
   struct tms TmsStruct;
   unsigned long instructionCount = 0;
 
   // Setup and initialization.
   if (parseCommandLineArguments(argc, argv))
     goto done;
+
+  if (0)
+    {
+      restart: ;
+      runStepN = 0;
+      inNextNotStep = 0;
+      inNextHop = 0;
+      pausedTime = 0;
+      cycleCount = 0;
+      instructionCount = 0;
+    }
+  nextSnapshot = cycleCount + snapshotIntervalCycles;
+
   // Note that readCore() must occur after readAssemblies(), since if present,
   // the core-memory file overrides the core-memory image from the assembler.
   if (readAssemblies())
     goto done;
   if (coldStart == 0)
     if (readCore())
-      goto done;
-  dPrintouts(); // Some optional printouts for debugging.
+      goto done; dPrintouts(); // Some optional printouts for debugging.
   fflush(stdout);
   state.returnAddress = -1;
 
@@ -155,6 +168,14 @@ main(int argc, char *argv[])
     {
       unsigned long targetCycles;
       hopStructure_t hs;
+
+      // Save a snapshot, if appropriate.
+      if (cycleCount >= nextSnapshot)
+        {
+          nextSnapshot += snapshotIntervalCycles;
+          printf("Saving emulation snapshot.\n");
+          writeCore();
+        }
 
       // The emulator emulates LVDC/PTC instructions just as fast as it can,
       // until it catches up with real time in terms of the number of instructions
@@ -173,23 +194,101 @@ main(int argc, char *argv[])
           if (!parseHopConstant(state.hop, &hs))
             {
               int i;
-              for (i = 0, breakpoint=breakpoints; i < numBreakpoints; i++, breakpoint++)
-                if (breakpoint->module == hs.im && breakpoint->sector == hs.is && breakpoint->syllable == hs.s && breakpoint->location == hs.loc)
+              // Note that the search is made from the end of the breakpoint list
+              // downward:  i.e., the most-recently added breakpoint is found if
+              // there are two breakpoints at the same address.  I thought this would
+              // be helpful for something I ended up not using it for.
+              for (i = 0, breakpoint = &breakpoints[numBreakpoints - 1];
+                  i < numBreakpoints; i++, breakpoint--)
+                if (breakpoint->module == hs.im && breakpoint->sector == hs.is
+                    && breakpoint->syllable == hs.s
+                    && breakpoint->location == hs.loc)
                   {
-                    runNextN = 0;
+                    runStepN = 0;
                     break;
                   }
               if (i >= numBreakpoints)
                 breakpoint = NULL;
             }
-          if (runNextN <= 0)
+          // Doing NEXT?
+          if (runStepN > 0 && inNextNotStep)
+            {
+              entryNext:;
+              // If we've just returned after a HOP subroutine in a NEXT,
+              // detect our poor-man's breakpoint and clean up.
+              if (inNextHop && inNextHopIM == hs.im && inNextHopIS == hs.is
+                  && inNextHopS == hs.s && inNextHopLOC == hs.loc)
+                {
+                  inNextHop = 0;
+                  runStepN--; // Wasn't decremented after last instruction because of inNextHop.
+                }
+              if (!inNextHop && runStepN > 0)
+                {
+                  int instruction, op, a9, a81, dataFromInstructionMemory, instructiond;
+                  hopStructure_t hsd;
+                  int32_t destHopConstant;
+                  // What we have to do now, if the current instruction is a HOP,
+                  // is to analyze it to determine if it's a subroutine.  We do
+                  // that by detecting STO 776 or STO 776 at the target destination
+                  // of the HOP.  If so, then we mark ourselves as being inNextHop
+                  // and set a poor-man's breakpoint to detect the eventual return.
+                  // If not, though, we can just treat the HOP instructin like any
+                  // other, for NEXT purposes.
+                  instruction = state.core[hs.im][hs.is][hs.s][hs.loc];
+                  if (instruction == -1)
+                    goto badNext;
+                  op = instruction & 017;
+                  if (op == 0) // Is indeed a HOP instruction.
+                    {
+                      // Fetch the HOP constant pointed to by the instruction's operand.
+                      a9 = (instruction >> 4) & 1;
+                      a81 = (instruction >> 5) & 0377;
+                      if (fetchData(hs.dm, a9, hs.ds, a81, &destHopConstant,
+                          &dataFromInstructionMemory))
+                        goto badNext;
+                       // Now fetch the first instruction from the destination of the HOP.
+                      if (parseHopConstant(destHopConstant, &hsd))
+                        goto badNext;
+                      instructiond = state.core[hsd.im][hsd.is][hsd.s][hsd.loc];
+                      if (instructiond == -1)
+                        goto badNext;
+                      // Is the destination instruction a STO 776 or STO 777?
+                      if (instructiond == 017733 || instructiond == 017773)
+                        {
+                          // Yes!  Set up our poor-man's breakpoint for the
+                          // instruction immediately following the HOP.
+                          inNextHop = 1;
+                          inNextHopIM = hs.im;
+                          inNextHopIS = hs.is;
+                          inNextHopS = hs.s;
+                          inNextHopLOC = hs.loc + 1;
+                        }
+                    }
+                }
+              if (0)
+                {
+                  badNext: ;
+                  printf("Failed to fetch or analyze instruction.\n");
+                  runStepN = 0;
+                }
+            }
+          if (runStepN <= 0)
             {
               clock_t start, end;
+              inNextNotStep = 0;
+              inNextHop = 0;
               start = times(&TmsStruct);
               if (gdbInterface(instructionCount, cycleCount, breakpoint))
                 goto done;
               end = times(&TmsStruct);
               pausedTime += (end - start);
+              // If we selected NEXT, it would normally be fine to just
+              // fall through right here, but if the current instruction
+              // is a HOP to a subroutine, we'd have no way to detect that,
+              // so we have to spaghetti our way to the analysis code for
+              // detecting that special case.
+              if (runStepN > 0 && inNextNotStep)
+                goto entryNext;
             }
           if (!runOneInstruction(&cyclesUsed))
             {
@@ -200,18 +299,20 @@ main(int argc, char *argv[])
             goto done;
           if (processInterrupts())
             goto done;
-          if (runNextN > 0) // Number of instructions remaining.
+          if (runStepN > 0) // Number of instructions remaining.
             {
               // If a key hit at the keyboard, pause the emulation.
               // Otherwise, update counters.
               if (kbhit())
                 {
-                  runNextN = 0;
+                  runStepN = 0;
                   getchar(); // Eliminate the keypress.
                 }
-              else
-                runNextN--;
+              else if (runStepN != INT_MAX && !inNextHop)
+                runStepN--;
             }
+          if (state.restart)
+            goto restart;
         }
 
       // Sleep for a little to avoid hogging 100% CPU time.  The amount

@@ -134,6 +134,7 @@ parseCommand(void)
 enum commandTokens
 {
   ctSTEP,
+  ctNEXT,
   ctDELETE,
   ctCONTINUE,
   ctLIST,
@@ -143,7 +144,6 @@ enum commandTokens
   ctTBREAK,
   ctINFO,
   ctRUN,
-  ctKILL,
   ctQUIT,
   ctSET,
   ctSHOW,
@@ -154,36 +154,41 @@ typedef struct
 {
   enum commandTokens token;
   const char *string;
-  const char *helpstring;
+  const char *syntax;
+  const char *description;
 } commandAssociation_t;
 commandAssociation_t commandAssociations[] =
   {
-    { ctSTEP, "STEPI", "STEPI [n]\t\tStep n instructions, default n=1." },
-    { ctDELETE, "DELETE", "DELETE\t\t\tDelete all breakpoints." },
-    { ctDELETE, "DELETE", "DELETE n\t\tDelete breakpoint n." },
-    { ctCONTINUE, "CONTINUE", "CONTINUE\t\tContinue running emulation." },
-    { ctLIST, "LIST", "LIST\t\t\tList following block of source code." },
-    { ctLIST, "LIST", "LIST -\t\t\tList preceding block source code." },
-    { ctLIST, "LIST", "LIST [asm:]n\t\tList source block at line #n." },
-    { ctLIST, "LIST", "LIST [asm:]name\t\tList source block at function." },
-    { ctX, "X", "X[/[n][b|d|o]] address\tShow n words at address." },
-    { ctX, "X", "X[/[n][b|d|o]] &[asm:]name\tShow n words at name." },
-    { ctCLEAR, "CLEAR", "CLEAR [asm:]name\tDelete breakpoint at function." },
-    { ctCLEAR, "CLEAR", "CLEAR [asm:]number\tDelete breakpoint at line #." },
-    { ctCLEAR, "CLEAR", "CLEAR *address\t\tDelete breakpoint at address." },
-    { ctBREAK, "BREAK", "BREAK [asm:]name\tSet breakpoint at function." },
-    { ctBREAK, "BREAK", "BREAK [asm:]number\tSet breakpoint at line #." },
-    { ctBREAK, "BREAK", "BREAK *address\t\tSet breakpoint at address." },
-    { ctTBREAK, "TBREAK", "TBREAK ...\t\tSame as BREAK, but temporary." },
-    { ctINFO, "INFO", "INFO ASSEMBLIES\t\tList all loaded assemblies." },
-    { ctINFO, "INFO", "INFO BREAKPOINTS\tList all breakpoints." },
-    { ctINFO, "INFO", "INFO BREAK\t\tList all breakpoint numbers." },
-    { ctRUN, "RUN", "RUN\t\t\tRun the LVDC/PTC program from beginning." },
-    { ctKILL, "KILL", "KILL\t\t\tEnd the LVDC/PTC program emulation." },
-    { ctQUIT, "QUIT", "QUIT\t\t\tQuit the LVDC/PTC emulator." },
-    { ctSET, "SET", "SET LISTSIZE n\t\tSets default size used for LIST." },
-    { ctSHOW, "SHOW", "SHOW LISTSIZE\t\tShow current size for LIST." },
-    { ctHELP, "HELP", "HELP\t\t\tPrint this list of commands." },
+    { ctSTEP, "STEPI", "STEPI [n]", "Step n instructions, default n=1." },
+    { ctSTEP, "STEPI", "SI [n]", "Step n instructions, default n=1." },
+    { ctNEXT, "NEXTI", "NEXTI [n]", "Next n instructions, w/o entry." },
+    { ctNEXT, "NEXTI", "NI [n]", "Next n instructions, w/o entry." },
+    { ctDELETE, "DELETE", "DELETE", "Delete all breakpoints." },
+    { ctDELETE, "DELETE", "DELETE n", "Delete breakpoint n." },
+    { ctCONTINUE, "CONTINUE", "CONTINUE", "Continue running emulation." },
+    { ctLIST, "LIST", "LIST", "List following block of source code." },
+    { ctLIST, "LIST", "LIST -", "List preceding block source code." },
+    { ctLIST, "LIST", "LIST [asm:]n", "List source block at line #n." },
+    { ctLIST, "LIST", "LIST [asm:]name", "List source block at function." },
+    { ctX, "X", "X[/[n][b|d|o]] address", "Show n words at address." },
+    { ctX, "X", "X[/[n][b|d|o]] &[asm:]name", "Show n words at name." },
+    { ctCLEAR, "CLEAR", "CLEAR [asm:]name", "Delete breakpoint at function." },
+    { ctCLEAR, "CLEAR", "CLEAR [asm:]number", "Delete breakpoint at line #." },
+    { ctCLEAR, "CLEAR", "CLEAR *address", "Delete breakpoint at address." },
+    { ctBREAK, "BREAK", "BREAK [asm:]name", "Set breakpoint at function." },
+    { ctBREAK, "BREAK", "BREAK [asm:]number", "Set breakpoint at line #." },
+    { ctBREAK, "BREAK", "BREAK *address", "Set breakpoint at address." },
+    { ctTBREAK, "TBREAK", "TBREAK ...", "Same as BREAK, but temporary." },
+    { ctINFO, "INFO", "INFO ASSEMBLIES", "List all loaded assemblies." },
+    { ctINFO, "INFO", "INFO BREAKPOINTS", "List all breakpoints." },
+    { ctINFO, "INFO", "INFO BREAK", "List all breakpoint numbers." },
+    { ctRUN, "RUN", "RUN", "Reboot the LVDC/PTC emulation." },
+    { ctQUIT, "QUIT", "QUIT", "Quit the LVDC/PTC emulator." },
+    { ctSET, "SET", "SET LISTSIZE n", "Sets default size used for LIST." },
+    { ctSET, "SET", "SET name = n", "Store value n in variable name." },
+    { ctSET, "SET", "SET *address = n", "Store value n at memory address." },
+    { ctSHOW, "SHOW", "SHOW LISTSIZE", "Show current size for LIST." },
+    { ctHELP, "HELP", "HELP", "Print this list of commands." },
     { ctNone, "" } };
 enum commandTokens
 findCommandToken(void)
@@ -484,9 +489,9 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
   // runNextN is a global variable telling the LVDC/PTC instruction emulator
   // how many instructions to emulate (-1 is unlimited) before pausing next,
   // so obviously we accept user commands until this becomes non-zero.
-  while (runNextN <= 0)
+  while (runStepN <= 0)
     {
-      int i, found = 0;
+      int i, j, found = 0;
       enum commandTokens commandToken;
       assembly_t *assembly;
 
@@ -589,34 +594,68 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         {
       case ctHELP:
         lastLine[0] = 0;
+        for (i = j = 0; commandAssociations[i].token != ctNone; i++)
+          if (strlen(commandAssociations[i].syntax) > j)
+            j = strlen(commandAssociations[i].syntax);
         printf("\nAvailable commands:\n");
         for (i = 0; commandAssociations[i].token != ctNone; i++)
-          printf("\t%s\n", commandAssociations[i].helpstring);
-        printf("Notes:\n");
-        printf("1. Commands are not case sensitive.\n");
-        printf("2. Command abbreviations (like S for STEP) are accepted.\n");
-        printf("3. An empty command repeats previous command in some cases.\n");
-        printf("4. Addresses have the following formats:\n");
-        printf("   * Code memory:  M-SS-Y-LLL, where M is the memory module\n");
-        printf(
-            "     (0-7), SS is the sector (00-17 octal), Y is the syllable\n");
-        printf("     (0 or 1), and LLL is the offset within the sector\n");
-        printf("     (000-377 octal).\n");
-        printf("   * Data memory:  M-SS-LLL, where M is the memory module\n");
-        printf("     (0-7), SS is the sector (00-17 octal), and LLL is the\n");
-        printf("     offset within the sector (000-377 octal).\n");
-        printf("   * PIO port:  PIO-LLL, where LLL is the port number\n");
-        printf("     (000-377 octal).\n");
-        printf("   * CIO port:  CIO-LLL, where LLL is the port number\n");
-        printf("     (000-777 octal).\n");
-        printf("5. Source line numbers (decimal) come from the input .src\n");
-        printf("   file, not from the original .lvdc source-code file.\n");
-        printf("6. A free-running emulation can be paused by hitting any\n");
-        printf("   key on the keyboard.\n");
-        printf("7. If optional assembly names ([asm:]) are omitted, then\n");
-        printf("   all loaded assemblies are searched, even though naming\n");
-        printf("   conflicts may occur.  Only the first match encountered\n");
-        printf("   is affected by the command.\n");
+          printf("  %-*s   %s\n", j, commandAssociations[i].syntax,
+              commandAssociations[i].description);
+        printf("\nNotes:\n");
+        printf(" 1. Commands are not case sensitive.\n");
+        printf(" 2. Command abbreviations (like S for STEP) are accepted.\n");
+        printf(" 3. An empty command sometimes repeats previous command.\n");
+        printf(" 4. Addresses have the following formats:\n");
+        printf("    * Code memory:  M-SS-Y-LLL, where M is memory module\n");
+        printf("      (0-7), SS is sector (00-17 octal), Y is syllable\n");
+        printf("      (0 or 1), and LLL is offset within the sector\n");
+        printf("      (000-377 octal).\n");
+        printf("    * Data memory:  M-SS-LLL, where M is the memory module\n");
+        printf("      (0-7), SS is the sector (00-17 octal), and LLL is the\n");
+        printf("      offset within the sector (000-377 octal).\n");
+        printf("    * PIO port:  PIO-LLL, where LLL is the port number\n");
+        printf("      (000-377 octal).\n");
+        printf("    * CIO port:  CIO-LLL, where LLL is the port number\n");
+        printf("      (000-777 octal).\n");
+        printf(" 5. Source line numbers (decimal) come from the input .src\n");
+        printf("    file, not from the original .lvdc source-code file.\n");
+        printf(" 6. A free-running emulation can be paused by hitting any\n");
+        printf("    key on the keyboard.\n");
+        printf(" 7. If optional assembly names ([asm:]) are omitted, then\n");
+        printf("    all loaded assemblies are searched, even though naming\n");
+        printf("    conflicts may occur.  Only the first match encountered\n");
+        printf("    is affected by the command.\n");
+        printf(" 8. For commands like \"SET ... = n\", the number n is hex\n");
+        printf("    if it has leading 0x, octal if it merely has leading\n");
+        printf("    0, and decimal otherwise.\n");
+        goto nextCommand;
+      case ctRUN:
+        if (coldStart)
+          {
+            printf("Because the --cold-start command-line switch was used,\n");
+            printf("this will restore the emulation to a clean start state,\n");
+            printf("including all registers, memory, i/o ports, and so on.\n");
+          }
+        else
+          {
+            printf("Because the --cold-start command-line switch was not\n");
+            printf("used, this will restore the state of the emulation from\n");
+            printf("the most-recently created snapshot file (yaLVDC.core).\n");
+            printf("If your desire is instead to have a completely clean\n");
+            printf("startup, exit yaLVDC and rerun it with --cold-start.\n");
+            printf("Or, manually delete the core file before proceeding.\n");
+          }
+        printf("Are you sure?  Input Y to proceed, anything else to cancel: ");
+        fgets(lineBuffer, sizeof(lineBuffer), stdin);
+        if (lineBuffer[0] == 'Y')
+          {
+            state.restart = 1;
+            printf("Restoring state, restarting emulation.\n");
+            retVal = 0;
+            goto done;
+          }
+        else
+          printf("Canceled.\n");
         goto nextCommand;
       case ctX:
         if (count == 2 || (count >= 3 && fields[1][0] == '/'))
@@ -670,6 +709,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                         at = atData;
                         module = symbol->module;
                         sector = symbol->sector;
+                        syllable = 2;
                         location = symbol->loc;
                       }
                   }
@@ -732,8 +772,208 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
           }
         goto nextCommand;
       case ctSET:
-        if (count >= 3 && !strcasecmp(fields[1], "listsize"))
-          listSize = atoi(fields[2]);
+        {
+          int assignment = 0;
+          if (count > 1)
+            {
+              if (!strcasecmp(fields[1], "variable") || fields[1][0] == '*')
+                assignment = 1;
+              else if (isalpha(fields[1][0])
+                  && (strstr(fields[1], "=") != NULL
+                      || (count > 2 && strstr(fields[2], "=") != NULL)))
+                assignment = 1;
+            }
+          if (count >= 3 && !strcasecmp(fields[1], "listsize"))
+            listSize = atoi(fields[2]);
+          else if (assignment)
+            {
+              // At this point, we know that the command can't be anything _other_
+              // than an assignment of a value to a variable or a memory location,
+              // but we don't know that is actually valid wither in format or data.
+              int start = 1, intValue, overflow, conflict = 0;
+              char *equal, *destination, *value, *format, dummy[256];
+              int module, sector, syllable, location;
+              int32_t *destinationPointer;
+              enum addressType_t at;
+              if (!strcasecmp(fields[start], "variable")) // fields[1] literally "variable".
+                start++; // ... so the assignment begins at fields[2].
+              if (start >= count)
+                goto badSetCommand;
+              // Because we don't know whether/how the '=' is surrounded by spaces,
+              // nor even that the '=' is present, the value and the destination for
+              // the assignment may be spread out over fields[start], fields[start+1],
+              // and fields[start+2].  Consequently, we to do some parsing to find
+              // the fields we need and verify the format.
+              destination = fields[start];
+              equal = strstr(fields[start], "=");
+              if (equal != NULL) // fields[start] includes the "=".
+                {
+                  *equal = 0;
+                  if (equal[1] != 0)
+                    value = equal + 1;
+                  else
+                    value = fields[start + 1];
+                }
+              else if (fields[start + 1][0] != '=')
+                goto badSetCommand;
+              else
+                {
+                  if (fields[start + 1][1] != 0)
+                    value = &fields[start + 1][1];
+                  else if (start + 2 >= count)
+                    goto badSetCommand;
+                  else
+                    value = fields[start + 2];
+                }
+              // The strings named "destination" and "value" are now set.
+              // Parse the value to determine its format, and convert it
+              // to an integer.
+              if (!strncasecmp(value, "0x", 2))
+                {
+                  value += 2;
+                  format = "%x%s";
+                }
+              else if (value[0] == '0')
+                format = "%o%s";
+              else
+                format = "%d%s";
+              if (1 != sscanf(value, format, &intValue, dummy))
+                goto badSetCommand;
+
+              // Determine the address at which to store the value.
+              at = atNone;
+              if (destination[0] == '*')
+                {
+                  at = parseInputAddress(destination + 1, &module, &sector,
+                      &syllable, &location);
+                }
+              else
+                {
+                  symbol_t *symbol;
+                  symbol = findSymbol(destination, 0);
+                  if (symbol != NULL)
+                    {
+                      at = atData;
+                      module = symbol->module;
+                      sector = symbol->sector;
+                      syllable = 2;
+                      location = symbol->loc;
+                    }
+                  else
+                    {
+                      symbol = findSymbol(destination, 1);
+                      if (symbol != NULL)
+                        {
+                          at = atCode;
+                          module = symbol->module;
+                          sector = symbol->sector;
+                          syllable = symbol->syllable;
+                          location = symbol->loc;
+                        }
+                    }
+                }
+              if (at == atNone)
+                goto badSetCommand;
+              // Range checks.
+              if (at == atCode || at == atData)
+                if ((ptc && module > 1) || module < 0 || module > 7
+                    || sector < 0 || sector > 017 || syllable < 0
+                    || syllable > 2 || location < 0 || location > 0377)
+                  {
+                    printf("Code or data memory address out of range.\n");
+                    goto badSetCommand;
+                  }
+              if (at == atPio && (location < 0 || location > 0377))
+                {
+                  printf("PIO port out of range.\n");
+                  goto badSetCommand;
+                }
+              if (at == atCio && (location < 0 || location > 0777))
+                {
+                  printf("CIO port out of range.\n");
+                  goto badSetCommand;
+                }
+              if (at == atCode)
+                {
+                  overflow = intValue & ~017777;
+                  if (overflow != 0)
+                    {
+                      printf("Value out of range.\n");
+                      goto badSetCommand;
+                    }
+                }
+              else
+                {
+                  overflow = intValue & ~0377777777;
+                  if (overflow != 0 && overflow != ~0377777777)
+                    {
+                      printf("Value out of range.\n");
+                      goto badSetCommand;
+                    }
+                  intValue &= 0377777777;
+                }
+              // Sanity clause.
+              conflict = 0;
+              switch (at)
+                {
+              case atCode:
+                printf(
+                    "Note that the destination address is in code memory.\n");
+                destinationPointer =
+                    &state.core[module][sector][syllable][location];
+                if (state.core[module][sector][2][location] != -1)
+                  {
+                    conflict = 1;
+                    printf(
+                        "Note that this will conflict with data memory contents.\n");
+                  }
+                break;
+              case atData:
+                destinationPointer = &state.core[module][sector][2][location];
+                if (state.core[module][sector][0][location] != -1
+                    || state.core[module][sector][1][location] != -1)
+                  {
+                    conflict = 1;
+                    printf(
+                        "Note that this will conflict with code memory contents.\n");
+                  }
+                break;
+              case atPio:
+                destinationPointer = &state.pio[location];
+                break;
+              case atCio:
+                destinationPointer = &state.cio[location];
+                break;
+              default:
+                break;
+                }
+              if (conflict || at == atCode)
+                {
+                  printf(
+                      "Are you sure? Input Y to continue, anything else to cancel: ");
+                  fgets(lineBuffer, sizeof(lineBuffer), stdin);
+                  if (lineBuffer[0] != 'Y')
+                    {
+                      printf("Canceled!\n");
+                      goto nextCommand;
+                    }
+                }
+              // Perform the assignment.
+              if (*destinationPointer == -1)
+                printf("Overwriting empty location with %09o.\n", intValue);
+              else
+                printf("Overwriting value %09o with %09o.\n",
+                    *destinationPointer, intValue);
+              *destinationPointer = intValue;
+            }
+          else
+            printf("Unrecognized SET command.\n");
+        }
+        if (0)
+          {
+            badSetCommand: ;
+            printf("Illegal SET command.\n");
+          }
         goto nextCommand;
       case ctSHOW:
         if (count >= 2 && !strcasecmp(fields[1], "listsize"))
@@ -784,21 +1024,21 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
             printf("Unrecognized command.\n");
         }
         goto nextCommand;
-      case ctKILL:
-        lastLine[0] = 0;
-        goto nextCommand;
       case ctQUIT:
         lastLine[0] = 0;
         goto done;
+      case ctNEXT:
       case ctSTEP:
+        inNextNotStep = (commandToken == ctNEXT);
+        inNextHop = 0;
         if (count == 1)
-          runNextN = 1;
+          runStepN = 1;
         else
-          runNextN = atoi(fields[1]);
+          runStepN = atoi(fields[1]);
         strcpy(lastLine, lineBuffer);
         break;
       case ctCONTINUE:
-        runNextN = INT_MAX;
+        runStepN = INT_MAX;
         strcpy(lastLine, lineBuffer);
         break;
       case ctINFO:

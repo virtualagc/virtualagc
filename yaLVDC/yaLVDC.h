@@ -64,8 +64,9 @@ dPrintouts (void);
 
 // See yaLVDC.c
 #define MAX_SYMBOL_LENGTH 10
-typedef struct {
-  int temporary; // 1=temporary, 0=permanent.
+typedef struct
+{
+  int temporary; // 0=permanent, 1=temporary.
   int module;
   int sector;
   int syllable;
@@ -82,7 +83,9 @@ int numBreakpoints;
 char *coreFilename;
 int ptc;
 int coldStart;
-int runNextN; // # of LVDC/PTC instructions left to run until pausing. INT_MAX is unlimited.
+int runStepN; // # of emulation steps left to run until pausing. INT_MAX is unlimited.
+int inNextNotStep, inNextHop, inNextHopIM, inNextHopIS, inNextHopS, inNextHopLOC;
+
 int
 parseCommandLineArguments(int argc, char *argv[]);
 
@@ -92,7 +95,9 @@ parseCommandLineArguments(int argc, char *argv[]);
 // cycle, because the emulator will periodically write it out to a persistence
 // file that will be reread at startup.  So if there's non-persistent state
 // stuff, it needs to be handled using some other mechanism than state_t.
-typedef struct {
+typedef struct
+{
+  int restart;
   int32_t hop;
   int32_t acc;
   int32_t pq;
@@ -101,7 +106,8 @@ typedef struct {
   int32_t pio[512];
   int32_t cio[01000]; // PTC only.
   int32_t prs; // PTC only.
-  struct {
+  struct
+  {
     int pending; // True or False, if last instruction was EXM or not.
     int32_t nextHop; // HOP constant for next instruction (as if no pending EXM-modified instruction).
     int32_t pendingHop; // HOP constant for the pending EXM-modified instruction.
@@ -119,14 +125,16 @@ typedef struct {
   int prsChange;
 } state_t;
 state_t state;
-typedef struct {
+typedef struct
+{
   char name[MAX_SYMBOL_LENGTH];
   uint8_t module;
   uint8_t sector;
   uint8_t syllable; // 0,1 instructions, 2 data.
   uint8_t loc;
 } symbol_t;
-typedef struct {
+typedef struct
+{
   char *line;
   uint8_t module;
   uint8_t sector;
@@ -135,7 +143,8 @@ typedef struct {
   int lineNumber;
 } sourceLine_t;
 #define MAX_ASSEMBLIES 16
-typedef struct {
+typedef struct
+{
   char *name;
   symbol_t *symbols;
   int numSymbols;
@@ -150,25 +159,26 @@ int freezeAssemblies;
 int
 readAssemblies(void);
 int
-cmpSourceByAddress (const void *r1, const void *r2);
+cmpSourceByAddress(const void *r1, const void *r2);
 int
-cmpSymbolsByAddress (const void *r1, const void *r2);
+cmpSymbolsByAddress(const void *r1, const void *r2);
 
 // See pushErrorMessage.c
 #define MAX_ERROR_MESSAGES 32
 char *errorMessageStack[MAX_ERROR_MESSAGES];
 int numErrorMessages;
 int
-pushErrorMessage (char *part1, char *part2);
+pushErrorMessage(char *part1, char *part2);
 
 // See readWriteCore.c
 int
-readCore (void);
+readCore(void);
 int
-writeCore (void);
+writeCore(void);
 
 // See runOneInstruction.c
-typedef struct {
+typedef struct
+{
   uint8_t im;
   uint8_t is;
   uint8_t s;
@@ -182,21 +192,22 @@ int instructionFromDataMemory;
 int dataFromInstructionMemory;
 int dataOverwritesInstructionMemory;
 int
-runOneInstruction (int *cyclesUsed);
+runOneInstruction(int *cyclesUsed);
 int
-parseHopConstant (int hopConstant, hopStructure_t *hopStructure);
+parseHopConstant(int hopConstant, hopStructure_t *hopStructure);
 int
-formHopConstant (hopStructure_t *hopStructure, int *hopConstant);
+formHopConstant(hopStructure_t *hopStructure, int *hopConstant);
 int
-fetchData (int module, int residual, int sector, int loc, int32_t *data,
-	   int *dataFromInstructionMemory);
+fetchData(int module, int residual, int sector, int loc, int32_t *data,
+    int *dataFromInstructionMemory);
 int
-storeData (int module, int residual, int sector, int loc, int32_t data,
-	   int *dataOverwritesInstructionMemory);
+storeData(int module, int residual, int sector, int loc, int32_t data,
+    int *dataOverwritesInstructionMemory);
 
 // See gdbInterface.c
 int
-gdbInterface (unsigned long instructionCount, unsigned long cycleCount, breakpoint_t *breakpoint);
+gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
+    breakpoint_t *breakpoint);
 
 // See processPIO.c
 int
