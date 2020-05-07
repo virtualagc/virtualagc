@@ -143,6 +143,14 @@ main(int argc, char *argv[])
   if (parseCommandLineArguments(argc, argv))
     goto done;
 
+  ServerBaseSocket = EstablishSocket(PortNum, MAX_LISTENERS);
+  if (ServerBaseSocket == -1)
+    {
+      printf("Cannot establish networking socket for virtual wiring.\n");
+      goto done;
+    }
+  connectCheck();
+
   if (0)
     {
       restart: ;
@@ -154,14 +162,6 @@ main(int argc, char *argv[])
       instructionCount = 0;
     }
   nextSnapshot = cycleCount + snapshotIntervalCycles;
-
-  ServerBaseSocket = EstablishSocket(PortNum, MAX_LISTENERS);
-  if (ServerBaseSocket == -1)
-    {
-      printf("Cannot establish networking socket for virtual wiring.\n");
-      goto done;
-    }
-  connectCheck();
 
   // Note that readCore() must occur after readAssemblies(), since if present,
   // the core-memory file overrides the core-memory image from the assembler.

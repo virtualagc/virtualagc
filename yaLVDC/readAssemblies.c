@@ -678,6 +678,9 @@ readAssemblies(void)
       for (k = 0; k < 3; k++)
         for (n = 0; n < 256; n++)
           state.core[i][j][k][n] = -1;
+  state.pioChange = -1;
+  state.cioChange = -1;
+  state.prsChange = -1;
 
   for (i = 0, assembly = assemblies; i < numAssemblies; i++, assembly++)
     {

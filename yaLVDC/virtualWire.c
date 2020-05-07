@@ -45,6 +45,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 #else
 #include <windows.h>
 #include <winsock2.h>
@@ -73,7 +74,7 @@
  * the data packet will be invalid.
  *
  * Each packet consists
- * of 5 data bytes, formatted as follows:
+ * of 6 data bytes, formatted as follows:
  *
  *  1st byte:   D7      1
  *              D6      1 if the message is a mask, 0 if it's data.
@@ -81,45 +82,79 @@
  *                                      001     CIO
  *                                      010     PRS
  *                                      011     Interrupt
- *                                      1XX     (reserved)
+ *                                      100     (reserved)
+ *                                      101     (reserved)
+ *                                      110     (reserved)
+ *                                      111     PING
  *              D2-D0   Unique Source ID.  (000 is the server; i.e., the CPU.)
  *                      The port numbers used are the base port number plus
  *                      the ID.  Thus if the server were port number 19653,
  *                      then ID=1 would be port 19694, ... , ID=7 would be
  *                      port 19660.
+ *              Note that if all fields are 0xFF, it could be used as
+ *              a harmless 1-byte PING message.  I don't know why I'd
+ *              want to use that, necessarily, but at least I'm allowing
+ *              for it.
  *
  *   2nd byte   D7      0
- *              D6      (reserved)
- *              D5      (reserved)
- *              D4-D0   Most-significant 5 bits of the 26-bit data/mask
+ *              D6-D0   Least-significant 7 bits of the channel number
  *
  *   3rd byte   D7      0
- *              D6-D0   Next-most-significant 7 bits of the 26-bit data/mask.
+ *              D6      Most-significant bit of the channel number
+ *              D5      (reserved)
+ *              D4-D0   Most-significant 5 bits of the 26-bit data/mask
  *
  *   4th byte   D7      0
  *              D6-D0   Next-most-significant 7 bits of the 26-bit data/mask.
  *
  *   5th byte   D7      0
+ *              D6-D0   Next-most-significant 7 bits of the 26-bit data/mask.
+ *
+ *   6th byte   D7      0
  *              D6-D0   Least-significant 7 bits of the 26-bit data/mask.
  */
 
 int ServerBaseSocket = -1;
 int PortNum = 19653;
-int Listeners[MAX_LISTENERS], NumListeners = 0;
-#define MAX_INPACKET_SIZE 2048
+typedef struct
+{
+  int Listener;
+  int disabled;
+} Listener_t;
+Listener_t Listeners[MAX_LISTENERS];
+int NumListeners = 0;
+#define MAX_INPACKET_SIZE 1800
 
 void
 connectCheck(void)
 {
-  int i;
-  if (NumListeners < MAX_LISTENERS)
+  int i, j;
+  char *reassigned = "";
+  for (j = 0; j < NumListeners; j++)
+    if (Listeners[j].disabled)
+      break;
+  if (j < MAX_LISTENERS)
     {
       i = accept(ServerBaseSocket, NULL, NULL);
-      if (i != -1)
+      if (i > 0)
         {
           UnblockSocket(i);
-          Listeners[NumListeners++] = i;
-          printf("\nConnected to peripheral #%d on handle %d.\n", NumListeners, i);
+          Listeners[j].disabled = 0;
+          Listeners[j].Listener = i;
+          if (j < NumListeners)
+            {
+              reassigned = " (reassigned)";
+            }
+          else
+            {
+              NumListeners++;
+            }
+          printf("\nConnected to peripheral #%d%s on handle %d.\n", j,
+              reassigned, i);
+        }
+      else if (i == -1 && errno != EAGAIN)
+        {
+          printf("\nVirtual wire (accept) error: %s\n", strerror(errno));
         }
     }
 }
@@ -130,8 +165,8 @@ connectCheck(void)
 int
 pendingVirtualWireActivity(void /* int id, int mask */)
 {
-  int i, j, ioType = -1, payload, outPacketSize = 0;
-  uint8_t outPacket[10];
+  int i, j, received = 0, ioType = -1, payload, outPacketSize = 0, channel;
+  uint8_t outPacket[12];
   static uint8_t inPackets[MAX_LISTENERS][MAX_INPACKET_SIZE];
   static int inPacketSizes[MAX_LISTENERS] =
     { 0 };
@@ -150,18 +185,21 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   if (state.pioChange != -1)
     {
       ioType = 0;
-      payload = state.pio[state.pioChange];
+      channel = state.pioChange;
+      payload = state.pio[channel];
       state.pioChange = -1;
     }
   else if (state.cioChange != -1)
     {
       ioType = 1;
-      payload = state.cio[state.cioChange];
+      channel = state.cioChange;
+      payload = state.cio[channel];
       state.cioChange = -1;
     }
   else if (state.prsChange != -1)
     {
       ioType = 2;
+      channel = 0;
       payload = state.prs;
       state.prsChange = -1;
     }
@@ -172,13 +210,15 @@ pendingVirtualWireActivity(void /* int id, int mask */)
         {
           outPacket[outPacketSize++] = 0300 | ((ioType << 3) & 0070)
               | (id & 0007);
-          outPacket[outPacketSize++] = (mask >> 21) & 0037;
+          outPacket[outPacketSize++] = channel & 0177;
+          outPacket[outPacketSize++] = ((channel & 0200) >> 1) | ((mask >> 21) & 0037);
           outPacket[outPacketSize++] = (mask >> 14) & 0177;
           outPacket[outPacketSize++] = (mask >> 7) & 0177;
           outPacket[outPacketSize++] = mask & 0177;
         }
       outPacket[outPacketSize++] = 0200 | ((ioType << 3) & 0070) | (id & 0007);
-      outPacket[outPacketSize++] = (payload >> 21) & 0037;
+      outPacket[outPacketSize++] = channel & 0177;
+      outPacket[outPacketSize++] = ((channel & 0200) >> 1) | ((payload >> 21) & 0037);
       outPacket[outPacketSize++] = (payload >> 14) & 0177;
       outPacket[outPacketSize++] = (payload >> 7) & 0177;
       outPacket[outPacketSize++] = payload & 0177;
@@ -187,24 +227,56 @@ pendingVirtualWireActivity(void /* int id, int mask */)
 
   // Take care of any network stuff needed.
   connectCheck();
+  // Receive data.
+  for (i = 0; i < NumListeners; i++)
+    if (!Listeners[i].disabled)
+      {
+        j = recv(Listeners[i].Listener, &inPackets[i][inPacketSizes[i]],
+        MAX_INPACKET_SIZE, 0);
+        if (j == -1 && errno != EAGAIN)
+          {
+            printf("Peripheral handle #%d error message (by recv: %s).\n", i,
+                strerror(errno));
+            if (errno == ENOTCONN)
+              {
+                printf("Disconnected socket #%d, handle %d.\n", i,
+                    Listeners[i].Listener);
+                Listeners[i].disabled = 1;
+              }
+          }
+        else if (j > 0)
+          {
+            received += j;
+            inPacketSizes[i] += j;
+          }
+      }
   // Send data.  I suppose I should check that the entire packet is sent,
   // and do something about it if not, but I'm not sure what.  I'll
   // come back to that later.
   for (i = 0; i < NumListeners; i++)
-    {
-      send(Listeners[i], outPacket, outPacketSize, 0);
-    }
-  // Receive data.
-  for (i = 0; i < NumListeners; i++)
-    {
-      j = recv(Listeners[i], &inPackets[i][inPacketSizes[i]], MAX_INPACKET_SIZE, 0);
-      if (j != -1)
-        inPacketSizes[i] += j;
-    }
+    if (!Listeners[i].disabled)
+      {
+        j = send(Listeners[i].Listener, outPacket, outPacketSize, MSG_NOSIGNAL);
+        if (j == -1)
+          {
+            printf("Peripheral handle #%d error message (by send: %s).\n", i,
+                strerror(errno));
+            if (errno == ENOTCONN || errno == EPIPE)
+              {
+                printf("Disconnected socket #%d, handle %d.\n", i,
+                    Listeners[i].Listener);
+                Listeners[i].disabled = 1;
+              }
+          }
+        else if (j >= 0 && j < outPacketSize)
+          printf("Message to peripheral handle #%d incomplete.\n", i);
+      }
 
   // Parse the received data.  All we have to do is to
   // read any inputs and stick them in the global "state" structure, where
   // the LVDC emulation will see them at some point.
+  if (received > 0)
+    printf("Received %d bytes.\n", received);
 
   return (0);
 }

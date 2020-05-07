@@ -43,11 +43,6 @@
 #include <ctype.h>
 #include "yaLVDC.h"
 
-// From yaLVDC.c.
-int
-kbhit(void);
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // Utility functions.
 
@@ -377,7 +372,7 @@ printSourceBlock(assembly_t *assembly, int start, int end)
 // Parse an input address string.
 enum addressType_t
 {
-  atCode, atData, atPio, atCio, atNone
+  atCode, atData, atPio, atCio, atPrs, atNone
 };
 enum addressType_t
 parseInputAddress(char *string, int *module, int *sector, int *syllable,
@@ -385,6 +380,8 @@ parseInputAddress(char *string, int *module, int *sector, int *syllable,
 {
   char s[256];
 
+  if (!strcasecmp(string, "PRS"))
+    return (atPrs);
   if (4
       == sscanf(string, "%o-%o-%o-%o%s", module, sector, syllable, location, s))
     return (atCode);
@@ -632,6 +629,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         printf("      (000-377 octal).\n");
         printf("    * CIO port:  CIO-LLL, where LLL is the port number\n");
         printf("      (000-777 octal).\n");
+        printf("    * PRS port:  Just the literal PRS, since there is only\n");
+        printf("      a single PRS port.\n");
         printf(" 5. Source line numbers (decimal) come from the input .src\n");
         printf("    file, not from the original .lvdc source-code file.\n");
         printf(" 6. A free-running emulation can be paused by hitting any\n");
@@ -771,6 +770,10 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   formatFetchedValue(state.cio[location], formatType, 1, 2);
                   printf("CIO-%03o: %s\n", location, formattedFetchedValue);
                   location++;
+                  break;
+                case atPrs:
+                  formatFetchedValue(state.prs, formatType, 1, 2);
+                  printf("PRS: %s\n", formattedFetchedValue);
                   break;
                 default:
                   printf("Unrecognized format\n");
@@ -961,6 +964,9 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 destinationPointer = &state.cio[location];
                 state.cioChange = location;
                 break;
+              case atPrs:
+                destinationPointer = &state.prs;
+                state.prsChange = 0;
               default:
                 break;
                 }
@@ -982,7 +988,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 printf("Overwriting value %09o with %09o.\n",
                     *destinationPointer, intValue);
               *destinationPointer = intValue;
-              if (at == atPio || at == atCio)
+              if (at == atPio || at == atCio || at == atPrs)
                 processInterruptsAndIO();
             }
           else

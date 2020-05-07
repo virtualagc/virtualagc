@@ -62,6 +62,8 @@ static char helpMessage[] = "Usage:\n"
     "--ptc         Emulate a PTC target rather than an LVDC target.\n"
     "--run         Start the LVDC/PTC program running freely.  By default,\n"
     "              (without --run), will simply pause without running.\n"
+    "--port=N      Specifies the port number used by the server for virtual\n"
+    "              connection to peripherals.  Default is 19653.\n"
     "";
 
 char *coreFilename = "yaLVDC.core";
@@ -76,7 +78,7 @@ int
 parseCommandLineArguments (int argc, char *argv[])
 {
   int retVal = 1;
-  int i;
+  int i, j;
 
   for (i = 1; i < argc; i++)
     {
@@ -93,6 +95,8 @@ parseCommandLineArguments (int argc, char *argv[])
 	coreFilename = &argv[i][7];
       else if (!strcmp (argv[i], "--ptc"))
         ptc = 1;
+      else if (1 == sscanf(argv[i], "--port=%d", &j))
+        PortNum = j;
       else if (!strcmp (argv[i], "--cold-start"))
         coldStart = 1;
       else if (!strcmp (argv[i], "--run"))
