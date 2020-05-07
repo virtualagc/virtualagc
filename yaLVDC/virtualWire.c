@@ -139,7 +139,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   // be function arguments, but for an LVDC server they always have the
   // same values, so it would be kind of pointless for them to be anything
   // other than constants.
-  int id = 0, mask = ~0377777777;
+  int id = 0, mask = 0377777777;
   // Take care of any virtual-wire outputs needed.  The changes (triggered by
   // the last LVDC/PTC instruction executed) have stuck the necessary info in
   // the global "state" structure.  Note that any given instruction can flag
@@ -149,21 +149,18 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   // out of order here.
   if (state.pioChange != -1)
     {
-      printf("A\n");
       ioType = 0;
       payload = state.pio[state.pioChange];
       state.pioChange = -1;
     }
   else if (state.cioChange != -1)
     {
-      printf("B\n");
       ioType = 1;
       payload = state.cio[state.cioChange];
       state.cioChange = -1;
     }
   else if (state.prsChange != -1)
     {
-      printf("C\n");
       ioType = 2;
       payload = state.prs;
       state.prsChange = -1;
@@ -171,7 +168,6 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   // Format the output packet(s).
   if (ioType >= 0)
     {
-      printf("D\n");
       if ((mask & 0377777777) != 0377777777)
         {
           outPacket[outPacketSize++] = 0300 | ((ioType << 3) & 0070)
@@ -196,7 +192,6 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   // come back to that later.
   for (i = 0; i < NumListeners; i++)
     {
-      printf("E: %d\n", i);
       send(Listeners[i], outPacket, outPacketSize, 0);
     }
   // Receive data.

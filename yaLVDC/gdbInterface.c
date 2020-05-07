@@ -955,13 +955,11 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 break;
               case atPio:
                 destinationPointer = &state.pio[location];
-                state.pioChange = 1;
-                processInterruptsAndIO();
+                state.pioChange = location;
                 break;
               case atCio:
                 destinationPointer = &state.cio[location];
-                state.pioChange = 1;
-                processInterruptsAndIO();
+                state.cioChange = location;
                 break;
               default:
                 break;
@@ -984,6 +982,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 printf("Overwriting value %09o with %09o.\n",
                     *destinationPointer, intValue);
               *destinationPointer = intValue;
+              if (at == atPio || at == atCio)
+                processInterruptsAndIO();
             }
           else
             printf("Unrecognized SET command.\n");
