@@ -308,6 +308,7 @@ runOneInstruction(int *cyclesUsed)
   state.pioChange = -1;
   state.cioChange = -1;
   state.prsChange = -1;
+  state.lastHop = -1;
 
   // Set global variables providing background info on the emulation.
   dataFromInstructionMemory = 0;
@@ -364,6 +365,7 @@ runOneInstruction(int *cyclesUsed)
   memcpy(&rawestHopStructure, &rawHopStructure, sizeof(hopStructure_t));
 
   // Parse instruction into fields.
+  state.lastInstruction = instruction;
   op = instruction & 017;
   a9 = (instruction >> 4) & 1;
   operand = (instruction >> 5) & 0377;
@@ -390,6 +392,7 @@ runOneInstruction(int *cyclesUsed)
 #ifdef DEBUG_A_LOT
       printf("HOP %o-%02o-%o-%02o %09o\n", hopStructure.dm, residual, hopStructure.ds, operand, fetchedFromMemory);
 #endif
+      state.lastHop = state.hop;
       state.hop = fetchedFromMemory;
     }
   else if (!ptc && (op == 001 || op == 005))
@@ -503,6 +506,7 @@ runOneInstruction(int *cyclesUsed)
         {
           nextLOC = operand;
           nextS = residual;
+          state.lastHop = state.hop;
         }
     }
   else if (op == 006)
@@ -531,6 +535,7 @@ runOneInstruction(int *cyclesUsed)
       // TRA
       nextLOC = operand;
       nextS = residual;
+      state.lastHop = state.hop;
     }
   else if ((!ptc && op == 011) || (ptc && op == 015))
     {
@@ -580,6 +585,7 @@ runOneInstruction(int *cyclesUsed)
         {
           nextLOC = operand;
           nextS = residual;
+          state.lastHop = state.hop;
         }
     }
   else if ((!ptc && op == 015) || (ptc && op == 003))

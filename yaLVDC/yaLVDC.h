@@ -89,6 +89,28 @@ typedef struct
 breakpoint_t breakpoints[MAX_BREAKPOINTS];
 int numBreakpoints;
 
+typedef struct
+{
+  int32_t fromWhere;
+  int32_t toWhere;
+  unsigned long cycleCount;
+  unsigned long instructionCount;
+  int16_t fromInstruction;
+} backtrace_t;
+// A circular buffer for backtraces.  If firstEmptyBacktrace == firstUsedBacktrace,
+// then the buffer is empty, so it can hold up to MAX_BACKTRACES-1 entries.
+// When adding a new one, if the buffer is already full then the oldest one
+// is silently deleted.  Yes, it would be preferable instead of a circular buffer
+// to unroll as subroutines were returned from, but that's beyond my ability to
+// analyze, given the nature of the code.
+#define MAX_BACKTRACES 101
+backtrace_t backtraces[MAX_BACKTRACES];
+int firstUsedBacktrace, firstEmptyBacktrace;
+#define NEXT_BACKTRACE(n) (((n) + 1) % MAX_BACKTRACES)
+void
+addBacktrace(int16_t fromInstruction, int32_t fromWhere, int32_t toWhere,
+    unsigned long cycleCount, unsigned long instructionCount);
+
 // See parseCommandLineArguments.c
 char *coreFilename;
 int ptc;
@@ -134,6 +156,11 @@ typedef struct
   int pioChange;
   int cioChange;
   int prsChange;
+  // The following is normally -1, but is set by runOneInstruction()
+  // to the address of a HOP, TRA, TMI, or TNZ if it causes a jump
+  // to an instruction that's out of sequence.
+  int32_t lastHop;
+  int16_t lastInstruction;
 } state_t;
 state_t state;
 typedef struct

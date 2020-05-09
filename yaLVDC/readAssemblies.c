@@ -681,6 +681,7 @@ readAssemblies(void)
   state.pioChange = -1;
   state.cioChange = -1;
   state.prsChange = -1;
+  state.lastHop = -1;
 
   for (i = 0, assembly = assemblies; i < numAssemblies; i++, assembly++)
     {

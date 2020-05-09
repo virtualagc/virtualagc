@@ -63,121 +63,125 @@ else:
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
 # initialization.  This is the section to customize for specific applications.
 
-# These functions are called by the GUI event loop when various events occur.
+# Callbacks for the GUI (tkinter) event loop.
+
 ProgRegA = -1
 def cPRA():
 	global ProgRegA
 	n = 0
-	if ProcessorDisplayPanel_support.bPRAS:
+	if ProcessorDisplayPanel_support.bPRAS.get():
 		n |= 0o200000000
-	if ProcessorDisplayPanel_support.bPRA1:
+	if ProcessorDisplayPanel_support.bPRA1.get():
 		n |= 0o100000000
-	if ProcessorDisplayPanel_support.bPRA2:
+	if ProcessorDisplayPanel_support.bPRA2.get():
 		n |= 0o040000000
-	if ProcessorDisplayPanel_support.bPRA3:
+	if ProcessorDisplayPanel_support.bPRA3.get():
 		n |= 0o020000000
-	if ProcessorDisplayPanel_support.bPRA4:
+	if ProcessorDisplayPanel_support.bPRA4.get():
 		n |= 0o010000000
-	if ProcessorDisplayPanel_support.bPRA5:
+	if ProcessorDisplayPanel_support.bPRA5.get():
 		n |= 0o004000000
-	if ProcessorDisplayPanel_support.bPRA6:
+	if ProcessorDisplayPanel_support.bPRA6.get():
 		n |= 0o002000000
-	if ProcessorDisplayPanel_support.bPRA7:
+	if ProcessorDisplayPanel_support.bPRA7.get():
 		n |= 0o001000000
-	if ProcessorDisplayPanel_support.bPRA8:
+	if ProcessorDisplayPanel_support.bPRA8.get():
 		n |= 0o000400000
-	if ProcessorDisplayPanel_support.bPRA9:
+	if ProcessorDisplayPanel_support.bPRA9.get():
 		n |= 0o000200000
-	if ProcessorDisplayPanel_support.bPRA10:
+	if ProcessorDisplayPanel_support.bPRA10.get():
 		n |= 0o000100000
-	if ProcessorDisplayPanel_support.bPRA11:
+	if ProcessorDisplayPanel_support.bPRA11.get():
 		n |= 0o000040000
-	if ProcessorDisplayPanel_support.bPRA12:
+	if ProcessorDisplayPanel_support.bPRA12.get():
 		n |= 0o000020000
-	if ProcessorDisplayPanel_support.bPRA13:
+	if ProcessorDisplayPanel_support.bPRA13.get():
 		n |= 0o000010000
-	if ProcessorDisplayPanel_support.bPRA14:
+	if ProcessorDisplayPanel_support.bPRA14.get():
 		n |= 0o000004000
-	if ProcessorDisplayPanel_support.bPRA15:
+	if ProcessorDisplayPanel_support.bPRA15.get():
 		n |= 0o000002000
-	if ProcessorDisplayPanel_support.bPRA16:
+	if ProcessorDisplayPanel_support.bPRA16.get():
 		n |= 0o000001000
-	if ProcessorDisplayPanel_support.bPRA17:
+	if ProcessorDisplayPanel_support.bPRA17.get():
 		n |= 0o000000400
-	if ProcessorDisplayPanel_support.bPRA18:
+	if ProcessorDisplayPanel_support.bPRA18.get():
 		n |= 0o000000200
-	if ProcessorDisplayPanel_support.bPRA19:
+	if ProcessorDisplayPanel_support.bPRA19.get():
 		n |= 0o000000100
-	if ProcessorDisplayPanel_support.bPRA20:
+	if ProcessorDisplayPanel_support.bPRA20.get():
 		n |= 0o000000040
-	if ProcessorDisplayPanel_support.bPRA21:
+	if ProcessorDisplayPanel_support.bPRA21.get():
 		n |= 0o000000020
-	if ProcessorDisplayPanel_support.bPRA22:
+	if ProcessorDisplayPanel_support.bPRA22.get():
 		n |= 0o000000010
-	if ProcessorDisplayPanel_support.bPRA23:
+	if ProcessorDisplayPanel_support.bPRA23.get():
 		n |= 0o000000004
-	if ProcessorDisplayPanel_support.bPRA24:
+	if ProcessorDisplayPanel_support.bPRA24.get():
 		n |= 0o000000002
-	if ProcessorDisplayPanel_support.bPRA25:
+	if ProcessorDisplayPanel_support.bPRA25.get():
 		n |= 0o000000001
 	ProgRegA = n
+ProcessorDisplayPanel_support.cPRA = cPRA
+	
 ProgRegB = -1
 def cPRB():
 	global ProgRegB
 	n = 0
-	if ProcessorDisplayPanel_support.bPRBS:
+	if ProcessorDisplayPanel_support.bPRBS.get():
 		n |= 0o200000000
-	if ProcessorDisplayPanel_support.bPRB1:
+	if ProcessorDisplayPanel_support.bPRB1.get():
 		n |= 0o100000000
-	if ProcessorDisplayPanel_support.bPRB2:
+	if ProcessorDisplayPanel_support.bPRB2.get():
 		n |= 0o040000000
-	if ProcessorDisplayPanel_support.bPRB3:
+	if ProcessorDisplayPanel_support.bPRB3.get():
 		n |= 0o020000000
-	if ProcessorDisplayPanel_support.bPRB4:
+	if ProcessorDisplayPanel_support.bPRB4.get():
 		n |= 0o010000000
-	if ProcessorDisplayPanel_support.bPRB5:
+	if ProcessorDisplayPanel_support.bPRB5.get():
 		n |= 0o004000000
-	if ProcessorDisplayPanel_support.bPRB6:
+	if ProcessorDisplayPanel_support.bPRB6.get():
 		n |= 0o002000000
-	if ProcessorDisplayPanel_support.bPRB7:
+	if ProcessorDisplayPanel_support.bPRB7.get():
 		n |= 0o001000000
-	if ProcessorDisplayPanel_support.bPRB8:
+	if ProcessorDisplayPanel_support.bPRB8.get():
 		n |= 0o000400000
-	if ProcessorDisplayPanel_support.bPRB9:
+	if ProcessorDisplayPanel_support.bPRB9.get():
 		n |= 0o000200000
-	if ProcessorDisplayPanel_support.bPRB10:
+	if ProcessorDisplayPanel_support.bPRB10.get():
 		n |= 0o000100000
-	if ProcessorDisplayPanel_support.bPRB11:
+	if ProcessorDisplayPanel_support.bPRB11.get():
 		n |= 0o000040000
-	if ProcessorDisplayPanel_support.bPRB12:
+	if ProcessorDisplayPanel_support.bPRB12.get():
 		n |= 0o000020000
-	if ProcessorDisplayPanel_support.bPRB13:
+	if ProcessorDisplayPanel_support.bPRB13.get():
 		n |= 0o000010000
-	if ProcessorDisplayPanel_support.bPRB14:
+	if ProcessorDisplayPanel_support.bPRB14.get():
 		n |= 0o000004000
-	if ProcessorDisplayPanel_support.bPRB15:
+	if ProcessorDisplayPanel_support.bPRB15.get():
 		n |= 0o000002000
-	if ProcessorDisplayPanel_support.bPRB16:
+	if ProcessorDisplayPanel_support.bPRB16.get():
 		n |= 0o000001000
-	if ProcessorDisplayPanel_support.bPRB17:
+	if ProcessorDisplayPanel_support.bPRB17.get():
 		n |= 0o000000400
-	if ProcessorDisplayPanel_support.bPRB18:
+	if ProcessorDisplayPanel_support.bPRB18.get():
 		n |= 0o000000200
-	if ProcessorDisplayPanel_support.bPRB19:
+	if ProcessorDisplayPanel_support.bPRB19.get():
 		n |= 0o000000100
-	if ProcessorDisplayPanel_support.bPRB20:
+	if ProcessorDisplayPanel_support.bPRB20.get():
 		n |= 0o000000040
-	if ProcessorDisplayPanel_support.bPRB21:
+	if ProcessorDisplayPanel_support.bPRB21.get():
 		n |= 0o000000020
-	if ProcessorDisplayPanel_support.bPRB22:
+	if ProcessorDisplayPanel_support.bPRB22.get():
 		n |= 0o000000010
-	if ProcessorDisplayPanel_support.bPRB23:
+	if ProcessorDisplayPanel_support.bPRB23.get():
 		n |= 0o000000004
-	if ProcessorDisplayPanel_support.bPRB24:
+	if ProcessorDisplayPanel_support.bPRB24.get():
 		n |= 0o000000002
-	if ProcessorDisplayPanel_support.bPRB25:
+	if ProcessorDisplayPanel_support.bPRB25.get():
 		n |= 0o000000001
 	ProgRegB = n
+ProcessorDisplayPanel_support.cPRB = cPRB
 
 # This function is automatically called periodically by the event loop to check for 
 # conditions that will result in sending messages to yaLVDC that are interpreted
@@ -236,9 +240,74 @@ def inputsForCPU():
 # ioTypes[] array (see the top of this file), giving the class of i/o ports
 # to which the channel belongs.  Only the PIO, CIO, and PRS channels are appicable
 # for output from the CPU to peripherals.
+def indicatorOff(canvas):
+	canvas.delete(tk.ALL)
+def indicatorOn(canvas):
+	canvas.delete(tk.ALL)
+	canvas.create_rectangle(0, 0, canvas.winfo_width(), canvas.winfo_height(), fill="white")
 def outputFromCPU(ioType, channel, value):
 	
-	# Demo
+	# Turn indicator lamps on or off.  I think this is actually
+	# the full functionality of CIO-204
+	if ioType == 1 and channel == 0o204:
+		if value & 0o1:
+			indicatorOn(top.P1)
+		else:
+			indicatorOff(top.P1)
+		if value & 0o2:
+			indicatorOn(top.P2)
+		else:
+			indicatorOff(top.P2)
+		if value & 0o4:
+			indicatorOn(top.P4)
+		else:
+			indicatorOff(top.P4)
+		if value & 0o10:
+			indicatorOn(top.P10)
+		else:
+			indicatorOff(top.P10)
+		if value & 0o20:
+			indicatorOn(top.P20)
+		else:
+			indicatorOff(top.P20)
+		if value & 0o40:
+			indicatorOn(top.P40)
+		else:
+			indicatorOff(top.P40)
+		return
+	
+	# All I'm doing here (CIO-210) is manipulating indicator lamps,
+	# but the discretes additionally have some other functionality
+	# in terms of latching signals or something which is
+	# TBD.  ***FIXME***
+	if ioType == 1 and channel == 0o210:
+		if value & 0o1:
+			indicatorOn(top.D1)
+		else:
+			indicatorOff(top.D1)
+		if value & 0o2:
+			indicatorOn(top.D2)
+		else:
+			indicatorOff(top.D2)
+		if value & 0o4:
+			indicatorOn(top.D3)
+		else:
+			indicatorOff(top.D3)
+		if value & 0o10:
+			indicatorOn(top.D4)
+		else:
+			indicatorOff(top.D4)
+		if value & 0o20:
+			indicatorOn(top.D5)
+		else:
+			indicatorOff(top.D5)
+		if value & 0o40:
+			indicatorOn(top.D6)
+		else:
+			indicatorOff(top.D6)
+		return
+	
+	# Fallback.
 	if ioType == 0:
 		print("Channel PIO-%03o = %09o" % (channel, value))
 	elif ioType == 1:
@@ -345,7 +414,7 @@ def mainLoopIteration():
 				ok = 0
 			elif (inputBuffer[1] & 0x80) != 0x00:
 				ok = 0
-			elif (inputBuffer[2] & 0xA0) != 0x00:
+			elif (inputBuffer[2] & 0x80) != 0x00:
 				ok = 0
 			elif (inputBuffer[3] & 0x80) != 0x00:
 				ok = 0
@@ -361,7 +430,7 @@ def mainLoopIteration():
 				# other corrupted packets we print a message.  In either 
 				# case, we try to realign past the corrupted/ping byte(s).
 				if inputBuffer[0] != 0xff:
-					print("Illegal packet: 0x%02X%02X%02X%02X%02X%02X" % inputBuffer)
+					print("Illegal packet: %03o %03o %03o %03o %03o %03o" % tuple(inputBuffer))
 				for i in range(1,packetSize):
 					if (inputBuffer[i] & 0x80) == 0x80 and inputBuffer[i] != 0xFF:
 						j = 0
@@ -399,7 +468,5 @@ root = tk.Tk()
 ProcessorDisplayPanel_support.set_Tk_var()
 top = topProcessorDisplayPanel (root)
 ProcessorDisplayPanel_support.init(root, top)
-ProcessorDisplayPanel_support.cPRA = cPRA
-ProcessorDisplayPanel_support.cPRB = cPRB
 root.after(10, mainLoopIteration)
 root.mainloop()

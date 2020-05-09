@@ -126,6 +126,24 @@ kbhit(void)
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
+
+int firstUsedBacktrace = 0, firstEmptyBacktrace = 0;
+void
+addBacktrace(int16_t fromInstruction, int32_t fromWhere, int32_t toWhere, unsigned long cycleCount,
+    unsigned long instructionCount)
+{
+  backtrace_t *backtrace = &backtraces[firstEmptyBacktrace];
+  backtrace->fromInstruction = fromInstruction;
+  backtrace->fromWhere = fromWhere;
+  backtrace->toWhere = toWhere;
+  backtrace->cycleCount = cycleCount;
+  backtrace->instructionCount = instructionCount;
+  firstEmptyBacktrace = NEXT_BACKTRACE(firstEmptyBacktrace);
+  if (firstUsedBacktrace == firstEmptyBacktrace)
+    firstUsedBacktrace = NEXT_BACKTRACE(firstUsedBacktrace);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // Main program.
 
 int
@@ -160,6 +178,8 @@ main(int argc, char *argv[])
       pausedTime = 0;
       cycleCount = 0;
       instructionCount = 0;
+      firstUsedBacktrace = 0;
+      firstEmptyBacktrace = 0;
     }
   nextSnapshot = cycleCount + snapshotIntervalCycles;
 
@@ -169,7 +189,7 @@ main(int argc, char *argv[])
     goto done;
   if (coldStart == 0)
     if (readCore())
-        goto done;
+      goto done;
   // Some optional printouts for debugging.
   dPrintouts();
   fflush(stdout);
@@ -320,6 +340,8 @@ main(int argc, char *argv[])
             }
           if (!runOneInstruction(&cyclesUsed))
             {
+              if (state.lastHop != -1)
+                addBacktrace(state.lastInstruction, state.lastHop, state.hop, cycleCount, instructionCount);
               cycleCount += cyclesUsed;
               instructionCount++;
             }

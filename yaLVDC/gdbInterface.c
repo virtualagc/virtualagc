@@ -152,6 +152,7 @@ enum commandTokens
   ctCLEAR,
   ctBREAK,
   ctTBREAK,
+  ctBACKTRACE,
   ctINFO,
   ctRUN,
   ctQUIT,
@@ -170,9 +171,9 @@ typedef struct
 commandAssociation_t commandAssociations[] =
   {
     { ctSTEP, "STEPI", "STEPI [n]", "Step n instructions, default n=1." },
-    { ctSTEP, "STEPI", "SI [n]", "Step n instructions, default n=1." },
+    { ctSTEP, "STEPI", "SI [n]", "Same as STEPI." },
     { ctNEXT, "NEXTI", "NEXTI [n]", "Next n instructions, w/o entry." },
-    { ctNEXT, "NEXTI", "NI [n]", "Next n instructions, w/o entry." },
+    { ctNEXT, "NEXTI", "NI [n]", "Same as NEXTI." },
     { ctDELETE, "DELETE", "DELETE", "Delete all breakpoints." },
     { ctDELETE, "DELETE", "DELETE n", "Delete breakpoint n." },
     { ctCONTINUE, "CONTINUE", "CONTINUE", "Continue running emulation." },
@@ -189,6 +190,9 @@ commandAssociation_t commandAssociations[] =
     { ctBREAK, "BREAK", "BREAK [asm:]number", "Set breakpoint at line #." },
     { ctBREAK, "BREAK", "BREAK *address", "Set breakpoint at address." },
     { ctTBREAK, "TBREAK", "TBREAK ...", "Same as BREAK, but temporary." },
+    { ctBACKTRACE, "BACKTRACE", "BACKTRACE [n]",
+        "Show last n backtraces, default=20." },
+    { ctBACKTRACE, "BACKTRACE", "BT [n]", "Same as BACKTRACE." },
     { ctINFO, "INFO", "INFO ASSEMBLIES", "List all loaded assemblies." },
     { ctINFO, "INFO", "INFO BREAKPOINTS", "List all breakpoints." },
     { ctINFO, "INFO", "INFO BREAK", "List all breakpoint numbers." },
@@ -642,6 +646,58 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         printf(" 8. For commands like \"SET ... = n\", the number n is hex\n");
         printf("    if it has leading 0x, octal if it merely has leading\n");
         printf("    0, and decimal otherwise.\n");
+        goto nextCommand;
+      case ctBACKTRACE:
+        {
+          int i, n = 20, numBacktraces = (firstEmptyBacktrace
+              - firstUsedBacktrace) % MAX_BACKTRACES;
+          printf("\nRecent HOP, TRA, TNZ, or TMI control transfers:\n");
+          if (count > 1)
+            n = atoi(fields[1]);
+          if (n > MAX_BACKTRACES - 1)
+            n = MAX_BACKTRACES - 1;
+          //printf("%d %d %d %d\n", firstEmptyBacktrace, firstUsedBacktrace, numBacktraces, n);
+          if (n > numBacktraces)
+            n = numBacktraces;
+          if (n == 0)
+            {
+              printf("\t(none)\n");
+              goto nextCommand;
+            }
+          i = (firstEmptyBacktrace - n) % MAX_BACKTRACES;
+          for (i = (firstEmptyBacktrace - n) % MAX_BACKTRACES;
+              i != firstEmptyBacktrace; i = NEXT_BACKTRACE(i))
+            {
+              backtrace_t *backtrace = &backtraces[i];
+              char buffer[32], *mnemonic;
+              hopStructure_t hs;
+              switch (backtrace->fromInstruction & 017)
+                {
+              case 000:
+                mnemonic = "HOP";
+                break;
+              case 004:
+                mnemonic = "TNZ";
+                break;
+              case 010:
+                mnemonic = "TRA";
+                break;
+              case 014:
+                mnemonic = "TMI";
+                break;
+              default:
+                mnemonic = "TBD";
+                break;
+                }
+              formHopDescription(backtrace->fromWhere, 0, 0, 0, buffer, &hs);
+              printf(
+                  "\tCycle count = %lu, Instruction count = %lu, from instruction %05o (%s) at %s to ",
+                  backtrace->cycleCount, backtrace->instructionCount,
+                  backtrace->fromInstruction, mnemonic, buffer);
+              formHopDescription(backtrace->toWhere, 0, 0, 0, buffer, &hs);
+              printf("%s.\n", buffer);
+            }
+        }
         goto nextCommand;
       case ctRUN:
         if (coldStart)
