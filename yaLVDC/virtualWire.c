@@ -101,7 +101,7 @@
  *
  *   3rd byte   D7      0
  *              D6      Most-significant bit of the channel number
- *              D5      (reserved)
+ *              D5      Next-most-significant bit of the channel number
  *              D4-D0   Most-significant 5 bits of the 26-bit data/mask
  *
  *   4th byte   D7      0
@@ -124,6 +124,9 @@ typedef struct
 Listener_t Listeners[MAX_LISTENERS];
 int NumListeners = 0;
 #define MAX_INPACKET_SIZE 1800
+uint8_t inPackets[MAX_LISTENERS][MAX_INPACKET_SIZE];
+int inPacketSizes[MAX_LISTENERS] =
+  { 0 };
 
 void
 connectCheck(void)
@@ -141,6 +144,7 @@ connectCheck(void)
           UnblockSocket(i);
           Listeners[j].disabled = 0;
           Listeners[j].Listener = i;
+          inPacketSizes[j] = 0;
           if (j < NumListeners)
             {
               reassigned = " (reassigned)";
@@ -162,14 +166,19 @@ connectCheck(void)
 // Once the server system has been activated, call this function once after
 // emulation of each LVDC/PTC instruction to take care of any pending
 // virtual-wire actions.  Returns 0 on success, non-zero on error.
+typedef struct {
+  int valid;
+  int source;
+  int ioType;
+  int channel;
+  int mask;
+} pendingMask_t;
+pendingMask_t pendingMasks[MAX_LISTENERS] = { { 0 } };
 int
 pendingVirtualWireActivity(void /* int id, int mask */)
 {
   int i, j, received = 0, ioType = -1, payload, outPacketSize = 0, channel;
   uint8_t outPacket[12];
-  static uint8_t inPackets[MAX_LISTENERS][MAX_INPACKET_SIZE];
-  static int inPacketSizes[MAX_LISTENERS] =
-    { 0 };
   // For a general-purpose function, the following two things would
   // be function arguments, but for an LVDC server they always have the
   // same values, so it would be kind of pointless for them to be anything
@@ -211,14 +220,16 @@ pendingVirtualWireActivity(void /* int id, int mask */)
           outPacket[outPacketSize++] = 0300 | ((ioType << 3) & 0070)
               | (id & 0007);
           outPacket[outPacketSize++] = channel & 0177;
-          outPacket[outPacketSize++] = ((channel & 0200) >> 1) | ((mask >> 21) & 0037);
+          outPacket[outPacketSize++] = ((channel & 0600) >> 2)
+              | ((mask >> 21) & 0037);
           outPacket[outPacketSize++] = (mask >> 14) & 0177;
           outPacket[outPacketSize++] = (mask >> 7) & 0177;
           outPacket[outPacketSize++] = mask & 0177;
         }
       outPacket[outPacketSize++] = 0200 | ((ioType << 3) & 0070) | (id & 0007);
       outPacket[outPacketSize++] = channel & 0177;
-      outPacket[outPacketSize++] = ((channel & 0200) >> 1) | ((payload >> 21) & 0037);
+      outPacket[outPacketSize++] = ((channel & 0600) >> 2)
+          | ((payload >> 21) & 0037);
       outPacket[outPacketSize++] = (payload >> 14) & 0177;
       outPacket[outPacketSize++] = (payload >> 7) & 0177;
       outPacket[outPacketSize++] = payload & 0177;
@@ -232,7 +243,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
     if (!Listeners[i].disabled)
       {
         j = recv(Listeners[i].Listener, &inPackets[i][inPacketSizes[i]],
-        MAX_INPACKET_SIZE, 0);
+        MAX_INPACKET_SIZE - inPacketSizes[i], 0);
         if (j == -1 && errno != EAGAIN)
           {
             printf("Peripheral handle #%d error message (by recv: %s).\n", i,
@@ -272,11 +283,149 @@ pendingVirtualWireActivity(void /* int id, int mask */)
           printf("Message to peripheral handle #%d incomplete.\n", i);
       }
 
-  // Parse the received data.  All we have to do is to
-  // read any inputs and stick them in the global "state" structure, where
-  // the LVDC emulation will see them at some point.
-  if (received > 0)
-    printf("Received %d bytes.\n", received);
+  // Parse the received data.  All we have to do is to read any
+  // inputs and stick them in the global "state" structure, where
+  // the LVDC emulation will see them at some point.  By the way,
+  // note that while there could be buffered output data even if
+  // received==0, previous iterations will have insured that there
+  // can't be enough buffered yet to form complete packets.
+  if (received != 0)
+    {
+      //printf("Received %d bytes.\n", received);
+      for (i = 0; i < NumListeners; i++)
+        {
+          int size, offsetIntoPacket, offsetIntoBuffer, offset;
+          int source, isMask, ioType, channel, value, firstByte;
+          if (Listeners[i].disabled)
+            continue;
+          size = inPacketSizes[i];
+          offsetIntoBuffer = 0;
+          offset = 0;
+          retry:;
+          offsetIntoPacket = 0;
+          for (; offset < size; offset++)
+            {
+              uint8_t currentByte;
+              currentByte = inPackets[i][offset];
+              //printf("%02X %03o\n", currentByte, currentByte);
+              // Check for corruption.
+              firstByte = currentByte & 0x80;
+              if (!firstByte && !offsetIntoPacket)
+                {
+                  printf("Corrupt input packet.\n");
+                  offset++;
+                  // Mark corrupted stuff for removal from buffer.
+                  offsetIntoBuffer = offset;
+                  goto retry;
+                }
+              else if (firstByte && offsetIntoPacket)
+                {
+                  printf("Corrupt input packet.\n");
+                  // Mark corrupted stuff for removal from buffer.
+                  offsetIntoBuffer = offset;
+                  goto retry;
+                }
+              switch (offsetIntoPacket)
+              {
+              case 0:
+                offsetIntoPacket++;
+                isMask = 0x40 & currentByte;
+                ioType = 0x07 & (currentByte >> 3);
+                source = 0x07 & currentByte;
+                break;
+              case 1:
+                offsetIntoPacket++;
+                channel = 0x7F & currentByte;
+                break;
+              case 2:
+                offsetIntoPacket++;
+                channel |= ((currentByte << 2) & 0x180);
+                value = (currentByte & 0x1F) << 21;
+                break;
+              case 3:
+                offsetIntoPacket++;
+                value |= currentByte << 14;
+                break;
+              case 4:
+                offsetIntoPacket++;
+                value |= currentByte << 7;
+                break;
+              case 5:
+                offsetIntoPacket = 0;
+                value |= currentByte;
+                // If we've gotten to here, then it means that the packet has
+                // been completely parsed, and we can mark everything so-far
+                // processed for removal from the input buffer.
+                offsetIntoBuffer = offset + 1;
+                // If this is a mask, we can't do anything with it immediately,
+                // and so set it aside for later.  Otherwise, apply the pending
+                // mask (if any) to the data and update the i/o buffers in
+                // the state structure.
+                if (isMask)
+                  {
+                    pendingMasks[i].valid = 1;
+                    pendingMasks[i].source = source;
+                    pendingMasks[i].ioType = ioType;
+                    pendingMasks[i].channel = channel;
+                    pendingMasks[i].mask = value;
+                  }
+                else
+                  {
+                    int mask = 0377777777;
+                    if (pendingMasks[i].valid)
+                      {
+                        if (pendingMasks[i].source != source)
+                          printf("Input mask does not match source.\n");
+                        else if (pendingMasks[i].ioType != ioType)
+                          printf("Input mask does not match i/o type.\n");
+                        else if (pendingMasks[i].channel != channel)
+                          printf("Input mask does not match channel.\n");
+                        else
+                          mask = pendingMasks[i].mask;
+                        pendingMasks[i].valid = 0;
+                      }
+                    switch (ioType)
+                    {
+                    case 0: // PIO
+                      if (channel < 0 || channel > 0377)
+                        printf("Input PIO channel out of range.\n");
+                      printf("PIO-%03o changed from %09o to %09o with mask %09o.\n", channel, state.pio[channel], value, mask);
+                      state.pio[channel] = (state.pio[channel & ~mask]) | (value & mask);
+                      break;
+                    case 1: // CIO
+                      if (channel < 0 || channel > 0777)
+                        printf("Input CIO channel out of range.\n");
+                      printf("CIO-%03o changed from %09o to %09o with mask %09o.\n", channel, state.cio[channel], value, mask);
+                      state.cio[channel] = (state.pio[channel & ~mask]) | (value & mask);
+                      break;
+                    case 2: // PRS
+                      printf ("PRS data received from peripheral, which is not allowed.\n");
+                      break;
+                    case 3: // INT
+                      printf ("INT data received from peripheral, which is not yet implemented.\n");
+                      break;
+                    default:
+                      printf ("Unrecognized input i/o type.\n");
+                      break;
+                    }
+                  }
+                break;
+              default:
+                break;
+              }
+            }
+          // Everything from the input buffer than cat be processed has
+          // been.  So removed that stuff from the buffer, leaving everything
+          // not yet processed.
+          if (offsetIntoBuffer > 0)
+            {
+              size = size - offsetIntoBuffer;
+              if (size > 0)
+                memcpy(inPackets[i], &inPackets[i][offsetIntoBuffer], size);
+              inPacketSizes[i] = size;
+            }
+        }
+    }
 
   return (0);
 }

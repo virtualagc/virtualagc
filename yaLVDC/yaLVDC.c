@@ -192,7 +192,7 @@ main(int argc, char *argv[])
       if (cycleCount >= nextSnapshot)
         {
           nextSnapshot += snapshotIntervalCycles;
-          printf("Saving emulation snapshot.\n");
+          //printf("Saving emulation snapshot.\n");
           writeCore();
         }
 

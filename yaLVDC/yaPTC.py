@@ -11,6 +11,16 @@
 # Mod history:	2020-05-07 RSB	Began adapting from piPeripheral.py, which is
 #				a skeleton program for developing peripherals
 #				for the AGC or AGS CPU emulators.
+#		2020-05-08 RSB	I've added a GUI, based on the standard
+#				tkinter module in Python.  I've used the PAGE
+#				(http://page.sourceforge.net/html/index.html)
+#				tool to build it, and those are the files
+#				ProcessorDisplayPanel.py and 
+#				ProcessorDisplayPanel_support.py, which are
+#				simply imported as a module called
+#				"ProcessorDisplayPanel" at the top of this
+#				file.  The sources PAGE uses to generate 
+#				this code are in the guiDesign folder.
 #
 # The parts which need to be modified from the skeleton form of the program 
 # to make it peripheral-specific are the outputFromCPU() and inputsForCPU() 
@@ -21,6 +31,8 @@
 # you can simply run yaLVDC and yaPTC.py from different consoles on that same 
 # computer. 
 
+from ProcessorDisplayPanel import *
+
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
 
 # Parse command-line arguments.
@@ -29,14 +41,7 @@ cli = argparse.ArgumentParser()
 cli.add_argument("--host", help="Host address of yaAGC/yaAGS, defaulting to localhost.")
 cli.add_argument("--port", help="Port for yaLVDC, defaulting to 19653.", type=int)
 cli.add_argument("--id", help="Unique ID of this peripheral (1-7), default=1.", type=int)
-cli.add_argument("--slow", help="For use on a really slow computer.")
 args = cli.parse_args()
-
-# Responsiveness settings.
-if args.slow:
-	PULSE = 0.25
-else:
-	PULSE = 0.05
 
 # Characteristics of the host and port being used for yaLVDC communications.  
 if args.host:
@@ -48,7 +53,7 @@ if args.port:
 else:
 	TCP_PORT = 19653
 
-# Characteristics of this client being used for comminicating with yaLVDC.
+# Characteristics of this client being used for communicating with yaLVDC.
 if args.id:
 	ID = args.id
 else:
@@ -57,6 +62,122 @@ else:
 ###################################################################################
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
 # initialization.  This is the section to customize for specific applications.
+
+# These functions are called by the GUI event loop when various events occur.
+ProgRegA = -1
+def cPRA():
+	global ProgRegA
+	n = 0
+	if ProcessorDisplayPanel_support.bPRAS:
+		n |= 0o200000000
+	if ProcessorDisplayPanel_support.bPRA1:
+		n |= 0o100000000
+	if ProcessorDisplayPanel_support.bPRA2:
+		n |= 0o040000000
+	if ProcessorDisplayPanel_support.bPRA3:
+		n |= 0o020000000
+	if ProcessorDisplayPanel_support.bPRA4:
+		n |= 0o010000000
+	if ProcessorDisplayPanel_support.bPRA5:
+		n |= 0o004000000
+	if ProcessorDisplayPanel_support.bPRA6:
+		n |= 0o002000000
+	if ProcessorDisplayPanel_support.bPRA7:
+		n |= 0o001000000
+	if ProcessorDisplayPanel_support.bPRA8:
+		n |= 0o000400000
+	if ProcessorDisplayPanel_support.bPRA9:
+		n |= 0o000200000
+	if ProcessorDisplayPanel_support.bPRA10:
+		n |= 0o000100000
+	if ProcessorDisplayPanel_support.bPRA11:
+		n |= 0o000040000
+	if ProcessorDisplayPanel_support.bPRA12:
+		n |= 0o000020000
+	if ProcessorDisplayPanel_support.bPRA13:
+		n |= 0o000010000
+	if ProcessorDisplayPanel_support.bPRA14:
+		n |= 0o000004000
+	if ProcessorDisplayPanel_support.bPRA15:
+		n |= 0o000002000
+	if ProcessorDisplayPanel_support.bPRA16:
+		n |= 0o000001000
+	if ProcessorDisplayPanel_support.bPRA17:
+		n |= 0o000000400
+	if ProcessorDisplayPanel_support.bPRA18:
+		n |= 0o000000200
+	if ProcessorDisplayPanel_support.bPRA19:
+		n |= 0o000000100
+	if ProcessorDisplayPanel_support.bPRA20:
+		n |= 0o000000040
+	if ProcessorDisplayPanel_support.bPRA21:
+		n |= 0o000000020
+	if ProcessorDisplayPanel_support.bPRA22:
+		n |= 0o000000010
+	if ProcessorDisplayPanel_support.bPRA23:
+		n |= 0o000000004
+	if ProcessorDisplayPanel_support.bPRA24:
+		n |= 0o000000002
+	if ProcessorDisplayPanel_support.bPRA25:
+		n |= 0o000000001
+	ProgRegA = n
+ProgRegB = -1
+def cPRB():
+	global ProgRegB
+	n = 0
+	if ProcessorDisplayPanel_support.bPRBS:
+		n |= 0o200000000
+	if ProcessorDisplayPanel_support.bPRB1:
+		n |= 0o100000000
+	if ProcessorDisplayPanel_support.bPRB2:
+		n |= 0o040000000
+	if ProcessorDisplayPanel_support.bPRB3:
+		n |= 0o020000000
+	if ProcessorDisplayPanel_support.bPRB4:
+		n |= 0o010000000
+	if ProcessorDisplayPanel_support.bPRB5:
+		n |= 0o004000000
+	if ProcessorDisplayPanel_support.bPRB6:
+		n |= 0o002000000
+	if ProcessorDisplayPanel_support.bPRB7:
+		n |= 0o001000000
+	if ProcessorDisplayPanel_support.bPRB8:
+		n |= 0o000400000
+	if ProcessorDisplayPanel_support.bPRB9:
+		n |= 0o000200000
+	if ProcessorDisplayPanel_support.bPRB10:
+		n |= 0o000100000
+	if ProcessorDisplayPanel_support.bPRB11:
+		n |= 0o000040000
+	if ProcessorDisplayPanel_support.bPRB12:
+		n |= 0o000020000
+	if ProcessorDisplayPanel_support.bPRB13:
+		n |= 0o000010000
+	if ProcessorDisplayPanel_support.bPRB14:
+		n |= 0o000004000
+	if ProcessorDisplayPanel_support.bPRB15:
+		n |= 0o000002000
+	if ProcessorDisplayPanel_support.bPRB16:
+		n |= 0o000001000
+	if ProcessorDisplayPanel_support.bPRB17:
+		n |= 0o000000400
+	if ProcessorDisplayPanel_support.bPRB18:
+		n |= 0o000000200
+	if ProcessorDisplayPanel_support.bPRB19:
+		n |= 0o000000100
+	if ProcessorDisplayPanel_support.bPRB20:
+		n |= 0o000000040
+	if ProcessorDisplayPanel_support.bPRB21:
+		n |= 0o000000020
+	if ProcessorDisplayPanel_support.bPRB22:
+		n |= 0o000000010
+	if ProcessorDisplayPanel_support.bPRB23:
+		n |= 0o000000004
+	if ProcessorDisplayPanel_support.bPRB24:
+		n |= 0o000000002
+	if ProcessorDisplayPanel_support.bPRB25:
+		n |= 0o000000001
+	ProgRegB = n
 
 # This function is automatically called periodically by the event loop to check for 
 # conditions that will result in sending messages to yaLVDC that are interpreted
@@ -68,9 +189,44 @@ else:
 # indices into ioTypes[] (see top of file) to tell which particular class of i/o
 # channels is affected.  Only the PIO, CIO, and INT classes are possible for inputs
 # to the CPU.
+#delayCount = 0
+#ioTypeCount = 0
+#channelCount = 0
 def inputsForCPU():
+	#global delayCount, ioTypeCount, channelCount
+	global ProgRegA, ProgRegB
 	returnValue = []
 	
+	if ProgRegA != -1:
+		n = ProgRegA
+		ProgRegA = -1
+		return [(1, 0o214, n, 0o377777777)]
+
+	if ProgRegB != -1:
+		n = ProgRegB
+		ProgRegB = -1
+		return [(1, 0o220, n, 0o377777777)]
+	
+	if False:
+		# This is just a little demo function to show that the communication
+		# with yaLVDC, the protocol, and the parsing are okay.
+		if delayCount >= 100:
+			delayCount = 0
+			if ioTypeCount == 0 and channelCount <= 0o377:
+				returnValue = [(ioTypeCount, channelCount, 0o252525252 >> (channelCount & 1), 0o3777777777)]
+				channelCount += 1
+				if channelCount > 0o377:
+					channelCount = 0
+					ioTypeCount += 1
+			elif ioTypeCount == 1 and channelCount <= 0o777:
+				returnValue = [(ioTypeCount, channelCount, 0o125252525 << (channelCount & 1), 0o3777777777)]
+				channelCount += 1
+				if channelCount > 0o777:
+					channelCount = 0
+					ioTypeCount += 1
+				
+		else:
+			delayCount += 1
 	return returnValue
 
 # This function is called by the event loop only when yaLVDC has written
@@ -142,18 +298,18 @@ def packetize(tuple):
 	mask = tuple[3]
 	if mask != 0o377777777:
 		outputBuffer[0] = 0x80 | 0x40 | ((ioType & 7) << 3) | (ID & 7)
-		outputBuffer[1] = channel & 0x3F
-		outputBuffer[2] = ((channel & 0x80) >> 1) | ((mask >> 21) & 0x1F)
-		outputBuffer[3] = (mask >> 14) & 0x3F
-		outputBuffer[4] = (mask >> 7) & 0x3F
-		outputBuffer[5] = mask & 0x3F
+		outputBuffer[1] = channel & 0x7F
+		outputBuffer[2] = ((channel & 0x180) >> 2) | ((mask >> 21) & 0x1F)
+		outputBuffer[3] = (mask >> 14) & 0x7F
+		outputBuffer[4] = (mask >> 7) & 0x7F
+		outputBuffer[5] = mask & 0x7F
 		s.send(outputBuffer)
 	outputBuffer[0] = 0x80 | ((ioType & 7) << 3) | (ID & 7)
-	outputBuffer[1] = channel & 0x3F
-	outputBuffer[2] = ((channel & 0x80) >> 1) | ((value >> 21) & 0x1F)
-	outputBuffer[3] = (value >> 14) & 0x3F
-	outputBuffer[4] = (value >> 7) & 0x3F
-	outputBuffer[5] = value & 0x3F
+	outputBuffer[1] = channel & 0x7F
+	outputBuffer[2] = ((channel & 0x180) >> 2) | ((value >> 21) & 0x1F)
+	outputBuffer[3] = (value >> 14) & 0x7F
+	outputBuffer[4] = (value >> 7) & 0x7F
+	outputBuffer[5] = value & 0x7F
 	s.send(outputBuffer)
 
 # Buffer for a packet received from yaLVDC.
@@ -163,11 +319,9 @@ leftToRead = packetSize
 view = memoryview(inputBuffer)
 
 didSomething = False
-while True:
-	if not didSomething:
-		time.sleep(PULSE)
-	didSomething = False
-	
+def mainLoopIteration():
+	global didSomething, inputBuffer, leftToRead, view
+
 	# Check for packet data received from yaLVDC and process it.
 	# While these packets are always exactly 5
 	# bytes long, since the socket is non-blocking, any individual read
@@ -219,7 +373,7 @@ while True:
 			else:
 				ioType = (inputBuffer[0] >> 3) & 7
 				source = inputBuffer[0] & 7
-				channel = ((inputBuffer[2] << 1) & 0x80) | (inputBuffer[1] & 0x7F)
+				channel = ((inputBuffer[2] << 2) & 0x180) | (inputBuffer[1] & 0x7F)
 				value = (inputBuffer[2] & 0x1F) << 21
 				value |= (inputBuffer[3] & 0x7F) << 14
 				value |= (inputBuffer[4] & 0x7F) << 7
@@ -235,4 +389,17 @@ while True:
 	for i in range(0, len(externalData)):
 		packetize(externalData[i])
 		didSomething = True
-		
+	
+	root.after(10, mainLoopIteration)		
+	
+while False:
+	mainLoopIteration()
+
+root = tk.Tk()
+ProcessorDisplayPanel_support.set_Tk_var()
+top = topProcessorDisplayPanel (root)
+ProcessorDisplayPanel_support.init(root, top)
+ProcessorDisplayPanel_support.cPRA = cPRA
+ProcessorDisplayPanel_support.cPRB = cPRB
+root.after(10, mainLoopIteration)
+root.mainloop()
