@@ -179,6 +179,7 @@ typedef struct
   uint8_t syllable; // 0,1 instructions, 2 data.
   uint8_t loc;
   int lineNumber;
+  uint16_t assembled;
 } sourceLine_t;
 #define MAX_ASSEMBLIES 16
 typedef struct
@@ -234,6 +235,9 @@ fetchData(int module, int residual, int sector, int loc, int32_t *data,
 int
 storeData(int module, int residual, int sector, int loc, int32_t data,
     int *dataOverwritesInstructionMemory);
+int
+fetchInstruction(int module, int sector, int syllable, int loc,
+    uint16_t *instruction, int *instructionFromDataMemory);
 
 // See gdbInterface.c
 int

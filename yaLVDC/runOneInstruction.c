@@ -156,7 +156,12 @@ fetchData(int module, int residual, int sector, int loc, int *data,
       int16_t fetch1, fetch0;
       fetch1 = state.core[module][sector][1][loc];
       fetch0 = state.core[module][sector][0][loc];
-      if (fetch0 == -1 || fetch1 == -1)
+      // Note that fetching data from a completely-empty location
+      // may be an error (or perhaps not?), but that fetching from a
+      // partially-empty location is not, since the LVDC/PTC code
+      // is self-modifying, and may need to do that to modify the
+      // code.
+      if (fetch0 == -1 && fetch1 == -1)
         {
           //pushErrorMessage("Fetching data from empty location", NULL);
           printf("Fetching data from empty location %o-%02o-%03o\n", module,
@@ -164,6 +169,10 @@ fetchData(int module, int residual, int sector, int loc, int *data,
           runStepN = 0;
           goto done;
         }
+      if (fetch0 == -1)
+        fetch0 = 0;
+      if (fetch1 == -1)
+        fetch1 = 0;
       *data = (fetch1 << 13) + fetch0;
       *dataFromInstructionMemory = 1;
     }
@@ -233,27 +242,25 @@ int
 fetchInstruction(int module, int sector, int syllable, int loc,
     uint16_t *instruction, int *instructionFromDataMemory)
 {
-  int retVal = 1;
+  int retVal = 1, fetchedData;
   *instructionFromDataMemory = 0;
-  *instruction = state.core[module][sector][syllable][loc];
-  if (*instruction == -1)
+  fetchedData = state.core[module][sector][syllable][loc];
+  if (fetchedData == -1)
     {
-      int fetchedData;
       fetchedData = state.core[module][sector][2][loc];
       if (fetchedData == -1)
         {
           //pushErrorMessage("Cannot fetch instruction from empty address", NULL);
-          printf("Cannot fetch instruction from empty address\n");
+          printf("Cannot fetch instruction from empty data address\n");
           goto done;
         }
       *instructionFromDataMemory = 1;
       if (syllable == 1)
-        *instruction = (fetchedData >> 13) & 017777;
-      else
-        *instruction = fetchedData & 017777;
-
+        fetchedData = fetchedData >> 13;
+      fetchedData &= 017777;
     }
 
+  *instruction = fetchedData;
   retVal = 0;
   done: ;
   return (retVal);

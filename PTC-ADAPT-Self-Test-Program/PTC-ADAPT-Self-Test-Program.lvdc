@@ -5338,6 +5338,19 @@ KL	BCI	^PAGE NR $
 # PAGE 100, SEQUENCE 48810-49370
 
 *	ERROR ROUTINE
+# The 50-word table at ERR (see paragraph 7-34 of the PTC
+# documentation) can store up to 10 errors, as 5-word blocks.  
+# The first error encountered is stored at ERR through ERR+4,  
+# the second at ERR+5 through ERR+9, and so on.  This is 
+# self-modifying code.  You'll notice that as written, the STO
+# instructions (at L95P7 and at L95P2-L95P5) put data into the
+# error table at ERR through ERR+4, but farther down in the code 
+# (at L96P1) all of these STO's are overwritten with different 
+# STO instructions operating 5 words higher in the ERR table. 
+# At the 11th error (there is no test in the code for overflowing
+# the end of the ERR table!), the modified code then at L95P7 
+# will overwrite the instruction L95P7+1 with ERR-table data, 
+# and the program will probably crash. -- RSB 2020.
 	ORG	,16,,1,,16,212
 ERR	BSS	50
 L95P1	CIO	240			SET PTC ERROR LAMP

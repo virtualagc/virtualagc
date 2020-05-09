@@ -32,6 +32,11 @@
 #		2020-04-21 RSB	Began adding the --ptc command-line options
 #				along with --past-bugs and --help.
 #		2020-05-01 RSB	Added line number field to .src output file.
+#		2020-05-09 RSB	Added the assembled octals for the source lines
+#				to the .src file.  Needed by the debugger for
+#				detecting locations which have been changed by
+#				self-modifying code, and hence whose original
+#				source lines are no longer applicable.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -1850,7 +1855,7 @@ for entry in inputFile:
 		# Put the assembled value wherever it's supposed to 
 		storeAssembled(lineNumber, assembled, inputLine["hop"])
 	elif operator in operators:
-		print("%o\t%02o\t%o\t%03o\t%d\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], lineNumber, inputLine["raw"]), file=f)
+		#print("%o\t%02o\t%o\t%03o\t%d\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], lineNumber, inputLine["raw"]), file=f)
 		inDataMemory = False
 		loc = 0
 		residual = 0
@@ -2170,6 +2175,7 @@ for entry in inputFile:
 		a9 = "%o" % residual
 		assembled = assembled | (loc << 5) | (residual << 4)
 		storeAssembled(lineNumber, assembled, hop, False)
+		print("%o\t%02o\t%o\t%03o\t%d\t%05o\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], lineNumber, assembled, inputLine["raw"]), file=f)
 	
 	if lineNumber != lastLineNumber:
 		errorsPrinted = []

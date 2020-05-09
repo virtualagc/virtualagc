@@ -489,13 +489,13 @@ readSourceLines(assembly_t *assembly, int count, char *filename)
 
   while (NULL != fgets(buffer, MAX_LINE, fp))
     {
-      unsigned module, sector, syllable, loc;
+      unsigned module, sector, syllable, loc, assembled;
       int i;
       buffer[MAX_LINE] = 0;
       trim(buffer);
-      i = sscanf(buffer, "%o%o%o%o%d%[^\n]", &module, &sector, &syllable, &loc,
-          &lineNumber, rawline);
-      if (i != 6)
+      i = sscanf(buffer, "%o%o%o%o%d%o%[^\n]", &module, &sector, &syllable, &loc,
+          &lineNumber, &assembled, rawline);
+      if (i != 7)
         {
           printf("Ill-formed source-table line: %s\n", buffer);
           goto done;
@@ -527,6 +527,7 @@ readSourceLines(assembly_t *assembly, int count, char *filename)
       assembly->sourceLines[assembly->numSourceLines].syllable = syllable;
       assembly->sourceLines[assembly->numSourceLines].loc = loc;
       assembly->sourceLines[assembly->numSourceLines].lineNumber = lineNumber;
+      assembly->sourceLines[assembly->numSourceLines].assembled = assembled;
       assembly->numSourceLines++;
     }
 

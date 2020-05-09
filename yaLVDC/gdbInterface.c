@@ -232,7 +232,7 @@ findAssemblyByName(char *assemblyName)
   return (NULL);
 }
 
-// Find a in the symbol table.  Accepts names of the form assembly:symbol
+// Find a name in the symbol table.  Accepts names of the form assembly:symbol
 // or just symbol.  Returns a pointer to the symbol-table entry or to NULL
 // if not found.  If the input assemblyName is missing, then all
 // assemblies are searched, but only the first match found is returned.
@@ -281,6 +281,30 @@ findSymbol(char *symbolName, int code)
             printf("Symbol specification is not unique.\n");
         }
   return (symbol);
+}
+
+// Find an address in the symbol table.  Returns a pointer to
+// the symbol-table entry or to NULL if not found.  The assembly
+// in which it was found is in the global symbolAssembly variable.
+symbol_t *
+findSymbolByAddress(int module, int sector, int syllable, int location)
+{
+  int i, j;
+  assembly_t *assembly;
+  symbol_t *symbol;
+
+  for (j = 0, assembly = assemblies; j < numAssemblies; j++, assembly++)
+    for (i = 0, symbol = assembly->symbols; i < assembly->numSymbols;
+        i++, symbol++)
+      if (module == symbol->module && sector == symbol->sector
+          && syllable == symbol->syllable && location == symbol->loc)
+        {
+          symbolAssembly = assembly;
+          return (symbol);
+        }
+
+  symbolAssembly = NULL;
+  return (NULL);
 }
 
 // Find a line number in the source table.  Return a pointer to the source-table
@@ -457,8 +481,13 @@ findSourceLineByAddress(int module, int sector, int syllable, int location)
 
   assemblySourceLineByAddress = NULL;
 
-  // Search for the matching source line.
-  if (state.core[module][sector][syllable][location] != -1)
+  // Search for the matching source line.  We check both the spec'd
+  // syllable and syllable "2" (a data word spanning both syllables
+  // 0 and 1) for emptiness, because the self-modifying nature of the
+  // code sometimes blurs the lines.
+
+  if (state.core[module][sector][syllable][location] != -1
+      || state.core[module][sector][2][location] != -1)
     {
       int i;
       assembly_t *assembly;
@@ -482,6 +511,119 @@ findSourceLineByAddress(int module, int sector, int syllable, int location)
         }
     }
   return (-1);
+}
+
+// Disassemble an octal value as an instruction.
+char *
+disassemble(uint32_t hop, uint16_t instruction)
+{
+  static char lineBuffer[81];
+  strcpy(lineBuffer, "Failed to disassemble.");
+  char *opcode;
+  uint8_t op, operand, a8, a9;
+
+  // Parse instruction into fields.
+  op = instruction & 017;
+  a9 = (instruction >> 4) & 1;
+  operand = (instruction >> 5) & 0377;
+  a8 = (operand >> 7) & 1;
+
+  // Execute the instruction.
+  if (op == 000)
+    {
+      opcode = "HOP";
+    }
+  else if (!ptc && op == 001)
+    {
+      opcode = "MPY";
+    }
+  else if (!ptc && op == 005)
+    {
+      opcode = "MPH";
+    }
+  else if (ptc && op == 001)
+    {
+      opcode = "PRS";
+    }
+  else if (ptc && op == 005)
+    {
+      opcode = "CIO";
+    }
+  else if (op == 002)
+    {
+      opcode = "SUB";
+    }
+  else if (!ptc && op == 003)
+    {
+      opcode = "DIV";
+    }
+  else if (op == 004)
+    {
+      opcode = "TNZ";
+    }
+  else if (op == 006)
+    {
+      opcode = "AND";
+    }
+  else if (op == 007)
+    {
+      opcode = "ADD";
+    }
+  else if (op == 010)
+    {
+      opcode = "TRA";
+    }
+  else if ((!ptc && op == 011) || (ptc && op == 015))
+    {
+      opcode = "XOR";
+    }
+  else if (op == 012)
+    {
+      opcode = "PIO";
+    }
+  else if (op == 013)
+    {
+      opcode = "STO";
+    }
+  else if (op == 014)
+    {
+      opcode = "TMI";
+    }
+  else if ((!ptc && op == 015) || (ptc && op == 003))
+    {
+      opcode = "RSU";
+    }
+  else if (ptc && op == 016 && a8 == 1)
+    {
+      opcode = "CDS";
+    }
+  else if (!ptc && op == 016 && a8 == 0 && a9 == 0)
+    {
+      opcode = "CDS";
+    }
+  else if (ptc && op == 016 && a8 == 0)
+    {
+      opcode = "SHF";
+    }
+  else if (!ptc && op == 016 && a8 == 0 && a9 == 1)
+    {
+      opcode = "SHF";
+    }
+  else if (!ptc && op == 016 && a8 == 1 && a9 == 1)
+    {
+      opcode = "EXM";
+    }
+  else if (op == 017)
+    {
+      opcode = "CLA";
+    }
+  else
+    {
+      return (lineBuffer);
+    }
+
+  sprintf(lineBuffer, "        %s", opcode);
+  return (lineBuffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -551,12 +693,19 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         }
       else
         {
+          uint16_t instruction;
           printf("%s   VAL = ", hopBuffer);
-          value = state.core[hs.im][hs.is][hs.s][hs.loc];
-          if (value == -1)
-            printf("%-5s", "empty");
+          if (fetchInstruction(hs.im, hs.is, hs.s, hs.loc, &instruction,
+              &instructionFromDataMemory))
+            {
+              printf("%-5s", "empty");
+              value = -1;
+            }
           else
-            printf("%05o", value);
+            {
+              value = instruction;
+              printf("%05o", value);
+            }
         }
 
       // Search for the matching source line.
@@ -564,8 +713,6 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       found = (lineIndexInAssembly != -1);
       if (found)
         assembly = assemblySourceLineByAddress;
-      else
-        printf("(source line not found)\n");
 
       printf("   ACC = %09o", state.acc);
       if (ptc == 0)
@@ -581,13 +728,33 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       printf(", Cycles: %lu", cycleCount);
       printf(", Elapsed time: %f seconds\n", cycleCount * SECONDS_PER_CYCLE);
       if (found)
-        printf("Source line: %s:%d\n", assembly->name,
-            assembly->sourceLines[lineIndexInAssembly].lineNumber);
+        {
+          printf("Source line: ");
+          if (numAssemblies > 1)
+            printf("%s:", assembly->name);
+          printf("%d\n", assembly->sourceLines[lineIndexInAssembly].lineNumber);
+        }
       else
         printf("Source line not found\n");
 
       if (found)
-        printf("%s\n", assembly->sourceLines[lineIndexInAssembly].line);
+        {
+          if (value != assembly->sourceLines[lineIndexInAssembly].assembled)
+            {
+              printf("Code in memory (%05o) has changed from load (%05o).\n",
+                  value, assembly->sourceLines[lineIndexInAssembly].assembled);
+              printf("From source:\t%s\n", assembly->sourceLines[lineIndexInAssembly].line);
+              goto mustDisassemble;
+            }
+          else
+            printf("%s\n", assembly->sourceLines[lineIndexInAssembly].line);
+        }
+      else
+        {
+          printf("From source:\t(not found)\n");
+          mustDisassemble:;
+          printf("Disassembled\t%s\n", disassemble (state.hop, value));
+        }
 
       nextCommand: ;
 
@@ -671,6 +838,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
               backtrace_t *backtrace = &backtraces[i];
               char buffer[32], *mnemonic;
               hopStructure_t hs;
+              symbol_t *symbol;
               switch (backtrace->fromInstruction & 017)
                 {
               case 000:
@@ -690,12 +858,19 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 break;
                 }
               formHopDescription(backtrace->fromWhere, 0, 0, 0, buffer, &hs);
+              symbol = findSymbolByAddress(hs.im, hs.is, hs.s, hs.loc);
               printf(
-                  "\tCycle count = %lu, Instruction count = %lu, from instruction %05o (%s) at %s to ",
+                  "\tCycle count = %lu, Instruction count = %lu, from instruction %05o (%s) at %s",
                   backtrace->cycleCount, backtrace->instructionCount,
                   backtrace->fromInstruction, mnemonic, buffer);
+              if (symbol != NULL)
+                printf(" (%s)", symbol->name);
               formHopDescription(backtrace->toWhere, 0, 0, 0, buffer, &hs);
-              printf("%s.\n", buffer);
+              symbol = findSymbolByAddress(hs.im, hs.is, hs.s, hs.loc);
+              printf(" to %s", buffer);
+              if (symbol != NULL)
+                printf(" (%s)", symbol->name);
+              printf(".\n");
             }
         }
         goto nextCommand;

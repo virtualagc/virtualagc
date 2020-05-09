@@ -281,6 +281,7 @@ main(int argc, char *argv[])
                   op = instruction & 017;
                   if (op == 000 || op == 010 || op == 004 || op == 014) // Is indeed a HOP, TRA, TNZ, or TMI instruction.
                     {
+                      uint16_t instruction16;
                       a9 = (instruction >> 4) & 1;
                       a81 = (instruction >> 5) & 0377;
                       if (op == 000) // HOP
@@ -292,12 +293,19 @@ main(int argc, char *argv[])
                           // Now fetch the first instruction from the destination of the HOP.
                           if (parseHopConstant(destHopConstant, &hsd))
                             goto badNext;
-                          instructiond =
-                              state.core[hsd.im][hsd.is][hsd.s][hsd.loc];
+                          if (fetchInstruction(hsd.im, hsd.is, hsd.s, hsd.loc, &instruction16, &instructionFromDataMemory))
+                            instructiond = -1;
+                          else
+                            instructiond = instruction16;
                         }
                       else
+                        {
                         // TRA, TNZ, or TMI
-                        instructiond = state.core[hs.im][hs.is][a9][a81];
+                          if (fetchInstruction(hs.im, hs.is, a9, a81, &instruction16, &instructionFromDataMemory))
+                            instructiond = -1;
+                          else
+                            instructiond = instruction16;
+                        }
                       if (instructiond == -1)
                         goto badNext;
                       // Is the destination instruction a STO 776 or STO 777?
