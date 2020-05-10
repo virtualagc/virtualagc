@@ -56,7 +56,7 @@ BA8421 = [
 	'+', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
 	'H', 'I', '?', '.', ')', '?', '?', '?'
 ]
-refreshRate = 100 # Milliseconds
+refreshRate = 1 # Milliseconds
 
 # Parse command-line arguments.
 import argparse
@@ -285,9 +285,11 @@ def indicatorOn(canvas):
 def outputFromCPU(ioType, channel, value):
 	global interruptLatches
 	
+	print("*", end="")
+	
 	if ioType == 0:
 		# PIO
-		print("Channel PIO-%03o = %09o" % (channel, value))
+		print("\nChannel PIO-%03o = %09o" % (channel, value))
 		
 	elif ioType == 1:
 		# CIO
@@ -367,20 +369,20 @@ def outputFromCPU(ioType, channel, value):
 			if channel >= 0o002 and channel <= 0o072:
 				setLatch(quotient + 1)
 		else:
-			print("Channel CIO-%03o = %09o" % (channel, value))
+			print("\nChannel CIO-%03o = %09o" % (channel, value))
 		
 	elif ioType == 2:
 		if value == 0o77:
-			print("Channel PRS = %09o (group mark)" % value)
+			print("\nChannel PRS = %09o (group mark)" % value)
 		else:
 			shift = 18
 			string = ""
 			while shift >= 0:
 				string += BA8421[(value >> shift) & 0o077]
 				shift -= 6
-			print("Channel PRS = %09o (%s)" % (value, string))
+			print("\nChannel PRS = %09o (%s)" % (value, string))
 	else:
-		print("Unimplemented type %d, channel %03o, value %09o" % (ioType, channel, value))
+		print("\nUnimplemented type %d, channel %03o, value %09o" % (ioType, channel, value))
 	
 	return
 

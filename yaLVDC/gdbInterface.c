@@ -1045,8 +1045,9 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       //nextCommand: ;
 
       // Get a user command.
-      printf("> ");
+      printf("\n> ");
       fgets(lineBuffer, sizeof(lineBuffer), stdin);
+      printf("\n");
       repeatLastCommand: ;
       count = parseCommand();
       if (count < 1)
@@ -1066,7 +1067,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         for (i = j = 0; commandAssociations[i].token != ctNone; i++)
           if (strlen(commandAssociations[i].syntax) > j)
             j = strlen(commandAssociations[i].syntax);
-        printf("\nAvailable commands:\n");
+        printf("Available commands:\n");
         for (i = 0; commandAssociations[i].token != ctNone; i++)
           printf("  %-*s   %s\n", j, commandAssociations[i].syntax,
               commandAssociations[i].description);
@@ -1104,7 +1105,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         {
           int i, n = 20, numBacktraces = (firstEmptyBacktrace
               - firstUsedBacktrace) % MAX_BACKTRACES;
-          printf("\nRecent HOP, TRA, TNZ, or TMI control transfers:\n");
+          printf("Recent HOP, TRA, TNZ, or TMI control transfers:\n");
           if (count > 1)
             n = atoi(fields[1]);
           if (n > MAX_BACKTRACES - 1)
@@ -1178,6 +1179,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
           }
         printf("Are you sure?  Input Y to proceed, anything else to cancel: ");
         fgets(lineBuffer, sizeof(lineBuffer), stdin);
+        printf("\n");
         if (toupper(lineBuffer[0]) == 'Y')
           {
             state.restart = 1;
@@ -1186,7 +1188,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
             goto done;
           }
         else
-          printf("\n*** Canceled ***\n");
+          printf("*** Canceled ***\n");
         goto nextCommand;
       case ctX:
         if (count == 2 || (count >= 3 && fields[1][0] == '/'))
@@ -1492,9 +1494,10 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   printf(
                       "Are you sure? Input Y to continue, anything else to cancel: ");
                   fgets(lineBuffer, sizeof(lineBuffer), stdin);
+                  printf("\n");
                   if (toupper(lineBuffer[0]) != 'Y')
                     {
-                      printf("\n*** Canceled ***\n");
+                      printf("*** Canceled ***\n");
                       goto nextCommand;
                     }
                 }
@@ -1559,9 +1562,9 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 goto nextCommand;
               }
             if (warn)
-              printf("\nDisassembling (note: starting DM/DS not known):\n");
+              printf("Disassembling (note: starting DM/DS not known):\n");
             else
-              printf("\nDisassembling:\n");
+              printf("Disassembling:\n");
             if (endloc < startloc)
               printf("\t(empty address range)\n");
             else
