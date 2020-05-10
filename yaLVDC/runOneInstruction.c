@@ -215,6 +215,8 @@ storeData(int module, int residual, int sector, int loc, int data,
         }
       else if (loc == 0376 || loc == 0377)
         data = state.hopSaver;
+      if (ptc)
+        module = 0;
       sector = 017;
     }
   state.core[module][sector][2][loc] = data;
