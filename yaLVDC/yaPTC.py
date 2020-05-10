@@ -277,11 +277,17 @@ def inputsForCPU():
 # ioTypes[] array (see the top of this file), giving the class of i/o ports
 # to which the channel belongs.  Only the PIO, CIO, and PRS channels are appicable
 # for output from the CPU to peripherals.
-def indicatorOff(canvas):
-	canvas.delete(tk.ALL)
-def indicatorOn(canvas):
-	canvas.delete(tk.ALL)
-	canvas.create_rectangle(0, 0, canvas.winfo_width(), canvas.winfo_height(), fill="white")
+indicatorIDs = {}
+def indicatorOff(canvas, index):
+	global indicatorIDs
+	if index in indicatorIDs:
+		canvas.itemconfig(indicatorIDs[index], state = "hidden")
+def indicatorOn(canvas, index):
+	global indicatorIDs
+	if index not in indicatorIDs:
+		indicatorIDs[index] = canvas.create_rectangle(0, 0, canvas.winfo_width(), canvas.winfo_height(), fill="white")
+	else:
+		canvas.itemconfig(indicatorIDs[index], state = "normal")
 def outputFromCPU(ioType, channel, value):
 	global interruptLatches
 	
@@ -305,29 +311,29 @@ def outputFromCPU(ioType, channel, value):
 			# Turn indicator lamps on or off.  I think this is actually
 			# the full functionality of CIO-204
 			if value & 0o1:
-				indicatorOn(top.P1)
+				indicatorOn(top.P1, 1)
 			else:
-				indicatorOff(top.P1)
+				indicatorOff(top.P1, 1)
 			if value & 0o2:
-				indicatorOn(top.P2)
+				indicatorOn(top.P2, 2)
 			else:
-				indicatorOff(top.P2)
+				indicatorOff(top.P2, 2)
 			if value & 0o4:
-				indicatorOn(top.P4)
+				indicatorOn(top.P4, 3)
 			else:
-				indicatorOff(top.P4)
+				indicatorOff(top.P4, 3)
 			if value & 0o10:
-				indicatorOn(top.P10)
+				indicatorOn(top.P10, 4)
 			else:
-				indicatorOff(top.P10)
+				indicatorOff(top.P10, 4)
 			if value & 0o20:
-				indicatorOn(top.P20)
+				indicatorOn(top.P20, 5)
 			else:
-				indicatorOff(top.P20)
+				indicatorOff(top.P20, 5)
 			if value & 0o40:
-				indicatorOn(top.P40)
+				indicatorOn(top.P40, 6)
 			else:
-				indicatorOff(top.P40)
+				indicatorOff(top.P40, 6)
 			return
 		elif channel == 0o210:
 			# All I'm doing here (CIO-210) is manipulating indicator lamps,
@@ -335,29 +341,29 @@ def outputFromCPU(ioType, channel, value):
 			# in terms of latching signals or something which is
 			# TBD.  ***FIXME***
 			if value & 0o1:
-				indicatorOn(top.D1)
+				indicatorOn(top.D1, 7)
 			else:
-				indicatorOff(top.D1)
+				indicatorOff(top.D1, 7)
 			if value & 0o2:
-				indicatorOn(top.D2)
+				indicatorOn(top.D2, 8)
 			else:
-				indicatorOff(top.D2)
+				indicatorOff(top.D2, 8)
 			if value & 0o4:
-				indicatorOn(top.D3)
+				indicatorOn(top.D3, 9)
 			else:
-				indicatorOff(top.D3)
+				indicatorOff(top.D3, 9)
 			if value & 0o10:
-				indicatorOn(top.D4)
+				indicatorOn(top.D4, 10)
 			else:
-				indicatorOff(top.D4)
+				indicatorOff(top.D4, 10)
 			if value & 0o20:
-				indicatorOn(top.D5)
+				indicatorOn(top.D5, 11)
 			else:
-				indicatorOff(top.D5)
+				indicatorOff(top.D5, 11)
 			if value & 0o40:
-				indicatorOn(top.D6)
+				indicatorOn(top.D6, 12)
 			else:
-				indicatorOff(top.D6)
+				indicatorOff(top.D6, 12)
 			return
 		elif remainder == 0:
 			if channel >= 0o010 and channel <= 0o104:
