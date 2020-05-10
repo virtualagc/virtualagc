@@ -148,6 +148,7 @@ enum commandTokens
   ctDELETE,
   ctCONTINUE,
   ctLIST,
+  ctDISASSEMBLE,
   ctX,
   ctCLEAR,
   ctBREAK,
@@ -169,41 +170,53 @@ typedef struct
   const char *description;
 } commandAssociation_t;
 commandAssociation_t commandAssociations[] =
-  {
-    { ctSTEP, "STEPI", "STEPI [n]", "Step n instructions, default n=1." },
-    { ctSTEP, "STEPI", "SI [n]", "Same as STEPI." },
-    { ctNEXT, "NEXTI", "NEXTI [n]", "Next n instructions, w/o entry." },
-    { ctNEXT, "NEXTI", "NI [n]", "Same as NEXTI." },
-    { ctDELETE, "DELETE", "DELETE", "Delete all breakpoints." },
-    { ctDELETE, "DELETE", "DELETE n", "Delete breakpoint n." },
-    { ctCONTINUE, "CONTINUE", "CONTINUE", "Continue running emulation." },
-    { ctLIST, "LIST", "LIST", "List following block of source code." },
-    { ctLIST, "LIST", "LIST -", "List preceding block source code." },
-    { ctLIST, "LIST", "LIST [asm:]n", "List source block at line #n." },
-    { ctLIST, "LIST", "LIST [asm:]name", "List source block at function." },
-    { ctX, "X", "X[/[n][b|d|o]] address", "Show n words at address." },
-    { ctX, "X", "X[/[n][b|d|o]] &[asm:]name", "Show n words at name." },
-    { ctCLEAR, "CLEAR", "CLEAR [asm:]name", "Delete breakpoint at function." },
-    { ctCLEAR, "CLEAR", "CLEAR [asm:]number", "Delete breakpoint at line #." },
-    { ctCLEAR, "CLEAR", "CLEAR *address", "Delete breakpoint at address." },
-    { ctBREAK, "BREAK", "BREAK [asm:]name", "Set breakpoint at function." },
-    { ctBREAK, "BREAK", "BREAK [asm:]number", "Set breakpoint at line #." },
-    { ctBREAK, "BREAK", "BREAK *address", "Set breakpoint at address." },
-    { ctTBREAK, "TBREAK", "TBREAK ...", "Same as BREAK, but temporary." },
-    { ctBACKTRACE, "BACKTRACE", "BACKTRACE [n]",
-        "Show last n backtraces, default=20." },
-    { ctBACKTRACE, "BACKTRACE", "BT [n]", "Same as BACKTRACE." },
-    { ctINFO, "INFO", "INFO ASSEMBLIES", "List all loaded assemblies." },
-    { ctINFO, "INFO", "INFO BREAKPOINTS", "List all breakpoints." },
-    { ctINFO, "INFO", "INFO BREAK", "List all breakpoint numbers." },
-    { ctRUN, "RUN", "RUN", "Reboot the LVDC/PTC emulation." },
-    { ctQUIT, "QUIT", "QUIT", "Quit the LVDC/PTC emulator." },
-    { ctSET, "SET", "SET LISTSIZE n", "Sets default size used for LIST." },
-    { ctSET, "SET", "SET name = n", "Store value n in variable name." },
-    { ctSET, "SET", "SET *address = n", "Store value n at memory address." },
-    { ctSHOW, "SHOW", "SHOW LISTSIZE", "Show current size for LIST." },
-    { ctHELP, "HELP", "HELP", "Print this list of commands." },
-    { ctNone, "" } };
+      {
+        { ctSTEP, "STEPI", "STEPI [n]", "Step n instructions, default n=1." },
+        { ctSTEP, "STEPI", "SI [n]", "Same as STEPI." },
+        { ctNEXT, "NEXTI", "NEXTI [n]", "Next n instructions, w/o entry." },
+        { ctNEXT, "NEXTI", "NI [n]", "Same as NEXTI." },
+        { ctDELETE, "DELETE", "DELETE", "Delete all breakpoints." },
+        { ctDELETE, "DELETE", "DELETE n", "Delete breakpoint n." },
+        { ctCONTINUE, "CONTINUE", "CONTINUE", "Continue running emulation." },
+        { ctLIST, "LIST", "LIST", "List following block of source code." },
+        { ctLIST, "LIST", "LIST -", "List preceding block source code." },
+        { ctLIST, "LIST", "LIST [asm:]n", "List source block at line #n." },
+        { ctLIST, "LIST", "LIST [asm:]name", "List source block at function." },
+            { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE",
+                "Disassemble next LISTSIZE instructions in current HOP environment." },
+            { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE - D-TT",
+                "Disassemble preceding LISTSIZE instructions; D-TT is starting DM/DS." },
+            { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE M-SS-Y-LLL EEE D-TT",
+                "Disassemble from code address M-SS-Y-LLL EEE using data sector D-TT." },
+            { ctX, "X", "X[/[n][b|d|o]] address", "Show n words at address." },
+            { ctX, "X", "X[/[n][b|d|o]] &[asm:]name", "Show n words at name." },
+            { ctCLEAR, "CLEAR", "CLEAR [asm:]name",
+                "Delete breakpoint at function." },
+            { ctCLEAR, "CLEAR", "CLEAR [asm:]number",
+                "Delete breakpoint at line #." },
+            { ctCLEAR, "CLEAR", "CLEAR *address",
+                "Delete breakpoint at address." },
+            { ctBREAK, "BREAK", "BREAK [asm:]name",
+                "Set breakpoint at function." },
+            { ctBREAK, "BREAK", "BREAK [asm:]number",
+                "Set breakpoint at line #." },
+            { ctBREAK, "BREAK", "BREAK *address", "Set breakpoint at address." },
+            { ctTBREAK, "TBREAK", "TBREAK ...", "Same as BREAK, but temporary." },
+            { ctBACKTRACE, "BACKTRACE", "BACKTRACE [n]",
+                "Show last n backtraces, default=20." },
+            { ctBACKTRACE, "BACKTRACE", "BT [n]", "Same as BACKTRACE." },
+            { ctINFO, "INFO", "INFO ASSEMBLIES", "List all loaded assemblies." },
+            { ctINFO, "INFO", "INFO BREAKPOINTS", "List all breakpoints." },
+            { ctINFO, "INFO", "INFO BREAK", "List all breakpoint numbers." },
+            { ctRUN, "RUN", "RUN", "Reboot the LVDC/PTC emulation." },
+            { ctQUIT, "QUIT", "QUIT", "Quit the LVDC/PTC emulator." },
+            { ctSET, "SET", "SET LISTSIZE n", "Sets default size used for LIST." },
+            { ctSET, "SET", "SET name = n", "Store value n in variable name." },
+            { ctSET, "SET", "SET *address = n",
+                "Store value n at memory address." },
+            { ctSHOW, "SHOW", "SHOW LISTSIZE", "Show current size for LIST." },
+            { ctHELP, "HELP", "HELP", "Print this list of commands." },
+            { ctNone, "" } };
 enum commandTokens
 findCommandToken(void)
 {
@@ -211,7 +224,7 @@ findCommandToken(void)
 
   for (i = 0; commandAssociations[i].token != ctNone; i++)
     {
-      if (!strncmp(fields[0], commandAssociations[i].string, n))
+      if (!strncasecmp(fields[0], commandAssociations[i].string, n))
         break;
     }
 
@@ -268,7 +281,7 @@ findSymbol(char *symbolName, int code)
     }
   for (; start < end; start++, assembly++)
     for (i = 0; i < assembly->numSymbols; i++)
-      if (!strcmp(symbolName, assembly->symbols[i].name)
+      if (!strcasecmp(symbolName, assembly->symbols[i].name)
           && ((code && assembly->symbols[i].syllable < 2)
               || (!code && assembly->symbols[i].syllable == 2)))
         {
@@ -305,6 +318,17 @@ findSymbolByAddress(int module, int sector, int syllable, int location)
 
   symbolAssembly = NULL;
   return (NULL);
+}
+
+symbol_t *
+findSymbolByDataAddress(int module, int sector, int residual, int location)
+{
+  if (!residual)
+    return (findSymbolByAddress(module, sector, 2, location));
+  else if (ptc)
+    return (findSymbolByAddress(0, 017, 2, location));
+  else
+    return (findSymbolByAddress(module, 017, 2, location));
 }
 
 // Find a line number in the source table.  Return a pointer to the source-table
@@ -513,116 +537,371 @@ findSourceLineByAddress(int module, int sector, int syllable, int location)
   return (-1);
 }
 
-// Disassemble an octal value as an instruction.
-char *
-disassemble(uint32_t hop, uint16_t instruction)
+// The disassembly process works as follows.  First, setupDisassembly()
+// is used to setup up the state of the process properly.  It can be
+// set up either with a hopStructure_t, or else (if the pointer to the
+// structure is NULL), a HOP constant.  That setup sets the instruction
+// sector, the starting instruction address, and the starting data
+// sector.  Actually performing the dissasembly is to successively
+// use the disassemble() function, which not only disassembles the
+// current instruction, but also sets the state properly for the next
+// instruction.  The range of instructions disassembled has to reside
+// in a single sector.
+struct
 {
-  static char lineBuffer[81];
-  strcpy(lineBuffer, "Failed to disassemble.");
-  char *opcode;
-  uint8_t op, operand, a8, a9;
+  int valid;
+  int error;
+  int im, is, s, loc, dm, ds;
+} disassemblyState = { 0 };
+int
+setupDisassembly(uint32_t hop, hopStructure_t *hs)
+{
+  hopStructure_t hsl;
+  disassemblyState.valid = 0;
+  disassemblyState.error = 0;
+  if (hs == NULL)
+    {
+      hs = &hsl;
+      if (parseHopConstant(hop, hs))
+        return (1);
+    }
+  else
+    {
+      memcpy(&hsl, hs, sizeof(hopStructure_t));
+      hs = &hsl;
+    }
+  if (hs->im < 0 || hs->im > 7)
+    return (1);
+  disassemblyState.im = hs->im;
+  if (hs->is < 0 || hs->is > 017)
+    return (1);
+  disassemblyState.is = hs->is;
+  if (hs->s < 0 || hs->s > 1)
+    return (1);
+  disassemblyState.s = hs->s;
+  if (hs->loc < 0 || hs->loc > 0377)
+    return (1);
+  disassemblyState.loc = hs->loc;
+  if (hs->dm < 0 || hs->dm > 7)
+    return (1);
+  disassemblyState.dm = hs->dm;
+  if (hs->ds < 0 || hs->ds > 017)
+    return (1);
+  disassemblyState.ds = hs->ds;
+  disassemblyState.valid = 1;
+  return (0);
+}
+char *
+disassemble(void)
+{
+  static char lineBuffer[256];
+  char *opcode, *lhs, operandString[128];
+  uint16_t instruction;
+  uint8_t op, operand, a8, a9, a91;
+  hopStructure_t hsc;
+  symbol_t *lhsSymbol = NULL, *operandSymbol = NULL;
+  int isHopOperand = 0, isUsualOperand = 0, isTraOperand = 0, isLiteralOperand =
+      0;
+
+  if (!disassemblyState.valid)
+    {
+      strcpy(lineBuffer, "(disassembly process not initialized)");
+      goto error;
+    }
+
+  if (disassemblyState.loc > 0377)
+    {
+      strcpy(lineBuffer, "(address past end of sector)");
+      goto error;
+    }
+
+  lhsSymbol = findSymbolByAddress(disassemblyState.im, disassemblyState.is,
+      disassemblyState.s, disassemblyState.loc);
+  if (lhsSymbol == NULL)
+    lhs = "";
+  else
+    lhs = lhsSymbol->name;
+
+  if (fetchInstruction(disassemblyState.im, disassemblyState.is,
+      disassemblyState.s, disassemblyState.loc, &instruction,
+      &instructionFromDataMemory))
+    {
+      strcpy(lineBuffer, "(no instruction at current address)");
+      goto error;
+    }
 
   // Parse instruction into fields.
   op = instruction & 017;
   a9 = (instruction >> 4) & 1;
   operand = (instruction >> 5) & 0377;
   a8 = (operand >> 7) & 1;
+  a91 = (a9 << 8) | operand;
 
   // Execute the instruction.
   if (op == 000)
     {
       opcode = "HOP";
+      isHopOperand = 1;
     }
   else if (!ptc && op == 001)
     {
       opcode = "MPY";
+      isUsualOperand = 1;
     }
   else if (!ptc && op == 005)
     {
       opcode = "MPH";
+      isUsualOperand = 1;
     }
   else if (ptc && op == 001)
     {
       opcode = "PRS";
+      isLiteralOperand = 1;
     }
   else if (ptc && op == 005)
     {
       opcode = "CIO";
+      isLiteralOperand = 1;
     }
   else if (op == 002)
     {
       opcode = "SUB";
+      isUsualOperand = 1;
     }
   else if (!ptc && op == 003)
     {
       opcode = "DIV";
+      isUsualOperand = 1;
     }
   else if (op == 004)
     {
       opcode = "TNZ";
+      isTraOperand = 1;
     }
   else if (op == 006)
     {
       opcode = "AND";
+      isUsualOperand = 1;
     }
   else if (op == 007)
     {
       opcode = "ADD";
+      isUsualOperand = 1;
     }
   else if (op == 010)
     {
       opcode = "TRA";
+      isTraOperand = 1;
     }
   else if ((!ptc && op == 011) || (ptc && op == 015))
     {
       opcode = "XOR";
+      isUsualOperand = 1;
     }
   else if (op == 012)
     {
       opcode = "PIO";
+      isLiteralOperand = 1;
     }
   else if (op == 013)
     {
       opcode = "STO";
+      isUsualOperand = 1;
     }
   else if (op == 014)
     {
       opcode = "TMI";
+      isTraOperand = 1;
     }
   else if ((!ptc && op == 015) || (ptc && op == 003))
     {
       opcode = "RSU";
+      isUsualOperand = 1;
     }
   else if (ptc && op == 016 && a8 == 1)
     {
       opcode = "CDS";
+      disassemblyState.dm = (operand >> 4) & 1;
+      disassemblyState.ds = operand & 0xF;
+      sprintf(operandString, "%o,%o", disassemblyState.dm, disassemblyState.ds);
     }
   else if (!ptc && op == 016 && a8 == 0 && a9 == 0)
     {
       opcode = "CDS";
+      disassemblyState.dm = (operand >> 1) & 7;
+      disassemblyState.ds = (operand >> 4) & 0xF;
+      sprintf(operandString, "%o,%o", disassemblyState.dm, disassemblyState.ds);
     }
   else if (ptc && op == 016 && a8 == 0)
     {
-      opcode = "SHF";
+      if ((operand & 0100) == 0)
+        opcode = "SHL";
+      else
+        opcode = "SHR";
+      switch (operand & 077)
+        {
+      case 001:
+        strcpy(operandString, "1");
+        break;
+      case 002:
+        strcpy(operandString, "2");
+        break;
+      case 004:
+        strcpy(operandString, "3");
+        break;
+      case 010:
+        strcpy(operandString, "4");
+        break;
+      case 020:
+        strcpy(operandString, "5");
+        break;
+      case 030:
+        strcpy(operandString, "6");
+        break;
+      default:
+        strcpy(operandString, "(illegal value)");
+        break;
+        }
     }
   else if (!ptc && op == 016 && a8 == 0 && a9 == 1)
     {
-      opcode = "SHF";
+      switch (operand)
+        {
+      case 000:
+        opcode = "SHF";
+        strcpy(operandString, "0");
+        break;
+      case 001:
+        opcode = "SHR";
+        strcpy(operandString, "1");
+        break;
+      case 002:
+        opcode = "SHR";
+        strcpy(operandString, "2");
+        break;
+      case 020:
+        opcode = "SHL";
+        strcpy(operandString, "1");
+        break;
+      case 040:
+        opcode = "SHL";
+        strcpy(operandString, "2");
+        break;
+      default:
+        opcode = "SHF";
+        strcpy(operandString, "(illegal value)");
+        break;
+        }
     }
   else if (!ptc && op == 016 && a8 == 1 && a9 == 1)
     {
       opcode = "EXM";
+      sprintf(operandString, "%o,%o,%o", (instruction >> 4) & 7,
+          (operand >> 4) & 1, operand & 0xF);
     }
   else if (op == 017)
     {
       opcode = "CLA";
+      isUsualOperand = 1;
     }
   else
     {
-      return (lineBuffer);
+      sprintf(lineBuffer, "(cannot disassemble value %05o)", instruction);
+      goto error;
     }
 
-  sprintf(lineBuffer, "        %s", opcode);
+  // Additional formatting of operand, by instruction type.
+  if (isHopOperand)
+    {
+      symbol_t *operandSymbol = NULL, *hopSymbol = NULL;
+      int n, hopValueMissing = 1, hopValue = -1, hopValueCorrupt = 1;
+
+      operandSymbol = findSymbolByDataAddress(disassemblyState.dm,
+          disassemblyState.ds, a9, operand);
+      hopValueMissing = fetchData(disassemblyState.dm, a9, disassemblyState.ds,
+          operand, &hopValue, &dataFromInstructionMemory);
+      if (!hopValueMissing)
+        {
+          hopValueCorrupt = parseHopConstant(hopValue, &hsc);
+          if (!hopValueCorrupt)
+            hopSymbol = findSymbolByAddress(hsc.im, hsc.is, hsc.s, hsc.loc);
+        }
+
+      // To format the output operand, work downward from
+      // most-preferable case to least-preferable case.
+      n = 0;
+      if (hopSymbol != NULL)
+        n += sprintf(&operandString[n], "%s (destination), ", hopSymbol->name);
+      else if (!hopValueCorrupt)
+        n += sprintf(&operandString[n], "%o-%02o-%o-%03o (destination), ",
+            hsc.im, hsc.is, hsc.s, hsc.loc);
+      else if (hopValueMissing)
+        n += sprintf(&operandString[n], "Missing HOP value, ");
+      else
+        n += sprintf(&operandString[n], "Corrupt HOP value, ");
+      if (operandSymbol != NULL)
+        n += sprintf(&operandString[n], "%s (operand)", operandSymbol->name);
+      else if (a9 == 0)
+        n += sprintf(&operandString[n], "%o-%02o-%03o (operand)",
+            disassemblyState.dm, disassemblyState.ds, operand);
+      else if (ptc)
+        n += sprintf(&operandString[n], "0-17-%03o (operand)", operand);
+      else
+        n += sprintf(&operandString[n], "%o-17-%03o (operand)",
+            disassemblyState.dm, operand);
+    }
+  else if (isUsualOperand)
+    {
+      int n, value;
+      // The "usual operand" is a data location, possibly in the residual sector.
+      operandSymbol = findSymbolByDataAddress(disassemblyState.dm,
+          disassemblyState.ds, a9, operand);
+      n = 0;
+      if (operandSymbol != NULL)
+        {
+          char *prefix;
+          if (isdigit(operandSymbol->name[0]))
+            prefix = "=O";
+          else
+            prefix = "";
+          n += sprintf(&operandString[n], "%s%s", prefix, operandSymbol->name);
+        }
+      else if (a9 == 0)
+        n += sprintf(&operandString[n], "%o-%02o-%03o", disassemblyState.dm,
+            disassemblyState.ds, operand);
+      else if (ptc)
+        n += sprintf(&operandString[n], "0-17-%03o", operand);
+      else
+        n += sprintf(&operandString[n], "%o-17-%03o", disassemblyState.dm,
+            operand);
+      if (fetchData(disassemblyState.dm, a9, disassemblyState.ds, operand,
+          &value, &dataFromInstructionMemory))
+        n += sprintf(&operandString[n], ", memory location is empty");
+      else
+        n += sprintf(&operandString[n], ", stored value = %09o", value);
+    }
+  else if (isTraOperand)
+    {
+      operandSymbol = findSymbolByAddress(disassemblyState.is,
+          disassemblyState.im, a9, operand);
+      if (operandSymbol == NULL)
+        sprintf(operandString, "%o-%0o-%o-%03o", disassemblyState.is,
+            disassemblyState.im, a9, operand);
+      else
+        strcpy(operandString, operandSymbol->name);
+    }
+  else if (isLiteralOperand)
+    {
+      sprintf(operandString, "%03o", a91);
+    }
+
+  sprintf(lineBuffer, "%-8s%-8s%s", lhs, opcode, operandString);
+  if (0)
+    {
+      error: ;
+      disassemblyState.error = 1;
+    }
+  disassemblyState.loc++;
   return (lineBuffer);
 }
 
@@ -685,6 +964,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
             }
         }
 
+      nextCommand: ;
+
       // Display registers.
       printf("\n HOP = ");
       if (formHopDescription(state.hop, 0, 0, 0, hopBuffer, &hs))
@@ -743,7 +1024,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
             {
               printf("Code in memory (%05o) has changed from load (%05o).\n",
                   value, assembly->sourceLines[lineIndexInAssembly].assembled);
-              printf("From source:\t%s\n", assembly->sourceLines[lineIndexInAssembly].line);
+              printf("From source:\t%s\n",
+                  assembly->sourceLines[lineIndexInAssembly].line);
               goto mustDisassemble;
             }
           else
@@ -752,11 +1034,12 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       else
         {
           printf("From source:\t(not found)\n");
-          mustDisassemble:;
-          printf("Disassembled\t%s\n", disassemble (state.hop, value));
+          mustDisassemble: ;
+          setupDisassembly(state.hop, NULL);
+          printf("Disassembled:\t%s\n", disassemble());
         }
 
-      nextCommand: ;
+      //nextCommand: ;
 
       // Get a user command.
       printf("> ");
@@ -892,7 +1175,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
           }
         printf("Are you sure?  Input Y to proceed, anything else to cancel: ");
         fgets(lineBuffer, sizeof(lineBuffer), stdin);
-        if (lineBuffer[0] == 'Y')
+        if (toupper(lineBuffer[0]) == 'Y')
           {
             state.restart = 1;
             printf("Restoring state, restarting emulation.\n");
@@ -900,7 +1183,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
             goto done;
           }
         else
-          printf("Canceled.\n");
+          printf("\n*** Canceled ***\n");
         goto nextCommand;
       case ctX:
         if (count == 2 || (count >= 3 && fields[1][0] == '/'))
@@ -1206,9 +1489,9 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   printf(
                       "Are you sure? Input Y to continue, anything else to cancel: ");
                   fgets(lineBuffer, sizeof(lineBuffer), stdin);
-                  if (lineBuffer[0] != 'Y')
+                  if (toupper(lineBuffer[0]) != 'Y')
                     {
-                      printf("Canceled!\n");
+                      printf("\n*** Canceled ***\n");
                       goto nextCommand;
                     }
                 }
@@ -1234,6 +1517,69 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       case ctSHOW:
         if (count >= 2 && !strcasecmp(fields[1], "listsize"))
           printf("Default block size for LIST is %d lines.\n", listSize);
+        goto nextCommand;
+      case ctDISASSEMBLE:
+        if (count >= 3 || count < 2)
+          {
+            int im = hs.im, is = hs.is, s = hs.s, startloc = hs.loc, endloc,
+                dm = hs.dm, ds = hs.ds, warn = 1;
+            if (count == 3 && strcmp(fields[1], "-")
+                && 2 == sscanf(fields[2], "%o-%o", &dm, &ds) && dm <= 7
+                && ds <= 017)
+              {
+                endloc = startloc - 1;
+                startloc -= listSize;
+                if (startloc < 0)
+                  startloc = 0;
+                if (endloc < 0)
+                  endloc = 0;
+              }
+            else if (count == 1)
+              {
+                warn = 0;
+                endloc = startloc + listSize - 1;
+                if (endloc > 0377)
+                  endloc = 0377;
+              }
+            else if (count >= 4
+                && 3
+                    == sscanf(fields[1], "%o-%o-%o-%o", &im, &is, &s, &startloc)
+                && 1 == sscanf(fields[2], "%o", &endloc)
+                && 2 == sscanf(fields[3], "%o-%o", &dm, &ds) && im <= 7
+                && is <= 017 && s <= 1 && startloc <= 0377 && endloc <= 0377
+                && dm <= 7 && ds >= 017)
+              {
+              }
+            else
+              {
+                printf("Invalid arguments.\n");
+                goto nextCommand;
+              }
+            if (warn)
+              printf("\nDisassembling (note: starting DM/DS not known):\n");
+            else
+              printf("\nDisassembling:\n");
+            if (endloc < startloc)
+              printf("\t(empty address range)\n");
+            else
+              {
+                hopStructure_t dhs;
+                dhs.im = im;
+                dhs.is = is;
+                dhs.s = s;
+                dhs.loc = startloc;
+                dhs.dm = dm;
+                dhs.ds = ds;
+                if (setupDisassembly(-1, &dhs))
+                  printf("Unable to set up disassembly.\n");
+                else
+                  for (; startloc <= endloc; startloc++)
+                    {
+                      printf("\t%o-%02o-%o-%03o:\t", im, is, s, startloc);
+                      printf("%s\n", disassemble());
+                    }
+              }
+          }
         goto nextCommand;
       case ctLIST:
         {
