@@ -146,6 +146,7 @@ addBacktrace(int16_t fromInstruction, int32_t fromWhere, int32_t toWhere, unsign
 //////////////////////////////////////////////////////////////////////////////
 // Main program.
 
+int clockDivisor = 1;
 int
 main(int argc, char *argv[])
 {
@@ -195,7 +196,7 @@ main(int argc, char *argv[])
   fflush(stdout);
   state.hopSaver = 0;
 
-  cyclesPerTick = 1.0 / (SECONDS_PER_CYCLE * sysconf(_SC_CLK_TCK));
+  cyclesPerTick = 1.0 / (SECONDS_PER_CYCLE * sysconf(_SC_CLK_TCK)) / clockDivisor;
   startingTime = times(&TmsStruct);
   if (ptc)
     state.hop = 0;

@@ -73,6 +73,8 @@ dPrintouts (void);
 #endif
 
 // See yaLVDC.c
+int clockDivisor;
+int inhibitFetchMessages;
 #define MAX_SYMBOL_LENGTH 10
 typedef struct
 {

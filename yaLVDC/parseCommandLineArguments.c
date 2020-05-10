@@ -64,6 +64,10 @@ static char helpMessage[] = "Usage:\n"
     "              (without --run), will simply pause without running.\n"
     "--port=N      Specifies the port number used by the server for virtual\n"
     "              connection to peripherals.  Default is 19653.\n"
+    "--divisor=N   Slows down the emulated CPU clock by a factor of N (with\n"
+    "              the default obviously being 1).  This is intended to be\n"
+    "              used with very slow peripheral emulations, such as yaPTC.py\n"
+    "              that cannot keep up with yaLVDC otherwise.\n"
     "";
 
 char *coreFilename = "yaLVDC.core";
@@ -101,6 +105,8 @@ parseCommandLineArguments (int argc, char *argv[])
         coldStart = 1;
       else if (!strcmp (argv[i], "--run"))
         runStepN = INT_MAX;
+      else if (1 == sscanf(argv[i], "--divisor=%d", &j))
+        clockDivisor = j;
       else if (!strcmp (argv[i], "--help"))
 	goto help;
       else

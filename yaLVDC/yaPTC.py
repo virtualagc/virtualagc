@@ -21,6 +21,15 @@
 #				"ProcessorDisplayPanel" at the top of this
 #				file.  The sources PAGE uses to generate 
 #				this code are in the guiDesign folder.
+#		2020-05-10 RSB	Unfortunately, there's no way this can keep up
+#				with yaLVDC in terms of speed.  It continues
+#				to receive data from yaLVDC *long* after the
+#				PTC program has been paused.  It may be 
+#				possible to use it if the clock-rate in 
+#				yaLVDC is cut way down, and I'll experiment
+#				with that, because this program is nice enough
+#				now that I'm not keen to reimplement it in 
+#				another language and gui toolkit.
 #
 # The parts which need to be modified from the skeleton form of the program 
 # to make it peripheral-specific are the outputFromCPU() and inputsForCPU() 
@@ -34,6 +43,20 @@
 from ProcessorDisplayPanel import *
 
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
+# BA8421 character set in its native encoding.  All of the unprintable
+# characters are replaced by '?', which isn't a legal character anyway.
+# Used only for --ptc.
+BA8421 = [
+	' ', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', '0', '#', '@', '?', '?', '?',
+	'?', '/', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', '‡', ',', '(', '?', '?', '?',
+	'-', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', '?', '$', '*', '?', '?', '?',
+	'+', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', '?', '.', ')', '?', '?', '?'
+]
+refreshRate = 100 # Milliseconds
 
 # Parse command-line arguments.
 import argparse
@@ -183,6 +206,14 @@ def cPRB():
 	ProgRegB = n
 ProcessorDisplayPanel_support.cPRB = cPRB
 
+interruptLatches = 0
+def setLatch(n):
+	global interruptLatches
+	interruptLatches |= (1 << (n - 1))
+def resetLatch(n):
+	global interruptLatches
+	interruptLatches &= ~(1 << (n - 1))
+	
 # This function is automatically called periodically by the event loop to check for 
 # conditions that will result in sending messages to yaLVDC that are interpreted
 # as changes to bits on its input channels.  The return
@@ -196,7 +227,9 @@ ProcessorDisplayPanel_support.cPRB = cPRB
 #delayCount = 0
 #ioTypeCount = 0
 #channelCount = 0
+lastInterruptLatches = -1
 def inputsForCPU():
+	global lastInterruptLatches
 	#global delayCount, ioTypeCount, channelCount
 	global ProgRegA, ProgRegB
 	returnValue = []
@@ -210,6 +243,10 @@ def inputsForCPU():
 		n = ProgRegB
 		ProgRegB = -1
 		return [(1, 0o220, n, 0o377777777)]
+		
+	if lastInterruptLatches != interruptLatches:
+		lastInterruptLatches = interruptLatches
+		return [(1, 0o154, lastInterruptLatches, 0o377777777)]
 	
 	if False:
 		# This is just a little demo function to show that the communication
@@ -246,74 +283,102 @@ def indicatorOn(canvas):
 	canvas.delete(tk.ALL)
 	canvas.create_rectangle(0, 0, canvas.winfo_width(), canvas.winfo_height(), fill="white")
 def outputFromCPU(ioType, channel, value):
+	global interruptLatches
 	
-	# Turn indicator lamps on or off.  I think this is actually
-	# the full functionality of CIO-204
-	if ioType == 1 and channel == 0o204:
-		if value & 0o1:
-			indicatorOn(top.P1)
-		else:
-			indicatorOff(top.P1)
-		if value & 0o2:
-			indicatorOn(top.P2)
-		else:
-			indicatorOff(top.P2)
-		if value & 0o4:
-			indicatorOn(top.P4)
-		else:
-			indicatorOff(top.P4)
-		if value & 0o10:
-			indicatorOn(top.P10)
-		else:
-			indicatorOff(top.P10)
-		if value & 0o20:
-			indicatorOn(top.P20)
-		else:
-			indicatorOff(top.P20)
-		if value & 0o40:
-			indicatorOn(top.P40)
-		else:
-			indicatorOff(top.P40)
-		return
-	
-	# All I'm doing here (CIO-210) is manipulating indicator lamps,
-	# but the discretes additionally have some other functionality
-	# in terms of latching signals or something which is
-	# TBD.  ***FIXME***
-	if ioType == 1 and channel == 0o210:
-		if value & 0o1:
-			indicatorOn(top.D1)
-		else:
-			indicatorOff(top.D1)
-		if value & 0o2:
-			indicatorOn(top.D2)
-		else:
-			indicatorOff(top.D2)
-		if value & 0o4:
-			indicatorOn(top.D3)
-		else:
-			indicatorOff(top.D3)
-		if value & 0o10:
-			indicatorOn(top.D4)
-		else:
-			indicatorOff(top.D4)
-		if value & 0o20:
-			indicatorOn(top.D5)
-		else:
-			indicatorOff(top.D5)
-		if value & 0o40:
-			indicatorOn(top.D6)
-		else:
-			indicatorOff(top.D6)
-		return
-	
-	# Fallback.
 	if ioType == 0:
+		# PIO
 		print("Channel PIO-%03o = %09o" % (channel, value))
+		
 	elif ioType == 1:
-		print("Channel CIO-%03o = %09o" % (channel, value))
+		# CIO
+		remainder = channel % 4
+		quotient = channel // 4
+		if channel == 0o000:
+			interruptLatches |= value & 0o77777
+		elif channel == 0o001:
+			setLatch(3)
+		elif channel == 0o004:
+			interruptLatches &= ~(value & 0o77777)
+		elif channel == 0o204:
+			# Turn indicator lamps on or off.  I think this is actually
+			# the full functionality of CIO-204
+			if value & 0o1:
+				indicatorOn(top.P1)
+			else:
+				indicatorOff(top.P1)
+			if value & 0o2:
+				indicatorOn(top.P2)
+			else:
+				indicatorOff(top.P2)
+			if value & 0o4:
+				indicatorOn(top.P4)
+			else:
+				indicatorOff(top.P4)
+			if value & 0o10:
+				indicatorOn(top.P10)
+			else:
+				indicatorOff(top.P10)
+			if value & 0o20:
+				indicatorOn(top.P20)
+			else:
+				indicatorOff(top.P20)
+			if value & 0o40:
+				indicatorOn(top.P40)
+			else:
+				indicatorOff(top.P40)
+			return
+		elif channel == 0o210:
+			# All I'm doing here (CIO-210) is manipulating indicator lamps,
+			# but the discretes additionally have some other functionality
+			# in terms of latching signals or something which is
+			# TBD.  ***FIXME***
+			if value & 0o1:
+				indicatorOn(top.D1)
+			else:
+				indicatorOff(top.D1)
+			if value & 0o2:
+				indicatorOn(top.D2)
+			else:
+				indicatorOff(top.D2)
+			if value & 0o4:
+				indicatorOn(top.D3)
+			else:
+				indicatorOff(top.D3)
+			if value & 0o10:
+				indicatorOn(top.D4)
+			else:
+				indicatorOff(top.D4)
+			if value & 0o20:
+				indicatorOn(top.D5)
+			else:
+				indicatorOff(top.D5)
+			if value & 0o40:
+				indicatorOn(top.D6)
+			else:
+				indicatorOff(top.D6)
+			return
+		elif remainder == 0:
+			if channel >= 0o010 and channel <= 0o104:
+				resetLatch(quotient - 1)
+		elif remainder == 1:
+			if channel >= 0o001 and channel <= 0o061:
+				setLatch(quotient + 3)
+		elif remainder == 2:
+			if channel >= 0o002 and channel <= 0o072:
+				setLatch(quotient + 1)
+		else:
+			print("Channel CIO-%03o = %09o" % (channel, value))
+		
 	elif ioType == 2:
-		print("Channel PRS = %09o" % value)
+		if value == 0o77:
+			print("Channel PRS = %09o (group mark)" % value)
+		else:
+			shift = 18
+			string = ""
+			while shift >= 0:
+				string += BA8421[(value >> shift) & 0o077]
+				shift -= 6
+			print("Channel PRS = %09o (%s)" % (value, string))
 	else:
 		print("Unimplemented type %d, channel %03o, value %09o" % (ioType, channel, value))
 	
@@ -343,7 +408,6 @@ def connectToAGC():
 			count += 1
 			if count >= 10:
 				sys.stderr.write("Too many retries ...\n")
-				shutdownGPIO()
 				time.sleep(3)
 				sys.exit(1)
 			time.sleep(1)
@@ -459,7 +523,7 @@ def mainLoopIteration():
 		packetize(externalData[i])
 		didSomething = True
 	
-	root.after(10, mainLoopIteration)		
+	root.after(refreshRate, mainLoopIteration)		
 	
 while False:
 	mainLoopIteration()
@@ -468,5 +532,5 @@ root = tk.Tk()
 ProcessorDisplayPanel_support.set_Tk_var()
 top = topProcessorDisplayPanel (root)
 ProcessorDisplayPanel_support.init(root, top)
-root.after(10, mainLoopIteration)
+root.after(refreshRate, mainLoopIteration)
 root.mainloop()

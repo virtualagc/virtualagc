@@ -601,7 +601,9 @@ disassemble(void)
   hopStructure_t hsc;
   symbol_t *lhsSymbol = NULL, *operandSymbol = NULL;
   int isHopOperand = 0, isUsualOperand = 0, isTraOperand = 0, isLiteralOperand =
-      0;
+      0, originalInhibit = inhibitFetchMessages;
+
+  inhibitFetchMessages = 1;
 
   if (!disassemblyState.valid)
     {
@@ -902,6 +904,7 @@ disassemble(void)
       disassemblyState.error = 1;
     }
   disassemblyState.loc++;
+  inhibitFetchMessages = originalInhibit;
   return (lineBuffer);
 }
 
@@ -1007,7 +1010,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       printf(" RET = %s\n", hopBuffer);
       printf("Instructions: %lu", instructionCount);
       printf(", Cycles: %lu", cycleCount);
-      printf(", Elapsed time: %f seconds\n", cycleCount * SECONDS_PER_CYCLE);
+      printf(", Elapsed time: %f seconds\n", cycleCount * SECONDS_PER_CYCLE * clockDivisor);
       if (found)
         {
           printf("Source line: ");

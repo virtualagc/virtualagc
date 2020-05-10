@@ -130,6 +130,7 @@ formHopConstant(hopStructure_t *hopStructure, int *hopConstant)
 // Note that address 0775 is treated as a special case, since the data comes
 // from the CPU's PQ register rather than from memory.
 
+int inhibitFetchMessages = 0;
 int
 fetchData(int module, int residual, int sector, int loc, int *data,
     int32_t *dataFromInstructionMemory)
@@ -163,9 +164,9 @@ fetchData(int module, int residual, int sector, int loc, int *data,
       // code.
       if (fetch0 == -1 && fetch1 == -1)
         {
-          //pushErrorMessage("Fetching data from empty location", NULL);
-          printf("Fetching data from empty location %o-%02o-%03o\n", module,
-              sector, loc);
+          if (!inhibitFetchMessages)
+            printf("Fetching data from empty location %o-%02o-%03o\n", module,
+                sector, loc);
           runStepN = 0;
           goto done;
         }
@@ -252,8 +253,8 @@ fetchInstruction(int module, int sector, int syllable, int loc,
       fetchedData = state.core[module][sector][2][loc];
       if (fetchedData == -1)
         {
-          //pushErrorMessage("Cannot fetch instruction from empty address", NULL);
-          printf("Cannot fetch instruction from empty data address\n");
+          if (!inhibitFetchMessages)
+            printf("Cannot fetch instruction from empty data address\n");
           goto done;
         }
       *instructionFromDataMemory = 1;
