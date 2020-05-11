@@ -64,6 +64,7 @@ BA8421 = [
 	'H', 'I', '?', '.', ')', '?', '?', '?'
 ]
 refreshRate = 1 # Milliseconds
+resizable = 0
 
 # Parse command-line arguments.
 import argparse
@@ -71,6 +72,7 @@ cli = argparse.ArgumentParser()
 cli.add_argument("--host", help="Host address of yaAGC/yaAGS, defaulting to localhost.")
 cli.add_argument("--port", help="Port for yaLVDC, defaulting to 19653.", type=int)
 cli.add_argument("--id", help="Unique ID of this peripheral (1-7), default=1.", type=int)
+cli.add_argument("--resizable", help="If 1 (default 0), make the window resizable.", type=int)
 args = cli.parse_args()
 
 # Characteristics of the host and port being used for yaLVDC communications.  
@@ -88,6 +90,14 @@ if args.id:
 	ID = args.id
 else:
 	ID = 1
+
+if args.resizable:
+	resizable = args.resizable
+	if resizable != 0:
+		resizable = 1
+else:
+	resizable = 0
+print(resizable)
 
 ###################################################################################
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
@@ -242,37 +252,25 @@ def inputsForCPU():
 
 # GUI indicator functions.  These are implemented as canvas widgets,
 # sometimes with callback functions bound to them when they're supposed
-# to act like pushbuttons.  First, define a set of unique IDs for 
-# all of the canvas widgets so-used.
-ID_P1 = 1
-ID_P2 = 2
-ID_P4 = 3
-ID_P10 = 4
-ID_P20 = 5
-ID_P40 = 6
-ID_D1 = 7
-ID_D2 = 8
-ID_D3 = 9
-ID_D4 = 10
-ID_D5 = 11
-ID_D6 = 12
-ID_PROG_ERR = 13
-indicatorIDs = {}
-def indicatorInitialize(canvas, index, text):
-	global indicatorIDs
-	width = canvas.winfo_width()
-	height = canvas.winfo_height()
-	indicatorIDs[index] = []
-	indicatorIDs[index].append(canvas.create_rectangle(0, 0, width, height, fill="white", state = "hidden"))
-	indicatorIDs[index].append(canvas.create_text(width // 2, height // 2, fill="white", text=text, justify=tk.CENTER))
-def indicatorOff(canvas, index):
-	global indicatorIDs
-	canvas.itemconfig(indicatorIDs[index][0], state = "hidden")
-	canvas.itemconfig(indicatorIDs[index][1], fill = "white")
-def indicatorOn(canvas, index):
-	global indicatorIDs
-	canvas.itemconfig(indicatorIDs[index][0], state = "normal")
-	canvas.itemconfig(indicatorIDs[index][1], fill = "black")
+# to act like pushbuttons.  Each canvas just has two visible elements:
+# a filling white rectangle (ID=1) that can be either opaque or invisible,
+# and a textual caption (ID=5).
+def indicatorReconfigure(event):
+	width = event.width
+	height = event.height
+	event.widget.coords(1, 0, 0, width, height)
+	event.widget.coords(2, width/2.0, height/2.0)
+def indicatorInitialize(canvas, text):
+	canvas.delete("all")
+	canvas.create_rectangle(0, 0, 1, 1, fill="white", state = "hidden")
+	canvas.create_text(1, 1, fill="white", text=text, font=("Sans", 6), justify=tk.CENTER)
+	canvas.bind("<Configure>", indicatorReconfigure)
+def indicatorOff(canvas):
+	canvas.itemconfig(1, state = "hidden")
+	canvas.itemconfig(2, fill = "white")
+def indicatorOn(canvas):
+	canvas.itemconfig(1, state = "normal")
+	canvas.itemconfig(2, fill = "black")
 
 # This function is called by the event loop only when yaLVDC has written
 # to an output channel.  The function should do whatever it is that needs to be done
@@ -286,18 +284,57 @@ def outputFromCPU(ioType, channel, value):
 	
 	if ioType == 0:
 		# PIO
-		print("\nChannel PIO-%03o = %09o" % (channel, value))
+		print("\nChannel PIO-%03o = %09o" % (channel, value), end="  ")
 		
 	elif ioType == 1:
 		# CIO
 		if channel == 0o114:
 			print("\nSingle step")
-		elif channel == 0o120:
-			print("\nAlphanumeric = %09o (%s)" % (value, BA8421[(value >> 20) & 0o77]))
-		elif channel == 0o124:
-			print("\nDecimal = %09o (%s)" % (value, BA8421[(value >> 22) & 0o17]))
-		elif channel == 0o130:
-			print("\nOctal = %09o (%s)" % (value, BA8421[(value >> 23) & 0o7]))
+		elif channel == 0o120 or channel == 0o160:
+			if channel == 0o120:
+				destination = "Typewriter"
+			else:
+				destination = "Printer"
+			string = ""
+			shift = 20
+			while shift >= 0:
+				string += BA8421[(value >> shift) & 0o77]
+				if channel == 0o120:
+					shift = -1
+				else:
+					shift -= 6
+			print("\n%s alphanumeric = %09o (%s)" % (destination, value, string), end="  ")
+		elif channel == 0o124 or channel == 0o170:
+			if channel == 0o124:
+				destination = "Typewriter"
+			else:
+				destination = "Printer"
+			string = ""
+			shift = 22
+			while shift >= 0:
+				string += BA8421[(value >> shift) & 0o17]
+				if channel == 0o124:
+					shift = -1
+				else:
+					shift -= 4
+			print("\n%s decimal = %09o (%s)" % (destination, value, string), end="  ")
+		elif channel == 0o130 or channel == 0o164:
+			if channel == 0o130:
+				destination = "Typewriter"
+			else:
+				destination = "Printer"
+			string = ""
+			shift = 23
+			while shift >= 0:
+				character = BA8421[(value >> shift) & 0o07]
+				if character == " ":
+					character = "0"
+				string += character
+				if channel == 0o130:
+					shift = -1
+				else:
+					shift -= 3
+			print("\n%s octal = %09o (%s)" % (destination, value, string), end="  ")
 		elif channel == 0o134:
 			if value == 0o200000000:
 				string = "space"
@@ -313,46 +350,40 @@ def outputFromCPU(ioType, channel, value):
 				string = "tab"
 			else:
 				string = "illegal"
-			print("\nTypewriter control = %09o (%s)" % (value, string))
+			print("\nTypewriter control = %09o (%s)" % (value, string), end="  ")
 		elif channel == 0o140:
-			print("\nX plot = %09o" % value)
+			print("\nX plot = %09o" % value, end="  ")
 		elif channel == 0o144:
-			print("\nY plot = %09o" % value)
+			print("\nY plot = %09o" % value, end="  ")
 		elif channel == 0o150:
-			print("\nZ plot = %09o" % value)
-		elif channel == 0o160:
-			print("\nPrinter carriage contro = %09o (%s)" % (value, BA8421[(value >> 20) & 0o77]))
-		elif channel == 0o164:
-			print("\nPrint octal = %09o (%s)" % (value, BA8421[(value >> 23) & 0o7]))
-		elif channel == 0o170:
-			print("\nPrint BCD = %09o (%s)" % (value, BA8421[(value >> 22) & 0o17]))
+			print("\nZ plot = %09o" % value, end="  ")
 		elif channel == 0o204:
 			# Turn indicator lamps on or off.  I think this is actually
 			# the full functionality of CIO-204
 			if value & 0o1:
-				indicatorOn(top.P1, ID_P1)
+				indicatorOn(top.P1)
 			else:
-				indicatorOff(top.P1, ID_P1)
+				indicatorOff(top.P1)
 			if value & 0o2:
-				indicatorOn(top.P2, ID_P2)
+				indicatorOn(top.P2)
 			else:
-				indicatorOff(top.P2, ID_P2)
+				indicatorOff(top.P2)
 			if value & 0o4:
-				indicatorOn(top.P4, ID_P4)
+				indicatorOn(top.P4)
 			else:
-				indicatorOff(top.P4, ID_P4)
+				indicatorOff(top.P4)
 			if value & 0o10:
-				indicatorOn(top.P10, ID_P10)
+				indicatorOn(top.P10)
 			else:
-				indicatorOff(top.P10, ID_P10)
+				indicatorOff(top.P10)
 			if value & 0o20:
-				indicatorOn(top.P20, ID_P20)
+				indicatorOn(top.P20)
 			else:
-				indicatorOff(top.P20, ID_P20)
+				indicatorOff(top.P20)
 			if value & 0o40:
-				indicatorOn(top.P40, ID_P40)
+				indicatorOn(top.P40)
 			else:
-				indicatorOff(top.P40, ID_P40)
+				indicatorOff(top.P40)
 			return
 		elif channel == 0o210:
 			# All I'm doing here (CIO-210) is manipulating indicator lamps,
@@ -360,52 +391,52 @@ def outputFromCPU(ioType, channel, value):
 			# in terms of latching signals or something which is
 			# TBD.  ***FIXME***
 			if value & 0o1:
-				indicatorOn(top.D1, ID_D1)
+				indicatorOn(top.D1)
 			else:
-				indicatorOff(top.D1, ID_D1)
+				indicatorOff(top.D1)
 			if value & 0o2:
-				indicatorOn(top.D2, ID_D2)
+				indicatorOn(top.D2)
 			else:
-				indicatorOff(top.D2, ID_D2)
+				indicatorOff(top.D2)
 			if value & 0o4:
-				indicatorOn(top.D3, ID_D3)
+				indicatorOn(top.D3)
 			else:
-				indicatorOff(top.D3, ID_D3)
+				indicatorOff(top.D3)
 			if value & 0o10:
-				indicatorOn(top.D4, ID_D4)
+				indicatorOn(top.D4)
 			else:
-				indicatorOff(top.D4, ID_D4)
+				indicatorOff(top.D4)
 			if value & 0o20:
-				indicatorOn(top.D5, ID_D5)
+				indicatorOn(top.D5)
 			else:
-				indicatorOff(top.D5, ID_D5)
+				indicatorOff(top.D5)
 			if value & 0o40:
-				indicatorOn(top.D6, ID_D6)
+				indicatorOn(top.D6)
 			else:
-				indicatorOff(top.D6, ID_D6)
+				indicatorOff(top.D6)
 			return
 		elif channel == 0o240:
-			indicatorOn(top.PROG_ERR, ID_PROG_ERR)
+			indicatorOn(top.PROG_ERR)
 		else:
-			print("\nChannel CIO-%03o = %09o" % (channel, value))
+			print("\nChannel CIO-%03o = %09o" % (channel, value), end="  ")
 		
 	elif ioType == 2:
 		if value == 0o77:
-			print("\nChannel PRS = %09o (group mark)" % value)
+			print("\nChannel PRS = %09o (group mark)" % value, end= "  ")
 		else:
 			shift = 18
 			string = ""
 			while shift >= 0:
 				string += BA8421[(value >> shift) & 0o077]
 				shift -= 6
-			print("\nChannel PRS = %09o (%s)" % (value, string))
+			print("\nChannel PRS = %09o (%s)" % (value, string), end="  ")
 	else:
-		print("\nUnimplemented type %d, channel %03o, value %09o" % (ioType, channel, value))
+		print("\nUnimplemented type %d, channel %03o, value %09o" % (ioType, channel, value), end="  ")
 	
 	return
 
 def pressedPROG_ERR(event):
-	indicatorOff(top.PROG_ERR, ID_PROG_ERR)
+	indicatorOff(top.PROG_ERR)
 
 ###################################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
@@ -555,19 +586,20 @@ root = tk.Tk()
 ProcessorDisplayPanel_support.set_Tk_var()
 top = topProcessorDisplayPanel (root)
 ProcessorDisplayPanel_support.init(root, top)
-indicatorInitialize(top.P1, ID_P1, "P1")
-indicatorInitialize(top.P2, ID_P2, "P2")
-indicatorInitialize(top.P4, ID_P4, "P4")
-indicatorInitialize(top.P10, ID_P10, "P10")
-indicatorInitialize(top.P20, ID_P20, "P20")
-indicatorInitialize(top.P40, ID_P40, "P40")
-indicatorInitialize(top.D1, ID_D1, "D1")
-indicatorInitialize(top.D2, ID_D2, "D2")
-indicatorInitialize(top.D3, ID_D3, "D3")
-indicatorInitialize(top.D4, ID_D4, "D4")
-indicatorInitialize(top.D5, ID_D5, "D5")
-indicatorInitialize(top.D6, ID_D6, "D6")
-indicatorInitialize(top.PROG_ERR, ID_PROG_ERR, "PROG\nERR")
+root.resizable(resizable, resizable)
+indicatorInitialize(top.P1, "P1")
+indicatorInitialize(top.P2, "P2")
+indicatorInitialize(top.P4, "P4")
+indicatorInitialize(top.P10, "P10")
+indicatorInitialize(top.P20, "P20")
+indicatorInitialize(top.P40, "P40")
+indicatorInitialize(top.D1, "D1")
+indicatorInitialize(top.D2, "D2")
+indicatorInitialize(top.D3, "D3")
+indicatorInitialize(top.D4, "D4")
+indicatorInitialize(top.D5, "D5")
+indicatorInitialize(top.D6, "D6")
+indicatorInitialize(top.PROG_ERR, "PROG\nERR")
 top.PROG_ERR.bind("<Button-1>", pressedPROG_ERR)
 root.after(refreshRate, mainLoopIteration)
 root.mainloop()

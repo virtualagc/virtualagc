@@ -39,6 +39,17 @@
  *              2020-05-06 RSB  Merged Interrupts, PIO, CIO, PRS processing
  *                              into this one file, since they seem to
  *                              interact a lot.
+ *              2020-05-11 RSB  Moved processing of the "interrupt latch"
+ *                              from yaPTC.py to here.  I found that the
+ *                              PTC ADAPT Self-Test Program expected to be
+ *                              able to read back the contents of the
+ *                              interrupt latch the very next instruction
+ *                              cycle after it had written them out, which
+ *                              precludes them being handled by a peripheral
+ *                              like yaPTC that's communicating with yaLVDC
+ *                              via the "virtual wire" system.  It turns out
+ *                              also that there were errors in the yaPTC.py
+ *                              implementation of this that I fixed here.
  */
 
 #include <stdlib.h>
@@ -46,22 +57,153 @@
 #include <string.h>
 #include "yaLVDC.h"
 
+int interruptInhibitLatches = 0;
+
+// Note the mapping of the individual bits in the interrupt
+// latch (CIO 154):  interrupt 1 is the most-significant
+// bit (1<<25), etc.  This is not the same as the mapping
+// in the interrupt inhibit latch (CIO 000 and 004), in
+// which interrupt 1 is instead the least-significant bit.
+#define interruptLatches state.cio[0154]
+void
+setLatch(int n)
+{
+  if (n < 0 || n > 15)
+    return;
+  interruptLatches|= (1 << (26 - n));
+}
+void
+resetLatch(int n)
+{
+  if (n < 0 || n > 15)
+    return;
+  interruptLatches&= ~(1 << (26 - n));
+}
+
 // Returns 0 on success, non-zero on fatal error.
 int
 processInterruptsAndIO(void)
 {
-  int retVal = 1;
+  int retVal = 1, channel, payload;
+
+  // Intercept operations we *don't* want performed by the
+  // "virtual wire" system.
+  if (state.pioChange != -1)
+    {
+      channel = state.pioChange;
+      payload = state.pio[channel];
+
+      //state.pioChange = -1;
+    }
+  else if (state.cioChange != -1)
+    {
+      int remainder, quotient;
+      channel = state.cioChange;
+      payload = state.cio[channel];
+      remainder = channel % 4;
+      quotient = channel / 4;
+      if (remainder == 0)
+        {
+          if (channel == 0000)
+            {
+              interruptInhibitLatches|= payload & 077777;
+            }
+          else if (channel == 0004)
+            {
+              interruptInhibitLatches &= ~(payload & 077777);
+            }
+          else if (channel <= 0104)
+            {
+              resetLatch(quotient - 1);
+            }
+          else if (channel == 0110)
+            {
+              interruptLatches = 0;
+            }
+          else
+            {
+              goto doneCIO;
+            }
+        }
+      else if (remainder == 1)
+        {
+          if (channel <= 0061)
+            {
+              setLatch(quotient + 3);
+            }
+          else if (channel <= 0071)
+            {
+              setLatch(quotient - 6);
+            }
+          else if (channel <= 0151)
+            {
+              setLatch(quotient - 016);
+            }
+          else if (channel <= 0175)
+            {
+              // These are marked as SPARE, and thus presumably
+              // need no processing at all.
+            }
+          else
+            {
+              goto doneCIO;
+            }
+        }
+      else if (remainder == 2)
+        {
+          if (channel <= 0072)
+            {
+              setLatch(quotient + 1);
+            }
+          else if (channel == 0076)
+            {
+              setLatch(11);
+            }
+          else if (channel == 0102)
+            {
+              setLatch(13);
+            }
+          else if (channel <= 0176)
+            {
+              setLatch(quotient - 020);
+            }
+          else if (channel == 0202)
+            {
+              setLatch(12);
+            }
+          else if (channel == 0206)
+            {
+              setLatch(14);
+            }
+          else if (channel <= 0216)
+            {
+              setLatch(quotient - 041);
+            }
+          else
+            {
+              goto doneCIO;
+            }
+        }
+      else if (remainder == 3)
+        {
+          if (0)
+            {
+
+            }
+          else
+            {
+              goto doneCIO;
+            }
+        }
+      // If we've gotten to here, the channel has been fully processed
+      // and doesn't need to be processed by pendingVirtualWireActivity().
+      // On the other hand, if we've skipped down to doneCIO, then the
+      // converse is true.
+      state.cioChange = -1;
+      doneCIO: ;
+    }
 
   pendingVirtualWireActivity();
-
-  if (!ptc)
-    {
-
-    }
-  else
-    {
-
-    }
 
   retVal = 0;
   //done: ;

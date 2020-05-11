@@ -40,5 +40,25 @@ The files output by the process are:
 
 # Emulation, Using PTC/LVDC Emulator Software
 
-Useful PTC/LVDC emulation software does not presently exist.
+The PTC/LVDC CPU emulator is called yaLVDC, and a crude PTC peripheral for it &mdash; i.e., representation of the PTC user interface panels, typewriter, printer, plotter, etc. &mdash; is called yaPTC.py.  Both appear in the yaLVDC folder of the Virtual AGC software repository, and they require nothing other than the material in that folder (and, of course, the files produced by the assembler from the PTC-ADAPT-Self-Test-Program source files).
 
+The yaLVDC program must be built from source, using the instructions found in that folder.  Assuming you've done that, you can then run the emulation.
+
+If, for example, the yaASM.tsv, .src, and .sym files created by the assembler were copied into the yaLVDC folder, then you could run the emulation by 
+
+1. Opening up a pair of command lines and cd'ing each of them into the yaLVDC folder.
+2. From one command line, run the command:
+    ./yaLVDC --ptc --cold-start --assembly=yaASM
+3. From the other command line, run the command:
+    ./yaASM.py
+4. The emulator (yaLVDC) has a gdb-like interface &mdash; or perhaps gdb "lite" would be more accurate &mdah; from which you can do things like set breakpoints, single-step through the program, let it free-run until breakpoints are hit, examine memory and registers, change the values in memory, list (or disassemble) portions of the source code, and so on.  But the assumption is that you probably want to run the test procedures associated with the PTC ADAPT Self-Test Program, and that topis is covered in the next section.
+
+# Running the Tests in the Emulator
+
+Chapter V if the original PTC documentation linked earlier describes quite a few test procedures.  Many of these have little to do with the PTC CPU or the software running on it, and more to do with characteristics of the PTC that have not been implemented in the somewhat-primitive yaPTC.py program.  (See the preceding section.)
+
+According to my estimation &mdash; which is subject to reevaluation &mdash; the test procedures worth running in the emulator are these (by figure number from the PTC documentation), but particularly the final one:
+
+* Chapter V, Figure 7-9, Central Processor Manual Checks.
+* Chapter V, Figure 7-10, Central Processor Memory Automatic Checks.
+* Chapter V, Figure 7-11, Self-Test Program Checks.
