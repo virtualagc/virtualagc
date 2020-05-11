@@ -6567,10 +6567,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>120</b><br>
           </td>
-          <td valign="middle" align="left">Generates a type alpha
-            numeric command. Positions SIGN and 1 through 5,
-            respectively, of the accumulator data word contain the
-            "BA8421" code.<br>
+          <td valign="middle" align="left">Generates a typewriter alpha
+            numeric command. The data (taken from ACC) contains a single
+            character encoded in 6-bit BA8421, aligned at the
+            most-significant (SIGN) bit.<br>
           </td>
         </tr>
         <tr>
@@ -6588,9 +6588,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>124</b><br>
           </td>
-          <td valign="middle" align="left">Generates a type decimal
-            command. Positions SIGN, 1, 2, and 3, respectively, of the
-            accumulator data word contain the "8421" code.<br>
+          <td valign="middle" align="left">Generates a typewriter
+            decimal command.&nbsp; The data (taken from ACC) contains a
+            single character encoded in 4-bit "8421" — i.e., using only
+            the lowest 16 characters of BA8421.&nbsp; This happens to
+            include all decimal digits, plus 6 other characters (space
+            and so on).&nbsp; Aligned at the most-significant (SIGN)
+            bit.<br>
           </td>
         </tr>
         <tr>
@@ -6608,10 +6612,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>130</b><br>
           </td>
-          <td valign="middle" align="left">Generates a type octal
-            command. Positions SIGN, 1, and 2, respectively, of the
-            accumulator data word contain the "421" code.<br>
-          </td>
+          <td valign="middle" align="left">Generates a typewriter octal
+            command.&nbsp; The data (taken from ACC) contains a single
+            character encoded in 3-bit "421" — i.e., using only the
+            lowest 8 characters of BA8421.&nbsp; This happens to include
+            all octal digits, with a space character (at code 00) rather
+            than any '0' character, so I imagine that it actually types
+            a 0 when the code specifies a space.&nbsp; The aligned at
+            the most-significant (SIGN) bit. </td>
         </tr>
         <tr>
           <td valign="middle" align="center">131<br>
@@ -6674,7 +6682,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                 <tr>
                   <td valign="middle" align="center">5<br>
                   </td>
-                  <td valign="middle" align="center">Tap<br>
+                  <td valign="middle" align="center">Tab<br>
                   </td>
                 </tr>
               </tbody>
@@ -6777,11 +6785,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>160</b><br>
           </td>
-          <td valign="middle" align="left">Generates a printer carriage
-            control command. Positions SIGN and 1 through 5,
-            respectively, of the accumulator data word contain the
-            "BA8421" code.<br>
-          </td>
+          <td valign="middle" align="left">Outputs alphanumeric data to
+            the printer. The data (taken from ACC) contains 4 packed
+            characters encoded in 6-bit BA8421, with the first character
+            aligned at the most-significant (SIGN) bit. </td>
         </tr>
         <tr>
           <td valign="middle" align="center">161<br>
@@ -6797,9 +6804,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>164</b><br>
           </td>
-          <td valign="middle" align="left">Generates a print octal
-            command.<br>
-          </td>
+          <td valign="middle" align="left">Outputs octal data to the
+            printer.&nbsp; The data (taken from ACC) contains 8 packed
+            characters encoded in 3-bit "421" — i.e., using only the
+            lowest 8 characters of BA8421.&nbsp; This happens to include
+            all octal digits, with a space character (at code 00) rather
+            than any '0' character, so I imagine that it actually types
+            a 0 when the code specifies a space.&nbsp; The first
+            character is aligned at the most-significant (SIGN) bit. </td>
         </tr>
         <tr>
           <td valign="middle" align="center">165<br>
@@ -6816,9 +6828,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>170</b><br>
           </td>
-          <td valign="middle" align="left">Generates a print BCD
-            command.<br>
-          </td>
+          <td valign="middle" align="left">Outputs decimal data to the
+            printer.&nbsp; The data (taken from ACC) contains 6 packed
+            characters encoded in 4-bit "8421" — i.e., using only the
+            lowest 16 characters of BA8421.&nbsp; This happens to
+            include all decimal digits, plus 6 other characters (space
+            and so on).&nbsp; The first character is aligned at the
+            most-significant (SIGN) bit. </td>
         </tr>
         <tr>
           <td valign="middle" align="center">171<br>
@@ -6868,12 +6884,17 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>204</b><br>
           </td>
-          <td valign="middle" align="left">Enables the program control
-            display register to be loaded. Positions 21 through 25 of
-            the accumulator data word are loaded into positions P40,
-            P20, P10, P4, P2 and PI, respectively, of the program
-            control display register.<br>
-          </td>
+          <td valign="middle" align="left"><a
+              href="ptcProcessorDisplayPanel.png"><img
+                src="ptcProcessorDisplayPanel-tiny.jpg" title="Click to
+                enlarge." alt="" width="108" height="200" border="2"
+                align="right"></a>Enables the program control display
+            register to be loaded. Positions 20 through 25 of the
+            accumulator data word are loaded into positions P40, P20,
+            P10, P4, P2 and P1, respectively, of the program control
+            display register, which in turn light the corresponding
+            lamps on the PTC's Processor Display Panel depicted to the
+            right (click to enlarge).&nbsp;&nbsp;</td>
         </tr>
         <tr>
           <td valign="middle" align="center">206<br>
@@ -6884,10 +6905,18 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>210</b><br>
           </td>
-          <td valign="middle" align="left">Enables one of six output
-            discretes to be generated. Discretes 1 through 6,
-            respectively, are controlled by positions 25, 24, 23, 22,
-            21, and 20 of the accumulator data word.<br>
+          <td valign="middle" align="left"><a
+              href="ptcProcessorDisplayPanel.png"><img
+                src="ptcProcessorDisplayPanel-tiny.jpg" title="Click to
+                enlarge." alt="" width="108" height="200" border="2"
+                align="right"></a>Enables one of six output discretes to
+            be generated. Discretes 1 through 6, respectively, are
+            controlled by positions 25, 24, 23, 22, 21, and 20 of the
+            accumulator data word.<br>
+            <br>
+            I'm not certain, but I think they may also light the lamps
+            labeled D6 through D1 on the PTC's Processor Display Panel
+            depicted to the right (click to enlarge).<br>
           </td>
         </tr>
         <tr>
@@ -6996,7 +7025,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center">240<br>
           </td>
-          <td valign="middle" align="left">TBD </td>
+          <td valign="middle" align="left"><a
+              href="ptcProcessorDisplayPanel.png"><img
+                src="ptcProcessorDisplayPanel-tiny.jpg" title="Click to
+                enlarge." alt="" width="108" height="200" border="2"
+                align="right"></a>Lights the PROG ERR (PROGRAM ERROR)
+            lamp on the PTC's Processor Display Panel, depicted to the
+            right (click to enlarge).&nbsp; There is no way to
+            programmatically reset the PROG ERR lamp.&nbsp; The lamp is
+            part of the PROG ERROR/SYNC ERROR pushbutton indicator, and
+            the lamp is turned off by pressing the pushbutton on the
+            panel.&nbsp; (The SYNC ERROR lamp, though physically part of
+            the pushbutton, is not reset by this action; it is an
+            independent indicator and has a separate reset mechanism.)<br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" align="center">243<br>
