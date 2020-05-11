@@ -30,6 +30,13 @@
 #				with that, because this program is nice enough
 #				now that I'm not keen to reimplement it in 
 #				another language and gui toolkit.
+#		2020-05-11 RSB	Removed all of the "interrupt latch" 
+#				processing (most of the input CIO's) and 
+#				moved it all back locally to yaLVDC, because
+#				the PAST software expects to read back changes
+#				to the interrupt latch within one instruction
+#				cycle.  I expect this will help with the
+#				speed problem I complained about above as well.
 #
 # The parts which need to be modified from the skeleton form of the program 
 # to make it peripheral-specific are the outputFromCPU() and inputsForCPU() 
@@ -206,14 +213,6 @@ def cPRB():
 	ProgRegB = n
 ProcessorDisplayPanel_support.cPRB = cPRB
 
-interruptLatches = 0
-def setLatch(n):
-	global interruptLatches
-	interruptLatches |= (1 << (n - 1))
-def resetLatch(n):
-	global interruptLatches
-	interruptLatches &= ~(1 << (n - 1))
-	
 # This function is automatically called periodically by the event loop to check for 
 # conditions that will result in sending messages to yaLVDC that are interpreted
 # as changes to bits on its input channels.  The return
@@ -224,12 +223,7 @@ def resetLatch(n):
 # indices into ioTypes[] (see top of file) to tell which particular class of i/o
 # channels is affected.  Only the PIO, CIO, and INT classes are possible for inputs
 # to the CPU.
-#delayCount = 0
-#ioTypeCount = 0
-#channelCount = 0
-lastInterruptLatches = -1
 def inputsForCPU():
-	global lastInterruptLatches
 	#global delayCount, ioTypeCount, channelCount
 	global ProgRegA, ProgRegB
 	returnValue = []
@@ -244,53 +238,50 @@ def inputsForCPU():
 		ProgRegB = -1
 		return [(1, 0o220, n, 0o377777777)]
 		
-	if lastInterruptLatches != interruptLatches:
-		lastInterruptLatches = interruptLatches
-		return [(1, 0o154, lastInterruptLatches, 0o377777777)]
-	
-	if False:
-		# This is just a little demo function to show that the communication
-		# with yaLVDC, the protocol, and the parsing are okay.
-		if delayCount >= 100:
-			delayCount = 0
-			if ioTypeCount == 0 and channelCount <= 0o377:
-				returnValue = [(ioTypeCount, channelCount, 0o252525252 >> (channelCount & 1), 0o3777777777)]
-				channelCount += 1
-				if channelCount > 0o377:
-					channelCount = 0
-					ioTypeCount += 1
-			elif ioTypeCount == 1 and channelCount <= 0o777:
-				returnValue = [(ioTypeCount, channelCount, 0o125252525 << (channelCount & 1), 0o3777777777)]
-				channelCount += 1
-				if channelCount > 0o777:
-					channelCount = 0
-					ioTypeCount += 1
-				
-		else:
-			delayCount += 1
 	return returnValue
+
+# GUI indicator functions.  These are implemented as canvas widgets,
+# sometimes with callback functions bound to them when they're supposed
+# to act like pushbuttons.  First, define a set of unique IDs for 
+# all of the canvas widgets so-used.
+ID_P1 = 1
+ID_P2 = 2
+ID_P4 = 3
+ID_P10 = 4
+ID_P20 = 5
+ID_P40 = 6
+ID_D1 = 7
+ID_D2 = 8
+ID_D3 = 9
+ID_D4 = 10
+ID_D5 = 11
+ID_D6 = 12
+ID_PROG_ERR = 13
+indicatorIDs = {}
+def indicatorInitialize(canvas, index, text):
+	global indicatorIDs
+	width = canvas.winfo_width()
+	height = canvas.winfo_height()
+	indicatorIDs[index] = []
+	indicatorIDs[index].append(canvas.create_rectangle(0, 0, width, height, fill="white", state = "hidden"))
+	indicatorIDs[index].append(canvas.create_text(width // 2, height // 2, fill="white", text=text, justify=tk.CENTER))
+def indicatorOff(canvas, index):
+	global indicatorIDs
+	canvas.itemconfig(indicatorIDs[index][0], state = "hidden")
+	canvas.itemconfig(indicatorIDs[index][1], fill = "white")
+def indicatorOn(canvas, index):
+	global indicatorIDs
+	canvas.itemconfig(indicatorIDs[index][0], state = "normal")
+	canvas.itemconfig(indicatorIDs[index][1], fill = "black")
 
 # This function is called by the event loop only when yaLVDC has written
 # to an output channel.  The function should do whatever it is that needs to be done
 # with this output data, which is not processed additionally in any way by the 
 # generic portion of the program.  The ioType argument is an index into the
 # ioTypes[] array (see the top of this file), giving the class of i/o ports
-# to which the channel belongs.  Only the PIO, CIO, and PRS channels are appicable
+# to which the channel belongs.  Only the PIO, CIO, and PRS channels are applicable
 # for output from the CPU to peripherals.
-indicatorIDs = {}
-def indicatorOff(canvas, index):
-	global indicatorIDs
-	if index in indicatorIDs:
-		canvas.itemconfig(indicatorIDs[index], state = "hidden")
-def indicatorOn(canvas, index):
-	global indicatorIDs
-	if index not in indicatorIDs:
-		indicatorIDs[index] = canvas.create_rectangle(0, 0, canvas.winfo_width(), canvas.winfo_height(), fill="white")
-	else:
-		canvas.itemconfig(indicatorIDs[index], state = "normal")
 def outputFromCPU(ioType, channel, value):
-	global interruptLatches
-	
 	print("*", end="")
 	
 	if ioType == 0:
@@ -299,41 +290,69 @@ def outputFromCPU(ioType, channel, value):
 		
 	elif ioType == 1:
 		# CIO
-		remainder = channel % 4
-		quotient = channel // 4
-		if channel == 0o000:
-			interruptLatches |= value & 0o77777
-		elif channel == 0o001:
-			setLatch(3)
-		elif channel == 0o004:
-			interruptLatches &= ~(value & 0o77777)
+		if channel == 0o114:
+			print("\nSingle step")
+		elif channel == 0o120:
+			print("\nAlphanumeric = %09o (%s)" % (value, BA8421[(value >> 20) & 0o77]))
+		elif channel == 0o124:
+			print("\nDecimal = %09o (%s)" % (value, BA8421[(value >> 22) & 0o17]))
+		elif channel == 0o130:
+			print("\nOctal = %09o (%s)" % (value, BA8421[(value >> 23) & 0o7]))
+		elif channel == 0o134:
+			if value == 0o200000000:
+				string = "space"
+			elif value == 0o100000000:
+				string = "black ribbon"
+			elif value == 0o040000000:
+				string = "red ribbon"
+			elif value == 0o020000000:
+				string = "index"
+			elif value == 0o010000000:
+				string = "return"
+			elif value == 0o004000000:
+				string = "tab"
+			else:
+				string = "illegal"
+			print("\nTypewriter control = %09o (%s)" % (value, string))
+		elif channel == 0o140:
+			print("\nX plot = %09o" % value)
+		elif channel == 0o144:
+			print("\nY plot = %09o" % value)
+		elif channel == 0o150:
+			print("\nZ plot = %09o" % value)
+		elif channel == 0o160:
+			print("\nPrinter carriage contro = %09o (%s)" % (value, BA8421[(value >> 20) & 0o77]))
+		elif channel == 0o164:
+			print("\nPrint octal = %09o (%s)" % (value, BA8421[(value >> 23) & 0o7]))
+		elif channel == 0o170:
+			print("\nPrint BCD = %09o (%s)" % (value, BA8421[(value >> 22) & 0o17]))
 		elif channel == 0o204:
 			# Turn indicator lamps on or off.  I think this is actually
 			# the full functionality of CIO-204
 			if value & 0o1:
-				indicatorOn(top.P1, 1)
+				indicatorOn(top.P1, ID_P1)
 			else:
-				indicatorOff(top.P1, 1)
+				indicatorOff(top.P1, ID_P1)
 			if value & 0o2:
-				indicatorOn(top.P2, 2)
+				indicatorOn(top.P2, ID_P2)
 			else:
-				indicatorOff(top.P2, 2)
+				indicatorOff(top.P2, ID_P2)
 			if value & 0o4:
-				indicatorOn(top.P4, 3)
+				indicatorOn(top.P4, ID_P4)
 			else:
-				indicatorOff(top.P4, 3)
+				indicatorOff(top.P4, ID_P4)
 			if value & 0o10:
-				indicatorOn(top.P10, 4)
+				indicatorOn(top.P10, ID_P10)
 			else:
-				indicatorOff(top.P10, 4)
+				indicatorOff(top.P10, ID_P10)
 			if value & 0o20:
-				indicatorOn(top.P20, 5)
+				indicatorOn(top.P20, ID_P20)
 			else:
-				indicatorOff(top.P20, 5)
+				indicatorOff(top.P20, ID_P20)
 			if value & 0o40:
-				indicatorOn(top.P40, 6)
+				indicatorOn(top.P40, ID_P40)
 			else:
-				indicatorOff(top.P40, 6)
+				indicatorOff(top.P40, ID_P40)
 			return
 		elif channel == 0o210:
 			# All I'm doing here (CIO-210) is manipulating indicator lamps,
@@ -341,39 +360,32 @@ def outputFromCPU(ioType, channel, value):
 			# in terms of latching signals or something which is
 			# TBD.  ***FIXME***
 			if value & 0o1:
-				indicatorOn(top.D1, 7)
+				indicatorOn(top.D1, ID_D1)
 			else:
-				indicatorOff(top.D1, 7)
+				indicatorOff(top.D1, ID_D1)
 			if value & 0o2:
-				indicatorOn(top.D2, 8)
+				indicatorOn(top.D2, ID_D2)
 			else:
-				indicatorOff(top.D2, 8)
+				indicatorOff(top.D2, ID_D2)
 			if value & 0o4:
-				indicatorOn(top.D3, 9)
+				indicatorOn(top.D3, ID_D3)
 			else:
-				indicatorOff(top.D3, 9)
+				indicatorOff(top.D3, ID_D3)
 			if value & 0o10:
-				indicatorOn(top.D4, 10)
+				indicatorOn(top.D4, ID_D4)
 			else:
-				indicatorOff(top.D4, 10)
+				indicatorOff(top.D4, ID_D4)
 			if value & 0o20:
-				indicatorOn(top.D5, 11)
+				indicatorOn(top.D5, ID_D5)
 			else:
-				indicatorOff(top.D5, 11)
+				indicatorOff(top.D5, ID_D5)
 			if value & 0o40:
-				indicatorOn(top.D6, 12)
+				indicatorOn(top.D6, ID_D6)
 			else:
-				indicatorOff(top.D6, 12)
+				indicatorOff(top.D6, ID_D6)
 			return
-		elif remainder == 0:
-			if channel >= 0o010 and channel <= 0o104:
-				resetLatch(quotient - 1)
-		elif remainder == 1:
-			if channel >= 0o001 and channel <= 0o061:
-				setLatch(quotient + 3)
-		elif remainder == 2:
-			if channel >= 0o002 and channel <= 0o072:
-				setLatch(quotient + 1)
+		elif channel == 0o240:
+			indicatorOn(top.PROG_ERR, ID_PROG_ERR)
 		else:
 			print("\nChannel CIO-%03o = %09o" % (channel, value))
 		
@@ -391,6 +403,9 @@ def outputFromCPU(ioType, channel, value):
 		print("\nUnimplemented type %d, channel %03o, value %09o" % (ioType, channel, value))
 	
 	return
+
+def pressedPROG_ERR(event):
+	indicatorOff(top.PROG_ERR, ID_PROG_ERR)
 
 ###################################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
@@ -540,5 +555,19 @@ root = tk.Tk()
 ProcessorDisplayPanel_support.set_Tk_var()
 top = topProcessorDisplayPanel (root)
 ProcessorDisplayPanel_support.init(root, top)
+indicatorInitialize(top.P1, ID_P1, "P1")
+indicatorInitialize(top.P2, ID_P2, "P2")
+indicatorInitialize(top.P4, ID_P4, "P4")
+indicatorInitialize(top.P10, ID_P10, "P10")
+indicatorInitialize(top.P20, ID_P20, "P20")
+indicatorInitialize(top.P40, ID_P40, "P40")
+indicatorInitialize(top.D1, ID_D1, "D1")
+indicatorInitialize(top.D2, ID_D2, "D2")
+indicatorInitialize(top.D3, ID_D3, "D3")
+indicatorInitialize(top.D4, ID_D4, "D4")
+indicatorInitialize(top.D5, ID_D5, "D5")
+indicatorInitialize(top.D6, ID_D6, "D6")
+indicatorInitialize(top.PROG_ERR, ID_PROG_ERR, "PROG\nERR")
+top.PROG_ERR.bind("<Button-1>", pressedPROG_ERR)
 root.after(refreshRate, mainLoopIteration)
 root.mainloop()
