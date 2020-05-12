@@ -1084,7 +1084,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         printf("      (0-7), SS is the sector (00-17 octal), and LLL is the\n");
         printf("      offset within the sector (000-377 octal).\n");
         printf("    * PIO port:  PIO-LLL, where LLL is the port number\n");
-        printf("      (000-377 octal).\n");
+        printf("      (000-777 octal).\n");
         printf("    * CIO port:  CIO-LLL, where LLL is the port number\n");
         printf("      (000-777 octal).\n");
         printf("    * PRS port:  Just the literal PRS, since there is only\n");
@@ -1277,7 +1277,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   location++;
                   break;
                 case atPio:
-                  if (location < 0 || location > 0377)
+                  if (location < 0 || location > 0777)
                     goto badAddressX;
                   formatFetchedValue(state.pio[location], formatType, 1, 2);
                   printf("PIO-%03o: %s\n", location, formattedFetchedValue);
@@ -1420,7 +1420,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                     printf("Code or data memory address out of range.\n");
                     goto badSetCommand;
                   }
-              if (at == atPio && (location < 0 || location > 0377))
+              if (at == atPio && (location < 0 || location > 0777))
                 {
                   printf("PIO port out of range.\n");
                   goto badSetCommand;

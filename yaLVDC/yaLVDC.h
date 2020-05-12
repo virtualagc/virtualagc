@@ -138,7 +138,7 @@ typedef struct
   int32_t pq;
   int32_t hopSaver; // otherwise known as the "HOP saver" register.
   int32_t core[8][16][3][256];
-  int32_t pio[512];
+  int32_t pio[01000];
   int32_t cio[01000]; // PTC only.
   int32_t prs; // PTC only.
   struct

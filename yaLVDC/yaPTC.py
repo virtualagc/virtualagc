@@ -48,9 +48,6 @@
 # computer. 
 
 from ProcessorDisplayPanel import *
-#from CePanel import *
-#from MemoryLoadAndDataDisplayPanel import *
-import MemoryLoadAndDataDisplayPanel
 
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
 # BA8421 character set in its native encoding.  All of the unprintable
@@ -75,7 +72,7 @@ cli = argparse.ArgumentParser()
 cli.add_argument("--host", help="Host address of yaAGC/yaAGS, defaulting to localhost.")
 cli.add_argument("--port", help="Port for yaLVDC, defaulting to 19653.", type=int)
 cli.add_argument("--id", help="Unique ID of this peripheral (1-7), default=1.", type=int)
-cli.add_argument("--resizable", help="If 1 (default 0), make the window resizable.", type=int)
+cli.add_argument("--resize", help="If 1 (default 0), make the window resizable.", type=int)
 args = cli.parse_args()
 
 # Characteristics of the host and port being used for yaLVDC communications.  
@@ -94,12 +91,12 @@ if args.id:
 else:
 	ID = 1
 
-if args.resizable:
-	resizable = args.resizable
-	if resizable != 0:
-		resizable = 1
+if args.resize:
+	resize = args.resize
+	if resize != 0:
+		resize = 1
 else:
-	resizable = 0
+	resize = 0
 
 ###################################################################################
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
@@ -363,29 +360,29 @@ def outputFromCPU(ioType, channel, value):
 			# Turn indicator lamps on or off.  I think this is actually
 			# the full functionality of CIO-204
 			if value & 0o1:
-				indicatorOn(topPDP.P1)
+				indicatorOn(top.P1)
 			else:
-				indicatorOff(topPDP.P1)
+				indicatorOff(top.P1)
 			if value & 0o2:
-				indicatorOn(topPDP.P2)
+				indicatorOn(top.P2)
 			else:
-				indicatorOff(topPDP.P2)
+				indicatorOff(top.P2)
 			if value & 0o4:
-				indicatorOn(topPDP.P4)
+				indicatorOn(top.P4)
 			else:
-				indicatorOff(topPDP.P4)
+				indicatorOff(top.P4)
 			if value & 0o10:
-				indicatorOn(topPDP.P10)
+				indicatorOn(top.P10)
 			else:
-				indicatorOff(topPDP.P10)
+				indicatorOff(top.P10)
 			if value & 0o20:
-				indicatorOn(topPDP.P20)
+				indicatorOn(top.P20)
 			else:
-				indicatorOff(topPDP.P20)
+				indicatorOff(top.P20)
 			if value & 0o40:
-				indicatorOn(topPDP.P40)
+				indicatorOn(top.P40)
 			else:
-				indicatorOff(topPDP.P40)
+				indicatorOff(top.P40)
 			return
 		elif channel == 0o210:
 			# All I'm doing here (CIO-210) is manipulating indicator lamps,
@@ -393,32 +390,32 @@ def outputFromCPU(ioType, channel, value):
 			# in terms of latching signals or something which is
 			# TBD.  ***FIXME***
 			if value & 0o1:
-				indicatorOn(topPDP.D1)
+				indicatorOn(top.D1)
 			else:
-				indicatorOff(topPDP.D1)
+				indicatorOff(top.D1)
 			if value & 0o2:
-				indicatorOn(topPDP.D2)
+				indicatorOn(top.D2)
 			else:
-				indicatorOff(topPDP.D2)
+				indicatorOff(top.D2)
 			if value & 0o4:
-				indicatorOn(topPDP.D3)
+				indicatorOn(top.D3)
 			else:
-				indicatorOff(topPDP.D3)
+				indicatorOff(top.D3)
 			if value & 0o10:
-				indicatorOn(topPDP.D4)
+				indicatorOn(top.D4)
 			else:
-				indicatorOff(topPDP.D4)
+				indicatorOff(top.D4)
 			if value & 0o20:
-				indicatorOn(topPDP.D5)
+				indicatorOn(top.D5)
 			else:
-				indicatorOff(topPDP.D5)
+				indicatorOff(top.D5)
 			if value & 0o40:
-				indicatorOn(topPDP.D6)
+				indicatorOn(top.D6)
 			else:
-				indicatorOff(topPDP.D6)
+				indicatorOff(top.D6)
 			return
 		elif channel == 0o240:
-			indicatorOn(topPDP.PROG_ERR)
+			indicatorOn(top.PROG_ERR)
 		else:
 			print("\nChannel CIO-%03o = %09o" % (channel, value), end="  ")
 		
@@ -438,7 +435,7 @@ def outputFromCPU(ioType, channel, value):
 	return
 
 def pressedPROG_ERR(event):
-	indicatorOff(topPDP.PROG_ERR)
+	indicatorOff(top.PROG_ERR)
 
 ###################################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
@@ -587,32 +584,23 @@ while False:
 root = tk.Tk()
 
 ProcessorDisplayPanel_support.set_Tk_var()
-topPDP = topProcessorDisplayPanel (root)
-ProcessorDisplayPanel_support.init(root, topPDP)
-indicatorInitialize(topPDP.P1, "P1")
-indicatorInitialize(topPDP.P2, "P2")
-indicatorInitialize(topPDP.P4, "P4")
-indicatorInitialize(topPDP.P10, "P10")
-indicatorInitialize(topPDP.P20, "P20")
-indicatorInitialize(topPDP.P40, "P40")
-indicatorInitialize(topPDP.D1, "D1")
-indicatorInitialize(topPDP.D2, "D2")
-indicatorInitialize(topPDP.D3, "D3")
-indicatorInitialize(topPDP.D4, "D4")
-indicatorInitialize(topPDP.D5, "D5")
-indicatorInitialize(topPDP.D6, "D6")
-indicatorInitialize(topPDP.PROG_ERR, "PROG\nERR")
-topPDP.PROG_ERR.bind("<Button-1>", pressedPROG_ERR)
+top = topProcessorDisplayPanel (root)
+ProcessorDisplayPanel_support.init(root, top)
+indicatorInitialize(top.P1, "P1")
+indicatorInitialize(top.P2, "P2")
+indicatorInitialize(top.P4, "P4")
+indicatorInitialize(top.P10, "P10")
+indicatorInitialize(top.P20, "P20")
+indicatorInitialize(top.P40, "P40")
+indicatorInitialize(top.D1, "D1")
+indicatorInitialize(top.D2, "D2")
+indicatorInitialize(top.D3, "D3")
+indicatorInitialize(top.D4, "D4")
+indicatorInitialize(top.D5, "D5")
+indicatorInitialize(top.D6, "D6")
+indicatorInitialize(top.PROG_ERR, "PROG\nERR")
+top.PROG_ERR.bind("<Button-1>", pressedPROG_ERR)
 
-#CePanel_support.set_Tk_var()
-#topCEP = topCePanel (root)
-#CePanel_support.init(root, topPDP)
-
-#MemoryLoadAndDataDisplayPanel_support.set_Tk_var()
-#topMLDD = MemoryLoadAndDataDisplayPanel.topMemoryLoadAndDataDisplayPanel (root)
-#MemoryLoadAndDataDisplayPanel.MemoryLoadAndDataDisplayPanel_support.init(root, topMLDD)
-#MemoryLoadAndDataDisplayPanel.create_topMemoryLoadAndDataDisplayPanel(root)
-
-root.resizable(resizable, resizable)
+root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
 root.mainloop()

@@ -387,16 +387,16 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                     switch (ioType)
                     {
                     case 0: // PIO
-                      if (channel < 0 || channel > 0377)
+                      if (channel < 0 || channel > 0777)
                         printf("Input PIO channel out of range.\n");
                       printf("PIO-%03o changed from %09o to %09o with mask %09o.\n", channel, state.pio[channel], value, mask);
-                      state.pio[channel] = (state.pio[channel & ~mask]) | (value & mask);
+                      state.pio[channel] = (state.pio[channel] & ~mask) | (value & mask);
                       break;
                     case 1: // CIO
                       if (channel < 0 || channel > 0777)
                         printf("Input CIO channel out of range.\n");
                       printf("CIO-%03o changed from %09o to %09o with mask %09o.\n", channel, state.cio[channel], value, mask);
-                      state.cio[channel] = (state.pio[channel & ~mask]) | (value & mask);
+                      state.cio[channel] = (state.pio[channel] & ~mask) | (value & mask);
                       break;
                     case 2: // PRS
                       printf ("PRS data received from peripheral, which is not allowed.\n");
