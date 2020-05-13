@@ -4745,18 +4745,28 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
         style="font-family: Courier New,Courier,monospace;">PIO</span>
       Instruction)</h3>
     My understanding of this is sketchy right now, so take anything I
-    have to say with a grain of salt.&nbsp; Note that the following list
-    of additional ports, which do not appear in the table taken from the
-    documentation that appears below it, are used in the AS206-RAM
-    Flight Program source code.&nbsp; I have no explanation for them at
-    the moment:<br>
-    <ul>
-      <li>172</li>
-      <li>273</li>
-      <li>303</li>
-      <li>672<br>
-      </li>
-    </ul>
+    have to say with a grain of salt.&nbsp; <br>
+    <p>Note that the LVDC code is self-modifying, and thus ports that
+      don't explicitly appear in the source code may actually be
+      accessed at runtime, while ports that do explicitly appear in the
+      code may be changed to something else before having a chance to be
+      accessed at runtime.&nbsp; For example, on p. 227 of the AS206-RAM
+      source code (look at labels <tt>MLDBUX</tt>, <tt>MLDBUY</tt>,
+      and <tt>MLDBUZ</tt>), there's self-modifying code that changes an
+      instruction <tt>PIO 203</tt> to a <tt>PIO 303</tt>, then changes
+      it to a <tt>PIO 273</tt>, and then finally changes it back to <tt>PIO
+        203</tt>.&nbsp; Unfortunately, with programming and
+      documentation practices like these, getting a complete list of
+      ports used — other than by just running the code under all
+      possible combinations of conditions and recording what happens —
+      is a tough proposition.&nbsp; (That's not intended as a criticism
+      of the programming practices IBM FSD had back in 1967 ... but it
+      goes to show why, <i>today</i>, there are reasons that practices
+      such as these are frowned upon.)<br>
+    </p>
+    <p>At any rate, here is a table of ports from the original
+      documentation, though massaged a bit by me.<br>
+    </p>
     <table summary="" style="text-align: left; width: 100%;"
       cellspacing="2" cellpadding="2" border="1">
       <tbody>
@@ -5741,8 +5751,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
               border="1" align="center">
               <tbody>
                 <tr>
-                  <th valign="top">A7 - A1 (octal) </th>
-                  <th valign="top" align="left">Purpose<br>
+                  <th valign="bottom" align="center">A7 - A1 (octal) </th>
+                  <th valign="bottom" align="center">Purpose<br>
                   </th>
                 </tr>
                 <tr>
@@ -5781,7 +5791,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                 </tr>
                 <tr>
                   <td valign="top" align="center">032 </td>
-                  <td valign="top">Interrupt Register Reset<br>
+                  <td valign="top">Interrupt Register Reset.&nbsp;
+                    Resets the interrupts whose bits are set in ACC. See
+                    072 below.<br>
                   </td>
                 </tr>
                 <tr>
@@ -5812,7 +5824,62 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                 </tr>
                 <tr>
                   <td valign="top" align="center">072 </td>
-                  <td valign="top">Inhibit Interrupt<br>
+                  <td valign="top">Interrupt-inhibit latch.&nbsp; (None
+                    of the following is covered by the available
+                    documentation, so everything I say about it is
+                    inferred or guessed from source code.)&nbsp; It's
+                    not clear to me whether this simply writes the value
+                    in ACC to the latch, or whether it logically-OR's
+                    ACC to the latch; I presume the latter.&nbsp; There
+                    are 13 interrupts covered, and the mask comprises
+                    the 12 most-significant bits of ACC other than
+                    SIGN.&nbsp; Here's how I think the bit-positions of
+                    the latch are interpreted:<br>
+                    <ul>
+                      <li>S: n/a (0)</li>
+                      <li>1: ML (Minor Loop)</li>
+                      <li>2: SS (Switch Select)<br>
+                      </li>
+                      <li>3: CIU?&nbsp; In the AS206-RAM Flight Program,
+                        the interrupt-service routine for this always
+                        immediately exits.&nbsp; So in effect, these
+                        interrupts are always ignored whether inhibited
+                        or not.<br>
+                      </li>
+                      <li>4: TLC (Tough Luck Charlie)</li>
+                      <li>5: Command Receiver?&nbsp; The
+                        interrupt-service routine for this is not part
+                        of the AS206-RAM Flight Program, and is instead
+                        in unassigned memory.&nbsp; Presumably it is
+                        serviced by some other program co-loaded into
+                        memory along with the flight program.<br>
+                      </li>
+                      <li>6: GRR?&nbsp; In the AS206-RAM Flight Program,
+                        the interrupt-service routine for this always
+                        immediately exits.&nbsp; So in effect, these
+                        interrupts are always ignored whether inhibited
+                        or not.</li>
+                      <li>7: S2 PROP. DEPL.?&nbsp; In the AS206-RAM
+                        Flight Program, the interrupt-service routine
+                        for this always immediately exits.&nbsp; So in
+                        effect, these interrupts are always ignored
+                        whether inhibited or not.</li>
+                      <li>8: OECO/OBCO (Outboard Engine Cut Off, starts
+                        Time Base 3)<br>
+                      </li>
+                      <li>9: S4B/S4BEO/S4BCO (S4B Engine Cut Off)<br>
+                      </li>
+                      <li>10: RCA?&nbsp; In the AS206-RAM Flight
+                        Program, the interrupt-service routine for this
+                        always immediately exits.&nbsp; So in effect,
+                        these interrupts are always ignored whether
+                        inhibited or not.</li>
+                      <li>11: LLS (Low Level Sense, starts Time Base 2)<br>
+                      </li>
+                      <li>12: ?<br>
+                      </li>
+                      <li>13-25: n/a (0)</li>
+                    </ul>
                   </td>
                 </tr>
                 <tr>
@@ -5843,6 +5910,44 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                 <tr>
                   <td valign="top" align="center">166 </td>
                   <td valign="top">Ladder No. 5<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">172<br>
+                  </td>
+                  <td valign="top">Clamp adders.&nbsp; (This is not
+                    covered by the available documentation, but seems to
+                    be implied by the comments in the source code.)&nbsp;
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">672<br>
+                  </td>
+                  <td valign="top">(None of this is covered by the
+                    available documentation.)&nbsp; Clear
+                    interrupt-inhibit latch, using a mask.&nbsp; It's
+                    not clear to me whether this logically-inverts the
+                    mask and then AND's it to the latch, or whether it
+                    XOR's the mask to the latch; I presume the
+                    former.&nbsp; In the AS206RAM Flight Program's
+                    source code, <tt>PIO 672</tt> is used in memory
+                    module 2, and address 672 translates to 2-17-272,
+                    which is the variable <tt>IHBT</tt>.&nbsp; I infer
+                    that the technique for temporarily inhibiting
+                    LVDA-generated interrupts is:<br>
+                    <ul>
+                      <li>Create a bit-mask determining which interrupts
+                        to inhibit.</li>
+                      <li>Store the mask at <tt>IHBT</tt>.</li>
+                      <li>Write the mask out to the interrupt-inhibit
+                        latch with <tt>PIO 072</tt> (and possibly <tt>PIO
+                          032</tt>).<br>
+                      </li>
+                      <li>... do stuff ...</li>
+                      <li>Use <tt>PIO 672</tt> to undo the masked
+                        interrupt-inhibit bits in the latch.<br>
+                      </li>
+                    </ul>
                   </td>
                 </tr>
               </tbody>
@@ -5921,8 +6026,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
               border="1" align="center">
               <tbody>
                 <tr>
-                  <th valign="top">A8 - A1 (octal) </th>
-                  <th valign="top" align="left">Purpose<br>
+                  <th valign="bottom" align="center">A8 - A1 (octal) </th>
+                  <th valign="bottom" align="center">Purpose<br>
                   </th>
                 </tr>
                 <tr>
@@ -6045,8 +6150,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
               border="1" align="center">
               <tbody>
                 <tr>
-                  <th valign="top">A7 - A1 (octal) </th>
-                  <th valign="top" align="left">Purpose<br>
+                  <th valign="bottom" align="center">A7 - A1 (octal) </th>
+                  <th valign="bottom" align="center">Purpose<br>
                   </th>
                 </tr>
                 <tr>
@@ -6106,10 +6211,24 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                   </td>
                 </tr>
                 <tr>
-                  <td valign="top" align="center">277<br>
+                  <td valign="middle" align="center">273<br>
+                  </td>
+                  <td valign="top">Y Gimbal Backup.&nbsp; (This is not
+                    covered by the available documentation, but seems to
+                    be implied by the comments in the source code.)</td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">277<br>
                   </td>
                   <td valign="top">Spare No. 4<br>
                   </td>
+                </tr>
+                <tr>
+                  <td valign="middle" align="center">303<br>
+                  </td>
+                  <td valign="top">X Gimbal Backup.&nbsp; (This is not
+                    covered by the available documentation, but seems to
+                    be implied by the comments in the source code.)</td>
                 </tr>
                 <tr>
                   <td valign="top" align="center">313<br>
