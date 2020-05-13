@@ -567,13 +567,20 @@ runOneInstruction(int *cyclesUsed)
 
       // Determine direction of data flow.  If the least-significant 2 bits of
       // the operand are 11, then the data flows into the accumulator.
-      // Otherwise, the accumulator is the source of the data.
+      // Otherwise, the accumulator or memory is the source of the data.
       if ((operand & 3) == 3)
         state.acc = state.pio[operand];
       else
         {
           state.pioChange = operand;
-          state.pio[operand] = state.acc;
+          if (a8) // Source is the accumulator
+            state.pio[operand] = state.acc;
+          else // Source is memory.
+            {
+              if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand, &fetchedFromMemory, &dataFromInstructionMemory))
+                fetchedFromMemory = 0;
+              state.pio[operand] = fetchedFromMemory;
+            }
         }
     }
   else if (op == 013)

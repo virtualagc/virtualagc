@@ -2175,7 +2175,9 @@ for entry in inputFile:
 		a9 = "%o" % residual
 		assembled = assembled | (loc << 5) | (residual << 4)
 		storeAssembled(lineNumber, assembled, hop, False)
-		print("%o\t%02o\t%o\t%03o\t%d\t%05o\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], lineNumber, assembled, inputLine["raw"]), file=f)
+		print("%o\t%02o\t%o\t%03o\t%d\t%05o\t%o\t%02o\t%s" % (hop["IM"], hop["IS"], \
+			hop["S"], hop["LOC"], lineNumber, assembled, hop["DM"], hop["DS"], \
+			inputLine["raw"]), file=f)
 	
 	if lineNumber != lastLineNumber:
 		errorsPrinted = []
