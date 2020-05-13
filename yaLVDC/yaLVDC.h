@@ -182,6 +182,8 @@ typedef struct
   uint8_t loc;
   int lineNumber;
   uint16_t assembled;
+  uint8_t dm;
+  uint8_t ds;
 } sourceLine_t;
 #define MAX_ASSEMBLIES 16
 typedef struct

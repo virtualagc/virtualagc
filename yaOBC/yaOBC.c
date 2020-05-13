@@ -2424,7 +2424,7 @@ HalSockThreadFunction(void *Data)
       case ENET_EVENT_TYPE_RECEIVE:
         if (Verbosity > 5)
           {
-            printf("%u 0x%08X:%u \"%s\"\n", event.packet -> dataLength,
+            printf("%zu 0x%08X:%u \"%s\"\n", event.packet -> dataLength,
                 event.peer -> address.host, event.peer -> address.port,
                 event.packet -> data);
             NeedDebuggerPrompt = 1;

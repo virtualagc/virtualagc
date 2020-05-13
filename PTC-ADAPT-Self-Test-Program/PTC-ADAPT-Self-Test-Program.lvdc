@@ -366,6 +366,24 @@ H8P6	HPC	L8P6
 
 # PAGE 7, SEQUENCE 2550-3000
 
+# This is the entry point for the program at power-up.  
+# Note that there's already a bug ... or at least an
+# element of unnecessary confusion!  Because of the 
+# preceding ORG statement on page 5, the assembler
+# believes that the current data sector is 0-13, and 
+# it will therefore look in that memory sector when it
+# accesses variables.  On the other hand, the CPU has 
+# no way of knowing at runtime what the assembler 
+# believes, and will instead believe that the current 
+# data sector is 0-00.  Perhaps by design, however,
+# the initial instructions of the program access variables
+# (ZERO, INTIND, STOP, CTR, LC8) that are in residual
+# memory, and thus are accessible regardless of 
+# whether the assembler and the CPU agree as to which
+# memory sector is currently selected.  The 6th
+# instruction executed, "CDS 1,13" puts the assembler
+# and CPU into agreement for subsequently-encountered
+# variables. -- RSB 2020
 *	PROGRAM ENTRANCE.
 L1P1	CLA	ZERO
 	STO	INTIND

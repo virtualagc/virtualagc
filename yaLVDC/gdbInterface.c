@@ -389,7 +389,7 @@ void
 printSourceBlock(assembly_t *assembly, int start, int end)
 {
   int i, j;
-  int module, sector, syllable, location;
+  int module, sector, syllable, location, assembled, dm, ds;
   sourceLine_t *sourceLine;
   char c;
   breakpoint_t *breakpoint;
@@ -405,6 +405,9 @@ printSourceBlock(assembly_t *assembly, int start, int end)
       sector = sourceLine->sector;
       syllable = sourceLine->syllable;
       location = sourceLine->loc;
+      assembled = sourceLine->assembled;
+      dm = sourceLine->dm;
+      ds = sourceLine->ds;
       c = ' ';
       for (j = 0, breakpoint = breakpoints; j < numBreakpoints;
           j++, breakpoint++)
@@ -415,9 +418,9 @@ printSourceBlock(assembly_t *assembly, int start, int end)
             c = '*';
             break;
           }
-      printf("%6d:%c   %o-%02o-%o-%03o   %s\n",
+      printf("%6d:%c  %o-%02o-%o-%03o %o-%02o %05o   %s\n",
           assembly->sourceLines[i].lineNumber, c, module, sector, syllable,
-          location, assembly->sourceLines[i].line);
+          location, dm, ds, assembled, assembly->sourceLines[i].line);
     }
 }
 
@@ -602,18 +605,20 @@ disassemble(void)
   symbol_t *lhsSymbol = NULL, *operandSymbol = NULL;
   int isHopOperand = 0, isUsualOperand = 0, isTraOperand = 0, isLiteralOperand =
       0, originalInhibit = inhibitFetchMessages;
+  int m = 0, n = 0;
 
   inhibitFetchMessages = 1;
 
   if (!disassemblyState.valid)
     {
-      strcpy(lineBuffer, "(disassembly process not initialized)");
+      m += sprintf(&lineBuffer[m], "(disassembly process not initialized)");
       goto error;
     }
 
+  m += sprintf(&lineBuffer[m], "%o-%02o-%o-%03o %o-%02o ", disassemblyState.im, disassemblyState.is, disassemblyState.s, disassemblyState.loc, disassemblyState.dm, disassemblyState.ds);
   if (disassemblyState.loc > 0377)
     {
-      strcpy(lineBuffer, "(address past end of sector)");
+      m += sprintf(&lineBuffer[m], "(address past end of sector)");
       goto error;
     }
 
@@ -628,9 +633,10 @@ disassemble(void)
       disassemblyState.s, disassemblyState.loc, &instruction,
       &instructionFromDataMemory))
     {
-      strcpy(lineBuffer, "(no instruction at current address)");
+      m += sprintf(&lineBuffer[m], "(no instruction at current address)");
       goto error;
     }
+  m += sprintf(&lineBuffer[m], "%05o   ", instruction);
 
   // Parse instruction into fields.
   op = instruction & 017;
@@ -816,7 +822,7 @@ disassemble(void)
   if (isHopOperand)
     {
       symbol_t *operandSymbol = NULL, *hopSymbol = NULL;
-      int n, hopValueMissing = 1, hopValue = -1, hopValueCorrupt = 1;
+      int hopValueMissing = 1, hopValue = -1, hopValueCorrupt = 1;
 
       operandSymbol = findSymbolByDataAddress(disassemblyState.dm,
           disassemblyState.ds, a9, operand);
@@ -854,7 +860,7 @@ disassemble(void)
     }
   else if (isUsualOperand)
     {
-      int n, value;
+      int value;
       // The "usual operand" is a data location, possibly in the residual sector.
       operandSymbol = findSymbolByDataAddress(disassemblyState.dm,
           disassemblyState.ds, a9, operand);
@@ -897,7 +903,7 @@ disassemble(void)
       sprintf(operandString, "%03o", a91);
     }
 
-  sprintf(lineBuffer, "%-8s%-8s%s", lhs, opcode, operandString);
+  m += sprintf(&lineBuffer[m], "%-8s%-8s%s", lhs, opcode, operandString);
   if (0)
     {
       error: ;
@@ -1023,16 +1029,22 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
 
       if (found)
         {
-          if (value != assembly->sourceLines[lineIndexInAssembly].assembled)
+          sourceLine_t *sourceLine = &assembly->sourceLines[lineIndexInAssembly];
+          if (value != sourceLine->assembled)
             {
               printf("Code in memory (%05o) has changed from load (%05o).\n",
-                  value, assembly->sourceLines[lineIndexInAssembly].assembled);
-              printf("From source:\t%s\n",
-                  assembly->sourceLines[lineIndexInAssembly].line);
+                  value, sourceLine->assembled);
+              printf("From source:\t%o-%02o-%o-%03o %o-%02o %05o   %s\n",
+                  sourceLine->module, sourceLine->sector, sourceLine->syllable,
+                  sourceLine->loc, sourceLine->dm, sourceLine->ds, sourceLine->assembled,
+                  sourceLine->line);
               goto mustDisassemble;
             }
           else
-            printf("%s\n", assembly->sourceLines[lineIndexInAssembly].line);
+            printf("%o-%02o-%o-%03o %o-%02o %05o   %s\n",
+                sourceLine->module, sourceLine->sector, sourceLine->syllable,
+                sourceLine->loc, sourceLine->dm, sourceLine->ds, sourceLine->assembled,
+                sourceLine->line);
         }
       else
         {
@@ -1581,8 +1593,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 else
                   for (; startloc <= endloc; startloc++)
                     {
-                      printf("\t%o-%02o-%o-%03o:\t", im, is, s, startloc);
-                      printf("%s\n", disassemble());
+                      printf("%10s%s\n", "", disassemble());
                     }
               }
           }

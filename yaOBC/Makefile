@@ -54,7 +54,7 @@ all-archs: \
 	${SAVE}
 
 ${TARGET} ${TARGET2}: % : %.c ../yaASM/yaASM.h Makefile
-	${cc} ${CFLAGS} -m32 -o $@ -I../enet/include \
+	${cc} ${CFLAGS} -o $@ -I../enet/include \
 		$< ../enet/*.c -lpthread -lm
 
 ${TARGET}.exe ${TARGET2}.exe: %.exe : %.c ../yaASM/yaASM.h Makefile

@@ -1,4 +1,4 @@
-# Copyright 2003-2007,2009-2010,2016-2018 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2007,2009-2010,2016-2018,2020 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -182,6 +182,10 @@
 #		2019-09-17 MAS	Added Luminary 178.
 #		2019-09-18 RSB	Added yaOBC and yaASM targets.
 #		2019-09-22 RSB	Added Luminary163 and 173 missions.
+#		2020-05-13 RSB	While I had added the yaOBC and yaASM (Gemini) targets a
+#				couple of years ago, for some reason I didn't set them
+#				to be built automatically.  Now they are.  Also, added
+#				the yaLVDC (LVDC/PTC) target, and have it build automatically.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -444,6 +448,7 @@ cbMISSIONS := $(patsubst %,%.cbp,$(cbMISSIONS))
 # The base set of targets to be built always.
 SUBDIRS = Tools yaLEMAP yaAGC yaAGS yaYUL ControlPulseSim yaUniverse
 SUBDIRS += yaAGC-Block1-Pultorak yaAGCb1 yaUplinkBlock1 Validation-Block1
+SUBDIRS += yaASM yaOBC yaLVDC
 SUBDIRS += $(MISSIONS)
 
 ifndef NOGUI
@@ -568,6 +573,10 @@ yaASM:
 yaOBC:
 	$(BUILD) -C $@
 
+.PHONY: yaLVDC
+yaLVDC:
+	$(BUILD) -C $@
+
 # This target is for making HTML assembly listings for the website.
 .PHONY: listings
 AGC_LISTINGS = $(addprefix listing-agc-, $(MISSIONS))
@@ -665,6 +674,8 @@ Validation.cbp:
 clean: clean-missions
 	$(MAKE) -C yaLEMAP clean
 	$(MAKE) -C yaASM clean
+	$(MAKE) -C yaOBC clean
+	$(MAKE) -C yaLVDC clean
 	$(MAKE) -C yaAGC clean
 	$(MAKE) -C yaAGS clean
 	$(MAKE) -C yaDSKY/src -f Makefile.all-archs clean
