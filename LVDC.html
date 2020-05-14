@@ -46,10 +46,6 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         <li><a href="#IO_Ports_For_PIO_Instruction">I/O Ports (for
             LVDC/PTC <span style="font-family: Courier
               New,Courier,monospace;">PIO</span> Instructions)</a></li>
-        <li><a href="#IO_Ports_For_PTC_PIO">I/O Ports (For PTC <span
-              style="font-family: Courier New,Courier,monospace;">PIO</span>
-            Instruction)</a><br>
-        </li>
         <li><a href="#IO_Ports_for_PTC_CIO_Instruction">I/O Ports (for
             PTC <font face="Courier New, Courier, monospace">CIO</font>
             Instructions)</a><br>
@@ -1745,24 +1741,6 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
           instructions.&nbsp; Chapter 2 ("Theory of Operation") contains
           detailed information about the PTC CPU and its peripheral
           devices.<br>
-        </p>
-        <p>Regarding emulation, several of the PTC's peripherals are
-          commercial products (from IBM, CalComp, and possibly other
-          companies), and thus a creating a full PTC emulation <i>may</i>
-          (or may not) require additional documentation of those
-          commercial products as well.&nbsp; For example, I've looked at
-          a number of manuals for the IBM 1403 printer and related
-          devices ... but so far I've found all of them severely lacking
-          in any useful information regarding a programming interface to
-          the printer.&nbsp; In other words, so far I can't recommend
-          any of the commercial documentation for the peripheral
-          devices.&nbsp; In lieu of such additional documentation,
-          however, I'd point out section 2-326 ("Input/Output
-          Processor") and succeeding sections of the PTC document as
-          providing lots of useful information about programming
-          interfaces to the printer, typewriter, plotter, and so on, and
-          thus the PTC documentation may turn out to be an adequate
-          reference.<br>
         </p>
       </div>
     </div>
@@ -4741,7 +4719,7 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
     </table>
     <br>
     <h3><a name="IO_Ports_For_PIO_Instruction"
-        id="IO_Ports_For_PIO_Instruction"></a>I/O Ports (For LVDC <span
+        id="IO_Ports_For_PIO_Instruction"></a>I/O Ports (For LVDC/PTC <span
         style="font-family: Courier New,Courier,monospace;">PIO</span>
       Instruction)</h3>
     My understanding of this is sketchy right now, so take anything I
@@ -4862,13 +4840,17 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           </td>
           <td style="text-align: center;" valign="middle" align="center"><i>A</i><br>
           </td>
-          <td valign="middle">LVDC Accumulator Register<br>
+          <td valign="middle">Accumulator Register<br>
           </td>
           <td valign="middle">LVDA Telemetry Registers<span
               style="font-style: italic;"></span><br>
+            <br>
+            or PTC<br>
+            general<br>
+            purpose<br>
           </td>
-          <td colspan="1" rowspan="3" valign="middle">(Note:&nbsp; Used
-            to output telemetry consisting of the values of variables,
+          <td colspan="1" rowspan="3" valign="middle">For LVDC, used to
+            output telemetry consisting of the values of variables,
             typically via the <tt>TELEM</tt> macro in the LVDC source
             code.&nbsp; For definitions of non-standard units of
             measurement, see <a href="#AngleUnits">the later discussion
@@ -4911,774 +4893,937 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
               form</a>.)<br>
-            <table width="80%" cellspacing="2" cellpadding="2"
-              border="1" align="center">
+            <br>
+            <table width="100%" cellspacing="2" cellpadding="10">
               <tbody>
                 <tr>
-                  <th valign="bottom">A9 - A1 (octal)<br>
-                  </th>
-                  <th valign="bottom">Variable<br>
-                  </th>
-                  <th valign="bottom">Scale<br>
-                  </th>
-                  <th valign="bottom">Units<br>
-                  </th>
-                  <th valign="bottom" align="left">Interpretation<br>
-                  </th>
+                  <td width="50%" valign="middle" align="center"><b>LVDC</b><b><br>
+                    </b></td>
+                  <td width="50%" valign="middle" align="center"><b>PTC</b><b><br>
+                    </b></td>
                 </tr>
                 <tr>
-                  <td valign="middle" align="center">000<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TASEC</tt><tt><br>
-                    </tt><tt>ONTAS</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B15</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">sec<br>
-                  </td>
-                  <td valign="middle">Time elapsed from GRR or time of
-                    last orbit navigation<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">001<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>CHIZ</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad<br>
-                  </td>
-                  <td valign="middle">Yaw guidance command in
-                    space-fixed coordinates<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">004<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ACCZ</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">0.05 m/sec<br>
-                  </td>
-                  <td valign="middle">Accelerator optisyn reading<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">005<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>CHIX</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad<br>
-                  </td>
-                  <td valign="middle">Pitch guidance command in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">010<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ACCX</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">0.05 m/sec</td>
-                  <td valign="middle">Accelerator optisyn reading</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">011<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>CHIY</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad<br>
-                  </td>
-                  <td valign="middle">Roll guidance command in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">014<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ACCY</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">0.05 m/sec</td>
-                  <td valign="middle">Accelerator optisyn reading</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">015<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>THETZ</tt></td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad</td>
-                  <td valign="middle">Whole yaw gimbal angle<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">021<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>THETX</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad</td>
-                  <td valign="middle">Whole roll gimbal angle</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">025<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>THETY</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad</td>
-                  <td valign="middle">Whole pitch gimbal angle</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">030<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TLTBB</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B15</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">sec<br>
-                  </td>
-                  <td valign="middle">Biased time elapsed in time base<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">031<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TB</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B15</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">sec<br>
-                  </td>
-                  <td valign="middle">Time elapsed in current time base<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">034<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ZS</tt><tt><br>
-                    </tt><tt>ONZN</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Component of position in
-                    space-fixed coordinates<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">044<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>XS</tt><tt><br>
-                    </tt><tt>ONXN</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Component of position in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">050<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>Y</tt><tt>S</tt><tt><br>
-                    </tt><tt>ONYN</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Component of position in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">054<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>GR10R</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B-22</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<sup>-1</sup></td>
-                  <td valign="middle">Reciprocal of total radius in
-                    space-fixed coordinates<sup></sup><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">060<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>GZ</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of gravitational
-                    acceleration<sup></sup><br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">064<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>GX</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of gravitational
-                    acceleration<sup></sup></td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">070<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>GY</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of gravitational
-                    acceleration<sup></sup></td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">074<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TBA</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B15</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">sec<br>
-                  </td>
-                  <td valign="middle">Set equal to TBB at the time of a
-                    C-band station gain or loss<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">075<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>SS</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Switch selector interrupt<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">110<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ZDS</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B14</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<br>
-                  </td>
-                  <td valign="middle">Component of velocity in
-                    space-fixed coordinates<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">114<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>XDS</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B14</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec</td>
-                  <td valign="middle">Component of velocity in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">120<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>YDS</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B14</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec</td>
-                  <td valign="middle">Component of velocity in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">124<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>V</tt><tt><br>
-                    </tt> </td>
-                  <td valign="middle" align="center"><tt>B14</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec</td>
-                  <td valign="middle">Total velocity in space-fixed
-                    coordinates<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">134<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ZS</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Component of position in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">144<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>XS</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Component of position in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">150<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>YS</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Component of position in
-                    space-fixed coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">174<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ACCT</tt><tt><br>
-                    </tt><tt>TLPAST</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B25</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">qms<br>
-                  </td>
-                  <td valign="middle">Real time clock reading<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">400<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>T1I</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B10</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">sec<br>
-                  </td>
-                  <td valign="middle">First IGM phase time-to-go<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">414<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>MC28</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Mode code 28 status changes.&nbsp;
-                    Refer to p. 12.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">415<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>MC24</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Mode code 24 status changes.&nbsp;
-                    Refer to pp. 4-5.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">420<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>MC27</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Mode code 27 status changes.&nbsp;
-                    Refer to pp. 11-12<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">421<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>MC25</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Mode code 25 status changes.&nbsp;
-                    Refer to p. 5.</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">425<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>DORSW</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Discrete output register
-                    contents.&nbsp; A change indicates a guidance
-                    failure.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">431<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ICR</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">LVDA internal control register
-                    contents.&nbsp; Refer to pp. 5-6.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">434<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>Z4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Position in target plane
-                    coordinates<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">435<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>EMRR</tt><tt><br>
-                    </tt><tt>TLEMR1</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Error monitor register
-                    contents.&nbsp; Change indicates ladder failure or
-                    redundancy disagreement.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">441<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>INT</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">LLS, OBCO, TLC, or S4BCO
-                    interrupt.&nbsp; Refer to p. 6.</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">444<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>X4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Position in target plane
-                    coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">450<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>Y4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B23</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Position in target plane
-                    coordinates</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">460<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>T3I</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B10</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">sec<br>
-                  </td>
-                  <td valign="middle">Time-to-go in S4B second burn<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">461<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TLCHPC</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">TLC ("tough luck charlie") HOP
-                    constant<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">465<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>DIS.IN</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Discrete inputs.&nbsp; Refer to p.
-                    6.</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">471<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>SQ3</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B1</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">(1-ZSP<sup>2</sup>)<sup>1/2</sup></td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">475<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TBBU</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Time base backup<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">500<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>FDBK</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Switch-selector feedback register,
-                    in the event of an error<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">501<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>MLCHIZ</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad<br>
-                  </td>
-                  <td valign="middle">Minor loop CHIZ<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">504<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ZDDV</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of vent acceleration<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">505<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>MLCHIX</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad<br>
-                  </td>
-                  <td valign="middle">Minor loop CHIX</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">510<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>XDDV</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of vent acceleration<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">511<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>MLCHIY</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B0</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">pirad<br>
-                  </td>
-                  <td valign="middle">Minor loop CHIY</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">514<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>YDDV</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of vent acceleration<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">520<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ZDDD</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of drag acceleration</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">524<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>XDDD</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of drag acceleration</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">530<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>YDDD</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m/sec<sup>2</sup></td>
-                  <td valign="middle">Component of drag acceleration</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">534<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ALT</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B4</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">m<br>
-                  </td>
-                  <td valign="middle">Altitude<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">535<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TLEMR8</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Minor-loop error code<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">544<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TAUD</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B10</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">sec<br>
-                  </td>
-                  <td valign="middle">Time-to-go<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">561<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>TI</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt>B15</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center">sec<br>
-                  </td>
-                  <td valign="middle">Time from GRR of time-base change<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">570<br>
-                  </td>
-                  <td valign="middle" align="center">(various)<br>
-                  </td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Minor-loop error code.&nbsp; Refer
-                    to pp. 6 and 14.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">571<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>ETC</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">End of telemetry cycle, one per
-                    computation cycle<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">575<br>
-                  </td>
-                  <td valign="middle" align="center"><tt>BTC</tt><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><tt><br>
-                    </tt></td>
-                  <td valign="middle" align="center"><br>
-                  </td>
-                  <td valign="middle">Begin telemetry cycle, one per
-                    computation cycle<br>
+                  <td width="50%" valign="top" align="center">
+                    <table width="80%" cellspacing="2" cellpadding="2"
+                      border="1" align="center">
+                      <tbody>
+                        <tr>
+                          <th valign="bottom">A9-A1 (octal)<br>
+                          </th>
+                          <th valign="bottom">Variable<br>
+                          </th>
+                          <th valign="bottom">Scale<br>
+                          </th>
+                          <th valign="bottom">Units<br>
+                          </th>
+                          <th valign="bottom" align="left">Interpretation<br>
+                          </th>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">000<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TASEC</tt><tt><br>
+                            </tt><tt>ONTAS</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B15</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">sec<br>
+                          </td>
+                          <td valign="middle">Time elapsed from GRR or
+                            time of last orbit navigation<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">001<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>CHIZ</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad<br>
+                          </td>
+                          <td valign="middle">Yaw guidance command in
+                            space-fixed coordinates<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">004<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ACCZ</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">0.05 m/sec<br>
+                          </td>
+                          <td valign="middle">Accelerator optisyn
+                            reading<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">005<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>CHIX</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad<br>
+                          </td>
+                          <td valign="middle">Pitch guidance command in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">010<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ACCX</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">0.05 m/sec</td>
+                          <td valign="middle">Accelerator optisyn
+                            reading</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">011<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>CHIY</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad<br>
+                          </td>
+                          <td valign="middle">Roll guidance command in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">014<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ACCY</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">0.05 m/sec</td>
+                          <td valign="middle">Accelerator optisyn
+                            reading</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">015<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>THETZ</tt></td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad</td>
+                          <td valign="middle">Whole yaw gimbal angle<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">021<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>THETX</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad</td>
+                          <td valign="middle">Whole roll gimbal angle</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">025<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>THETY</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad</td>
+                          <td valign="middle">Whole pitch gimbal angle</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">030<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TLTBB</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B15</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">sec<br>
+                          </td>
+                          <td valign="middle">Biased time elapsed in
+                            time base<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">031<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TB</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B15</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">sec<br>
+                          </td>
+                          <td valign="middle">Time elapsed in current
+                            time base<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">034<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ZS</tt><tt><br>
+                            </tt><tt>ONZN</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Component of position in
+                            space-fixed coordinates<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">044<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>XS</tt><tt><br>
+                            </tt><tt>ONXN</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Component of position in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">050<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>Y</tt><tt>S</tt><tt><br>
+                            </tt><tt>ONYN</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Component of position in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">054<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>GR10R</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B-22</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<sup>-1</sup></td>
+                          <td valign="middle">Reciprocal of total radius
+                            in space-fixed coordinates<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">060<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>GZ</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of gravitational
+                            acceleration<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">064<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>GX</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of gravitational
+                            acceleration</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">070<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>GY</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of gravitational
+                            acceleration</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">074<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TBA</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B15</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">sec<br>
+                          </td>
+                          <td valign="middle">Set equal to TBB at the
+                            time of a C-band station gain or loss<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">075<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>SS</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Switch selector interrupt<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">110<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ZDS</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B14</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<br>
+                          </td>
+                          <td valign="middle">Component of velocity in
+                            space-fixed coordinates<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">114<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>XDS</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B14</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec</td>
+                          <td valign="middle">Component of velocity in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">120<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>YDS</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B14</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec</td>
+                          <td valign="middle">Component of velocity in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">124<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>V</tt><tt><br>
+                            </tt> </td>
+                          <td valign="middle" align="center"><tt>B14</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec</td>
+                          <td valign="middle">Total velocity in
+                            space-fixed coordinates<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">134<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ZS</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Component of position in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">144<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>XS</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Component of position in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">150<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>YS</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Component of position in
+                            space-fixed coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">174<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ACCT</tt><tt><br>
+                            </tt><tt>TLPAST</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B25</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">qms<br>
+                          </td>
+                          <td valign="middle">Real time clock reading<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">400<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>T1I</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B10</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">sec<br>
+                          </td>
+                          <td valign="middle">First IGM phase time-to-go<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">414<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>MC28</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Mode code 28 status
+                            changes.&nbsp; Refer to p. 12.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">415<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>MC24</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Mode code 24 status
+                            changes.&nbsp; Refer to pp. 4-5.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">420<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>MC27</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Mode code 27 status
+                            changes.&nbsp; Refer to pp. 11-12<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">421<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>MC25</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Mode code 25 status
+                            changes.&nbsp; Refer to p. 5.</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">425<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>DORSW</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Discrete output register
+                            contents.&nbsp; A change indicates a
+                            guidance failure.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">431<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ICR</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">LVDA internal control
+                            register contents.&nbsp; Refer to pp. 5-6.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">434<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>Z4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Position in target plane
+                            coordinates<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">435<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>EMRR</tt><tt><br>
+                            </tt><tt>TLEMR1</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Error monitor register
+                            contents.&nbsp; Change indicates ladder
+                            failure or redundancy disagreement.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">441<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>INT</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">LLS, OBCO, TLC, or S4BCO
+                            interrupt.&nbsp; Refer to p. 6.</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">444<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>X4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Position in target plane
+                            coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">450<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>Y4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B23</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Position in target plane
+                            coordinates</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">460<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>T3I</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B10</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">sec<br>
+                          </td>
+                          <td valign="middle">Time-to-go in S4B second
+                            burn<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">461<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TLCHPC</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">TLC ("tough luck charlie")
+                            HOP constant<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">465<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>DIS.IN</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Discrete inputs.&nbsp;
+                            Refer to p. 6.</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">471<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>SQ3</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B1</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">(1-ZSP<sup>2</sup>)<sup>1/2</sup></td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">475<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TBBU</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Time base backup<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">500<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>FDBK</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Switch-selector feedback
+                            register, in the event of an error<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">501<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>MLCHIZ</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad<br>
+                          </td>
+                          <td valign="middle">Minor loop CHIZ<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">504<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ZDDV</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of vent
+                            acceleration<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">505<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>MLCHIX</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad<br>
+                          </td>
+                          <td valign="middle">Minor loop CHIX</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">510<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>XDDV</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of vent
+                            acceleration<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">511<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>MLCHIY</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B0</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">pirad<br>
+                          </td>
+                          <td valign="middle">Minor loop CHIY</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">514<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>YDDV</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of vent
+                            acceleration<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">520<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ZDDD</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of drag
+                            acceleration</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">524<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>XDDD</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of drag
+                            acceleration</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">530<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>YDDD</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m/sec<sup>2</sup></td>
+                          <td valign="middle">Component of drag
+                            acceleration</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">534<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ALT</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B4</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">m<br>
+                          </td>
+                          <td valign="middle">Altitude<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">535<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TLEMR8</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Minor-loop error code<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">544<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TAUD</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B10</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">sec<br>
+                          </td>
+                          <td valign="middle">Time-to-go<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">561<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>TI</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt>B15</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center">sec<br>
+                          </td>
+                          <td valign="middle">Time from GRR of time-base
+                            change<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">570<br>
+                          </td>
+                          <td valign="middle" align="center">(various)<br>
+                          </td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Minor-loop error
+                            code.&nbsp; Refer to pp. 6 and 14.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">571<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>ETC</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">End of telemetry cycle,
+                            one per computation cycle<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">575<br>
+                          </td>
+                          <td valign="middle" align="center"><tt>BTC</tt><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><tt><br>
+                            </tt></td>
+                          <td valign="middle" align="center"><br>
+                          </td>
+                          <td valign="middle">Begin telemetry cycle, one
+                            per computation cycle<br>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                  <td width="50%" valign="top" align="center">
+                    <table width="100%" cellspacing="2" cellpadding="2"
+                      border="1">
+                      <tbody>
+                        <tr>
+                          <td valign="bottom" align="center"><b>A9-A1</b><b><br>
+                            </b><b>(octal)</b><b><br>
+                            </b></td>
+                          <td valign="bottom" align="center"><b>Purpose</b><b><br>
+                            </b></td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">000<br>
+                          </td>
+                          <td valign="top">I suspect this may clear the
+                            entire interrupt latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">001<br>
+                          </td>
+                          <td valign="top">Set interrupt 1 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">004<br>
+                          </td>
+                          <td valign="top">Set interrupt 3 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">010<br>
+                          </td>
+                          <td valign="top">Set interrupt 4 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">020<br>
+                          </td>
+                          <td valign="top">Set interrupt 5 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">021<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">034<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">040<br>
+                          </td>
+                          <td valign="top">Set interrupt 6 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">065<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">075<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">100<br>
+                          </td>
+                          <td valign="top">Set interrupt 7 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">135<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">200<br>
+                          </td>
+                          <td valign="top">Set interrupt 8 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">210<br>
+                          </td>
+                          <td valign="top">Enables one of six output
+                            discretes to be generated. Discretes 1
+                            through 6, respectively, are controlled by
+                            positions 25, 24, 23, 22, 21, and 20 of the
+                            accumulator data word.&nbsp; I'm not sure
+                            how this differs from <tt>CIO 210</tt> (see
+                            next section).&nbsp; In fact, the
+                            source-code comment in the PAST program even
+                            mentions <tt>CIO 210</tt>. I believe these
+                            are the same 6 bits which can be read back
+                            with CIO 214 (bits 22-17) when appropriately
+                            gated.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">221<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">340<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">400<br>
+                          </td>
+                          <td valign="top">Set interrupt 9 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">525<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <br>
                   </td>
                 </tr>
               </tbody>
@@ -5700,7 +5845,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
           </td>
           <td valign="middle" align="center"><i>A</i><br>
           </td>
-          <td valign="middle">LVDC Main Memory<br>
+          <td valign="middle">Main Memory<br>
           </td>
           <td valign="middle">LVDA Telemetry Registers<span
               style="font-style: italic;"></span></td>
@@ -5719,7 +5864,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
           </td>
           <td valign="middle" align="center"><i>A</i><br>
           </td>
-          <td valign="middle">LVDC Residual Memory<br>
+          <td valign="middle">Residual Memory<br>
           </td>
           <td valign="middle">LVDA Telemetry Registers<span
               style="font-style: italic;"></span></td>
@@ -5743,215 +5888,357 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
           </td>
           <td valign="middle" align="center">0<br>
           </td>
-          <td valign="middle">LVDC Accumulator Register</td>
+          <td valign="middle">Accumulator Register</td>
           <td valign="middle">LVDA Output Registers<br>
+            <br>
+            or <br>
+            <br>
+            PTC<br>
+            general <br>
+            purpose<br>
           </td>
           <td colspan="1" rowspan="3" valign="middle">
-            <table width="80%" cellspacing="2" cellpadding="2"
-              border="1" align="center">
+            <table width="100%" cellspacing="2" cellpadding="10">
               <tbody>
                 <tr>
-                  <th valign="bottom" align="center">A7 - A1 (octal) </th>
-                  <th valign="bottom" align="center">Purpose<br>
-                  </th>
+                  <td width="50%" valign="middle" align="center"><b>LVDC</b><b><br>
+                    </b></td>
+                  <td width="50%" valign="middle" align="center"><b>PTC</b><b><br>
+                    </b></td>
                 </tr>
                 <tr>
-                  <td valign="top" align="center">006<br>
+                  <td width="50%" valign="top" align="center">
+                    <table width="80%" cellspacing="2" cellpadding="2"
+                      border="1" align="center">
+                      <tbody>
+                        <tr>
+                          <th valign="bottom" align="center">A9-A1
+                            (octal) </th>
+                          <th valign="bottom" align="center">Purpose<br>
+                          </th>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">006<br>
+                          </td>
+                          <td valign="top">Mode Register<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">012 </td>
+                          <td valign="top">Discrete Output Register
+                            (Reset).&nbsp; The <a
+                              href="Documents/satinstunitibm_3.pdf">LVDC
+                              EDD for the Saturn IB Flight Program</a>
+                            document, section 7.3, summarizes the
+                            discrete outputs as: <br>
+                            <div align="center"><img alt=""
+                                src="lvdcDO.png"
+                                width="375" height="215"><br>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">016 </td>
+                          <td valign="top">Discrete Output Register
+                            (Set).&nbsp; See <tt>PIO 012</tt> above.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">022 </td>
+                          <td valign="top">Internal Control Register
+                            (Set)<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">026 </td>
+                          <td valign="top">Internal Control Register
+                            (Reset)<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">032 </td>
+                          <td valign="top">Interrupt Register
+                            Reset.&nbsp; Resets the interrupts whose
+                            bits are set in ACC. See 072 below.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">036 </td>
+                          <td valign="top">Switch Selector Register
+                            (Load)<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">042 </td>
+                          <td valign="top">Orbital Checkout<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">052 </td>
+                          <td valign="top">Switch Selector &amp;
+                            Discrete Output Registers (Read)<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">062 </td>
+                          <td valign="top">Switch Selector Interrupt
+                            Counter<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">066 </td>
+                          <td valign="top">COD Error (Read)<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">072 </td>
+                          <td valign="top">Interrupt-inhibit
+                            latch.&nbsp; (None of the following is
+                            covered by the available documentation, so
+                            everything I say about it is inferred or
+                            guessed from source code.)&nbsp; It's not
+                            clear to me whether this simply writes the
+                            value in ACC to the latch, or whether it
+                            logically-OR's ACC to the latch; I presume
+                            the latter.&nbsp; There are 13 interrupts
+                            covered, and the mask comprises the 12
+                            most-significant bits of ACC other than
+                            SIGN.&nbsp; Here's how I think the
+                            bit-positions of the latch are interpreted:<br>
+                            <ul>
+                              <li>S: n/a (0)</li>
+                              <li>1: ML (Minor Loop)</li>
+                              <li>2: SS (Switch Select)<br>
+                              </li>
+                              <li>3: CIU?&nbsp; In the AS206-RAM Flight
+                                Program, the interrupt-service routine
+                                for this always immediately exits.&nbsp;
+                                So in effect, these interrupts are
+                                always ignored whether inhibited or not.<br>
+                              </li>
+                              <li>4: TLC (Tough Luck Charlie)</li>
+                              <li>5: Command Receiver?&nbsp; The
+                                interrupt-service routine for this is
+                                not part of the AS206-RAM Flight
+                                Program, and is instead in unassigned
+                                memory.&nbsp; Presumably it is serviced
+                                by some other program co-loaded into
+                                memory along with the flight program.<br>
+                              </li>
+                              <li>6: GRR?&nbsp; In the AS206-RAM Flight
+                                Program, the interrupt-service routine
+                                for this always immediately exits.&nbsp;
+                                So in effect, these interrupts are
+                                always ignored whether inhibited or not.</li>
+                              <li>7: S2 PROP. DEPL.?&nbsp; In the
+                                AS206-RAM Flight Program, the
+                                interrupt-service routine for this
+                                always immediately exits.&nbsp; So in
+                                effect, these interrupts are always
+                                ignored whether inhibited or not.</li>
+                              <li>8: OECO/OBCO (Outboard Engine Cut Off,
+                                starts Time Base 3)<br>
+                              </li>
+                              <li>9: S4B/S4BEO/S4BCO (S4B Engine Cut
+                                Off)<br>
+                              </li>
+                              <li>10: RCA?&nbsp; In the AS206-RAM Flight
+                                Program, the interrupt-service routine
+                                for this always immediately exits.&nbsp;
+                                So in effect, these interrupts are
+                                always ignored whether inhibited or not.</li>
+                              <li>11: LLS (Low Level Sense, starts Time
+                                Base 2)<br>
+                              </li>
+                              <li>12: ?<br>
+                              </li>
+                              <li>13-25: n/a (0)</li>
+                            </ul>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">076 </td>
+                          <td valign="top">Minor Loop Timed Interrupt
+                            Counter<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">146 </td>
+                          <td valign="top">Ladder No. 1<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">152 </td>
+                          <td valign="top">Ladder No. 2<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">156 </td>
+                          <td valign="top">Ladder No. 3<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">162 </td>
+                          <td valign="top">Ladder No. 4<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">166 </td>
+                          <td valign="top">Ladder No. 5<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">172<br>
+                          </td>
+                          <td valign="top">Clamp adders.&nbsp; (This is
+                            not covered by the available documentation,
+                            but seems to be implied by the comments in
+                            the source code.)&nbsp; </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">672<br>
+                          </td>
+                          <td valign="top">(None of this is covered by
+                            the available documentation.)&nbsp; Clear
+                            interrupt-inhibit latch, using a mask.&nbsp;
+                            It's not clear to me whether this
+                            logically-inverts the mask and then AND's it
+                            to the latch, or whether it XOR's the mask
+                            to the latch; I presume the former.&nbsp; In
+                            the AS206RAM Flight Program's source code, <tt>PIO
+                              672</tt> is used in memory module 2, and
+                            address 672 translates to 2-17-272, which is
+                            the variable <tt>IHBT</tt>.&nbsp; I infer
+                            that the technique for temporarily
+                            inhibiting LVDA-generated interrupts is:<br>
+                            <ul>
+                              <li>Create a bit-mask determining which
+                                interrupts to inhibit.</li>
+                              <li>Store the mask at <tt>IHBT</tt>.</li>
+                              <li>Write the mask out to the
+                                interrupt-inhibit latch with <tt>PIO
+                                  072</tt> (and possibly <tt>PIO 032</tt>).<br>
+                              </li>
+                              <li>... do stuff ...</li>
+                              <li>Use <tt>PIO 672</tt> to undo the
+                                masked interrupt-inhibit bits in the
+                                latch.<br>
+                              </li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </td>
-                  <td valign="top">Mode Register<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">012 </td>
-                  <td valign="top">Discrete Output Register
-                    (Reset).&nbsp; The <a
-                      href="Documents/satinstunitibm_3.pdf">LVDC EDD for
-                      the Saturn IB Flight Program</a> document, section
-                    7.3, summarizes the discrete outputs as: <br>
-                    <div align="center"><img alt="" src="lvdcDO.png"
-                        width="497" height="285"><br>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">016 </td>
-                  <td valign="top">Discrete Output Register (Set).&nbsp;
-                    See <tt>PIO 012</tt> above.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">022 </td>
-                  <td valign="top">Internal Control Register (Set)<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">026 </td>
-                  <td valign="top">Internal Control Register (Reset)<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">032 </td>
-                  <td valign="top">Interrupt Register Reset.&nbsp;
-                    Resets the interrupts whose bits are set in ACC. See
-                    072 below.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">036 </td>
-                  <td valign="top">Switch Selector Register (Load)<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">042 </td>
-                  <td valign="top">Orbital Checkout<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">052 </td>
-                  <td valign="top">Switch Selector &amp; Discrete Output
-                    Registers (Read)<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">062 </td>
-                  <td valign="top">Switch Selector Interrupt Counter<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">066 </td>
-                  <td valign="top">COD Error (Read)<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">072 </td>
-                  <td valign="top">Interrupt-inhibit latch.&nbsp; (None
-                    of the following is covered by the available
-                    documentation, so everything I say about it is
-                    inferred or guessed from source code.)&nbsp; It's
-                    not clear to me whether this simply writes the value
-                    in ACC to the latch, or whether it logically-OR's
-                    ACC to the latch; I presume the latter.&nbsp; There
-                    are 13 interrupts covered, and the mask comprises
-                    the 12 most-significant bits of ACC other than
-                    SIGN.&nbsp; Here's how I think the bit-positions of
-                    the latch are interpreted:<br>
-                    <ul>
-                      <li>S: n/a (0)</li>
-                      <li>1: ML (Minor Loop)</li>
-                      <li>2: SS (Switch Select)<br>
-                      </li>
-                      <li>3: CIU?&nbsp; In the AS206-RAM Flight Program,
-                        the interrupt-service routine for this always
-                        immediately exits.&nbsp; So in effect, these
-                        interrupts are always ignored whether inhibited
-                        or not.<br>
-                      </li>
-                      <li>4: TLC (Tough Luck Charlie)</li>
-                      <li>5: Command Receiver?&nbsp; The
-                        interrupt-service routine for this is not part
-                        of the AS206-RAM Flight Program, and is instead
-                        in unassigned memory.&nbsp; Presumably it is
-                        serviced by some other program co-loaded into
-                        memory along with the flight program.<br>
-                      </li>
-                      <li>6: GRR?&nbsp; In the AS206-RAM Flight Program,
-                        the interrupt-service routine for this always
-                        immediately exits.&nbsp; So in effect, these
-                        interrupts are always ignored whether inhibited
-                        or not.</li>
-                      <li>7: S2 PROP. DEPL.?&nbsp; In the AS206-RAM
-                        Flight Program, the interrupt-service routine
-                        for this always immediately exits.&nbsp; So in
-                        effect, these interrupts are always ignored
-                        whether inhibited or not.</li>
-                      <li>8: OECO/OBCO (Outboard Engine Cut Off, starts
-                        Time Base 3)<br>
-                      </li>
-                      <li>9: S4B/S4BEO/S4BCO (S4B Engine Cut Off)<br>
-                      </li>
-                      <li>10: RCA?&nbsp; In the AS206-RAM Flight
-                        Program, the interrupt-service routine for this
-                        always immediately exits.&nbsp; So in effect,
-                        these interrupts are always ignored whether
-                        inhibited or not.</li>
-                      <li>11: LLS (Low Level Sense, starts Time Base 2)<br>
-                      </li>
-                      <li>12: ?<br>
-                      </li>
-                      <li>13-25: n/a (0)</li>
-                    </ul>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">076 </td>
-                  <td valign="top">Minor Loop Timed Interrupt Counter<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">146 </td>
-                  <td valign="top">Ladder No. 1<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">152 </td>
-                  <td valign="top">Ladder No. 2<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">156 </td>
-                  <td valign="top">Ladder No. 3<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">162 </td>
-                  <td valign="top">Ladder No. 4<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">166 </td>
-                  <td valign="top">Ladder No. 5<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">172<br>
-                  </td>
-                  <td valign="top">Clamp adders.&nbsp; (This is not
-                    covered by the available documentation, but seems to
-                    be implied by the comments in the source code.)&nbsp;
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">672<br>
-                  </td>
-                  <td valign="top">(None of this is covered by the
-                    available documentation.)&nbsp; Clear
-                    interrupt-inhibit latch, using a mask.&nbsp; It's
-                    not clear to me whether this logically-inverts the
-                    mask and then AND's it to the latch, or whether it
-                    XOR's the mask to the latch; I presume the
-                    former.&nbsp; In the AS206RAM Flight Program's
-                    source code, <tt>PIO 672</tt> is used in memory
-                    module 2, and address 672 translates to 2-17-272,
-                    which is the variable <tt>IHBT</tt>.&nbsp; I infer
-                    that the technique for temporarily inhibiting
-                    LVDA-generated interrupts is:<br>
-                    <ul>
-                      <li>Create a bit-mask determining which interrupts
-                        to inhibit.</li>
-                      <li>Store the mask at <tt>IHBT</tt>.</li>
-                      <li>Write the mask out to the interrupt-inhibit
-                        latch with <tt>PIO 072</tt> (and possibly <tt>PIO
-                          032</tt>).<br>
-                      </li>
-                      <li>... do stuff ...</li>
-                      <li>Use <tt>PIO 672</tt> to undo the masked
-                        interrupt-inhibit bits in the latch.<br>
-                      </li>
-                    </ul>
+                  <td width="50%" valign="top" align="center">
+                    <table width="100%" cellspacing="2" cellpadding="2"
+                      border="1">
+                      <tbody>
+                        <tr>
+                          <td valign="bottom" align="center"><b>A9-A1</b><b><br>
+                            </b><b>(octal)</b><b><br>
+                            </b></td>
+                          <td valign="bottom" align="center"><b>Purpose</b><b><br>
+                            </b></td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">002<br>
+                          </td>
+                          <td valign="top">Set interrupt 2 latch.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">006<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">016<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">022<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">026<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">032<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">036<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">056<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">066<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">076<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">136<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">222<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">252<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">402<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">776<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <br>
                   </td>
                 </tr>
               </tbody>
             </table>
+            <br>
           </td>
         </tr>
         <tr>
@@ -5973,7 +6260,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
           </td>
           <td valign="middle" align="center">0<br>
           </td>
-          <td valign="middle">LVDC Main Memory</td>
+          <td valign="middle">Main Memory</td>
           <td valign="middle">LVDA Output Registers</td>
         </tr>
         <tr>
@@ -5995,7 +6282,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
           </td>
           <td valign="middle" align="center">0<br>
           </td>
-          <td valign="middle">LVDC Residual Memory</td>
+          <td valign="middle">Residual Memory</td>
           <td valign="middle">LVDA Output Registers</td>
         </tr>
         <tr>
@@ -6019,108 +6306,276 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
           </td>
           <td valign="middle">LVDA Peripheral Inputs and Errors<br>
           </td>
-          <td valign="middle">LVDC Accumulator<br>
+          <td valign="middle">Accumulator<br>
           </td>
           <td valign="middle">
-            <table width="80%" cellspacing="2" cellpadding="2"
-              border="1" align="center">
+            <table width="100%" cellspacing="2" cellpadding="10">
               <tbody>
                 <tr>
-                  <th valign="bottom" align="center">A8 - A1 (octal) </th>
-                  <th valign="bottom" align="center">Purpose<br>
-                  </th>
+                  <td width="50%" valign="middle" align="center"><b>LVDC</b><b><br>
+                    </b></td>
+                  <td width="50%" valign="middle" align="center"><b>PTC</b><b><br>
+                    </b></td>
                 </tr>
                 <tr>
-                  <td valign="top" align="center">023<br>
+                  <td width="50%" valign="top" align="center">
+                    <table width="80%" cellspacing="2" cellpadding="2"
+                      border="1" align="center">
+                      <tbody>
+                        <tr>
+                          <th valign="bottom" align="center">A9-A1
+                            (octal) </th>
+                          <th valign="bottom" align="center">Purpose<br>
+                          </th>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">023<br>
+                          </td>
+                          <td valign="top">Error Monitor Register<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">043<br>
+                          </td>
+                          <td valign="top">Command Receiver or RCA-110<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">053<br>
+                          </td>
+                          <td valign="top">Discrete Input Spares.&nbsp;
+                            Refer to the DIS1-DIS8 inputs in the table
+                            for <tt>PIO 057</tt> below.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">057<br>
+                          </td>
+                          <td valign="top">Discrete Inputs.&nbsp; The <a
+                              href="Documents/satinstunitibm_3.pdf">LVDC
+                              EDD for the Saturn IB Flight Program</a>
+                            document, section 7.4, summarizes the
+                            discrete inputs in the table below.&nbsp;
+                            (The DIS1-DIS8 inputs in the table for <tt>PIO
+                              053</tt> above.)<br>
+                            <div align="center"><img alt=""
+                                src="lvdcDI.png"
+                                width="400" height="440"><br>
+                              <div align="left">The Command Decoder OM/D
+                                bits mentioned in the table originate in
+                                an <a href="LVDC.html#Up-data">up-data
+                                  command word</a> transmitted to the
+                                rocket from mission control.&nbsp; There
+                                are two such bits in the transmitted
+                                word, but the LVDA combines them into a
+                                single bit before passing them to the
+                                LVDC — hence, OM/D bits "A" and "B" both
+                                appear at the same position in <tt>PIO
+                                  057</tt>.&nbsp; A value of 1 in the
+                                OM/D bit indicates that a "mode" command
+                                word has been received (and is
+                                accessible via <tt>PIO 043</tt>), while
+                                a value of 0 indicates instead that a
+                                "data" command word has been received
+                                (in <tt>PIO 043</tt>).<br>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">067<br>
+                          </td>
+                          <td valign="top">Telemetry Scanner<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">077<br>
+                          </td>
+                          <td valign="top">Switch Selector<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">103<br>
+                          </td>
+                          <td valign="top">Real Time<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">107<br>
+                          </td>
+                          <td valign="top">Accelerometer Processor X<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">117<br>
+                          </td>
+                          <td valign="top">Accelerometer Processor Z<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">127<br>
+                          </td>
+                          <td valign="top">Accelerometer Processor Y </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">137<br>
+                          </td>
+                          <td valign="top">Interrupt Storage </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </td>
-                  <td valign="top">Error Monitor Register<br>
+                  <td width="50%" valign="top" align="center">
+                    <table width="100%" cellspacing="2" cellpadding="2"
+                      border="1">
+                      <tbody>
+                        <tr>
+                          <td valign="bottom" align="center"><b>A9-A1</b><b><br>
+                            </b><b>(octal)</b><b><br>
+                            </b></td>
+                          <td valign="bottom" align="center"><b>Purpose</b><b><br>
+                            </b></td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">003<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">017<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">023<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">027<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">033<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">037<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">043<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">047<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">053<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">057<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">063<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">067<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">073<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">077<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">117<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">123<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">127<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">133<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">137<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">157<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">167<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">177<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <br>
                   </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">043<br>
-                  </td>
-                  <td valign="top">Command Receiver or RCA-110<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">053<br>
-                  </td>
-                  <td valign="top">Discrete Input Spares.&nbsp; Refer to
-                    the DIS1-DIS8 inputs in the table for <tt>PIO 057</tt>
-                    below.<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">057<br>
-                  </td>
-                  <td valign="top">Discrete Inputs.&nbsp; The <a
-                      href="Documents/satinstunitibm_3.pdf">LVDC EDD for
-                      the Saturn IB Flight Program</a> document, section
-                    7.4, summarizes the discrete inputs in the table
-                    below.&nbsp; (The DIS1-DIS8 inputs in the table for
-                    <tt>PIO 053</tt> above.)<br>
-                    <div align="center"><img alt="" src="lvdcDI.png"
-                        width="499" height="549"><br>
-                      <div align="left">The Command Decoder OM/D bits
-                        mentioned in the table originate in an <a
-                          href="#Up-data">up-data command word</a>
-                        transmitted to the rocket from mission
-                        control.&nbsp; There are two such bits in the
-                        transmitted word, but the LVDA combines them
-                        into a single bit before passing them to the
-                        LVDC — hence, OM/D bits "A" and "B" both appear
-                        at the same position in <tt>PIO 057</tt>.&nbsp;
-                        A value of 1 in the OM/D bit indicates that a
-                        "mode" command word has been received (and is
-                        accessible via <tt>PIO 043</tt>), while a value
-                        of 0 indicates instead that a "data" command
-                        word has been received (in <tt>PIO 043</tt>).<br>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">067<br>
-                  </td>
-                  <td valign="top">Telemetry Scanner<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">077<br>
-                  </td>
-                  <td valign="top">Switch Selector<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">103<br>
-                  </td>
-                  <td valign="top">Real Time<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">107<br>
-                  </td>
-                  <td valign="top">Accelerometer Processor X<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">117<br>
-                  </td>
-                  <td valign="top">Accelerometer Processor Z<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">127<br>
-                  </td>
-                  <td valign="top">Accelerometer Processor Y </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">137<br>
-                  </td>
-                  <td valign="top">Interrupt Storage </td>
                 </tr>
               </tbody>
             </table>
+            <br>
           </td>
         </tr>
         <tr>
@@ -6144,171 +6599,388 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
           </td>
           <td valign="middle">LVDA Resolver Processor Inputs<br>
           </td>
-          <td valign="middle">LVDC Accumulator</td>
+          <td valign="middle">Accumulator</td>
           <td valign="middle">
-            <table width="80%" cellspacing="2" cellpadding="2"
-              border="1" align="center">
+            <table width="100%" cellspacing="2" cellpadding="10">
               <tbody>
                 <tr>
-                  <th valign="bottom" align="center">A7 - A1 (octal) </th>
-                  <th valign="bottom" align="center">Purpose<br>
-                  </th>
+                  <td width="50%" valign="middle" align="center"><b>LVDC</b><b><br>
+                    </b></td>
+                  <td width="50%" valign="middle" align="center"><b>PTC</b><b><br>
+                    </b></td>
                 </tr>
                 <tr>
-                  <td valign="middle" align="center">203<br>
+                  <td width="50%" valign="top" align="center">
+                    <table width="80%" cellspacing="2" cellpadding="2"
+                      border="1" align="center">
+                      <tbody>
+                        <tr>
+                          <th valign="bottom" align="center">A9-A1
+                            (octal) </th>
+                          <th valign="bottom" align="center">Purpose<br>
+                          </th>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">203<br>
+                          </td>
+                          <td valign="top">Z Gimbal Backup.&nbsp; (This
+                            is not covered by the available
+                            documentation, but seems to be implied by
+                            the comments in the source code.)<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">207<br>
+                          </td>
+                          <td valign="top">Spare No. 6<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">217<br>
+                          </td>
+                          <td valign="top">Computer COD Counter Start<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">223<br>
+                          </td>
+                          <td valign="top">Fine Gimbal No. 1<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">233<br>
+                          </td>
+                          <td valign="top">Coarse Gimbal No. 3<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">237<br>
+                          </td>
+                          <td valign="top">Computer COD Counter Start<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">243<br>
+                          </td>
+                          <td valign="top">Coarse Gimbal No. 1<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">247<br>
+                          </td>
+                          <td valign="top">Horizon Seeker No. 1<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">257<br>
+                          </td>
+                          <td valign="top">Spare No. 3<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">273<br>
+                          </td>
+                          <td valign="top">Y Gimbal Backup.&nbsp; (This
+                            is not covered by the available
+                            documentation, but seems to be implied by
+                            the comments in the source code.)</td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">277<br>
+                          </td>
+                          <td valign="top">Spare No. 4<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">303<br>
+                          </td>
+                          <td valign="top">X Gimbal Backup.&nbsp; (This
+                            is not covered by the available
+                            documentation, but seems to be implied by
+                            the comments in the source code.)</td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">313<br>
+                          </td>
+                          <td valign="top">Fine Gimbal No. 4<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">317<br>
+                          </td>
+                          <td valign="top">Spare No. 1<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">323<br>
+                          </td>
+                          <td valign="top">Horizon Seeker No. 3<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">327<br>
+                          </td>
+                          <td valign="top">Horizon Seeker No. 2<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">333<br>
+                          </td>
+                          <td valign="top">Coarse Gimbal No. 4<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">337<br>
+                          </td>
+                          <td valign="top">Spare No. 5<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">343<br>
+                          </td>
+                          <td valign="top">Coarse Gimbal No. 2<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">353<br>
+                          </td>
+                          <td valign="top">Fine Gimbal No. 3<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">357<br>
+                          </td>
+                          <td valign="top">Spare No. 2<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">363<br>
+                          </td>
+                          <td valign="top">Fine Gimbal No. 2<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="top" align="center">367<br>
+                          </td>
+                          <td valign="top">Horizon Seeker No. 4<br>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </td>
-                  <td valign="top">Z Gimbal Backup.&nbsp; (This is not
-                    covered by the available documentation, but seems to
-                    be implied by the comments in the source code.)<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">207<br>
-                  </td>
-                  <td valign="top">Spare No. 6<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">217<br>
-                  </td>
-                  <td valign="top">Computer COD Counter Start<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">223<br>
-                  </td>
-                  <td valign="top">Fine Gimbal No. 1<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">233<br>
-                  </td>
-                  <td valign="top">Coarse Gimbal No. 3<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">237<br>
-                  </td>
-                  <td valign="top">Computer COD Counter Start<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">243<br>
-                  </td>
-                  <td valign="top">Coarse Gimbal No. 1<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">247<br>
-                  </td>
-                  <td valign="top">Horizon Seeker No. 1<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">257<br>
-                  </td>
-                  <td valign="top">Spare No. 3<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">273<br>
-                  </td>
-                  <td valign="top">Y Gimbal Backup.&nbsp; (This is not
-                    covered by the available documentation, but seems to
-                    be implied by the comments in the source code.)</td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">277<br>
-                  </td>
-                  <td valign="top">Spare No. 4<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="middle" align="center">303<br>
-                  </td>
-                  <td valign="top">X Gimbal Backup.&nbsp; (This is not
-                    covered by the available documentation, but seems to
-                    be implied by the comments in the source code.)</td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">313<br>
-                  </td>
-                  <td valign="top">Fine Gimbal No. 4<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">317<br>
-                  </td>
-                  <td valign="top">Spare No. 1<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">323<br>
-                  </td>
-                  <td valign="top">Horizon Seeker No. 3<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">327<br>
-                  </td>
-                  <td valign="top">Horizon Seeker No. 2<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">333<br>
-                  </td>
-                  <td valign="top">Coarse Gimbal No. 4<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">337<br>
-                  </td>
-                  <td valign="top">Spare No. 5<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">343<br>
-                  </td>
-                  <td valign="top">Coarse Gimbal No. 2<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">353<br>
-                  </td>
-                  <td valign="top">Fine Gimbal No. 3<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">357<br>
-                  </td>
-                  <td valign="top">Spare No. 2<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">363<br>
-                  </td>
-                  <td valign="top">Fine Gimbal No. 2<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" align="center">367<br>
-                  </td>
-                  <td valign="top">Horizon Seeker No. 4<br>
+                  <td width="50%" valign="top" align="center">
+                    <table width="100%" cellspacing="2" cellpadding="2"
+                      border="1">
+                      <tbody>
+                        <tr>
+                          <td valign="bottom" align="center"><b>A9-A1</b><b><br>
+                            </b><b>(octal)</b><b><br>
+                            </b></td>
+                          <td valign="bottom" align="center"><b>Purpose</b><b><br>
+                            </b></td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">203<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">213<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">223<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">227<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">233<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">237<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">243<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">247<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">253<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">257<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">263<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">267<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">273<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">277<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">303<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">313<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">317<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">323<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">333<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">337<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">343<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">347<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">353<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">357<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">363<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">367<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">373<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">403<br>
+                          </td>
+                          <td valign="top">The usage in PAST-program
+                            code is consistent with the following:&nbsp;
+                            Takes the value previously written out with
+                            <tt>CIO 230</tt>, bitwise inverts it, XOR's
+                            it what whatever was previously saved with <tt>STO
+                              403</tt>, and puts the result in the
+                            accumulator.&nbsp; I'm <i>not</i> saying it
+                            does this ... I'm just reporting that that's
+                            what seems to happen numerically in the
+                            available code samples.<br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">773<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td valign="middle" align="center">777<br>
+                          </td>
+                          <td valign="top"><br>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <br>
                   </td>
                 </tr>
               </tbody>
             </table>
+            <br>
           </td>
         </tr>
       </tbody>
     </table>
-    <h3><a name="IO_Ports_For_PTC_PIO"></a>I/O Ports (For PTC <span
-        style="font-family: Courier New,Courier,monospace;">PIO</span>
-      Instruction)</h3>
-    <p>TBD (At the moment, I have little more than a list of the ports
-      used by the PAST program and the observation that some of them are
-      not on the list above.)<br>
-    </p>
+    <br>
     <h3><a name="IO_Ports_for_PTC_CIO_Instruction"></a>I/O Ports (for
       PTC <font face="Courier New, Courier, monospace">CIO</font>
       Instruction)</h3>
@@ -6626,7 +7298,28 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center">066<br>
           </td>
-          <td valign="middle" align="left">Set interrupt latch 14</td>
+          <td valign="middle" align="left"><i>May</i> do the
+            following:&nbsp; set interrupt 14 latch and then "enable
+            compare" (if SIGN=1) or "disable compare / reset compare
+            latch" (if SIGN=0).&nbsp; In other words, I suspect that an
+            interrupt of type 14 occurs when a comparison match
+            occurs.&nbsp; The other bits in <tt>ACC</tt> may be the bit
+            pattern against which the comparison is made.&nbsp; I would
+            suggest further that the the "compare latch" referred to is
+            the Address Compare (ADR COMP) latch, discussed on p. V-2-69
+            of the PTC documentation, so that the contents of <tt>ACC</tt>
+            would be something like a HOP constant.&nbsp; A perhaps
+            illustrative usage in the PAST program code is found at
+            label <tt>L9P36</tt>, shortly after which we find <tt>ACC</tt>
+            indeed being loaded with the HOP constant (for location <tt>L9P36</tt>),
+            and then output via <tt>CIO 066</tt>.&nbsp; A similar
+            sequence of code occurs at label <tt>L10P33</tt>.&nbsp; On
+            the other hand, this interpretation is inconsistent with the
+            notion that the SIGN bit must be non-zero to enable
+            comparisons, since <tt>L9P36</tt>'s HOP constant has a SIGN
+            bit of 0, so perhaps more thought is required to unravel
+            what this operation is doing.<br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" align="center"><b>070</b><br>
@@ -6637,13 +7330,23 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center">071<br>
           </td>
-          <td valign="middle" align="left">Set interrupt latch 10<br>
-          </td>
+          <td valign="middle" align="left"><i>S</i>et interrupt latch 10</td>
         </tr>
         <tr>
           <td valign="middle" align="center">072<br>
           </td>
-          <td valign="middle" align="left">Set interrupt latch 15<br>
+          <td valign="middle" align="left"><i>May</i> do the
+            following:&nbsp; set interrupt latch 15, and load a register
+            determining the behavior of TSYNC signal.&nbsp; The PAST
+            program comments that relate to the values loaded in <tt>ACC</tt>
+            are:<br>
+            <ul>
+              <li>137777777, solid TSYNC reset, diode check<br>
+              </li>
+              <li>337777777, single TSYNC pulse (if not followed by <tt>CIO
+                  102</tt>) or 240 TSYNC pulses per second (if followed
+                by <tt>CIO 102</tt>).</li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -6661,8 +7364,23 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center">076<br>
           </td>
-          <td valign="middle" align="left">Set interrupt latch 11<br>
-          </td>
+          <td valign="middle" align="left"><i>May</i> be the same kind
+            of thing as <tt>CIO 072</tt>, except for interrupt latch 11
+            and the GCSYNC signal:<br>
+            <ul>
+              <li>000000002, solid GSYNC reset, diode check.</li>
+              <li>257777777, reset solid GSYNC</li>
+              <li>357777777, single GSYNC pulse (if not followed by <tt>CIO
+                  102</tt>) or 240 GSYNC pulses per second (if followed
+                by <tt>CIO 102</tt>).</li>
+              <li>377777777, solid GSYNC<br>
+              </li>
+            </ul>
+            (The PAST program source code actually indicates that the
+            first item on the list above is a <tt>CIO 072</tt> ... but
+            I think this may be a bug in the PAST program, and it may
+            have intended to say <tt>CIO 076</tt> rather than <tt>CIO
+              072</tt>.) </td>
         </tr>
         <tr>
           <td valign="middle" align="center">077<br>
@@ -7096,11 +7814,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                 align="right"></a>Enables one of six output discretes to
             be generated. Discretes 1 through 6, respectively, are
             controlled by positions 25, 24, 23, 22, 21, and 20 of the
-            accumulator data word.<br>
+            accumulator data word.&nbsp; I believe these are the same
+            bits which can be read back with <tt>CIO 214</tt> (bits
+            22-17).<br>
             <br>
             I'm not certain, but I think they may also light the lamps
             labeled D6 through D1 on the PTC's Processor Display Panel
             depicted to the right (click to enlarge).<br>
+            <br>
+            See also <tt>PIO 210</tt> in the preceding section.<br>
           </td>
         </tr>
         <tr>
@@ -7149,8 +7871,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                 encountered:&nbsp; If ON, then single step; if OFF,
                 continuous run.</li>
               <li>(GATED) Bits 17-22: Externally-generated discrete
-                inputs.&nbsp; The source and nature of these
-                externally-generated inputs is TBD.</li>
+                inputs.&nbsp; See <tt>CIO 210</tt> above and <tt>PIO
+                  210</tt> in the preceding section.<br>
+              </li>
               <li>(GATED) Bit 23: The PTC's typewriter's busy signal.</li>
               <li>(GATED) Bit 24: The PTC's plotter's busy signal.</li>
               <li>(GATED) Bit 25: The PTC's printer's busy signal.</li>
@@ -7194,7 +7917,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center">230<br>
           </td>
-          <td valign="middle" align="left">TBD </td>
+          <td valign="middle" align="left">TBD, but see PIO <tt>403</tt>
+            in the preceding section. </td>
         </tr>
         <tr>
           <td valign="middle" align="center">233<br>
@@ -11163,7 +11887,7 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         NASSP project and elsewhere.<br>
         <div align="center"><img style="width: 770px; height: 236px;"
             alt=""
-src="file:///home/rburkey/git/virtualagc-web/Saturn-GuidanceEquations.jpg"
+src="Saturn-GuidanceEquations.jpg"
             width="770" height="236"><br>
         </div>
       </div>
@@ -11737,34 +12461,91 @@ src="file:///home/rburkey/git/virtualagc-web/Saturn-GuidanceEquations.jpg"
         </tr>
       </tbody>
     </table>
-    <p>Before getting into the details of how to work with the PAST
-      program's test procedures, you may want to have a little
-      familiarity with the PTC's user interface.&nbsp; I suppose that,
-      in theory, you could run the self tests entirely from yaLVDC's
-      debugger, but the test procedures are not written in a way that
-      facilitates that, so it would be much harder to do so.&nbsp; The
-      facilities of the PTC's user interface which are needed are the
-      following:<br>
+    <p><img src="PTC-familiarization.png" alt="" width="366" hspace="10"
+        height="278" align="left"><a href="IBM-1443-printer.png"><img
+          src="IBM-1443-printer-small.png" alt="" width="317"
+          height="256" border="0" align="right"></a>Before getting into
+      the details of how to work with the PAST program's test procedures
+      in the emulation, you may want to have a little familiarity with
+      the PTC's physical layout.&nbsp; I suppose, in theory, that you
+      could run the self tests entirely from yaLVDC's debugger without
+      using the PTC's panels and other peripheral devices, but the test
+      procedures are not written in a way that facilitates that, so it
+      would be much harder to do so.&nbsp; And it wouldn't be as fun.<br>
     </p>
-    <ul>
-      <li>The typewriter</li>
-      <li>The printer</li>
-      <li>The plotter</li>
-      <li>The PROCESSOR DISPLAY PANEL<br>
-      </li>
-      <li>The MEMORY LOAD AND DATA DISPLAY<br>
-      </li>
-      <li>The C. E. PANEL<br>
-      </li>
-    </ul>
-    These are implemented in yaPTC.py ... or at least <i>partially</i>
-    implemented, to the extent that makes sense.&nbsp; Besides those,
-    you have the tape drive and the TAPE READER AND MODE CONTROL, which
-    are not implemented at all since we have no need of a tape drive for
-    loading software into the device.<br>
-    <br>
-    TBD (panel images and familiarization)<br>
-    <br>
+    <p>The photo to the left gives you an overview of some of the
+      portions of the PTC main console used in the emulation.&nbsp; The
+      Tape Reader and Mode Control Panel, though shown, isn't actually
+      needed by the emulation, since the software is loaded from
+      yaLVDC's command line rather than from a tape drive.&nbsp; On the
+      other hand, among the items truly needed by the emulation, the C.
+      E. Panel apparently hadn't been installed when the photograph was
+      taken, so our handy caption just points to an empty space.&nbsp;
+      How the C. E. panel fits into the indicated space in the PTC
+      cabinet isn't clear to me, but that's life!&nbsp; Hopefully the
+      photo gives you an idea of the general layout, in spite of its
+      deficiencies.<br>
+    </p>
+    <p>We do know that the printer (photo to the right) was an IBM 1443,
+      and that the plotter was a Calcomp 565. </p>
+    <p>The Typewriter peripheral isn't shown.&nbsp; I haven't been able
+      to determine a model number (and thus obtain a photograph of
+      one).&nbsp; It printed stuff and had a keyboard, so what more is
+      there to know about its visual appearance, really?&nbsp; I would
+      hazard a guess that it was a modified IBM Selectric Typewriter,
+      for whatever an uninformed guess from me is worth.<br>
+    </p>
+    <p>To run the test procedures in the PAST program, the principal PTC
+      interfaces you have to interact with are the three control panels,
+      which are obviously a bit too small to see in the photo above, so
+      below you'll find a more-detailed representation of those.&nbsp;
+      Clicking on any of them should give you enlarged view.&nbsp; Not
+      everything you see is reproduced in the emulation, because not all
+      of it is relevant to emulation of the PTC's CPU or running the
+      PAST program's self-test procedures.&nbsp; For example, the
+      emulated PTC has no power supplies, so emulating the Power Control
+      area of the Processor Display Panel would be rather
+      pointless.&nbsp; Also, to be blunt, the thrill of putting a lot of
+      effort into making emulations that visually mimic the original
+      physical devices as worn thin for me over the decades, so don't
+      expect yaPTC.py to duplicate every little nuance of the original
+      panel layouts shown here:<br>
+    </p>
+    <table width="100%" cellspacing="10" cellpadding="2">
+      <tbody>
+        <tr>
+          <td width="33%" valign="top" align="center"><a
+              href="ptcCEPanel-422.png"><img src="ptcCEPanel-422.png"
+                title="Click to enlarge" alt="" width="422" height="729"
+                border="2"></a><br>
+          </td>
+          <td width="33%" valign="top" align="center"><a
+              href="ptcMemoryLoadAndDataDisplay-422.png"><img
+                src="ptcMemoryLoadAndDataDisplay-422.png" title="Click
+                to enlarge." alt="" width="422" height="773" border="2"></a><br>
+          </td>
+          <td width="33%" valign="top" align="center"><a
+              href="ptcProcessorDisplayPanel.png"><img
+                src="ptcProcessorDisplayPanel-422.png" title="Click to
+                enlarge." alt="" width="422" height="780" border="2"></a><br>
+          </td>
+        </tr>
+        <tr>
+          <td width="33%" valign="top" align="center"><font size="-1"><i>C.
+                E. Panel (CE)</i><i><br>
+              </i></font></td>
+          <td width="33%" valign="top" align="center"><font size="-1"><i>Memory
+                Load and Data Display (MLDD)</i><i><br>
+              </i></font></td>
+          <td width="33%" valign="top" align="center"><font size="-1"><i>Processor
+                Display Panel (PD)</i><i><br>
+              </i></font></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>TBD (explanation of a few of the more-interesting controls on the
+      panels)<br>
+    </p>
     The PAST-program test-procedures you can run are all covered in
     chapter V of <a href="Documents/19730064346_1973064346.pdf">the PTC
       documentation</a>.&nbsp; The first few calibration procedures and
