@@ -188,6 +188,8 @@ Launch
 
 
 
+
+
     Vehicle Digital Computer (LVDC) was a computer that resided in the
     Instrument Unit (IU) that perched above the Saturn IVB that was the
     second stage in a Saturn IB rocket and the third stage in a Saturn V
@@ -307,6 +309,8 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
 
 
 
@@ -661,6 +665,8 @@ Launch
 
 
 
+
+
       Saturn Flight Program Simulator</a>", as pointed out to me by one
     of the article's authors.&nbsp; (Thanks, Tom Dillon!)<br>
     <h2><a name="LVDC_Software"></a>LVDC Software</h2>
@@ -801,6 +807,8 @@ Launch
 
 
 
+
+
         Flight Program</a>, however, I do have a couple of reasons to
       believe that the AS-206RAM Flight Program would have been used in
       conjunction with a Preflight Program:<br>
@@ -855,9 +863,13 @@ href="http://www.ibiblio.org/apollo/Documents/AstrionicsSystemsHandbook_Nov69.pd
 
 
 
+
+
         15 1969 release</a> (see section 11.2.1 in particular), but does
       not even mention the ECP at all in its <a
 href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">November
+
+
 
 
 
@@ -1066,6 +1078,8 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
 
 
 
+
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -1094,6 +1108,8 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
       images, since you can do things like text searches on it, or even
       assemble it using the nifty new LVDC assembler I've written (<a
         href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>).&nbsp;
+
+
 
 
 
@@ -1160,6 +1176,8 @@ href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identificati
     restricted by ITAR, if they do not pertain to guidance, control, or
     other technical aspects of the launch vehicle.&nbsp; <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">Such
+
+
 
 
 
@@ -1410,6 +1428,8 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
 
 
 
+
+
           HCCMDC</tt> instruction it contains now.&nbsp; Another
         workaround would be to simply disable the command-upload
         interrupt.&nbsp; But alas, that's just one example of the
@@ -1473,6 +1493,8 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         </p>
         <ol>
           <li>The PTC contains a CPU ... <i>which is a modified LVDC</i>.&nbsp;
+
+
 
 
 
@@ -1645,10 +1667,14 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
 
 
 
+
+
           You can get that source code from our software repository:<br>
         </p>
         <p align="center"><a
 href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-Program">Folder
+
+
 
 
 
@@ -1724,6 +1750,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
 
 
 
+
+
                 of scanned page images for the PAST program</a></p>
           </blockquote>
         </div>
@@ -1746,6 +1774,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
     </div>
     <h2><a name="Architecture_of_the_LVDC" id="Architecture_of_the_LVDC"></a>Architecture
 of
+
+
 
 
 
@@ -1958,6 +1988,8 @@ This
 
 
 
+
+
         is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp; <br>
@@ -2058,9 +2090,13 @@ Astrionics
 
 
 
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -2432,6 +2468,8 @@ of
 
 
 
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -2540,9 +2578,59 @@ of
     address 000 (presumably in memory module 0 sector 0), and this
     determines where program execution starts.<br>
     <br>
-    Below are some photos sent to us by Dmitris Vitoris of an LVDC "page
-    assembly", which I suppose (but am not sure) is a memory
-    module.&nbsp; (I'm not really sure which is the best photo, so I've
+    <a name="Dimitris"></a>Below are some photos sent to us by Dimitris
+    Vitoris of an LVDC "page assembly".&nbsp; Unfortunately, I don't
+    know exactly what this particular page assembly does, but don't be
+    fooled by the array-like regularity of the design into supposing
+    these are memory.&nbsp; They're not, since LVDC memory consisted of
+    ferrite cores and not surface-mounted flatpacks.<br>
+    <br>
+    The term <i>page assembly</i> refers to plug-in modular circuit
+    boards used to build the LVDC and LVDA, and not to the specific
+    functionality the individual module provides.&nbsp; Each page
+    assembly contains a printed circuit board with up to 35 "Unit Logic
+    Devices" (ULD) on the top side, and another 35 on the bottom
+    side.&nbsp; The ULDs were themselves designed by IBM, rather than
+    being off-the-shelf components from other manufacturers; as a
+    consequence, there aren't ULD datasheets floating around, and
+    there's not a lot of information about them.&nbsp; But here's a
+    little info we've been able to glean.&nbsp; Most of the explanations
+    about their functionality came from the "Logic Symbols" Appendix of
+    <a
+href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">this
+
+      document</a>, which also describes a number of other symbols that
+    may or may not be ULDs as well.<br>
+    <ul>
+      <li>AA — a network which can provide several combinations of logic
+        functions, depending on wiring:&nbsp; e.g., 4 2-input AND gates,
+        2 4-input AND gates, etc.<br>
+      </li>
+      <li>CDR — a pull-up/down resistor.<br>
+      </li>
+      <li>CLI — TBD<br>
+      </li>
+      <li>CLN — a resistor-divider network.</li>
+      <li>DD — logical disagreement detector.&nbsp; (Detects if any 1 of
+        3 inputs differs from the other 2 inputs.)</li>
+      <li>DDI — TBD</li>
+      <li>FP 2412 — a pair of PNP transistors.&nbsp; This is technically
+        not a "ULD", but can be installed in a ULD location.<br>
+      </li>
+      <li>HCI — high-current inverter.</li>
+      <li>INV — an AND gate and a NAND gate.<br>
+      </li>
+      <li>TMV — a logical majority detector.&nbsp; (Output is the
+        majority of the 3 inputs.)<br>
+      </li>
+      <li>VI — a logical inverter, capable of driving 10 AND-get inputs.</li>
+      <li>VIP — TBD</li>
+      <li>... and presumably a number others, although the documentation
+        suggests that an effort was made to minimize the number of
+        types.<br>
+      </li>
+    </ul>
+    (I'm not really sure which is the best photo from Dimitris, so I've
     just included them all.)<br>
     <br>
     <table summary="" style="text-align: left; width: 100%;"
@@ -2717,6 +2805,8 @@ of
 
 
 
+
+
                 HIGTHR<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .<br>
@@ -2795,6 +2885,8 @@ of
             (more accurately, 4 computer cycles) following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
 
 
 
@@ -3119,6 +3211,8 @@ However,
 
 
 
+
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -3159,6 +3253,8 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
 
 
 
@@ -3663,6 +3759,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>Residual sector, location 0375<sub>8</sub> (often
@@ -3723,6 +3821,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               <tt>TMI</tt>, or <tt>TNZ</tt>) is <tt>STO 776</tt> or <tt>STO
 
 
+
+
                 777</tt>, what ends up getting stored in location 776 or
               777 is the HOP constant for the memory address that
               follows the previously executed transfer instruction
@@ -3742,6 +3842,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 SUB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
                 # Call a subroutine.<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
                 <br>
@@ -3751,13 +3853,19 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 776&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
                 # Save the return address.</tt><br>
               <tt> </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
                 # ... do stuff ...</tt><br>
               <tt> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt>HOP&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
                 776
@@ -3783,11 +3891,15 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                   SUB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
                   # Call a subroutine.<br>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
                 </tt></p>
               <p><tt>SUBRET&nbsp; BSS&nbsp;&nbsp;&nbsp;
                   1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
                   # Variable for saving a return address.<br>
@@ -3797,10 +3909,14 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                   776&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
                   # Save the return address.<br>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   CLA&nbsp;&nbsp;&nbsp;&nbsp;
                   776&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
                   # Move the return address to SUBRET,<br>
@@ -3968,6 +4084,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 or <tt>DEQS</tt> pseudo-ops (see below), whereas the
                 module number and sector number are simply supplied with
                 octal numeric literals in <tt>CDSD</tt> or <tt>CDSS</tt>.&nbsp;
+
+
 
 
 
@@ -4594,6 +4712,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -4733,6 +4853,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
       and <tt>MLDBUZ</tt>), there's self-modifying code that changes an
       instruction <tt>PIO 203</tt> to a <tt>PIO 303</tt>, then changes
       it to a <tt>PIO 273</tt>, and then finally changes it back to <tt>PIO
+
+
         203</tt>.&nbsp; Unfortunately, with programming and
       documentation practices like these, getting a complete list of
       ports used — other than by just running the code under all
@@ -4757,6 +4879,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           <th colspan="1" rowspan="2">Data Destination<br>
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Specific
+
+
 
 
 
@@ -4857,6 +4981,8 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               of that topic</a>.&nbsp; Page-number references are to the
             AS-206RAM LVDC source code or to its <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">abridged
+
+
 
 
 
@@ -5932,8 +6058,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                             document, section 7.3, summarizes the
                             discrete outputs as: <br>
                             <div align="center"><img alt=""
-                                src="lvdcDO.png"
-                                width="375" height="215"><br>
+                                src="lvdcDO.png" width="375"
+                                height="215"><br>
                             </div>
                           </td>
                         </tr>
@@ -6106,6 +6232,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                             to the latch, or whether it XOR's the mask
                             to the latch; I presume the former.&nbsp; In
                             the AS206RAM Flight Program's source code, <tt>PIO
+
+
                               672</tt> is used in memory module 2, and
                             address 672 translates to 2-17-272, which is
                             the variable <tt>IHBT</tt>.&nbsp; I infer
@@ -6357,10 +6485,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                             document, section 7.4, summarizes the
                             discrete inputs in the table below.&nbsp;
                             (The DIS1-DIS8 inputs in the table for <tt>PIO
+
+
                               053</tt> above.)<br>
                             <div align="center"><img alt=""
-                                src="lvdcDI.png"
-                                width="400" height="440"><br>
+                                src="lvdcDI.png" width="400"
+                                height="440"><br>
                               <div align="left">The Command Decoder OM/D
                                 bits mentioned in the table originate in
                                 an <a href="LVDC.html#Up-data">up-data
@@ -6949,6 +7079,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                             Takes the value previously written out with
                             <tt>CIO 230</tt>, bitwise inverts it, XOR's
                             it what whatever was previously saved with <tt>STO
+
+
                               403</tt>, and puts the result in the
                             accumulator.&nbsp; I'm <i>not</i> saying it
                             does this ... I'm just reporting that that's
@@ -6985,6 +7117,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
       PTC <font face="Courier New, Courier, monospace">CIO</font>
       Instruction)</h3>
     <p>Figure 2-11 of <a href="Documents/19730064346_1973064346.pdf">the
+
+
 
 
 
@@ -7312,6 +7446,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
             illustrative usage in the PAST program code is found at
             label <tt>L9P36</tt>, shortly after which we find <tt>ACC</tt>
             indeed being loaded with the HOP constant (for location <tt>L9P36</tt>),
+
+
             and then output via <tt>CIO 066</tt>.&nbsp; A similar
             sequence of code occurs at label <tt>L10P33</tt>.&nbsp; On
             the other hand, this interpretation is inconsistent with the
@@ -7344,6 +7480,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
               <li>137777777, solid TSYNC reset, diode check<br>
               </li>
               <li>337777777, single TSYNC pulse (if not followed by <tt>CIO
+
+
                   102</tt>) or 240 TSYNC pulses per second (if followed
                 by <tt>CIO 102</tt>).</li>
             </ul>
@@ -7371,6 +7509,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
               <li>000000002, solid GSYNC reset, diode check.</li>
               <li>257777777, reset solid GSYNC</li>
               <li>357777777, single GSYNC pulse (if not followed by <tt>CIO
+
+
                   102</tt>) or 240 GSYNC pulses per second (if followed
                 by <tt>CIO 102</tt>).</li>
               <li>377777777, solid GSYNC<br>
@@ -8124,6 +8264,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -8232,6 +8374,8 @@ Only
 
 
 
+
+
     those special addresses work.&nbsp; So a typical subroutine linkage
     would look like this:<br>
     <br>
@@ -8241,6 +8385,8 @@ Only
       </span> </div>
     <div style="margin-left: 40px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; ... <i>return
+
+
 
 
 
@@ -8421,6 +8567,8 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
 
 
 
@@ -8871,6 +9019,8 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
 
 
 
+
+
     bits.)&nbsp; The LVDA combines this pair of bits (in some manner
     unknown to me), and thus the LVDC receives a single OM/D bit.&nbsp;
     The LVDC recognizes two types of commands, <i>mode commands words</i>
@@ -9038,6 +9188,8 @@ Assembly
 
 
 
+
+
       Language</h2>
     Unfortunately, there is no surviving manual or other reference
     describing the syntax of LVDC assembly language, nor the pseudo-ops
@@ -9050,6 +9202,8 @@ Assembly
     PTC source code that was acquired later.&nbsp; The description is
     intended to be authoritative only in the sense that it describes how
     my own assembler (<a href="#yaLVDCASM_the_LVDC_Cross-Assembler">yaASM.py</a>),
+
+
 
 
 
@@ -9120,6 +9274,8 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
 
 
 
@@ -9285,12 +9441,16 @@ Assembly
 
 
 
+
+
         In other words, a decimal integer encoded as <i>N</i> bits
         would be sign-extended on the left by 26-<i>N</i> bits.</li>
       <li>Decimal non-integer constants are treated as being in the
         range -1.0 &lt; <i>constant</i> &lt; 1.0.&nbsp;</li>
     </ul>
     <p><i><a name="AngleUnits"></a>Units of angular measurement</i>:&nbsp;
+
+
 
 
 
@@ -9653,6 +9813,8 @@ Assembly
 
 
 
+
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -9760,6 +9922,8 @@ Assembly
 
 
 
+
+
         in the existing LVDC source code, so I really have no way of
         knowing whether the original assembler accepted decimal
         constants or octal ones.)<br>
@@ -9800,6 +9964,8 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>target</i>,<i>syllable</i>,<i>modifier</i></tt>",
+
+
 
 
 
@@ -9963,11 +10129,15 @@ href="https://en.wikipedia.org/wiki/IBM_1400_series#Field_and_character_coding">
 
 
 
+
+
               1400 series printers</a>, and EBCDIC encoding, used for
             later IBM printers like the ones that printed the original
             LVDC and PTC assembly listings.&nbsp; The BA8421 encoding
             scheme can be found at <a
 href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_code">this
+
+
 
 
 
@@ -10564,6 +10734,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
 
 
 
+
+
             In that case, the first previously-unused location in the
             select data module/sector is used.&nbsp; Actually, even
             specifying <tt><i>DLOC</i></tt> explicitly does not
@@ -10604,6 +10776,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
 
 
 
+
+
             In the case of <tt><tt><i>DLOC</i></tt></tt>, it appears to
             me that it defaults to the <i>next</i> location after the
             previous one allocated in the sector.&nbsp; For example,
@@ -10623,6 +10797,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             address 0-16-23.&nbsp; It should not be inferred that the
             addresses 0-16-0 through 0-16-17 are completely filled up
             (as they would be for a similar LVDC pseudo-op <tt>ORGDD</tt>),
+
+
 
 
 
@@ -10665,6 +10841,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           <td valign="middle">This pseudo-op requires a left-hand symbol
             to precede the <tt>SYN</tt> on the line.&nbsp; It tells the
             assembler to treat the left-hand symbol as a synonym for <tt><i>symbol</i></tt>.&nbsp;
+
+
 
 
 
@@ -10791,6 +10969,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
 
 
 
+
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -10804,6 +10984,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
+
 
 
 
@@ -11240,6 +11422,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
 
 
 
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unHOP.py">unHOP.py</a>)
@@ -11419,6 +11603,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -11886,15 +12072,16 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         simulations for the <span style="font-weight: bold;">Orbiter</span>
         NASSP project and elsewhere.<br>
         <div align="center"><img style="width: 770px; height: 236px;"
-            alt=""
-src="Saturn-GuidanceEquations.jpg"
-            width="770" height="236"><br>
+            alt="" src="Saturn-GuidanceEquations.jpg" width="770"
+            height="236"><br>
         </div>
       </div>
     </div>
     <br>
     The yaLVDC program currently has to be build from its <a
       href="https://github.com/virtualagc/virtualagc/tree/master/yaLVDC">source
+
+
 
 
 
@@ -11957,9 +12144,13 @@ src="Saturn-GuidanceEquations.jpg"
 
 
 
+
+
             Or if you had renamed them (say) MyProgram.tsv,
             MyProgram.sym, and MyProgram.src, and were in the folder
             .../test/, then it would be <tt>--assembly=../test/MyProgram</tt>.&nbsp;
+
+
 
 
 
@@ -12114,6 +12305,8 @@ src="Saturn-GuidanceEquations.jpg"
 
 
 
+
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -12138,6 +12331,8 @@ src="Saturn-GuidanceEquations.jpg"
     <br>
     Usage of the LVDC assembler is quite simple:<br>
     <blockquote><tt>yaASM.py [<i>OPTIONS</i>] [<i>OCTALS</i>.tsv] &lt;<i>INPUT</i>.lvdc
+
+
 
 
 
@@ -12322,6 +12517,8 @@ src="Saturn-GuidanceEquations.jpg"
                 instructions.&nbsp; For example, in the PTC, the
                 "instruction" <tt>SHL 25</tt> is really the sequence of
                 instructions <tt>SHL 6 / SHL 6 / SHL 6 / SHL 6 / SHL 1</tt>.&nbsp;
+
+
 
                 <br>
               </li>
@@ -12532,12 +12729,18 @@ src="Saturn-GuidanceEquations.jpg"
         </tr>
         <tr>
           <td width="33%" valign="top" align="center"><font size="-1"><i>C.
+
+
                 E. Panel (CE)</i><i><br>
               </i></font></td>
           <td width="33%" valign="top" align="center"><font size="-1"><i>Memory
+
+
                 Load and Data Display (MLDD)</i><i><br>
               </i></font></td>
           <td width="33%" valign="top" align="center"><font size="-1"><i>Processor
+
+
                 Display Panel (PD)</i><i><br>
               </i></font></td>
         </tr>
@@ -12600,6 +12803,8 @@ src="Saturn-GuidanceEquations.jpg"
           <li>Source code for the software run by the test &amp;
             checkout computers, as opposed to the LVDC itself.</li>
           <li>Any documents missing from the <a href="links.html#LVDC">Document
+
+
 
 
 
@@ -12815,10 +13020,12 @@ Commons
 
 
 
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2020-05-12.<br>
+          2020-05-16.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
