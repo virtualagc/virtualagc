@@ -250,7 +250,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   // be function arguments, but for an LVDC server they always have the
   // same values, so it would be kind of pointless for them to be anything
   // other than constants.
-  int id = 0, mask = 0377777777;
+  int mask = 0377777777;
   outPacketSize = 0;
   // Take care of any virtual-wire outputs needed.  The changes (triggered by
   // the last LVDC/PTC instruction executed) have stuck the necessary info in
@@ -287,7 +287,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
 
       formatPacket(5, 003, state.hop, 0);
 
-      formatPacket(5, 0600, state.acc);
+      formatPacket(5, 0600, state.acc, 0);
     }
   if (ioType >= 0)
     {
