@@ -82,8 +82,8 @@
  *                                      001     CIO
  *                                      010     PRS
  *                                      011     Interrupt
- *                                      100     (reserved)
- *                                      101     (reserved)
+ *                                      100     Command or status from panel
+ *                                      101     Command or status to panel
  *                                      110     (reserved)
  *                                      111     PING
  *              D2-D0   Unique Source ID.  (000 is the server; i.e., the CPU.)
@@ -112,6 +112,51 @@
  *
  *   6th byte   D7      0
  *              D6-D0   Least-significant 7 bits of the 26-bit data/mask.
+ *
+ * Commands/status from/to the PTC front panel (I/O type 100 or 101) are, of course,
+ * my own invention, and thus are not documented in any of the original Apollo-era
+ * documentation, since in the physical PTC they were not implemented with i/o ports.
+ * (Except, of course, for data conveyed already by existing PIO or
+ * CIO commands.)  So here is the documentation:
+ *
+ * Type 100 (from panel emulation to CPU emulation):
+ *      Channel 000:    Pause at current instruction.  What that means is that the
+ *                      main CPU emulation loop will continue cycling normally,
+ *                      except that runOneInstruction() is not being executed
+ *                      and the cycle/instruction counts are not updated.  This
+ *                      means that the yaLVDC debugger interface *won't* appear,
+ *                      and virtual-wire transactions will continue to occur.
+ *                      The packet payload is ignored.
+ *      Channel 001:    Release the instruction pause (from prior channel 000) and
+ *                      proceed executing normally.  The packet payload is ignored.
+ *      Channel 002:    Set a data-address comparison pattern.  The packet payload
+ *                      is the bit pattern against which to compare data addresses.
+ *                      The most-significant 13 bits are formatted like a HOP
+ *                      constant (in particular, they contain the DM and DS fields),
+ *                      while the least-significant 13 bits are formatted like
+ *                      an instruction (opcode + operand), because those are the 4
+ *                      fields specified by the controls on the MLDD panel.
+ *      Channel 003:    Set an instruction-address comparison pattern.  The packet
+ *                      is formatted like a HOP constant, and provides the payload.
+ *                      Only the IM, IS, S, and LOC fields are significant.
+ *      Channel 004:    Set a data comparison pattern.  The payload is the 26 bits
+ *                      of a pattern for comparison to data.
+ *
+ *      Channel 600:    Set the data-comparison mode.  The payload is ignored.
+ *      Channel 601:    Set the instruction-comparison mode.  The payload is ignored.
+ *      Channel 602:    Inhibit interrupts.  The payload is the 16-bit mask (aligned
+ *                      at the least-significant bit) of interrupts to inhibit.
+ *      Channel 603:    Step a single instruction.
+ *      Channel 604:    Reset the CPU.
+ *
+ * Type 101 (from CPU emulation to panel emulation):
+ *      Channel 000:    CPU is paused.
+ *      Channel 001:    CPU is running.
+ *      Channel 002:    Current data address (same format as i/o type 100 channel 002).
+ *      Channel 003:    Current instruction address (same format as i/o type 100 channel 003).
+ *      Channel 004:    Current data value.
+ *
+ *      Channel 600:    Current accumulator value.
  */
 
 int ServerBaseSocket = -1;
@@ -163,27 +208,50 @@ connectCheck(void)
     }
 }
 
+// Add a 6-byte chunk to the output packet. First set outPacketSize=0; then
+// call formatPacket() up to MAX_CHUNKS_PER_PACKET times.  Then send()
+// outPacket[].
+#define MAX_CHUNKS_PER_PACKET 32
+static int outPacketSize = 0;
+static uint8_t outPacket[6 * MAX_CHUNKS_PER_PACKET];
+void
+formatPacket(int ioType, int channel, int payload, int isMask)
+{
+  int id = 0;
+  outPacket[outPacketSize++] = (isMask ? 0300 : 0200) | ((ioType << 3) & 0070)
+      | (id & 0007);
+  outPacket[outPacketSize++] = channel & 0177;
+  outPacket[outPacketSize++] = ((channel & 0600) >> 2)
+      | ((payload >> 21) & 0037);
+  outPacket[outPacketSize++] = (payload >> 14) & 0177;
+  outPacket[outPacketSize++] = (payload >> 7) & 0177;
+  outPacket[outPacketSize++] = payload & 0177;
+}
+
 // Once the server system has been activated, call this function once after
 // emulation of each LVDC/PTC instruction to take care of any pending
 // virtual-wire actions.  Returns 0 on success, non-zero on error.
-typedef struct {
+typedef struct
+{
   int valid;
   int source;
   int ioType;
   int channel;
   int mask;
 } pendingMask_t;
-pendingMask_t pendingMasks[MAX_LISTENERS] = { { 0 } };
+pendingMask_t pendingMasks[MAX_LISTENERS] =
+  {
+    { 0 } };
 int
 pendingVirtualWireActivity(void /* int id, int mask */)
 {
-  int i, j, received = 0, ioType = -1, payload, outPacketSize = 0, channel;
-  uint8_t outPacket[12];
+  int i, j, received = 0, ioType = -1, payload, channel;
   // For a general-purpose function, the following two things would
   // be function arguments, but for an LVDC server they always have the
   // same values, so it would be kind of pointless for them to be anything
   // other than constants.
   int id = 0, mask = 0377777777;
+  outPacketSize = 0;
   // Take care of any virtual-wire outputs needed.  The changes (triggered by
   // the last LVDC/PTC instruction executed) have stuck the necessary info in
   // the global "state" structure.  Note that any given instruction can flag
@@ -212,28 +280,20 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       payload = state.prs;
       state.prsChange = -1;
     }
-  // Format the output packet(s).
+  // Format the output packet.
+  if (panelPause == 2 || panelPause == 4)
+    {
+      formatPacket(5, (panelPause == 4) ? 001 : 000, 0, 0);
+
+      formatPacket(5, 003, state.hop, 0);
+
+      formatPacket(5, 0600, state.acc);
+    }
   if (ioType >= 0)
     {
       if ((mask & 0377777777) != 0377777777)
-        {
-          outPacket[outPacketSize++] = 0300 | ((ioType << 3) & 0070)
-              | (id & 0007);
-          outPacket[outPacketSize++] = channel & 0177;
-          outPacket[outPacketSize++] = ((channel & 0600) >> 2)
-              | ((mask >> 21) & 0037);
-          outPacket[outPacketSize++] = (mask >> 14) & 0177;
-          outPacket[outPacketSize++] = (mask >> 7) & 0177;
-          outPacket[outPacketSize++] = mask & 0177;
-        }
-      outPacket[outPacketSize++] = 0200 | ((ioType << 3) & 0070) | (id & 0007);
-      outPacket[outPacketSize++] = channel & 0177;
-      outPacket[outPacketSize++] = ((channel & 0600) >> 2)
-          | ((payload >> 21) & 0037);
-      outPacket[outPacketSize++] = (payload >> 14) & 0177;
-      outPacket[outPacketSize++] = (payload >> 7) & 0177;
-      outPacket[outPacketSize++] = payload & 0177;
-
+        formatPacket(ioType, channel, mask, 1);
+      formatPacket(ioType, channel, payload, 0);
     }
 
   // Take care of any network stuff needed.
@@ -301,7 +361,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
           size = inPacketSizes[i];
           offsetIntoBuffer = 0;
           offset = 0;
-          retry:;
+          retry: ;
           offsetIntoPacket = 0;
           for (; offset < size; offset++)
             {
@@ -326,7 +386,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                   goto retry;
                 }
               switch (offsetIntoPacket)
-              {
+                {
               case 0:
                 offsetIntoPacket++;
                 isMask = 0x40 & currentByte;
@@ -385,34 +445,42 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                         pendingMasks[i].valid = 0;
                       }
                     switch (ioType)
-                    {
+                      {
                     case 0: // PIO
                       if (channel < 0 || channel > 0777)
                         printf("Input PIO channel out of range.\n");
-                      printf("PIO-%03o changed from %09o to %09o with mask %09o.\n", channel, state.pio[channel], value, mask);
-                      state.pio[channel] = (state.pio[channel] & ~mask) | (value & mask);
+                      printf(
+                          "PIO-%03o changed from %09o to %09o with mask %09o.\n",
+                          channel, state.pio[channel], value, mask);
+                      state.pio[channel] = (state.pio[channel] & ~mask)
+                          | (value & mask);
                       break;
                     case 1: // CIO
                       if (channel < 0 || channel > 0777)
                         printf("Input CIO channel out of range.\n");
-                      printf("CIO-%03o changed from %09o to %09o with mask %09o.\n", channel, state.cio[channel], value, mask);
-                      state.cio[channel] = (state.pio[channel] & ~mask) | (value & mask);
+                      printf(
+                          "CIO-%03o changed from %09o to %09o with mask %09o.\n",
+                          channel, state.cio[channel], value, mask);
+                      state.cio[channel] = (state.pio[channel] & ~mask)
+                          | (value & mask);
                       break;
                     case 2: // PRS
-                      printf ("PRS data received from peripheral, which is not allowed.\n");
+                      printf(
+                          "PRS data received from peripheral, which is not allowed.\n");
                       break;
                     case 3: // INT
-                      printf ("INT data received from peripheral, which is not yet implemented.\n");
+                      printf(
+                          "INT data received from peripheral, which is not yet implemented.\n");
                       break;
                     default:
-                      printf ("Unrecognized input i/o type.\n");
+                      printf("Unrecognized input i/o type.\n");
                       break;
-                    }
+                      }
                   }
                 break;
               default:
                 break;
-              }
+                }
             }
           // Everything from the input buffer than cat be processed has
           // been.  So removed that stuff from the buffer, leaving everything

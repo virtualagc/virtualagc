@@ -73,8 +73,6 @@ static char helpMessage[] = "Usage:\n"
 char *coreFilename = "yaLVDC.core";
 int ptc = 0;
 int coldStart = 0;
-int runStepN = 0;
-int runNextN = 0;
 
 // Parse a set of command-line arguments and set global variables based
 // on them.

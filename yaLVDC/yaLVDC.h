@@ -73,8 +73,8 @@ dPrintouts (void);
 #endif
 
 // See yaLVDC.c
-int clockDivisor;
-int inhibitFetchMessages;
+extern int clockDivisor;
+extern int inhibitFetchMessages;
 #define MAX_SYMBOL_LENGTH 10
 typedef struct
 {
@@ -88,9 +88,8 @@ typedef struct
   int whichType;        // 0=name, 1=number, 2=address.
 } breakpoint_t;
 #define MAX_BREAKPOINTS 50
-breakpoint_t breakpoints[MAX_BREAKPOINTS];
-int numBreakpoints;
-
+extern breakpoint_t breakpoints[MAX_BREAKPOINTS];
+extern int numBreakpoints;
 typedef struct
 {
   int32_t fromWhere;
@@ -106,20 +105,32 @@ typedef struct
 // to unroll as subroutines were returned from, but that's beyond my ability to
 // analyze, given the nature of the code.
 #define MAX_BACKTRACES 101
-backtrace_t backtraces[MAX_BACKTRACES];
-int firstUsedBacktrace, firstEmptyBacktrace;
+extern backtrace_t backtraces[MAX_BACKTRACES];
+extern int firstUsedBacktrace, firstEmptyBacktrace;
+extern int runStepN; // # of emulation steps left to run until pausing. INT_MAX is unlimited.
+extern int runNextN;
+extern int inNextNotStep, inNextHop, inNextHopIM, inNextHopIS, inNextHopS,
+    inNextHopLOC;
 #define NEXT_BACKTRACE(n) (((n) + 1) % MAX_BACKTRACES)
 void
 addBacktrace(int16_t fromInstruction, int32_t fromWhere, int32_t toWhere,
     unsigned long cycleCount, unsigned long instructionCount);
+// CPU/Panel status/commands.
+extern int panelPause;
+extern int panelPatternDataAddress;
+extern int panelPatternInstructionAddress;
+extern int panelPatternDataValue;
+extern int panelComparisonModeData;
+extern int cpuIsRunning;
+extern int cpuCurrentAddressData;
+extern int cpuCurrentAddressInstruction;
+extern int cpuCurrentValueData;
+extern int cpuCurrentAccumulator;
 
 // See parseCommandLineArguments.c
-char *coreFilename;
-int ptc;
-int coldStart;
-int runStepN; // # of emulation steps left to run until pausing. INT_MAX is unlimited.
-int inNextNotStep, inNextHop, inNextHopIM, inNextHopIS, inNextHopS,
-    inNextHopLOC;
+extern char *coreFilename;
+extern int ptc;
+extern int coldStart;
 
 int
 parseCommandLineArguments(int argc, char *argv[]);
@@ -164,7 +175,7 @@ typedef struct
   int32_t lastHop;
   int16_t lastInstruction;
 } state_t;
-state_t state;
+extern state_t state;
 typedef struct
 {
   char name[MAX_SYMBOL_LENGTH];
@@ -196,9 +207,9 @@ typedef struct
   int codeWords;
   int dataWords;
 } assembly_t;
-assembly_t assemblies[MAX_ASSEMBLIES];
-int numAssemblies;
-int freezeAssemblies;
+extern assembly_t assemblies[MAX_ASSEMBLIES];
+extern int numAssemblies;
+extern int freezeAssemblies;
 int
 readAssemblies(void);
 int
@@ -224,9 +235,9 @@ typedef struct
   uint8_t dupin;
   uint8_t dupdn;
 } hopStructure_t;
-int instructionFromDataMemory;
-int dataFromInstructionMemory;
-int dataOverwritesInstructionMemory;
+extern int instructionFromDataMemory;
+extern int dataFromInstructionMemory;
+extern int dataOverwritesInstructionMemory;
 int
 runOneInstruction(int *cyclesUsed);
 int
@@ -253,10 +264,12 @@ int
 processInterruptsAndIO(void);
 
 // See virtualWire.c
+// Socket stuff.
 #define MAX_LISTENERS 7
-int ServerBaseSocket;
-int PortNum;
-int virtualWireErrorCodes;
+extern int ServerBaseSocket;
+extern int PortNum;
+extern int virtualWireErrorCodes;
+// Functions.
 int
 InitializeSocketSystem(void);
 void

@@ -159,6 +159,7 @@ enum commandTokens
   ctQUIT,
   ctSET,
   ctSHOW,
+  ctPANEL,
   ctHELP,
   ctNone
 };
@@ -215,6 +216,7 @@ commandAssociation_t commandAssociations[] =
             { ctSET, "SET", "SET *address = n",
                 "Store value n at memory address." },
             { ctSHOW, "SHOW", "SHOW LISTSIZE", "Show current size for LIST." },
+            { ctPANEL, "PANEL", "PANEL", "Resume full control by PTC front panel." },
             { ctHELP, "HELP", "HELP", "Print this list of commands." },
             { ctNone, "" } };
 enum commandTokens
@@ -1113,6 +1115,13 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         printf("    if it has leading 0x, octal if it merely has leading\n");
         printf("    0, and decimal otherwise.\n");
         goto nextCommand;
+      case ctPANEL:
+        if (!ptc)
+          {
+            printf("Not emulating PTC; no PTC front panel available.\n");
+            goto nextCommand;
+          }
+        break;
       case ctBACKTRACE:
         {
           int i, n = 20, numBacktraces = (firstEmptyBacktrace
