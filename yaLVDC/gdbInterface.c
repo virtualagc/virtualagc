@@ -937,7 +937,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
   // runNextN is a global variable telling the LVDC/PTC instruction emulator
   // how many instructions to emulate (-1 is unlimited) before pausing next,
   // so obviously we accept user commands until this becomes non-zero.
-  while (runStepN <= 0)
+  while (panelPause || runStepN <= 0)
     {
       int i, j, found = 0;
       enum commandTokens commandToken;
@@ -976,6 +976,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         }
 
       nextCommand: ;
+      if (panelPause)
+        printf("\n*** CPU is paused by PTC panel ... no instructions will execute. ***\n");
 
       // Display registers.
       printf("\n HOP = ");
@@ -1121,7 +1123,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
             printf("Not emulating PTC; no PTC front panel available.\n");
             goto nextCommand;
           }
-        break;
+        retVal = 0;
+        goto done;
       case ctBACKTRACE:
         {
           int i, n = 20, numBacktraces = (firstEmptyBacktrace

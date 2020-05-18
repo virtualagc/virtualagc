@@ -104,6 +104,16 @@ else:
 
 # Callbacks for the GUI (tkinter) event loop.
 
+resetMachine = False
+def eventResetMachine(event):
+	global resetMachine
+	resetMachine = True
+
+halt = False
+def eventHalt(event):
+	global halt
+	halt = True
+
 ProgRegA = -1
 def cPRA():
 	global ProgRegA
@@ -234,19 +244,27 @@ ProcessorDisplayPanel_support.cPRB = cPRB
 # to the CPU.
 def inputsForCPU():
 	#global delayCount, ioTypeCount, channelCount
-	global ProgRegA, ProgRegB
+	global ProgRegA, ProgRegB, resetMachine, halt
 	returnValue = []
 	
 	if ProgRegA != -1:
 		n = ProgRegA
 		ProgRegA = -1
-		return [(1, 0o214, n, 0o377777777)]
+		returnValue.append((1, 0o214, n, 0o377777777))
 
 	if ProgRegB != -1:
 		n = ProgRegB
 		ProgRegB = -1
-		return [(1, 0o220, n, 0o377777777)]
-		
+		returnValue.append((1, 0o220, n, 0o377777777))
+	
+	if resetMachine:
+		resetMachine = False
+		returnValue.append((4, 0o604, 0, 0o377777777))
+	
+	if halt:
+		halt = False
+		returnValue.append((4, 0o000, 0, 0o377777777))
+	
 	return returnValue
 
 # GUI indicator functions.  These are implemented as canvas widgets,
@@ -1012,6 +1030,8 @@ top.acDATA.bind("<Button-1>", eventAddressCompareData)
 top.pdpLAMP_TEST.bind("<Button-1>", eventPdpLampTest)
 top.mlddLAMP_TEST.bind("<Button-1>", eventMlddLampTest)
 top.ceLAMP_TEST.bind("<Button-1>", eventCeLampTest)
+top.RESET_MACHINE.bind("<Button-1>", eventResetMachine)
+top.HALT.bind("<Button-1>", eventHalt)
 
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)

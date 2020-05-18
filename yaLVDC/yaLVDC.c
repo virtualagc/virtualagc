@@ -177,7 +177,7 @@ int
 main(int argc, char *argv[])
 {
   int retVal = 1;
-  clock_t startingTime, currentTime, pausedTime = 0;
+  clock_t startingTime, currentTime, pausedTime = 0, panelPauseTime = 0;
   double cyclesPerTick;
   unsigned long cycleCount = 0, nextSnapshot, snapshotIntervalCycles = 5.0
       / SECONDS_PER_CYCLE;
@@ -243,6 +243,11 @@ main(int argc, char *argv[])
 
       if (panelPause)
         {
+          if (0)
+            {
+              startPanelPause: ;
+              panelPauseTime = times(&TmsStruct);
+            }
           // See the comments where panelPause is allocated to understand
           // the difference between states panelPause = 0,1,2,3,4.
           // If a single step was remotely commanded, then take care of
@@ -264,7 +269,10 @@ main(int argc, char *argv[])
           if (panelPause == 2)
             panelPause = 3;
           if (panelPause == 4)
-            panelPause = 0;
+            {
+              panelPause = 0;
+              pausedTime += times(&TmsStruct) - panelPauseTime;
+            }
           else
             {
               // If a key hit at the keyboard, we can still force entry
@@ -273,11 +281,8 @@ main(int argc, char *argv[])
               if (kbhit())
                 {
                   getchar(); // Eliminate the keypress.
-                  start = times(&TmsStruct);
                   if (gdbInterface(instructionCount, cycleCount, NULL))
                     goto done;
-                  end = times(&TmsStruct);
-                  pausedTime += (end - start);
                 }
             }
         }
@@ -437,6 +442,8 @@ main(int argc, char *argv[])
                 }
               if (processInterruptsAndIO())
                 goto done;
+              if (panelPause)
+                goto startPanelPause;
               if (runStepN > 0) // Number of instructions remaining.
                 {
                   // If a key hit at the keyboard, pause the emulation.

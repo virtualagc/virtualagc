@@ -252,6 +252,15 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   // other than constants.
   int mask = 0377777777;
   outPacketSize = 0;
+  // Format the output packet.
+  if (panelPause == 2 || panelPause == 4)
+    {
+      formatPacket(5, (panelPause == 4) ? 001 : 000, 0, 0);
+
+      formatPacket(5, 003, state.hop, 0);
+
+      formatPacket(5, 0600, state.acc, 0);
+    }
   // Take care of any virtual-wire outputs needed.  The changes (triggered by
   // the last LVDC/PTC instruction executed) have stuck the necessary info in
   // the global "state" structure.  Note that any given instruction can flag
@@ -279,15 +288,6 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       channel = 0;
       payload = state.prs;
       state.prsChange = -1;
-    }
-  // Format the output packet.
-  if (panelPause == 2 || panelPause == 4)
-    {
-      formatPacket(5, (panelPause == 4) ? 001 : 000, 0, 0);
-
-      formatPacket(5, 003, state.hop, 0);
-
-      formatPacket(5, 0600, state.acc, 0);
     }
   if (ioType >= 0)
     {
@@ -471,6 +471,20 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                     case 3: // INT
                       printf(
                           "INT data received from peripheral, which is not yet implemented.\n");
+                      break;
+                    case 4: // Commands directly from PTC panel emulation
+                      if (channel == 0)
+                        {
+                          printf("PTC panel commands halt.\n");
+                          panelPause = 2;
+                        }
+                      else
+                        printf("Command %03o/%09o received from PTC panel\n",
+                            channel, value);
+                      break;
+                    case 5: // Status sent directly from CPU to PTC panel emulation.
+                      printf(
+                          "Illegal status info received ... should be output only.\n");
                       break;
                     default:
                       printf("Unrecognized input i/o type.\n");
