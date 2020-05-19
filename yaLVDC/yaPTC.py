@@ -400,6 +400,9 @@ def eventErrorReset(event):
 	indicatorOff(top.OAC)
 	indicatorOff(top.BR14)
 
+def getCommandedDataAddress():
+	indicatorOn(event.widget)
+
 def eventAddressCmptr(event):
 	indicatorOn(event.widget)
 
