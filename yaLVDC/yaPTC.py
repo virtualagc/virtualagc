@@ -104,15 +104,20 @@ else:
 
 # Callbacks for the GUI (tkinter) event loop.
 
+def eventIndicatorButtonRelease(event):
+	indicatorOff(event.widget)
+	
 resetMachine = False
 def eventResetMachine(event):
 	global resetMachine
 	resetMachine = True
+	indicatorOn(event.widget)
 
 halt = False
 def eventHalt(event):
 	global halt
 	halt = True
+	indicatorOn(event.widget)
 
 ProgRegA = -1
 def cPRA():
@@ -272,53 +277,156 @@ def inputsForCPU():
 # to act like pushbuttons.  Each canvas just has two visible elements:
 # a filling white rectangle (ID=1) that can be either opaque or invisible,
 # and a textual caption (ID=5).
+# Adjust the size of an indicator lamp after a startup, window resize, etc.
 def indicatorReconfigure(event):
 	width = event.width
 	height = event.height
 	event.widget.coords(1, 0, 0, width, height)
 	event.widget.coords(2, width/2.0, height/2.0)
-PANEL_PDP = 0
+# Set up an indicator lamp, at startup, before use.  As defined by the PAGE
+# tool, and our import of the modules it creates, an indicator lamp is simply
+# an empty rectangular canvas.  We add two elements to the canvas:  a 
+# rectangular block that fills it, and which we can use to adjust the color 
+# by either revealing it or hiding it, and above that, the textual caption.
+PANEL_PDP = 0	# PANEL_XXX is just a constant we use to ID specific panels.
 PANEL_MLDD = 1
 PANEL_CE = 2
+CC_NONE = 0 # CC_XXX is a constant we use to tell if an indicator is "computer" or "command" or neither.
+CC_COMPUTER = 1
+CC_COMMAND = 2
 indicators = { PANEL_PDP : {}, PANEL_MLDD : {}, PANEL_CE : {} }
-def indicatorInitialize(canvas, text, panel):
+computerIndicators = []
+commandIndicators = []
+def indicatorInitialize(canvas, text, panel, cc = CC_NONE):
 	indicators[panel][canvas] = 0
+	if cc == CC_COMPUTER:
+		computerIndicators.append(canvas)
+	elif cc == CC_COMMAND:
+		commandIndicators.append(canvas)
 	canvas.delete("all")
 	canvas.create_rectangle(0, 0, 1, 1, fill="white", state = "hidden")
 	canvas.create_text(1, 1, fill="white", text=text, font=("Sans", 6), justify=tk.CENTER)
 	canvas.bind("<Configure>", indicatorReconfigure)
+# indicatorOn() and indicatorOff() are used to either light up an indicator
+# or to unlight it.  That involves changing the color of the rectangular
+# fill and the text-color of the caption.  However, we have to intercept
+# that process if a LAMP TEST is in progress for the particular panel 
+# containing the indicator, because in that case we have to capture the
+# intended change of state but not change the actual colors, since when 
+# a lamp test is in progress the indicator stays lit regardless.  Similarly,
+# when a lamp test ends, the lamp must resume either the state it had before
+# the lamp test or else the desired state due to changes that have taken 
+# place while the lamp test was in progress.  The indicators[] dictionary
+# tracks those changes; it not only indicates which indicators are on which
+# of the 3 panels, but also tracks their intended states during LAMP TESTS;
+# it doesn't try to track their states whilst there is no LAMP TEST for the
+# corresponding panel, because the actual visual appearance already does that.
+inLampTests = []
+def isIndicatorInLampTest(canvas):
+	for panel in inLampTests:
+		if canvas in indicators[panel]:
+			return panel
+	return False 
 def indicatorOff(canvas):
-	canvas.itemconfig(1, state = "hidden")
-	canvas.itemconfig(2, fill = "white")
+	inTest = isIndicatorInLampTest(canvas)
+	if inTest == False:
+		canvas.itemconfig(1, state = "hidden")
+		canvas.itemconfig(2, fill = "white")
+	else:
+		indicators[inTest][canvas] = "hidden"
 def indicatorOn(canvas):
-	canvas.itemconfig(1, state = "normal")
-	canvas.itemconfig(2, fill = "black")
+	inTest = isIndicatorInLampTest(canvas)
+	if inTest == False:
+		canvas.itemconfig(1, state = "normal")
+		canvas.itemconfig(2, fill = "black")
+	else:
+		indicators[inTest][canvas] = "normal"
+def indicatorSet(canvas, onOff):
+	if onOff:
+		indicatorOn(canvas)
+	else:
+		indicatorOff(canvas)
+def indicatorToggle(canvas):
+	inTest = isIndicatorInLampTest(canvas)
+	if inTest == False:
+		indicatorSet(canvas, canvas.itemcget(1, "state") == "hidden")
+	else:
+		indicatorSet(canvas, indicators[inTest][canvas] == "hidden")
 def startPanelLampTest(panel):
 	for indicator in indicators[panel]:
 		indicators[panel][indicator] = indicator.itemcget(1, "state")
 		indicatorOn(indicator)
+	if panel not in inLampTests:
+		inLampTests.append(panel)
 def endPanelLampTest(panel):
+	if panel in inLampTests:
+		inLampTests.remove(panel)
 	for indicator in indicators[panel]:
 		if indicators[panel][indicator] == "normal":
 			indicatorOn(indicator)
 		else:
 			indicatorOff(indicator)
+
+def eventToggleIndicator(event):
+	indicatorToggle(event.widget)
+
 def eventPdpLampTest(event):
 	if event.widget.itemcget(1, "state") == "normal":
 		endPanelLampTest(PANEL_PDP)
 	else:
 		startPanelLampTest(PANEL_PDP)
+
 def eventMlddLampTest(event):
 	if event.widget.itemcget(1, "state") == "normal":
 		endPanelLampTest(PANEL_MLDD)
 	else:
 		startPanelLampTest(PANEL_MLDD)
+
 def eventCeLampTest(event):
 	if event.widget.itemcget(1, "state") == "normal":
 		endPanelLampTest(PANEL_CE)
 	else:
 		startPanelLampTest(PANEL_CE)
-	
+
+def eventErrorReset(event):
+	indicatorOn(event.widget)
+	indicatorOff(top.PARITY_SERIAL)
+	indicatorOff(top.TRS)
+	indicatorOff(top.A13)
+	indicatorOff(top.SERIAL)
+	indicatorOff(top.HOPC1)
+	indicatorOff(top.SSMSC)
+	indicatorOff(top.SSMBR)
+	indicatorOff(top.OAC)
+	indicatorOff(top.BR14)
+
+def eventAddressCmptr(event):
+	indicatorOn(event.widget)
+
+def eventComptrDisplayReset(event):
+	indicatorOn(event.widget)
+	for indicator in computerIndicators:
+		indicatorOff(indicator)
+
+def eventCommandDisplayReset(event):
+	indicatorOn(event.widget)
+	for indicator in commandIndicators:
+		indicatorOff(indicator)
+
+def eventREPEAT(event):
+	indicatorOn(event.widget)
+	indicatorOff(top.mlREPEAT_INVERSE)
+
+def eventREPEAT_INVERSE(event):
+	indicatorOn(event.widget)
+	indicatorOff(top.mlREPEAT)
+
+def oddParity13(value): # Starts with 13 bits.
+	value = (value ^ (value >> 7)) # Now has 7 bits.
+	value = (value ^ (value >> 4)) # Now has 4 bits.
+	value = (value ^ (value >> 2)) # Now has 2 bits.
+	return 1 & (1 ^ value ^ (value >> 1)) # Just 1 bit left!
+
 # This function is called by the event loop only when yaLVDC has written
 # to an output channel.  The function should do whatever it is that needs to be done
 # with this output data, which is not processed additionally in any way by the 
@@ -478,14 +586,107 @@ def outputFromCPU(ioType, channel, value):
 				shift -= 6
 			print("\nChannel PRS = %09o (%s)" % (value, string), end="  ")
 	elif ioType == 5:
-		print("\nCPU status %03o %09o" % (channel, value))
+		if channel == 0o000:
+			print("\nCPU is paused.")
+		elif channel == 0o001:
+			print("\nCPU is running.")
+		elif channel == 0o002:
+			# Data address.
+			opcode = value & 0o17
+			a9 = (value >> 4) & 1
+			a81 = (value >> 5) & 0o377
+			dm = (value >> 17) & 1
+			ds = (value >> 20) & 0o17
+			indicatorSet(top.daComputerM0, not dm)
+			indicatorSet(top.daComputerM1, dm)
+			indicatorSet(top.daComputerDS1, ds & 1)
+			indicatorSet(top.daComputerDS2, ds & 2)
+			indicatorSet(top.daComputerDS3, ds & 4)
+			indicatorSet(top.daComputerDS4, ds & 8)
+			indicatorSet(top.daComputerOP1, opcode & 1)
+			indicatorSet(top.daComputerOP2, opcode & 2)
+			indicatorSet(top.daComputerOP3, opcode & 4)
+			indicatorSet(top.daComputerOP4, opcode & 8)
+			indicatorSet(top.daComputerOA9, a9)
+			indicatorSet(top.daComputerOA1, a81 & 1)
+			indicatorSet(top.daComputerOA2, a81 & 2)
+			indicatorSet(top.daComputerOA3, a81 & 4)
+			indicatorSet(top.daComputerOA4, a81 & 8)
+			indicatorSet(top.daComputerOA5, a81 & 16)
+			indicatorSet(top.daComputerOA6, a81 & 32)
+			indicatorSet(top.daComputerOA7, a81 & 64)
+			indicatorSet(top.daComputerOA8, a81 & 128)
+			indicatorSet(top.daPARITY_BIT, oddParity13(value & 0o17777))
+		elif channel == 0o003:
+			# Instruction address.
+			isect = (value >> 2) & 0o17
+			s = (value >> 6) & 1
+			loc = (value >> 7) & 0o377
+			dm = (value >> 17) & 1
+			ds = (value >> 20) & 0o17
+			im = (value >> 25) & 1
+			indicatorSet(top.iaComputerM0, not im)
+			indicatorSet(top.iaComputerM1, im)
+			indicatorSet(top.iaComputerSYL0, not s)
+			indicatorSet(top.iaComputerSYL1, s)
+			indicatorSet(top.iaComputerIS1, isect & 1)
+			indicatorSet(top.iaComputerIS2, isect & 2)
+			indicatorSet(top.iaComputerIS3, isect & 4)
+			indicatorSet(top.iaComputerIS4, isect & 8)
+			indicatorSet(top.iaComputerA1, loc & 1)
+			indicatorSet(top.iaComputerA2, loc & 2)
+			indicatorSet(top.iaComputerA3, loc & 4)
+			indicatorSet(top.iaComputerA4, loc & 8)
+			indicatorSet(top.iaComputerA5, loc & 16)
+			indicatorSet(top.iaComputerA6, loc & 32)
+			indicatorSet(top.iaComputerA7, loc & 64)
+			indicatorSet(top.iaComputerA8, loc & 128)
+		elif channel == 0o004:
+			parity0 = oddParity13(value & 0o17777)
+			parity1 = oddParity13((value >> 13) & 0o17777)
+			indicatorSet(top.mlddComputerBR0, parity0)
+			indicatorSet(top.mlddComputerBR1, parity1)
+			indicatorSet(top.mlddPARITY_BIT, 1 ^ parity0 ^ parity1)
+			indicatorSet(top.mlddComputer25, value & 0o1)
+			indicatorSet(top.mlddComputer24, value & 0o2)
+			indicatorSet(top.mlddComputer23, value & 0o4)
+			indicatorSet(top.mlddComputer22, value & 0o10)
+			indicatorSet(top.mlddComputer21, value & 0o20)
+			indicatorSet(top.mlddComputer20, value & 0o40)
+			indicatorSet(top.mlddComputer19, value & 0o100)
+			indicatorSet(top.mlddComputer18, value & 0o200)
+			indicatorSet(top.mlddComputer17, value & 0o400)
+			indicatorSet(top.mlddComputer16, value & 0o1000)
+			indicatorSet(top.mlddComputer15, value & 0o2000)
+			indicatorSet(top.mlddComputer14, value & 0o4000)
+			indicatorSet(top.mlddComputer13, value & 0o10000)
+			indicatorSet(top.mlddComputer12, value & 0o20000)
+			indicatorSet(top.mlddComputer11, value & 0o40000)
+			indicatorSet(top.mlddComputer10, value & 0o100000)
+			indicatorSet(top.mlddComputer9, value & 0o200000)
+			indicatorSet(top.mlddComputer8, value & 0o400000)
+			indicatorSet(top.mlddComputer7, value & 0o1000000)
+			indicatorSet(top.mlddComputer6, value & 0o2000000)
+			indicatorSet(top.mlddComputer5, value & 0o4000000)
+			indicatorSet(top.mlddComputer4, value & 0o10000000)
+			indicatorSet(top.mlddComputer3, value & 0o20000000)
+			indicatorSet(top.mlddComputer2, value & 0o40000000)
+			indicatorSet(top.mlddComputer1, value & 0o100000000)
+			indicatorSet(top.mlddComputerSIGN, value & 0o200000000)
+			pass
+		elif channel == 0o600:
+			pass
+		elif channel == 0o601:
+			pass
+		else:
+			print("\nCPU status %03o %09o" % (channel, value))
 	else:
 		print("\nUnimplemented type %d, channel %03o, value %09o" % (ioType, channel, value), end="  ")
 	
 	return
 
 def pressedPROG_ERR(event):
-	indicatorOff(top.PROG_ERR)
+	indicatorOn(top.PROG_ERR)
 
 displaySelect = 0
 modeControl = 0
@@ -673,6 +874,8 @@ root = tk.Tk()
 ProcessorDisplayPanel_support.set_Tk_var()
 top = topProcessorDisplayPanel (root)
 ProcessorDisplayPanel_support.init(root, top)
+# Lots and lots of initializations that the PAGE tool wasn't
+# flexible enough to do for me.
 # Indicators for PDP DATA area:
 indicatorInitialize(top.pdp1, "1", PANEL_PDP)
 indicatorInitialize(top.pdp2, "2", PANEL_PDP)
@@ -779,137 +982,140 @@ indicatorInitialize(top.HALT, "HALT", PANEL_PDP)
 # Indicators for PDP POWER CONTROL area:
 indicatorInitialize(top.pdpLAMP_TEST, "LAMP\nTEST", PANEL_PDP)
 # Indicators for MLDD INSTRUCTION ADDRESS area:
-indicatorInitialize(top.iaComputerM0, "0", PANEL_MLDD)
-indicatorInitialize(top.iaComputerM1, "1", PANEL_MLDD)
-indicatorInitialize(top.iaComputerSYL0, "0", PANEL_MLDD)
-indicatorInitialize(top.iaComputerSYL1, "1", PANEL_MLDD)
-indicatorInitialize(top.iaComputerIS4, "IS4", PANEL_MLDD)
-indicatorInitialize(top.iaComputerIS3, "IS3", PANEL_MLDD)
-indicatorInitialize(top.iaComputerIS2, "IS2", PANEL_MLDD)
-indicatorInitialize(top.iaComputerIS1, "IS1", PANEL_MLDD)
-indicatorInitialize(top.iaComputerA8, "A8", PANEL_MLDD)
-indicatorInitialize(top.iaComputerA7, "A7", PANEL_MLDD)
-indicatorInitialize(top.iaComputerA6, "A6", PANEL_MLDD)
-indicatorInitialize(top.iaComputerA5, "A5", PANEL_MLDD)
-indicatorInitialize(top.iaComputerA4, "A4", PANEL_MLDD)
-indicatorInitialize(top.iaComputerA3, "A3", PANEL_MLDD)
-indicatorInitialize(top.iaComputerA2, "A2", PANEL_MLDD)
-indicatorInitialize(top.iaComputerA1, "A1", PANEL_MLDD)
-indicatorInitialize(top.iaCommandM0, "0", PANEL_MLDD)
-indicatorInitialize(top.iaCommandM1, "1", PANEL_MLDD)
-indicatorInitialize(top.iaCommandSYL0, "0", PANEL_MLDD)
-indicatorInitialize(top.iaCommandSYL1, "1", PANEL_MLDD)
-indicatorInitialize(top.iaCommandIS4, "IS4", PANEL_MLDD)
-indicatorInitialize(top.iaCommandIS3, "IS3", PANEL_MLDD)
-indicatorInitialize(top.iaCommandIS2, "IS2", PANEL_MLDD)
-indicatorInitialize(top.iaCommandIS1, "IS1", PANEL_MLDD)
-indicatorInitialize(top.iaCommandA8, "A8", PANEL_MLDD)
-indicatorInitialize(top.iaCommandA7, "A7", PANEL_MLDD)
-indicatorInitialize(top.iaCommandA6, "A6", PANEL_MLDD)
-indicatorInitialize(top.iaCommandA5, "A5", PANEL_MLDD)
-indicatorInitialize(top.iaCommandA4, "A4", PANEL_MLDD)
-indicatorInitialize(top.iaCommandA3, "A3", PANEL_MLDD)
-indicatorInitialize(top.iaCommandA2, "A2", PANEL_MLDD)
-indicatorInitialize(top.iaCommandA1, "A1", PANEL_MLDD)
+indicatorInitialize(top.iaComputerM0, "0", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerM1, "1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerSYL0, "0", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerSYL1, "1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerIS4, "IS4", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerIS3, "IS3", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerIS2, "IS2", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerIS1, "IS1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerA8, "A8", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerA7, "A7", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerA6, "A6", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerA5, "A5", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerA4, "A4", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerA3, "A3", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerA2, "A2", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaComputerA1, "A1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.iaCommandM0, "0", PANEL_MLDD, cc=CC_COMMAND)
+indicatorOn(top.iaCommandM0)
+indicatorInitialize(top.iaCommandM1, "1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandSYL0, "0", PANEL_MLDD, cc=CC_COMMAND)
+indicatorOn(top.iaCommandSYL0)
+indicatorInitialize(top.iaCommandSYL1, "1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandIS4, "IS4", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandIS3, "IS3", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandIS2, "IS2", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandIS1, "IS1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandA8, "A8", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandA7, "A7", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandA6, "A6", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandA5, "A5", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandA4, "A4", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandA3, "A3", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandA2, "A2", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandA1, "A1", PANEL_MLDD, cc=CC_COMMAND)
 # Indicators for MLDD DATA ADDRESS area:
-indicatorInitialize(top.daPARITY_BIT, "BR", PANEL_MLDD)
-indicatorInitialize(top.daComputerDS4, "DS4", PANEL_MLDD)
-indicatorInitialize(top.daComputerDS3, "DS3", PANEL_MLDD)
-indicatorInitialize(top.daComputerDS2, "DS2", PANEL_MLDD)
-indicatorInitialize(top.daComputerDS1, "DS1", PANEL_MLDD)
-indicatorInitialize(top.daComputerM0, "0", PANEL_MLDD)
-indicatorInitialize(top.daComputerM1, "1", PANEL_MLDD)
-indicatorInitialize(top.daComputerOP4, "OP4", PANEL_MLDD)
-indicatorInitialize(top.daComputerOP3, "OP3", PANEL_MLDD)
-indicatorInitialize(top.daComputerOP2, "OP2", PANEL_MLDD)
-indicatorInitialize(top.daComputerOP1, "OP1", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA9, "OA9", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA8, "OA8", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA7, "OA7", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA6, "OA6", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA5, "OA5", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA4, "OA4", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA3, "OA3", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA2, "OA2", PANEL_MLDD)
-indicatorInitialize(top.daComputerOA1, "OA1", PANEL_MLDD)
-indicatorInitialize(top.daCommandDS4, "DS4", PANEL_MLDD)
-indicatorInitialize(top.daCommandDS3, "DS3", PANEL_MLDD)
-indicatorInitialize(top.daCommandDS2, "DS2", PANEL_MLDD)
-indicatorInitialize(top.daCommandDS1, "DS1", PANEL_MLDD)
-indicatorInitialize(top.daCommandM0, "0", PANEL_MLDD)
-indicatorInitialize(top.daCommandM1, "1", PANEL_MLDD)
-indicatorInitialize(top.daCommandOP4, "OP4", PANEL_MLDD)
-indicatorInitialize(top.daCommandOP3, "OP3", PANEL_MLDD)
-indicatorInitialize(top.daCommandOP2, "OP2", PANEL_MLDD)
-indicatorInitialize(top.daCommandOP1, "OP1", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA9, "OA9", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA8, "OA8", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA7, "OA7", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA6, "OA6", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA5, "OA5", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA4, "OA4", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA3, "OA3", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA2, "OA2", PANEL_MLDD)
-indicatorInitialize(top.daCommandOA1, "OA1", PANEL_MLDD)
+indicatorInitialize(top.daPARITY_BIT, "BR", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerDS4, "DS4", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerDS3, "DS3", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerDS2, "DS2", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerDS1, "DS1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerM0, "0", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerM1, "1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOP4, "OP4", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOP3, "OP3", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOP2, "OP2", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOP1, "OP1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA9, "OA9", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA8, "OA8", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA7, "OA7", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA6, "OA6", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA5, "OA5", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA4, "OA4", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA3, "OA3", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA2, "OA2", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daComputerOA1, "OA1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.daCommandDS4, "DS4", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandDS3, "DS3", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandDS2, "DS2", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandDS1, "DS1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandM0, "0", PANEL_MLDD, cc=CC_COMMAND)
+indicatorOn(top.daCommandM0)
+indicatorInitialize(top.daCommandM1, "1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOP4, "OP4", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOP3, "OP3", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOP2, "OP2", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOP1, "OP1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA9, "OA9", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA8, "OA8", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA7, "OA7", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA6, "OA6", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA5, "OA5", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA4, "OA4", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA3, "OA3", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA2, "OA2", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.daCommandOA1, "OA1", PANEL_MLDD, cc=CC_COMMAND)
 # Indicators for MLDD DATA area:
 indicatorInitialize(top.mlddLAMP_TEST, "LAMP\nTEST", PANEL_MLDD)
 indicatorInitialize(top.mlddPARITY_BIT, "PARITY\nBIT", PANEL_MLDD)
-indicatorInitialize(top.mlddComputerBR0, "B\nR", PANEL_MLDD)
-indicatorInitialize(top.mlddComputerBR1, "B\nR", PANEL_MLDD)
-indicatorInitialize(top.mlddComputerSIGN, "S", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer1, "1", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer2, "2", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer3, "3", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer4, "4", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer5, "5", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer6, "6", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer7, "7", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer8, "8", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer9, "9", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer10, "10", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer11, "11", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer12, "12", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer13, "13", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer14, "14", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer15, "15", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer16, "16", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer17, "17", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer18, "18", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer19, "19", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer20, "20", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer21, "21", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer22, "22", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer23, "23", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer24, "24", PANEL_MLDD)
-indicatorInitialize(top.mlddComputer25, "25", PANEL_MLDD)
-indicatorInitialize(top.mlddCommandSYL0, "S\nY\n0", PANEL_MLDD)
-indicatorInitialize(top.mlddCommandSYL1, "S\nY\n1", PANEL_MLDD)
-indicatorInitialize(top.mlddCommandSIGN, "S", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand1, "1", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand2, "2", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand3, "3", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand4, "4", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand5, "5", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand6, "6", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand7, "7", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand8, "8", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand9, "9", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand10, "10", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand11, "11", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand12, "12", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand13, "13", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand14, "14", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand15, "15", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand16, "16", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand17, "17", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand18, "18", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand19, "19", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand20, "20", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand21, "21", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand22, "22", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand23, "23", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand24, "24", PANEL_MLDD)
-indicatorInitialize(top.mlddCommand25, "25", PANEL_MLDD)
+indicatorInitialize(top.mlddComputerBR0, "B\nR", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputerBR1, "B\nR", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputerSIGN, "S", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer1, "1", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer2, "2", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer3, "3", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer4, "4", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer5, "5", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer6, "6", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer7, "7", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer8, "8", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer9, "9", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer10, "10", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer11, "11", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer12, "12", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer13, "13", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer14, "14", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer15, "15", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer16, "16", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer17, "17", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer18, "18", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer19, "19", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer20, "20", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer21, "21", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer22, "22", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer23, "23", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer24, "24", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddComputer25, "25", PANEL_MLDD, cc=CC_COMPUTER)
+indicatorInitialize(top.mlddCommandSYL0, "S\nY\n0", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommandSYL1, "S\nY\n1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommandSIGN, "S", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand1, "1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand2, "2", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand3, "3", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand4, "4", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand5, "5", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand6, "6", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand7, "7", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand8, "8", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand9, "9", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand10, "10", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand11, "11", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand12, "12", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand13, "13", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand14, "14", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand15, "15", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand16, "16", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand17, "17", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand18, "18", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand19, "19", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand20, "20", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand21, "21", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand22, "22", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand23, "23", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand24, "24", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommand25, "25", PANEL_MLDD, cc=CC_COMMAND)
 # Indicators for MLDD DISPLAY MODE area:
 indicatorInitialize(top.acDATA, "DATA", PANEL_MLDD)
 indicatorOn(top.acDATA)
@@ -929,6 +1135,7 @@ indicatorInitialize(top.INVERT_ERROR, "INVERT\nERROR", PANEL_MLDD)
 # Indicators for MLDD MEMORY LOADER area:
 indicatorInitialize(top.mlREPEAT, "REPEAT", PANEL_MLDD)
 indicatorInitialize(top.mlREPEAT_INVERSE, "/REPEAT", PANEL_MLDD)
+indicatorOn(top.mlREPEAT_INVERSE)
 indicatorInitialize(top.mlADDRESS_CMPTR, "ADDRESS\nCOMPTR", PANEL_MLDD)
 indicatorInitialize(top.mlCOMPTR_DISPLAY_RESET, "COMPTR\nDISPLAY\nRESET", PANEL_MLDD)
 indicatorInitialize(top.mlCOMMAND_DISPLAY_RESET, "COMMAND\nDISPLAY\nRESET", PANEL_MLDD)
@@ -1025,13 +1232,89 @@ indicatorInitialize(top.mbrLOAD, "LOAD", PANEL_CE)
 indicatorInitialize(top.ceLAMP_TEST, "LAMP\nTEST", PANEL_CE)
 # Callback bindings for indicators which are also pushbuttons.
 top.PROG_ERR.bind("<Button-1>", pressedPROG_ERR)
+top.PROG_ERR.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.acINS.bind("<Button-1>", eventAddressCompareIns)
 top.acDATA.bind("<Button-1>", eventAddressCompareData)
 top.pdpLAMP_TEST.bind("<Button-1>", eventPdpLampTest)
 top.mlddLAMP_TEST.bind("<Button-1>", eventMlddLampTest)
 top.ceLAMP_TEST.bind("<Button-1>", eventCeLampTest)
 top.RESET_MACHINE.bind("<Button-1>", eventResetMachine)
+top.RESET_MACHINE.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.HALT.bind("<Button-1>", eventHalt)
+top.HALT.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.ERROR_RESET.bind("<Button-1>", eventErrorReset)
+top.ERROR_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.mlADDRESS_CMPTR.bind("<Button-1>", eventAddressCmptr)
+top.mlADDRESS_CMPTR.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.mlCOMPTR_DISPLAY_RESET.bind("<Button-1>", eventComptrDisplayReset)
+top.mlCOMPTR_DISPLAY_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.mlCOMMAND_DISPLAY_RESET.bind("<Button-1>", eventCommandDisplayReset)
+top.mlCOMMAND_DISPLAY_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.daCommandOP1.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOP2.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOP3.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOP4.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommandSYL0.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommandSYL1.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommandSIGN.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand1.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand2.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand3.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand4.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand5.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand6.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand7.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand8.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand9.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand10.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand11.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand12.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand13.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand14.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand15.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand16.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand17.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand18.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand19.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand20.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand21.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand22.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand23.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand24.bind("<Button-1>", eventToggleIndicator)
+top.mlddCommand25.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA1.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA2.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA3.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA4.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA5.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA6.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA7.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA8.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOA9.bind("<Button-1>", eventToggleIndicator)
+top.daCommandDS1.bind("<Button-1>", eventToggleIndicator)
+top.daCommandDS2.bind("<Button-1>", eventToggleIndicator)
+top.daCommandDS3.bind("<Button-1>", eventToggleIndicator)
+top.daCommandDS4.bind("<Button-1>", eventToggleIndicator)
+top.daCommandM0.bind("<Button-1>", eventToggleIndicator)
+top.daCommandM1.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandA1.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandA2.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandA3.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandA4.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandA5.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandA6.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandA7.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandA8.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandIS1.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandIS2.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandIS3.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandIS4.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandSYL1.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandSYL0.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandM1.bind("<Button-1>", eventToggleIndicator)
+top.iaCommandM0.bind("<Button-1>", eventToggleIndicator)
+top.mlREPEAT.bind("<Button-1>", eventREPEAT)
+top.mlREPEAT_INVERSE.bind("<Button-1>", eventREPEAT_INVERSE)
 
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)

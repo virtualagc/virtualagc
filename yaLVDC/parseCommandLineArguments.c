@@ -62,12 +62,29 @@ static char helpMessage[] = "Usage:\n"
     "--ptc         Emulate a PTC target rather than an LVDC target.\n"
     "--run         Start the LVDC/PTC program running freely.  By default,\n"
     "              (without --run), will simply pause without running.\n"
+    "              This relates only to the built-in yaLVDC debugger.\n"
+    "--panel-pause Start the PTC program in a paused state relative to\n"
+    "              control by the PTC front panel.  By default (without\n"
+    "              --panel-pause), the emulation will be running freely.\n"
+    "              This is unrelated to the built-in yaLVDC debugger, and\n"
+    "              has no effect on whether a debugger prompt appears.\n"
     "--port=N      Specifies the port number used by the server for virtual\n"
     "              connection to peripherals.  Default is 19653.\n"
     "--divisor=N   Slows down the emulated CPU clock by a factor of N (with\n"
     "              the default obviously being 1).  This is intended to be\n"
     "              used with very slow peripheral emulations, such as yaPTC.py\n"
     "              that cannot keep up with yaLVDC otherwise.\n"
+    "The following comment applies only to PTC emulation, and not to LVDC.\n"
+    "Regarding debugging using the yaLVDC built-in debugger vs the PTC panel's\n"
+    "debugging features, such as the emulated PTC program being paused, single\n"
+    "stepped, breakpoints, and so on, these two debugging capabilities\n"
+    "are separate and essentially independent.  To a certain extent they can\n"
+    "coexist without problems, but it is best to avoid using the yaLVDC debugger\n"
+    "when using the PTC debugging, and vice-versa.  Specifically, to use the\n"
+    "PTC debugger you'd normally allow the yaLVDC debugger to free-run the\n"
+    "emulation, while to use the yaLVDC debugger you'd allow the PTC panel to\n"
+    "free run the CPU.  Thus the command-line switches --run and --panel-pause\n"
+    "would generally be used together (for PTC emulations), or not at all.\n"
     "";
 
 char *coreFilename = "yaLVDC.core";
@@ -103,6 +120,8 @@ parseCommandLineArguments (int argc, char *argv[])
         coldStart = 1;
       else if (!strcmp (argv[i], "--run"))
         runStepN = INT_MAX;
+      else if (!strcmp (argv[i], "--panel-pause"))
+        panelPause = 2;
       else if (1 == sscanf(argv[i], "--divisor=%d", &j))
         clockDivisor = j;
       else if (!strcmp (argv[i], "--help"))

@@ -157,6 +157,7 @@
  *      Channel 004:    Current data value.
  *
  *      Channel 600:    Current accumulator value.
+ *      Channel 601:    Current instruction value.
  */
 
 int ServerBaseSocket = -1;
@@ -173,6 +174,7 @@ uint8_t inPackets[MAX_LISTENERS][MAX_INPACKET_SIZE];
 int inPacketSizes[MAX_LISTENERS] =
   { 0 };
 
+static int newConnect = 0;
 void
 connectCheck(void)
 {
@@ -200,6 +202,7 @@ connectCheck(void)
             }
           printf("\nConnected to peripheral #%d%s on handle %d.\n", j,
               reassigned, i);
+          newConnect = 1;
         }
       else if (i == -1 && errno != EAGAIN)
         {
@@ -253,13 +256,37 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   int mask = 0377777777;
   outPacketSize = 0;
   // Format the output packet.
-  if (panelPause == 2 || panelPause == 4)
+  if (newConnect || panelPause == 2 || panelPause == 4)
     {
+      uint16_t instruction = 0;
+      int data = 0, hopd = 0;
+      hopStructure_t hs =
+        { 0 };
+      newConnect = 0;
+      if (!parseHopConstant(state.hop, &hs))
+        if (!fetchInstruction(hs.im, hs.dm, hs.s, hs.loc, &instruction,
+            &instructionFromDataMemory))
+          {
+            int opcode = instruction & 0x0F;
+            int a9 = (instruction >> 4) & 1;
+            int a81 = (instruction >> 5) & 0xFF;
+            hopd = (state.hop & 0377760000) | instruction;
+            if ((ptc && (opcode == 01 || opcode == 05)) || opcode == 04
+                || opcode == 010 || opcode == 012 || opcode == 014
+                || opcode == 016)
+              {
+                // These are operators whose operands are not variables.
+              }
+            else
+              fetchData(hs.dm, a9, hs.ds, a81, &data,
+                  &dataFromInstructionMemory);
+          }
       formatPacket(5, (panelPause == 4) ? 001 : 000, 0, 0);
-
+      formatPacket(5, 002, hopd, 0);
       formatPacket(5, 003, state.hop, 0);
-
+      formatPacket(5, 004, data, 0);
       formatPacket(5, 0600, state.acc, 0);
+      formatPacket(5, 0601, instruction, 0);
     }
   // Take care of any virtual-wire outputs needed.  The changes (triggered by
   // the last LVDC/PTC instruction executed) have stuck the necessary info in
