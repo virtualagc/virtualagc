@@ -132,14 +132,15 @@
  *      Channel 002:    Set a data-address comparison pattern.  The packet payload
  *                      is the bit pattern against which to compare data addresses.
  *                      The most-significant 13 bits are formatted like a HOP
- *                      constant (in particular, they contain the DM and DS fields),
+ *                      constant (containing only the DM and DS fields),
  *                      while the least-significant 13 bits are formatted like
  *                      an instruction (opcode + operand), because those are the 4
  *                      fields specified by the controls on the MLDD panel.
  *      Channel 003:    Set an instruction-address comparison pattern.  The packet
  *                      is formatted like a HOP constant, and provides the payload.
  *                      Only the IM, IS, S, and LOC fields are significant.
- *      Channel 004:    Set a data comparison pattern.  The payload is the 26 bits
+ *      Channel 004:    A data value for saving to the current data address (set by
+ *                      channel 002 above).  The payload is the 26 bits
  *                      of a pattern for comparison to data.
  *
  *      Channel 600:    Set the data-comparison mode.  The payload is ignored.
@@ -148,6 +149,7 @@
  *                      at the least-significant bit) of interrupts to inhibit.
  *      Channel 603:    Step a single instruction.
  *      Channel 604:    Reset the CPU.
+ *      Channel 605:    Request status.
  *
  * Type 101 (from CPU emulation to panel emulation):
  *      Channel 000:    CPU is paused.
@@ -245,6 +247,7 @@ typedef struct
 pendingMask_t pendingMasks[MAX_LISTENERS] =
   {
     { 0 } };
+static int needStatus = 0;
 int
 pendingVirtualWireActivity(void /* int id, int mask */)
 {
@@ -256,13 +259,12 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   int mask = 0377777777;
   outPacketSize = 0;
   // Format the output packet.
-  if (newConnect || panelPause == 2 || panelPause == 4)
+  if (needStatus || newConnect || panelPause == 2 || panelPause == 4)
     {
       uint16_t instruction = 0;
       int data = 0, hopd = 0;
       hopStructure_t hs =
         { 0 };
-      newConnect = 0;
       if (!parseHopConstant(state.hop, &hs))
         if (!fetchInstruction(hs.im, hs.dm, hs.s, hs.loc, &instruction,
             &instructionFromDataMemory))
@@ -277,16 +279,33 @@ pendingVirtualWireActivity(void /* int id, int mask */)
               {
                 // These are operators whose operands are not variables.
               }
-            else
+            else if (needStatus != 2)
               fetchData(hs.dm, a9, hs.ds, a81, &data,
                   &dataFromInstructionMemory);
           }
+      if (needStatus == 2)
+        {
+          int dm, ds, dloc, residual;
+          dm = (panelPatternDataAddress >> 17) & 1;
+          ds = (panelPatternDataAddress >> 19) & 017;
+          residual = (panelPatternDataAddress >> 4) & 1;
+          dloc = (panelPatternDataAddress >> 5) & 0377;
+          if (residual)
+            {
+              ds = 017;
+              if (ptc)
+                dm = 0;
+            }
+          data = state.core[dm][ds][2][dloc];
+        }
       formatPacket(5, (panelPause == 4) ? 001 : 000, 0, 0);
       formatPacket(5, 002, hopd, 0);
       formatPacket(5, 003, state.hop, 0);
       formatPacket(5, 004, data, 0);
       formatPacket(5, 0600, state.acc, 0);
       formatPacket(5, 0601, instruction, 0);
+      needStatus = 0;
+      newConnect = 0;
     }
   // Take care of any virtual-wire outputs needed.  The changes (triggered by
   // the last LVDC/PTC instruction executed) have stuck the necessary info in
@@ -504,6 +523,60 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                         {
                           printf("PTC panel commands halt.\n");
                           panelPause = 2;
+                        }
+                      else if (channel == 1)
+                        {
+                          printf("PTC panel commands resumption.\n");
+                          panelPause = 4;
+                        }
+                      else if (channel == 2)
+                        {
+                          int dm, ds, dloc, residual, opcode;
+                          dm = (value >> 17) & 1;
+                          ds = (value >> 19) & 017;
+                          residual = (value >> 4) & 1;
+                          dloc = (value >> 5) & 0377;
+                          opcode = value && 017;
+                          printf(
+                              "PTC panel new DATA ADDRESS %o-%02o, OPCODE=%02o, OPERAND=%03o.\n",
+                              dm, ds,
+                              opcode, (residual << 8) | dloc);
+                          panelPatternDataAddress = value;
+                        }
+                      else if (channel == 3)
+                        {
+                          printf(
+                              "PTC panel new INSTRUCTION ADDRESS %o-%02o-%o-%03o.\n",
+                              (value >> 25) & 1, (value >> 2) & 017,
+                              (value >> 6) & 1, (value >> 7) & 0377);
+                          panelPatternInstructionAddress = value;
+                        }
+                      else if (channel == 4)
+                        {
+                          int dm, ds, dloc, residual;
+                          printf("PTC new DATA %09o.\n", value);
+                          panelPatternDataValue = value;
+                          // What we want to do with this now is write the value to memory,
+                          // using our most-recent panelDataAddress to determine where.
+                          dm = (panelPatternDataAddress >> 17) & 1;
+                          ds = (panelPatternDataAddress >> 19) & 017;
+                          residual = (panelPatternDataAddress >> 4) & 1;
+                          dloc = (panelPatternDataAddress >> 5) & 0377;
+                          if (residual)
+                            {
+                              ds = 017;
+                              if (ptc)
+                                dm = 0;
+                            }
+                          state.core[dm][ds][2][dloc] = value;
+                          state.core[dm][ds][0][dloc] = -1;
+                          state.core[dm][ds][1][dloc] = -1;
+                          needStatus = 2;
+                        }
+                      else if (channel == 0605)
+                        {
+                          printf("PTC panel requesting status.\n");
+                          needStatus = 1;
                         }
                       else
                         printf("Command %03o/%09o received from PTC panel\n",

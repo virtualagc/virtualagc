@@ -247,9 +247,14 @@ ProcessorDisplayPanel_support.cPRB = cPRB
 # indices into ioTypes[] (see top of file) to tell which particular class of i/o
 # channels is affected.  Only the PIO, CIO, and INT classes are possible for inputs
 # to the CPU.
+changedIA = -1
+changedDA = -1
+changedD = -1
+needStatusFromCPU = False
 def inputsForCPU():
 	#global delayCount, ioTypeCount, channelCount
-	global ProgRegA, ProgRegB, resetMachine, halt
+	global ProgRegA, ProgRegB, resetMachine, halt, needStatusFromCPU
+	global changedIA, changedDA, changedD
 	returnValue = []
 	
 	if ProgRegA != -1:
@@ -269,6 +274,22 @@ def inputsForCPU():
 	if halt:
 		halt = False
 		returnValue.append((4, 0o000, 0, 0o377777777))
+	
+	if changedIA != -1:
+		returnValue.append((4, 0o003, changedIA, 0o377777777))
+		changedIA = -1
+
+	if changedDA != -1:
+		returnValue.append((4, 0o002, changedDA, 0o377777777))
+		changedDA = -1
+
+	if changedD != -1:
+		returnValue.append((4, 0o004, changedD, 0o377777777))
+		changedD = -1
+
+	if needStatusFromCPU:
+		needStatusFromCPU = False
+		returnValue.append((4, 0o605, 0, 0o377777777))
 	
 	return returnValue
 
@@ -367,8 +388,186 @@ def endPanelLampTest(panel):
 		else:
 			indicatorOff(indicator)
 
+# Turns the switch settings for the commanded DATA area
+# of MLDD into an integer.		
+def getDataCommand():
+	value = 0;			
+	if top.mlddCommandSIGN.itemcget(1, "state") == "normal":
+		value |= 0o200000000
+	if top.mlddCommand1.itemcget(1, "state") == "normal":
+		value |= 0o100000000
+	if top.mlddCommand2.itemcget(1, "state") == "normal":
+		value |= 0o040000000
+	if top.mlddCommand3.itemcget(1, "state") == "normal":
+		value |= 0o020000000
+	if top.mlddCommand4.itemcget(1, "state") == "normal":
+		value |= 0o010000000
+	if top.mlddCommand5.itemcget(1, "state") == "normal":
+		value |= 0o004000000
+	if top.mlddCommand6.itemcget(1, "state") == "normal":
+		value |= 0o002000000
+	if top.mlddCommand7.itemcget(1, "state") == "normal":
+		value |= 0o001000000
+	if top.mlddCommand8.itemcget(1, "state") == "normal":
+		value |= 0o000400000
+	if top.mlddCommand9.itemcget(1, "state") == "normal":
+		value |= 0o000200000
+	if top.mlddCommand10.itemcget(1, "state") == "normal":
+		value |= 0o000100000
+	if top.mlddCommand11.itemcget(1, "state") == "normal":
+		value |= 0o000040000
+	if top.mlddCommand12.itemcget(1, "state") == "normal":
+		value |= 0o000020000
+	if top.mlddCommand13.itemcget(1, "state") == "normal":
+		value |= 0o000010000
+	if top.mlddCommand14.itemcget(1, "state") == "normal":
+		value |= 0o000004000
+	if top.mlddCommand15.itemcget(1, "state") == "normal":
+		value |= 0o000002000
+	if top.mlddCommand16.itemcget(1, "state") == "normal":
+		value |= 0o000001000
+	if top.mlddCommand17.itemcget(1, "state") == "normal":
+		value |= 0o000000400
+	if top.mlddCommand18.itemcget(1, "state") == "normal":
+		value |= 0o000000200
+	if top.mlddCommand19.itemcget(1, "state") == "normal":
+		value |= 0o000000100
+	if top.mlddCommand20.itemcget(1, "state") == "normal":
+		value |= 0o000000040
+	if top.mlddCommand21.itemcget(1, "state") == "normal":
+		value |= 0o000000020
+	if top.mlddCommand22.itemcget(1, "state") == "normal":
+		value |= 0o000000010
+	if top.mlddCommand23.itemcget(1, "state") == "normal":
+		value |= 0o000000004
+	if top.mlddCommand24.itemcget(1, "state") == "normal":
+		value |= 0o000000002
+	if top.mlddCommand25.itemcget(1, "state") == "normal":
+		value |= 0o000000001
+	return value
+			
+def indicatorDataCommandParity():
+	value = getDataCommand()
+	indicatorSet(top.mlddCommandSYL1, parity13(value >> 13))
+	indicatorSet(top.mlddCommandSYL0, parity13(value))
+
+# Turns the switch settings for the commanded DATA ADDRESS
+# of MLDD into an integer.		
+def getDataAddressCommand():
+	value = 0;			
+	if top.daCommandDS4.itemcget(1, "state") == "normal":
+		value |= 0o040000000
+	if top.daCommandDS3.itemcget(1, "state") == "normal":
+		value |= 0o020000000
+	if top.daCommandDS2.itemcget(1, "state") == "normal":
+		value |= 0o010000000
+	if top.daCommandDS1.itemcget(1, "state") == "normal":
+		value |= 0o004000000
+
+	if top.daCommandM1.itemcget(1, "state") == "normal":
+		value |= 0o000400000
+
+	if top.daCommandOA8.itemcget(1, "state") == "normal":
+		value |= 0o000010000
+	if top.daCommandOA7.itemcget(1, "state") == "normal":
+		value |= 0o000004000
+	if top.daCommandOA6.itemcget(1, "state") == "normal":
+		value |= 0o000002000
+	if top.daCommandOA5.itemcget(1, "state") == "normal":
+		value |= 0o000001000
+	if top.daCommandOA4.itemcget(1, "state") == "normal":
+		value |= 0o000000400
+	if top.daCommandOA3.itemcget(1, "state") == "normal":
+		value |= 0o000000200
+	if top.daCommandOA2.itemcget(1, "state") == "normal":
+		value |= 0o000000100
+	if top.daCommandOA1.itemcget(1, "state") == "normal":
+		value |= 0o000000040
+		
+	if top.daCommandOA9.itemcget(1, "state") == "normal":
+		value |= 0o000000020
+		
+	if top.daCommandOP4.itemcget(1, "state") == "normal":
+		value |= 0o000000010
+	if top.daCommandOP3.itemcget(1, "state") == "normal":
+		value |= 0o000000004
+	if top.daCommandOP2.itemcget(1, "state") == "normal":
+		value |= 0o000000002
+	if top.daCommandOP1.itemcget(1, "state") == "normal":
+		value |= 0o000000001
+	return value
+			
+# Turns the switch settings for the commanded INSTRUCTION AREA
+# of MLDD into an integer.	
+def getInstructionAddressCommand():
+	value = 0;			
+	if top.iaCommandM1.itemcget(1, "state") == "normal":
+		value |= 0o200000000
+		
+	if top.iaCommandA8.itemcget(1, "state") == "normal":
+		value |= 0o000040000
+	if top.iaCommandA7.itemcget(1, "state") == "normal":
+		value |= 0o000020000
+	if top.iaCommandA6.itemcget(1, "state") == "normal":
+		value |= 0o000010000
+	if top.iaCommandA5.itemcget(1, "state") == "normal":
+		value |= 0o000004000
+	if top.iaCommandA4.itemcget(1, "state") == "normal":
+		value |= 0o000002000
+	if top.iaCommandA3.itemcget(1, "state") == "normal":
+		value |= 0o000001000
+	if top.iaCommandA2.itemcget(1, "state") == "normal":
+		value |= 0o000000400
+	if top.iaCommandA1.itemcget(1, "state") == "normal":
+		value |= 0o000000200
+		
+	if top.iaCommandSYL1.itemcget(1, "state") == "normal":
+		value |= 0o000000100
+		
+	if top.iaCommandIS4.itemcget(1, "state") == "normal":
+		value |= 0o000000040
+	if top.iaCommandIS3.itemcget(1, "state") == "normal":
+		value |= 0o000000020
+	if top.iaCommandIS2.itemcget(1, "state") == "normal":
+		value |= 0o000000010
+	if top.iaCommandIS1.itemcget(1, "state") == "normal":
+		value |= 0o000000004
+	return value
+			
 def eventToggleIndicator(event):
 	indicatorToggle(event.widget)
+
+def updateDaCommand(event):
+	global changedDA
+	indicatorToggle(event.widget)
+	changedDA = getDataAddressCommand()
+def eventToggleDaCommandM0(event):
+	indicatorToggle(top.daCommandM1)
+	updateDaCommand(event)
+def eventToggleDaCommandM1(event):
+	indicatorToggle(top.daCommandM0)
+	updateDaCommand(event)
+
+def updateIaCommand(event):
+	global changedIA
+	indicatorToggle(event.widget)
+	changedIA = getInstructionAddressCommand()
+def eventToggleIaCommandM0(event):
+	indicatorToggle(top.iaCommandM1)
+	updateIaCommand(event)
+def eventToggleIaCommandM1(event):
+	indicatorToggle(top.iaCommandM0)
+	updateIaCommand(event)
+def eventToggleIaCommandSYL0(event):
+	indicatorToggle(top.iaCommandSYL1)
+	updateIaCommand(event)
+def eventToggleIaCommandSYL1(event):
+	indicatorToggle(top.iaCommandSYL0)
+	updateIaCommand(event)
+
+def eventToggleDataIndicator(event):
+	eventToggleIndicator(event)
+	indicatorDataCommandParity()
 
 def eventPdpLampTest(event):
 	if event.widget.itemcget(1, "state") == "normal":
@@ -404,17 +603,25 @@ def getCommandedDataAddress():
 	indicatorOn(event.widget)
 
 def eventAddressCmptr(event):
+	global changedD
 	indicatorOn(event.widget)
+	changedD = getDataCommand()
 
 def eventComptrDisplayReset(event):
+	global needStatusFromCPU
 	indicatorOn(event.widget)
 	for indicator in computerIndicators:
 		indicatorOff(indicator)
+	needStatusFromCPU = True
 
 def eventCommandDisplayReset(event):
 	indicatorOn(event.widget)
 	for indicator in commandIndicators:
 		indicatorOff(indicator)
+	indicatorDataCommandParity()
+	indicatorOn(top.iaCommandM0)
+	indicatorOn(top.iaCommandSYL0)
+	indicatorOn(top.daCommandM0)
 
 def eventREPEAT(event):
 	indicatorOn(event.widget)
@@ -424,11 +631,15 @@ def eventREPEAT_INVERSE(event):
 	indicatorOn(event.widget)
 	indicatorOff(top.mlREPEAT)
 
-def oddParity13(value): # Starts with 13 bits.
-	value = (value ^ (value >> 7)) # Now has 7 bits.
-	value = (value ^ (value >> 4)) # Now has 4 bits.
-	value = (value ^ (value >> 2)) # Now has 2 bits.
-	return 1 & (1 ^ value ^ (value >> 1)) # Just 1 bit left!
+# This computes the actual parity of the bits of the syllable ...
+# not the parity bit that must be added to make an overall odd
+# parity.
+def parity13(value):
+	value &= 0o17777  # Starts with 13 bits.
+	value = 0o177 & (value ^ (value >> 7)) # Now has 7 bits.
+	value = 0o17 & (value ^ (value >> 4)) # Now has 4 bits.
+	value = 3 & (value ^ (value >> 2)) # Now has 2 bits.
+	return 1 & (value ^ (value >> 1)) # Just 1 bit left!
 
 # This function is called by the event loop only when yaLVDC has written
 # to an output channel.  The function should do whatever it is that needs to be done
@@ -437,6 +648,9 @@ def oddParity13(value): # Starts with 13 bits.
 # ioTypes[] array (see the top of this file), giving the class of i/o ports
 # to which the channel belongs.  Only the PIO, CIO, and PRS channels are applicable
 # for output from the CPU to peripherals.
+#
+# The function _could_ also be called directly, by panel events, though I'm not
+# aware of any reason at the moment why that would be needed.  But it does work.
 def outputFromCPU(ioType, channel, value):
 	print("*", end="")
 	
@@ -619,7 +833,7 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.daComputerOA6, a81 & 32)
 			indicatorSet(top.daComputerOA7, a81 & 64)
 			indicatorSet(top.daComputerOA8, a81 & 128)
-			indicatorSet(top.daPARITY_BIT, oddParity13(value & 0o17777))
+			indicatorSet(top.daPARITY_BIT, parity13(value))
 		elif channel == 0o003:
 			# Instruction address.
 			isect = (value >> 2) & 0o17
@@ -645,8 +859,8 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.iaComputerA7, loc & 64)
 			indicatorSet(top.iaComputerA8, loc & 128)
 		elif channel == 0o004:
-			parity0 = oddParity13(value & 0o17777)
-			parity1 = oddParity13((value >> 13) & 0o17777)
+			parity0 = parity13(value)
+			parity1 = parity13(value >> 13)
 			indicatorSet(top.mlddComputerBR0, parity0)
 			indicatorSet(top.mlddComputerBR1, parity1)
 			indicatorSet(top.mlddPARITY_BIT, 1 ^ parity0 ^ parity1)
@@ -676,7 +890,6 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.mlddComputer2, value & 0o40000000)
 			indicatorSet(top.mlddComputer1, value & 0o100000000)
 			indicatorSet(top.mlddComputerSIGN, value & 0o200000000)
-			pass
 		elif channel == 0o600:
 			pass
 		elif channel == 0o601:
@@ -1093,6 +1306,7 @@ indicatorInitialize(top.mlddComputer24, "24", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.mlddComputer25, "25", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.mlddCommandSYL0, "S\nY\n0", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.mlddCommandSYL1, "S\nY\n1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorDataCommandParity()
 indicatorInitialize(top.mlddCommandSIGN, "S", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.mlddCommand1, "1", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.mlddCommand2, "2", PANEL_MLDD, cc=CC_COMMAND)
@@ -1253,69 +1467,67 @@ top.mlCOMPTR_DISPLAY_RESET.bind("<Button-1>", eventComptrDisplayReset)
 top.mlCOMPTR_DISPLAY_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.mlCOMMAND_DISPLAY_RESET.bind("<Button-1>", eventCommandDisplayReset)
 top.mlCOMMAND_DISPLAY_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
-top.daCommandOP1.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOP2.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOP3.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOP4.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommandSYL0.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommandSYL1.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommandSIGN.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand1.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand2.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand3.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand4.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand5.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand6.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand7.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand8.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand9.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand10.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand11.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand12.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand13.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand14.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand15.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand16.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand17.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand18.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand19.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand20.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand21.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand22.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand23.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand24.bind("<Button-1>", eventToggleIndicator)
-top.mlddCommand25.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA1.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA2.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA3.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA4.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA5.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA6.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA7.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA8.bind("<Button-1>", eventToggleIndicator)
-top.daCommandOA9.bind("<Button-1>", eventToggleIndicator)
-top.daCommandDS1.bind("<Button-1>", eventToggleIndicator)
-top.daCommandDS2.bind("<Button-1>", eventToggleIndicator)
-top.daCommandDS3.bind("<Button-1>", eventToggleIndicator)
-top.daCommandDS4.bind("<Button-1>", eventToggleIndicator)
-top.daCommandM0.bind("<Button-1>", eventToggleIndicator)
-top.daCommandM1.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandA1.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandA2.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandA3.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandA4.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandA5.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandA6.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandA7.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandA8.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandIS1.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandIS2.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandIS3.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandIS4.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandSYL1.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandSYL0.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandM1.bind("<Button-1>", eventToggleIndicator)
-top.iaCommandM0.bind("<Button-1>", eventToggleIndicator)
+top.daCommandOP1.bind("<Button-1>", updateDaCommand)
+top.daCommandOP2.bind("<Button-1>", updateDaCommand)
+top.daCommandOP3.bind("<Button-1>", updateDaCommand)
+top.daCommandOP4.bind("<Button-1>", updateDaCommand)
+top.mlddCommandSIGN.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand1.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand2.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand3.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand4.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand5.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand6.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand7.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand8.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand9.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand10.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand11.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand12.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand13.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand14.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand15.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand16.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand17.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand18.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand19.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand20.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand21.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand22.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand23.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand24.bind("<Button-1>", eventToggleDataIndicator)
+top.mlddCommand25.bind("<Button-1>", eventToggleDataIndicator)
+top.daCommandOA1.bind("<Button-1>", updateDaCommand)
+top.daCommandOA2.bind("<Button-1>", updateDaCommand)
+top.daCommandOA3.bind("<Button-1>", updateDaCommand)
+top.daCommandOA4.bind("<Button-1>", updateDaCommand)
+top.daCommandOA5.bind("<Button-1>", updateDaCommand)
+top.daCommandOA6.bind("<Button-1>", updateDaCommand)
+top.daCommandOA7.bind("<Button-1>", updateDaCommand)
+top.daCommandOA8.bind("<Button-1>", updateDaCommand)
+top.daCommandOA9.bind("<Button-1>", updateDaCommand)
+top.daCommandDS1.bind("<Button-1>", updateDaCommand)
+top.daCommandDS2.bind("<Button-1>", updateDaCommand)
+top.daCommandDS3.bind("<Button-1>", updateDaCommand)
+top.daCommandDS4.bind("<Button-1>", updateDaCommand)
+top.daCommandM0.bind("<Button-1>", eventToggleDaCommandM0)
+top.daCommandM1.bind("<Button-1>", eventToggleDaCommandM1)
+top.iaCommandA1.bind("<Button-1>", updateIaCommand)
+top.iaCommandA2.bind("<Button-1>", updateIaCommand)
+top.iaCommandA3.bind("<Button-1>", updateIaCommand)
+top.iaCommandA4.bind("<Button-1>", updateIaCommand)
+top.iaCommandA5.bind("<Button-1>", updateIaCommand)
+top.iaCommandA6.bind("<Button-1>", updateIaCommand)
+top.iaCommandA7.bind("<Button-1>", updateIaCommand)
+top.iaCommandA8.bind("<Button-1>", updateIaCommand)
+top.iaCommandIS1.bind("<Button-1>", updateIaCommand)
+top.iaCommandIS2.bind("<Button-1>", updateIaCommand)
+top.iaCommandIS3.bind("<Button-1>", updateIaCommand)
+top.iaCommandIS4.bind("<Button-1>", updateIaCommand)
+top.iaCommandSYL1.bind("<Button-1>", eventToggleIaCommandSYL1)
+top.iaCommandSYL0.bind("<Button-1>", eventToggleIaCommandSYL0)
+top.iaCommandM1.bind("<Button-1>", eventToggleIaCommandM1)
+top.iaCommandM0.bind("<Button-1>", eventToggleIaCommandM0)
 top.mlREPEAT.bind("<Button-1>", eventREPEAT)
 top.mlREPEAT_INVERSE.bind("<Button-1>", eventREPEAT_INVERSE)
 
