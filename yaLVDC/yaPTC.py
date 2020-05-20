@@ -448,8 +448,8 @@ def getDataCommand():
 			
 def indicatorDataCommandParity():
 	value = getDataCommand()
-	indicatorSet(top.mlddCommandSYL1, parity13(value >> 13))
-	indicatorSet(top.mlddCommandSYL0, parity13(value))
+	indicatorSet(top.mlddCommandSYL1, not parity13(value >> 13))
+	indicatorSet(top.mlddCommandSYL0, not parity13(value))
 
 # Turns the switch settings for the commanded DATA ADDRESS
 # of MLDD into an integer.		
@@ -570,22 +570,31 @@ def eventToggleDataIndicator(event):
 	indicatorDataCommandParity()
 
 def eventPdpLampTest(event):
-	if event.widget.itemcget(1, "state") == "normal":
-		endPanelLampTest(PANEL_PDP)
-	else:
-		startPanelLampTest(PANEL_PDP)
+	startPanelLampTest(PANEL_PDP)
+def eventPdpLampTestRelease(event):
+	endPanelLampTest(PANEL_PDP)
 
 def eventMlddLampTest(event):
-	if event.widget.itemcget(1, "state") == "normal":
-		endPanelLampTest(PANEL_MLDD)
-	else:
-		startPanelLampTest(PANEL_MLDD)
+	startPanelLampTest(PANEL_MLDD)
+def eventMlddLampTestRelease(event):
+	endPanelLampTest(PANEL_MLDD)
 
 def eventCeLampTest(event):
-	if event.widget.itemcget(1, "state") == "normal":
-		endPanelLampTest(PANEL_CE)
-	else:
-		startPanelLampTest(PANEL_CE)
+	startPanelLampTest(PANEL_CE)
+def eventCeLampTestRelease(event):
+	endPanelLampTest(PANEL_CE)
+
+def eventTrmcErrorDevicesTest(event):
+	indicatorOn(event.widget)
+	indicatorOn(top.PARITY_SERIAL)
+	indicatorOn(top.TRS)
+	indicatorOn(top.A13)
+	indicatorOn(top.SERIAL)
+	indicatorOn(top.HOPC1)
+	indicatorOn(top.SSMSC)
+	indicatorOn(top.SSMBR)
+	indicatorOn(top.OAC)
+	indicatorOn(top.BR14)
 
 def eventErrorReset(event):
 	indicatorOn(event.widget)
@@ -612,7 +621,10 @@ def eventComptrDisplayReset(event):
 	indicatorOn(event.widget)
 	for indicator in computerIndicators:
 		indicatorOff(indicator)
-	needStatusFromCPU = True
+	#needStatusFromCPU = True
+	indicatorOn(top.iaComputerM0)
+	indicatorOn(top.iaComputerSYL0)
+	indicatorOn(top.daComputerM0)
 
 def eventCommandDisplayReset(event):
 	indicatorOn(event.widget)
@@ -630,6 +642,14 @@ def eventREPEAT(event):
 def eventREPEAT_INVERSE(event):
 	indicatorOn(event.widget)
 	indicatorOff(top.mlREPEAT)
+
+def eventML(event):
+	indicatorOn(event.widget)
+	indicatorOff(top.trmcDD)
+
+def eventDD(event):
+	indicatorOn(event.widget)
+	indicatorOff(top.trmcML)
 
 # This computes the actual parity of the bits of the syllable ...
 # not the parity bit that must be added to make an overall odd
@@ -1195,8 +1215,14 @@ indicatorInitialize(top.D5, "D5", PANEL_PDP)
 indicatorInitialize(top.D6, "D6", PANEL_PDP)
 indicatorInitialize(top.RESET_MACHINE, "RESET\nMACHINE", PANEL_PDP)
 indicatorInitialize(top.HALT, "HALT", PANEL_PDP)
-# Indicators for PDP POWER CONTROL area:
+# Indicators for MISCELLANEOUS area (PDP POWER CONTROL and TRMC MODE):
 indicatorInitialize(top.pdpLAMP_TEST, "LAMP\nTEST", PANEL_PDP)
+indicatorInitialize(top.trmcMANUAL, "MANUAL", PANEL_PDP)
+indicatorOn(top.trmcMANUAL)
+indicatorInitialize(top.trmcML, "ML", PANEL_PDP)
+indicatorInitialize(top.trmcDD, "DD", PANEL_PDP)
+indicatorOn(top.trmcDD)
+indicatorInitialize(top.trmcERROR_DEVICES_TEST, "ERROR\nDEVICES\nTEST", PANEL_PDP)
 # Indicators for MLDD INSTRUCTION ADDRESS area:
 indicatorInitialize(top.iaComputerM0, "0", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.iaComputerM1, "1", PANEL_MLDD, cc=CC_COMPUTER)
@@ -1453,8 +1479,13 @@ top.PROG_ERR.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.acINS.bind("<Button-1>", eventAddressCompareIns)
 top.acDATA.bind("<Button-1>", eventAddressCompareData)
 top.pdpLAMP_TEST.bind("<Button-1>", eventPdpLampTest)
+top.pdpLAMP_TEST.bind("<ButtonRelease-1>", eventPdpLampTestRelease)
 top.mlddLAMP_TEST.bind("<Button-1>", eventMlddLampTest)
+top.mlddLAMP_TEST.bind("<ButtonRelease-1>", eventMlddLampTestRelease)
 top.ceLAMP_TEST.bind("<Button-1>", eventCeLampTest)
+top.ceLAMP_TEST.bind("<ButtonRelease-1>", eventCeLampTestRelease)
+top.trmcERROR_DEVICES_TEST.bind("<Button-1>", eventTrmcErrorDevicesTest)
+top.trmcERROR_DEVICES_TEST.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.RESET_MACHINE.bind("<Button-1>", eventResetMachine)
 top.RESET_MACHINE.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.HALT.bind("<Button-1>", eventHalt)
@@ -1530,6 +1561,8 @@ top.iaCommandM1.bind("<Button-1>", eventToggleIaCommandM1)
 top.iaCommandM0.bind("<Button-1>", eventToggleIaCommandM0)
 top.mlREPEAT.bind("<Button-1>", eventREPEAT)
 top.mlREPEAT_INVERSE.bind("<Button-1>", eventREPEAT_INVERSE)
+top.trmcML.bind("<Button-1>", eventML)
+top.trmcDD.bind("<Button-1>", eventDD)
 
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
