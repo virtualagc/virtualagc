@@ -5,7 +5,6 @@
 #		use with the yaLVDC PTC CPU emulator, and is connected
 #		to yaLVDC with "virtual wires" ... i.e., via network sockets.
 #		It's not fully developed, and is just intended to help me
-#		with developing and debugging yaLVDC.  But there's no reason
 #		it couldn't be developed fully, if there were reason to do so.  
 # Reference:	http://www.ibiblio.org/apollo/developer.html
 # Mod history:	2020-05-07 RSB	Began adapting from piPeripheral.py, which is
@@ -448,8 +447,8 @@ def getDataCommand():
 			
 def indicatorDataCommandParity():
 	value = getDataCommand()
-	indicatorSet(top.mlddCommandSYL1, not parity13(value >> 13))
-	indicatorSet(top.mlddCommandSYL0, not parity13(value))
+	indicatorSet(top.mlddCommandSYL1, oddParity13(value >> 13))
+	indicatorSet(top.mlddCommandSYL0, oddParity13(value))
 
 # Turns the switch settings for the commanded DATA ADDRESS
 # of MLDD into an integer.		
@@ -586,6 +585,7 @@ def eventCeLampTestRelease(event):
 
 def eventTrmcErrorDevicesTest(event):
 	indicatorOn(event.widget)
+	indicatorOn(top.PARITY_TAPE)
 	indicatorOn(top.PARITY_SERIAL)
 	indicatorOn(top.TRS)
 	indicatorOn(top.A13)
@@ -598,6 +598,7 @@ def eventTrmcErrorDevicesTest(event):
 
 def eventErrorReset(event):
 	indicatorOn(event.widget)
+	indicatorOff(top.PARITY_TAPE)
 	indicatorOff(top.PARITY_SERIAL)
 	indicatorOff(top.TRS)
 	indicatorOff(top.A13)
@@ -625,6 +626,9 @@ def eventComptrDisplayReset(event):
 	indicatorOn(top.iaComputerM0)
 	indicatorOn(top.iaComputerSYL0)
 	indicatorOn(top.daComputerM0)
+	indicatorOn(top.mlddComputerBR0)
+	indicatorOn(top.mlddComputerBR1)
+	indicatorOn(top.mlddPARITY_BIT)
 
 def eventCommandDisplayReset(event):
 	indicatorOn(event.widget)
@@ -635,14 +639,6 @@ def eventCommandDisplayReset(event):
 	indicatorOn(top.iaCommandSYL0)
 	indicatorOn(top.daCommandM0)
 
-def eventREPEAT(event):
-	indicatorOn(event.widget)
-	indicatorOff(top.mlREPEAT_INVERSE)
-
-def eventREPEAT_INVERSE(event):
-	indicatorOn(event.widget)
-	indicatorOff(top.mlREPEAT)
-
 def eventML(event):
 	indicatorOn(event.widget)
 	indicatorOff(top.trmcDD)
@@ -651,15 +647,13 @@ def eventDD(event):
 	indicatorOn(event.widget)
 	indicatorOff(top.trmcML)
 
-# This computes the actual parity of the bits of the syllable ...
-# not the parity bit that must be added to make an overall odd
-# parity.
-def parity13(value):
+# This computes an odd-parity bit for the syllable.
+def oddParity13(value):
 	value &= 0o17777  # Starts with 13 bits.
 	value = 0o177 & (value ^ (value >> 7)) # Now has 7 bits.
 	value = 0o17 & (value ^ (value >> 4)) # Now has 4 bits.
 	value = 3 & (value ^ (value >> 2)) # Now has 2 bits.
-	return 1 & (value ^ (value >> 1)) # Just 1 bit left!
+	return 1 & (1 ^ value ^ (value >> 1)) # Just 1 bit left!
 
 # This function is called by the event loop only when yaLVDC has written
 # to an output channel.  The function should do whatever it is that needs to be done
@@ -853,7 +847,7 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.daComputerOA6, a81 & 32)
 			indicatorSet(top.daComputerOA7, a81 & 64)
 			indicatorSet(top.daComputerOA8, a81 & 128)
-			indicatorSet(top.daPARITY_BIT, parity13(value))
+			indicatorSet(top.daPARITY_BIT, oddParity13(value))
 		elif channel == 0o003:
 			# Instruction address.
 			isect = (value >> 2) & 0o17
@@ -879,8 +873,8 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.iaComputerA7, loc & 64)
 			indicatorSet(top.iaComputerA8, loc & 128)
 		elif channel == 0o004:
-			parity0 = parity13(value)
-			parity1 = parity13(value >> 13)
+			parity0 = oddParity13(value)
+			parity1 = oddParity13(value >> 13)
 			indicatorSet(top.mlddComputerBR0, parity0)
 			indicatorSet(top.mlddComputerBR1, parity1)
 			indicatorSet(top.mlddPARITY_BIT, 1 ^ parity0 ^ parity1)
@@ -911,8 +905,6 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.mlddComputer1, value & 0o100000000)
 			indicatorSet(top.mlddComputerSIGN, value & 0o200000000)
 		elif channel == 0o600:
-			pass
-		elif channel == 0o601:
 			pass
 		else:
 			print("\nCPU status %03o %09o" % (channel, value))
@@ -1148,7 +1140,7 @@ indicatorInitialize(top.pdpA9, "A9", PANEL_PDP)
 indicatorInitialize(top.pdpMEM_ADD_REG, "MEM\nADD\nREG", PANEL_PDP)
 indicatorInitialize(top.pdpHOPSAVE_REG, "HOP\nSAVE\nREG", PANEL_PDP)
 indicatorInitialize(top.pdpSYL0, "0", PANEL_PDP)
-indicatorInitialize(top.pdpSYL1, "0", PANEL_PDP)
+indicatorInitialize(top.pdpSYL1, "1", PANEL_PDP)
 indicatorInitialize(top.pdpIS4, "IS4", PANEL_PDP)
 indicatorInitialize(top.pdpIS3, "IS3", PANEL_PDP)
 indicatorInitialize(top.pdpIS2, "IS2", PANEL_PDP)
@@ -1217,11 +1209,12 @@ indicatorInitialize(top.RESET_MACHINE, "RESET\nMACHINE", PANEL_PDP)
 indicatorInitialize(top.HALT, "HALT", PANEL_PDP)
 # Indicators for MISCELLANEOUS area (PDP POWER CONTROL and TRMC MODE):
 indicatorInitialize(top.pdpLAMP_TEST, "LAMP\nTEST", PANEL_PDP)
+indicatorInitialize(top.trmcAUTO, "AUTO", PANEL_PDP)
 indicatorInitialize(top.trmcMANUAL, "MANUAL", PANEL_PDP)
 indicatorOn(top.trmcMANUAL)
 indicatorInitialize(top.trmcML, "ML", PANEL_PDP)
 indicatorInitialize(top.trmcDD, "DD", PANEL_PDP)
-indicatorOn(top.trmcDD)
+indicatorOn(top.trmcML)
 indicatorInitialize(top.trmcERROR_DEVICES_TEST, "ERROR\nDEVICES\nTEST", PANEL_PDP)
 # Indicators for MLDD INSTRUCTION ADDRESS area:
 indicatorInitialize(top.iaComputerM0, "0", PANEL_MLDD, cc=CC_COMPUTER)
@@ -1364,6 +1357,7 @@ indicatorInitialize(top.acDATA, "DATA", PANEL_MLDD)
 indicatorOn(top.acDATA)
 indicatorInitialize(top.acINS, "INS", PANEL_MLDD)
 # Indicators for MLDD ERRORS area:
+indicatorInitialize(top.PARITY_TAPE, "TAPE", PANEL_MLDD)
 indicatorInitialize(top.PARITY_SERIAL, "SER", PANEL_MLDD)
 indicatorInitialize(top.TRS, "TRS", PANEL_MLDD)
 indicatorInitialize(top.A13, "A13", PANEL_MLDD)
@@ -1559,8 +1553,6 @@ top.iaCommandSYL1.bind("<Button-1>", eventToggleIaCommandSYL1)
 top.iaCommandSYL0.bind("<Button-1>", eventToggleIaCommandSYL0)
 top.iaCommandM1.bind("<Button-1>", eventToggleIaCommandM1)
 top.iaCommandM0.bind("<Button-1>", eventToggleIaCommandM0)
-top.mlREPEAT.bind("<Button-1>", eventREPEAT)
-top.mlREPEAT_INVERSE.bind("<Button-1>", eventREPEAT_INVERSE)
 top.trmcML.bind("<Button-1>", eventML)
 top.trmcDD.bind("<Button-1>", eventDD)
 

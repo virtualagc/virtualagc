@@ -159,7 +159,6 @@
  *      Channel 004:    Current data value.
  *
  *      Channel 600:    Current accumulator value.
- *      Channel 601:    Current instruction value.
  */
 
 int ServerBaseSocket = -1;
@@ -262,30 +261,14 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   if (needStatus || newConnect || panelPause == 2 || panelPause == 4)
     {
       uint16_t instruction = 0;
-      int data = 0, hopd = 0;
+      int data = 0, hopd = 0, hop;
       hopStructure_t hs =
         { 0 };
-      if (!parseHopConstant(state.hop, &hs))
-        if (!fetchInstruction(hs.im, hs.dm, hs.s, hs.loc, &instruction,
-            &instructionFromDataMemory))
-          {
-            int opcode = instruction & 0x0F;
-            int a9 = (instruction >> 4) & 1;
-            int a81 = (instruction >> 5) & 0xFF;
-            hopd = (state.hop & 0377760000) | instruction;
-            if ((ptc && (opcode == 01 || opcode == 05)) || opcode == 04
-                || opcode == 010 || opcode == 012 || opcode == 014
-                || opcode == 016)
-              {
-                // These are operators whose operands are not variables.
-              }
-            else if (needStatus != 2)
-              fetchData(hs.dm, a9, hs.ds, a81, &data,
-                  &dataFromInstructionMemory);
-          }
       if (needStatus == 2)
         {
           int dm, ds, dloc, residual;
+          hop = panelPatternInstructionAddress;
+          hopd = panelPatternDataAddress;
           dm = (panelPatternDataAddress >> 17) & 1;
           ds = (panelPatternDataAddress >> 19) & 017;
           residual = (panelPatternDataAddress >> 4) & 1;
@@ -298,12 +281,30 @@ pendingVirtualWireActivity(void /* int id, int mask */)
             }
           data = state.core[dm][ds][2][dloc];
         }
+      else if (!parseHopConstant(state.hop, &hs))
+        if (!fetchInstruction(hs.im, hs.dm, hs.s, hs.loc, &instruction,
+            &instructionFromDataMemory))
+          {
+            int opcode = instruction & 0x0F;
+            int a9 = (instruction >> 4) & 1;
+            int a81 = (instruction >> 5) & 0xFF;
+            hop = state.hop;
+            hopd = (state.hop & 0377760000) | instruction;
+            if ((ptc && (opcode == 01 || opcode == 05)) || opcode == 04
+                || opcode == 010 || opcode == 012 || opcode == 014
+                || opcode == 016)
+              {
+                // These are operators whose operands are not variables.
+              }
+            else if (needStatus != 2)
+              fetchData(hs.dm, a9, hs.ds, a81, &data,
+                  &dataFromInstructionMemory);
+          }
       formatPacket(5, (panelPause == 4) ? 001 : 000, 0, 0);
       formatPacket(5, 002, hopd, 0);
-      formatPacket(5, 003, state.hop, 0);
+      formatPacket(5, 003, hop, 0);
       formatPacket(5, 004, data, 0);
       formatPacket(5, 0600, state.acc, 0);
-      formatPacket(5, 0601, instruction, 0);
       needStatus = 0;
       newConnect = 0;
     }
@@ -572,6 +573,11 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                           state.core[dm][ds][0][dloc] = -1;
                           state.core[dm][ds][1][dloc] = -1;
                           needStatus = 2;
+                        }
+                      else if (channel == 0604)
+                        {
+                          printf("PTC panel requesting reset.\n");
+                          state.restart = 1;
                         }
                       else if (channel == 0605)
                         {

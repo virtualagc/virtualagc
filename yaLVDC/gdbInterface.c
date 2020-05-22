@@ -35,6 +35,7 @@
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2020-04-30 RSB  Began.
+ *              2020-05-21 RSB  Fixed arguments for DISASSEMBLE.
  */
 
 #include <stdlib.h>
@@ -188,7 +189,7 @@ commandAssociation_t commandAssociations[] =
             { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE - D-TT",
                 "Disassemble preceding LISTSIZE instructions; D-TT is starting DM/DS." },
             { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE M-SS-Y-LLL EEE D-TT",
-                "Disassemble from code address M-SS-Y-LLL EEE using data sector D-TT." },
+                "Disassemble from code address M-SS-Y-LLL to EEE using data sector D-TT." },
             { ctX, "X", "X[/[n][b|d|o]] address", "Show n words at address." },
             { ctX, "X", "X[/[n][b|d|o]] &[asm:]name", "Show n words at name." },
             { ctCLEAR, "CLEAR", "CLEAR [asm:]name",
@@ -1572,12 +1573,12 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   endloc = 0377;
               }
             else if (count >= 4
-                && 3
+                && 4
                     == sscanf(fields[1], "%o-%o-%o-%o", &im, &is, &s, &startloc)
                 && 1 == sscanf(fields[2], "%o", &endloc)
                 && 2 == sscanf(fields[3], "%o-%o", &dm, &ds) && im <= 7
                 && is <= 017 && s <= 1 && startloc <= 0377 && endloc <= 0377
-                && dm <= 7 && ds >= 017)
+                && dm <= 7 && ds <= 017)
               {
               }
             else

@@ -199,6 +199,7 @@ main(int argc, char *argv[])
   if (0)
     {
       restart: ;
+      printf("Resetting ...\n");
       runStepN = 0;
       inNextNotStep = 0;
       inNextHop = 0;
@@ -207,6 +208,10 @@ main(int argc, char *argv[])
       instructionCount = 0;
       firstUsedBacktrace = 0;
       firstEmptyBacktrace = 0;
+      if (panelPause == 0)
+        panelPause = 4;
+      else if (panelPause == 3)
+        panelPause = 2;
     }
   nextSnapshot = cycleCount + snapshotIntervalCycles;
 
@@ -285,6 +290,8 @@ main(int argc, char *argv[])
                     goto done;
                 }
             }
+          if (state.restart)
+            goto restart;
         }
       else
         {
