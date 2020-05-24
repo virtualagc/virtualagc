@@ -58,9 +58,9 @@ int inNextNotStep, inNextHop, inNextHopIM, inNextHopIS, inNextHopS,
 //      4 = Transition from paused to running state.  That transition can be
 //          reported to the panel.
 int panelPause = 0;
-int panelPatternDataAddress = 0;
-int panelPatternInstructionAddress = 0;
-int panelPatternDataValue = 0;
+int panelPatternDataAddress = -1;
+int panelPatternInstructionAddress = -1;
+int panelPatternDataValue = -1;
 int panelComparisonModeData = 1;
 int cpuIsRunning = 0;
 int cpuCurrentAddressData = -1;

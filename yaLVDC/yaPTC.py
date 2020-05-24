@@ -340,7 +340,8 @@ def indicatorInitialize(canvas, text, panel, cc = CC_NONE):
 # tracks those changes; it not only indicates which indicators are on which
 # of the 3 panels, but also tracks their intended states during LAMP TESTS;
 # it doesn't try to track their states whilst there is no LAMP TEST for the
-# corresponding panel, because the actual visual appearance already does that.
+# corresponding panel, because the configuration attributes of the canvases'
+# elements do that already.
 inLampTests = []
 def isIndicatorInLampTest(canvas):
 	for panel in inLampTests:
@@ -350,17 +351,29 @@ def isIndicatorInLampTest(canvas):
 def indicatorOff(canvas):
 	inTest = isIndicatorInLampTest(canvas)
 	if inTest == False:
-		canvas.itemconfig(1, state = "hidden")
-		canvas.itemconfig(2, fill = "white")
+		if canvas.itemcget(1, "state") == "normal":
+			canvas.itemconfig(1, state = "hidden")
+			canvas.itemconfig(2, fill = "white")
+			if canvas in commandIndicators:
+				indicatorToggle(top.mlddPARITY_BIT)
 	else:
-		indicators[inTest][canvas] = "hidden"
+		if indicators[inTest][canvas] == "normal":
+			indicators[inTest][canvas] = "hidden"
+			if canvas in commandIndicators:
+				indicatorToggle(top.mlddPARITY_BIT)
 def indicatorOn(canvas):
 	inTest = isIndicatorInLampTest(canvas)
 	if inTest == False:
-		canvas.itemconfig(1, state = "normal")
-		canvas.itemconfig(2, fill = "black")
+		if canvas.itemcget(1, "state") == "hidden":
+			canvas.itemconfig(1, state = "normal")
+			canvas.itemconfig(2, fill = "black")
+			if canvas in commandIndicators:
+				indicatorToggle(top.mlddPARITY_BIT)
 	else:
-		indicators[inTest][canvas] = "normal"
+		if indicators[inTest][canvas] == "hidden":
+			indicators[inTest][canvas] = "normal"
+			if canvas in commandIndicators:
+				indicatorToggle(top.mlddPARITY_BIT)
 def indicatorSet(canvas, onOff):
 	if onOff:
 		indicatorOn(canvas)
@@ -612,6 +625,20 @@ def eventErrorReset(event):
 def getCommandedDataAddress():
 	indicatorOn(event.widget)
 
+def autoAddressCmptr():
+	global changedD
+	if top.mlREPEAT.itemcget(1, "state") == "normal":
+		changedD = getDataCommand()
+		root.after(500, autoAddressCmptr)
+def eventRepeat(event):
+	indicatorOn(event.widget)
+	indicatorOff(top.mlREPEAT_INVERSE)
+	autoAddressCmptr()
+
+def eventRepeatInverse(event):
+	indicatorOn(event.widget)
+	indicatorOff(top.mlREPEAT)
+
 def eventAddressCmptr(event):
 	global changedD
 	indicatorOn(event.widget)
@@ -626,9 +653,9 @@ def eventComptrDisplayReset(event):
 	indicatorOn(top.iaComputerM0)
 	indicatorOn(top.iaComputerSYL0)
 	indicatorOn(top.daComputerM0)
-	indicatorOn(top.mlddComputerBR0)
-	indicatorOn(top.mlddComputerBR1)
-	indicatorOn(top.mlddPARITY_BIT)
+	#indicatorOn(top.mlddComputerBR0)
+	#indicatorOn(top.mlddComputerBR1)
+	#indicatorOn(top.mlddPARITY_BIT)
 
 def eventCommandDisplayReset(event):
 	indicatorOn(event.widget)
@@ -638,6 +665,7 @@ def eventCommandDisplayReset(event):
 	indicatorOn(top.iaCommandM0)
 	indicatorOn(top.iaCommandSYL0)
 	indicatorOn(top.daCommandM0)
+	indicatorOn(top.mlddPARITY_BIT)
 
 def eventML(event):
 	indicatorOn(event.widget)
@@ -821,7 +849,7 @@ def outputFromCPU(ioType, channel, value):
 			print("\nCPU is paused.")
 		elif channel == 0o001:
 			print("\nCPU is running.")
-		elif channel == 0o002:
+		elif channel == 0o002 or channel == 0o602:
 			# Data address.
 			opcode = value & 0o17
 			a9 = (value >> 4) & 1
@@ -847,8 +875,9 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.daComputerOA6, a81 & 32)
 			indicatorSet(top.daComputerOA7, a81 & 64)
 			indicatorSet(top.daComputerOA8, a81 & 128)
-			indicatorSet(top.daPARITY_BIT, oddParity13(value))
-		elif channel == 0o003:
+			if channel == 0o002:
+				indicatorSet(top.daPARITY_BIT, oddParity13(value))
+		elif channel == 0o003 or channel == 0o603:
 			# Instruction address.
 			isect = (value >> 2) & 0o17
 			s = (value >> 6) & 1
@@ -872,12 +901,11 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.iaComputerA6, loc & 32)
 			indicatorSet(top.iaComputerA7, loc & 64)
 			indicatorSet(top.iaComputerA8, loc & 128)
-		elif channel == 0o004:
+		elif channel == 0o004 or channel == 0o601:
 			parity0 = oddParity13(value)
 			parity1 = oddParity13(value >> 13)
 			indicatorSet(top.mlddComputerBR0, parity0)
 			indicatorSet(top.mlddComputerBR1, parity1)
-			indicatorSet(top.mlddPARITY_BIT, 1 ^ parity0 ^ parity1)
 			indicatorSet(top.mlddComputer25, value & 0o1)
 			indicatorSet(top.mlddComputer24, value & 0o2)
 			indicatorSet(top.mlddComputer23, value & 0o4)
@@ -1104,6 +1132,8 @@ top = topProcessorDisplayPanel (root)
 ProcessorDisplayPanel_support.init(root, top)
 # Lots and lots of initializations that the PAGE tool wasn't
 # flexible enough to do for me.
+indicatorInitialize(top.mlddPARITY_BIT, "PARITY\nBIT", PANEL_MLDD)
+indicatorOn(top.mlddPARITY_BIT)
 # Indicators for PDP DATA area:
 indicatorInitialize(top.pdp1, "1", PANEL_PDP)
 indicatorInitialize(top.pdp2, "2", PANEL_PDP)
@@ -1233,10 +1263,16 @@ indicatorInitialize(top.iaComputerA4, "A4", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.iaComputerA3, "A3", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.iaComputerA2, "A2", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.iaComputerA1, "A1", PANEL_MLDD, cc=CC_COMPUTER)
-indicatorInitialize(top.iaCommandM0, "0", PANEL_MLDD, cc=CC_COMMAND)
+# Note that iaCommandM0 is omitted from CC_COMMAND for the sake of 
+# the SERIALIZER PARITY BIT.  It does not need to be in CC_COMMAND
+# anyway, since resetting the COMMAND lamps does not clear it.
+indicatorInitialize(top.iaCommandM0, "0", PANEL_MLDD)
 indicatorOn(top.iaCommandM0)
 indicatorInitialize(top.iaCommandM1, "1", PANEL_MLDD, cc=CC_COMMAND)
-indicatorInitialize(top.iaCommandSYL0, "0", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.iaCommandSYL0, "0", PANEL_MLDD)
+# Note that iaCommandSYL0 is omitted from CC_COMMAND for the sake of 
+# the SERIALIZER PARITY BIT.  It does not need to be in CC_COMMAND
+# anyway, since resetting the COMMAND lamps does not clear it.
 indicatorOn(top.iaCommandSYL0)
 indicatorInitialize(top.iaCommandSYL1, "1", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.iaCommandIS4, "IS4", PANEL_MLDD, cc=CC_COMMAND)
@@ -1276,7 +1312,10 @@ indicatorInitialize(top.daCommandDS4, "DS4", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.daCommandDS3, "DS3", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.daCommandDS2, "DS2", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.daCommandDS1, "DS1", PANEL_MLDD, cc=CC_COMMAND)
-indicatorInitialize(top.daCommandM0, "0", PANEL_MLDD, cc=CC_COMMAND)
+# Note that daCommandM0 is omitted from CC_COMMAND for the sake of 
+# the SERIALIZER PARITY BIT.  It does not need to be in CC_COMMAND
+# anyway, since resetting the COMMAND lamps does not clear it.
+indicatorInitialize(top.daCommandM0, "0", PANEL_MLDD)
 indicatorOn(top.daCommandM0)
 indicatorInitialize(top.daCommandM1, "1", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.daCommandOP4, "OP4", PANEL_MLDD, cc=CC_COMMAND)
@@ -1294,7 +1333,8 @@ indicatorInitialize(top.daCommandOA2, "OA2", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.daCommandOA1, "OA1", PANEL_MLDD, cc=CC_COMMAND)
 # Indicators for MLDD DATA area:
 indicatorInitialize(top.mlddLAMP_TEST, "LAMP\nTEST", PANEL_MLDD)
-indicatorInitialize(top.mlddPARITY_BIT, "PARITY\nBIT", PANEL_MLDD)
+# The mlddPARITY_BIT indicator has to be initialized before all other
+# CC_COMPUTER indicators, so I've moved it to the very top of the list.
 indicatorInitialize(top.mlddComputerBR0, "B\nR", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.mlddComputerBR1, "B\nR", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.mlddComputerSIGN, "S", PANEL_MLDD, cc=CC_COMPUTER)
@@ -1323,8 +1363,8 @@ indicatorInitialize(top.mlddComputer22, "22", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.mlddComputer23, "23", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.mlddComputer24, "24", PANEL_MLDD, cc=CC_COMPUTER)
 indicatorInitialize(top.mlddComputer25, "25", PANEL_MLDD, cc=CC_COMPUTER)
-indicatorInitialize(top.mlddCommandSYL0, "S\nY\n0", PANEL_MLDD, cc=CC_COMMAND)
-indicatorInitialize(top.mlddCommandSYL1, "S\nY\n1", PANEL_MLDD, cc=CC_COMMAND)
+indicatorInitialize(top.mlddCommandSYL0, "S\nY\n0", PANEL_MLDD)
+indicatorInitialize(top.mlddCommandSYL1, "S\nY\n1", PANEL_MLDD)
 indicatorDataCommandParity()
 indicatorInitialize(top.mlddCommandSIGN, "S", PANEL_MLDD, cc=CC_COMMAND)
 indicatorInitialize(top.mlddCommand1, "1", PANEL_MLDD, cc=CC_COMMAND)
@@ -1486,6 +1526,8 @@ top.HALT.bind("<Button-1>", eventHalt)
 top.HALT.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.ERROR_RESET.bind("<Button-1>", eventErrorReset)
 top.ERROR_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.mlREPEAT.bind("<Button-1>", eventRepeat)
+top.mlREPEAT_INVERSE.bind("<Button-1>", eventRepeatInverse)
 top.mlADDRESS_CMPTR.bind("<Button-1>", eventAddressCmptr)
 top.mlADDRESS_CMPTR.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.mlCOMPTR_DISPLAY_RESET.bind("<Button-1>", eventComptrDisplayReset)

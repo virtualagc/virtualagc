@@ -159,6 +159,9 @@
  *      Channel 004:    Current data value.
  *
  *      Channel 600:    Current accumulator value.
+ *      Channel 601:    Current data from the data-address comparison pattern.
+ *      Channel 602:    Current data-address comparison pattern.
+ *      Channel 603:    Current instruction-address comparison pattern.
  */
 
 int ServerBaseSocket = -1;
@@ -261,27 +264,10 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   if (needStatus || newConnect || panelPause == 2 || panelPause == 4)
     {
       uint16_t instruction = 0;
-      int data = 0, hopd = 0, hop;
+      int data = 0, hopd = 0, hop, dataReadback = -1, datapat = -1, inspat = -1;
       hopStructure_t hs =
         { 0 };
-      if (needStatus == 2)
-        {
-          int dm, ds, dloc, residual;
-          hop = panelPatternInstructionAddress;
-          hopd = panelPatternDataAddress;
-          dm = (panelPatternDataAddress >> 17) & 1;
-          ds = (panelPatternDataAddress >> 19) & 017;
-          residual = (panelPatternDataAddress >> 4) & 1;
-          dloc = (panelPatternDataAddress >> 5) & 0377;
-          if (residual)
-            {
-              ds = 017;
-              if (ptc)
-                dm = 0;
-            }
-          data = state.core[dm][ds][2][dloc];
-        }
-      else if (!parseHopConstant(state.hop, &hs))
+      if (!parseHopConstant(state.hop, &hs))
         if (!fetchInstruction(hs.im, hs.dm, hs.s, hs.loc, &instruction,
             &instructionFromDataMemory))
           {
@@ -300,11 +286,38 @@ pendingVirtualWireActivity(void /* int id, int mask */)
               fetchData(hs.dm, a9, hs.ds, a81, &data,
                   &dataFromInstructionMemory);
           }
+      if (needStatus == 2)
+        {
+          int dm, ds, dloc, residual;
+          inspat = panelPatternInstructionAddress;
+          datapat = panelPatternDataAddress;
+          dataReadback = -1;
+          if (panelPatternDataAddress != -1)
+            {
+              dm = (panelPatternDataAddress >> 17) & 1;
+              ds = (panelPatternDataAddress >> 19) & 017;
+              residual = (panelPatternDataAddress >> 4) & 1;
+              dloc = (panelPatternDataAddress >> 5) & 0377;
+              if (residual)
+                {
+                  ds = 017;
+                  if (ptc)
+                    dm = 0;
+                }
+              dataReadback = state.core[dm][ds][2][dloc];
+            }
+        }
       formatPacket(5, (panelPause == 4) ? 001 : 000, 0, 0);
       formatPacket(5, 002, hopd, 0);
       formatPacket(5, 003, hop, 0);
       formatPacket(5, 004, data, 0);
       formatPacket(5, 0600, state.acc, 0);
+      if (inspat != -1)
+        formatPacket(5, 0603, inspat, 0);
+      if (datapat != -1)
+        formatPacket(5, 0602, datapat, 0);
+      if (dataReadback != -1)
+        formatPacket(5, 0601, dataReadback, 0);
       needStatus = 0;
       newConnect = 0;
     }
