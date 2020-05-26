@@ -161,7 +161,7 @@
  *                      Bit D7          CST (PD PROGRAM CONTROL area)
  *                      Bit D8          MAN CST (PD PROGRAM CONTROL area)
  *                      Bit D9          ML (1) vs DD (0) (TRMC MODE)
- *
+ *                      Bit D10         ACC DISPLAY ENABLE (CE ACCUMULATOR area)
  *      Channel 600:    Set the data-comparison mode.  The payload is ignored.
  *      Channel 601:    Set the instruction-comparison mode.  The payload is ignored.
  *      Channel 602:    Inhibit interrupts.  The payload is the 16-bit mask (aligned

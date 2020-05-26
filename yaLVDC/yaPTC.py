@@ -1072,6 +1072,7 @@ def outputFromCPU(ioType, channel, value):
 			cst = (value >> 7) & 1
 			manCst = (value >> 8) & 1
 			ml = (value >> 9) & 1
+			accDisplayEnable = (value >> 10) & 1
 			#print("\n%d %d %d" % (displaySelect, addressCompare, modeControl))
 			ProcessorDisplayPanel_support.displaySelect.set(displaySelect)
 			ProcessorDisplayPanel_support.modeControl.set(modeControl)
@@ -1083,8 +1084,36 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.MAN_CST, manCst)
 			indicatorSet(top.trmcML, ml)
 			indicatorSet(top.trmcDD, not ml)
+			indicatorSet(top.ACC_DISPLAY_ENABLE, accDisplayEnable)
 		elif channel == 0o600:
-			pass
+			print("ACC = %09o" % value)
+			if top.ACC_DISPLAY_ENABLE.itemcget(1, "state") == "normal":
+				indicatorSet(top.DLA26, (value >> 0) & 1)
+				indicatorSet(top.DLA25, (value >> 1) & 1)
+				indicatorSet(top.DLA24, (value >> 2) & 1)
+				indicatorSet(top.DLA23, (value >> 3) & 1)
+				indicatorSet(top.DLA22, (value >> 4) & 1)
+				indicatorSet(top.DLA21, (value >> 5) & 1)
+				indicatorSet(top.DLA20, (value >> 6) & 1)
+				indicatorSet(top.DLA19, (value >> 7) & 1)
+				indicatorSet(top.DLA18, (value >> 8) & 1)
+				indicatorSet(top.DLA17, (value >> 9) & 1)
+				indicatorSet(top.DLA16, (value >> 10) & 1)
+				indicatorSet(top.DLA15, (value >> 11) & 1)
+				indicatorSet(top.DLA14, (value >> 12) & 1)
+				indicatorSet(top.DLA13, (value >> 13) & 1)
+				indicatorSet(top.DLA12, (value >> 14) & 1)
+				indicatorSet(top.DLA11, (value >> 15) & 1)
+				indicatorSet(top.DLA10, (value >> 16) & 1)
+				indicatorSet(top.DLA9, (value >> 17) & 1)
+				indicatorSet(top.DLA8, (value >> 18) & 1)
+				indicatorSet(top.DLA7, (value >> 19) & 1)
+				indicatorSet(top.DLA6, (value >> 20) & 1)
+				indicatorSet(top.DLA5, (value >> 21) & 1)
+				indicatorSet(top.DLA4, (value >> 22) & 1)
+				indicatorSet(top.DLA3, (value >> 23) & 1)
+				indicatorSet(top.DLA2, (value >> 24) & 1)
+				indicatorSet(top.A_S, (value >> 25) & 1)
 		elif channel == 0o604:
 			ProcessorDisplayPanel_support.bPRA25.set((value >> 0) & 1)
 			ProcessorDisplayPanel_support.bPRA24.set((value >> 1) & 1)
@@ -1185,6 +1214,8 @@ def changeDisplayMode(newDisplaySelect, newModeControl, newAddressCompare, other
 			displayModePayload |= 1 << 8
 		if top.trmcML.itemcget(1, "state") == "normal":
 			displayModePayload |= 1 << 9
+		if top.ACC_DISPLAY_ENABLE.itemcget(1, "state") == "normal":
+			displayModePayload |= 1 << 10
 		
 def eventDisplaySelect():
 	changeDisplayMode(ProcessorDisplayPanel_support.displaySelect.get(), modeControl, addressCompare)
@@ -1722,6 +1753,7 @@ indicatorInitialize(top.mbrODD_PARITY, "ODD PAR", PANEL_CE)
 indicatorInitialize(top.mbrLOAD, "LOAD", PANEL_CE)
 indicatorInitialize(top.ceLAMP_TEST, "LAMP\nTEST", PANEL_CE)
 # Callback bindings for indicators which are also pushbuttons.
+top.ACC_DISPLAY_ENABLE.bind("<Button-1>", eventToggleIndicatorChange)
 top.PROG_ERR.bind("<Button-1>", pressedPROG_ERR)
 top.PROG_ERR.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.acINS.bind("<Button-1>", eventAddressCompareInsData)
