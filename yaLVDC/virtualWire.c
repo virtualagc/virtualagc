@@ -666,6 +666,11 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                            mcStrings[panelModeControl]);
                            */
                         }
+                      else if (channel == 0603)
+                        {
+                          printf("PTC panel requesting single step.\n");
+                          panelPause = 1;
+                        }
                       else if (channel == 0604)
                         {
                           printf("PTC panel requesting reset.\n");

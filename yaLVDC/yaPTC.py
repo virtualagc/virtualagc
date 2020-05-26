@@ -106,8 +106,11 @@ else:
 def eventIndicatorButtonRelease(event):
 	indicatorOff(event.widget)
 
+advance = False
 def eventAdvance(event):
+	global advance
 	indicatorOn(event.widget)
+	advance = True
 	
 resetMachine = False
 def eventResetMachine(event):
@@ -254,49 +257,60 @@ changedDA = -1
 changedD = -1
 displayModePayload = -1
 needStatusFromCPU = False
+nomask = 0o377777777
 def inputsForCPU():
 	#global delayCount, ioTypeCount, channelCount
 	global ProgRegA, ProgRegB, resetMachine, halt, needStatusFromCPU
-	global changedIA, changedDA, changedD, displayModePayload
+	global changedIA, changedDA, changedD, displayModePayload, advance
 	returnValue = []
 	
 	if ProgRegA != -1:
 		n = ProgRegA
 		ProgRegA = -1
-		returnValue.append((1, 0o214, n, 0o377777777))
+		returnValue.append((1, 0o214, n, nomask))
 
 	if ProgRegB != -1:
 		n = ProgRegB
 		ProgRegB = -1
-		returnValue.append((1, 0o220, n, 0o377777777))
+		returnValue.append((1, 0o220, n, nomask))
 	
 	if resetMachine:
 		resetMachine = False
-		returnValue.append((4, 0o604, 0, 0o377777777))
+		returnValue.append((4, 0o604, 0, nomask))
 	
 	if halt:
 		halt = False
-		returnValue.append((4, 0o000, 0, 0o377777777))
+		returnValue.append((4, 0o000, 0, nomask))
 	
 	if changedIA != -1:
-		returnValue.append((4, 0o003, changedIA, 0o377777777))
+		returnValue.append((4, 0o003, changedIA, nomask))
 		changedIA = -1
 
 	if changedDA != -1:
-		returnValue.append((4, 0o002, changedDA, 0o377777777))
+		returnValue.append((4, 0o002, changedDA, nomask))
 		changedDA = -1
 
 	if changedD != -1:
-		returnValue.append((4, 0o004, changedD, 0o377777777))
+		returnValue.append((4, 0o004, changedD, nomask))
 		changedD = -1
 
 	if displayModePayload != -1:
-		returnValue.append((4, 0o005, displayModePayload, 0o377777777))
+		returnValue.append((4, 0o005, displayModePayload, nomask))
 		displayModePayload = -1
+
+	if advance:
+		advance = False
+		if modeControl == 2:
+			returnValue.append((4, 0o001, 0, nomask))
+		elif modeControl == 1:
+			returnValue.append((4, 0o603, 0, nomask))
+		elif modeControl == 0:
+			returnValue.append((4, 0o604, 0, nomask))
+			returnValue.append((4, 0o001, 0, nomask))
 
 	if needStatusFromCPU:
 		needStatusFromCPU = False
-		returnValue.append((4, 0o605, 0, 0o377777777))
+		returnValue.append((4, 0o605, 0, nomask))
 	
 	return returnValue
 
