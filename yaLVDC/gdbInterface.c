@@ -481,9 +481,9 @@ formatFetchedValue(int value, char type /* o, d, or b */,
 {
   strcpy(formattedFetchedValue, "unknown");
   if (value == -1 && size)
-    strcpy(formattedFetchedValue, "not data value");
+    sprintf(formattedFetchedValue, "empty data location");
   else if (value == -1 && !size)
-    strcpy(formattedFetchedValue, "not code value");
+    sprintf(formattedFetchedValue, "empty code location");
   else if (type == 'o' && size)
     sprintf(formattedFetchedValue, "%09o (%09o)", value, value << 1);
   else if (type == 'o' && !size)
@@ -896,8 +896,8 @@ disassemble(void)
       operandSymbol = findSymbolByAddress(disassemblyState.is,
           disassemblyState.im, a9, operand);
       if (operandSymbol == NULL)
-        sprintf(operandString, "%o-%0o-%o-%03o", disassemblyState.is,
-            disassemblyState.im, a9, operand);
+        sprintf(operandString, "%o-%0o-%o-%03o", disassemblyState.im,
+            disassemblyState.is, a9, operand);
       else
         strcpy(operandString, operandSymbol->name);
     }

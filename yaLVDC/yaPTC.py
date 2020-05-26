@@ -105,6 +105,9 @@ else:
 
 def eventIndicatorButtonRelease(event):
 	indicatorOff(event.widget)
+
+def eventAdvance(event):
+	indicatorOn(event.widget)
 	
 resetMachine = False
 def eventResetMachine(event):
@@ -249,11 +252,12 @@ ProcessorDisplayPanel_support.cPRB = cPRB
 changedIA = -1
 changedDA = -1
 changedD = -1
+displayModePayload = -1
 needStatusFromCPU = False
 def inputsForCPU():
 	#global delayCount, ioTypeCount, channelCount
 	global ProgRegA, ProgRegB, resetMachine, halt, needStatusFromCPU
-	global changedIA, changedDA, changedD
+	global changedIA, changedDA, changedD, displayModePayload
 	returnValue = []
 	
 	if ProgRegA != -1:
@@ -285,6 +289,10 @@ def inputsForCPU():
 	if changedD != -1:
 		returnValue.append((4, 0o004, changedD, 0o377777777))
 		changedD = -1
+
+	if displayModePayload != -1:
+		returnValue.append((4, 0o005, displayModePayload, 0o377777777))
+		displayModePayload = -1
 
 	if needStatusFromCPU:
 		needStatusFromCPU = False
@@ -379,23 +387,41 @@ def indicatorSet(canvas, onOff):
 		indicatorOn(canvas)
 	else:
 		indicatorOff(canvas)
+
 def indicatorToggle(canvas):
 	inTest = isIndicatorInLampTest(canvas)
 	if inTest == False:
 		indicatorSet(canvas, canvas.itemcget(1, "state") == "hidden")
 	else:
 		indicatorSet(canvas, indicators[inTest][canvas] == "hidden")
+
 def startPanelLampTest(panel):
 	for indicator in indicators[panel]:
 		indicators[panel][indicator] = indicator.itemcget(1, "state")
 		indicatorOn(indicator)
+	# The SERIALIZER PARITY BIT has to be lit last (although
+	# it may already have been lit above), since the subsequent
+	# indicatorXXX() calls may have changed its visual state.
+	if panel == PANEL_MLDD:
+		indicatorOn(top.mlddPARITY_BIT)
 	if panel not in inLampTests:
 		inLampTests.append(panel)
 def endPanelLampTest(panel):
 	if panel in inLampTests:
 		inLampTests.remove(panel)
 	for indicator in indicators[panel]:
-		if indicators[panel][indicator] == "normal":
+		# The SERIALIZER PARITY BIT lamp has to be treated specially:
+		# instead of being restored to whatever state it was when 
+		# the lamp test started, it must be set to 1 and then the
+		# indicatorOn() calls for the other lamps progressively 
+		# adjust it so that it ends up agreeing with them.  Or else
+		# it can be restored, but has to be done *last*.  Either way,
+		# it has to be treated specially.  It will be the *first*
+		# item on the list for its panel, because that's how the
+		# initialization was ordered.
+		if indicator == top.mlddPARITY_BIT:
+			indicatorOn(indicator)
+		elif indicators[panel][indicator] == "normal":
 			indicatorOn(indicator)
 		else:
 			indicatorOff(indicator)
@@ -549,37 +575,56 @@ def getInstructionAddressCommand():
 def eventToggleIndicator(event):
 	indicatorToggle(event.widget)
 
-def updateDaCommand(event):
-	global changedDA
+def eventToggleIndicatorChange(event):
 	indicatorToggle(event.widget)
-	changedDA = getDataAddressCommand()
-def eventToggleDaCommandM0(event):
-	indicatorToggle(top.daCommandM1)
-	updateDaCommand(event)
-def eventToggleDaCommandM1(event):
-	indicatorToggle(top.daCommandM0)
-	updateDaCommand(event)
+	changeDisplayMode(displaySelect, modeControl, addressCompare, other=True)
 
+# Note that this function accepts as input either an event 
+# (which is a class having an attribute that's a widget, 
+# in this case a canvas) or else a canvas.
+def updateDaCommand(event):
+	global changedDA, dcDisplayCount
+	if hasattr(event, "widget"):
+		indicatorToggle(event.widget)
+	else:
+		indicatorToggle(event)
+	changedDA = getDataAddressCommand()
+	dcDisplayCount = 0
+	
+def eventToggleDaCommandM01(event):
+	global dcDisplayCount
+	indicatorToggle(top.daCommandM0)
+	updateDaCommand(top.daCommandM1)
+	dcDisplayCount = 0
+
+# Note that this function accepts as input either an event 
+# (which is a class having an attribute that's a widget, 
+# in this case a canvas) or else a canvas.
 def updateIaCommand(event):
-	global changedIA
-	indicatorToggle(event.widget)
+	global changedIA, dcDisplayCount
+	if hasattr(event, "widget"):
+		indicatorToggle(event.widget)
+	else:
+		indicatorToggle(event)
 	changedIA = getInstructionAddressCommand()
-def eventToggleIaCommandM0(event):
-	indicatorToggle(top.iaCommandM1)
-	updateIaCommand(event)
-def eventToggleIaCommandM1(event):
+	dcDisplayCount = 0
+	
+def eventToggleIaCommandM01(event):
+	global dcDisplayCount
 	indicatorToggle(top.iaCommandM0)
-	updateIaCommand(event)
-def eventToggleIaCommandSYL0(event):
-	indicatorToggle(top.iaCommandSYL1)
-	updateIaCommand(event)
-def eventToggleIaCommandSYL1(event):
+	updateIaCommand(top.iaCommandM1)
+	dcDisplayCount = 0
+
+def eventToggleIaCommandSYL01(event):
+	global dcDisplayCount
 	indicatorToggle(top.iaCommandSYL0)
-	updateIaCommand(event)
+	updateIaCommand(top.iaCommandSYL1)
+	dcDisplayCount = 0
 
 def eventToggleDataIndicator(event):
 	eventToggleIndicator(event)
 	indicatorDataCommandParity()
+	
 
 def eventPdpLampTest(event):
 	startPanelLampTest(PANEL_PDP)
@@ -630,14 +675,12 @@ def autoAddressCmptr():
 	if top.mlREPEAT.itemcget(1, "state") == "normal":
 		changedD = getDataCommand()
 		root.after(500, autoAddressCmptr)
-def eventRepeat(event):
-	indicatorOn(event.widget)
-	indicatorOff(top.mlREPEAT_INVERSE)
-	autoAddressCmptr()
 
-def eventRepeatInverse(event):
-	indicatorOn(event.widget)
-	indicatorOff(top.mlREPEAT)
+def eventRepeat(event):
+	indicatorToggle(top.mlREPEAT)
+	indicatorToggle(top.mlREPEAT_INVERSE)
+	changeDisplayMode(displaySelect, modeControl, addressCompare, other=True)
+	autoAddressCmptr()
 
 def eventAddressCmptr(event):
 	global changedD
@@ -667,13 +710,10 @@ def eventCommandDisplayReset(event):
 	indicatorOn(top.daCommandM0)
 	indicatorOn(top.mlddPARITY_BIT)
 
-def eventML(event):
-	indicatorOn(event.widget)
-	indicatorOff(top.trmcDD)
-
-def eventDD(event):
-	indicatorOn(event.widget)
-	indicatorOff(top.trmcML)
+def eventMlDd(event):
+	indicatorToggle(top.trmcML)
+	indicatorToggle(top.trmcDD)
+	changeDisplayMode(displaySelect, modeControl, addressCompare, other=True)
 
 # This computes an odd-parity bit for the syllable.
 def oddParity13(value):
@@ -693,7 +733,11 @@ def oddParity13(value):
 #
 # The function _could_ also be called directly, by panel events, though I'm not
 # aware of any reason at the moment why that would be needed.  But it does work.
+displaySelect = -1
+modeControl = 0
+addressCompare = False
 def outputFromCPU(ioType, channel, value):
+	global displaySelect, modeControl, addressCompare, dcDisplayCount
 	print("*", end="")
 	
 	if ioType == 0:
@@ -856,27 +900,49 @@ def outputFromCPU(ioType, channel, value):
 			a81 = (value >> 5) & 0o377
 			dm = (value >> 17) & 1
 			ds = (value >> 20) & 0o17
-			indicatorSet(top.daComputerM0, not dm)
-			indicatorSet(top.daComputerM1, dm)
-			indicatorSet(top.daComputerDS1, ds & 1)
-			indicatorSet(top.daComputerDS2, ds & 2)
-			indicatorSet(top.daComputerDS3, ds & 4)
-			indicatorSet(top.daComputerDS4, ds & 8)
-			indicatorSet(top.daComputerOP1, opcode & 1)
-			indicatorSet(top.daComputerOP2, opcode & 2)
-			indicatorSet(top.daComputerOP3, opcode & 4)
-			indicatorSet(top.daComputerOP4, opcode & 8)
-			indicatorSet(top.daComputerOA9, a9)
-			indicatorSet(top.daComputerOA1, a81 & 1)
-			indicatorSet(top.daComputerOA2, a81 & 2)
-			indicatorSet(top.daComputerOA3, a81 & 4)
-			indicatorSet(top.daComputerOA4, a81 & 8)
-			indicatorSet(top.daComputerOA5, a81 & 16)
-			indicatorSet(top.daComputerOA6, a81 & 32)
-			indicatorSet(top.daComputerOA7, a81 & 64)
-			indicatorSet(top.daComputerOA8, a81 & 128)
-			if channel == 0o002:
-				indicatorSet(top.daPARITY_BIT, oddParity13(value))
+			if not (channel == 0o002 and (dcDisplayCount & 1) != 0 and modeControl == 3):
+				indicatorSet(top.daComputerM0, not dm)
+				indicatorSet(top.daComputerM1, dm)
+				indicatorSet(top.daComputerDS1, ds & 1)
+				indicatorSet(top.daComputerDS2, ds & 2)
+				indicatorSet(top.daComputerDS3, ds & 4)
+				indicatorSet(top.daComputerDS4, ds & 8)
+				indicatorSet(top.daComputerOP1, opcode & 1)
+				indicatorSet(top.daComputerOP2, opcode & 2)
+				indicatorSet(top.daComputerOP3, opcode & 4)
+				indicatorSet(top.daComputerOP4, opcode & 8)
+				indicatorSet(top.daComputerOA9, a9)
+				indicatorSet(top.daComputerOA1, a81 & 1)
+				indicatorSet(top.daComputerOA2, a81 & 2)
+				indicatorSet(top.daComputerOA3, a81 & 4)
+				indicatorSet(top.daComputerOA4, a81 & 8)
+				indicatorSet(top.daComputerOA5, a81 & 16)
+				indicatorSet(top.daComputerOA6, a81 & 32)
+				indicatorSet(top.daComputerOA7, a81 & 64)
+				indicatorSet(top.daComputerOA8, a81 & 128)
+				if channel == 0o002:
+					dcDisplayCount |= 1
+					indicatorSet(top.daPARITY_BIT, oddParity13(value))
+			if channel == 0o602:
+				indicatorSet(top.daCommandM0, not dm)
+				indicatorSet(top.daCommandM1, dm)
+				indicatorSet(top.daCommandDS1, ds & 1)
+				indicatorSet(top.daCommandDS2, ds & 2)
+				indicatorSet(top.daCommandDS3, ds & 4)
+				indicatorSet(top.daCommandDS4, ds & 8)
+				indicatorSet(top.daCommandOP1, opcode & 1)
+				indicatorSet(top.daCommandOP2, opcode & 2)
+				indicatorSet(top.daCommandOP3, opcode & 4)
+				indicatorSet(top.daCommandOP4, opcode & 8)
+				indicatorSet(top.daCommandOA9, a9)
+				indicatorSet(top.daCommandOA1, a81 & 1)
+				indicatorSet(top.daCommandOA2, a81 & 2)
+				indicatorSet(top.daCommandOA3, a81 & 4)
+				indicatorSet(top.daCommandOA4, a81 & 8)
+				indicatorSet(top.daCommandOA5, a81 & 16)
+				indicatorSet(top.daCommandOA6, a81 & 32)
+				indicatorSet(top.daCommandOA7, a81 & 64)
+				indicatorSet(top.daCommandOA8, a81 & 128)
 		elif channel == 0o003 or channel == 0o603:
 			# Instruction address.
 			isect = (value >> 2) & 0o17
@@ -885,55 +951,180 @@ def outputFromCPU(ioType, channel, value):
 			dm = (value >> 17) & 1
 			ds = (value >> 20) & 0o17
 			im = (value >> 25) & 1
-			indicatorSet(top.iaComputerM0, not im)
-			indicatorSet(top.iaComputerM1, im)
-			indicatorSet(top.iaComputerSYL0, not s)
-			indicatorSet(top.iaComputerSYL1, s)
-			indicatorSet(top.iaComputerIS1, isect & 1)
-			indicatorSet(top.iaComputerIS2, isect & 2)
-			indicatorSet(top.iaComputerIS3, isect & 4)
-			indicatorSet(top.iaComputerIS4, isect & 8)
-			indicatorSet(top.iaComputerA1, loc & 1)
-			indicatorSet(top.iaComputerA2, loc & 2)
-			indicatorSet(top.iaComputerA3, loc & 4)
-			indicatorSet(top.iaComputerA4, loc & 8)
-			indicatorSet(top.iaComputerA5, loc & 16)
-			indicatorSet(top.iaComputerA6, loc & 32)
-			indicatorSet(top.iaComputerA7, loc & 64)
-			indicatorSet(top.iaComputerA8, loc & 128)
+			if not (channel == 0o003 and (dcDisplayCount & 2) != 0 and modeControl == 3):
+				indicatorSet(top.iaComputerM0, not im)
+				indicatorSet(top.iaComputerM1, im)
+				indicatorSet(top.iaComputerSYL0, not s)
+				indicatorSet(top.iaComputerSYL1, s)
+				indicatorSet(top.iaComputerIS1, isect & 1)
+				indicatorSet(top.iaComputerIS2, isect & 2)
+				indicatorSet(top.iaComputerIS3, isect & 4)
+				indicatorSet(top.iaComputerIS4, isect & 8)
+				indicatorSet(top.iaComputerA1, loc & 1)
+				indicatorSet(top.iaComputerA2, loc & 2)
+				indicatorSet(top.iaComputerA3, loc & 4)
+				indicatorSet(top.iaComputerA4, loc & 8)
+				indicatorSet(top.iaComputerA5, loc & 16)
+				indicatorSet(top.iaComputerA6, loc & 32)
+				indicatorSet(top.iaComputerA7, loc & 64)
+				indicatorSet(top.iaComputerA8, loc & 128)
+				if channel == 0o003:
+					dcDisplayCount |= 2
+			if channel == 0o603:
+				indicatorSet(top.iaCommandM0, not im)
+				indicatorSet(top.iaCommandM1, im)
+				indicatorSet(top.iaCommandSYL0, not s)
+				indicatorSet(top.iaCommandSYL1, s)
+				indicatorSet(top.iaCommandIS1, isect & 1)
+				indicatorSet(top.iaCommandIS2, isect & 2)
+				indicatorSet(top.iaCommandIS3, isect & 4)
+				indicatorSet(top.iaCommandIS4, isect & 8)
+				indicatorSet(top.iaCommandA1, loc & 1)
+				indicatorSet(top.iaCommandA2, loc & 2)
+				indicatorSet(top.iaCommandA3, loc & 4)
+				indicatorSet(top.iaCommandA4, loc & 8)
+				indicatorSet(top.iaCommandA5, loc & 16)
+				indicatorSet(top.iaCommandA6, loc & 32)
+				indicatorSet(top.iaCommandA7, loc & 64)
+				indicatorSet(top.iaCommandA8, loc & 128)
 		elif channel == 0o004 or channel == 0o601:
 			parity0 = oddParity13(value)
 			parity1 = oddParity13(value >> 13)
-			indicatorSet(top.mlddComputerBR0, parity0)
-			indicatorSet(top.mlddComputerBR1, parity1)
-			indicatorSet(top.mlddComputer25, value & 0o1)
-			indicatorSet(top.mlddComputer24, value & 0o2)
-			indicatorSet(top.mlddComputer23, value & 0o4)
-			indicatorSet(top.mlddComputer22, value & 0o10)
-			indicatorSet(top.mlddComputer21, value & 0o20)
-			indicatorSet(top.mlddComputer20, value & 0o40)
-			indicatorSet(top.mlddComputer19, value & 0o100)
-			indicatorSet(top.mlddComputer18, value & 0o200)
-			indicatorSet(top.mlddComputer17, value & 0o400)
-			indicatorSet(top.mlddComputer16, value & 0o1000)
-			indicatorSet(top.mlddComputer15, value & 0o2000)
-			indicatorSet(top.mlddComputer14, value & 0o4000)
-			indicatorSet(top.mlddComputer13, value & 0o10000)
-			indicatorSet(top.mlddComputer12, value & 0o20000)
-			indicatorSet(top.mlddComputer11, value & 0o40000)
-			indicatorSet(top.mlddComputer10, value & 0o100000)
-			indicatorSet(top.mlddComputer9, value & 0o200000)
-			indicatorSet(top.mlddComputer8, value & 0o400000)
-			indicatorSet(top.mlddComputer7, value & 0o1000000)
-			indicatorSet(top.mlddComputer6, value & 0o2000000)
-			indicatorSet(top.mlddComputer5, value & 0o4000000)
-			indicatorSet(top.mlddComputer4, value & 0o10000000)
-			indicatorSet(top.mlddComputer3, value & 0o20000000)
-			indicatorSet(top.mlddComputer2, value & 0o40000000)
-			indicatorSet(top.mlddComputer1, value & 0o100000000)
-			indicatorSet(top.mlddComputerSIGN, value & 0o200000000)
+			if not (channel == 0o004 and (dcDisplayCount & 4) != 0 and modeControl == 3):
+				indicatorSet(top.mlddComputerBR0, parity0)
+				indicatorSet(top.mlddComputerBR1, parity1)
+				indicatorSet(top.mlddComputer25, value & 0o1)
+				indicatorSet(top.mlddComputer24, value & 0o2)
+				indicatorSet(top.mlddComputer23, value & 0o4)
+				indicatorSet(top.mlddComputer22, value & 0o10)
+				indicatorSet(top.mlddComputer21, value & 0o20)
+				indicatorSet(top.mlddComputer20, value & 0o40)
+				indicatorSet(top.mlddComputer19, value & 0o100)
+				indicatorSet(top.mlddComputer18, value & 0o200)
+				indicatorSet(top.mlddComputer17, value & 0o400)
+				indicatorSet(top.mlddComputer16, value & 0o1000)
+				indicatorSet(top.mlddComputer15, value & 0o2000)
+				indicatorSet(top.mlddComputer14, value & 0o4000)
+				indicatorSet(top.mlddComputer13, value & 0o10000)
+				indicatorSet(top.mlddComputer12, value & 0o20000)
+				indicatorSet(top.mlddComputer11, value & 0o40000)
+				indicatorSet(top.mlddComputer10, value & 0o100000)
+				indicatorSet(top.mlddComputer9, value & 0o200000)
+				indicatorSet(top.mlddComputer8, value & 0o400000)
+				indicatorSet(top.mlddComputer7, value & 0o1000000)
+				indicatorSet(top.mlddComputer6, value & 0o2000000)
+				indicatorSet(top.mlddComputer5, value & 0o4000000)
+				indicatorSet(top.mlddComputer4, value & 0o10000000)
+				indicatorSet(top.mlddComputer3, value & 0o20000000)
+				indicatorSet(top.mlddComputer2, value & 0o40000000)
+				indicatorSet(top.mlddComputer1, value & 0o100000000)
+				indicatorSet(top.mlddComputerSIGN, value & 0o200000000)
+				if channel == 0o004:
+					dcDisplayCount |= 4
+			if channel == 0o601:
+				indicatorSet(top.mlddCommandSYL0, parity0)
+				indicatorSet(top.mlddCommandSYL1, parity1)
+				indicatorSet(top.mlddCommand25, value & 0o1)
+				indicatorSet(top.mlddCommand24, value & 0o2)
+				indicatorSet(top.mlddCommand23, value & 0o4)
+				indicatorSet(top.mlddCommand22, value & 0o10)
+				indicatorSet(top.mlddCommand21, value & 0o20)
+				indicatorSet(top.mlddCommand20, value & 0o40)
+				indicatorSet(top.mlddCommand19, value & 0o100)
+				indicatorSet(top.mlddCommand18, value & 0o200)
+				indicatorSet(top.mlddCommand17, value & 0o400)
+				indicatorSet(top.mlddCommand16, value & 0o1000)
+				indicatorSet(top.mlddCommand15, value & 0o2000)
+				indicatorSet(top.mlddCommand14, value & 0o4000)
+				indicatorSet(top.mlddCommand13, value & 0o10000)
+				indicatorSet(top.mlddCommand12, value & 0o20000)
+				indicatorSet(top.mlddCommand11, value & 0o40000)
+				indicatorSet(top.mlddCommand10, value & 0o100000)
+				indicatorSet(top.mlddCommand9, value & 0o200000)
+				indicatorSet(top.mlddCommand8, value & 0o400000)
+				indicatorSet(top.mlddCommand7, value & 0o1000000)
+				indicatorSet(top.mlddCommand6, value & 0o2000000)
+				indicatorSet(top.mlddCommand5, value & 0o4000000)
+				indicatorSet(top.mlddCommand4, value & 0o10000000)
+				indicatorSet(top.mlddCommand3, value & 0o20000000)
+				indicatorSet(top.mlddCommand2, value & 0o40000000)
+				indicatorSet(top.mlddCommand1, value & 0o100000000)
+				indicatorSet(top.mlddCommandSIGN, value & 0o200000000)
+		elif channel == 0o005:
+			displaySelect = (value >> 4) & 3
+			addressCompare = ((value >> 3) & 1) != 0
+			modeControl = value & 7;
+			repeat = (value >> 6) & 1
+			cst = (value >> 7) & 1
+			manCst = (value >> 8) & 1
+			ml = (value >> 9) & 1
+			#print("\n%d %d %d" % (displaySelect, addressCompare, modeControl))
+			ProcessorDisplayPanel_support.displaySelect.set(displaySelect)
+			ProcessorDisplayPanel_support.modeControl.set(modeControl)
+			indicatorSet(top.acINS, not addressCompare)
+			indicatorSet(top.acDATA, addressCompare)
+			indicatorSet(top.mlREPEAT, repeat)
+			indicatorSet(top.mlREPEAT_INVERSE, not repeat)
+			indicatorSet(top.CST, cst)
+			indicatorSet(top.MAN_CST, manCst)
+			indicatorSet(top.trmcML, ml)
+			indicatorSet(top.trmcDD, not ml)
 		elif channel == 0o600:
 			pass
+		elif channel == 0o604:
+			ProcessorDisplayPanel_support.bPRA25.set((value >> 0) & 1)
+			ProcessorDisplayPanel_support.bPRA24.set((value >> 1) & 1)
+			ProcessorDisplayPanel_support.bPRA23.set((value >> 2) & 1)
+			ProcessorDisplayPanel_support.bPRA22.set((value >> 3) & 1)
+			ProcessorDisplayPanel_support.bPRA21.set((value >> 4) & 1)
+			ProcessorDisplayPanel_support.bPRA20.set((value >> 5) & 1)
+			ProcessorDisplayPanel_support.bPRA19.set((value >> 6) & 1)
+			ProcessorDisplayPanel_support.bPRA18.set((value >> 7) & 1)
+			ProcessorDisplayPanel_support.bPRA17.set((value >> 8) & 1)
+			ProcessorDisplayPanel_support.bPRA16.set((value >> 9) & 1)
+			ProcessorDisplayPanel_support.bPRA15.set((value >> 10) & 1)
+			ProcessorDisplayPanel_support.bPRA14.set((value >> 11) & 1)
+			ProcessorDisplayPanel_support.bPRA13.set((value >> 12) & 1)
+			ProcessorDisplayPanel_support.bPRA12.set((value >> 13) & 1)
+			ProcessorDisplayPanel_support.bPRA11.set((value >> 14) & 1)
+			ProcessorDisplayPanel_support.bPRA10.set((value >> 15) & 1)
+			ProcessorDisplayPanel_support.bPRA9.set((value >> 16) & 1)
+			ProcessorDisplayPanel_support.bPRA8.set((value >> 17) & 1)
+			ProcessorDisplayPanel_support.bPRA7.set((value >> 18) & 1)
+			ProcessorDisplayPanel_support.bPRA6.set((value >> 19) & 1)
+			ProcessorDisplayPanel_support.bPRA5.set((value >> 20) & 1)
+			ProcessorDisplayPanel_support.bPRA4.set((value >> 21) & 1)
+			ProcessorDisplayPanel_support.bPRA3.set((value >> 22) & 1)
+			ProcessorDisplayPanel_support.bPRA2.set((value >> 23) & 1)
+			ProcessorDisplayPanel_support.bPRA1.set((value >> 24) & 1)
+			ProcessorDisplayPanel_support.bPRAS.set((value >> 25) & 1)
+		elif channel == 0o605:
+			ProcessorDisplayPanel_support.bPRB25.set((value >> 0) & 1)
+			ProcessorDisplayPanel_support.bPRB24.set((value >> 1) & 1)
+			ProcessorDisplayPanel_support.bPRB23.set((value >> 2) & 1)
+			ProcessorDisplayPanel_support.bPRB22.set((value >> 3) & 1)
+			ProcessorDisplayPanel_support.bPRB21.set((value >> 4) & 1)
+			ProcessorDisplayPanel_support.bPRB20.set((value >> 5) & 1)
+			ProcessorDisplayPanel_support.bPRB19.set((value >> 6) & 1)
+			ProcessorDisplayPanel_support.bPRB18.set((value >> 7) & 1)
+			ProcessorDisplayPanel_support.bPRB17.set((value >> 8) & 1)
+			ProcessorDisplayPanel_support.bPRB16.set((value >> 9) & 1)
+			ProcessorDisplayPanel_support.bPRB15.set((value >> 10) & 1)
+			ProcessorDisplayPanel_support.bPRB14.set((value >> 11) & 1)
+			ProcessorDisplayPanel_support.bPRB13.set((value >> 12) & 1)
+			ProcessorDisplayPanel_support.bPRB12.set((value >> 13) & 1)
+			ProcessorDisplayPanel_support.bPRB11.set((value >> 14) & 1)
+			ProcessorDisplayPanel_support.bPRB10.set((value >> 15) & 1)
+			ProcessorDisplayPanel_support.bPRB9.set((value >> 16) & 1)
+			ProcessorDisplayPanel_support.bPRB8.set((value >> 17) & 1)
+			ProcessorDisplayPanel_support.bPRB7.set((value >> 18) & 1)
+			ProcessorDisplayPanel_support.bPRB6.set((value >> 19) & 1)
+			ProcessorDisplayPanel_support.bPRB5.set((value >> 20) & 1)
+			ProcessorDisplayPanel_support.bPRB4.set((value >> 21) & 1)
+			ProcessorDisplayPanel_support.bPRB3.set((value >> 22) & 1)
+			ProcessorDisplayPanel_support.bPRB2.set((value >> 23) & 1)
+			ProcessorDisplayPanel_support.bPRB1.set((value >> 24) & 1)
+			ProcessorDisplayPanel_support.bPRBS.set((value >> 25) & 1)
 		else:
 			print("\nCPU status %03o %09o" % (channel, value))
 	else:
@@ -944,40 +1135,49 @@ def outputFromCPU(ioType, channel, value):
 def pressedPROG_ERR(event):
 	indicatorOn(top.PROG_ERR)
 
-displaySelect = 0
-modeControl = 0
-addressCompare = 0
-def changeDisplayMode(newDisplaySelect, newModeControl, newAddressCompare):
-	global displaySelect, modeControl, addressCompare
+dcDisplayCount = 0
+def changeDisplayMode(newDisplaySelect, newModeControl, newAddressCompare, other=False):
+	global displaySelect, modeControl, addressCompare, displayModePayload, dcDisplayCount
 	changed = False
-	if displaySelect != newDisplaySelect:
-		print("Display select changed from %d to %d" % (displaySelect, newDisplaySelect))
-		displaySelect = newDisplaySelect
+	if other:
 		changed = True
-	if modeControl != newModeControl:
-		print("Mode control changed from %d to %d" % (modeControl, newModeControl))
-		modeControl = newModeControl
-		changed = True
-	if addressCompare != newAddressCompare:
-		print("Address compare changed from %d to %d" % (addressCompare, newAddressCompare))
-		addressCompare = newAddressCompare
-		if addressCompare:
-			indicatorOn(top.acINS)
-			indicatorOff(top.acDATA)
-		else:
-			indicatorOn(top.acDATA)
-			indicatorOff(top.acINS)
-		changed = True
+	else:
+		if displaySelect != newDisplaySelect:
+			print("Display select changed from %d to %d" % (displaySelect, newDisplaySelect))
+			displaySelect = newDisplaySelect
+			changed = True
+		if modeControl != newModeControl:
+			print("Mode control changed from %d to %d" % (modeControl, newModeControl))
+			modeControl = newModeControl
+			changed = True
+			dcDisplayCount = 0
+		if addressCompare != newAddressCompare:
+			print("Address compare changed from %d to %d" % (addressCompare, newAddressCompare))
+			addressCompare = newAddressCompare
+			indicatorSet(top.acINS, not addressCompare)
+			indicatorSet(top.acDATA, addressCompare)
+			changed = True
+			dcDisplayCount = 0
 	if changed:
-		pass
+		displayModePayload = (displaySelect & 3) << 4
+		if addressCompare:
+			displayModePayload |= 1 << 3
+		displayModePayload |= modeControl & 7
+		if top.mlREPEAT.itemcget(1, "state") == "normal":
+			displayModePayload |= 1 << 6
+		if top.CST.itemcget(1, "state") == "normal":
+			displayModePayload |= 1 << 7
+		if top.MAN_CST.itemcget(1, "state") == "normal":
+			displayModePayload |= 1 << 8
+		if top.trmcML.itemcget(1, "state") == "normal":
+			displayModePayload |= 1 << 9
+		
 def eventDisplaySelect():
 	changeDisplayMode(ProcessorDisplayPanel_support.displaySelect.get(), modeControl, addressCompare)
 def eventModeControl():
 	changeDisplayMode(displaySelect, ProcessorDisplayPanel_support.modeControl.get(), addressCompare)
-def eventAddressCompareData(event):
-	changeDisplayMode(displaySelect, modeControl, 0)
-def eventAddressCompareIns(event):
-	changeDisplayMode(displaySelect, modeControl, 1)
+def eventAddressCompareInsData(event):
+	changeDisplayMode(displaySelect, modeControl, not addressCompare)
 ProcessorDisplayPanel_support.eventDisplaySelect = eventDisplaySelect
 ProcessorDisplayPanel_support.eventModeControl = eventModeControl
 
@@ -1510,8 +1710,8 @@ indicatorInitialize(top.ceLAMP_TEST, "LAMP\nTEST", PANEL_CE)
 # Callback bindings for indicators which are also pushbuttons.
 top.PROG_ERR.bind("<Button-1>", pressedPROG_ERR)
 top.PROG_ERR.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
-top.acINS.bind("<Button-1>", eventAddressCompareIns)
-top.acDATA.bind("<Button-1>", eventAddressCompareData)
+top.acINS.bind("<Button-1>", eventAddressCompareInsData)
+top.acDATA.bind("<Button-1>", eventAddressCompareInsData)
 top.pdpLAMP_TEST.bind("<Button-1>", eventPdpLampTest)
 top.pdpLAMP_TEST.bind("<ButtonRelease-1>", eventPdpLampTestRelease)
 top.mlddLAMP_TEST.bind("<Button-1>", eventMlddLampTest)
@@ -1520,6 +1720,10 @@ top.ceLAMP_TEST.bind("<Button-1>", eventCeLampTest)
 top.ceLAMP_TEST.bind("<ButtonRelease-1>", eventCeLampTestRelease)
 top.trmcERROR_DEVICES_TEST.bind("<Button-1>", eventTrmcErrorDevicesTest)
 top.trmcERROR_DEVICES_TEST.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.CST.bind("<Button-1>", eventToggleIndicatorChange)
+top.MAN_CST.bind("<Button-1>", eventToggleIndicatorChange)
+top.ADVANCE.bind("<Button-1>", eventAdvance)
+top.ADVANCE.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.RESET_MACHINE.bind("<Button-1>", eventResetMachine)
 top.RESET_MACHINE.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.HALT.bind("<Button-1>", eventHalt)
@@ -1527,7 +1731,7 @@ top.HALT.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.ERROR_RESET.bind("<Button-1>", eventErrorReset)
 top.ERROR_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.mlREPEAT.bind("<Button-1>", eventRepeat)
-top.mlREPEAT_INVERSE.bind("<Button-1>", eventRepeatInverse)
+top.mlREPEAT_INVERSE.bind("<Button-1>", eventRepeat)
 top.mlADDRESS_CMPTR.bind("<Button-1>", eventAddressCmptr)
 top.mlADDRESS_CMPTR.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.mlCOMPTR_DISPLAY_RESET.bind("<Button-1>", eventComptrDisplayReset)
@@ -1577,8 +1781,8 @@ top.daCommandDS1.bind("<Button-1>", updateDaCommand)
 top.daCommandDS2.bind("<Button-1>", updateDaCommand)
 top.daCommandDS3.bind("<Button-1>", updateDaCommand)
 top.daCommandDS4.bind("<Button-1>", updateDaCommand)
-top.daCommandM0.bind("<Button-1>", eventToggleDaCommandM0)
-top.daCommandM1.bind("<Button-1>", eventToggleDaCommandM1)
+top.daCommandM0.bind("<Button-1>", eventToggleDaCommandM01)
+top.daCommandM1.bind("<Button-1>", eventToggleDaCommandM01)
 top.iaCommandA1.bind("<Button-1>", updateIaCommand)
 top.iaCommandA2.bind("<Button-1>", updateIaCommand)
 top.iaCommandA3.bind("<Button-1>", updateIaCommand)
@@ -1591,12 +1795,12 @@ top.iaCommandIS1.bind("<Button-1>", updateIaCommand)
 top.iaCommandIS2.bind("<Button-1>", updateIaCommand)
 top.iaCommandIS3.bind("<Button-1>", updateIaCommand)
 top.iaCommandIS4.bind("<Button-1>", updateIaCommand)
-top.iaCommandSYL1.bind("<Button-1>", eventToggleIaCommandSYL1)
-top.iaCommandSYL0.bind("<Button-1>", eventToggleIaCommandSYL0)
-top.iaCommandM1.bind("<Button-1>", eventToggleIaCommandM1)
-top.iaCommandM0.bind("<Button-1>", eventToggleIaCommandM0)
-top.trmcML.bind("<Button-1>", eventML)
-top.trmcDD.bind("<Button-1>", eventDD)
+top.iaCommandSYL1.bind("<Button-1>", eventToggleIaCommandSYL01)
+top.iaCommandSYL0.bind("<Button-1>", eventToggleIaCommandSYL01)
+top.iaCommandM1.bind("<Button-1>", eventToggleIaCommandM01)
+top.iaCommandM0.bind("<Button-1>", eventToggleIaCommandM01)
+top.trmcML.bind("<Button-1>", eventMlDd)
+top.trmcDD.bind("<Button-1>", eventMlDd)
 
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)

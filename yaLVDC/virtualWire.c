@@ -142,6 +142,25 @@
  *      Channel 004:    A data value for saving to the current data address (set by
  *                      channel 002 above).  The payload is the 26 bits
  *                      of a pattern for comparison to data.
+ *      Channel 005:    Settings from the DISPLAY MODE area of the MLDD, and a
+ *                      few other controls whose states we'd like preserved
+ *                      if it should happen that the front-panel emulation is
+ *                      exited and then restarted during a test procedure:
+ *                      Bits D2,D1,D0   0 = PROG-CYCLE REPEAT
+ *                                      1 = PROG-CYCLE SINGLE STEP
+ *                                      2 = PROG-CYCLE ADR HOLD
+ *                                      3 = DISPLAY SINGLE
+ *                                      4 = DISPLAY REPEAT
+ *                      Bit D3          0 = ADDRESS COMPARE INS
+ *                                      1 = ADDRESS COMPARE DATA
+ *                      Bits D5,D4      0 = NONE
+ *                                      1 = A13 IA
+ *                                      2 = A13 DATA
+ *                                      3 = TRS
+ *                      Bit D6          REPEAT (MLDD MEMORY LOADER area)
+ *                      Bit D7          CST (PD PROGRAM CONTROL area)
+ *                      Bit D8          MAN CST (PD PROGRAM CONTROL area)
+ *                      Bit D9          ML (1) vs DD (0) (TRMC MODE)
  *
  *      Channel 600:    Set the data-comparison mode.  The payload is ignored.
  *      Channel 601:    Set the instruction-comparison mode.  The payload is ignored.
@@ -157,11 +176,14 @@
  *      Channel 002:    Current data address (same format as i/o type 100 channel 002).
  *      Channel 003:    Current instruction address (same format as i/o type 100 channel 003).
  *      Channel 004:    Current data value.
+ *      Channel 005:    Current DISPLAY MODE settings (same format as i/o type 100 channel 005).
  *
  *      Channel 600:    Current accumulator value.
  *      Channel 601:    Current data from the data-address comparison pattern.
  *      Channel 602:    Current data-address comparison pattern.
  *      Channel 603:    Current instruction-address comparison pattern.
+ *      Channel 604:    Last PROG REG A configuration received by CPU.
+ *      Channel 605:    Last PROG REG B configuration received by CPU.
  */
 
 int ServerBaseSocket = -1;
@@ -253,18 +275,24 @@ static int needStatus = 0;
 int
 pendingVirtualWireActivity(void /* int id, int mask */)
 {
-  int i, j, received = 0, ioType = -1, payload, channel;
-  // For a general-purpose function, the following two things would
-  // be function arguments, but for an LVDC server they always have the
+  int i, j, received, ioType, payload, channel;
+  // For a general-purpose function, the following would be a
+  // function argument, but for an LVDC server they always have the
   // same values, so it would be kind of pointless for them to be anything
   // other than constants.
-  int mask = 0377777777;
+  int mask;
+
+  retryStatus: ;
+  received = 0;
+  ioType = -1;
+  mask = 0377777777;
   outPacketSize = 0;
   // Format the output packet.
   if (needStatus || newConnect || panelPause == 2 || panelPause == 4)
     {
       uint16_t instruction = 0;
-      int data = 0, hopd = 0, hop, dataReadback = -1, datapat = -1, inspat = -1;
+      int data = 0, hopd = 0, dataReadback = -1, datapat = -1, inspat = -1;
+      int displayModePayload = -1, progRegA = -1, progRegB = -1;
       hopStructure_t hs =
         { 0 };
       if (!parseHopConstant(state.hop, &hs))
@@ -274,7 +302,6 @@ pendingVirtualWireActivity(void /* int id, int mask */)
             int opcode = instruction & 0x0F;
             int a9 = (instruction >> 4) & 1;
             int a81 = (instruction >> 5) & 0xFF;
-            hop = state.hop;
             hopd = (state.hop & 0377760000) | instruction;
             if ((ptc && (opcode == 01 || opcode == 05)) || opcode == 04
                 || opcode == 010 || opcode == 012 || opcode == 014
@@ -286,11 +313,21 @@ pendingVirtualWireActivity(void /* int id, int mask */)
               fetchData(hs.dm, a9, hs.ds, a81, &data,
                   &dataFromInstructionMemory);
           }
-      if (needStatus == 2)
+      if (needStatus == 3)
+        datapat = panelPatternDataAddress;
+      if (needStatus == 4)
+        inspat = panelPatternInstructionAddress;
+      if (needStatus == 2 || newConnect || needStatus == 5)
         {
           int dm, ds, dloc, residual;
-          inspat = panelPatternInstructionAddress;
-          datapat = panelPatternDataAddress;
+          if (needStatus == 2 || newConnect)
+            {
+              inspat = panelPatternInstructionAddress;
+              datapat = panelPatternDataAddress;
+              displayModePayload = panelDisplayModePlus;
+              progRegA = state.cio[0214];
+              progRegB = state.cio[0220];
+            }
           dataReadback = -1;
           if (panelPatternDataAddress != -1)
             {
@@ -307,11 +344,17 @@ pendingVirtualWireActivity(void /* int id, int mask */)
               dataReadback = state.core[dm][ds][2][dloc];
             }
         }
-      formatPacket(5, (panelPause == 4) ? 001 : 000, 0, 0);
+      formatPacket(5, (panelPause == 0 || panelPause == 4) ? 001 : 000, 0, 0);
+      formatPacket(5, 003, state.hop, 0);
       formatPacket(5, 002, hopd, 0);
-      formatPacket(5, 003, hop, 0);
       formatPacket(5, 004, data, 0);
+      if (displayModePayload != -1)
+        formatPacket(5, 005, displayModePayload, 0);
       formatPacket(5, 0600, state.acc, 0);
+      if (progRegA != -1)
+        formatPacket(5, 0604, progRegA, 0);
+      if (progRegB != -1)
+        formatPacket(5, 0605, progRegB, 0);
       if (inspat != -1)
         formatPacket(5, 0603, inspat, 0);
       if (datapat != -1)
@@ -402,6 +445,15 @@ pendingVirtualWireActivity(void /* int id, int mask */)
         else if (j >= 0 && j < outPacketSize)
           printf("Message to peripheral handle #%d incomplete.\n", i);
       }
+  // The following is just a little trick:  a delay to allow the UI
+  // some time to take care of its business after receiving the data.
+  // Undoubtedly there are better ways of handling this.
+  if (outPacketSize)
+    {
+      void
+      sleepMilliseconds(unsigned Milliseconds);
+      sleepMilliseconds(5);
+    }
 
   // Parse the received data.  All we have to do is to read any
   // inputs and stick them in the global "state" structure, where
@@ -553,9 +605,9 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                           opcode = value && 017;
                           printf(
                               "PTC panel new DATA ADDRESS %o-%02o, OPCODE=%02o, OPERAND=%03o.\n",
-                              dm, ds,
-                              opcode, (residual << 8) | dloc);
+                              dm, ds, opcode, (residual << 8) | dloc);
                           panelPatternDataAddress = value;
+                          needStatus = 3;
                         }
                       else if (channel == 3)
                         {
@@ -564,6 +616,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                               (value >> 25) & 1, (value >> 2) & 017,
                               (value >> 6) & 1, (value >> 7) & 0377);
                           panelPatternInstructionAddress = value;
+                          needStatus = 4;
                         }
                       else if (channel == 4)
                         {
@@ -585,7 +638,33 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                           state.core[dm][ds][2][dloc] = value;
                           state.core[dm][ds][0][dloc] = -1;
                           state.core[dm][ds][1][dloc] = -1;
-                          needStatus = 2;
+                          needStatus = 5;
+                        }
+                      else if (channel == 5)
+                        {
+                          /*
+                           char *dsStrings[] =
+                           { "NONE", "A13 IA", "A13 DATA", "TRS" };
+                           char *acStrings[] =
+                           { "INS", "DATA" };
+                           char *mcStrings[] =
+                           { "PROG-CYCLE REPEAT", "PROG-CYCLE SINGLE-STEP",
+                           "PROG-CYCLE ADR-HOLD", "DISPLAY SINGLE",
+                           "DISPLAY REPEAT" };
+                           */
+                          panelDisplayModePlus = value;
+                          panelModeControl = value & 7;
+                          panelAddressCompare = (value >> 3) & 1;
+                          panelDisplaySelect = (value >> 4) & 3;
+                          if (panelModeControl >= 3)
+                            panelPause = 0;
+                          /*
+                           printf(
+                           "PTC panel:  DISPLAY SELECT = %s, ADDRESS COMPARE = %s, MODE CONTROL = %s\n",
+                           dsStrings[panelDisplaySelect],
+                           acStrings[panelAddressCompare],
+                           mcStrings[panelModeControl]);
+                           */
                         }
                       else if (channel == 0604)
                         {
@@ -628,6 +707,12 @@ pendingVirtualWireActivity(void /* int id, int mask */)
         }
     }
 
+  // If we've gotten to this point and needStatus is non-zero, due to something
+  // received from the panel or (I suppose) other peripherals that requires
+  // informing the panel of the changed status.  We want to take care of this
+  // right away rather than sitting through another potential instruction cycle.
+  if (needStatus)
+    goto retryStatus;
   return (0);
 }
 

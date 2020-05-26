@@ -61,7 +61,11 @@ int panelPause = 0;
 int panelPatternDataAddress = -1;
 int panelPatternInstructionAddress = -1;
 int panelPatternDataValue = -1;
-int panelComparisonModeData = 1;
+#define DEFAULT_PANEL_SETTINGS 064
+int panelDisplayModePlus = DEFAULT_PANEL_SETTINGS;
+int panelDisplaySelect = (DEFAULT_PANEL_SETTINGS >> 4) & 3;
+int panelAddressCompare = (DEFAULT_PANEL_SETTINGS >> 3) & 1;
+int panelModeControl = DEFAULT_PANEL_SETTINGS & 7;
 int cpuIsRunning = 0;
 int cpuCurrentAddressData = -1;
 int cpuCurrentAddressInstruction = -1;
@@ -212,6 +216,8 @@ main(int argc, char *argv[])
         panelPause = 4;
       else if (panelPause == 3)
         panelPause = 2;
+      if (panelPause)
+        runStepN = INT_MAX;
     }
   nextSnapshot = cycleCount + snapshotIntervalCycles;
 
@@ -297,6 +303,7 @@ main(int argc, char *argv[])
         {
           unsigned long targetCycles;
           hopStructure_t hs;
+          int mustGo0 = 0;
 
           // Save a snapshot, if appropriate.
           if (cycleCount >= nextSnapshot)
@@ -447,10 +454,43 @@ main(int argc, char *argv[])
                   cycleCount += cyclesUsed;
                   instructionCount++;
                 }
+              // Check for various PTC-panel-related break conditions here.
+              if (panelPause == 0) // While free-running ...
+                {
+                  // Find an instruction-address-comparison match.
+                  if (panelAddressCompare == 0 && panelPatternInstructionAddress != -1 && ((state.hop ^ panelPatternInstructionAddress) & 0200077774) == 0)
+                    {
+                      printf("Hit instruction-address match.\n");
+                      if (panelModeControl >= 3) // Just send status to the panel emulation and keep going!
+                        panelPause = 4;
+                      else if (panelModeControl >= 1) // Sent status and pause processing.
+                        panelPause = 2;
+                      else // Continue free running, but at address 0.
+                        {
+                          panelPause = 4;
+                          mustGo0 = 1;
+                        }
+                    }
+                }
               if (processInterruptsAndIO())
                 goto done;
               if (panelPause)
-                goto startPanelPause;
+                {
+                  if (mustGo0)
+                    {
+                      // It's unclear here (address/data comparison match found with
+                      // the MODE CONTROL set to PROG CYCLE REPEAT) whether or not:
+                      // a) the instruction address reported to the front panel is
+                      // the one at which the match occurred or whether it's 0-00-000;
+                      // b) whether or not DM-DS gets reset to 0-00.  As far as "a"
+                      // is concerned, neither case reports any new information.
+                      // I've arbitrarily chosen to display the match address.  As far
+                      // as "b" is concerned, I don't see how the PAST program could
+                      // function if DM-DS weren't reset.
+                      state.hop = 0;
+                    }
+                  goto startPanelPause;
+                }
               if (runStepN > 0) // Number of instructions remaining.
                 {
                   // If a key hit at the keyboard, pause the emulation.
