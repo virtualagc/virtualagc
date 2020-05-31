@@ -1,0 +1,496 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <title>The Launch Vehicle Digital Computer</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="author" content="Ron Burkey">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ron Burkey">
+    <script type="text/javascript" src="Header.js"></script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
+document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (PTC) Test Procedures").replace("@SUBTITLE@","LVDC Emulator Validation"))
+</script>
+    <div align="center"> <font size="+1"><i><br>
+          <font size="+2">(This page represents work in progress, and is
+            itself under construction.&nbsp; Don't rely on it very much
+            yet!)</font></i></font><br>
+    </div>
+    <h2>Contents</h2>
+    <ul>
+    </ul>
+    <ul>
+      <li><a href="#Background">Background</a></li>
+      <li><a href="#Setup">One-Time Setup</a><br>
+      </li>
+      <li><a href="#Starting_Up_the_PTC_Emulation">Starting Up the PTC
+          Emulation</a></li>
+      <li><a href="#Familiarization">Familiarization</a></li>
+      <li><a href="#Performing_the_Test_Procedures">Performing the Test
+          Procedures</a></li>
+    </ul>
+    <h2><a name="Background"></a>Background</h2>
+    <p>As explained on <a href="LVDC.html">the Saturn Launch Vehicle
+        Digital Computer (LVDC) page</a>, the LVDC was the digital
+      computer that guided Apollo's Saturn rockets, while other types of
+      computers (principally the Apollo Guidance Computer, or AGC for
+      short) guided the Command Module and Lunar Module.&nbsp; An
+      extensive collection of AGC software survives, for many of the
+      Apollo missions.&nbsp; However, only a tiny amount of LVDC
+      software has become available to us:&nbsp; namely, <i>one</i>
+      LVDC flight program for a proposed but unflown mission known as
+      AS206-RAM.&nbsp; But also, we have the software for something
+      called the PTC ADAPT Self-Test Program ... which for brevity we
+      refer to as the PAST program.&nbsp; The PAST program is the focus
+      of this particular page.<br>
+    </p>
+    <p>The Programmable Test Controller (PTC) was test equipment which
+      contained a slightly-modified LVDC CPU and whose purpose was to
+      test the CPU design as well as to provide debugging capabilities
+      for the software.&nbsp; The PAST program itself, meanwhile, was
+      software that ran on the PTC and consisted primarily of such test
+      procedures.&nbsp; Thus while from the viewpoint of the Apollo era
+      the PTC's CPU was not precisely an LVDC CPU, and the PAST program
+      was not precisely LVDC software, from a viewpoint 55 years later
+      (when I'm writing this), it's much more convenient to think of the
+      PTC is as being an LVDC and the PAST program as being LVDC
+      software.<br>
+    </p>
+    <p>The reason this is significant is that while the Virtual AGC
+      Project is excited to be able to provide LVDC software publicly
+      (to the extent that the U.S. regulatory environment allows us to
+      do so), the main purpose is to provide working software emulations
+      of the original Apollo-era flight computers, including the LVDC,
+      which are capable of accurately running that original flight
+      software.&nbsp; The existence of the original PAST program — even
+      more so that the existence of the original flight programs —
+      advances this goal by helping us to validate the software
+      emulation of the CPU.&nbsp; That's because successfully running a
+      test program in the emulator gives us much more confidence that
+      the emulation works properly than merely running a flight program
+      would.&nbsp; After all, even though a flight program may run, how
+      could we be fully confident that it runs <i>correctly</i>?&nbsp;
+      Whereas the PAST program provides its own pass/fail criteria for
+      correctness, so successfully running the PAST program according to
+      its own internal criteria is a pretty decisive judgement on the
+      correctness of the emulator as well.<br>
+    </p>
+    <h2><a name="Setup"></a>One-Time Setup</h2>
+    The PTC emulator comprises two programs that run on your local
+    computer:&nbsp; the LVDC/PTC CPU emulator and the PTC front-panel
+    emulator.&nbsp; The former is a program which typically has to be
+    built from its source code before being run on your computer, while
+    the latter is a program that is written in the Python language and
+    does not need to be built but does require that Python 3 be
+    installed on your computer.&nbsp; You should consult <a
+      href="LVDC.html#yaLVDC_the_LVDC_CPU_Emulation">the LVDC page</a>
+    for instructions as to how to acquire/build the CPU-emulation
+    software.<br>
+    <br>
+    Additionally, the source code of the PAST program itself needs to be
+    "assembled" into an executable form which can be used by the
+    emulator.&nbsp; You can either do this yourself with <a
+      href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">the
+      instructions on the LVDC page</a>, or else you can use the
+    pre-built version of it that's already available in our software
+    repository.&nbsp; In the discussion that follows, we'll assume the
+    latter since it's automatic without you making any additional
+    effort, but you can adapt the instructions if you choose the former.<br>
+    <br>
+    The net result of all this is that <i>somewhere</i> on your local
+    computer, depending on your choices above, you'll find a folder
+    called "yaLVDC", in which you'll find these files:<br>
+    <ul>
+      <li>yaLVDC (or yaLVDC.exe) —the LVDC/PTC CPU emulator<br>
+      </li>
+      <li>yaPTC.py (and some other *.py files) — the PTC front-panel
+        emulator<br>
+      </li>
+      <li>PAST.tsv, PAST.src, PAST.sym, PAST.listing — the "assembled"
+        form of the PTC ADAPT Self-Test Program.<br>
+      </li>
+    </ul>
+    <h2><a name="Starting_Up_the_PTC_Emulation"></a>Starting Up the PTC
+      Emulation</h2>
+    Assuming you've successfully performed the one-time setup from the
+    preceding section, you can run the emulations like so:<br>
+    <ol>
+      <li>Open up two separate command-line prompts.</li>
+      <li>At each of the command-line prompts, 'cd' to the yaLVDC folder
+        described in the preceding section.</li>
+      <li>At one of the command lines, execute this command:&nbsp; "<tt>./yaLVDC
+
+
+
+
+
+          --ptc --cold-start --run --assembly=PAST</tt>".&nbsp; This
+        starts the LVDC/PTC CPU emulation running the PAST
+        program.&nbsp; At this point, it's just running freely, without
+        any input from the PTC front panel.&nbsp; Don't do anything
+        additionally at this command line (such as hitting a keyboard
+        key), since that would pause the emulation and give you access
+        instead to yaLVDC's native LVDC/PTC debugger.&nbsp; If that
+        happens accidentally, just type the command <tt>PANEL</tt> or <tt>CONTINUE</tt>
+        into yaLVDC's native debugger to resume the emulation.<br>
+      </li>
+      <li>At the second command line, execute this command:&nbsp; "<tt>./yaPTC.py</tt>".&nbsp;
+
+
+
+
+
+        This starts the PTC front-panel emulation.<br>
+      </li>
+    </ol>
+    These two programs talk to each other using what I call "virtual
+    wire".&nbsp; That's a networking system in which yaLVDC is a
+    "server" and yaPTC.py is its client.&nbsp; By default, the
+    assumptions of this system are appropriate for the case of yaLVDC
+    and yaPTC.py running on the same computer as our instructions have
+    implied, but there's nothing to stop you from running them on two
+    entirely separate computers if you find it convenient to do
+    so.&nbsp; Hopefully, a message will appear that says:<br>
+    <blockquote><tt>Connected.</tt><br>
+    </blockquote>
+    <a href="yaPTC-screenshot.png"><img src="yaPTC-screenshot-small.png"
+        title="Click to enlarge" alt="" width="698" height="400"
+        border="2" align="right"></a>At any rate, once started, yaPTC's
+    simulated control panel should then appear, and it will look
+    something like the screenshot to the right (click to enlarge).<br>
+    <br>
+    The interface is graphical, so further interaction with the
+    emulation involves observing whether the emulated indicator lamps
+    turn on or off, clicking on controls representing pushbuttons or
+    toggle switches, etc. All of the numerous black or white rectangular
+    boxes you see in the screenshot are indicator lamps which are white
+    when lit or black when not lit.&nbsp; Some of them, additionally are
+    either momentary or latching pushbuttons that can click with a
+    mouse.<br>
+    <br>
+    For instance, consider the PROG ERR indicator, located approximately
+    midway down at the far right of the interface.&nbsp; It lights up
+    under control of the PAST program, after the program has found an
+    error when running its self-tests.&nbsp; But once the PROG ERR lamp
+    lights, the PTC CPU (and hence the PAST program) has no programmatic
+    way to turn the lamp off.&nbsp; Instead, the PROG ERR indicator is a
+    momentary pushbutton in addition to being an indicator lamp;
+    originally, to reset the PROG ERR lamp (i.e., turn it black), you
+    were supposed to physically press the PROG ERR pushbutton.&nbsp; In
+    the case of the emulation, that means you instead mouse-click PROG
+    ERR on the emulated panel.<br>
+    <br>
+    Both yaLVDC and yaPTC.py have a few additional command-line options
+    that could prove to be of use sometimes.&nbsp; Those for yaLVDC are
+    described on the LVDC page, while those for yaPTC.py are:<br>
+    <ul>
+      <li><tt>--host=<i>IP</i></tt> to select the network host running
+        yaLVDC.&nbsp; By default it's "localhost" (127.0.0.1, the local
+        computer), but if you want to run yaLVDC on a different computer
+        than yaPTC.py, it could be any host name recognized by your
+        computer or any IPv4 address (like 192.168.0.123).<br>
+      </li>
+      <li> <tt>--port=<i>N</i></tt> to select the networking port yaPTC
+        uses to find yaLVDC.&nbsp; The default is 19653.</li>
+      <li><tt>--resize=1</tt> to make the yaPTC window resizable.&nbsp;
+        By default I make it non-resizable, simply because I haven't put
+        in any of the effort needed to make it resize <i>gracefully</i>,
+        and because I personally have lots of display-screen real estate
+        ... but that's of no help to you if you're stuck on a tiny
+        laptop screen, so for whatever it's worth, the option is at
+        least here for you to try it out if need be.</li>
+      <li><tt>--help</tt> to get a full list of available command-line
+        switches.</li>
+    </ul>
+    <h2><a name="Familiarization"></a>Familiarization<br>
+    </h2>
+    <ul>
+    </ul>
+    <p> </p>
+    <p><img src="PTC-familiarization.png" alt="" width="366" hspace="10"
+        height="278" align="left"><a href="IBM-1443-printer.png"><img
+          src="IBM-1443-printer-small.png" alt="" width="317"
+          height="256" border="0" align="right"></a>Before getting into
+      the details of how to work with the PAST program's test procedures
+      in the emulation, you may want to have a little familiarity with
+      the PTC's physical layout.&nbsp; I suppose, in theory, that you
+      could run the self tests entirely from yaLVDC's native debugger
+      without using the PTC's panels and other peripheral devices, but
+      the test procedures are not written in a way that facilitates
+      that, so it would be much harder to do so.&nbsp; And it wouldn't
+      be as fun.<br>
+    </p>
+    <p>The photo to the left gives you an overview of some of the
+      portions of the PTC main console used in the emulation.&nbsp; The
+      Tape Reader and Mode Control Panel, though shown, isn't actually
+      needed by the emulation, since the software is loaded from
+      yaLVDC's command line rather than from a tape drive.&nbsp; The
+      Tape Reader, by the way, accepted a punched tape, not a magnetic
+      tape.&nbsp; One of the test procedures refers specifically to a
+      short paper tape, although perhaps longer mylar tapes may have
+      been used when the PAST program was read.&nbsp; <br>
+    </p>
+    <p>On the other hand, among the items truly needed by the emulation,
+      the C. E. Panel apparently hadn't been installed when the
+      photograph was taken, so our handy caption just points to an empty
+      space.&nbsp; How the C. E. panel fits into the indicated space in
+      the PTC cabinet isn't clear to me, but that's life!&nbsp;
+      Hopefully the photo gives you an idea of the general layout, in
+      spite of its deficiencies.<br>
+    </p>
+    <p>We do know that the printer (photo to the right) was an IBM 1443,
+      and that the plotter was a Calcomp 565. </p>
+    <p>The PTC's typewriter peripheral isn't depicted in any photos I've
+      found, nor have I been able to determine its model number.&nbsp;
+      It printed stuff and had a keyboard, so what more is there to know
+      about its visual appearance, really?&nbsp; I would hazard a guess
+      that it was a modified IBM Selectric Typewriter, for whatever an
+      uninformed guess from me is worth.<br>
+    </p>
+    <p>To run the test procedures in the PAST program, the principal PTC
+      interfaces you have to interact with are the three control panels,
+      which are obviously a bit too small to see in the photo above, so
+      below you'll find a more-detailed representation of those.&nbsp;
+      Clicking on any of them should give you enlarged view.&nbsp; Not
+      everything you see is reproduced in the emulation precisely as-is,
+      because not all of it is relevant to emulation of the PTC's CPU or
+      running the PAST program's self-test procedures.&nbsp; For
+      example, the emulated PTC has no power supplies, so emulating the
+      Power Control area of the Processor Display Panel (bottom of
+      far-right image) would be rather pointless.<br>
+    </p>
+    <table width="100%" cellspacing="10" cellpadding="2">
+      <tbody>
+        <tr>
+          <td width="33%" valign="top" align="center"><i><a
+                href="ptcCEPanel-422.png"><img src="ptcCEPanel-422.png"
+                  title="Click to enlarge" alt="" width="422"
+                  height="729" border="2"></a></i><br>
+          </td>
+          <td width="33%" valign="top" align="center"><a
+              href="ptcMemoryLoadAndDataDisplay-422.png"><img
+                src="ptcMemoryLoadAndDataDisplay-422.png" title="Click
+                to enlarge." alt="" width="422" height="773" border="2"></a><br>
+          </td>
+          <td width="33%" valign="top" align="center"><a
+              href="ptcProcessorDisplayPanel.png"><img
+                src="ptcProcessorDisplayPanel-422.png" title="Click to
+                enlarge." alt="" width="422" height="780" border="2"></a><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    Now, the purposes of all the various controls on these panels may
+    not be obvious to you at first glance, nor is the original PTC
+    documentation very forthcoming about how many of them work.&nbsp; At
+    least, they were not obvious to <i>me</i>.&nbsp; But I'm
+    nevertheless going to resist the temptation of providing a detailed
+    writeup of the individual controls here, because such a description
+    would be even too dry and unreadable even for me ... which as you
+    can tell from the remainder of this website would have to be pretty
+    darn dry and unreadable indeed!&nbsp; And I know this for certain,
+    because I started adding such a writeup, and found I had to remove
+    it immediately afterward in order to retain any semblance of
+    sanity.&nbsp;<img src="smiley.png" alt="" width="16" height="16"> If
+    there's a clamor for such descriptions in the future, I'll try again
+    later to add something helpful along those lines.<br>
+    <br>
+    A couple of brief remarks may be worthwhile, though.&nbsp; On the
+    center panel, normally abbreviated as MLDD, you'll notice that many
+    of the controls appear in pairs, half labeled <tt>COMPUTER</tt> and
+    the other half labeled <tt>COMMAND</tt>.&nbsp; The former are
+    indicator lamps directly reporting the status of the CPU while the
+    latter are combination lamps/pushbuttons which the technician
+    operating the test panel used to configure settings.&nbsp; For
+    example, in the topmost area of the MLDD, the INSTRUCTION address
+    area, the <tt>COMPUTER</tt> lamps tell you the current instruction
+    address at which the CPU is paused, while the <tt>COMMAND</tt>
+    pushbuttons allow you to select a probably-different address, which
+    could subsequently be used as a breakpoint.&nbsp; On the left-hand
+    panel, normally abbreviated as CE — and no, I've found no
+    explanation anywhere of what "C. E." stands for — you'll see an
+    ACCUMULATOR area, which for some reason has 58 indicators even
+    though the <tt>ACC</tt> register as we know it from all of the
+    earlier discussion on this page, has only 26 bits.&nbsp; Or at most
+    28, if you include parity bits.&nbsp; The answer appears to be that
+    while the 26 (28) bits are all you can access from software,
+    internally to the CPU, the accumulator has many more bits, all of
+    which are visible from the PTC front panel.<br>
+    <h2><a name="Performing_the_Test_Procedures"></a>Performing the Test
+      Procedures</h2>
+    At any rate, the test procedures described here are derived from
+    chapter V of <a href="Documents/19730064346_1973064346.pdf">the PTC
+      documentation</a>.&nbsp; <br>
+    <br>
+    The first few calibration procedures and test procedures covered
+    there are of no particular use to us, since they relate to
+    irrelevant hardware characteristics of the PTC itself rather than to
+    its CPU or software.&nbsp; For example, the PTC had physical
+    power-supply circuitry which needed to be adjusted and checked for
+    proper voltage levels.&nbsp; The emulated PTC has no such thing, and
+    therefore obviously requires no calibration or checks.&nbsp; At some
+    point, though, the descriptions of the test procedures begin to
+    mention that they "can not be performed unless the special program
+    has been loaded into the central processor memory".&nbsp; That
+    "special program", of course, is the PTC ADAPT Self-Test Program
+    (PAST program), and it's at <i>that</i> point that the test
+    procedures become interesting to us.&nbsp; <br>
+    <br>
+    To save the trouble of poring through the original PTC
+    documentation, I've cloned the relevant test procedures into a
+    more-convenient form, correcting typos where I saw fit, and
+    providing my own comments as to how the instructions have to be
+    interpreted in order to use them in our emulation.&nbsp; Without
+    further ado, here are those test procedures:<br>
+    <ul>
+      <li><a href="Test%20procedure%20Figure%207-7.html">"Memory loader
+          manual checks".</a>&nbsp; (From Figure 7-7 in the PTC
+        documentation.)<br>
+      </li>
+      <li> "Data display check".&nbsp; (From Figure 7-8 in the PTC
+        documentation.)</li>
+      <li>"Central processor manual checks".&nbsp; (From Figure 7-9 in
+        the PTC documentation.)</li>
+      <li>"Central processor memory automatic checks".&nbsp; (From
+        Figure 7-10 in the PTC documentation.)<br>
+      </li>
+      <li>"Self-test program checks".&nbsp; (From Figure 7-11 in the PTC
+        documentation.) </li>
+    </ul>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <center> <br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+Commons
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          No Rights Reserved License</a></span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2020-05-27.<br>
+          <br>
+          <a href="http://www.ibiblio.org"><img style="border: 0px solid
+              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
+        </font></i> </center>
+    <br>
+  </body>
+</html>
