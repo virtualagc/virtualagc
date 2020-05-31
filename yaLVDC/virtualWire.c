@@ -162,6 +162,7 @@
  *                      Bit D8          MAN CST (PD PROGRAM CONTROL area)
  *                      Bit D9          ML (1) vs DD (0) (TRMC MODE)
  *                      Bit D10         ACC DISPLAY ENABLE (CE ACCUMULATOR area)
+ *                      Bit D11         MEM ADD REG (PD DATA area)
  *      Channel 600:    Set the data-comparison mode.  The payload is ignored.
  *      Channel 601:    Set the instruction-comparison mode.  The payload is ignored.
  *      Channel 602:    Inhibit interrupts.  The payload is the 16-bit mask (aligned
@@ -291,11 +292,14 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   if (needStatus || newConnect || panelPause == 2 || panelPause == 4)
     {
       uint16_t instruction = 0;
-      int data = 0, hopd = 0, dataReadback = -1, datapat = -1, inspat = -1;
+      int data = -1, hop = -1, hopd = -1, dataReadback = -1, datapat = -1,
+          inspat = -1;
       int displayModePayload = -1, progRegA = -1, progRegB = -1;
       hopStructure_t hs =
         { 0 };
-      if (!parseHopConstant(state.hop, &hs))
+      if (needStatus != 3 && needStatus != 4 && needStatus != 5)
+        hop = state.hop;
+      if (hop != -1 && !parseHopConstant(hop, &hs))
         if (!fetchInstruction(hs.im, hs.dm, hs.s, hs.loc, &instruction,
             &instructionFromDataMemory))
           {
@@ -310,8 +314,11 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                 // These are operators whose operands are not variables.
               }
             else if (needStatus != 2)
-              fetchData(hs.dm, a9, hs.ds, a81, &data,
-                  &dataFromInstructionMemory);
+              {
+                if (fetchData(hs.dm, a9, hs.ds, a81, &data,
+                    &dataFromInstructionMemory))
+                  data = 0;
+              }
           }
       if (needStatus == 3)
         datapat = panelPatternDataAddress;
@@ -319,7 +326,6 @@ pendingVirtualWireActivity(void /* int id, int mask */)
         inspat = panelPatternInstructionAddress;
       if (needStatus == 2 || newConnect || needStatus == 5)
         {
-          int dm, ds, dloc, residual;
           if (needStatus == 2 || newConnect)
             {
               inspat = panelPatternInstructionAddress;
@@ -331,23 +337,18 @@ pendingVirtualWireActivity(void /* int id, int mask */)
           dataReadback = -1;
           if (panelPatternDataAddress != -1)
             {
-              dm = (panelPatternDataAddress >> 17) & 1;
-              ds = (panelPatternDataAddress >> 19) & 017;
-              residual = (panelPatternDataAddress >> 4) & 1;
-              dloc = (panelPatternDataAddress >> 5) & 0377;
-              if (residual)
-                {
-                  ds = 017;
-                  if (ptc)
-                    dm = 0;
-                }
-              dataReadback = state.core[dm][ds][2][dloc];
+              if (fetchData(panelPatternDM, 0, panelPatternDS, panelPatternDLOC,
+                  &dataReadback, &dataFromInstructionMemory))
+                dataReadback = 0;
             }
         }
       formatPacket(5, (panelPause == 0 || panelPause == 4) ? 001 : 000, 0, 0);
-      formatPacket(5, 003, state.hop, 0);
-      formatPacket(5, 002, hopd, 0);
-      formatPacket(5, 004, data, 0);
+      if (hop != -1)
+        formatPacket(5, 003, state.hop, 0);
+      if (hopd != -1)
+        formatPacket(5, 002, hopd, 0);
+      if (data != -1)
+        formatPacket(5, 004, data, 0);
       if (displayModePayload != -1)
         formatPacket(5, 005, displayModePayload, 0);
       formatPacket(5, 0600, state.acc, 0);
@@ -597,16 +598,23 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                         }
                       else if (channel == 2)
                         {
-                          int dm, ds, dloc, residual, opcode;
-                          dm = (value >> 17) & 1;
-                          ds = (value >> 19) & 017;
+                          int residual, opcode;
+                          panelPatternDM = (value >> 17) & 1;
+                          panelPatternDS = (value >> 20) & 017;
                           residual = (value >> 4) & 1;
-                          dloc = (value >> 5) & 0377;
-                          opcode = value && 017;
+                          panelPatternDLOC = (value >> 5) & 0377;
+                          opcode = value & 017;
                           printf(
                               "PTC panel new DATA ADDRESS %o-%02o, OPCODE=%02o, OPERAND=%03o.\n",
-                              dm, ds, opcode, (residual << 8) | dloc);
+                              panelPatternDM, panelPatternDS, opcode,
+                              (residual << 8) | panelPatternDLOC);
                           panelPatternDataAddress = value;
+                          if (residual)
+                            {
+                              if (ptc)
+                                panelPatternDM = 0;
+                              panelPatternDS = 017;
+                            }
                           needStatus = 3;
                         }
                       else if (channel == 3)
@@ -620,24 +628,14 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                         }
                       else if (channel == 4)
                         {
-                          int dm, ds, dloc, residual;
                           printf("PTC new DATA %09o.\n", value);
                           panelPatternDataValue = value;
-                          // What we want to do with this now is write the value to memory,
-                          // using our most-recent panelDataAddress to determine where.
-                          dm = (panelPatternDataAddress >> 17) & 1;
-                          ds = (panelPatternDataAddress >> 19) & 017;
-                          residual = (panelPatternDataAddress >> 4) & 1;
-                          dloc = (panelPatternDataAddress >> 5) & 0377;
-                          if (residual)
-                            {
-                              ds = 017;
-                              if (ptc)
-                                dm = 0;
-                            }
-                          state.core[dm][ds][2][dloc] = value;
-                          state.core[dm][ds][0][dloc] = -1;
-                          state.core[dm][ds][1][dloc] = -1;
+                          state.core[panelPatternDM][panelPatternDS][2][panelPatternDLOC] =
+                              value;
+                          state.core[panelPatternDM][panelPatternDS][0][panelPatternDLOC] =
+                              -1;
+                          state.core[panelPatternDM][panelPatternDS][1][panelPatternDLOC] =
+                              -1;
                           needStatus = 5;
                         }
                       else if (channel == 5)
@@ -674,7 +672,9 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                       else if (channel == 0604)
                         {
                           printf("PTC panel requesting reset.\n");
-                          state.restart = 1;
+                          //state.restart = 1;
+                          state.hop = 0;
+                          panelPause = 0;
                         }
                       else if (channel == 0605)
                         {

@@ -118,6 +118,7 @@ addBacktrace(int16_t fromInstruction, int32_t fromWhere, int32_t toWhere,
 // CPU/Panel status/commands.
 extern int panelPause;
 extern int panelPatternDataAddress;
+extern int panelPatternDM, panelPatternDS, panelPatternDLOC;
 extern int panelPatternInstructionAddress;
 extern int panelPatternDataValue;
 extern int panelDisplayModePlus;

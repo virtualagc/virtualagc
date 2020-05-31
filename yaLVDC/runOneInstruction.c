@@ -161,21 +161,30 @@ fetchData(int module, int residual, int sector, int loc, int *data,
       // may be an error (or perhaps not?), but that fetching from a
       // partially-empty location is not, since the LVDC/PTC code
       // is self-modifying, and may need to do that to modify the
-      // code.
+      // code.  But regardless, we can't actually treat it as an
+      // error when operating with the PTC panel, because it's
+      // very disruptive to suddenly drop into the native debugger.
       if (fetch0 == -1 && fetch1 == -1)
         {
           if (!inhibitFetchMessages)
             printf("Fetching data from empty location %o-%02o-%03o\n", module,
                 sector, loc);
-          runStepN = 0;
-          goto done;
+          if (!ptc)
+            {
+              runStepN = 0;
+              goto done;
+            }
+          *data = 0;
         }
-      if (fetch0 == -1)
-        fetch0 = 0;
-      if (fetch1 == -1)
-        fetch1 = 0;
-      *data = (fetch1 << 13) + fetch0;
-      *dataFromInstructionMemory = 1;
+      else
+        {
+          if (fetch0 == -1)
+            fetch0 = 0;
+          if (fetch1 == -1)
+            fetch1 = 0;
+          *data = (fetch1 << 13) + fetch0;
+          *dataFromInstructionMemory = 1;
+        }
     }
 
 #ifdef DEBUG_A_LOT
@@ -467,8 +476,7 @@ runOneInstruction(int *cyclesUsed)
       // larger action is required.
 
       // The following is based on Figure 2-11 in the PTC documentation.
-      if (operand == 0154 || operand == 0204 || operand == 0214
-          || operand == 0220)
+      if (operand == 0154 || operand == 0214 || operand == 0220)
         state.acc = state.cio[operand];
       else
         {
@@ -577,7 +585,8 @@ runOneInstruction(int *cyclesUsed)
             state.pio[operand] = state.acc;
           else // Source is memory.
             {
-              if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand, &fetchedFromMemory, &dataFromInstructionMemory))
+              if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
+                  &fetchedFromMemory, &dataFromInstructionMemory))
                 fetchedFromMemory = 0;
               state.pio[operand] = fetchedFromMemory;
             }

@@ -330,9 +330,9 @@ def indicatorReconfigure(event):
 # an empty rectangular canvas.  We add two elements to the canvas:  a 
 # rectangular block that fills it, and which we can use to adjust the color 
 # by either revealing it or hiding it, and above that, the textual caption.
-PANEL_PDP = 0	# PANEL_XXX is just a constant we use to ID specific panels.
-PANEL_MLDD = 1
-PANEL_CE = 2
+PANEL_PDP = 1	# PANEL_XXX is just a constant we use to ID specific panels.
+PANEL_MLDD = 2
+PANEL_CE = 3
 CC_NONE = 0 # CC_XXX is a constant we use to tell if an indicator is "computer" or "command" or neither.
 CC_COMPUTER = 1
 CC_COMMAND = 2
@@ -411,6 +411,7 @@ def indicatorToggle(canvas):
 
 def startPanelLampTest(panel):
 	for indicator in indicators[panel]:
+		#print(indicator.itemcget(2, "text"))
 		indicators[panel][indicator] = indicator.itemcget(1, "state")
 		indicatorOn(indicator)
 	# The SERIALIZER PARITY BIT has to be lit last (although
@@ -686,7 +687,7 @@ def getCommandedDataAddress():
 
 def autoAddressCmptr():
 	global changedD
-	if top.mlREPEAT.itemcget(1, "state") == "normal":
+	if top.trmcML.itemcget(1, "state") == "normal" and top.mlREPEAT.itemcget(1, "state") == "normal":
 		changedD = getDataCommand()
 		root.after(500, autoAddressCmptr)
 
@@ -698,8 +699,9 @@ def eventRepeat(event):
 
 def eventAddressCmptr(event):
 	global changedD
-	indicatorOn(event.widget)
-	changedD = getDataCommand()
+	if top.trmcML.itemcget(1, "state") == "normal":
+		indicatorOn(event.widget)
+		changedD = getDataCommand()
 
 def eventComptrDisplayReset(event):
 	global needStatusFromCPU
@@ -715,6 +717,7 @@ def eventComptrDisplayReset(event):
 	#indicatorOn(top.mlddPARITY_BIT)
 
 def eventCommandDisplayReset(event):
+	global changedIA, changedDA
 	indicatorOn(event.widget)
 	for indicator in commandIndicators:
 		indicatorOff(indicator)
@@ -723,10 +726,21 @@ def eventCommandDisplayReset(event):
 	indicatorOn(top.iaCommandSYL0)
 	indicatorOn(top.daCommandM0)
 	indicatorOn(top.mlddPARITY_BIT)
+	changedIA = 0
+	changedDA = 0
 
 def eventMlDd(event):
 	indicatorToggle(top.trmcML)
 	indicatorToggle(top.trmcDD)
+	changeDisplayMode(displaySelect, modeControl, addressCompare, other=True)
+
+# Display MEM ADD REG or HOP SAVE REG on PD.
+def displayMarHsr():
+	pass
+def eventMarHsr(event):
+	indicatorToggle(top.pdpMEM_ADD_REG)
+	indicatorToggle(top.pdpHOPSAVE_REG)
+	displayMarHsr()
 	changeDisplayMode(displaySelect, modeControl, addressCompare, other=True)
 
 # This computes an odd-parity bit for the syllable.
@@ -832,6 +846,7 @@ def outputFromCPU(ioType, channel, value):
 		elif channel == 0o204:
 			# Turn indicator lamps on or off.  I think this is actually
 			# the full functionality of CIO-204
+			#print("here %d" % value)
 			if value & 0o1:
 				indicatorOn(top.P1)
 			else:
@@ -937,6 +952,24 @@ def outputFromCPU(ioType, channel, value):
 				if channel == 0o002:
 					dcDisplayCount |= 1
 					indicatorSet(top.daPARITY_BIT, oddParity13(value))
+				if channel == 0o002 and top.pdpMEM_ADD_REG.itemcget(1, "state") == "normal":
+					indicatorSet(top.pdp1, value & 4096)
+					indicatorSet(top.pdp2, value & 2048)
+					indicatorSet(top.pdp3, value & 1024)
+					indicatorSet(top.pdp4, value & 512)
+					indicatorSet(top.pdp5, value & 256)
+					indicatorSet(top.pdp6, value & 128)
+					indicatorSet(top.pdp7, value & 64)
+					indicatorSet(top.pdp8, value & 32)
+					indicatorSet(top.pdp9, value & 16)
+					indicatorSet(top.pdp10, value & 8)
+					indicatorSet(top.pdp11, value & 4)
+					indicatorSet(top.pdp12, value & 2)
+					indicatorSet(top.pdp13, value & 1)
+					indicatorSet(top.pdpOP1, opcode & 1)
+					indicatorSet(top.pdpOP2, opcode & 2)
+					indicatorSet(top.pdpOP3, opcode & 4)
+					indicatorSet(top.pdpOP4, opcode & 8)
 			if channel == 0o602:
 				indicatorSet(top.daCommandM0, not dm)
 				indicatorSet(top.daCommandM1, dm)
@@ -984,6 +1017,30 @@ def outputFromCPU(ioType, channel, value):
 				indicatorSet(top.iaComputerA8, loc & 128)
 				if channel == 0o003:
 					dcDisplayCount |= 2
+				if channel == 0o003 and top.pdpMEM_ADD_REG.itemcget(1, "state") == "normal":
+					indicatorSet(top.pdpIM0, not im)
+					indicatorSet(top.pdpIM1, im)
+					indicatorSet(top.pdpSYL0, not s)
+					indicatorSet(top.pdpSYL1, s)
+					indicatorSet(top.pdpIS1, isect & 1)
+					indicatorSet(top.pdpIS2, isect & 2)
+					indicatorSet(top.pdpIS3, isect & 4)
+					indicatorSet(top.pdpIS4, isect & 8)
+					indicatorSet(top.pdpDM0, not dm)
+					indicatorSet(top.pdpDM1, dm)
+					indicatorSet(top.pdpDS1, ds & 1)
+					indicatorSet(top.pdpDS2, ds & 2)
+					indicatorSet(top.pdpDS3, ds & 4)
+					indicatorSet(top.pdpDS4, ds & 8)
+					indicatorSet(top.pdpA1, loc & 1)
+					indicatorSet(top.pdpA2, loc & 2)
+					indicatorSet(top.pdpA3, loc & 4)
+					indicatorSet(top.pdpA4, loc & 8)
+					indicatorSet(top.pdpA5, loc & 16)
+					indicatorSet(top.pdpA6, loc & 32)
+					indicatorSet(top.pdpA7, loc & 64)
+					indicatorSet(top.pdpA8, loc & 128)
+					indicatorSet(top.pdpA9, 0)
 			if channel == 0o603:
 				indicatorSet(top.iaCommandM0, not im)
 				indicatorSet(top.iaCommandM1, im)
@@ -1073,6 +1130,7 @@ def outputFromCPU(ioType, channel, value):
 			manCst = (value >> 8) & 1
 			ml = (value >> 9) & 1
 			accDisplayEnable = (value >> 10) & 1
+			memAddReg = (value >> 11) & 1
 			#print("\n%d %d %d" % (displaySelect, addressCompare, modeControl))
 			ProcessorDisplayPanel_support.displaySelect.set(displaySelect)
 			ProcessorDisplayPanel_support.modeControl.set(modeControl)
@@ -1085,6 +1143,8 @@ def outputFromCPU(ioType, channel, value):
 			indicatorSet(top.trmcML, ml)
 			indicatorSet(top.trmcDD, not ml)
 			indicatorSet(top.ACC_DISPLAY_ENABLE, accDisplayEnable)
+			indicatorSet(top.pdpMEM_ADD_REG, memAddReg)
+			indicatorSet(top.pdpHOPSAVE_REG, not memAddReg)
 		elif channel == 0o600:
 			print("ACC = %09o" % value)
 			if top.ACC_DISPLAY_ENABLE.itemcget(1, "state") == "normal":
@@ -1216,6 +1276,8 @@ def changeDisplayMode(newDisplaySelect, newModeControl, newAddressCompare, other
 			displayModePayload |= 1 << 9
 		if top.ACC_DISPLAY_ENABLE.itemcget(1, "state") == "normal":
 			displayModePayload |= 1 << 10
+		if top.pdpMEM_ADD_REG.itemcget(1, "state") == "normal":
+			displayModePayload |= 1 << 11
 		
 def eventDisplaySelect():
 	changeDisplayMode(ProcessorDisplayPanel_support.displaySelect.get(), modeControl, addressCompare)
@@ -1413,6 +1475,7 @@ indicatorInitialize(top.pdpA7, "A7", PANEL_PDP)
 indicatorInitialize(top.pdpA8, "A8", PANEL_PDP)
 indicatorInitialize(top.pdpA9, "A9", PANEL_PDP)
 indicatorInitialize(top.pdpMEM_ADD_REG, "MEM\nADD\nREG", PANEL_PDP)
+indicatorOn(top.pdpMEM_ADD_REG)
 indicatorInitialize(top.pdpHOPSAVE_REG, "HOP\nSAVE\nREG", PANEL_PDP)
 indicatorInitialize(top.pdpSYL0, "0", PANEL_PDP)
 indicatorInitialize(top.pdpSYL1, "1", PANEL_PDP)
@@ -1847,6 +1910,8 @@ top.iaCommandM1.bind("<Button-1>", eventToggleIaCommandM01)
 top.iaCommandM0.bind("<Button-1>", eventToggleIaCommandM01)
 top.trmcML.bind("<Button-1>", eventMlDd)
 top.trmcDD.bind("<Button-1>", eventMlDd)
+top.pdpMEM_ADD_REG.bind("<Button-1>", eventMarHsr)
+top.pdpHOPSAVE_REG.bind("<Button-1>", eventMarHsr)
 
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
