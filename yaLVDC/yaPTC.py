@@ -300,7 +300,7 @@ def inputsForCPU():
 
 	if advance:
 		advance = False
-		if modeControl == 2:
+		if modeControl >= 2:
 			returnValue.append((4, 0o001, 0, nomask))
 		elif modeControl == 1:
 			returnValue.append((4, 0o603, 0, nomask))
@@ -764,8 +764,9 @@ def oddParity13(value):
 displaySelect = -1
 modeControl = 0
 addressCompare = False
+crlfCount = 0
 def outputFromCPU(ioType, channel, value):
-	global displaySelect, modeControl, addressCompare, dcDisplayCount
+	global displaySelect, modeControl, addressCompare, dcDisplayCount, crlfCount
 	print("*", end="")
 	
 	if ioType == 0:
@@ -776,20 +777,24 @@ def outputFromCPU(ioType, channel, value):
 		# CIO
 		if channel == 0o114:
 			print("\nSingle step")
-		elif channel == 0o120 or channel == 0o160:
-			if channel == 0o120:
-				destination = "Typewriter"
+		elif channel == 0o120:
+			string = BA8421[(value >> 20) & 0o77]
+			print("\nTypewriter alphanumeric = %09o (%s)" % (value, string), end="  ")
+		elif channel == 0o160:
+			top2 = (value >> 24) & 3
+			bottom4 = (value >> 20) & 3
+			if top2 in [0, 3]:
+				string = "CRLF"
+				if crlfCount == 0:
+					top.PRINTER.insert(tk.END, "\n")
+					crlfCount += 1
 			else:
-				destination = "Printer"
-			string = ""
-			shift = 20
-			while shift >= 0:
-				string += BA8421[(value >> shift) & 0o77]
-				if channel == 0o120:
-					shift = -1
-				else:
-					shift -= 6
-			print("\n%s alphanumeric = %09o (%s)" % (destination, value, string), end="  ")
+				string = "%d space(s)" % bottom4
+				while bottom4 > 0:
+					top.PRINTER.insert(tk.END, " ")
+					bottom4 -= 1
+				crlfCount = 0
+			#print("\nPrinter carriage control = %09o (%s)" % (value, string), end="  ")
 		elif channel == 0o124 or channel == 0o170:
 			if channel == 0o124:
 				destination = "Typewriter"
@@ -911,12 +916,16 @@ def outputFromCPU(ioType, channel, value):
 		if value == 0o77:
 			print("\nChannel PRS = %09o (group mark)" % value, end= "  ")
 		else:
-			shift = 18
+			shift = 20
 			string = ""
 			while shift >= 0:
 				string += BA8421[(value >> shift) & 0o077]
 				shift -= 6
-			print("\nChannel PRS = %09o (%s)" % (value, string), end="  ")
+				break
+			if value & 0o3777777:
+				print("\nChannel PRS = %09o (%s)" % (value, string), end="  ")
+			top.PRINTER.insert(tk.END, string)
+			crlfCount = 0
 	elif ioType == 5:
 		if channel == 0o000:
 			print("\nCPU is paused.")

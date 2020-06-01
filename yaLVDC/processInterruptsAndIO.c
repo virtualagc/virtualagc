@@ -87,7 +87,8 @@ processInterruptsAndIO(void)
   int retVal = 1, channel, payload;
 
   // Intercept operations we *don't* want performed by the
-  // "virtual wire" system.
+  // "virtual wire" system, or that require processing both
+  // locally and in the client peripheral(s).
   if (state.pioChange != -1)
     {
       channel = state.pioChange;
@@ -100,6 +101,23 @@ processInterruptsAndIO(void)
       int remainder, quotient;
       channel = state.cioChange;
       payload = state.cio[channel];
+
+      if (channel == 0240)
+        {
+          // Light the PROG ERR lamp in the client.  Locally, we
+          // must use this info along with the setting of switch 16
+          // of PROG REG A either to pause the processor or else to
+          // continue free run.
+          if ((state.cio[0214] & (1 << 9)) == 0)
+            printf("PROG ERR ... no change in run mode.\n");
+          else
+            {
+              printf("PROG ERR ... pausing CPU.\n");
+              panelPause = 2;
+            }
+          goto doneCIO;
+        }
+
       remainder = channel % 4;
       quotient = channel / 4;
       if (remainder == 0)
