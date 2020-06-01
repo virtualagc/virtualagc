@@ -98,6 +98,47 @@ else:
 	resize = 0
 
 ###################################################################################
+# The separate window implementing the printer peripheral.
+
+class printer:
+	def __init__(self, root):
+		self.root = root
+		self.root.title("PTC PRINTER")
+		self.root.geometry("600x400")
+		self.text = ScrolledText(self.root)
+		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, bordermode='ignore')
+		self.text.configure(background="white")
+		self.text.configure(font="-family {Courier 10 Pitch} -size 8")
+		self.text.configure(insertborderwidth="3")
+		self.text.configure(selectbackground="#c4c4c4")
+		self.text.configure(wrap="none")
+
+###################################################################################
+# The separate window implementing the typewriter peripheral.
+
+class typewriter:
+	def __init__(self, root):
+		self.root = root
+		self.root.title("PTC TYPEWRITER")
+		self.root.geometry("600x400")
+		self.text = ScrolledText(self.root)
+		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, bordermode='ignore')
+		self.text.configure(background="white")
+		self.text.configure(font="-family {Courier 10 Pitch} -size 8")
+		self.text.configure(insertborderwidth="3")
+		self.text.configure(selectbackground="#c4c4c4")
+		self.text.configure(wrap="none")
+
+###################################################################################
+# The separate window implementing the plotter peripheral.
+
+class plotter:
+	def __init__(self, root):
+		self.root = root
+		self.root.title("PTC PLOTTER")
+		self.root.geometry("1024x1024")
+
+###################################################################################
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
 # initialization.  This is the section to customize for specific applications.
 
@@ -786,12 +827,13 @@ def outputFromCPU(ioType, channel, value):
 			if top2 in [0, 3]:
 				string = "CRLF"
 				if crlfCount == 0:
-					top.PRINTER.insert(tk.END, "\n")
+					printerWindow.text.insert(tk.END, "\n")
+					printerWindow.text.see("end")
 					crlfCount += 1
 			else:
 				string = "%d space(s)" % bottom4
 				while bottom4 > 0:
-					top.PRINTER.insert(tk.END, " ")
+					printerWindow.text.insert(tk.END, " ")
 					bottom4 -= 1
 				crlfCount = 0
 			#print("\nPrinter carriage control = %09o (%s)" % (value, string), end="  ")
@@ -924,7 +966,7 @@ def outputFromCPU(ioType, channel, value):
 				break
 			if value & 0o3777777:
 				print("\nChannel PRS = %09o (%s)" % (value, string), end="  ")
-			top.PRINTER.insert(tk.END, string)
+			printerWindow.text.insert(tk.END, string)
 			crlfCount = 0
 	elif ioType == 5:
 		if channel == 0o000:
@@ -1921,6 +1963,22 @@ top.trmcML.bind("<Button-1>", eventMlDd)
 top.trmcDD.bind("<Button-1>", eventMlDd)
 top.pdpMEM_ADD_REG.bind("<Button-1>", eventMarHsr)
 top.pdpHOPSAVE_REG.bind("<Button-1>", eventMarHsr)
+
+# Create the extra windows for the printer, plotter, and typewriter
+# peripherals.
+printerWindow = printer(tk.Toplevel(root))
+typewriterWindow = typewriter(tk.Toplevel(root))
+plotterWindow = plotter(tk.Toplevel(root))
+# Note that the "printer" and "typewriter" classes use a widget of type 
+# ScrolledText, which is not a native tkinter widget, but rather is a
+# class created by the PAGE tool I use to help design the UI.  Unfortunately,
+# PAGE will not define the ScrolledText class (in ProcessorDisplayPanel.py)
+# unless it thinks there's actually a ScrolledText widget in the design,
+# so I trick PAGE by adding a dummy ScrolledText widget (called
+# "dummyScrolledText") just outside the edge of the main maindow, where
+# it's not normally visible.  The following line is to try and insure
+# that it remains invisible.
+top.dummyScrolledText.pack_forget()
 
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
