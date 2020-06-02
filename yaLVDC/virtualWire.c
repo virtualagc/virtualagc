@@ -389,8 +389,8 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   else if (state.prsChange != -1)
     {
       ioType = 2;
-      channel = 0;
-      payload = state.prs;
+      channel = state.prsChange;
+      payload = state.prs[channel];
       state.prsChange = -1;
     }
   if (ioType >= 0)

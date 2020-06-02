@@ -438,8 +438,8 @@ parseInputAddress(char *string, int *module, int *sector, int *syllable,
 {
   char s[256];
 
-  if (!strcasecmp(string, "PRS"))
-    return (atPrs);
+  //if (!strcasecmp(string, "PRS"))
+  //  return (atPrs);
   if (4
       == sscanf(string, "%o-%o-%o-%o%s", module, sector, syllable, location, s))
     return (atCode);
@@ -451,6 +451,8 @@ parseInputAddress(char *string, int *module, int *sector, int *syllable,
         return (atPio);
       else if (!strncasecmp(string, "CIO", 3))
         return (atCio);
+      else if (!strncasecmp(string, "PRS", 3))
+        return (atPrs);
     }
   return (atNone);
 }
@@ -1104,8 +1106,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         printf("      (000-777 octal).\n");
         printf("    * CIO port:  CIO-LLL, where LLL is the port number\n");
         printf("      (000-777 octal).\n");
-        printf("    * PRS port:  Just the literal PRS, since there is only\n");
-        printf("      a single PRS port.\n");
+        printf("    * PRS port:  PRS-LLL, where LLL is the PRS operand number\n");
+        printf("      (000-777 octal).\n");
         printf(" 5. Source line numbers (decimal) come from the input .src\n");
         printf("    file, not from the original .lvdc source-code file.\n");
         printf(" 6. A free-running emulation can be paused by hitting any\n");
@@ -1316,8 +1318,10 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   location++;
                   break;
                 case atPrs:
-                  formatFetchedValue(state.prs, formatType, 1, 2);
-                  printf("PRS: %s\n", formattedFetchedValue);
+                  if (location < 0 || location > 0777)
+                    goto badAddressX;
+                  formatFetchedValue(state.prs[location], formatType, 1, 2);
+                  printf("PRS-%03o: %s\n", location, formattedFetchedValue);
                   break;
                 default:
                   printf("Unrecognized format\n");
@@ -1509,8 +1513,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                 state.cioChange = location;
                 break;
               case atPrs:
-                destinationPointer = &state.prs;
-                state.prsChange = 0;
+                destinationPointer = &state.prs[location];
+                state.prsChange = location;
               default:
                 break;
                 }

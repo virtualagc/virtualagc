@@ -443,7 +443,7 @@ runOneInstruction(int *cyclesUsed)
       // that state.prs has been written to.  The calling code must
       // interrogate these values in between instructions and take whatever
       // larger action is required.
-      int data;
+      int data, location;
       if (residual == 0 || (residual == 1 && operand <= 0373))
         {
           if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
@@ -462,8 +462,9 @@ runOneInstruction(int *cyclesUsed)
         data = state.acc;
       else
         goto done;
-      state.prs = data;
-      state.prsChange = 1;
+      location = operand | (residual << 8);
+      state.prs[location] = data;
+      state.prsChange = location;
     }
   else if (ptc && op == 005)
     {

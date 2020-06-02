@@ -49,18 +49,34 @@
 from ProcessorDisplayPanel import *
 
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
+prsModeBCD = True
 # BA8421 character set in its native encoding.  All of the unprintable
 # characters are replaced by '?', which isn't a legal character anyway.
 # Used only for --ptc.
+unp = '?'
 BA8421 = [
 	' ', '1', '2', '3', '4', '5', '6', '7',
-	'8', '9', '0', '#', '@', '?', '?', '?',
+	'8', '9', '0', '#', '@', unp, unp, unp,
 	'?', '/', 'S', 'T', 'U', 'V', 'W', 'X',
-	'Y', 'Z', '‡', ',', '(', '?', '?', '?',
+	'Y', 'Z', '‡', ',', '(', unp, unp, unp,
 	'-', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-	'Q', 'R', '?', '$', '*', '?', '?', '?',
+	'Q', 'R', unp, '$', '*', unp, unp, unp,
 	'+', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
-	'H', 'I', '?', '.', ')', '?', '?', '?'
+	'H', 'I', '?', '.', ')', unp, unp, unp
+]
+# This table comes from Figure 2-50 in the original PTC documentation and,
+# I guess, represents what the PTC printer physically prints, as opposed
+# to what the printer for the assembly listing prints.  I guess.
+unp = '▯'
+BA8421a = [
+	' ', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', '0', '=', "'", ':', unp, unp,
+	unp, '/', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', '≠', '.', '(', 'ƀ', unp, unp,
+	'-', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', '!', '$', '*', unp, unp, unp,
+	'+', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', '?', '.', ')', unp, unp, unp
 ]
 refreshRate = 1 # Milliseconds
 resizable = 0
@@ -100,15 +116,16 @@ else:
 ###################################################################################
 # The separate window implementing the printer peripheral.
 
+printerFont = "-family {Courier 10 Pitch} -size 9"
 class printer:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC PRINTER")
-		self.root.geometry("600x400")
+		self.root.geometry("720x480")
 		self.text = ScrolledText(self.root)
 		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, bordermode='ignore')
 		self.text.configure(background="white")
-		self.text.configure(font="-family {Courier 10 Pitch} -size 8")
+		self.text.configure(font=printerFont)
 		self.text.configure(insertborderwidth="3")
 		self.text.configure(selectbackground="#c4c4c4")
 		self.text.configure(wrap="none")
@@ -120,11 +137,11 @@ class typewriter:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC TYPEWRITER")
-		self.root.geometry("600x400")
+		self.root.geometry("720x480")
 		self.text = ScrolledText(self.root)
 		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, bordermode='ignore')
 		self.text.configure(background="white")
-		self.text.configure(font="-family {Courier 10 Pitch} -size 8")
+		self.text.configure(font=printerFont)
 		self.text.configure(insertborderwidth="3")
 		self.text.configure(selectbackground="#c4c4c4")
 		self.text.configure(wrap="none")
@@ -808,6 +825,7 @@ addressCompare = False
 crlfCount = 0
 def outputFromCPU(ioType, channel, value):
 	global displaySelect, modeControl, addressCompare, dcDisplayCount, crlfCount
+	global prsModeBCD
 	print("*", end="")
 	
 	if ioType == 0:
@@ -837,37 +855,20 @@ def outputFromCPU(ioType, channel, value):
 					bottom4 -= 1
 				crlfCount = 0
 			#print("\nPrinter carriage control = %09o (%s)" % (value, string), end="  ")
-		elif channel == 0o124 or channel == 0o170:
-			if channel == 0o124:
-				destination = "Typewriter"
-			else:
-				destination = "Printer"
-			string = ""
-			shift = 22
-			while shift >= 0:
-				string += BA8421[(value >> shift) & 0o17]
-				if channel == 0o124:
-					shift = -1
-				else:
-					shift -= 4
-			print("\n%s decimal = %09o (%s)" % (destination, value, string), end="  ")
-		elif channel == 0o130 or channel == 0o164:
-			if channel == 0o130:
-				destination = "Typewriter"
-			else:
-				destination = "Printer"
-			string = ""
-			shift = 23
-			while shift >= 0:
-				character = BA8421[(value >> shift) & 0o07]
-				if character == " ":
-					character = "0"
-				string += character
-				if channel == 0o130:
-					shift = -1
-				else:
-					shift -= 3
-			print("\n%s octal = %09o (%s)" % (destination, value, string), end="  ")
+		elif channel == 0o124:
+			string = BA8421[(value >> 22) & 0o17]
+			print("\nTypewriter decimal = %09o (%s)" % (value, string), end="  ")
+			printerWindow.text.insert(tk.END, string)
+			crlfCount = 0
+		elif channel == 0o164: # Set printer octal mode.
+			prsModeBCD = False
+		elif channel == 0o170: # Set printer BCD mode.
+			prsModeBCD = True
+		elif channel == 0o130:
+			string = chr(ord('0') + ((value >> 23) & 0o07))
+			print("\nTypewriter octal = %09o (%s)" % (value, string), end="  ")
+			printerWindow.text.insert(tk.END, string)
+			crlfCount = 0
 		elif channel == 0o134:
 			if value == 0o200000000:
 				string = "space"
@@ -955,17 +956,14 @@ def outputFromCPU(ioType, channel, value):
 			print("\nChannel CIO-%03o = %09o" % (channel, value), end="  ")
 		
 	elif ioType == 2:
-		if value == 0o77:
-			print("\nChannel PRS = %09o (group mark)" % value, end= "  ")
-		else:
-			shift = 20
-			string = ""
-			while shift >= 0:
-				string += BA8421[(value >> shift) & 0o077]
-				shift -= 6
-				break
-			if value & 0o3777777:
-				print("\nChannel PRS = %09o (%s)" % (value, string), end="  ")
+		if channel == 0o774:
+			print("\nPRS 774 (group mark)", end= "  ")
+		else: # PRS from ACC or memory.
+			#print("\nPRS 775 (%09o)" % value)
+			if prsModeBCD:
+				string = BA8421a[(value >> 20) & 0o077]
+			else:
+				string = chr(ord('0') + ((value >> 23) & 0o07))
 			printerWindow.text.insert(tk.END, string)
 			crlfCount = 0
 	elif ioType == 5:

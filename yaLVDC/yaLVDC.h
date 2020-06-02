@@ -155,7 +155,7 @@ typedef struct
   int32_t core[8][16][3][256];
   int32_t pio[01000];
   int32_t cio[01000]; // PTC only.
-  int32_t prs; // PTC only.
+  int32_t prs[01000]; // PTC only.
   struct
   {
     int pending; // True or False, if last instruction was EXM or not.
