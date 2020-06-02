@@ -148,6 +148,7 @@ enum commandTokens
   ctNEXT,
   ctDELETE,
   ctCONTINUE,
+  ctJUMP,
   ctLIST,
   ctDISASSEMBLE,
   ctX,
@@ -180,10 +181,19 @@ commandAssociation_t commandAssociations[] =
         { ctDELETE, "DELETE", "DELETE", "Delete all breakpoints." },
         { ctDELETE, "DELETE", "DELETE n", "Delete breakpoint n." },
         { ctCONTINUE, "CONTINUE", "CONTINUE", "Continue running emulation." },
-        { ctLIST, "LIST", "LIST", "List following block of source code." },
-        { ctLIST, "LIST", "LIST -", "List preceding block source code." },
-        { ctLIST, "LIST", "LIST [asm:]n", "List source block at line #n." },
-        { ctLIST, "LIST", "LIST [asm:]name", "List source block at function." },
+        { ctJUMP, "JUMP", "JUMP *address M-SS",
+            "Jump to code-memory address and assign DM/DS as M-SS." },
+            { ctJUMP, "JUMP", "JUMP [asm:]name",
+                "Jump. Operand is symbolic name of a HOP constant in data memory." },
+            { ctJUMP, "JUMP", "JUMP [asm:]name M-SS",
+                "Jump to symbol in code memory and assign DM/DS as M-SS." },
+            { ctJUMP, "JUMP", "JUMP octal",
+                "Jump using literal octal HOP constant." },
+            { ctLIST, "LIST", "LIST", "List following block of source code." },
+            { ctLIST, "LIST", "LIST -", "List preceding block source code." },
+            { ctLIST, "LIST", "LIST [asm:]n", "List source block at line #n." },
+            { ctLIST, "LIST", "LIST [asm:]name",
+                "List source block at function." },
             { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE",
                 "Disassemble next LISTSIZE instructions in current HOP environment." },
             { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE - D-TT",
@@ -217,7 +227,8 @@ commandAssociation_t commandAssociations[] =
             { ctSET, "SET", "SET *address = n",
                 "Store value n at memory address." },
             { ctSHOW, "SHOW", "SHOW LISTSIZE", "Show current size for LIST." },
-            { ctPANEL, "PANEL", "PANEL", "Resume full control by PTC front panel." },
+            { ctPANEL, "PANEL", "PANEL",
+                "Resume full control by PTC front panel." },
             { ctHELP, "HELP", "HELP", "Print this list of commands." },
             { ctNone, "" } };
 enum commandTokens
@@ -560,7 +571,8 @@ struct
   int valid;
   int error;
   int im, is, s, loc, dm, ds;
-} disassemblyState = { 0 };
+} disassemblyState =
+  { 0 };
 int
 setupDisassembly(uint32_t hop, hopStructure_t *hs)
 {
@@ -620,7 +632,9 @@ disassemble(void)
       goto error;
     }
 
-  m += sprintf(&lineBuffer[m], "%o-%02o-%o-%03o %o-%02o ", disassemblyState.im, disassemblyState.is, disassemblyState.s, disassemblyState.loc, disassemblyState.dm, disassemblyState.ds);
+  m += sprintf(&lineBuffer[m], "%o-%02o-%o-%03o %o-%02o ", disassemblyState.im,
+      disassemblyState.is, disassemblyState.s, disassemblyState.loc,
+      disassemblyState.dm, disassemblyState.ds);
   if (disassemblyState.loc > 0377)
     {
       m += sprintf(&lineBuffer[m], "(address past end of sector)");
@@ -980,7 +994,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
 
       nextCommand: ;
       if (panelPause)
-        printf("\n*** CPU is paused by PTC panel ... no instructions will execute. ***\n");
+        printf(
+            "\n*** CPU is paused by PTC panel ... no instructions will execute. ***\n");
 
       // Display registers.
       printf("\n HOP = ");
@@ -1023,7 +1038,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       printf(" RET = %s\n", hopBuffer);
       printf("Instructions: %lu", instructionCount);
       printf(", Cycles: %lu", cycleCount);
-      printf(", Elapsed time: %f seconds\n", cycleCount * SECONDS_PER_CYCLE * clockDivisor);
+      printf(", Elapsed time: %f seconds\n",
+          cycleCount * SECONDS_PER_CYCLE * clockDivisor);
       if (found)
         {
           printf("Source line: ");
@@ -1043,14 +1059,14 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   value, sourceLine->assembled);
               printf("From source:\t%o-%02o-%o-%03o %o-%02o %05o   %s\n",
                   sourceLine->module, sourceLine->sector, sourceLine->syllable,
-                  sourceLine->loc, sourceLine->dm, sourceLine->ds, sourceLine->assembled,
-                  sourceLine->line);
+                  sourceLine->loc, sourceLine->dm, sourceLine->ds,
+                  sourceLine->assembled, sourceLine->line);
               goto mustDisassemble;
             }
           else
-            printf("%o-%02o-%o-%03o %o-%02o %05o   %s\n",
-                sourceLine->module, sourceLine->sector, sourceLine->syllable,
-                sourceLine->loc, sourceLine->dm, sourceLine->ds, sourceLine->assembled,
+            printf("%o-%02o-%o-%03o %o-%02o %05o   %s\n", sourceLine->module,
+                sourceLine->sector, sourceLine->syllable, sourceLine->loc,
+                sourceLine->dm, sourceLine->ds, sourceLine->assembled,
                 sourceLine->line);
         }
       else
@@ -1106,7 +1122,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         printf("      (000-777 octal).\n");
         printf("    * CIO port:  CIO-LLL, where LLL is the port number\n");
         printf("      (000-777 octal).\n");
-        printf("    * PRS port:  PRS-LLL, where LLL is the PRS operand number\n");
+        printf(
+            "    * PRS port:  PRS-LLL, where LLL is the PRS operand number\n");
         printf("      (000-777 octal).\n");
         printf(" 5. Source line numbers (decimal) come from the input .src\n");
         printf("    file, not from the original .lvdc source-code file.\n");
@@ -1860,6 +1877,9 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   }
               }
           }
+        goto nextCommand;
+      case ctJUMP:
+        printf("Not yet implemented\n");
         goto nextCommand;
       case ctDELETE:
         if (count < 2)
