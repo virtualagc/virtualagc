@@ -3350,8 +3350,36 @@ However,
                 </tbody>
               </table>
             </blockquote>
-            I believe that the data transferred to the printer is often
-            buffered by the <tt>BCI</tt> pseudo-op.<br>
+            See also the discussion of the <tt>BCI</tt> pseudo-op,
+            farther down on this page.&nbsp; (However, I believe that
+            the <tt>BCI</tt> pseudo-op is used for forming strings to
+            be sent to the <i>typewriter</i> peripheral rather than to
+            the <i>printer</i> peripheral targeted by <tt>PRS</tt>,
+            since <tt>BCI</tt> encodes 4 characters per data word,
+            whereas I believe that the printer accepts only a single
+            character in each data word conveyed to it by <tt>PRS</tt>.)<br>
+            <br>
+            Specifically, the operand of the <tt>PRS</tt> instruction,
+            whether sourced from <tt>ACC</tt> or from memory, contains
+            room for several encoded characters, but I believe that in
+            fact it only conveys a single character to the
+            printer.&nbsp; Regarding the nature of that single
+            character, there are two cases:&nbsp; a) if the printer has
+            been put into "octal mode" by a <tt>CIO 164</tt>
+            instruction, then <tt>PRS</tt> holds only 3 bits, aligned
+            at the most-significant end of the data word, representing a
+            single octal digit; or b) if the printer has been put into
+            "BCD mode" by a <tt>CIO 170</tt> instruction, then <tt>PRS</tt>
+            holds only 6 bits, representing a single BA8421-encoded
+            character.&nbsp; The BA8421 encoding scheme is covered in
+            the discussion of the <tt>BCI</tt> pseudo-op, though there
+            are various minor discrepancies in terms of which "special"
+            (i.e., non-alphanumeric) characters are included, and which
+            specific codes are associated with them.&nbsp; In any case,
+            the term "BCD mode" is a misnomer, in modern terms, since it
+            would seem to imply that it covers only Binary Coded
+            Decimals, whereas in fact it covers the complete repertoire
+            of printable characters.<br>
             <br>
             In assembly language, the operand of the instruction is
             always a literal 3-digit octal number or else a symbolic
@@ -8569,14 +8597,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>164</b><br>
           </td>
-          <td valign="middle" align="left">Outputs octal data to the
-            printer.&nbsp; The data (taken from ACC) contains 8 packed
-            characters encoded in 3-bit "421" — i.e., using only the
-            lowest 8 characters of BA8421.&nbsp; This happens to include
-            all octal digits, with a space character (at code 00) rather
-            than any '0' character, so I imagine that it actually types
-            a 0 when the code specifies a space.&nbsp; The first
-            character is aligned at the most-significant (SIGN) bit. </td>
+          <td valign="middle" align="left">Sets the printer to "octal"
+            mode.&nbsp; In octal mode, 8 octal digits are encoded in <tt>PRS</tt>-instruction
+            data.<br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" align="center">165<br>
@@ -8593,13 +8617,12 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center"><b>170</b><br>
           </td>
-          <td valign="middle" align="left">Outputs decimal data to the
-            printer.&nbsp; The data (taken from ACC) contains 6 packed
-            characters encoded in 4-bit "8421" — i.e., using only the
-            lowest 16 characters of BA8421.&nbsp; This happens to
-            include all decimal digits, plus 6 other characters (space
-            and so on).&nbsp; The first character is aligned at the
-            most-significant (SIGN) bit. </td>
+          <td valign="middle" align="left">Sets the printer in "BCD"
+            mode.&nbsp; I think this is a misnomer, in that rather than
+            being a Binary Coded Decimal mode, it is actually a mode in
+            which 4 full characters (encoded in BA8421) are contained in
+            each <tt>PRS</tt>-instruction.<br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" align="center">171<br>
@@ -8679,12 +8702,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
             controlled by positions 25, 24, 23, 22, 21, and 20 of the
             accumulator data word.&nbsp; I believe these are the same
             bits which can be read back with <tt>CIO 214</tt> (bits
-            22-17).<br>
+            22-17).&nbsp; <br>
             <br>
             I'm not certain, but I think they may also light the lamps
             labeled D6 through D1 on the PTC's Processor Display Panel
-            depicted to the right (click to enlarge).<br>
-            <br>
+            depicted to the right (click to enlarge).&nbsp; Furthermore,
+            comments in the PAST program source code imply that the
+            lamps may sometimes have the following interpretations,
+            though perhaps these interpretations are merely
+            software-related:<br>
+            <ul>
+              <li>D1: PROCESSOR RELEASE</li>
+              <li>D2: PARITY ERROR</li>
+              <li>D3: CARR BUSY</li>
+            </ul>
             See also <tt>PIO 210</tt> in the preceding section.<br>
           </td>
         </tr>
@@ -10986,12 +11017,19 @@ Assembly
           <td valign="top">This pseudo-op appears only in PTC code.<br>
             <br>
             This pseudo-op encodes the <i><tt>text</tt></i> argument
-            into consecutive memory locations.&nbsp; The <i><tt>text</tt></i>
-            operand is delimited by a leading '^' and trailing '$',
-            which are not themselves encoded into memory.&nbsp; The
-            assembler right-pads the <i><tt>text</tt></i>, if
-            necessary, until it is a multiple of 4 characters ending in
-            at least 2 spaces. <br>
+            into consecutive memory locations.&nbsp; I believe that it
+            is used for preparing messages that are printed on the PTC's
+            <i>typewriter</i> peripheral.&nbsp; The typewriter is not to
+            be confused with the PTC's <i>printer</i> peripheral, which
+            also prints, and which also uses characters encoded in a
+            similar but not identical way.&nbsp; In other words, the <tt>BCI</tt>
+            pseudo-op is not used for preparing printer strings.<br>
+            <br>
+            The <i><tt>text</tt></i> operand is delimited by a leading
+            '^' and trailing '$', which are not themselves encoded into
+            memory.&nbsp; The assembler right-pads the <i><tt>text</tt></i>,
+            if necessary, until it is a multiple of 4 characters ending
+            in at least 2 spaces. <br>
             <br>
             <b>Note</b>:&nbsp; The leading carat character (<tt>^</tt>)
             in <tt><i>text</i></tt> was not used in the original
@@ -11258,15 +11296,40 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
               match the BA8421 encoding from wikipedia for some reason,
               so the table above has been doctored to match the
               assembler.&nbsp; The gray-background codes are
-              non-printable.&nbsp; I googled some of weirder characters,
-              since it wasn't obvious why they would be included in such
-              a limited repertoire of symbols, and unexpectedly got some
+              non-printable, and the emulation displays them as '
+              <meta http-equiv="content-type" content="text/html;
+                charset=UTF-8">
+              <span style="color: rgb(51, 51, 51); font-family:
+                &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;,
+                Helvetica, Arial, sans-serif; font-size: 14px;
+                font-style: normal; font-variant-ligatures: normal;
+                font-variant-caps: normal; font-weight: 400;
+                letter-spacing: normal; orphans: 2; text-align: left;
+                text-indent: 0px; text-transform: none; white-space:
+                normal; widows: 2; word-spacing: 0px;
+                -webkit-text-stroke-width: 0px; background-color:
+                rgb(255, 255, 255); text-decoration-style: initial;
+                text-decoration-color: initial; display: inline
+                !important; float: none;">▯</span>' when printed (for
+              example, using a <tt>PRS</tt> instruction).&nbsp; I
+              googled some of weirder characters, since it wasn't
+              obvious why they would be included in such a limited
+              repertoire of symbols, and unexpectedly got some
               historical information about them that may actually be
               applicable to their usage in the PTC: </p>
             <ul>
               <li>Code 77, the "group mark" character (a vertical line
                 with three horizontal hashes) was "formerly used as a
-                separator character for i/o operations".</li>
+                separator character for i/o operations".&nbsp; In the
+                case of the original printer, it seems to have been used
+                to flush the printer's internal memory buffer, by
+                physically printing the contents of the buffer and then
+                clearing the buffer.&nbsp; The buffer would normally
+                have been flushed anyway after filling up, so explicitly
+                sending the group mark would only have been necessary at
+                the end of a sequence of characters which may not have
+                completely filled the print buffer.<br>
+              </li>
               <li>Code 74, the "square lozenge" character (a square with
                 concave sides) was "used as a command delimiter in some
                 very old computers".</li>
@@ -11294,7 +11357,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             output assembled octals for the <tt>BCI</tt> pseudo-op uses
             the BA8421 coding scheme.&nbsp; Therefore, only characters
             available simultaneously in both characters are meaningful
-            from input through output of the assembler..<br>
+            from input through output of the assembler.<br>
             <br>
             As far as the octals assembled for <tt>BCI</tt> are
             concerned, each of the memory locations allocated by the
@@ -11382,7 +11445,6 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
               this behavior, but does so if the --past-bugs command-line
               switch is used.<br>
             </p>
-            See also the <tt>PRS</tt> CPU instruction.<br>
           </td>
         </tr>
         <tr>
@@ -14152,7 +14214,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2020-05-27.<br>
+          2020-06-02.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
