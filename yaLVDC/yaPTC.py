@@ -78,6 +78,19 @@ BA8421a = [
 	'+', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
 	'H', 'I', '?', '.', ')', unp, unp, unp
 ]
+# This table comes from Figure 2-53 in the original PTC documentation and,
+# I think, represents what the PTC typewriter physically prints.
+unp = '▯'
+BA8421b = [
+	' ', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', '0', '#', "@", ':', '>', '√',
+	'¢', '/', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', '≠', ',', '%', '=', '\\','⧻',
+	'-', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', '!', '$', '*', ']', ';', 'Δ',
+	'&', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', '?', '.', '⌑', '[', '<', '⯒'
+]
 refreshRate = 1 # Milliseconds
 resizable = 0
 
@@ -128,7 +141,7 @@ class printer:
 		self.text.configure(font=printerFont)
 		self.text.configure(insertborderwidth="3")
 		self.text.configure(selectbackground="#c4c4c4")
-		self.text.configure(wrap="none")
+		self.text.configure(wrap="char")
 
 ###################################################################################
 # The separate window implementing the typewriter peripheral.
@@ -144,7 +157,14 @@ class typewriter:
 		self.text.configure(font=printerFont)
 		self.text.configure(insertborderwidth="3")
 		self.text.configure(selectbackground="#c4c4c4")
-		self.text.configure(wrap="none")
+		self.text.configure(wrap="char")
+		# We want the tab stops to be every 5 characters.  Unfortunately,
+		# the widget we're using does it in terms of distances.  (Plus, 
+		# how to do it is mostly undocumented.)  So ultimately,
+		# we've just chosen some numbers that get us into the right ballpark,
+		# using trial and error.  Plus, it will probably all be different 
+		# on a different computer than mine anyway.
+		self.text.configure(tabs=("0.8919c", "1.7838c"))
 
 ###################################################################################
 # The separate window implementing the plotter peripheral.
@@ -837,8 +857,9 @@ def outputFromCPU(ioType, channel, value):
 		if channel == 0o114:
 			print("\nSingle step")
 		elif channel == 0o120:
-			string = BA8421[(value >> 20) & 0o77]
+			string = BA8421b[(value >> 20) & 0o77]
 			print("\nTypewriter alphanumeric = %09o (%s)" % (value, string), end="  ")
+			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o160:
 			top2 = (value >> 24) & 3
 			bottom4 = (value >> 20) & 3
@@ -856,10 +877,9 @@ def outputFromCPU(ioType, channel, value):
 				crlfCount = 0
 			#print("\nPrinter carriage control = %09o (%s)" % (value, string), end="  ")
 		elif channel == 0o124:
-			string = BA8421[(value >> 22) & 0o17]
+			string = BA8421b[(value >> 22) & 0o17]
 			print("\nTypewriter decimal = %09o (%s)" % (value, string), end="  ")
-			printerWindow.text.insert(tk.END, string)
-			crlfCount = 0
+			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o164: # Set printer octal mode.
 			prsModeBCD = False
 		elif channel == 0o170: # Set printer BCD mode.
@@ -867,24 +887,29 @@ def outputFromCPU(ioType, channel, value):
 		elif channel == 0o130:
 			string = chr(ord('0') + ((value >> 23) & 0o07))
 			print("\nTypewriter octal = %09o (%s)" % (value, string), end="  ")
-			printerWindow.text.insert(tk.END, string)
-			crlfCount = 0
+			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o134:
+			string = ""
 			if value == 0o200000000:
-				string = "space"
+				name = "space"
+				string = " "
 			elif value == 0o100000000:
-				string = "black ribbon"
+				name = "black ribbon"
 			elif value == 0o040000000:
-				string = "red ribbon"
+				name = "red ribbon"
 			elif value == 0o020000000:
-				string = "index"
+				name = "index"
 			elif value == 0o010000000:
-				string = "return"
+				name = "return"
+				string = "\n"
 			elif value == 0o004000000:
-				string = "tab"
+				name = "tab"
+				string = "\t"
 			else:
 				string = "illegal"
-			print("\nTypewriter control = %09o (%s)" % (value, string), end="  ")
+			print("\nTypewriter control = %09o (%s)" % (value, name), end="  ")
+			if string != "":
+				typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o140:
 			print("\nX plot = %09o" % value, end="  ")
 		elif channel == 0o144:
@@ -960,10 +985,18 @@ def outputFromCPU(ioType, channel, value):
 			print("\nPRS 774 (group mark)", end= "  ")
 		else: # PRS from ACC or memory.
 			#print("\nPRS 775 (%09o)" % value)
+			string = ""
 			if prsModeBCD:
-				string = BA8421a[(value >> 20) & 0o077]
+				shift = 20
+				while shift >= 0:
+					string += BA8421a[(value >> shift) & 0o077]
+					shift -= 6
 			else:
-				string = chr(ord('0') + ((value >> 23) & 0o07))
+				shift = 23
+				while shift >= 0:
+					string += chr(ord('0') + ((value >> shift) & 0o07))
+					shift -= 3
+				string += chr(ord('0') + ((value << 1) & 0o07)) + "   "
 			printerWindow.text.insert(tk.END, string)
 			crlfCount = 0
 	elif ioType == 5:

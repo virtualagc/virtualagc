@@ -149,6 +149,7 @@ enum commandTokens
   ctDELETE,
   ctCONTINUE,
   ctJUMP,
+  ctGOTO,
   ctLIST,
   ctDISASSEMBLE,
   ctX,
@@ -182,13 +183,15 @@ commandAssociation_t commandAssociations[] =
         { ctDELETE, "DELETE", "DELETE n", "Delete breakpoint n." },
         { ctCONTINUE, "CONTINUE", "CONTINUE", "Continue running emulation." },
         { ctJUMP, "JUMP", "JUMP *address M-SS",
-            "Jump to code-memory address and assign DM/DS as M-SS." },
+            "Jump to code-memory address and assign DM/DS as M-SS and run." },
             { ctJUMP, "JUMP", "JUMP [asm:]name",
                 "Jump. Operand is symbolic name of a HOP constant in data memory." },
             { ctJUMP, "JUMP", "JUMP [asm:]name M-SS",
                 "Jump to symbol in code memory and assign DM/DS as M-SS." },
             { ctJUMP, "JUMP", "JUMP octal",
                 "Jump using literal octal HOP constant." },
+            { ctGOTO, "GOTO", "GOTO ...",
+                "Same as JUMP, except pause rather than run." },
             { ctLIST, "LIST", "LIST", "List following block of source code." },
             { ctLIST, "LIST", "LIST -", "List preceding block source code." },
             { ctLIST, "LIST", "LIST [asm:]n", "List source block at line #n." },
@@ -1136,6 +1139,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         printf(" 8. For commands like \"SET ... = n\", the number n is hex\n");
         printf("    if it has leading 0x, octal if it merely has leading\n");
         printf("    0, and decimal otherwise.\n");
+        printf(" 9. All data displayed from memory or written to memory does\n");
+        printf("    NOT include parity bits or locations for parity bits.\n");
         goto nextCommand;
       case ctPANEL:
         if (!ptc)
@@ -1879,8 +1884,82 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
           }
         goto nextCommand;
       case ctJUMP:
-        printf("Not yet implemented\n");
-        goto nextCommand;
+      case ctGOTO:
+        {
+          int hop, dm, ds;
+          hopStructure_t hs;
+          char c;
+          symbol_t *symbol = NULL;
+          if (count == 2)
+            {
+              if (1 == sscanf(fields[1], "%o%c", &hop, &c) && hop >= 0
+                  && hop <= 0400000000)
+                goto foundJump;
+              else if (isalpha(fields[1][0]))
+                {
+                  symbol = findSymbol(fields[1], 0);
+                  if (symbol == NULL)
+                    {
+                      printf("Symbol not found in data memory.\n");
+                      goto nextCommand;
+                    }
+                  if (fetchData(symbol->module, 0, symbol->sector, symbol->loc, &hop, &dataFromInstructionMemory))
+                    {
+                      printf("Cannot fetch value of HOP constant from memory.\n");
+                      goto nextCommand;
+                    }
+                  goto foundJump;
+                }
+            }
+          else if (count == 3 && 2 == sscanf(fields[2], "%o-%o%c", &dm, &ds, &c))
+            {
+              if (fields[1][0] == '*')
+                {
+                  int module, sector, syllable, location;
+                  if (4 == sscanf(fields[1], "*%o-%o-%o-%o%c", &module, &sector, &syllable, &location, &c))
+                    {
+                      hs.im = module;
+                      hs.is = sector;
+                      hs.s = syllable;
+                      hs.loc = location;
+                      goto hopDescriptionFound;
+                    }
+                }
+              else if (isalpha(fields[1][0]))
+                {
+                  symbol = findSymbol(fields[1], 1);
+                  if (symbol == NULL)
+                    {
+                      printf("Symbol not found in code memory.\n");
+                      goto nextCommand;
+                    }
+                  hs.im = symbol->module;
+                  hs.is = symbol->sector;
+                  hs.s = symbol->syllable;
+                  hs.loc = symbol->loc;
+                  hopDescriptionFound:;
+                  hs.dm = dm;
+                  hs.ds = ds;
+                  if (formHopConstant(&hs, &hop))
+                    {
+                      printf("Cannot form HOP constant.\n");
+                      goto nextCommand;
+                    }
+                  goto foundJump;
+                }
+            }
+          printf("Illegal syntax.\n");
+          goto nextCommand;
+          foundJump: ;
+          state.hop = hop;
+          if (commandToken == ctJUMP)
+            {
+              runStepN = INT_MAX;
+              break;
+            }
+          else
+            goto nextCommand;
+        }
       case ctDELETE:
         if (count < 2)
           {
