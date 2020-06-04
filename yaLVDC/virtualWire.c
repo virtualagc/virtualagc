@@ -385,6 +385,25 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       channel = state.cioChange;
       payload = state.cio[channel];
       state.cioChange = -1;
+      // If the CIO was something that should have made the typewriter, plotter,
+      // or printer busy, we fake that up right here, since otherwise there
+      // wouldn't be enough time to allow the PTC front-panel emulation to
+      // report back that the device wasn't busy.
+      if (channel == 0144 || channel == 0150)
+        {
+          state.cio[0214] |= 2;
+          state.busyCountPlotter = 100;
+        }
+      else if (channel == 0160)
+        {
+          state.cio[0214] |= 1;
+          state.busyCountPrinter = 100;
+        }
+      else if (channel == 0120 || channel == 0124 || channel == 0130 || channel == 0134)
+        {
+          state.cio[0214] |= 4;
+          state.busyCountTypewriter = 100;
+        }
     }
   else if (state.prsChange != -1)
     {
@@ -392,6 +411,8 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       channel = state.prsChange;
       payload = state.prs[channel];
       state.prsChange = -1;
+      state.cio[0214] |= 1;
+      state.busyCountPrinter = 100;
     }
   if (ioType >= 0)
     {

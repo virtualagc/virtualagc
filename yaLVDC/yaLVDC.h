@@ -178,6 +178,10 @@ typedef struct
   // to an instruction that's out of sequence.
   int32_t lastHop;
   int16_t lastInstruction;
+  // Counters used for faking up busy signals for printer, plotter, typewriter.
+  int busyCountPlotter;
+  int busyCountPrinter;
+  int busyCountTypewriter;
 } state_t;
 extern state_t state;
 typedef struct

@@ -328,6 +328,24 @@ runOneInstruction(int *cyclesUsed)
   state.cioChange = -1;
   state.prsChange = -1;
   state.lastHop = -1;
+  if (state.busyCountPlotter)
+    {
+      state.busyCountPlotter--;
+      if (!state.busyCountPlotter)
+        state.cio[0214] &= ~2;
+    }
+  if (state.busyCountPrinter)
+    {
+      state.busyCountPrinter--;
+      if (!state.busyCountPrinter)
+        state.cio[0214] &= ~1;
+    }
+  if (state.busyCountTypewriter)
+    {
+      state.busyCountTypewriter--;
+      if (!state.busyCountTypewriter)
+        state.cio[0214] &= ~4;
+    }
 
   // Set global variables providing background info on the emulation.
   dataFromInstructionMemory = 0;

@@ -101,6 +101,7 @@ cli.add_argument("--host", help="Host address of yaAGC/yaAGS, defaulting to loca
 cli.add_argument("--port", help="Port for yaLVDC, defaulting to 19653.", type=int)
 cli.add_argument("--id", help="Unique ID of this peripheral (1-7), default=1.", type=int)
 cli.add_argument("--resize", help="If 1 (default 0), make the window resizable.", type=int)
+cli.add_argument("--scale", help="An integer (default 1) scale for the plotter peripheral.", type=int)
 args = cli.parse_args()
 
 # Characteristics of the host and port being used for yaLVDC communications.  
@@ -125,6 +126,18 @@ if args.resize:
 		resize = 1
 else:
 	resize = 0
+
+# The --scale switch is useful in that if you don't use it, some of the tiny 
+# details of the plotter test (see Figure 7-11 sheet 10 in the PTC documentation)
+# can't be seen well enough to confirm that they're correct in the test plot.
+# If so, --scale=2 or --scale=3 helps a lot in this regard.  However ... portions 
+# of the plot may not be immediately visible in the plot window.  You have to
+# use the mouse scroll-wheel to scroll the window up or down, and SHIFT scroll-wheel
+# to scroll sideways.  Or expand the plotter window if you have enough screen space.
+if args.scale:
+	plotScale = args.scale
+else:
+	plotScale = 1
 
 ###################################################################################
 # The separate window implementing the printer peripheral.
@@ -169,11 +182,24 @@ class typewriter:
 ###################################################################################
 # The separate window implementing the plotter peripheral.
 
+plotMargin = 10
 class plotter:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC PLOTTER")
-		self.root.geometry("1024x1024")
+		self.root.geometry("%dx%d" % (1024 + 2 * plotMargin, 1024 + 2 * plotMargin))
+		self.canvas = ScrolledWindow(self.root)
+		self.canvas.place(relx=0.0, rely=0.0, relheight=1.0,
+			relwidth=1.0, bordermode='ignore')
+		self.canvas.configure(background="white")
+		self.canvas.configure(borderwidth="2")
+		self.canvas.configure(relief="groove")
+		self.canvas.configure(selectbackground="#c4c4c4")
+		self.color = self.canvas.cget("background")
+		self.canvas_f = tk.Frame(self.canvas,
+	                            background=self.color)
+		self.canvas.create_window(0, 0, anchor='nw',
+	                                           window=self.canvas_f)
 
 ###################################################################################
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
@@ -843,9 +869,14 @@ displaySelect = -1
 modeControl = 0
 addressCompare = False
 crlfCount = 0
+xPlot = 0
+yPlot = 0
+penDown = False
+xDelta = 0
+yDelta = 0
 def outputFromCPU(ioType, channel, value):
 	global displaySelect, modeControl, addressCompare, dcDisplayCount, crlfCount
-	global prsModeBCD
+	global prsModeBCD, xPlot, yPlot, penDown, xDelta, yDelta
 	print("*", end="")
 	
 	if ioType == 0:
@@ -911,11 +942,40 @@ def outputFromCPU(ioType, channel, value):
 			if string != "":
 				typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o140:
-			print("\nX plot = %09o" % value, end="  ")
+			#print("\nX plot = %09o" % value, end="  ")
+			xDelta = value & 0o1777
+			if value & 0o200000000:
+				xDelta = -xDelta
 		elif channel == 0o144:
-			print("\nY plot = %09o" % value, end="  ")
+			#print("\nY plot = %09o" % value, end="  ")
+			yDelta = value & 0o1777
+			if value & 0o200000000:
+				yDelta = -yDelta
+			xPlotNew = xPlot + xDelta
+			yPlotNew = yPlot + yDelta
+			if yPlotNew < 0:
+				yPlotNew = 0
+			elif yPlotNew > 1023:
+				yPlotNew = 1023
+			xDelta = 0
+			yDelta = 0
+			if penDown:
+				print("\nPlotter:  draw from (%d,%d) to (%d,%d)" % (xPlot, yPlot, xPlotNew, yPlotNew))
+				# Note that the plotter axes are transposed from the
+				# axes of the canvas widget on which we're going to 
+				# draw it.
+				plotterWindow.canvas.create_line((1023-yPlot)*plotScale + plotMargin, 
+					-xPlot*plotScale + plotMargin, (1023-yPlotNew)*plotScale + plotMargin, -xPlotNew*plotScale + plotMargin, width=1)
+			else:
+				print("\nPlotter:  move from (%d,%d) to (%d,%d)" % (xPlot, yPlot, xPlotNew, yPlotNew))
+			xPlot = xPlotNew
+			yPlot = yPlotNew
 		elif channel == 0o150:
-			print("\nZ plot = %09o" % value, end="  ")
+			#print("\nZ plot = %09o" % value, end="  ")
+			if value & 1:
+				penDown = False
+			elif value & 2:
+				penDown = True
 		elif channel == 0o204:
 			# Turn indicator lamps on or off.  I think this is actually
 			# the full functionality of CIO-204
@@ -2000,16 +2060,23 @@ top.pdpHOPSAVE_REG.bind("<Button-1>", eventMarHsr)
 printerWindow = printer(tk.Toplevel(root))
 typewriterWindow = typewriter(tk.Toplevel(root))
 plotterWindow = plotter(tk.Toplevel(root))
-# Note that the "printer" and "typewriter" classes use a widget of type 
-# ScrolledText, which is not a native tkinter widget, but rather is a
-# class created by the PAGE tool I use to help design the UI.  Unfortunately,
-# PAGE will not define the ScrolledText class (in ProcessorDisplayPanel.py)
-# unless it thinks there's actually a ScrolledText widget in the design,
-# so I trick PAGE by adding a dummy ScrolledText widget (called
+# Note that the "printer" and "typewriter" classes use widgets of type 
+# ScrolledText and ScrolledWindow, which are not native tkinter widgets, 
+# but rather are classes created by the PAGE tool I use to help design 
+# the UI.  Unfortunately, PAGE will not define the ScrolledText or 
+# ScrolledWindow classes (in ProcessorDisplayPanel.py) unless it thinks 
+# there are actually widgets of those types in the design, so I trick
+# PAGE by adding dummy widgets (called "dummyScrolledWindow" and
 # "dummyScrolledText") just outside the edge of the main maindow, where
-# it's not normally visible.  The following line is to try and insure
-# that it remains invisible.
-top.dummyScrolledText.pack_forget()
+# they're not normally visible.  The following line is to try and insure
+# that they remains invisible if the main window were resized by the user.
+# Sometimes, though, I remove the dummy widgets manually, so the we
+# also have to allow for the possibility that the widgets aren't there at all.
+try:
+	top.dummyScrolledText.pack_forget()
+	top.dummyScrolledWindow.pack_forget()
+except:
+	pass
 
 root.resizable(resize, resize)
 root.after(refreshRate, mainLoopIteration)
