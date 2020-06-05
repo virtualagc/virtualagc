@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2019,2020 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -33,6 +33,16 @@
  * Compiler:    GNU gcc.
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-20 RSB  Began.
+ *              2020-06-05 RSB  Fixes for various bugs discovered in running
+ *                              self-test procedures from the PAST program:
+ *                              1)  SHL instructions were producing results
+ *                                  >26 bits in ACC, causing subsequent TMI
+ *                                  or TNZ instructions to fail.
+ *                              2)  A side effect of PRS sourced from memory
+ *                                  is supposed to be that the data goes into
+ *                                  ACC.
+ *                              3)  Assigned "spare" CIO 175 as an input port
+ *                                  rather than an output port.
  */
 
 #include <stdlib.h>
@@ -468,6 +478,7 @@ runOneInstruction(int *cyclesUsed)
               &fetchedFromMemory, &dataFromInstructionMemory))
             goto done;
           data = fetchedFromMemory;
+          state.acc = data;
         }
       else if (residual == 1 && operand == 0374)
         {
@@ -494,8 +505,13 @@ runOneInstruction(int *cyclesUsed)
       // interrogate these values in between instructions and take whatever
       // larger action is required.
 
-      // The following is based on Figure 2-11 in the PTC documentation.
-      if (operand == 0154 || operand == 0214 || operand == 0220)
+      // The following is based on Figure 2-11 in the PTC documentation.  CIO 175
+      // does not appear at all in the documentation, but the PAST program calls it
+      // and 155, 161, 165, and 171 "spares".  It "tests" these spares by executing
+      // them and then by testing that CIO 175 has put 0 into ACC.  On the basis of
+      // this rather slim data, I infer that 175 is a spare input port while the others
+      // are spare outputs.
+      if (operand == 0154 || operand == 0214 || operand == 0220 || operand == 0175)
         state.acc = state.cio[operand];
       else
         {
@@ -724,6 +740,7 @@ runOneInstruction(int *cyclesUsed)
             printf("Illegal SHF instruction\n");
             goto done;
             }
+          state.acc = state.acc & 0377777777;
         }
     }
   else if (!ptc && op == 016 && a8 == 0 && a9 == 1)
@@ -753,6 +770,7 @@ runOneInstruction(int *cyclesUsed)
         printf("Illegal SHF instruction\n");
         goto done;
         }
+      state.acc = state.acc & 0377777777;
     }
   else if (!ptc && op == 016 && a8 == 1 && a9 == 1)
     {

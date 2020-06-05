@@ -80,6 +80,21 @@ BA8421a = [
 ]
 # This table comes from Figure 2-53 in the original PTC documentation and,
 # I think, represents what the PTC typewriter physically prints.
+# Some of the characters are UTF-8 in this list (and the two lists above),
+# and each character displays fine on my own computer (which is Linux) using 
+# the monospaced font I've chosen for the text widgets (namely, Courier 10).
+# Except one:  character 0o77, ⯒.  This character has apparently been 
+# accepted into UTF-8 (seemingly thanks to Ken Shirriff) too recently to 
+# be available in _any_ font I've found.  It's supposed to look like character 
+# 0o73, ⧻, but rotated 90 degrees.  I could, of course, create a new font
+# that has all of the needed characters in it, and distribute it with this
+# program, but that just seems like a lot of work for something very few 
+# people are going to care about.  Particularly since I'd have a hard time
+# coming up with explanations about how to actually install that font and
+# make it accessible on so many system types.  So to sum it all up, you may 
+# or may not see the handful of UTF-8 characters on your computer in the 
+# PTC printer/typewriter emulations, and in particular you may not be able
+# to see character 0o77.  You probably won't notice the problem (if any) at all.
 unp = '▯'
 BA8421b = [
 	' ', '1', '2', '3', '4', '5', '6', '7',
@@ -132,8 +147,10 @@ else:
 # can't be seen well enough to confirm that they're correct in the test plot.
 # If so, --scale=2 or --scale=3 helps a lot in this regard.  However ... portions 
 # of the plot may not be immediately visible in the plot window.  You have to
-# use the mouse scroll-wheel to scroll the window up or down, and SHIFT scroll-wheel
-# to scroll sideways.  Or expand the plotter window if you have enough screen space.
+# use the mouse scroll-wheel to scroll the window up or down (which probably isn't
+# necessary if the height of the window is not changed from its default value of
+# >1024), and SHIFT scroll-wheel to scroll sideways (which definitely should be 
+# necessary.  Or expand the plotter window if you have enough screen space.
 if args.scale:
 	plotScale = args.scale
 else:
@@ -147,7 +164,7 @@ class printer:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC PRINTER")
-		self.root.geometry("720x480")
+		self.root.geometry("1200x480")
 		self.text = ScrolledText(self.root)
 		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, bordermode='ignore')
 		self.text.configure(background="white")
@@ -163,7 +180,7 @@ class typewriter:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC TYPEWRITER")
-		self.root.geometry("720x480")
+		self.root.geometry("1200x480")
 		self.text = ScrolledText(self.root)
 		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, bordermode='ignore')
 		self.text.configure(background="white")
@@ -371,7 +388,11 @@ def inputsForCPU():
 	if ProgRegA != -1:
 		n = ProgRegA
 		ProgRegA = -1
-		returnValue.append((1, 0o214, n, nomask))
+		# Note that the 3 least-significant bits (printer, plotter,
+		# and typewriter busy) are simulated directly in yaLVDC,
+		# due to timing considerations, and hence have to be masked
+		# off.
+		returnValue.append((1, 0o214, n, nomask & ~7))
 
 	if ProgRegB != -1:
 		n = ProgRegB
@@ -889,7 +910,7 @@ def outputFromCPU(ioType, channel, value):
 			print("\nSingle step")
 		elif channel == 0o120:
 			string = BA8421b[(value >> 20) & 0o77]
-			print("\nTypewriter alphanumeric = %09o (%s)" % (value, string), end="  ")
+			#print("\nTypewriter alphanumeric = %09o (%s)" % (value, string), end="  ")
 			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o160:
 			top2 = (value >> 24) & 3
@@ -909,7 +930,7 @@ def outputFromCPU(ioType, channel, value):
 			#print("\nPrinter carriage control = %09o (%s)" % (value, string), end="  ")
 		elif channel == 0o124:
 			string = BA8421b[(value >> 22) & 0o17]
-			print("\nTypewriter decimal = %09o (%s)" % (value, string), end="  ")
+			#print("\nTypewriter decimal = %09o (%s)" % (value, string), end="  ")
 			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o164: # Set printer octal mode.
 			prsModeBCD = False
@@ -917,7 +938,7 @@ def outputFromCPU(ioType, channel, value):
 			prsModeBCD = True
 		elif channel == 0o130:
 			string = chr(ord('0') + ((value >> 23) & 0o07))
-			print("\nTypewriter octal = %09o (%s)" % (value, string), end="  ")
+			#print("\nTypewriter octal = %09o (%s)" % (value, string), end="  ")
 			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o134:
 			string = ""
@@ -938,9 +959,11 @@ def outputFromCPU(ioType, channel, value):
 				string = "\t"
 			else:
 				string = "illegal"
-			print("\nTypewriter control = %09o (%s)" % (value, name), end="  ")
+			#print("\nTypewriter control = %09o (%s)" % (value, name), end="  ")
 			if string != "":
 				typewriterWindow.text.insert(tk.END, string)
+				if name == "return":
+					typewriterWindow.text.see("end")
 		elif channel == 0o140:
 			#print("\nX plot = %09o" % value, end="  ")
 			xDelta = value & 0o1777
@@ -961,11 +984,8 @@ def outputFromCPU(ioType, channel, value):
 			yDelta = 0
 			if penDown:
 				print("\nPlotter:  draw from (%d,%d) to (%d,%d)" % (xPlot, yPlot, xPlotNew, yPlotNew))
-				# Note that the plotter axes are transposed from the
-				# axes of the canvas widget on which we're going to 
-				# draw it.
-				plotterWindow.canvas.create_line((1023-yPlot)*plotScale + plotMargin, 
-					-xPlot*plotScale + plotMargin, (1023-yPlotNew)*plotScale + plotMargin, -xPlotNew*plotScale + plotMargin, width=1)
+				plotterWindow.canvas.create_line(xPlot*plotScale + plotMargin, (1023-yPlot)*plotScale + plotMargin, 
+					xPlotNew*plotScale + plotMargin, (1023-yPlotNew)*plotScale + plotMargin, width=1)
 			else:
 				print("\nPlotter:  move from (%d,%d) to (%d,%d)" % (xPlot, yPlot, xPlotNew, yPlotNew))
 			xPlot = xPlotNew

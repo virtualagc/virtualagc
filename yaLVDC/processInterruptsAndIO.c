@@ -50,6 +50,7 @@
  *                              via the "virtual wire" system.  It turns out
  *                              also that there were errors in the yaPTC.py
  *                              implementation of this that I fixed here.
+ *              2020-06-05 RSB  Corrected CIO 065, 071.
  */
 
 #include <stdlib.h>
@@ -151,7 +152,7 @@ processInterruptsAndIO(void)
             }
           else if (channel <= 0071)
             {
-              setLatch(quotient - 6);
+              setLatch(quotient - 4);
             }
           else if (channel <= 0151)
             {
