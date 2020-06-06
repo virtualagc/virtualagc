@@ -58,8 +58,6 @@
 #include <string.h>
 #include "yaLVDC.h"
 
-int interruptInhibitLatches = 0;
-
 // Note the mapping of the individual bits in the interrupt
 // latch (CIO 154):  interrupt 1 is the most-significant
 // bit (1<<25), etc.  This is not the same as the mapping
@@ -69,16 +67,16 @@ int interruptInhibitLatches = 0;
 void
 setLatch(int n)
 {
-  if (n < 0 || n > 15)
+  if (n < 1 || n > 16)
     return;
-  interruptLatches|= (1 << (26 - n));
+  interruptLatches |= (1 << (26 - n));
 }
 void
 resetLatch(int n)
 {
-  if (n < 0 || n > 15)
+  if (n < 1 || n > 16)
     return;
-  interruptLatches&= ~(1 << (26 - n));
+  interruptLatches &= ~(1 << (26 - n));
 }
 
 // Returns 0 on success, non-zero on fatal error.
@@ -92,10 +90,44 @@ processInterruptsAndIO(void)
   // locally and in the client peripheral(s).
   if (state.pioChange != -1)
     {
+      int *interruptLatch;
+
       channel = state.pioChange;
       payload = state.pio[channel];
+      if (ptc)
+        interruptLatch = &state.cio[0154];
+      else
+        interruptLatch = &state.pio[0137];
 
-      //state.pioChange = -1;
+      if (channel == 0000)
+        *interruptLatch = 0;
+      else if (channel == 0001) // Interrupt latch 1
+        *interruptLatch |= 0200000000;
+      else if (channel == 0002) // Interrupt latch 2
+        *interruptLatch |= 0100000000;
+      else if (channel == 0004) // Interrupt latch 3
+        *interruptLatch |= 0040000000;
+      else if (channel == 0010) // Interrupt latch 4
+        *interruptLatch |= 0020000000;
+      else if (channel == 0020) // Interrupt latch 5
+        *interruptLatch |= 0010000000;
+      else if (channel == 0040) // Interrupt latch 6
+        *interruptLatch |= 0004000000;
+      else if (channel == 0100) // Interrupt latch 7
+        *interruptLatch |= 0002000000;
+      else if (channel == 0200) // Interrupt latch 8
+        *interruptLatch |= 0001000000;
+      else if (channel == 0400) // Interrupt latch 9
+        *interruptLatch |= 0000400000;
+      else
+        goto donePIO;
+
+      // If we've gotten to here, the channel has been fully processed
+      // and doesn't need to be processed by pendingVirtualWireActivity().
+      // On the other hand, if we've skipped down to doneCIO, then the
+      // converse is true.
+      state.pioChange = -1;
+      donePIO:;
     }
   else if (state.cioChange != -1)
     {
@@ -125,11 +157,11 @@ processInterruptsAndIO(void)
         {
           if (channel == 0000)
             {
-              interruptInhibitLatches|= payload & 077777;
+              state.interruptInhibitLatches|= payload & 077777;
             }
           else if (channel == 0004)
             {
-              interruptInhibitLatches &= ~(payload & 077777);
+              state.interruptInhibitLatches &= ~(payload & 077777);
             }
           else if (channel <= 0104)
             {
@@ -137,7 +169,15 @@ processInterruptsAndIO(void)
             }
           else if (channel == 0110)
             {
-              interruptLatches = 0;
+              state.masterInterruptLatch = 0;
+            }
+          else if (channel == 0210)
+            {
+              state.gateProgRegA = (payload & 077) << 3;
+            }
+          else if (channel == 0224)
+            {
+              interruptLatches |= (payload & 0377774000) | ((payload & 03777) << 15);
             }
           else
             {

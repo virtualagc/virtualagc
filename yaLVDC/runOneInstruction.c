@@ -512,7 +512,23 @@ runOneInstruction(int *cyclesUsed)
       // this rather slim data, I infer that 175 is a spare input port while the others
       // are spare outputs.
       if (operand == 0154 || operand == 0214 || operand == 0220 || operand == 0175)
-        state.acc = state.cio[operand];
+        {
+          // The "gate" is needed only for reading PROG REG A, in which the lowest
+          // 9 bits are gated by bit written out on CIO 210 to the discrete outputs.
+          // When 1, those bits cause the corresponding bits on CIO 210 to be read
+          // back as 1, but when 0 gates in other signals on CIO 210, including the
+          // PRINTER/PLOTTER/TYPEWRITER BUSY bits.
+          int gate = 0;
+          if (operand == 0214)
+            {
+              gate = state.gateProgRegA;
+            }
+          state.acc = state.cio[operand] | gate;
+          //if (operand == 0214)
+          //  {
+          //    printf("PROG REG A (%09o) gated with %09o, giving %09o.\n", state.cio[operand], gate, state.acc);
+          //  }
+        }
       else
         {
           state.cioChange = operand;

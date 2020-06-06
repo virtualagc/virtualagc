@@ -174,6 +174,41 @@ addBacktrace(int16_t fromInstruction, int32_t fromWhere, int32_t toWhere,
     firstUsedBacktrace = NEXT_BACKTRACE(firstUsedBacktrace);
 }
 
+void checkForInterrupts(void)
+{
+  // Check if an interrupt has been triggered.
+  if (!state.masterInterruptLatch)
+    {
+      if (ptc)
+        {
+          int i, intLatch, intInhibit;
+          intLatch = state.cio[0154];
+          intInhibit = state.interruptInhibitLatches;
+          for (i = 0; i < 16;
+              i++, intLatch = intLatch << 1, intInhibit = intInhibit >> 1)
+            if ((intLatch & 0200000000) != 0 && (intInhibit & 1) == 0)
+              break;
+          if (i < 16)
+            {
+              state.masterInterruptLatch = 1;
+              state.hop = state.core[0][017][2][i];
+              printf("Interrupt %d.\n", i + 1);
+            }
+        }
+      else // LVDC
+        {
+          if (state.pio[0137] != 0)
+            {
+              hopStructure_t hs;
+              state.masterInterruptLatch = 1;
+              parseHopConstant(state.hop, &hs);
+              state.hop = state.core[hs.im][017][2][0];
+            }
+        }
+    }
+
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Main program.
 
@@ -266,6 +301,7 @@ main(int argc, char *argv[])
           // it.
           if (panelPause == 1)
             {
+              checkForInterrupts();
               if (!runOneInstruction(&cyclesUsed))
                 {
                   if (state.lastHop != -1)
@@ -327,6 +363,9 @@ main(int argc, char *argv[])
           while (cycleCount < targetCycles)
             {
               breakpoint_t *breakpoint;
+
+              checkForInterrupts();
+
               // Check if a breakpoint hit.
               if (!parseHopConstant(state.hop, &hs))
                 {
@@ -470,16 +509,16 @@ main(int argc, char *argv[])
                       goto patternMatched;
                     }
                   // Or find a data-address-comparison match.
-                  else if (0 && panelDisplaySelect == 3 && panelAddressCompare == 1
+                  else if (0 && panelDisplaySelect == 3
+                      && panelAddressCompare == 1
                       && panelPatternDataAddress != -1
-                      && ((state.hop ^ (panelPatternDLOC << 7))
-                          & 077600) == 0)
+                      && ((state.hop ^ (panelPatternDLOC << 7)) & 077600) == 0)
                     {
                       printf("Hit data-address match (TRS).\n");
                       goto patternMatched;
                     }
-                  else if (/*panelDisplaySelect != 3 && */ panelAddressCompare == 1
-                      && panelPatternDataAddress != -1
+                  else if (/*panelDisplaySelect != 3 && */panelAddressCompare
+                      == 1 && panelPatternDataAddress != -1
                       && !parseHopConstant(state.hop, &hs)
                       && !fetchInstruction(hs.im, hs.is, hs.s, hs.loc,
                           &instruction, &instructionFromDataMemory))
@@ -516,7 +555,8 @@ main(int argc, char *argv[])
                           // So there is no "data address" as such.  But I don't
                           // actually know if I should be excluding them or not.
                         }
-                      else if (dm == panelPatternDM && ds == panelPatternDS && a81 == panelPatternDLOC)
+                      else if (dm == panelPatternDM && ds == panelPatternDS
+                          && a81 == panelPatternDLOC)
                         {
                           printf("Hit data-address match (non-TRS).\n");
                           goto patternMatched;
@@ -525,7 +565,7 @@ main(int argc, char *argv[])
                   if (0)
                     {
                       // Come here for either a data-address match or an instruction-address match.
-                      patternMatched:;
+                      patternMatched: ;
                       if (panelModeControl >= 3) // Just send status to the panel emulation and keep going!
                         panelPause = 4;
                       else if (panelModeControl >= 1) // Sent status and pause processing.

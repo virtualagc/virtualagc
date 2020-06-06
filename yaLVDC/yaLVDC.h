@@ -182,6 +182,9 @@ typedef struct
   int busyCountPlotter;
   int busyCountPrinter;
   int busyCountTypewriter;
+  int interruptInhibitLatches;
+  int masterInterruptLatch;
+  int gateProgRegA;
 } state_t;
 extern state_t state;
 typedef struct

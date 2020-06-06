@@ -1038,6 +1038,17 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       formHopDescription(-1, 0, 017, 0376, hopBuffer, &hs2);
       printf("  (776)= %s\n", hopBuffer);
       formHopDescription(state.hopSaver, 0, 0, 0, hopBuffer, &hs2);
+      if (ptc)
+        {
+          printf(" INT = %09o", state.cio[0154]);
+          printf("  INH = %09o", state.interruptInhibitLatches);
+          printf("  INB = %d\n", state.masterInterruptLatch);
+        }
+      else
+        {
+          printf(" INT = %09o", state.pio[0137]);
+          printf("  INB = %d\n", state.masterInterruptLatch);
+        }
       printf(" RET = %s\n", hopBuffer);
       printf("Instructions: %lu", instructionCount);
       printf(", Cycles: %lu", cycleCount);
@@ -1940,6 +1951,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                   hopDescriptionFound:;
                   hs.dm = dm;
                   hs.ds = ds;
+                  hs.dupdn = 0;
+                  hs.dupin = 0;
                   if (formHopConstant(&hs, &hop))
                     {
                       printf("Cannot form HOP constant.\n");
