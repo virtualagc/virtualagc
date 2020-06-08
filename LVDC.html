@@ -8073,41 +8073,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                         <tr>
                           <td valign="middle" align="center">403<br>
                           </td>
-                          <td valign="top">The usage in PAST-program
-                            code is consistent with the following:&nbsp;
-                            Takes the value previously written out with
-                            <tt>CIO 230</tt>, bitwise inverts it, XOR's
-                            it what whatever was previously saved with <tt>STO
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                              403</tt>, and puts the result in the
-                            accumulator.&nbsp; I'm <i>not</i> saying it
-                            does this ... I'm just reporting that that's
-                            what seems to happen numerically in the
-                            available code samples.<br>
+                          <td valign="top">See <tt>CIO 230</tt>.<br>
                           </td>
                         </tr>
                         <tr>
@@ -8119,7 +8085,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                         <tr>
                           <td valign="middle" align="center">777<br>
                           </td>
-                          <td valign="top"><br>
+                          <td valign="top">Address register<br>
                           </td>
                         </tr>
                       </tbody>
@@ -8204,7 +8170,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center">001<br>
           </td>
-          <td valign="middle" align="left">Set interrupt 3 latch<br>
+          <td valign="middle" align="left">Set interrupt 3 latch.&nbsp;
+            For additional functionality, see also <tt>CIO 234</tt>.<br>
           </td>
         </tr>
         <tr>
@@ -8729,6 +8696,62 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
             encoded in 6 bits (SIGN and bits 1-5) in BA8421
             format.&nbsp; See <a href="#BCI">the <tt>BCI</tt>
               pseudo-op</a> for an explanation of BA8421.<br>
+            <br>
+            For reasons which are unclear to me, <tt>CIO 120</tt>
+            appears to enable various interrupts in the interrupt latch,
+            with different interrupts being enabled for different
+            characters.&nbsp; The same holds true for <tt>CIO 124</tt>
+            and <tt>CIO 130</tt>, with the same interrupts being
+            enabled for the same printable characters.&nbsp; Moreover,
+            the conditions enabled by <tt>CIO 130</tt> affect still
+            other interrupt bits.&nbsp; In the PAST program source code,
+            the characters printed vs the interrupt bits expected to be
+            set are given by a 1-to-1 relationship between the arrays <tt>CHAR</tt>
+            and <tt>PATN</tt>, with the exception that <tt>PATN</tt>
+            does not distinguish between "upper case" and "lower case"
+            characters as described below.&nbsp; Though not mentioning
+            interrupts at all, the interrupt-bit patterns <i>seem</i>
+            to be derivable from Figure 2-56 of the PTC document,
+            "Selection and Tilt-Rotate Schedule", in which the following
+            relationship between individual BCD keyboard solenoids (or
+            other conditions) and interrupt bits seems to hold
+            empirically:<br>
+            <ul>
+              <li>Interrupt 3 latch: R1 (<tt>CIO 120/124/130</tt>)</li>
+              <li>Interrupt 4 latch: R2 (<tt>CIO 120/124/130</tt>)</li>
+              <li>Interrupt 5 latch: R2A (<tt>CIO 120/124/130</tt>)</li>
+              <li>Interrupt 6 latch: R5 (<tt>CIO 120/124/130</tt>)</li>
+              <li>Interrupt 7 latch: T1 (<tt>CIO 120/124/130</tt>)</li>
+              <li>Interrupt 8 latch: T2 (<tt>CIO 120/124/130</tt>)</li>
+              <li>Interrupt 9 latch: Check Bit (<tt>CIO 120/124/130</tt>)</li>
+              <li>Interrupt 10 latch: TAB (<tt>CIO 134</tt>)</li>
+              <li>Interrupt 11 latch: INDEX (<tt>CIO 134</tt>)<br>
+              </li>
+              <li>Interrupt 12 latch: RED (<tt>CIO 134</tt>)<br>
+              </li>
+              <li>Interrupt 13 latch: BLACK (<tt>CIO 134</tt>)<br>
+              </li>
+              <li>Interrupt 14 latch: CARR RTN (<tt>CIO 134</tt>)<br>
+              </li>
+              <li>Interrupt 15 latch: SPACE (<tt>CIO 134</tt>) or UPPER
+                CASE (<tt>CIO 120/124/130</tt>)</li>
+            </ul>
+            <p>For example, in Figure 2-56, "Q" is listed as a
+              "lower-case" character and "*" as an "upper-case"
+              character, with R1, R5, and T1 solenoids energized, and
+              R2, R2A, T2, and Check Bit not energized.&nbsp; Therefore,
+              we would expect interrupt bits 001001100000000 to be set
+              in the interrupt latch for printing "Q" (in addition to
+              whatever interrupt bits were already set prior to that,
+              and for 001001100000001 to be set for printing "*".&nbsp;
+              Or in the form of an <tt>OCT</tt> pseudo-op, <tt>OCT
+                114000000</tt> and <tt>OCT 114010000</tt>.&nbsp; This
+              is exactly what you find in the <tt>PATN</tt> array,
+              except that (as mentioned earlier) <tt>PATN</tt> doesn't
+              distinguish between upper and lower case, so both "Q" and
+              "*" are listed there as having the same pattern, <tt>OCT
+                114000000</tt>.<br>
+            </p>
           </td>
         </tr>
         <tr>
@@ -8755,6 +8778,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
             0.&nbsp; I.e., the lowest 16 characters of BA8421, which
             happens to include all decimal digits, plus 6 other
             characters (space and so on). <br>
+            <br>
+            See the notes for <tt>CIO 120</tt>, regarding
+            interrupt-latch bits.<br>
           </td>
         </tr>
         <tr>
@@ -8774,7 +8800,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
           </td>
           <td valign="middle" align="left">Sends a single octal digit to
             be printed on the typewriter.&nbsp; This character is
-            encoded in 3 bits (SIGN and bits 1-2).</td>
+            encoded in 3 bits (SIGN and bits 1-2).<br>
+            <br>
+            See the notes for <tt>CIO 120</tt>, regarding
+            interrupt-latch bits.</td>
         </tr>
         <tr>
           <td valign="middle" align="center">131<br>
@@ -8843,6 +8872,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
               </tbody>
             </table>
             <br>
+            See the notes for <tt>CIO 120</tt>, regarding
+            interrupt-latch bits.<br>
           </td>
         </tr>
         <tr>
@@ -9371,8 +9402,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center">230<br>
           </td>
-          <td valign="middle" align="left">TBD, but see PIO <tt>403</tt>
-            in the preceding section. </td>
+          <td valign="middle" align="left">TBD<br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" align="center">233<br>
@@ -9382,7 +9413,26 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
         <tr>
           <td valign="middle" align="center">234<br>
           </td>
-          <td valign="middle" align="left">TBD </td>
+          <td valign="middle" align="left">As far as I can tell, this is
+            completely undocumented, so anything I have to say about it
+            is based on pure guesswork (and the desire for the self
+            tests in the PAST program to succeed rather than
+            fail).&nbsp; I think this may output a value to a 26-bit
+            shift register that subsequently shifts the data left at a
+            rate of one bit per machine cycle.&nbsp; In the original PTC
+            hardware, the shift register may be used to serialize data
+            for display on the PTC front panel, when the DISPLAY SELECT
+            rotary switch was in the TRS detent.<br>
+            <br>
+            Further, the current value of the shift register may
+            possibly be read back with a <tt>CIO 001</tt> instruction
+            for test purposes.&nbsp; Thus if successive instructions of
+            <tt>CIO 234</tt> and <tt>CIO 001</tt> are used, the latter
+            should read back the data the former wrote out, shifted left
+            by one bit position.&nbsp; If true, this would be an extra
+            capability of <tt>CIO 001</tt>, in addition to the
+            interrupt-control function described earlier.<br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" align="center">240<br>
@@ -15182,7 +15232,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2020-06-02.<br>
+          2020-06-07.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
