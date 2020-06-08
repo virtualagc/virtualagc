@@ -185,6 +185,15 @@ typedef struct
   int interruptInhibitLatches;
   int masterInterruptLatch;
   int gateProgRegA;
+  // It's possible that I missed seeing it, but the PTC documentation doesn't cover
+  // something which I think is necessary, and that's that you can't have an interrupt
+  // immediately following an instruction like HOP, TRA, TNZ, or TMI (in some cases),
+  // since the HOPSAVE register would be immediately overwritten prior to the called
+  // subroutine saving it, and hence would destroy the return address of the called
+  // subroutine.  The inhibitInterruptsOneCycle field can be set within runOneInstruction(),
+  // and inhibit interrupts for a single instruction cycle (being immediately reset
+  // upon the next entry to runOneInstruction()).
+  int inhibitInterruptsOneCycle;
 } state_t;
 extern state_t state;
 typedef struct
@@ -264,6 +273,8 @@ storeData(int module, int residual, int sector, int loc, int32_t data,
 int
 fetchInstruction(int module, int sector, int syllable, int loc,
     uint16_t *instruction, int *instructionFromDataMemory);
+void
+checkForInterrupts(void);
 
 // See gdbInterface.c
 int

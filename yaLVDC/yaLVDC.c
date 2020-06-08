@@ -174,41 +174,6 @@ addBacktrace(int16_t fromInstruction, int32_t fromWhere, int32_t toWhere,
     firstUsedBacktrace = NEXT_BACKTRACE(firstUsedBacktrace);
 }
 
-void checkForInterrupts(void)
-{
-  // Check if an interrupt has been triggered.
-  if (!state.masterInterruptLatch)
-    {
-      if (ptc)
-        {
-          int i, intLatch, intInhibit;
-          intLatch = state.cio[0154];
-          intInhibit = state.interruptInhibitLatches;
-          for (i = 0; i < 16;
-              i++, intLatch = intLatch << 1, intInhibit = intInhibit >> 1)
-            if ((intLatch & 0200000000) != 0 && (intInhibit & 1) == 0)
-              break;
-          if (i < 16)
-            {
-              state.masterInterruptLatch = 1;
-              state.hop = state.core[0][017][2][i];
-              printf("Interrupt %d.\n", i + 1);
-            }
-        }
-      else // LVDC
-        {
-          if (state.pio[0137] != 0)
-            {
-              hopStructure_t hs;
-              state.masterInterruptLatch = 1;
-              parseHopConstant(state.hop, &hs);
-              state.hop = state.core[hs.im][017][2][0];
-            }
-        }
-    }
-
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // Main program.
 
@@ -295,13 +260,13 @@ main(int argc, char *argv[])
               startPanelPause: ;
               panelPauseTime = times(&TmsStruct);
             }
+          checkForInterrupts();
           // See the comments where panelPause is allocated to understand
           // the difference between states panelPause = 0,1,2,3,4.
           // If a single step was remotely commanded, then take care of
           // it.
           if (panelPause == 1)
             {
-              checkForInterrupts();
               if (!runOneInstruction(&cyclesUsed))
                 {
                   if (state.lastHop != -1)
@@ -364,6 +329,14 @@ main(int argc, char *argv[])
             {
               breakpoint_t *breakpoint;
 
+              // The temptation is to do the following at the very end of runOneInstruction(),
+              // hence making runOneInstruction() more self-contained.  The problem with doing
+              // so is that runOneInstruction() will not yet have done processInterruptsAndIO(),
+              // and hence won't be able to recognize the interrupt until the next cycle after
+              // that.  Alternatively, the temptation is to put it at the very end of
+              // runOneInstruction().  The problem with doing that is that breakpoints and
+              // the debugger interface will be wrong.  So unfortunately, the only place to
+              // do it is in this loop, either at the beginning or the end.
               checkForInterrupts();
 
               // Check if a breakpoint hit.
@@ -401,7 +374,8 @@ main(int argc, char *argv[])
                     }
                   if (!inNextHop && runStepN > 0)
                     {
-                      int instruction, op, a9, a81, dataFromInstructionMemory,
+                      uint16_t instruction;
+                      int op, a9, a81, dataFromInstructionMemory,
                           instructiond;
                       hopStructure_t hsd;
                       int32_t destHopConstant;
@@ -413,8 +387,7 @@ main(int argc, char *argv[])
                       // and set a poor-man's breakpoint to detect the eventual return.
                       // If not, though, we can just treat the transfer instruction like any
                       // other, for NEXT purposes.
-                      instruction = state.core[hs.im][hs.is][hs.s][hs.loc];
-                      if (instruction == -1)
+                      if (fetchInstruction(hs.im, hs.is, hs.s, hs.loc, &instruction, &instructionFromDataMemory))
                         goto badNext;
                       op = instruction & 017;
                       if (op == 000 || op == 010 || op == 004 || op == 014) // Is indeed a HOP, TRA, TNZ, or TMI instruction.

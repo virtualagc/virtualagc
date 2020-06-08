@@ -309,6 +309,41 @@ convertNativeToDataWord(int integer)
   return (integer & dataWordMask);
 }
 
+void checkForInterrupts(void)
+{
+  // Check if an interrupt has been triggered.
+  if (!state.masterInterruptLatch && !state.inhibitInterruptsOneCycle)
+    {
+      if (ptc)
+        {
+          int i, intLatch, intInhibit;
+          intLatch = state.cio[0154];
+          intInhibit = state.interruptInhibitLatches;
+          for (i = 0; i < 16;
+              i++, intLatch = intLatch << 1, intInhibit = intInhibit >> 1)
+            if ((intLatch & 0200000000) != 0 && (intInhibit & 1) == 0)
+              break;
+          if (i < 16)
+            {
+              state.masterInterruptLatch = 1;
+              state.hop = state.core[0][017][2][i];
+              //printf("Interrupt %d.\n", i + 1);
+            }
+        }
+      else // LVDC
+        {
+          if (state.pio[0137] != 0)
+            {
+              hopStructure_t hs;
+              state.masterInterruptLatch = 1;
+              parseHopConstant(state.hop, &hs);
+              state.hop = state.core[hs.im][017][2][0];
+            }
+        }
+    }
+
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // The top-level function in this file.  Emulates a single instruction.
 
@@ -325,7 +360,7 @@ runOneInstruction(int *cyclesUsed)
   int cycleCount = 1, nextLOC, nextS, isHOP = 0;
   int64_t dummy;  // For multiplication intermediate result.
   hopStructure_t hopStructure, rawHopStructure, rawestHopStructure;
-  uint16_t instruction;
+  uint16_t instruction, operand9;
   uint8_t op, operand, residual, a8, a9;
   int32_t fetchedFromMemory;
   //int modOperand = 0;
@@ -358,6 +393,7 @@ runOneInstruction(int *cyclesUsed)
     }
 
   // Set global variables providing background info on the emulation.
+  state.inhibitInterruptsOneCycle = 0;
   dataFromInstructionMemory = 0;
   instructionFromDataMemory = 0;
 
@@ -418,6 +454,7 @@ runOneInstruction(int *cyclesUsed)
   operand = (instruction >> 5) & 0377;
   a8 = (operand >> 7) & 1;
   residual = a9;
+  operand9 = operand | (a9 << 8);
   // The following has something to do with EXM, but doesn't work as-is,
   // since it messes up almost all operands.  Fix later.
   //operand = (operand & ~3) | modOperand;
@@ -428,6 +465,7 @@ runOneInstruction(int *cyclesUsed)
     {
       // HOP
       isHOP = 1;
+      state.inhibitInterruptsOneCycle = 1;
       if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
           &fetchedFromMemory, &dataFromInstructionMemory))
         {
@@ -511,7 +549,7 @@ runOneInstruction(int *cyclesUsed)
       // them and then by testing that CIO 175 has put 0 into ACC.  On the basis of
       // this rather slim data, I infer that 175 is a spare input port while the others
       // are spare outputs.
-      if (operand == 0154 || operand == 0214 || operand == 0220 || operand == 0175)
+      if (operand9 == 0154 || operand9 == 0214 || operand9 == 0220 || operand9 == 0175)
         {
           // The "gate" is needed only for reading PROG REG A, in which the lowest
           // 9 bits are gated by bit written out on CIO 210 to the discrete outputs.
@@ -519,25 +557,25 @@ runOneInstruction(int *cyclesUsed)
           // back as 1, but when 0 gates in other signals on CIO 210, including the
           // PRINTER/PLOTTER/TYPEWRITER BUSY bits.
           int gate = 0;
-          if (operand == 0214)
+          if (operand9 == 0214)
             {
               gate = state.gateProgRegA;
             }
-          state.acc = state.cio[operand] | gate;
-          //if (operand == 0214)
+          state.acc = state.cio[operand9] | gate;
+          //if (operand9 == 0214)
           //  {
-          //    printf("PROG REG A (%09o) gated with %09o, giving %09o.\n", state.cio[operand], gate, state.acc);
+          //    printf("PROG REG A (%09o) gated with %09o, giving %09o.\n", state.cio[operand9], gate, state.acc);
           //  }
         }
       else
         {
-          state.cioChange = operand;
+          state.cioChange = operand9;
           // Note that for many CIO operations, it is the operation itself which
           // is significant, and not the specific info in ACC.  In other words,
           // the instruction above is often sufficient, and the instruction below
           // is often irrelevant.  However, there's no harm in the instruction
           // below, so we can keep it in all cases.
-          state.cio[operand] = state.acc;
+          state.cio[operand9] = state.acc;
         }
     }
   else if (op == 002)
@@ -573,6 +611,7 @@ runOneInstruction(int *cyclesUsed)
       // TNZ
       if (state.acc != 0)
         {
+          state.inhibitInterruptsOneCycle = 1;
           nextLOC = operand;
           nextS = residual;
           state.lastHop = state.hop;
@@ -602,6 +641,7 @@ runOneInstruction(int *cyclesUsed)
   else if (op == 010)
     {
       // TRA
+      state.inhibitInterruptsOneCycle = 1;
       nextLOC = operand;
       nextS = residual;
       state.lastHop = state.hop;
@@ -625,21 +665,21 @@ runOneInstruction(int *cyclesUsed)
       // larger action is required.
 
       // Determine direction of data flow.  If the least-significant 2 bits of
-      // the operand are 11, then the data flows into the accumulator.
+      // the operand9 are 11, then the data flows into the accumulator.
       // Otherwise, the accumulator or memory is the source of the data.
-      if ((operand & 3) == 3)
-        state.acc = state.pio[operand];
+      if ((operand9 & 3) == 3)
+        state.acc = state.pio[operand9];
       else
         {
-          state.pioChange = operand;
+          state.pioChange = operand9;
           if (a8) // Source is the accumulator
-            state.pio[operand] = state.acc;
+            state.pio[operand9] = state.acc;
           else // Source is memory.
             {
               if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
                   &fetchedFromMemory, &dataFromInstructionMemory))
                 fetchedFromMemory = 0;
-              state.pio[operand] = fetchedFromMemory;
+              state.pio[operand9] = fetchedFromMemory;
             }
         }
     }
@@ -660,6 +700,7 @@ runOneInstruction(int *cyclesUsed)
       // most-significant (26th) bit.
       if ((state.acc & signMask) != 0)
         {
+          state.inhibitInterruptsOneCycle = 1;
           nextLOC = operand;
           nextS = residual;
           state.lastHop = state.hop;
@@ -833,6 +874,7 @@ runOneInstruction(int *cyclesUsed)
       // instruction is executed.  But if all the details were worked out,
       // I think exiting the function normally would be better.
       cycleCount++;
+      state.inhibitInterruptsOneCycle = 1;
       goto reenterForEXM;
     }
   else if (op == 017)

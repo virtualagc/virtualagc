@@ -85,9 +85,13 @@ processInterruptsAndIO(void)
 {
   int retVal = 1, channel, payload;
 
-  // Intercept operations we *don't* want performed by the
-  // "virtual wire" system, or that require processing both
-  // locally and in the client peripheral(s).
+  // Some of these operations we want to performed entirely locally here,
+  // in the yaLVDC program; some we want to be done entirely in the client,
+  // yaPTC; some need processing in both places.  Interrupt processing
+  // is an example of the former.  If we want the client to do *anything*
+  // (i.e., if the processing isn't 100% local), then we need to skip
+  // down to the appropriate label (doneCIO, donePIO) after doing the
+  // appropriate local processing.
   if (state.pioChange != -1)
     {
       int *interruptLatch;
@@ -98,6 +102,8 @@ processInterruptsAndIO(void)
         interruptLatch = &state.cio[0154];
       else
         interruptLatch = &state.pio[0137];
+
+      //printf("here PIO channel %03o\n", channel);
 
       if (channel == 0000)
         *interruptLatch = 0;
@@ -120,14 +126,14 @@ processInterruptsAndIO(void)
       else if (channel == 0400) // Interrupt latch 9
         *interruptLatch |= 0000400000;
       else
-        goto donePIO;
+        goto morePIO;
 
       // If we've gotten to here, the channel has been fully processed
       // and doesn't need to be processed by pendingVirtualWireActivity().
-      // On the other hand, if we've skipped down to doneCIO, then the
+      // On the other hand, if we've skipped down to morePIO, then the
       // converse is true.
       state.pioChange = -1;
-      donePIO:;
+      morePIO:;
     }
   else if (state.cioChange != -1)
     {
@@ -148,7 +154,7 @@ processInterruptsAndIO(void)
               printf("PROG ERR ... pausing CPU.\n");
               panelPause = 2;
             }
-          goto doneCIO;
+          goto moreCIO;
         }
 
       remainder = channel % 4;
@@ -174,6 +180,7 @@ processInterruptsAndIO(void)
           else if (channel == 0210)
             {
               state.gateProgRegA = (payload & 077) << 3;
+              goto moreCIO;
             }
           else if (channel == 0224)
             {
@@ -181,7 +188,7 @@ processInterruptsAndIO(void)
             }
           else
             {
-              goto doneCIO;
+              goto moreCIO;
             }
         }
       else if (remainder == 1)
@@ -205,7 +212,7 @@ processInterruptsAndIO(void)
             }
           else
             {
-              goto doneCIO;
+              goto moreCIO;
             }
         }
       else if (remainder == 2)
@@ -240,7 +247,7 @@ processInterruptsAndIO(void)
             }
           else
             {
-              goto doneCIO;
+              goto moreCIO;
             }
         }
       else if (remainder == 3)
@@ -251,15 +258,15 @@ processInterruptsAndIO(void)
             }
           else
             {
-              goto doneCIO;
+              goto moreCIO;
             }
         }
       // If we've gotten to here, the channel has been fully processed
       // and doesn't need to be processed by pendingVirtualWireActivity().
-      // On the other hand, if we've skipped down to doneCIO, then the
+      // On the other hand, if we've skipped down to moreCIO, then the
       // converse is true.
       state.cioChange = -1;
-      doneCIO: ;
+      moreCIO: ;
     }
 
   pendingVirtualWireActivity();
