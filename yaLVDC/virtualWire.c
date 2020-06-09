@@ -392,17 +392,17 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       if (channel == 0144 || channel == 0150)
         {
           state.cio[0214] |= 2;
-          state.busyCountPlotter = 100;
+          state.busyCountPlotter = PERIPHERAL_BUSY_CYCLES;
         }
       else if (channel == 0160)
         {
           state.cio[0214] |= 1;
-          state.busyCountPrinter = 100;
+          state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
         }
       else if (channel == 0120 || channel == 0124 || channel == 0130 || channel == 0134)
         {
           state.cio[0214] |= 4;
-          state.busyCountTypewriter = 100;
+          state.busyCountTypewriter = PERIPHERAL_BUSY_CYCLES;
         }
     }
   else if (state.prsChange != -1)
@@ -412,7 +412,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       payload = state.prs[channel];
       state.prsChange = -1;
       state.cio[0214] |= 1;
-      state.busyCountPrinter = 100;
+      state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
     }
   if (ioType >= 0)
     {

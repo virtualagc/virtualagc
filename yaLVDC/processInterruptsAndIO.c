@@ -69,15 +69,86 @@ setLatch(int n)
 {
   if (n < 1 || n > 16)
     return;
-  interruptLatches |= (1 << (26 - n));
+  interruptLatches|= (1 << (26 - n));
 }
 void
 resetLatch(int n)
 {
   if (n < 1 || n > 16)
     return;
-  interruptLatches &= ~(1 << (26 - n));
+  interruptLatches&= ~(1 << (26 - n));
 }
+
+/*
+ The Typewriter CIO instructions (for some reason that's TBD) set the
+ interrupt latches in a pattern that depends on the specific character
+ (CIO 120, 124, 130) or other command (CIO 134) being output to the
+ typewriter.  The following is a table of such interrupt-bit patterns
+ derived from PTC documentation table 2-56, and more-or-less identical
+ to the PATN array from the PAST program source code (but sorted
+ differently, to conform to the order of BA8421b[] in yaPTC.py).
+
+ Note that because I made things simpler for myself by cutting and pasting
+ from OCT pseudo-ops in the PAST program's source code, all of the constants
+ are shifted left by one position, so that's why all of the >>1 mods are
+ present in the tables below.
+ */
+int TBDTBDTBDT = 0;
+int PATN[] =
+  {
+      // ' ', '1', '2', '3', '4', '5', '6', '7'
+      0000010000>>1, 0177000000>>1, 0067000000>>1, 0076000000>>1, 0127000000>>1, 0136000000>>1,
+      0026000000>>1, 0037000000>>1,
+      // '8', '9', '0', '#', "@", ':', '>', '√'
+      0117000000>>1, 0106000000>>1, 0016000000>>1, 0007000000>>1, 0517000000>>1, 0106000000>>1,
+      0016000000>>1, 0007000000>>1,
+      // '¢', '/', 'S', 'T', 'U', 'V', 'W', 'X'
+      0163000000>>1, 0172000000>>1, 0062000000>>1, 0073000000>>1, 0122000000>>1, 0133000000>>1,
+      0023000000>>1, 0032000000>>1,
+      // 'Y', 'Z', '≠', ',', '%', '=', '\\','⧻'
+      0112000000>>1, 0103000000>>1, 0032000000>>1, 0002000000>>1, 0112000000>>1, 0103000000>>1,
+      0163000000>>1, 0002000000>>1,
+      // '-', 'J', 'K', 'L', 'M', 'N', 'O', 'P'
+      0165000000>>1, 0174000000>>1, 0064000000>>1, 0075000000>>1, 0124000000>>1, 0135000000>>1,
+      0025000000>>1, 0034000000>>1,
+      // 'Q', 'R', '!', '$', '*', ']', ';', 'Δ'
+      0114000000>>1, 0105000000>>1, 0034000000>>1, 0004000000>>1, 0114000000>>1, 0105000000>>1,
+      0165000000>>1, 0004000000>>1,
+      // '&', 'A', 'B', 'C', 'D', 'E', 'F', 'G'
+      0160000000>>1, 0171000000>>1, 0061000000>>1, 0070000000>>1, 0121000000>>1, 0130000000>>1,
+      0020000000>>1, 0031000000>>1,
+      // 'H', 'I', '?', '.', '⌑', '[', '<', '⯒
+      0111000000>>1, 0100000000>>1, 0031000000>>1, 0001000000>>1, 0111000000>>1, 0100000000>>1,
+      0160000000>>1, 0001000000>>1 };
+// Same kind of thing, but for the control-code bit flags in CIO 134.
+int PATN134[] =
+  {
+      // space, black , red, index, return, tab
+      0000010000>>1, 0000040000>>1, 0000100000>>1, 0000200000>>1, 0000020000>>1, 0000400000>>1
+  };
+// This array tells which of the typewriter characters are "upper case".
+// This categorization has nothing whatever to do with your normal conception,
+// since 'A', 'B', ..., 'Z' are all "lower case" in this categorization.
+// Rather, it has to do with where various characters are positioned on the
+// particular Selectric ball being used by the PTC's typewriter.
+int UPCASE[] = {
+    // ' ', '1', '2', '3', '4', '5', '6', '7'
+    0, 0, 0, 0, 0, 0, 0, 0,
+    // '8', '9', '0', '#', "@", ':', '>', '√'
+    0, 0, 0, 0, 1, 1, 1, 1,
+    // '¢', '/', 'S', 'T', 'U', 'V', 'W', 'X'
+    0, 0, 0, 0, 0, 0, 0, 0,
+    // 'Y', 'Z', '≠', ',', '%', '=', '\\','⧻'
+    0, 0, 1, 0, 1, 1, 1, 1,
+    // '-', 'J', 'K', 'L', 'M', 'N', 'O', 'P'
+    0, 0, 0, 0, 0, 0, 0, 0,
+    // 'Q', 'R', '!', '$', '*', ']', ';', 'Δ'
+    0, 0, 1, 0, 1, 1, 1, 1,
+    // '&', 'A', 'B', 'C', 'D', 'E', 'F', 'G'
+    0, 0, 0, 0, 0, 0, 0, 0,
+    // 'H', 'I', '?', '.', '⌑', '[', '<', '⯒
+    0, 0, 1, 0, 1, 1, 1, 1
+};
 
 // Returns 0 on success, non-zero on fatal error.
 int
@@ -133,11 +204,11 @@ processInterruptsAndIO(void)
       // On the other hand, if we've skipped down to morePIO, then the
       // converse is true.
       state.pioChange = -1;
-      morePIO:;
+      morePIO: ;
     }
   else if (state.cioChange != -1)
     {
-      int remainder, quotient;
+      int remainder, quotient, index;
       channel = state.cioChange;
       payload = state.cio[channel];
 
@@ -163,7 +234,7 @@ processInterruptsAndIO(void)
         {
           if (channel == 0000)
             {
-              state.interruptInhibitLatches|= payload & 077777;
+              state.interruptInhibitLatches |= payload & 077777;
             }
           else if (channel == 0004)
             {
@@ -177,6 +248,50 @@ processInterruptsAndIO(void)
             {
               state.masterInterruptLatch = 0;
             }
+          else if (channel == 0120)
+            {
+              // Fix the interrupt bits.
+              index = (payload >> 20) & 077;
+              fixInterruptBits:;
+              int charCase = UPCASE[index];
+              if (charCase != state.lastTypewriterCharCase)
+                {
+                  state.lastTypewriterCharCase = charCase;
+                  if (charCase)
+                    state.currentCaseInterrupt = 0200000000;
+                  else
+                    state.currentCaseInterrupt = 0100000000;
+                  state.cio[0154] |= state.currentCaseInterrupt;
+                  state.caseChange = 1;
+                  state.currentTypewriterInterrupt = PATN[index];
+                }
+              else
+                state.cio[0154] |= PATN[index];
+              goto moreCIO;
+            }
+          else if (channel == 0124)
+            {
+              // Fix the interrupt bits.
+              index = (payload >> 22) & 017;
+              goto fixInterruptBits;
+            }
+          else if (channel == 0130)
+            {
+              // Fix the interrupt bits.
+              index = (payload >> 23) & 07;
+              if (index == 0) // In octal coding, a printed '0' is encoded as a space.
+                index = 012;
+              goto fixInterruptBits;
+            }
+          else if (channel == 0134)
+            {
+              // Fix the interrupt bits.
+              int i, bits;
+              for (i = 0, bits = payload; i < 6; i++, bits = bits << 1)
+                if ((bits & 0200000000) != 0)
+                  state.cio[0154] |= PATN134[i];
+              goto moreCIO;
+            }
           else if (channel == 0210)
             {
               state.gateProgRegA = (payload & 077) << 3;
@@ -184,7 +299,7 @@ processInterruptsAndIO(void)
             }
           else if (channel == 0224)
             {
-              interruptLatches |= (payload & 0377774000) | ((payload & 03777) << 15);
+              interruptLatches|= (payload & 0377774000) | ((payload & 03777) << 15);
             }
           else
             {

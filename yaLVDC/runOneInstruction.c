@@ -389,7 +389,19 @@ runOneInstruction(int *cyclesUsed)
     {
       state.busyCountTypewriter--;
       if (!state.busyCountTypewriter)
-        state.cio[0214] &= ~4;
+        {
+          if (state.caseChange)
+            {
+              //printf("CASE %09o %09o %09o ", state.cio[0154], state.currentCaseInterrupt, state.currentTypewriterInterrupt);
+              state.caseChange = 0;
+              //state.cio[0154] &= ~state.currentCaseInterrupt;
+              state.cio[0154] |= state.currentTypewriterInterrupt;
+              //printf("-> %09o\n", state.cio[0154]);
+              state.busyCountTypewriter = CASE_CHANGE_BUSY_CYCLES;
+            }
+          else
+            state.cio[0214] &= ~4;
+        }
     }
 
   // Set global variables providing background info on the emulation.

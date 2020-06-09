@@ -106,6 +106,7 @@ BA8421b = [
 	'&', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
 	'H', 'I', '?', '.', '⌑', '[', '<', '⯒'
 ]
+
 refreshRate = 1 # Milliseconds
 resizable = 0
 

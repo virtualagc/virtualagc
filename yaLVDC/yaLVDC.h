@@ -45,6 +45,12 @@
 
 // Length of an LVDC CPU's "computer cycle".
 #define SECONDS_PER_CYCLE (168.0/2048000) // About 82us.
+// A delay, expressed in number of CPU machine cycles, for which to hold the
+// plotter, printer, and typewriter ready lines at a BUSY level after writing
+// data or commands to those peripherals.  Yes, it could be fine-tuned a lot
+// more than this!  All I really know is that 0 is too short and 45 is too long.
+#define PERIPHERAL_BUSY_CYCLES 40
+#define CASE_CHANGE_BUSY_CYCLES 1060
 
 // See debug.c
 // (Note that debug.c relates to debugging yaLVDC and not to the
@@ -182,6 +188,10 @@ typedef struct
   int busyCountPlotter;
   int busyCountPrinter;
   int busyCountTypewriter;
+  int caseChange;
+  int currentTypewriterInterrupt;
+  int currentCaseInterrupt;
+  int lastTypewriterCharCase;
   int interruptInhibitLatches;
   int masterInterruptLatch;
   int gateProgRegA;
