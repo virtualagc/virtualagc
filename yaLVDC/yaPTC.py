@@ -200,13 +200,6 @@ class typewriter:
 		self.text.configure(insertborderwidth="3")
 		self.text.configure(selectbackground="#c4c4c4")
 		self.text.configure(wrap="char")
-		# We want the tab stops to be every 5 characters.  Unfortunately,
-		# the widget we're using does it in terms of distances.  (Plus, 
-		# how to do it is mostly undocumented.)  So ultimately,
-		# we've just chosen some numbers that get us into the right ballpark,
-		# using trial and error.  Plus, it will probably all be different 
-		# on a different computer than mine anyway.
-		self.text.configure(tabs=("0.8919c", "1.7838c"))
 
 ###################################################################################
 # The separate window implementing the plotter peripheral.
@@ -247,9 +240,10 @@ def eventAdvance(event):
 	
 resetMachine = False
 def eventResetMachine(event):
-	global resetMachine
+	global resetMachine, isRed
 	resetMachine = True
 	indicatorOn(event.widget)
+	isRed = False
 
 halt = False
 def eventHalt(event):
@@ -940,7 +934,7 @@ def outputFromCPU(ioType, channel, value):
 				string += "\n"
 				see = True
 			if isRed:
-				typewriterWindow.text.insert(tk.END, string, red)
+				typewriterWindow.text.insert(tk.END, string, "red")
 			else:
 				typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o160:
@@ -1014,7 +1008,7 @@ def outputFromCPU(ioType, channel, value):
 				see = True
 			elif value == 0o004000000:
 				name = "tab"
-				string = "\t"
+				string = ""
 				while True:
 					string += " "
 					typewriterCharsInLine += 1
