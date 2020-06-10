@@ -914,12 +914,14 @@ penDown = False
 xDelta = 0
 yDelta = 0
 typewriterCharsInLine = 0
+isRed = False
 def outputFromCPU(ioType, channel, value):
 	global displaySelect, modeControl, addressCompare, dcDisplayCount, crlfCount
 	global prsModeBCD, xPlot, yPlot, penDown, xDelta, yDelta, typewriterCharsInLine
+	global isRed
 	see = False
 	
-	print("*", end="")
+	#print("*", end="")
 	
 	if ioType == 0:
 		# PIO
@@ -937,7 +939,10 @@ def outputFromCPU(ioType, channel, value):
 				typewriterCharsInLine = 0
 				string += "\n"
 				see = True
-			typewriterWindow.text.insert(tk.END, string)
+			if isRed:
+				typewriterWindow.text.insert(tk.END, string, red)
+			else:
+				typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o160:
 			top2 = (value >> 24) & 3
 			bottom4 = (value >> 20) & 3
@@ -950,7 +955,7 @@ def outputFromCPU(ioType, channel, value):
 			else:
 				string = "%d space(s)" % bottom4
 				while bottom4 > 0:
-					printerWindow.text.insert(tk.END, " ")
+					printerWindow.text.insert(tk.END, " ", "bg")
 					bottom4 -= 1
 				crlfCount = 0
 			#print("\nPrinter carriage control = %09o (%s)" % (value, string), end="  ")
@@ -962,7 +967,10 @@ def outputFromCPU(ioType, channel, value):
 				typewriterCharsInLine = 0
 				string += "\n"
 				see = True
-			typewriterWindow.text.insert(tk.END, string)
+			if isRed:
+				typewriterWindow.text.insert(tk.END, string, "red")
+			else:
+				typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o164: # Set printer octal mode.
 			prsModeBCD = False
 		elif channel == 0o170: # Set printer BCD mode.
@@ -975,7 +983,10 @@ def outputFromCPU(ioType, channel, value):
 				typewriterCharsInLine = 0
 				string += "\n"
 				see = True
-			typewriterWindow.text.insert(tk.END, string)
+			if isRed:
+				typewriterWindow.text.insert(tk.END, string, "red")
+			else:
+				typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o134:
 			string = ""
 			if value == 0o200000000:
@@ -988,8 +999,10 @@ def outputFromCPU(ioType, channel, value):
 					see = True
 			elif value == 0o100000000:
 				name = "black ribbon"
+				isRed = False
 			elif value == 0o040000000:
 				name = "red ribbon"
+				isRed = True
 			elif value == 0o020000000:
 				name = "index"
 				string = ("\n%%%ds" % typewriterCharsInLine) % ""
@@ -1016,7 +1029,10 @@ def outputFromCPU(ioType, channel, value):
 				string = "(illegal)"
 			#print("\nTypewriter control = %09o (%s)" % (value, name), end="  ")
 			if string != "":
-				typewriterWindow.text.insert(tk.END, string)
+				if isRed:
+					typewriterWindow.text.insert(tk.END, string, "red")
+				else:
+					typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o140:
 			#print("\nX plot = %09o" % value, end="  ")
 			xDelta = value & 0o1777
@@ -1079,15 +1095,12 @@ def outputFromCPU(ioType, channel, value):
 				indicatorOff(top.P40)
 			return
 		elif channel == 0o210:
-			# All I'm doing here (CIO-210) is manipulating indicator lamps,
-			# but the discretes additionally have some other functionality
-			# in terms of latching signals or something which is
-			# TBD.  ***FIXME***
 			if value & 0o1:
 				indicatorOn(top.D1)
-				printerWindow.text.insert(tk.END, "\n")
-				printerWindow.text.see("end")
-				crlfCount += 1
+				if crlfCount == 0:
+					printerWindow.text.insert(tk.END, "\n")
+					printerWindow.text.see("end")
+					crlfCount += 1
 			else:
 				indicatorOff(top.D1)
 			if value & 0o2:
@@ -1123,6 +1136,10 @@ def outputFromCPU(ioType, channel, value):
 	elif ioType == 2:
 		if channel == 0o774:
 			print("\nPRS 774 (group mark)", end= "  ")
+			if crlfCount == 0:
+				printerWindow.text.insert(tk.END, "\n")
+				printerWindow.text.see("end")
+				crlfCount += 1
 		else: # PRS from ACC or memory.
 			#print("\nPRS 775 (%09o)" % value)
 			string = ""
@@ -1137,7 +1154,7 @@ def outputFromCPU(ioType, channel, value):
 					string += chr(ord('0') + ((value >> shift) & 0o07))
 					shift -= 3
 				string += chr(ord('0') + ((value << 1) & 0o07)) + "   "
-			printerWindow.text.insert(tk.END, string)
+			printerWindow.text.insert(tk.END, string, "bg")
 			crlfCount = 0
 	elif ioType == 5:
 		if channel == 0o000:
@@ -2141,7 +2158,9 @@ top.pdpHOPSAVE_REG.bind("<Button-1>", eventMarHsr)
 # Create the extra windows for the printer, plotter, and typewriter
 # peripherals.
 printerWindow = printer(tk.Toplevel(root))
+printerWindow.text.tag_config("bg", background="#f8f8f8")
 typewriterWindow = typewriter(tk.Toplevel(root))
+typewriterWindow.text.tag_config("red", foreground="red")
 plotterWindow = plotter(tk.Toplevel(root))
 # Note that the "printer" and "typewriter" classes use widgets of type 
 # ScrolledText and ScrolledWindow, which are not native tkinter widgets, 
