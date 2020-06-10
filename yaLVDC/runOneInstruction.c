@@ -309,7 +309,8 @@ convertNativeToDataWord(int integer)
   return (integer & dataWordMask);
 }
 
-void checkForInterrupts(void)
+void
+checkForInterrupts(void)
 {
   // Check if an interrupt has been triggered.
   if (!state.masterInterruptLatch && !state.inhibitInterruptsOneCycle)
@@ -373,17 +374,19 @@ runOneInstruction(int *cyclesUsed)
   state.cioChange = -1;
   state.prsChange = -1;
   state.lastHop = -1;
+  state.riLastHOP = state.hop;
   if (state.busyCountPlotter)
     {
       state.busyCountPlotter--;
       if (!state.busyCountPlotter)
-        state.cio[0214] &= ~2;
+        state.bbPlotter = 0;
     }
   if (state.busyCountPrinter)
     {
       state.busyCountPrinter--;
       if (!state.busyCountPrinter)
-        state.cio[0214] &= ~1;
+        state.bbPrinter = 0;
+      ;
     }
   if (state.busyCountTypewriter)
     {
@@ -398,9 +401,13 @@ runOneInstruction(int *cyclesUsed)
               state.cio[0154] |= state.currentTypewriterInterrupt;
               //printf("-> %09o\n", state.cio[0154]);
               state.busyCountTypewriter = CASE_CHANGE_BUSY_CYCLES;
+              dPrintoutsTypewriter("R1I CASE CHANGE");
             }
           else
-            state.cio[0214] &= ~4;
+            {
+              state.bbTypewriter = 0;
+              dPrintoutsTypewriter("R1I READY");
+            }
         }
     }
 
@@ -458,6 +465,7 @@ runOneInstruction(int *cyclesUsed)
         goto done;
     }
   memcpy(&rawestHopStructure, &rawHopStructure, sizeof(hopStructure_t));
+  state.riLastInstruction = instruction;
 
   // Parse instruction into fields.
   state.lastInstruction = instruction;
@@ -561,23 +569,21 @@ runOneInstruction(int *cyclesUsed)
       // them and then by testing that CIO 175 has put 0 into ACC.  On the basis of
       // this rather slim data, I infer that 175 is a spare input port while the others
       // are spare outputs.
-      if (operand9 == 0154 || operand9 == 0214 || operand9 == 0220 || operand9 == 0175)
+      if (operand9 == 0154 || operand9 == 0214 || operand9 == 0220
+          || operand9 == 0175)
         {
           // The "gate" is needed only for reading PROG REG A, in which the lowest
           // 9 bits are gated by bit written out on CIO 210 to the discrete outputs.
           // When 1, those bits cause the corresponding bits on CIO 210 to be read
           // back as 1, but when 0 gates in other signals on CIO 210, including the
           // PRINTER/PLOTTER/TYPEWRITER BUSY bits.
-          int gate = 0;
+          state.acc = state.cio[operand9];
           if (operand9 == 0214)
             {
-              gate = state.gateProgRegA;
+              state.acc |= state.progRegA17_22 | state.bbPrinter | state.bbPlotter
+                  | state.bbTypewriter;
+              dPrintoutsTypewriter("RI CIO 214");
             }
-          state.acc = state.cio[operand9] | gate;
-          //if (operand9 == 0214)
-          //  {
-          //    printf("PROG REG A (%09o) gated with %09o, giving %09o.\n", state.cio[operand9], gate, state.acc);
-          //  }
         }
       else
         {

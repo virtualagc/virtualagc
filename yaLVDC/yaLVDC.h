@@ -49,8 +49,11 @@
 // plotter, printer, and typewriter ready lines at a BUSY level after writing
 // data or commands to those peripherals.  Yes, it could be fine-tuned a lot
 // more than this!  All I really know is that 0 is too short and 45 is too long.
-#define PERIPHERAL_BUSY_CYCLES 40
+#define SHORT_BUSY_CYCLES 15
+#define MEDIUM_BUSY_CYCLES 20
+#define PERIPHERAL_BUSY_CYCLES 30
 #define CASE_CHANGE_BUSY_CYCLES 1060
+#define CARRIAGE_RETURN_BUSY_CYCLES 40
 
 // See debug.c
 // (Note that debug.c relates to debugging yaLVDC and not to the
@@ -65,22 +68,17 @@
 #define DEBUG_SYMBOLS 		1
 #define DEBUG_SOURCE_LINES 	2
 #define DEBUG_CORE		4
+#define DEBUG_TYPEWRITER        8
 
 #define DEBUG_FLAGS DEBUG_NONE
 #if DEBUG_FLAGS != DEBUG_NONE
 #define DEBUG
 #endif
 
-#ifdef DEBUG
-void
-dPrintouts (void);
-#else
-#define dPrintouts()
-#endif
-
 // See yaLVDC.c
 extern int clockDivisor;
 extern int inhibitFetchMessages;
+extern unsigned long cycleCount;
 #define MAX_SYMBOL_LENGTH 10
 typedef struct
 {
@@ -188,13 +186,18 @@ typedef struct
   int busyCountPlotter;
   int busyCountPrinter;
   int busyCountTypewriter;
+  int bbPlotter;
+  int bbPrinter;
+  int bbTypewriter;
   int caseChange;
   int currentTypewriterInterrupt;
   int currentCaseInterrupt;
   int lastTypewriterCharCase;
   int interruptInhibitLatches;
   int masterInterruptLatch;
-  int gateProgRegA;
+  int progRegA17_22;
+  int riLastHOP; // Just used for debugging.
+  int riLastInstruction; // Just used for debugging.
   // It's possible that I missed seeing it, but the PTC documentation doesn't cover
   // something which I think is necessary, and that's that you can't have an interrupt
   // immediately following an instruction like HOP, TRA, TNZ, or TMI (in some cases),
@@ -301,6 +304,9 @@ processInterruptsAndIO(void);
 extern int ServerBaseSocket;
 extern int PortNum;
 extern int virtualWireErrorCodes;
+extern int typewriterMargin;
+extern int typewriterTabStop;
+extern int typewriterCharsInLine;
 // Functions.
 int
 InitializeSocketSystem(void);
@@ -314,5 +320,33 @@ void
 connectCheck(void);
 int
 pendingVirtualWireActivity(void);
+
+// Used only during development, for printing certain kinds of debugging messages.
+
+#if defined(DEBUG) && (DEBUG & DEBUG_TYPEWRITER) != 0
+#ifndef yaLVDC_C
+void dPrintoutsTypewriter(char *);
+#else
+void
+dPrintoutsTypewriter(char *msg)
+{
+  hopStructure_t hs;
+  parseHopConstant(state.riLastHOP, &hs);
+  printf(
+      "Cycles=%lu, ACC=%09o, INT=%09o, TINT=%09o, TCNT=%d, TBB=%d, TCHARS=%d, PCNT=%d, PBB=%d, HOP=%o-%02o-%o-%03o %o-%02o, INS=%05o: %s\n",
+      cycleCount, state.acc, state.cio[0154], state.currentTypewriterInterrupt,
+      state.busyCountTypewriter, state.bbTypewriter, typewriterCharsInLine, state.busyCountPrinter, state.bbPrinter, hs.im, hs.is, hs.s, hs.loc, hs.dm, hs.ds, state.riLastInstruction, msg);
+}
+#endif // yaLVDC_C
+#else
+#define dPrintoutsTypewriter(msg)
+#endif // DEBUG_TYPEWRITER
+
+#ifdef DEBUG
+void
+dPrintouts(void);
+#else
+#define dPrintouts()
+#endif
 
 #endif // yaLVDC_h

@@ -110,6 +110,9 @@ BA8421b = [
 refreshRate = 1 # Milliseconds
 resizable = 0
 
+typewriterMargin = 90
+typewriterTabStop = 10
+
 # Parse command-line arguments.
 import argparse
 cli = argparse.ArgumentParser()
@@ -118,6 +121,8 @@ cli.add_argument("--port", help="Port for yaLVDC, defaulting to 19653.", type=in
 cli.add_argument("--id", help="Unique ID of this peripheral (1-7), default=1.", type=int)
 cli.add_argument("--resize", help="If 1 (default 0), make the window resizable.", type=int)
 cli.add_argument("--scale", help="An integer (default 1) scale for the plotter peripheral.", type=int)
+cli.add_argument("--twidth", help="Width of the typewriter, in characters (default %d)." % typewriterMargin, type=int)
+cli.add_argument("--tstop", help="Typewriter tab width, in characters (default %d)." % typewriterTabStop, type=int)
 args = cli.parse_args()
 
 # Characteristics of the host and port being used for yaLVDC communications.  
@@ -157,6 +162,12 @@ if args.scale:
 else:
 	plotScale = 1
 
+if args.twidth:
+	typewriterMargin = args.twidth
+
+if args.tstop:
+	typewriterTabStop = args.tstop
+	
 ###################################################################################
 # The separate window implementing the printer peripheral.
 
@@ -384,7 +395,13 @@ def inputsForCPU():
 	#global delayCount, ioTypeCount, channelCount
 	global ProgRegA, ProgRegB, resetMachine, halt, needStatusFromCPU
 	global changedIA, changedDA, changedD, displayModePayload, advance
+	global newConnect
 	returnValue = []
+	
+	if newConnect:
+		returnValue.append((4, 0o606, typewriterMargin, nomask))
+		returnValue.append((4, 0o607, typewriterTabStop, nomask))
+		newConnect = False
 	
 	if ProgRegA != -1:
 		n = ProgRegA
@@ -896,9 +913,12 @@ yPlot = 0
 penDown = False
 xDelta = 0
 yDelta = 0
+typewriterCharsInLine = 0
 def outputFromCPU(ioType, channel, value):
 	global displaySelect, modeControl, addressCompare, dcDisplayCount, crlfCount
-	global prsModeBCD, xPlot, yPlot, penDown, xDelta, yDelta
+	global prsModeBCD, xPlot, yPlot, penDown, xDelta, yDelta, typewriterCharsInLine
+	see = False
+	
 	print("*", end="")
 	
 	if ioType == 0:
@@ -912,6 +932,11 @@ def outputFromCPU(ioType, channel, value):
 		elif channel == 0o120:
 			string = BA8421b[(value >> 20) & 0o77]
 			#print("\nTypewriter alphanumeric = %09o (%s)" % (value, string), end="  ")
+			typewriterCharsInLine += 1
+			if typewriterCharsInLine >= typewriterMargin:
+				typewriterCharsInLine = 0
+				string += "\n"
+				see = True
 			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o160:
 			top2 = (value >> 24) & 3
@@ -932,6 +957,11 @@ def outputFromCPU(ioType, channel, value):
 		elif channel == 0o124:
 			string = BA8421b[(value >> 22) & 0o17]
 			#print("\nTypewriter decimal = %09o (%s)" % (value, string), end="  ")
+			typewriterCharsInLine += 1
+			if typewriterCharsInLine >= typewriterMargin:
+				typewriterCharsInLine = 0
+				string += "\n"
+				see = True
 			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o164: # Set printer octal mode.
 			prsModeBCD = False
@@ -940,31 +970,53 @@ def outputFromCPU(ioType, channel, value):
 		elif channel == 0o130:
 			string = chr(ord('0') + ((value >> 23) & 0o07))
 			#print("\nTypewriter octal = %09o (%s)" % (value, string), end="  ")
+			typewriterCharsInLine += 1
+			if typewriterCharsInLine >= typewriterMargin:
+				typewriterCharsInLine = 0
+				string += "\n"
+				see = True
 			typewriterWindow.text.insert(tk.END, string)
 		elif channel == 0o134:
 			string = ""
 			if value == 0o200000000:
 				name = "space"
 				string = " "
+				typewriterCharsInLine += 1
+				if typewriterCharsInLine >= typewriterMargin:
+					typewriterCharsInLine = 0
+					string += "\n"
+					see = True
 			elif value == 0o100000000:
 				name = "black ribbon"
 			elif value == 0o040000000:
 				name = "red ribbon"
 			elif value == 0o020000000:
 				name = "index"
+				string = ("\n%%%ds" % typewriterCharsInLine) % ""
+				see = True
 			elif value == 0o010000000:
 				name = "return"
 				string = "\n"
+				typewriterCharsInLine = 0
+				see = True
 			elif value == 0o004000000:
 				name = "tab"
 				string = "\t"
+				while True:
+					string += " "
+					typewriterCharsInLine += 1
+					if typewriterCharsInLine >= typewriterMargin:
+						typewriterCharsInLine = 0
+						string += "\n"
+						see = True
+						break
+					if typewriterCharsInLine % typewriterTabStop == 0:
+						break
 			else:
-				string = "illegal"
+				string = "(illegal)"
 			#print("\nTypewriter control = %09o (%s)" % (value, name), end="  ")
 			if string != "":
 				typewriterWindow.text.insert(tk.END, string)
-				if name == "return":
-					typewriterWindow.text.see("end")
 		elif channel == 0o140:
 			#print("\nX plot = %09o" % value, end="  ")
 			xDelta = value & 0o1777
@@ -1033,6 +1085,9 @@ def outputFromCPU(ioType, channel, value):
 			# TBD.  ***FIXME***
 			if value & 0o1:
 				indicatorOn(top.D1)
+				printerWindow.text.insert(tk.END, "\n")
+				printerWindow.text.see("end")
+				crlfCount += 1
 			else:
 				indicatorOff(top.D1)
 			if value & 0o2:
@@ -1041,6 +1096,9 @@ def outputFromCPU(ioType, channel, value):
 				indicatorOff(top.D2)
 			if value & 0o4:
 				indicatorOn(top.D3)
+				typewriterCharsInLine = 0
+				typewriterWindow.text.insert(tk.END, "\n")
+				typewriterWindow.text.see("end")
 			else:
 				indicatorOff(top.D3)
 			if value & 0o10:
@@ -1060,7 +1118,8 @@ def outputFromCPU(ioType, channel, value):
 			indicatorOn(top.PROG_ERR)
 		else:
 			print("\nChannel CIO-%03o = %09o" % (channel, value), end="  ")
-		
+		if see:
+			typewriterWindow.text.see("end")
 	elif ioType == 2:
 		if channel == 0o774:
 			print("\nPRS 774 (group mark)", end= "  ")
@@ -1461,7 +1520,9 @@ import socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setblocking(0)
 
+newConnect = False
 def connectToAGC():
+	global newConnect
 	import sys
 	count = 0
 	sys.stderr.write("Connecting to LVDC/PTC emulator at %s:%d\n" % (TCP_IP, TCP_PORT))
@@ -1469,6 +1530,7 @@ def connectToAGC():
 		try:
 			s.connect((TCP_IP, TCP_PORT))
 			sys.stderr.write("Connected.\n")
+			newConnect = True
 			break
 		except socket.error as msg:
 			sys.stderr.write(str(msg) + "\n")

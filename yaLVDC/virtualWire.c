@@ -170,6 +170,8 @@
  *      Channel 603:    Step a single instruction.
  *      Channel 604:    Reset the CPU.
  *      Channel 605:    Request status.
+ *      Channel 606:    Width of typewriter carriage, in characters.
+ *      Channel 607:    Width of typewriter tab stop, in characters.
  *
  * Type 101 (from CPU emulation to panel emulation):
  *      Channel 000:    CPU is paused.
@@ -391,18 +393,28 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       // report back that the device wasn't busy.
       if (channel == 0144 || channel == 0150)
         {
-          state.cio[0214] |= 2;
+          state.bbPlotter = 2;
           state.busyCountPlotter = PERIPHERAL_BUSY_CYCLES;
         }
       else if (channel == 0160)
         {
-          state.cio[0214] |= 1;
+          state.bbPrinter = 1;
           state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
         }
       else if (channel == 0120 || channel == 0124 || channel == 0130 || channel == 0134)
         {
-          state.cio[0214] |= 4;
-          state.busyCountTypewriter = PERIPHERAL_BUSY_CYCLES;
+          state.bbTypewriter = 4;
+          if (typewriterCharsInLine >= typewriterMargin)
+            {
+              dPrintoutsTypewriter("VW HIT MARGIN or RETURN");
+              state.busyCountTypewriter = CARRIAGE_RETURN_BUSY_CYCLES;
+              typewriterCharsInLine = 0;
+            }
+          else
+            {
+              state.busyCountTypewriter = PERIPHERAL_BUSY_CYCLES;
+              dPrintoutsTypewriter("VW CIO 120/124/130/134");
+            }
         }
     }
   else if (state.prsChange != -1)
@@ -411,7 +423,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       channel = state.prsChange;
       payload = state.prs[channel];
       state.prsChange = -1;
-      state.cio[0214] |= 1;
+      state.bbPrinter = 1;
       state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
     }
   if (ioType >= 0)
@@ -701,6 +713,16 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                         {
                           printf("PTC panel requesting status.\n");
                           needStatus = 1;
+                        }
+                      else if (channel == 0606)
+                        {
+                          printf("PTC typewriter carriage width %d.\n", value);
+                          typewriterMargin = value;
+                        }
+                      else if (channel == 0607)
+                        {
+                          printf("PTC typewriter tab width %d.\n", value);
+                          typewriterTabStop = value;
                         }
                       else
                         printf("Command %03o/%09o received from PTC panel\n",

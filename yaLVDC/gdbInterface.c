@@ -1040,7 +1040,8 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       formHopDescription(state.hopSaver, 0, 0, 0, hopBuffer, &hs2);
       if (ptc)
         {
-          printf(" TYP = %d ", state.busyCountTypewriter);
+          //printf(" TYP = %d ", state.busyCountTypewriter);
+          //printf(" CNT = %d ", typewriterCharsInLine);
           printf(" INT = %09o", state.cio[0154]);
           printf("  INH = %09o", state.interruptInhibitLatches);
           printf("  INB = %d\n", state.masterInterruptLatch);

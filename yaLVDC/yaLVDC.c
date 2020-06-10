@@ -37,6 +37,7 @@
  */
 
 #include <stdio.h>
+#define yaLVDC_C
 #include "yaLVDC.h"
 
 breakpoint_t breakpoints[MAX_BREAKPOINTS];
@@ -178,13 +179,14 @@ addBacktrace(int16_t fromInstruction, int32_t fromWhere, int32_t toWhere,
 // Main program.
 
 int clockDivisor = 1;
+unsigned long cycleCount = 0;
 int
 main(int argc, char *argv[])
 {
   int retVal = 1;
   clock_t startingTime, currentTime, pausedTime = 0, panelPauseTime = 0;
   double cyclesPerTick;
-  unsigned long cycleCount = 0, nextSnapshot, snapshotIntervalCycles = 5.0
+  unsigned long nextSnapshot, snapshotIntervalCycles = 5.0
       / SECONDS_PER_CYCLE;
   struct tms TmsStruct;
   unsigned long instructionCount = 0;
