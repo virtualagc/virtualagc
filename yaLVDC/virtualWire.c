@@ -260,6 +260,19 @@ formatPacket(int ioType, int channel, int payload, int isMask)
   outPacket[outPacketSize++] = payload & 0177;
 }
 
+// Compute parity of a 6-bit value.  The value returned is suitable for direct
+// insertion into an interrupt latch after a PRS instruction.
+int
+oddParity6(int value)
+{
+  value ^= (value >> 1) ^ (value >> 2) ^ (value >> 3) ^ (value >> 4) ^ (value >> 5);
+  value = 1 & ~value;
+  if (value)
+    return (0004000000 >> 1);
+  else
+    return (0000000000 >> 1);
+}
+
 // Once the server system has been activated, call this function once after
 // emulation of each LVDC/PTC instruction to take care of any pending
 // virtual-wire actions.  Returns 0 on success, non-zero on error.
@@ -275,6 +288,12 @@ pendingMask_t pendingMasks[MAX_LISTENERS] =
   {
     { 0 } };
 static int needStatus = 0;
+int printerOctalMode = 0;
+static const int octalPATN[] = {
+    0120300000>>1, 0130300000>>1, 0120300000>>1, 0130300000>>1, 0160300000>>1, 0170300000>>1, 0160300000>>1, 0170300000>>1
+};
+const int PATN160[32] = { 0
+};
 int
 pendingVirtualWireActivity(void /* int id, int mask */)
 {
@@ -401,6 +420,10 @@ pendingVirtualWireActivity(void /* int id, int mask */)
           state.bbPrinter = 1;
           state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
         }
+      else if (channel == 0164)
+        printerOctalMode = 1;
+      else if (channel == 0170)
+        printerOctalMode = 0;
       else if (channel == 0120 || channel == 0124 || channel == 0130 || channel == 0134)
         {
           state.bbTypewriter = 4;
@@ -419,12 +442,61 @@ pendingVirtualWireActivity(void /* int id, int mask */)
     }
   else if (state.prsChange != -1)
     {
+      int i;
+
       ioType = 2;
       channel = state.prsChange;
       payload = state.prs[channel];
       state.prsChange = -1;
       state.bbPrinter = 1;
-      state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
+      state.prsParityDelayCount = 0;
+
+      state.cio[0154] = 0;
+      if (channel == 0774) // Group mark.
+        {
+          state.busyCountPrinter = MEDIUM_BUSY_CYCLES;
+          state.cio[0154] |= 0000700000 >> 1;
+          state.prsDelayedParity[1] = oddParity6(000);
+          state.prsDelayedParity[2] = oddParity6(000);
+          state.prsDelayedParity[3] = oddParity6(000);
+        }
+      else if (printerOctalMode)
+        {
+          state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
+          for (i = 0; i <= 24; i += 3)
+            {
+              int octal = ((payload << i) & 0340000000) >> 23;
+              state.cio[0154] |= octalPATN[octal];
+              if (i == 3)
+                state.prsDelayedParity[1] = oddParity6(octal);
+              else if (i == 18)
+                state.prsDelayedParity[2] = oddParity6(octal);
+              else if (i == 24)
+                {
+                  if (state.inhibit250)
+                    state.prsDelayedParity[3] = oddParity6(octal);
+                  else
+                    state.prsDelayedParity[3] = oddParity6(000);
+                }
+            }
+        }
+      else // BCD mode
+        {
+          state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
+          for (i = 0; i <= 18; i += 6)
+            {
+              int ba8421 = (payload << i) & (0770000000 >> 1);
+              state.cio[0154] |= ba8421;
+              state.cio[0154] |= 0000300000 >> 1;
+              if (i == 6)
+                state.prsDelayedParity[1] = oddParity6(ba8421 >> 20);
+              else if (i == 18)
+                {
+                  state.prsDelayedParity[2] = oddParity6(ba8421 >> 20);
+                  state.prsDelayedParity[3] = oddParity6(ba8421 >> 20);
+                }
+            }
+        }
     }
   if (ioType >= 0)
     {

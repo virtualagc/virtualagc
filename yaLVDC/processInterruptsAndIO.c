@@ -157,7 +157,10 @@ int typewriterCharsInLine = 0;
 int
 processInterruptsAndIO(void)
 {
-  int retVal = 1, channel, payload;
+  int retVal = 1, channel, payload, lastInterruptLatch = 0;
+
+  if (ptc)
+    lastInterruptLatch = state.cio[0154];
 
   // Some of these operations we want to performed entirely locally here,
   // in the yaLVDC program; some we want to be done entirely in the client,
@@ -215,6 +218,14 @@ processInterruptsAndIO(void)
       channel = state.cioChange;
       payload = state.cio[channel];
 
+      if (channel == 0250)
+        {
+          if ((payload & 0200000000) != 0)
+            state.inhibit250 = 1;
+          if ((payload & 0100000000) != 0)
+            state.inhibit250 = 0;
+        }
+
       if (channel == 0240)
         {
           // Light the PROG ERR lamp in the client.  Locally, we
@@ -230,6 +241,9 @@ processInterruptsAndIO(void)
             }
           goto moreCIO;
         }
+
+      if (channel == 0234)
+        state.ai3Shifter = payload;
 
       remainder = channel % 4;
       quotient = channel / 4;
@@ -337,11 +351,16 @@ processInterruptsAndIO(void)
             {
               // Route the discrete outputs back into the (gated) discrete inputs.
               state.progRegA17_22 = (payload & 077) << 3;
-              if ((payload & 1) != 0)
+              if ((payload & 011) != 0 && !state.bbPrinter)
                 {
                   state.bbPrinter = 1;
                   dPrintoutsTypewriter("PI CIO 210 D.O. 1");
                   state.busyCountPrinter = SHORT_BUSY_CYCLES;
+                }
+              else if ((payload & 011) == 0 && state.bbPrinter)
+                {
+                  state.bbPrinter = 0;
+                  state.busyCountPrinter = 0;
                 }
               if ((payload & 4) != 0)
                 {
@@ -440,9 +459,13 @@ processInterruptsAndIO(void)
       moreCIO: ;
     }
 
+  if (ptc && lastInterruptLatch != state.cio[0154])
+    state.prsParityDelayCount = 100;
+
   pendingVirtualWireActivity();
 
   retVal = 0;
   //done: ;
+
   return (retVal);
 }

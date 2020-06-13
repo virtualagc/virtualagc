@@ -198,6 +198,16 @@ typedef struct
   int progRegA17_22;
   int riLastHOP; // Just used for debugging.
   int riLastInstruction; // Just used for debugging.
+  int ai3Shifter;
+  // The following are used only for generating the check-parity bit in the interrupt
+  // latch in the aftermath of a PRS instruction.  prsDelayedParity[0] and [4] are
+  // permanently 0, and represent the condition in which a readback of CIO 154 are
+  // not altered by this check-parity bit.  The [1], [2], and [3] entries are used
+  // for CIO 154 immediately following the PRS, one cycle after PRS, or two cycles
+  // after.
+  int prsDelayedParity[5];
+  int prsParityDelayCount;
+  int inhibit250;
   // It's possible that I missed seeing it, but the PTC documentation doesn't cover
   // something which I think is necessary, and that's that you can't have an interrupt
   // immediately following an instruction like HOP, TRA, TNZ, or TMI (in some cases),

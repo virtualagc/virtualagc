@@ -411,6 +411,15 @@ runOneInstruction(int *cyclesUsed)
         }
     }
 
+  state.ai3Shifter = (state.ai3Shifter << 1) & 0377777777;
+
+  // The following relates to how to report back a PRS instruction check-parity
+  // bit on the interrupt latch, via a CIO 154.  I'm not sure how this should
+  // interact with the regular CIO or PIO instructions for altering the interrupt
+  // latch, nor if the data should be available indefinitely.
+  if (state.prsParityDelayCount < 3)
+    state.prsParityDelayCount++;
+
   // Set global variables providing background info on the emulation.
   state.inhibitInterruptsOneCycle = 0;
   dataFromInstructionMemory = 0;
@@ -580,9 +589,20 @@ runOneInstruction(int *cyclesUsed)
           state.acc = state.cio[operand9];
           if (operand9 == 0214)
             {
-              state.acc |= state.progRegA17_22 | state.bbPrinter | state.bbPlotter
-                  | state.bbTypewriter;
+              state.acc |= state.progRegA17_22 | state.bbPrinter
+                  | state.bbPlotter | state.bbTypewriter;
+              if ((state.cio[0210] & 8) != 0)
+                state.acc |= 1;
+              if ((state.cio[0210] & 16) != 0)
+                state.acc |= 1;
               dPrintoutsTypewriter("RI CIO 214");
+            }
+          else if (operand9 == 0154)
+            {
+              if (state.prsParityDelayCount > 0 && state.prsParityDelayCount < 4)
+                {
+                  state.acc = (state.acc & ~0002000000) | state.prsDelayedParity[state.prsParityDelayCount];
+                }
             }
         }
       else
@@ -595,6 +615,8 @@ runOneInstruction(int *cyclesUsed)
           // below, so we can keep it in all cases.
           state.cio[operand9] = state.acc;
         }
+      if (operand == 0001)
+        state.acc = state.ai3Shifter;
     }
   else if (op == 002)
     {

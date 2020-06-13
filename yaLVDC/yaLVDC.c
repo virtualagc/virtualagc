@@ -223,6 +223,7 @@ main(int argc, char *argv[])
         runStepN = INT_MAX;
     }
   nextSnapshot = cycleCount + snapshotIntervalCycles;
+  state.prsParityDelayCount = 100;
 
   // Note that readCore() must occur after readAssemblies(), since if present,
   // the core-memory file overrides the core-memory image from the assembler.

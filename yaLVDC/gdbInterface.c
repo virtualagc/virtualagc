@@ -1042,6 +1042,12 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
         {
           //printf(" TYP = %d ", state.busyCountTypewriter);
           //printf(" CNT = %d ", typewriterCharsInLine);
+          printf(" PRT = %d ", state.busyCountPrinter);
+          printf("  CNT = %d ", state.prsParityDelayCount);
+          printf("  PR1 = %09o ", state.prsDelayedParity[1]);
+          printf("  PR2 = %09o ", state.prsDelayedParity[2]);
+          printf("  PR3 = %09o ", state.prsDelayedParity[3]);
+
           printf(" INT = %09o", state.cio[0154]);
           printf("  INH = %09o", state.interruptInhibitLatches);
           printf("  INB = %d\n", state.masterInterruptLatch);
