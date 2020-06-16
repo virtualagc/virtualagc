@@ -1,6 +1,6 @@
 /*
   Copyright 2003-2005,2009 Ronald S. Burkey <info@sandroid.org>
-  
+
   This file is part of yaAGC.
 
   yaAGC is free software; you can redistribute it and/or modify
@@ -18,14 +18,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
+  link the code of this program with the Orbiter SDK library (or with
+  modified versions of the Orbiter SDK library that use the same license as
+  the Orbiter SDK library), and distribute linked combinations including
+  the two. You must obey the GNU General Public License in all respects for
+  all of the code used other than the Orbiter SDK library. If you modify
+  this file, you may extend this exception to your version of the file,
+  but you are not obligated to do so. If you do not wish to do so, delete
+  this exception statement from your version.
 
   Filename:	yaAGC.h
   Purpose:	Header file for common yaAGC-project functionality.
@@ -40,7 +40,7 @@
 		08/18/04 RSB	Added the __embedded__ type system.
 		02/27/05 RSB	Added the license exception, as required by
 				the GPL, for linking to Orbiter SDK libraries.
-		05/29/05 RSB	Added AGS equivalents for a couple of 
+		05/29/05 RSB	Added AGS equivalents for a couple of
 				AGC packet functions.
 		08/13/05 RSB	Added the extern "C" stuff.
 		02/28/09 RSB	Added FORMAT_64U, FORMAT_64O for bypassing
@@ -84,8 +84,9 @@ extern "C" {
 
 #elif defined(WIN32)
 
-#include <windows.h>
 #include <winsock2.h>
+#include <windows.h>
+
 #define FORMAT_64U "%llu"
 #define FORMAT_64O "%llo"
 
@@ -124,5 +125,3 @@ int CallSocket (char *hostname, unsigned short portnum);
 #ifdef __cplusplus
 }
 #endif
-
-
