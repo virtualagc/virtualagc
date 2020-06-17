@@ -137,6 +137,8 @@ extern "C" {
 #define NULL ((void *) 0)
 #endif
 
+#include <stdio.h>
+
 // The following is used to get the int16_t datatype.
 #ifdef WIN32
 // Win32
