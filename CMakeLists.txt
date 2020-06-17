@@ -7,7 +7,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 set(NVER \\\"2019-09-22\\\")
 
 add_subdirectory(yaAGC)
+add_subdirectory(yaASM)
 add_subdirectory(yaDSKY2)
+add_subdirectory(yaLVDC)
 add_subdirectory(yaYUL)
 
 ## install to ~/VirtualAGC upon:
