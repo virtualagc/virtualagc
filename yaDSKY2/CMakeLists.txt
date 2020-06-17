@@ -12,6 +12,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/rfopen.c)
 
 add_executable(${APPNAME} ${SOURCES} ${SOURCESc})
 target_include_directories(${APPNAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC)
+target_compile_definitions(${APPNAME} PRIVATE NVER="${NVER}")
 if(WIN32)
   target_link_libraries(${APPNAME} wsock32)
 endif()
