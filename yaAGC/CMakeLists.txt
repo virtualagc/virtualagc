@@ -16,8 +16,9 @@ if(Threads_FOUND)
   target_link_libraries(yaAGC Threads::Threads)
 endif()
 
-
 if(WIN32)
   target_sources(yaAGC PRIVATE regex.c random.c)
   target_link_libraries(yaAGC wsock32)
 endif()
+
+install(TARGETS yaAGC)
