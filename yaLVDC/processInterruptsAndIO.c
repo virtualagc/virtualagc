@@ -351,25 +351,29 @@ processInterruptsAndIO(void)
             {
               // Route the discrete outputs back into the (gated) discrete inputs.
               state.progRegA17_22 = (payload & 077) << 3;
-              if ((payload & 011) != 0 && !state.bbPrinter)
+              if ((payload & 035) != 0 && !state.bbPrinter)
                 {
                   state.bbPrinter = 1;
                   dPrintoutsTypewriter("PI CIO 210 D.O. 1");
                   state.busyCountPrinter = SHORT_BUSY_CYCLES;
                 }
-              else if ((payload & 011) == 0 && state.bbPrinter)
+              else if ((payload & 035) == 0 && state.bbPrinter)
                 {
                   state.bbPrinter = 0;
                   state.busyCountPrinter = 0;
                 }
               if ((payload & 4) != 0)
                 {
+                  state.cio210CarrBusy = 0001020000 >> 1;
                   state.cio[0154] |= PATN134[4];
                   state.bbTypewriter = 4;
                   dPrintoutsTypewriter("PI CIO 210 D.O. 3");
                   typewriterCharsInLine = 0;
                   state.busyCountTypewriter = MEDIUM_BUSY_CYCLES;
+                  state.busyCountPrinter = MEDIUM_BUSY_CYCLES;
                 }
+              if ((payload & 32) != 0)
+                state.cio[0154] = (state.cio[0154] & ~0377770000) | 0305010000;
               goto moreCIO;
             }
           else if (channel == 0224)

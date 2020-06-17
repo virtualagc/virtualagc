@@ -385,8 +385,10 @@ runOneInstruction(int *cyclesUsed)
     {
       state.busyCountPrinter--;
       if (!state.busyCountPrinter)
-        state.bbPrinter = 0;
-      ;
+        {
+          state.bbPrinter = 0;
+          state.cio210CarrBusy = 0;
+        };
     }
   if (state.busyCountTypewriter)
     {
@@ -599,9 +601,12 @@ runOneInstruction(int *cyclesUsed)
             }
           else if (operand9 == 0154)
             {
-              if (state.prsParityDelayCount > 0 && state.prsParityDelayCount < 4)
+              state.acc |= state.cio210CarrBusy;
+              if (state.prsParityDelayCount > 0
+                  && state.prsParityDelayCount < 4)
                 {
-                  state.acc = (state.acc & ~0002000000) | state.prsDelayedParity[state.prsParityDelayCount];
+                  state.acc = (state.acc & ~0002000000)
+                      | state.prsDelayedParity[state.prsParityDelayCount];
                 }
             }
         }

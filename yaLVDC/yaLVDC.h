@@ -49,6 +49,7 @@
 // plotter, printer, and typewriter ready lines at a BUSY level after writing
 // data or commands to those peripherals.  Yes, it could be fine-tuned a lot
 // more than this!  All I really know is that 0 is too short and 45 is too long.
+#define REALLY_SHORT_BUSY_CYCLES 5
 #define SHORT_BUSY_CYCLES 15
 #define MEDIUM_BUSY_CYCLES 20
 #define PERIPHERAL_BUSY_CYCLES 30
@@ -199,6 +200,7 @@ typedef struct
   int riLastHOP; // Just used for debugging.
   int riLastInstruction; // Just used for debugging.
   int ai3Shifter;
+  int cio210CarrBusy;
   // The following are used only for generating the check-parity bit in the interrupt
   // latch in the aftermath of a PRS instruction.  prsDelayedParity[0] and [4] are
   // permanently 0, and represent the condition in which a readback of CIO 154 are
