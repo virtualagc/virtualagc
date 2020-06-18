@@ -410,11 +410,6 @@ SERVIDLE        EXTEND                                  # DISCONNECT SERVICER FR
                 DCA             NEG0
                 DXCH            -PHASE6
 
-                CAF             OCT33                   # 4.33SPOT FOR GOPOOFIX
-                TS              L
-                COM
-                DXCH            -PHASE4
-
                 TCF             WHIMPER                 # PERFORM A SOFTWARE RESTART AND PROCEED
                                                         # TO GOTOPOOH WHILE SERVICER CONTINUES TO
                                                         # RUN, ALBEIT IN A GROUND STATE WHERE

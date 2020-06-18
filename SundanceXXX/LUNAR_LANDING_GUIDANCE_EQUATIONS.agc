@@ -34,7 +34,7 @@
 # ROUTINES FOR STARTING NEW GUIDANCE PHASES:
 
                 TCF             TTFINCR                 # IGNALG
-NEWPHASE        TCF             TTFINCR                 # BRAKQUAD
+NEWPHASEL       TCF             TTFINCR                 # BRAKQUAD
                 TCF             LINSET?                 # BRAKLING
                 TCF             STARTP64                # APPRQUAD
                 TCF             LINSET                  # APPRLING

@@ -567,16 +567,6 @@ BLANKET         TS      MPAC    +6
 ENDMARK         TC      POSTJUMP
                 CADR    MARKEND
 
-CLEARMRK        CAF     ZERO
-                TS      EXTVBACT
-
-                INHINT
-                CS      BIT1
-                MASK    FLAGWRD4
-                TS      FLAGWRD4
-
-                RELINT
-                TC      Q
 # ***ALL EXTENDED VERB ROUTINES THAT HAVE AT LEAST ONE FLASHING DISPLAY MUST TCF ENDMARK OR TCF ENDEXT WHEN
 # FINISHED.
 
@@ -588,7 +578,13 @@ CLEARMRK        CAF     ZERO
 # NTERONLY IS USED TO DIFFERENTIATE THE MARK ROUTINE WITH ONLY ONE RETURN TO THE USER FROM THE MARKING ROUTINE WIT
 # 3 RETURNS TO THE USER. THIS ROUTINE IS ONLY USED BY GOMARK1 AND GOMARK1R.
 
-MARKEND         TC      CLEARMRK
+MARKEND         CAF     ZERO
+                TS      EXTVBACT
+
+                INHINT
+                CS      BIT1
+                MASK    FLAGWRD4
+                TS      FLAGWRD4
                 TCF     MARKOVER
 
 GOMARK          TS      PLAYTEM1        # ENTRANCE FOR MARK GODSP

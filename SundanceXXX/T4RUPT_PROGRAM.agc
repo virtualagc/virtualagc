@@ -1038,6 +1038,7 @@ LAMPTEST        CS              IMODES33                # BIT 1 OF IMODES33 = 1 
 
 33RDMSK         EQUALS          PRIO16
 OC40010         OCT             40010
+BITS4&5         OCT             30
 OCT54           OCT             54
 OCT75           OCT             75
 OCT272          OCT             00272

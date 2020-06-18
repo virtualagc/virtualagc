@@ -770,23 +770,10 @@ ISSERVON        CS              FLAGWRD7                # V37 FLAG SET - I.E. IS
                 TC              DOWNFLAG                # YES, TURN OFF THE AVERAGE FLAG AND
                 ADRES           AVEGFLAG                # WAIT FOR SERVICER TO RETURN TO CANV37.
 
-                CAF             V37RETAD
+                CAF             CANV37AD
                 TS              OUTROUTE
 
                 TCF             ENDOFJOB
-
-V37RET          CS              FLAGWRD0                # IS P20 OR P22 RUNNING?
-                MASK            RNDVZBIT
-                CCS             A
-                TCF             +2                      # NO. CHECK FOR P25.
-                TCF             2.7SPT                  # YES.  DO 2.7SPOT
-                CS              FLAGWRD0                # IS P25 RUNNING?
-                MASK            P25FLBIT
-                CCS             A
-2.0SPT          CA              OCT37667
-2.11SPT         AD              BIT5
-2.7SPT          AD              OCT40072
-                TC              PHSCHNGA
 
 CANV37          CAF             ZERO
                 EXTEND
@@ -1001,7 +988,7 @@ MMTEMP          EQUALS          PHSPRDT3
 BASETEMP        EQUALS          TBASE4
 V37QCAD         CADR            V37XEQ          +3
 ROOAD           CADR            DUMMYAD
-V37RETAD        CADR            V37RET
+CANV37AD        CADR            CANV37
 OCT37667        OCT             37667
 
 OCT40072        OCT             40072
