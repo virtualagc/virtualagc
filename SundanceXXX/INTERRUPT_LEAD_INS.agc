@@ -27,9 +27,9 @@
                 DTCB            
                                 
                 DXCH            ARUPT                   # T5RUPT - AUTOPILOT
-                EXTEND          
-                DCA             T5ADR   
-                DTCB            
+                CS              TIME5
+                AD              .5SEC
+                TCF             T5RUPT
                                 
                 DXCH            ARUPT                   # T3RUPT
                 CAF             T3RPTBB 
@@ -63,7 +63,6 @@
                                 
                 DXCH            ARUPT                   # RADAR RUPT
                 CAF             RDRPTBB 
-                
                 XCH             BBANK   
                 TCF             RADAREAD        
                                 
@@ -76,8 +75,8 @@
                 EBANK=          LST1                    # RESTART USES E0, E3
 GOBB            BBCON           GOPROG  
                 
-                EBANK=          PERROR  
-T6ADR           2CADR           DOT6RUPT        
+                EBANK=          TIME1
+T6RPTBB         BBCON           RESUME                  # ***FIX LATER***
                 
                 EBANK=          LST1    
 T3RPTBB         BBCON           T3RUPT  
@@ -102,4 +101,8 @@ T4RPTBB         BBCON           T4RUPT
                 EBANK=          ELVIRA  
 RUPT10BB        BBCON           PITFALL 
                                         
-        
+T5RUPT          EXTEND
+                BZMF            NOQBRSM
+                EXTEND
+                DCA             T5ADR
+                DTCB

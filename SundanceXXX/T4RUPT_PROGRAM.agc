@@ -448,7 +448,13 @@ ISSUP           CS              OCT54                   # REMOVE CAGING, IMU FAI
                 EBANK=          CDUIND
                 2CADR           PFAILOK
 
+                CS              STATE                   # SEE IF ANYONE IS WAITING FOR THE IMU AT
+                MASK            IMUSEFLG                # IMUZERO. IF SO, WAKE THEM UP.
+                CCS             A
                 TCF             TASKOVER
+                
+                TC              POSTJUMP
+                CADR            ENDIMU
 
 OPONLY          CAF             BIT4                    # IF OPERATE ON ONLY, AND WE ARE IN COARSE
                 EXTEND                                  # ALIGN, DONT ZERO THE CDUS BECAUSE WE
@@ -766,9 +772,6 @@ IMUCAGE         CCS             A                       # NO ACTION IF GOING OFF
                 EXTEND                                  # ERROR COUNTER ENABLE, ZERO ICDU, COARSE
                 WAND            CHAN12                  # ALIGN ENABLE, RR ERROR COUNTER ENABLE.
 
-                CS              ENGONBIT                # INSURE ENGONFLG IS CLEAR.
-                MASK            FLAGWRD5
-                TS              FLAGWRD5
                 CS              PRIO30                  # TURN ENGINE OFF.
                 EXTEND
                 RAND            DSALMOUT
@@ -1093,13 +1096,14 @@ RRAUTCHK        CA              RADMODES                # SEE IF CHANGE IN RR AU
                 LXCH            RADMODES                # UPDATE RADMODES.
                 EXTEND
                 RXOR            LCHAN
-                MASK            OCT05776                # CLR CONT. DES., REMODE, REPOS, CDUZERO,
-                TS              RADMODES                #   AND TURNON BITS.
+                TS              RADMODES
                 MASK            BIT2                    # SEE IF JUST ON.
                 CCS             A
                 TCF             RRCDUCHK        -3      # OFF.  GO DISABLE RR CDU ERROR COUNTERS.
-                CA              OCT10001                # SET RRCDUZRO AND TURNON BITS.
-                ADS             RADMODES
+                CS              OCT72001                # SET BITS TO INDICATE ZERO AND TURNON
+                MASK            RADMODES                # IN PROGRESS.
+                AD              OCT10001
+                TS              RADMODES
 
                 CAF             ONE
                 TC              WAITLIST
@@ -1108,7 +1112,8 @@ RRAUTCHK        CA              RADMODES                # SEE IF CHANGE IN RR AU
 
                 TCF             NORRGMON
 
-OCT05776        OCT             5776
+OCT10001        OCT             10001
+OCT72001        OCT             72001
 
 # PROGRAM NAME_ RRCDUCHK
 #
@@ -1216,15 +1221,7 @@ RRGIMON         CAE             FLAGWRD5                # IS NO ANGLE MONITOR FL
                 MASK            NORRMBIT
                 CCS             A
                 TCF             NORRGMON                # YES - SKIP LIMIT CHECK
-                CS              FLAGWRD7                # IS SERVICER RUNNING?
-                MASK            AVEGFBIT
-                CCS             A
-                TCF             +5                      # NO.  DO R25
-                CA              FLAGWRD6                # YES.  IS MUNFLAG SET?
-                MASK            MUNFLBIT
-                CCS             A
-                TCF             NORRGMON                # YES.  DON'T DO R25
- +5             CAF             OCT32002                # INHIBIT BY REMODE,ZEROING,MONITOR.
+                CAF             OCT32002                # INHIBIT BY REMODE,ZEROING,MONITOR.
                 MASK            RADMODES                # OR RR NOT IN AUTO.
                 CCS             A
                 TCF             NORRGMON
