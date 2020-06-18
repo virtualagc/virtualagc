@@ -613,15 +613,14 @@ SWINIT          OCT             0
 
 #       C. ALARM AND ABORT EXITS       NONE
 
-                BLOCK           03
-                SETLOC          FFTAG5
+                BLOCK           02
+                SETLOC          FFTAG10
                 BANK
 
                 COUNT*          $$/P00
-GOTOPOOH        CAF             OCT33                   # 4.33 SPOT FOR GOPOOFIX
-                TS              L
-                COM
-                DXCH            -PHASE4
+
+GOTOPOOH        TC              PHASCHNG                # RESTART GOTOPOOH
+                OCT             14
 
                 TC              POSTJUMP
                 CADR            GOPOOFIX

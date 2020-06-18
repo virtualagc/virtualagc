@@ -1209,8 +1209,13 @@ MAGSUB          EXTEND
                 INDEX           Q
                 AD              0
                 EXTEND
-                BZMF            Q+2                     # ABS(A) <= CONST GO TO L+3
-                TCF             Q+1                     # ABS(A) >  CONST GO TO L+2
+                BZMF            +3
+
+                INDEX           Q
+                TC              1
+
+                INDEX           Q
+                TC              2
 
 # PROGRAM NAME_  RRLIMCHK                                                  ARE IN THE LIMITS OF THE CURRENT MODE.
 
@@ -1330,31 +1335,52 @@ SETTRKF         CAF             BIT1                    # NO ACTION IF DURING LA
                 CCS             A
                 TC              Q
 
-RRTRKF          CA              BIT8
-                TS              L
-
                 CAF             13,7,2                  # SEE IF CDU FAILED.
                 MASK            RADMODES
                 EXTEND
                 BZF             TRKFLON                 # CONDITION 3 ABOVE.
 
+                EXTEND
+                READ            CHAN13
+                MASK            LOW3
+                TS              L
+                MASK            BIT3
+                EXTEND
+                BZF             RRCHECK
+
+                CAF             LOW3
+                EXTEND
+                RXOR            LCHAN
+                CCS             A
+                TCF             LRVELCHK
+
+LRALTCHK        CS              RADMODES
+                MASK            LRALTBIT
+LRCHECK         EXTEND
+                BZF             TRKFLON
+
 RRCHECK         CAF             BIT4                    # SEE IF RR DATA FAILED.
                 MASK            RADMODES
 
                 CCS             A
-TRKFLON         CA              L
+TRKFLON         CAF             BIT8
                 AD              DSPTAB          +11D    # HALF ADD DESIRED AND PRESENT STATES.
-                MASK            L
+                MASK            BIT8
                 EXTEND
                 BZF             TCQ                     # NO CHANGE.
 
-FLIP            CA              DSPTAB          +11D    # CANT USE LXCH DSPTAB +11D (RESTART PROB)
+FLIP            TS              L
+                CA              DSPTAB          +11D    # CANT USE LXCH DSPTAB +11D (RESTART PROB)
                 EXTEND
                 RXOR            LCHAN
                 MASK            POSMAX
                 AD              BIT15
                 TS              DSPTAB          +11D
                 TC              Q
+
+LRVELCHK        CS              RADMODES
+                MASK            LRVELBIT
+                TCF             LRCHECK
 
 13,7,2          OCT             10102
 ENDRMODF        EQUALS
@@ -2592,7 +2618,7 @@ GOODRAD         CS              ONE
                 CS              ITEMP1                  # WHEN ENOUGH GOOD DATA HAS BEEN GATHERED,
                 MASK            RADMODES                # RESET DATA FAIL FLAGS FOR SETTRKF.
                 TS              RADMODES
-                TC              RADLITES                # LAMPS MAY GO OFF IF DATA JUST GOOD.
+                TC              SETTRKF                 # LAMP MIGHT GO OFF IF DATA JUST GOOD.
                 TC              RGOODEND        -2
 
 NOEND           TS              NSAMP
@@ -2759,7 +2785,9 @@ DATAFAIL        CS              ITEMP1                  # IN THE ABOVE CASE, SET
 
                 DXCH            ITEMP3                  # IF WE HAVE BEEN UNABLE TO GATHER N
                 DXCH            SAMPLSUM                # SAMPLES, USE LAST ONE ONLY.
-                TC              RADLITES
+
+                TC              SETTRKF
+
                 TCF             NOMORE
 
 # THIS ROUTINE CHANGES THE LR POSITION, AND CHECKS THAT IT GOT THERE.
@@ -3074,7 +3102,7 @@ LRS22.1         TC              MAKECADR
                 EXTEND                                  # GET RR RANGE SCALE
                 RAND            CHAN33                  # FROM CHANNEL 33 BIT 3
                 TS              L
-                CS              BIT3			# AND SET IN RADMODES BIT3
+                CS              BIT3                    # AND SET IN RADMODES BIT3
                 MASK            RADMODES
                 AD              L
                 TS              RADMODES
@@ -4850,77 +4878,3 @@ V67XXX          LXA,1           SXA,1
 
 1/SQRT3         2DEC            0.5773502
 V06N99          VN              0699
-
-                BANK            25
-                SETLOC          RADARUPT
-                BANK
-                COUNT*          $$/RRUPT
-
-                EBANK=          LOSCOUNT
-
-R12LITES        CA              ONE
-                MASK            IMODES33
-                CCS             A
-                TCF             ISWRETRN
-
-                TC              HLIGHT
-                TC              HLIGHT          -3
-                TCF             ISWRETRN
-
-RADLITES        CA              BIT1
-                MASK            IMODES33
-                CCS             A
-                TC              Q
-
-                CS              BIT5
-                AD              ITEMP1
-                CCS             A
-                CS              ONE
-                TCF             VLIGHT
-
-                TCF             RRTRKF
-
-HLIGHT          TS              ITEMP5                  # ZERO ITEMP5 FOR H INDEX
-
-                CA              HLITE
-                TS              L
-
-                CA              FLGWRD11
-                MASK            SCABBIT
-                CCS             A
-                TCF             ONLITES
-                CA              BIT5
-BOTHLITS        MASK            RADMODES
-                CCS             A
-                TCF             ONLITES
-
-                CA              FLGWRD11
-                INDEX           ITEMP5
-                MASK            HFLSHBIT
-                CCS             A
-                TCF             RRTRKF
-
-LITIT           EXTEND
-                QXCH            ITEMP6
-                TC              TRKFLON         +1
-
-                EXTEND
-                QXCH            ITEMP6
-                TCF             RRTRKF
-
-
-ONLITES         INDEX           ITEMP5
-                CS              HFLSHBIT
-                MASK            FLGWRD11
-                TS              FLGWRD11
-
-                CA              L
-                TCF             LITIT
-VLIGHT          TS              ITEMP5
-                CA              VLITE
-                TS              L
-                CA              BIT8
-                TCF             BOTHLITS
-
-HLITE           EQUALS          BIT5
-VLITE           EQUALS          BIT3

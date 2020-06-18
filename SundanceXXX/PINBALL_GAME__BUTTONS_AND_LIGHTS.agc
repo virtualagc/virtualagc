@@ -3161,7 +3161,7 @@ ISCADR+0        CCS     CADRSTOR        # ABORTS (CODE 01206) IF CADRSTOR NOT= +
 ISLIST+0        CCS     DSPLIST         # ABORTS (CODE 01206) IF DSPLIST NOT= +0.
                 TC      DSPABORT        # RETURNS IF DSPLIST = +0.
                 TC      Q
-DSPABORT        TC      POODOO
+DSPABORT        TC      ABORT
                 OCT     01206
 
                 

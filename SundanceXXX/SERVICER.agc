@@ -775,9 +775,6 @@ CONTSERV        INHINT
                 MASK            FLGWRD11                # CLEAR LR MEASUREMENT MADE DISCRETES.
                 TS              FLGWRD11
 
-                TC              IBNKCALL                # SET LR LITES PROPERLY
-                CADR            R12LITES
-
 COPYCYC1        TC              QUIKFAZ5
 
 R29?            CA              FLAGWRD3

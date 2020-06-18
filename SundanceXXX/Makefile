@@ -10,6 +10,7 @@
 
 BASENAME=SundanceXXX
 
+EXTRA_YAYUL_ARGS+=--parity
 NO_BINSOURCE=yes
 EXTRA_TARGETS=SundanceDumps.bin diffSundanceXXX
 
