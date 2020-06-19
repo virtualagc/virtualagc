@@ -208,11 +208,11 @@ OHWELL1         CAF     ADUPBUFF        # * REQUEST USER TO SEND NUMBER *
                 CS      BIT2
                 AD      UPBUFF          # IS II (NUMBER OF COMPONENTS PARAMETER)
                 EXTEND                  # .GE. 3 AND .LE. 20D.
-                BZMF    OHWELL1 +2
+                BZMF    OHWELL1
                 CS      UPBUFF
                 AD      UP21
                 EXTEND
-                BZMF    OHWELL1 +2
+                BZMF    OHWELL1
                 CAE     UPBUFF
                 TS      COMPNUMB        # SAVE II IN COMPNUMB
 
@@ -244,9 +244,11 @@ UPVERIFY        CAF     ADUPTEMP        # PLACE ECADR WHERE COMPONENT NO. INDEX
                 TCF     UPOUT4          # V34 TERMINATE UPDATE (P27) RETURN
                 TCF     UPSTORE         # V33 DATA SENT IS GOOD.  GO STORE IT.
                 TC      CK4V32          # COMPONENT NO. INDEX OR V32 RETURN
-                CA      UPTEMP          # DOES THE COMPONENT NO. INDEX JUST SENT
-                EXTEND                  # SPECIFY A LEGAL COMPONENT NUMBER?
-                BZMF    UPVERIFY        # NO, IT IS NOT POSITIVE NONZERO
+                CCS     UPTEMP          # DOES THE COMPONENT NO. INDEX JUST SENT
+                TCF     +4              # SPECIFY A LEGAL COMPONENT NUMBER?
+                TCF     UPVERIFY        # NO, IT IS NOT POSITIVE NONZERO
+                TCF     UPVERIFY
+                TCF     UPVERIFY
                 CS      UPTEMP
                 AD      COMPNUMB
                 AD      BIT1
@@ -262,15 +264,18 @@ UPOUT4          EQUALS  UPOUT +1        # COMES HERE ON V34 TO TERMINATE UPDATE
 
 CK4V32          CS      MPAC            # ON DATA RETURN FROM 'GOXDSPF'
                 MASK    BIT6            # ON DATA RETURN FROM "GOXDSP"& THE CON-
-                CCS     A               # TENTS OF MPAC = VERB.  SO TEST FOR V32.
+                EXTEND                  # TENTS OF MPAC = VERB.  SO TEST FOR V32.
+                BZF     +2
                 TC      Q               # IT'S NOT A V32, IT'S DATA.  PROCEED.
-                INDEX   Q
-                TC      0 -6            # V32 ENCOUNTERED - GO BACK AND GET DATA
+                CS      SIX
+                AD      Q
+                TC      A               # V32 ENCOUNTERED - GO BACK AND GET DATA
 
 ADUPTEMP        ADRES   UPTEMP          # ADDRESS OF TEMP STORAGE FOR CORRECTIONS
 ADUPBUFF        ADRES   UPBUFF          # ADDRESS OF UPDATE DATA STORAGE BUFFER
 UPLOADNV        VN      2101            # VERB 21 NOUN 01
 UPVRFYNV        VN      2102            # VERB 21 NOUN 02
+ADUPBFM1        ADRES   UPBUFF -1       # SAME AS ADUPBUFF BUT LESS 1
 UP21            =       MD1             # DEC 21 = MAX NO OF COMPONENTS +1
 UPDTPHAS        EQUALS  FIVE
 
@@ -291,10 +296,11 @@ UPSTORE         EQUALS                  # GROUND HAS VERIFIED UPDATE. STORE DATA
                 OCT     04026           # DATA STORE IF A RESTART OCCURS.
                 INHINT                  # (BECAUSE PHASCHNG DID A RELINT)
 
-                CS      TWO             # GO TO UPFNDVAC IF INSTALL IS REQUIRED,
-                AD      UPVERB          # THAT IS, IF IT'S A V70 - V72.
-                EXTEND                  # GO TO UPEND73 IF IT'S A V73.
-                BZMF    UPFNDVAC
+                INDEX   UPVERB          # GO TO UPFNDVAC IF INSTALL IS REQUIRED,
+                TCF     +1              # THAT IS, IF IT'S A V70 - V72.
+                TCF     UPFNDVAC
+                TCF     UPFNDVAC
+                TCF     UPFNDVAC
 
 #          VERB 73 BRANCH
 UPEND73         EXTEND                  # V73-PERFORM DP OCTAL AGC CLOCK INCREMENT
@@ -322,9 +328,10 @@ UPWAKE          EXIT
                 TC      PHASCHNG        # RESTART PROTECT(GROUP 6)
                 OCT     04026
 
-                TC      UPFLAG          # SET INTEGRATION RESTART BIT
-                ADRES   REINTFLG
                 INHINT
+                CS      RASFLAG         # SET INTEGRATION RESTART BIT
+                MASK    REINTBIT
+                ADS     RASFLAG
 UPPART3         EQUALS
 
                 INDEX   UPVERB          # BRANCH TO THE APPROPRIATE UPDATE VERB
@@ -381,7 +388,12 @@ DELTAOK         TC      TPAGREE         # FORCE SIGN AGREEMENT
 
 #          VERB 71 BRANCH
 
-UPEND71         CAE     UPBUFF +1       # SET EBANK
+UPEND71         CS      ENDSAFE
+                AD      UPBUFF +1
+                EXTEND
+                BZMF    UPERROUT
+
+                CAE     UPBUFF +1       # SET EBANK
                 TS      EBANK           #    AND
                 MASK    LOW8            # CALCULATE
                 TS      UPTEMP          # S-REG VALUE OF RECEIVING AREA
@@ -399,7 +411,7 @@ UPEND71         CAE     UPBUFF +1       # SET EBANK
 STORLP71        TS      MPAC            # SAVE NO. OF WORDS REMAINING MINUS ONE
                 INDEX   A               # TAKE NEXT UPDATE WORD FROM
                 CA      UPBUFF +2       # UPBUFF AND
-                TS      L               # SAVE IT IN L
+                LXCH    A               # SAVE IT IN L
                 CA      MPAC            # CALCULATE NEXT
                 AD      UPTEMP          # RECEIVING ADDRESS
                 INDEX   A
@@ -409,7 +421,7 @@ STORLP71        TS      MPAC            # SAVE NO. OF WORDS REMAINING MINUS ONE
                 CCS     MPAC            # ARE THERE ANY WORDS LEFT TO BE STORED
                 TCF     STORLP71        # YES
                 TCF     UPOUT           # NO- THEN EXIT UPDATE PROGRAM
-ADUPBFM1        ADRES   UPBUFF -1       # SAME AS ADUPBUFF BUT LESS 1 (DON'T MOVE)
+ENDSAFE         ADRES   R1SAVE
                 TCF     UPOUT           # NO- EXIT UPDATE(HERE WHEN COMPNUMB = 3)
 
 #          VERB 72 BRANCH
@@ -419,6 +431,21 @@ UPEND72         CAF     BIT1            # HAVE AN ODD NO. OF COMPONENTS
                 CCS     A
                 TCF     +2              # YES
                 TCF     UPERROUT        # ERROR- SHOULD BE ODD NO. OF COMPONENTS
+                RELINT
+                CS      BIT2
+                AD      COMPNUMB
+LMLOOP72        TS      MPAC
+                INDEX   A
+                CAE     UPBUFF
+                XCH     L
+                CS      ENDSAFE
+                AD      L
+                EXTEND
+                BZMF    UPERROUT
+                CCS     MPAC
+                CCS     A
+                TCF     LMLOOP72
+                INHINT
                 CS      BIT2
                 AD      COMPNUMB
 LDLOOP72        TS      MPAC            # NOW PERFORM THE UPDATE
@@ -448,9 +475,9 @@ UPOUT           EQUALS
                 TS      DNLSTCOD
                 TC      UPACTOFF        # TURN OFF 'UPLINK ACTIVITY' LIGHT
 
-                EXTEND                  # KILL GROUP 6.
-                DCA     NEG0
-                DXCH    -PHASE6
+                CAF     ZERO            # KILL GROUP 6.
+                TC      NEWPHASE
+                OCT     6
 
                 TC      ENDEXT          # EXTENDED VERB EXIT
 

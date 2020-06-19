@@ -1646,14 +1646,12 @@ R36INT          STCALL  TDEC1
                         00D             #  -    -     -     -
                         18D             # (U  X V ) X U   = U
                 VSL2    UNIT            #   RA   A     RA    A
-                UNIT
                 STOVL   00D             # UNIT HORIZONTAL IN FORWARD DIR. 00D
                         18D
                 DOT     VXSC            # -
                         12D             # U
                 VSL2                    #  L
                 BVSU    UNIT
-                UNIT
                 PUSH    DOT             # LOS PROJECTED INTO HORIZONTAL  12D
                         00D             # PLANE
                 SL1     ARCCOS          #              -   -

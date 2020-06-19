@@ -271,26 +271,10 @@ ROE             2DEC            .00257125
                 BANK
                 COUNT*          $$/LT-LG
 
-ERAD            2DEC            6373338         B-29    # PAD RADIUS
-504RM           2DEC            1738090         B-29    # METERS B-29 (EQUATORIAL MOON RADIUS)
                 SETLOC          CONICS1
                 BANK
                 COUNT*          $$/CONIC
 
-# *** THE ORDER OF THE FOLLOWING CONSTANTS MUST BE PRESERVED *************
-
-MUTABLE         2DEC*           3.986032        E10 B-36*       # MUE
-                2DEC*           .25087606       E-10 B+34*      # 1/MUE
-                2DEC*           1.99650495      E5 B-18*        # SQRT(MUE)
-                2DEC*           .50087529       E-5 B+17*       # 1/SQRT(MUE)
-
-
-                2DEC*           4.902778        E8 B-30*        # MUM
-                2DEC*           .203966         E-8 B+28*       # 1/MUM
-
-                2DEC*           2.21422176      E4 B-15*        # SQRT(MUM)
-                2DEC*           .45162595       E-4 B+14*       # 1/SQRT(MUM)
-# ************************************************************************
 
                 SETLOC          INTINIT
                 BANK

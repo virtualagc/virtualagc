@@ -632,13 +632,7 @@ OCT31           MM              25
                 BANK
 
                 COUNT*          $$/P00                  # VERB 37 AND P00 IN BANK 4.
-GOPOOFIX        TC              DOWNFLAG                # ALLOW X-AXIS OVERRIDE
-                ADRES           XOVINFLG
-
-                TC              DOWNFLAG                # INSURE THAT ULLAGE IS OFF
-                ADRES           ULLAGFLG
-
-                CAF             V37N99
+GOPOOFIX        CAF             V37N99
                 TC              BANKCALL
                 CADR            GOFLASH
                 TCF             -3
@@ -722,14 +716,6 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 CCS             A
                 TCF             CANTROO
 
-                CS              MMNUMBER                # IS P70 REQUESTED?
-                AD              DEC70
-                EXTEND
-                BZF             SETUP70                 # YES
-                AD              ONE                     # IS P71 REQUESTED?
-                EXTEND
-                BZF             SETUP71                 # YES
-
                 CA              MMNUMBER                # IS NEW REQUEST POO
                 EXTEND
                 BZF             ISSERVON                # YES, CHECK SERVICER STATUS
@@ -746,7 +732,20 @@ V37BAD          TC              RELDSP                  # RELEASES DISPLAY FROM 
                 TC              POSTJUMP                # BRING BACK LAST NORMAL DISPLAY IF THERE
                 CADR            PINBRNCH                # WAS ONE. OTHERWISE DO AN EOJ.
 
-CHECKTAB        CA              NOV37MM                 # INDEX FOR MM TABLES.
+CHECKTAB        INHINT
+                CAF             PRIO25
+                TS              NEWPRIO
+
+                CS              MMNUMBER                # IS P70 REQUESTED?
+                AD              DEC70
+                EXTEND
+                BZF             SETUP70                 # YES
+                AD              ONE                     # IS P71 REQUESTED?
+                EXTEND
+                BZF             SETUP71                 # YES
+                RELINT
+
+                CA              NOV37MM                 # INDEX FOR MM TABLES.
 
 AGAINMM         TS              MPAC            +1
                 NDX             MPAC            +1
@@ -775,7 +774,10 @@ ISSERVON        CS              FLAGWRD7                # V37 FLAG SET - I.E. IS
 
                 TCF             ENDOFJOB
 
-CANV37          CAF             ZERO
+CANV37          TC              DOWNFLAG
+                ADRES           V37FLAG
+
+                CAF             ZERO
                 EXTEND
                 WRITE           SUPERBNK
 
@@ -795,23 +797,15 @@ DUMMYAD         EXIT
                 TC              DOWNFLAG
                 ADRES           3AXISFLG                # RESET 3-AXIS FLAG
 
-                CAF             LRBYBIT                 # CLEAN UP THE R12 FLAGWORD.
-                TS              FLGWRD11
-
-                TC              DOWNFLAG                # INSURE THAT THE R04FLAG IS CLEAR.
-                ADRES           R04FLAG
-
-                TC              DOWNFLAG                # ALLOW X-AXIS OVERRIDE.
-                ADRES           XOVINFLG
                 CCS             MMNUMBER                # IS THIS A POOH REQUEST
                 TCF             NOUVEAU                 # NO, PICK UP NEW PROGRAM
 
 POOH            TC              RELDSP                  # RELEASE DISPLAY SYSTEM
 
-                CAF             PRIO5                   # SET VARIABLE RESTART PRIORITY FOR
-                TS              PHSPRDT2                # P00 INTEGRATION.
+                INHINT
 
-                TC              CLRADMOD                # CLRADMOD DOES AN INHINT.
+                TC              IBNKCALL
+                CADR            CLRADMOD                # CLRADMOD DOES AN INHINT.
 
                 CS              NODOBIT                 # TURN OFF NODOFLAG.
                 MASK            FLAGWRD2
@@ -837,6 +831,8 @@ SEUDOPOO        TS              DNLSTCOD                # SET UP APPROPRIATE DOW
                 TC              IBNKCALL                # INSURE ALLCOAST.
                 CADR            ALLCOAST                # DOES A RESTORDB.
 
+                TC              IBNKCALL
+                CADR            STOPRATE
 
                 CS              OCT120                  # TURN OFF TRACK, UPDATE FLAGS
                 TS              EBANKTEM
@@ -857,19 +853,8 @@ GOMOD           TC              IBNKCALL                # REDUNDANT EXCEPT FOR G
 GOGOPROG        TC              POSTJUMP
                 CADR            GOPROG2
 
-RENDVOO         CS              MODREG                  # IS CURRENT PROGRAM 22
-                AD              OCT26
-                EXTEND
-                BZF             RESET22                 # YES - CLEAR RENDEZVOUS FLAG
-
-
-                CS              MMNUMBER                # IS NEW PROGRAM P22
-                AD              OCT26
-                EXTEND
-                BZF             RESET22
-
-
-                AD              NEG2                    # IS NEW PROGRAM = P20 OR P25
+RENDVOO         CS              MMNUMBER                # IS NEW PROGRAM P22
+                AD              OCT24                   # IS NEW PROGRAM = P20 OR P25
                 EXTEND
                 BZF             RENDNOO                 # YES
                 AD              FIVE                    # 25
@@ -880,11 +865,6 @@ RENDVOO         CS              MODREG                  # IS CURRENT PROGRAM 22
                 MASK            FLAGWRD0
                 CCS             A
                 TCF             POOFIZZ                 # YES, LEAVE GROUP 2 TO PICK UP P20 OR P25
-
-RESET22         CS              OCT700                  # CLEAR RENDEZVOUS,P25
-                MASK            FLAGWRD0                # AND IMU IN USE FLAGS
-                TS              FLAGWRD0
-                TC              CLRADMOD
 
 KILL2           EXTEND                                  # NO, KILL 2
                 DCA             NEG0
@@ -943,7 +923,6 @@ V37NONO         TC              FALTON                  # COME HERE IF MM REQUES
 OCT00010        EQUALS          BIT4
 OCT500          OCT             500                     # BITS 7 AND 9
 OCT305          OCT             305
-OCT26           OCT             26
 P20REG          OCT             124
 
 V37XEQ          INHINT
@@ -987,21 +966,24 @@ BASETEMP        EQUALS          TBASE4
 V37QCAD         CADR            V37XEQ          +3
 ROOAD           CADR            DUMMYAD
 CANV37AD        CADR            CANV37
-OCT37667        OCT             37667
 
-OCT40072        OCT             40072
 OCT700          OCT             700
 
-SETUP71         CAF             THREE
-SETUP70         TS              Q
-                EXTEND
+SETUP70         EXTEND
                 DCA             P70CADR
-                AD              Q
-                DTCB
+ +2             TC              SPVAC
+                TCF             JAMTERM
+
+SETUP71         EXTEND
+                DCA             P71CADR
+                TCF             SETUP70 +2
 
 DEC70           DEC             70
                 EBANK=          R
 P70CADR         2CADR           P70
+                EBANK=          R
+P71CADR         2CADR           P71
+
 # FOR VERB 37 TWO TABLES ARE MAINTAINED. EACH TABLE HAS AN ENTRY FOR EACH
 # MAJOR MODE THAT CAN BE STARTED FROM THE KEYBOARD. THE ENTRIES ARE PUT
 # INTO THE TABLE WITH THE ENTRY FOR THE HIGHEST MAJOR MODE COMING FIRST,
@@ -1020,14 +1002,11 @@ P70CADR         2CADR           P70
 
 FCADRMM1        FCADR           P79
                 FCADR           P78
-                FCADR           P76
                 FCADR           P75
                 FCADR           P74
                 FCADR           P73
                 FCADR           P72
-                FCADR           LANDJUNK
                 FCADR           P63LM
-                FCADR           P57
                 FCADR           PROG52
                 FCADR           P51
                 FCADR           P47LM
@@ -1038,16 +1017,16 @@ FCADRMM1        FCADR           P79
                 FCADR           P38
                 FCADR           P35
                 FCADR           P34
-
                 FCADR           P33
                 FCADR           P32
-                FCADR           P31
+                FCADR           P31LM
                 FCADR           P30
                 FCADR           PROG25
-                FCADR           PROG22
                 FCADR           PROG21
                 FCADR           PROG20
                 FCADR           P12LM
+                FCADR           P11
+                FCADR           P10
                 FCADR           P06
 #          THE PREMM TABLE CONTAINS THE E-BANK,MAJOR MODE, AND PRIORITY
 # INFORMATION, IT IS IN THE FOLLOWING FORM,
@@ -1071,14 +1050,11 @@ FCADRMM1        FCADR           P79
 # NOTE,    THE FIRST ENTRY MUST BE LABELED PREMM1
 PREMM1          OCT             27717                   # MM 79  EBANK 7  PRIO 13
                 OCT             27716                   # MM 78  EBANK 7  PRIO 13
-                OCT             27714                   # MM 76  EBANK 7  PRIO 13
                 OCT             27713                   # MM 75  EBANK 7  PRIO 13
                 OCT             27712                   # MM 74  EBANK 7  PRIO 13
                 OCT             27711                   # MM 73  EBANK 7  PRIO 13
                 OCT             27710                   # MM 72  EBANK 7  PRIO 13
-                OCT             27704                   # MM 68  EBANK 7  PRIO 13
                 OCT             27677                   # MM 63  EBANK 7  PRIO 13
-                OCT             27271                   # MM 57  EBANK 5  PRIO 13
                 OCT             27264                   # MM 52  EBANK 5  PRIO 13
                 OCT             27263                   # MM 51  EBANK 5  PRIO 13
                 OCT             27657                   # MM 47  EBANK 7  PRIO 13
@@ -1089,40 +1065,37 @@ PREMM1          OCT             27717                   # MM 79  EBANK 7  PRIO 1
                 OCT             27646                   # MM 38  EBANK 7  PRIO 13
                 OCT             27643                   # MM 35  EBANK 7  PRIO 13
                 OCT             27642                   # MM 34  EBANK 7  PRIO 13
-
                 OCT             27641                   # MM 33  EBANK 7  PRIO 13
                 OCT             27640                   # MM 32  EBANK 7  PRIO 13
                 OCT             27637                   # MM 31  EBANK 7  PRIO 13
                 OCT             27636                   # MM 30  EBANK 7  PRIO 13
                 OCT             27631                   # MM 25  EBANK 7  PRIO 13
-                OCT             27626                   # MM 22  EBANK 7  PRIO 13
                 OCT             27625                   # MM 21  EBANK 7  PRIO 13
                 OCT             27624                   # MM 20  EBANK 7  PRIO 13
                 OCT             27614                   # MM 12  EBANK 7  PRIO 13
+                OCT             27613                   # MM 11  EBANK 7  PRIO 13
+                OCT             27612                   # MM 10  EBANK 7  PRIO 13
                 OCT             27006                   # MM 06  EBANK 4  PRIO 13
 
 # NOTE,     THE FOLLOWING CONSTANT IS THE NUMBER OF ENTRIES IN EACH OF
 # ----      THE ABOVE LISTS-1(IE, THE NUMBER OF MAJOR MODES(EXCEPT P00)
 #           THAT CAN BE CALLED FROM THE KEYBOARD MINUS ONE)
 
-NOV37MM         DEC             29                      # MM'S -1
+NOV37MM         DEC             27                      # MM'S -1
 
 DNLADMM1        ADRES           RENDEZVU                # P79
                 ADRES           RENDEZVU                # P78
-                ADRES           RENDEZVU
                 ADRES           RENDEZVU                # P75
                 ADRES           RENDEZVU                # P74
                 ADRES           RENDEZVU                # P73
                 ADRES           RENDEZVU                # P72
-                ADRES           DESASCNT                # P68
-                ADRES           DESASCNT                # P63
-                ADRES           LUNRSALN                # P57
+                ADRES           POWERED                 # P63
                 ADRES           COSTALIN                # P52
                 ADRES           COSTALIN                # P51
-                ADRES           ORBMANUV                # P47
-                ADRES           ORBMANUV                # P42
-                ADRES           ORBMANUV                # P41
-                ADRES           ORBMANUV                # P40
+                ADRES           POWERED                 # P47
+                ADRES           POWERED                 # P42
+                ADRES           POWERED                 # P41
+                ADRES           POWERED                 # P40
                 ADRES           RENDEZVU                # P39
                 ADRES           RENDEZVU                # P38
                 ADRES           RENDEZVU                # P35
@@ -1132,19 +1105,17 @@ DNLADMM1        ADRES           RENDEZVU                # P79
                 ADRES           RENDEZVU                # P31LM
                 ADRES           RENDEZVU                # P30
                 ADRES           RENDEZVU                # P25
-                ADRES           LUNRSALN                # P22
                 ADRES           RENDEZVU                # P21
                 ADRES           RENDEZVU                # P20
-                ADRES           DESASCNT                # P12
+                ADRES           POWERED                 # P12
+                ADRES           RENDEZVU                # P11
+                ADRES           RENDEZVU                # P10
                 ADRES           COSTALIN                # P06
 DNLADP00        =               ZERO
 COSTALIN        =               0
 AGSUPDAT        =               1
 RENDEZVU        =               2
-
-ORBMANUV        =               3
-DESASCNT        =               4
-LUNRSALN        =               5
+POWERED         =               3
 
                 BANK            13
                 SETLOC          INTINIT

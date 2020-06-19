@@ -20,6 +20,8 @@
                 EBANK=  DVCNTR
                 COUNT*  $$/P12
 
+P10             =       P12LM           ## TEMPORARY
+P11             =       P12LM
 P12LM           TC      PHASCHNG
                 OCT     04024
 
