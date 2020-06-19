@@ -839,7 +839,7 @@ IFLEGAL         CAF     TWO
                 EXTEND
                 BZF     OKTOPLAY        # NO
 
-PRIOBORT        TC      POODOO
+PRIOBORT        TC      ABORT
                 OCT     1502
 
 OKTOPLAY        TC      COPIES2

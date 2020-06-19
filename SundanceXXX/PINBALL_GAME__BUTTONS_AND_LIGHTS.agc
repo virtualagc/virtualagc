@@ -2737,7 +2737,7 @@ DSPALARM        CS      NVSBENDL
                 TC      KILMONON
 CHARALRM        TC      FALTON          # NOT NVSUB INITIATED. TURN ON OPR ERROR
                 TC      ENDOFJOB
-                TC      POODOO
+                TC      ABORT
                 OCT     01501
 MONADR          GENADR  PASTEVB
 NVSBENDL        TC      NVSUBEND

@@ -2462,8 +2462,7 @@ ZEROANS         CAF     ZERO            # FORCE ANSWER TO ZERO HERE.
                 TCF     SQRTABRT
                 TCF     FIXROOT
 
-SQRTABRT        DXCH    LOC
-                TC      POODOO1
+SQRTABRT        TC      ABORT
                 OCT     1302
 
 SMPAC+          AD      -1/2+2          # SEE IF ARGUMENT GREATER THAN OR EQUAL TO
@@ -2728,9 +2727,7 @@ ACOSSHR         INDEX   A               # THE SHIFT RIGHT IS LESS THAN 14 SINCE
 ACOSOVF         EXTEND                  # IF MAJOR PART WAS ONLY 1 MORE THAN .5,
                 BZF     ACOS=0          # CALL ANSWER ZERO.
 
-ACOSABRT        EXTEND                  # IF OVERFLOW, CALL ANSWER ZERO BUT
-                DCA     LOC             # SOUND AN ALARM.
-                TC      ALARM1
+ACOSABRT        TC      ABORT
                 OCT     1301
 
                 CAF     ZERO

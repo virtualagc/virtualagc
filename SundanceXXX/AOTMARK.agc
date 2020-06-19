@@ -24,7 +24,7 @@ AOTMARK         INHINT
                 CCS             MARKSTAT                # SEE IF AOTMARK BUSY
                 TC              +2                      # MARK SYSTEM BUSY-DO ALARM
                 TC              EXTVBCHK
-                TC              POODOO
+                TC              ALARM
                 OCT             00105
 
 EXTVBCHK        CAF             SIX                     # SEE IF EXT. VERB WORKING
@@ -45,7 +45,7 @@ MKVAC           CCS             VAC1USE                 # LOOK FOR A VAC AREA-DO
                 CCS             VAC5USE
                 TCF             MKVACFND
                 DXCH            BUF2
-                TC              BAILOUT1                # ALL VAC AREAS OCCUPIED - ABORT.
+                TC              ABORT                   # ALL VAC AREAS OCCUPIED - ABORT.
                 OCT             01207
 
 MKVACFND        AD              TWO
@@ -64,7 +64,7 @@ MKVACFND        AD              TWO
                 TCF             SWRETURN
 
 MKABORT         DXCH            BUF2
-                TC              BAILOUT1                # CONFLICT WITH EXTENDED VERB
+                TC              ABORT                   # CONFLICT WITH EXTENDED VERB
                 OCT             01211
 
 MKRELEAS        CAF             ZERO

@@ -982,8 +982,6 @@ V37XEQC         CA              MMTEMP                  # UPON RETURN FROM FINDV
                 TC              RELDSP                  # RELEASE DISPLAY
                 TC              ENDOFJOB                # AND EXIT
 
-NEG7            EQUALS          OCT77770
-
 MMTEMP          EQUALS          PHSPRDT3
 BASETEMP        EQUALS          TBASE4
 V37QCAD         CADR            V37XEQ          +3

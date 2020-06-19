@@ -17,187 +17,138 @@
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 #
 # CALLING SEQUENCE IS AS FOLLOWS:
-#		TC	ALARM
-#		OCT	AAANN		ALARM NO. NN IN GENERAL AREA AAA.
-#					(RETURNS HERE)
+#               TC      ALARM
+#               OCT     AAANN           ALARM NO. NN IN GENERAL AREA AAA.
+#                                       (RETURNS HERE)
 
-		BLOCK	02
-		SETLOC	FFTAG7
-		BANK
+                BLOCK   02
+                SETLOC  FFTAG7
+                BANK
 
-		EBANK=	FAILREG
+                EBANK=  FAILREG
 
-		COUNT*	$$/ALARM
+                COUNT*  $$/ALARM
 # ALARM TURNS ON THE PROGRAM ALARM LIGHT, BUT DOES NOT DISPLAY.
 
-ALARM		INHINT
+ALARM           INHINT
 
-		CA	Q
-ALARM2		TS	ALMCADR
-		INDEX	Q
-		CA	0
-BORTENT		TS	L
+                CA      Q
+ALARM2          TS      ALMCADR
+                INDEX   Q
+                CA      0
+BORTENT         TS      L
 
-PRIOENT		CA	BBANK
- +1		EXTEND
-		ROR	SUPERBNK	# ADD SUPER BITS.
-		TS	ALMCADR +1
+PRIOENT         CA      BBANK
+ +1             EXTEND
+                ROR     SUPERBNK        # ADD SUPER BITS.
+                TS      ALMCADR +1
 
-LARMENT		CA	Q		# STORE RETURN FOR ALARM
-		TS	ITEMP1
+LARMENT         CA      Q               # STORE RETURN FOR ALARM
+                TS      ITEMP1
 
-CHKFAIL1	CCS	FAILREG		# IS ANYTHING IN FAILREG
-		TCF	CHKFAIL2	# YES TRY NEXT REG
-		LXCH	FAILREG
-		TCF	PROGLARM	# TURN ALARM LIGHT ON FOR FIRST ALARM
+CHKFAIL1        CCS     FAILREG         # IS ANYTHING IN FAILREG
+                TCF     CHKFAIL2        # YES TRY NEXT REG
+                LXCH    FAILREG
+                TCF     PROGLARM        # TURN ALARM LIGHT ON FOR FIRST ALARM
 
-CHKFAIL2	CCS	FAILREG +1
-		TCF	FAIL3
-		LXCH	FAILREG +1
-		TCF	MULTEXIT
+CHKFAIL2        CCS     FAILREG +1
+                TCF     FAIL3
+                LXCH    FAILREG +1
+                TCF     MULTEXIT
 
-FAIL3		CA	FAILREG +2
-		MASK	POSMAX
-		CCS	A
-		TCF	MULTFAIL
-		LXCH	FAILREG +2
-		TCF	MULTEXIT
+FAIL3           CA      FAILREG +2
+                MASK    POSMAX
+                CCS     A
+                TCF     MULTFAIL
+                LXCH    FAILREG +2
+                TCF     MULTEXIT
 
 
-PROGLARM	CS	DSPTAB +11D
-		MASK	OCT40400
-		ADS	DSPTAB +11D
+PROGLARM        CS      DSPTAB +11D
+                MASK    OCT40400
+                ADS     DSPTAB +11D
 
-MULTEXIT	XCH	ITEMP1		# OBTAIN RETURN ADDRESS IN A
-		RELINT
-		INDEX	A
-		TC	1
+MULTEXIT        XCH     ITEMP1          # OBTAIN RETURN ADDRESS IN A
+                RELINT
+                INDEX   A
+                TC      1
 
-MULTFAIL	CA	L
-		AD	BIT15
-		TS	FAILREG +2
+MULTFAIL        CA      L
+                AD      BIT15
+                TS      FAILREG +2
 
-		TCF	MULTEXIT
+                TCF     MULTEXIT
 
 # PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND
 # AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,
-#		CAF	OCTXX		ALARM CODE
-#		TC	BANKCALL
-#		CADR	PRIOLARM
+#               CAF     OCTXX           ALARM CODE
+#               TC      BANKCALL
+#               CADR    PRIOLARM
 #
-#		...	...
-#		...	...
-#		...	...		ASTRONAUT RETURN
-#		TC	PHASCHNG	IMMEDIATE RETURN TO USER.  RESTART
-#		OCT	X.1		PHASE CHANGE FOR PRIO DISPLAY
+#               ...     ...
+#               ...     ...
+#               ...     ...             ASTRONAUT RETURN
+#               TC      PHASCHNG        IMMEDIATE RETURN TO USER.  RESTART
+#               OCT     X.1             PHASE CHANGE FOR PRIO DISPLAY
 
-		BANK	10
-		SETLOC	DISPLAYS
-		BANK
+                BANK    10
+                SETLOC  DISPLAYS
+                BANK
 
-		COUNT*	$$/DSPLA
-PRIOLARM	INHINT			# * * * KEEP IN DISPLAY ROUTINES BANK
-		TS	L		# SAVE ALARM CODE
+                COUNT*  $$/DSPLA
+PRIOLARM        INHINT                  # * * * KEEP IN DISPLAY ROUTINES BANK
+                TS      L               # SAVE ALARM CODE
 
-		CA	BUF2		# 2 CADR OF PRIOLARM USER
-		TS	ALMCADR
-		CA	BUF2 +1
-		TC	PRIOENT +1	# * LEAVE L ALONE
--2SEC		DEC	-200		# *** DONT MOVE
-		CAF	V05N09
-		TCF	PRIODSPR
+                CA      BUF2            # 2 CADR OF PRIOLARM USER
+                TS      ALMCADR
+                CA      BUF2 +1
+                TC      PRIOENT +1      # * LEAVE L ALONE
+-2SEC           DEC     -200            # *** DONT MOVE
+                CAF     V05N09
+                TCF     PRIODSPR
 
-		BLOCK	02
-		SETLOC	FFTAG7
-		BANK
+                BLOCK   02
+                SETLOC  FFTAG7
+                BANK
 
-		COUNT*	$$/ALARM
-BAILOUT		INHINT
-		CA	Q
-		TS	ALMCADR
+                COUNT*  $$/ALARM
+ABORT           INHINT
+                CA      Q
+                TS      ALMCADR
 
-		INDEX	Q
-		CAF	0
-		TC	BORTENT
-OCT40400	OCT	40400
+ABORT2          INDEX   Q
+                CAF     0
+                TC      BORTENT
+OCT40400        OCT     40400
+WHIMPER         TC      WHIMPER
 
-		INHINT
-WHIMPER		CA	TWO
-		AD	Z
-		TS	BRUPT
-		RESUME
-		TC	POSTJUMP	# RESUME SENDS CONTROL HERE
-		CADR	ENEMA
-POODOO		INHINT
-		CA	Q
-ABORT2		TS	ALMCADR
-		INDEX	Q
-		CAF	0
-		TC	BORTENT
-OCT77770	OCT	77770		# DON'T MOVE
+CCSHOLE         INHINT
+                CA      Q
+                TS      ALMCADR
 
-GOPOODOO	INHINT
-		CA	FLAGWRD7	# IS SERVICER CURRENTLY IN OPERATION?
-		MASK	V37FLBIT
-		CCS	A
-		TCF	STRTIDLE
-		TC	BANKCALL
-		CADR	MR.KLEAN
-		TCF	WHIMPER
-STRTIDLE	TC	POSTJUMP	# PUT SERVICER INTO ITS "GROUND" STATE
-		CADR	SERVIDLE	# AND PROCEED TO GOTOPOOH.
-CCSHOLE		INHINT
-		CA	Q
-		TC	ABORT2
-OCT21103	OCT	1103
-CURTAINS	INHINT
-		CA	Q
-		TC	ALARM2
-OCT217		OCT	00217
-		TC	ALMCADR		# RETURN TO USER
+                TC      ABORT2
+                OCT     1103
 
-BAILOUT1	INHINT
-		DXCH	ALMCADR
-		CAF	ADR40400
-BOTHABRT	TS	ITEMP1
-		INDEX	Q
-		CAF	0
-		TS	L
-		TCF	CHKFAIL1
-POODOO1		INHINT
-		DXCH	ALMCADR
-		CAF	ADR77770
-		TCF	BOTHABRT
-
-ALARM1		INHINT
-		DXCH	ALMCADR
-ALMNCADR	INHINT
-		INDEX	Q
-		CA	0
-		TS	L
-		TCF	LARMENT
-
-ADR77770	TCF	OCT77770
-ADR40400	TCF	OCT40400
-DOALARM		EQUALS	ENDOFJOB
+CURTAINS        INHINT
+                CA      Q
+                TC      ALARM2
+OCT217          OCT     00217
+                TC      ALMCADR         # RETURN TO USER
 
 # CALLING SEQUENCE FOR VARALARM
-#		CAF	(ALARM)
-#		TC	VARALARM
+#               CAF     (ALARM)
+#               TC      VARALARM
 #
 # VARALARM TURNS ON PROGRAM ALARM LIGHT BUT DOES NOT DISPLAY
 
-VARALARM	INHINT
+VARALARM        INHINT
 
-		TS	L		# SAVE USERS ALARM CODE
+                TS      L               # SAVE USERS ALARM CODE
 
-		CA	Q		# SAVE USERS Q
-		TS	ALMCADR
+                CA      Q               # SAVE USERS Q
+                TS      ALMCADR
 
-		TC	PRIOENT
-OCT14		OCT	14		# DONT MOVE
+                TC      PRIOENT
+OCT14           OCT     14              # DONT MOVE
 
-		TC	ALMCADR		# RETURN TO USER
-
-ABORT		EQUALS	WHIMPER
-
+                TC      ALMCADR         # RETURN TO USER

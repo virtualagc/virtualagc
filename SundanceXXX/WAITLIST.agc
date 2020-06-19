@@ -174,9 +174,6 @@ SVCT3           CCS     FLAGWRD2        # DRIFT FLAG
                 BANK    01
                 COUNT*  $$/WAIT
 WAIT2           TS      WAITBANK        # BBANK OF CALLING PROGRAM.
-                CA      Q
-                EXTEND
-                BZMF    WAITPOOH
 
                 CS      TIME3
                 AD      BIT8            # BIT 8 = OCT 200
@@ -292,18 +289,15 @@ WTLST5          CCS     A               # TEST TD - T2 + 1
                 OCT     7
 
  +4             CCS     A
-WTABORT         TC      FILLED
-                NOOP                    # CAN'T GET HERE
+WTABORT         TC      ABORT           # NO ROOM IN THE INN.
+                OCT     1203
+
                 AD      ONE
                 TC      WTLST2
                 OCT     10
 
 OCT40201        OCT     40201
 
-FILLED          DXCH    WAITEXIT
-                TC      BAILOUT1        # NO ROOM IN THE INN
-                OCT     01203
-                
 # THE ENTRY TO WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
 #                                                  N           N+1
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
@@ -466,15 +460,6 @@ LNGCALL2        LXCH    LONGEXIT +1     # SAVE THE CORRECT BB FOR RETURN
                 ADS     Q
                 TS      LONGEXIT
 
-                CA      LONGTIME        # CHECK FOR LEGITIMATE DELTA-TIME
-                CCS     A
-                TCF     LONGCYCL        # HI-ORDER OK --> ALL IS OK.
-                TCF     +2              # HI-ORDER ZERO --> CHECK LO-ORDER.
-                TCF     LONGPOOH        # HI-ORDER NEG. --> NEG. DT
- +2             CA      LONGTIME +1     # CHECK LO-ORDER FOR ZERO OR NEGATIVE.
-                EXTEND
-                BZMF    LONGPOOH        # BAD DELTA-TIME.  ABORT
-
 # *** WAITLIST TASK LONGCYCL ***
 
 LONGCYCL        EXTEND                  # CAN WE SUCCESFULLY TAKE ABOUT 1.25
@@ -519,9 +504,3 @@ GETCADR         DXCH    LONGCADR        # GET THE LONGCALL THAT WE WISHED TO STA
                 DTCB                    # AND TRANSFER CONTROL TO IT
 
 TSKOVCDR        GENADR  TASKOVER
-LONGPOOH        DXCH    LONGEXIT
-                TCF     +2
-WAITPOOH        DXCH    WAITEXIT
- +2             TC      POODOO1
-                OCT     01204
-                

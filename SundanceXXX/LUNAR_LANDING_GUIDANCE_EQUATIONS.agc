@@ -520,9 +520,8 @@ TTF/8CL         TC              INTPRETX
 
                 CAF             TABLTTFL
                 TC              ROOTPSRS                # YIELDS TTF/8 IN MPAC
-                TC              POODOO                  # BAD RETURN
-                OCT             01406
-                EXTEND                                  # GOOD RETURN
+
+                EXTEND
                 DCA             MPAC                    # FETCH TTF/8 KEEPING IT IN MPAC
                 DXCH            TTF/8                   # CORRECTED TTF/8
 

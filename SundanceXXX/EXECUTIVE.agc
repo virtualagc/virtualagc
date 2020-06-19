@@ -123,9 +123,7 @@ FINDVAC2        TS              EXECTEM1                # (SAVE CALLER'S BANK FI
                 TCF             VACFOUND
                 CCS             VAC5USE
                 TCF             VACFOUND
-                LXCH            EXECTEM1
-                CA              Q
-                TC              BAILOUT1
+                TC              ABORT
                 OCT             1201                    # NO VAC AREAS.
 
 VACFOUND        AD              TWO                     # RESERVE THIS VAC AREA BY STORING A ZERO
@@ -183,9 +181,7 @@ NEXTCORE        CAF             COREINC
                 ADS             LOCCTR
                 CCS             EXECTEM2
                 TCF             NOVAC3
-                LXCH            EXECTEM1
-                CA              Q
-                TC              BAILOUT1                # NO CORE SETS AVAILABLE.
+                TC              ABORT                   # NO CORE SETS.
                 OCT             1202
 
 #          THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.

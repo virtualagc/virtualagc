@@ -128,12 +128,6 @@ SIZETAB         TC              1.2SPOT         -12006
 2.15SPOT        OCT             26000
                 EBANK=          LOSCOUNT
                 2CADR           R22RSTRT
-2.17SPOT        OCT             77777
-                EBANK=          VGPREV
-                -2CADR          REDO2.17
-2.21SPOT        DEC             25
-                EBANK=          DVCNTR
-                -2CADR          R10,R11
 # ANY MORE GROUP 2.ODD RESTART VALUES SHOULD GO HERE.
 
 3.2SPOT         EQUALS          1.2SPOT
@@ -152,9 +146,9 @@ SIZETAB         TC              1.2SPOT         -12006
                 -2CADR          REDO4.2
 # ANY MORE GROUP 4.EVEN RESTART VALUES SHOULD GO HERE
 
-4.3SPOT         OCT             25000
-                EBANK=          DVCNTR
-                2CADR           GOABORT
+4.3SPOT         OCT             0
+                OCT             0
+                OCT             0
 4.5SPOT         DEC             50
                 EBANK=          TTOGO
                 -2CADR          ULLAGOFF
@@ -184,23 +178,6 @@ SIZETAB         TC              1.2SPOT         -12006
                 -GENADR         TIG-35
                 EBANK=          SAVET-30
                 BBCON           TIG-35
-
-4.27SPOT        OCT             52777
-                EBANK=          DVCNTR
-                2CADR           P70A
-4.31SPOT        OCT             52777
-                EBANK=          DVCNTR
-                2CADR           P71A
-
-4.33SPOT        OCT             46777
-                EBANK=          DVCNTR
-                2CADR           GOPOOFIX
-4.35SPOT        OCT             46777
-                EBANK=          DVCNTR
-                2CADR           GOPOODOO
-4.37SPOT        OCT             52777
-                EBANK=          WHICH
-                2CADR           COMFAIL
 # ANY MORE 4.ODD RESTART VALUES SHOULD GO HERE.
 
 5.2SPOT         OCT             22000
