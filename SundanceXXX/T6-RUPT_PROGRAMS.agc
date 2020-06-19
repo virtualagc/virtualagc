@@ -109,6 +109,9 @@ GOCH56          INDEX   L
                 EBANK=  CDUXD
                 COUNT*  $$/DAPT6
 
+NARROWDB        OCTAL   00155           # 0.3 DEGREE SCALED AT 45.
+WIDEDB          OCTAL   03434           # 5.0 DEGREES SCALED AT 45.
+
                 EBANK=  T6NEXT
 T6ADR           2CADR   DOT6RUPT        # 2CADR OF INTERRUPT PROCESSOR.
 

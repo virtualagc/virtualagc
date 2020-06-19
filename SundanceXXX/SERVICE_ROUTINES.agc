@@ -13,12 +13,14 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-                BANK    10
-                SETLOC  DISPLAYS
+                BLOCK   3
+                SETLOC  FFTAG6
                 BANK
-                COUNT*  $$/DSPLA
+                COUNT*  $$/FLAG
 
-UPENT2          TS      L               # WHICH FLAGWORD IS IT
+UPENT2          INDEX   Q
+                CA      0
+                TS      L               # WHICH FLAGWORD IS IT
                 MASK    OCT7
                 XCH     L               # SAVE IN L FOR INDEXING
                 
@@ -36,7 +38,9 @@ UPENT2          TS      L               # WHICH FLAGWORD IS IT
                 INCR    Q               # OBTAIN THE CORRECT RETURN ADDRESS
                 TC      Q               # RETURN
 
-DOWNENT2        TS      L               # WHICH FLAGWORD IS IT
+DOWNENT2        INDEX   Q
+                CA      0
+                TS      L               # WHICH FLAGWORD IS IT
                 MASK    OCT7
                 XCH     L               # SAVE IN L FOR INDEXING
 

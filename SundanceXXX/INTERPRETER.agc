@@ -24,8 +24,7 @@
                 BLOCK   03
                 
                 COUNT*  $$/INTER
-INTPRET         RELINT
-                EXTEND                          # SET LOC TO THE WORD FOLLOWING THE TC.
+INTPRET         EXTEND                          # SET LOC TO THE WORD FOLLOWING THE TC.
                 QXCH    LOC
                 
  +2             CA      BBANK                   # INTERPRETIVE BRANCHES FINISH HERE.
@@ -39,7 +38,7 @@ INTPRET         RELINT
 
 
 INTRSM          LXCH    BBANK                   # RESUME SUSPENDED INTERPRETIVE JOB
-                TCF     INTPRET +3
+                TCF     INTPRET +2
 #          DLOAD LOADS MPAC, MPAC +1, LEAVING ZERO IN MPAC +2.
 
 DLOAD           EXTEND
@@ -1024,9 +1023,6 @@ POLY2           TC      DMPSUB          # MULTIPLY BY X
                 TC      POLYRET         # RETURN CALLER
                 
 #          MISCELLANEOUS MULTI-PRECISION ROUTINES REQUIRED IN FIXED-FIXED BUT NOT USED BY THE INTERPRETER.
-
-DPAGREE         CAF     ZERO            # DOUBLE PRECISION ENTRY -
-                TS      MPAC    +2      # ZERO LOW-ORDER WORD
 
 TPAGREE         LXCH    Q               # FORCE SIGN AGREEMENT AMONG THE TRIPLE
                 TC      BRANCH          # PRECISION CONTENTS OF MPAC.  RETURNING

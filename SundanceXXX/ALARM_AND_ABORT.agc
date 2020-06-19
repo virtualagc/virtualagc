@@ -131,6 +131,7 @@ CCSHOLE         INHINT
 
 CURTAINS        INHINT
                 CA      Q
+                TS      ALMCADR
                 TC      ALARM2
 OCT217          OCT     00217
                 TC      ALMCADR         # RETURN TO USER

@@ -982,11 +982,6 @@ R24END          INHINT
                 TC              CLRADMOD                # CLEAR BITS 10 & 15 OF RADMODES.
                 TCF             P20LEM1                 # AND GO TO 400 MI. RANGE CHECK IN P20.
 
-                BLOCK           3
-                SETLOC          FFTAG6
-                BANK
-                COUNT*          $$/R24
-
 CLRADMOD        CS              BIT10+15
                 INHINT
                 MASK            RADMODES
@@ -998,10 +993,6 @@ CLRADMOD        CS              BIT10+15
                 TC              Q
 
 BIT10+15        OCT             41000
-                BANK            24
-                SETLOC          P20S
-                BANK
-                COUNT*          $$/R24
 
 R24LEM3         TC              PHASCHNG
                 OCT             04022
