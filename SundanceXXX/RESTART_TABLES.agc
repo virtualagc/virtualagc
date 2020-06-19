@@ -102,6 +102,9 @@ SIZETAB         TC              1.2SPOT         -12006
 1.3SPOT         -GENADR         SAVET-30
                 EBANK=          DVCNTR
                 -2CADR          ULLGTASK
+1.5SPOT         OCT             10000
+                EBANK=          VG
+                2CADR           S40.9
 # ANY MORE GROUP 1.ODD RESTART VALUES SHOULD GO HERE
 
 2.2SPOT         EQUALS          1.2SPOT
@@ -194,6 +197,14 @@ SIZETAB         TC              1.2SPOT         -12006
                 OCT             20000
                 EBANK=          DVCNTR
                 2CADR           SERVICER
+
+5.6SPOT         OCT             45777
+                EBANK=          NBDX
+                2CADR           NORMBIAS
+
+                DEC             200
+                EBANK=          DVCNTR
+                2CADR           REREADAC
 # ANY MORE GROUP 5.EVEN RESTART VALUES SHOULD GO HERE
 
 5.3SPOT         DEC             200

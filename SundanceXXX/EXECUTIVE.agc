@@ -139,7 +139,7 @@ NOVAC3          TS              EXECTEM2
                 INDEX           LOCCTR
                 CCS             PRIORITY                # EACH PRIORITY REGISTER CONTAINS -0 IF
                 TCF             NEXTCORE                # THE CORRESPONDING CORE SET IS AVAILABLE.
-NO.CORES        DEC             7
+NO.CORES        DEC             6
                 TCF             NEXTCORE                # AN ACTIVE JOB HAS A POSITIVE PRIORITY
                                                         # BUT A DORMANT JOB'S PRIORITY IS NEGATIVE
 
@@ -384,12 +384,6 @@ EJSCAN          CCS             PRIORITY        +12D
                 TCF             +1
 
                 CCS             PRIORITY        +72D
-                TC              EJ1
-                TC              CCSHOLE
-                TCF             +1
-
-                CCS             PRIORITY        +84D
-
                 TC              EJ1
                 TC              CCSHOLE
                 TCF             +1

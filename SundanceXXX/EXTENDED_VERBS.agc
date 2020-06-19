@@ -1312,41 +1312,13 @@ DPDAT1          INHINT                                  # INHINT FOR SETTING OF 
                 MASK            THREE                   # MANEUVER RATE
                 DOUBLE                                  # RATEINDX HAS TO BE 0,2,4,6 SINCE RATES
                 TS              RATEINDX                # ARE DP
-                TC              POSTJUMP
-                CADR            STIKLOAD
 
 V01N46          VN              0146
 DSPLYMSK        OCT             33113
 BOOLSMSK        OCT             13113
-                BANK            01
-                SETLOC          LOADDAP1
-                BANK
-
-                COUNT*          $$/R03
-
-STIKLOAD        CAF             EBANK6
-
-                TS              EBANK
-                EBANK=          STIKSENS
-                CA              RHCSCALE                # SET STICK SENSITIVITY TO CORRESPOND TO A
-                MASK            DAPBOOLS                # MAXIMUM COMMANDED RATE (AT 42 COUNTS) OF
-                CCS             A                       # 20 D/S(NORMAL) OR 4 D/S(FINE), SCALED
-                CA              NORMAL                  # AT 45 D/S.
-                AD              FINE
-                TS              STIKSENS
-                CA              -0.6D/S
-                TS              -RATEDB                 # LM-ONLY BREAKOUT LEVEL IS .6 D/S.
-                CA              CSMDOCKD                # IF CSM-DOCKED, DIVIDE STICK SENSITIVITY
-                MASK            DAPBOOLS                # BY 10. NORMAL SCALING IS THEN 2 D/S AND
-                EXTEND                                  # FINE SCALING IS 0.4 D/S
-                BZF             +7                      # BRANCH IF CSM IS NOT DOCKED.
-                CA              STIKSENS
-                EXTEND
-                MP              1/10
-                TS              STIKSENS
-                CA              -0.3D/S                 # CSM-DOCKED BREAKOUT LEVEL IS .3 D/S.
-                TS              -RATEDB
-                RELINT                                  # PROCEED TO NOUN 47, MASS LOAD,
+MINLMD          DEC             -2850           B-16    # MIN. DESCENT STAGE MASS -- 2(16) KG.
+MINMINLM        DEC             -2200           B-16    # MIN ASCENT STAGE MASS -- 2(16) KG.
+MINCSM          =               BIT11                   # MIN CSM MASS (OK FOR 1/ACCS) = 9050 LBS
 
 DAPDATA2        CAF             V0647
                 TC              BANKCALL

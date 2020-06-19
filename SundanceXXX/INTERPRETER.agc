@@ -2726,9 +2726,6 @@ ACOSOVF         EXTEND                  # IF MAJOR PART WAS ONLY 1 MORE THAN .5,
 ACOSABRT        TC      ABORT
                 OCT     1301
 
-                CAF     ZERO
-                TCF     ACOS=0
-
 ACOSZERO        CAF     QUARTER         # ACOS(0) = PI/2.
                 TCF     ACOS=0  +1      # SET MPAC AND EXIT VIA ESCAPE.
 
@@ -2851,7 +2848,7 @@ TAGSUB          CA      FIXLOC
 
 RTB/BHIZ        CCS     CYR
 RTB             CA      POLISH
-                TC      SWCALL  -1      # SO A "TC Q" FROM ROUTINE LEADS TO DANZIG
+                TCF     BANKJUMP        # CALL BASIC ROUTINE.
 
 BHIZ            CCS     MPAC
                 TCF     DANZIG

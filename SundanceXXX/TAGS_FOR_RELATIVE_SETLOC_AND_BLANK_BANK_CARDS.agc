@@ -46,7 +46,6 @@ DLAYJOB         EQUALS
 
                 BANK            01
 RESTART         EQUALS
-LOADDAP1        EQUALS
                 BNKSUM          01
 
 

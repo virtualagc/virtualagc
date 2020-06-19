@@ -200,16 +200,6 @@ TORKJET1        DEC             .03757                  # 550 / .2 SCALED AT (+1
 
 FULLAPS         DEC             5050            B-16    # NOMINAL FULL ASCENT MASS -- 2(16) KG.
 
-                SETLOC          LOADDAP1
-                BANK
-                COUNT*          $$/R03
-
-MINLMD          DEC             -2850           B-16    # MIN. DESCENT STAGE MASS -- 2(16) KG.
-
-MINMINLM        DEC             -2200           B-16    # MIN ASCENT STAGE MASS -- 2(16) KG.
-
-MINCSM          =               BIT11                   # MIN CSM MASS (OK FOR 1/ACCS) = 9050 LBS
-
                 SETLOC          DAPS3
                 BANK
                 COUNT*          $$/DAPAO
