@@ -1738,6 +1738,9 @@ OLDXFORP        ERASE           +2                      # STORED CDU READINGS FO
 OLDYFORP        EQUALS          OLDXFORP        +1      # DERIVATIONS: SCALED AT PI RADIANS (2'S)
 OLDZFORQ        EQUALS          OLDXFORP        +2
 
+SUMRATEQ        ERASE           +1                      # SUM OF UN-WEIGHTED JETRATE TERMS
+SUMRATER        EQUALS          SUMRATEQ +1             # SCALED AT PI/4 RADIANS/SECOND
+
 # RATE-COMMAND AND MINIMUM IMPULSE MODES
 
 CH31TEMP        ERASE
@@ -1933,6 +1936,7 @@ RGIMTIMR        EQUALS          QGIMTIMR        +2      # R-GIMBAL DRIVE TIMER, 
 
 #          KALCMANU:DAP INTERFACE.                                      (9D)
 
+ACCSET          ERASE                                   # INDICATES 1/ACCS HAS BEEN SET UP
 CDUXD           ERASE           +2                      # CDU DESIRED REGISTERS:
 CDUYD           EQUALS          CDUXD           +1      # SCALED AT PI RADIANS (180 DEGREES)
 CDUZD           EQUALS          CDUXD           +2      # (STORE IN 2S COMPLEMENT)

@@ -56,88 +56,84 @@ AGSLIST         EQUALS          LMAGSIDL
 
 UPDNLIST        EQUALS          LMAGSIDL                # UPDATE PROGRAM (P27) DOWNLIST
 
-# LM ORBITAL MANEUVERS LIST
+# LM AGS INITIALIZATION AND UPDATE DOWNLIST
 
 #     -----------------  CONTROL LIST  --------------------------
 
-LMORBMDL        EQUALS                                  # SEND ID BY SPECIAL CODING
-                DNPTR           LMORBM01                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                1DNADR          DELLT4                  # DELLT4,+1
-                3DNADR          RTARG                   # RTARG,+1...+5
-                1DNADR          ELEV                    # ELEV,+1
-                1DNADR          TEVENT                  # TEVENT,+1
-                6DNADR          REFSMMAT                # REFSMMAT+0...+11D
-                1DNADR          TCSI                    # TCSI,+1
-                3DNADR          DELVEET1                # DELVEET1+0...+5
-                3DNADR          VGTIG                   # VGTIG+0...+5
-                1DNADR          DNLRVELZ                # DNLRVELZ,DNLRALT
-                1DNADR          TPASS4                  # TPASS4,+1
-                DNPTR           LMORBM02                # COMMON DATA
-                1DNADR          TIME2                   # TIME2/1
-                DNPTR           LMORBM03                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                DNPTR           LMORBM04                # COMMON DATA
-                2DNADR          POSTORKU                # POSTORKU,NEGTORKU,POSTORKV,NEGTORKV
+LMAGSIDL        EQUALS                                  # SEND IO BY SPECIAL CODING
+                DNPTR           LMAGSI01                # COLLECT SNAPSHOT
+                DNPTR           LMAGSI02                # SEND SNAPSHOT
+                4DNADR          AGSBUFF         +7      # AGSBUFF+7...+13D,GARBAGE
+                DNPTR           LMAGSI04                # COMMON DATA
                 1DNADR          SPARE
-                1DNADR          TCDH                    # TCDH,+1
-                3DNADR          DELVEET2                # DELVEET2+0...+5
-                1DNADR          TTPI                    # TTPI,+1
-                3DNADR          DELVEET3                # DELVEET3+0...+5
-                1DNADR          DNRRANGE                # DNRRANGE,DNRRDOT
-                2DNADR          DNLRVELX                # DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT
-                1DNADR          DIFFALT                 # DIFFALT,+1
-                1DNADR          LEMMASS                 # LEMMASS,CSMMASS
-                1DNADR          IMODES30                # IMODES30,IMODES33
-                1DNADR          TIG                     # TIG,+1
-                DNPTR           LMORBM05                # COMMON DATA
-                DNPTR           LMORBM06                # COMMON DATA
-                1DNADR          SPARE                   # FORMERLY PIF
-                -1DNADR         TGO                     # TGO,+1
+                1DNADR          SPARE
+                1DNADR          SPARE
+                1DNADR          AGSK                    # AGSK,+1
+                DNPTR           LMAGSI05                # COMMON DATA
+                1DNADR          TIME2                   # TIME2/1
+                DNPTR           LMAGSI03                # COLLECT SNAPSHOT
+                DNPTR           LMAGSI02                # SEND SNAPSHOT
+                2DNADR          REDOCTR                 # REDOCTR,THETAD,+1,+2
+                1DNADR          SPARE
+                1DNADR          SPARE
+                DNPTR           LMAGSI04                # COMMON DATA
+                1DNADR          SPARE
+                1DNADR          SPARE
+                1DNADR          SPARE
+                1DNADR          RADMODES                # RADMODES,DAPBOOLS
+                1DNADR          SUMRATEQ                # SUMRATEQ,SUMRATER
+                -DNPTR          LMAGSI06                # COMMON DATA
 
-#     -----------------  SUB-LISTS  ----------------------------
+#     -----------------  SUB-LISTS   ----------------------------
 
-LMORBM01        -1DNADR         R-OTHER         +2      # R-OTHER+2,+3             SNAPSHOT
-                1DNADR          R-OTHER         +4      # R-OTHER+4,+5
-                1DNADR          V-OTHER                 # V-OTHER,+1
-                1DNADR          V-OTHER         +2      # V-OTHER+2,+3
-                1DNADR          V-OTHER         +4      # V-OTHER+4,+5
-                1DNADR          T-OTHER                 # T-OTHER,+1
-                -1DNADR         R-OTHER                 # R-OTHER+0,+1
+LMAGSI01        -1DNADR         AGSBUFF         +2      # AGSBUFF+2,+3             SNAPSHOT
+                1DNADR          AGSBUFF         +4      # AGSBUFF+4,+5
+                1DNADR          AGSBUFF         +12D    # AGSBUFF+12D,GARBAGE
+                1DNADR          AGSBUFF         +1      # AGSBUFF+1,+2
+                1DNADR          AGSBUFF         +3      # AGSBUFF+3,+4
+                1DNADR          AGSBUFF         +5      # AGSBUFF+5,+6
+                1DNADR          AGSBUFF         +13D    # AGSBUFF+13D, GARBAGE
+                1DNADR          AGSBUFF         +6      # AGSBUFF+6,+7
+                1DNADR          AGSBUFF         +8D     # AGSBUFF+8D,+9D
+                1DNADR          AGSBUFF         +10D    # AGSBUFF+10D,+11D
+                1DNADR          AGSBUFF         +12D    # AGSBUFF+12,GARBAGE
+                -1DNADR         AGSBUFF                 # AGSBUFF+0,+1
 
-LMORBM02        2DNADR          REDOCTR                 # REDOCTR,THETAD,+1,+2     COMMON DATA
+LMAGSI02        6DNADR          DNTMBUFF                # SEND SNAPSHOT
+                -5DNADR         DNTMBUFF        +12D
 
-                1DNADR          RSBBQ                   # RSBBQ,+1
-                2DNADR          OMEGAP                  # OMEGAP,OMEGAQ,OMEGAR,GARBAGE
-                2DNADR          CDUXD                   # CDUXD,CDUYD,CDUZD,GARBAGE
-                2DNADR          CDUX                    # CDUX,CDUY,CDUZ,CDUT
-                6DNADR          STATE                   # STATE+0...+11D (FLAGWORDS)
-                -6DNADR         DSPTAB                  # DSPTAB TABLES
-
-LMORBM03        -1DNADR         RN              +2      # RN +2,+3                 SNAPSHOT
+LMAGSI03        -1DNADR         RN              +2      # RN +2,+3                 SNAPSHOT
                 1DNADR          RN              +4      # RN +4,+5
                 1DNADR          VN                      # VN,+1
                 1DNADR          VN              +2      # VN +2,+3
                 1DNADR          VN              +4      # VN +4,+5
                 1DNADR          PIPTIME                 # PIPTIME,+1
+                1DNADR          ACCSET                  # GARBAGE,CDUXD
+                1DNADR          CDUYD                   # CDUYD,CDUZD
+                1DNADR          OMEGAP                  # OMEGAP,OMEGAQ
+                1DNADR          OMEGAR                  # OMEGAR,GARBAGE
+                1DNADR          SPARE
                 -1DNADR         RN                      # RN,+1
 
-LMORBM04        2DNADR          OMEGAPD                 # OMEGAPD,OMEGAQD,OMEGARD,GARBAGE
-                3DNADR          CADRFLSH                # CADRFLSH,+1,+2,FAILREG,+1,+2
-                -1DNADR         RADMODES                # RADMODES,DAPBOOLS        COMMON DATA
+LMAGSI04        6DNADR          COMPNUMB                # COMPNUMB,UPOLDMOD,UPVERB,UPCOUNT,
+                                                        # UPBUFF+0...+7            COMMON DATA
+                -6DNADR         UPBUFF          +8D     # UPBUFF +8D...+19D
 
-LMORBM05        2DNADR          OMEGAP                  # OMEGAP,OMEGAQ,OMEGAR,GARBAGE
-                2DNADR          CDUXD                   # CDUXD,CDUXD,CDUZD,GARBAGE
+LMAGSI05        1DNADR          MASS                    # MASS,+1                  COMMON DATA
+                1DNADR          RSBBQ                   # RSBBQ,+1
+                2DNADR          CDUS                    # CDUS,PIPAX,PIPAY,PIPAZ
                 2DNADR          CDUX                    # CDUX,CDUY,CDUZ,CDUT
-                1DNADR          ALPHAQ                  # ALPHAQ,ALPHAR            COMMON DATA
-                1DNADR          POSTORKP                # POSTORKP,NEGTORKP
+                5DNADR          STATE                   # STATE+0...+9D (FLAGWORDS)
+                -6DNADR         DSPTAB                  # DSPTAB TABLES
+
+LMAGSI06        3DNADR          CADRFLSH                # CADRFLSH,+1,+2,FAILREG,+1,+2
+                2DNADR          CDUX                    # CDUX,CDUY,CDUZ,CDUT
+                1DNADR          IMODES30                # IMODES30,IMODES33
                 DNCHAN          11                      # CHANNELS11,12
                 DNCHAN          13                      # CHANNELS13,14
                 DNCHAN          30                      # CHANNELS30,31
-                -DNCHAN         32                      # CHANNELS32,33
-
-LMORBM06        1DNADR          PIPTIME1                # PIPTIME,+1               COMMON DATA
-                -3DNADR         DELV                    # DELV+0...+5
+                DNCHAN          32                      # CHANNELS32,33
+                -6DNADR         DSPTAB                  # DSPTAB TABLES
 
 #     ---------------------------------------------------------
 
@@ -147,50 +143,113 @@ LMORBM06        1DNADR          PIPTIME1                # PIPTIME,+1            
 
 LMCSTADL        EQUALS                                  # SEND ID BY SPECIAL CODING
                 DNPTR           LMCSTA01                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                1DNADR          AGSK                    # AGSK,+1
-                1DNADR          TALIGN                  # TALIGN,+1
-                2DNADR          POSTORKU                # POSTORKU,NEGTORKU,POSTORKV,NEGTORKV
-                1DNADR          DNRRANGE                # DNRRANGE,DNRRDOT
-                1DNADR          TEVENT                  # TEVENT,+1
-                6DNADR          REFSMMAT                # REFSMMAT+0...+11D
-                1DNADR          AOTCODE                 # AOTCODE,GARBAGE
-                3DNADR          VGTIG                   # VGTIG+0...+5
+                DNPTR           LMCSTA02                # SEND SNAPSHOT
                 2DNADR          DNLRVELX                # DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT
-                DNPTR           LMCSTA06                # COMMON DATA
-                DNPTR           LMCSTA02                # COMMON DATA
+                1DNADR          TEVENT                  # TEVENT,+1
+                1DNADR          DNRRANGE                # DNRRANGE,DNRRDOT
+                6DNADR          REFSMMAT                # REFSMMAT+0...+11D
+                6DNADR          STARAD                  # STARAD+0...+11D
+                3DNADR          STARAD          +12D    # STARAD+12D...+17D
+                1DNADR          AGSK                    # AGSK,+1
+                DNPTR           LMCSTA05                # COMMON DATA
                 1DNADR          TIME2                   # TIME2/1
                 DNPTR           LMCSTA03                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                DNPTR           LMCSTA04                # COMMON DATA
-                DNPTR           LMCSTA07                # COMMON DATA
+                DNPTR           LMCSTA02                # SEND SNAPSHOT
                 2DNADR          DNLRVELX                # DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT
-                2DNADR          CDUS                    # CDUS,PIPAX,PIPAY,PIPAZ
-                1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
-                1DNADR          LEMMASS                 # LEMMASS,CSMMASS
-                1DNADR          IMODES30                # IMODES30,IMODES33
-                1DNADR          TIG                     # TIG,+1
-                DNPTR           LMCSTA05                # COMMON DATA
-                -6DNADR         DSPTAB                  # DSPTAB+0...+11D TABLE
+                3DNADR          OGC                     # OGC,+1,IGC,+1,MGC,+1
+                3DNADR          STAR                    # STAR+0...+5
+                2DNADR          REDOCTR                 # REDOCTR,THETAD,+1,+2
+                1DNADR          SPARE
+                1DNADR          SPARE
+                1DNADR          BESTI                   # BESTI,BESTJ
+                6DNADR          STARSAV1                # STARSAV1+0...+5, STARSAV2+0...+5
+                1DNADR          RADMODES                # RADMODES,DAPBOOLS
+                1DNADR          SUMRATEQ                # SUMRATEQ,SUMRATER
+                -DNPTR          LMCSTA06                # COMMON DATA
 
 #     -----------------  SUB-LISTS   ----------------------------
 
-LMCSTA01        EQUALS          LMORBM01                # COMMON DOWNLIST DATA
+LMCSTA01        -1DNADR         R-OTHER         +2      # R-OTHER+2,+3             SNAPSHOT
+                1DNADR          R-OTHER         +4      # R-OTHER+4,+5
+                1DNADR          V-OTHER                 # V-OTHER,+1
+                1DNADR          V-OTHER         +2      # V-OTHER+2,+3
+                1DNADR          V-OTHER         +4      # V-OTHER+4,+5
+                1DNADR          T-OTHER                 # T-OTHER,+1
+                1DNADR          ACCSET                  # GARBAGE,CDUXD
+                1DNADR          CDUYD                   # CDUYD,CDUZD
+                1DNADR          OMEGAP                  # OMEGAP,OMEGAQ
+                1DNADR          OMEGAR                  # OMEGAR,GARBAGE
+                1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
+                -1DNADR         R-OTHER                 # R-OTHER+0,+1
 
-LMCSTA02        EQUALS          LMORBM02                # COMMON DOWNLIST DATA
+LMCSTA02        EQUALS          LMAGSI02                # COMMON DOWNLIST DATA
 
-LMCSTA03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
+LMCSTA03        -1DNADR         RN              +2      # RN +2,+3                 SNAPSHOT
+                1DNADR          RN              +4      # RN +4,+5
+                1DNADR          VN                      # VN,+1
+                1DNADR          VN              +2      # VN +2,+3
+                1DNADR          VN              +4      # VN +4,+5
+                1DNADR          PIPTIME                 # PIPTIME,+1
+                1DNADR          ACCSET                  # GARBAGE,CDUXD
+                1DNADR          CDUYD                   # CDUYD,CDUZD
+                1DNADR          OMEGAP                  # OMEGAP,OMEGAQ
+                1DNADR          OMEGAR                  # OMEGAR,GARBAGE
+                1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
+                -1DNADR         RN                      # RN,+1
 
-LMCSTA04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
+LMCSTA05        EQUALS          LMAGSI05                # COMMON DOWNLIST DATA
 
-LMCSTA05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
+LMCSTA06        EQUALS          LMAGSI06                # COMMON DOWNLIST DATA
 
-LMCSTA06        2DNADR          X789                    # X789+0...+3               COMMON DATA
-                -1DNADR         LASTYCMD                # LASTYCMD,LASTXCMD
-LMCSTA07        3DNADR          OGC                     # OGC,+1,IGC,+1,MGC,+1      COMMON DATA
-                1DNADR          BESTI                   # BESTI,BESTJ
-                3DNADR          STARSAV1                # STARSAV1+0...+5
-                -3DNADR         STARSAV2                # STARSAV2+0...+5
+#     ---------------------------------------------------------
+
+# LM POWERED DOWNLIST
+
+#     -----------------  CONTROL LIST  --------------------------
+
+LMPWRDDL        EQUALS                                  # SEND ID BY SPECIAL CODING
+                DNPTR           LMPWRD01                # COLLECT SNAPSHOT
+                DNPTR           LMPWRD02                # SEND SNAPSHOT
+                2DNADR          DNLRVELX                # DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT
+                1DNADR          TEVENT                  # TEVENT,+1
+                1DNADR          DNRRANGE                # DNRRANGE,DNRRDOT
+                6DNADR          REFSMMAT                # REFSMMAT+0...+11D
+                3DNADR          GDT/2                   # GDT/2+0...+5
+                2DNADR          REDOCTR                 # REDOCTR,THETAD,+1,+2
+                2DNADR          OMEGAPD                 # OMEGAPD,OMEGAQD,OMEGARD,GARBAGE
+                3DNADR          VRPREV                  # VRPREV+0...+5
+                DNPTR           LMPWRD05                # COMMON DATA
+                1DNADR          TIME2                   # TIME2/1
+                DNPTR           LMPWRD03                # COLLECT SNAPSHOT
+                DNPTR           LMPWRD02                # SEND SNAPSHOT
+                2DNADR          DNLRVELX                # DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT
+                1DNADR          TIG                     # TIG,+1
+                3DNADR          VGTIG                   # VGTIG+0...+5
+                1DNADR          CENTANG                 # CENTANG,+1
+                1DNADR          PIPTIME1                # PIPTIME,+1
+                3DNADR          DELV                    # DELV+0...+5
+                1DNADR          TGO                     # TGO,+1
+                1DNADR          PIF                     # PIF,+1
+                1DNADR          TTPI                    # TTPI,+1
+                3DNADR          DELVEET3                # DELVEET3+0...+5
+                1DNADR          ELEV                    # ELEV,+1
+                1DNADR          TPASS4                  # TPASS4,+1
+                1DNADR          RADMODES                # RADMODES,DAPBOOLS
+                1DNADR          ALPHAQ                  # ALPHAQ,ALPHAR
+                -DNPTR          LMPWRD06                # COMMON DATA
+
+#     -----------------  SUB-LISTS  ----------------------------
+
+LMPWRD01        EQUALS          LMCSTA01                # COMMON DOWNLIST DATA
+
+LMPWRD02        EQUALS          LMAGSI02                # COMMON DOWNLIST DATA
+
+LMPWRD03        EQUALS          LMCSTA03                # COMMON DOWNLIST DATA
+
+LMPWRD05        EQUALS          LMAGSI05                # COMMON DOWNLIST DATA
+
+LMPWRD06        EQUALS          LMAGSI06                # COMMON DOWNLIST DATA
+
 
 #     -----------------------------------------------------------
 
@@ -200,236 +259,58 @@ LMCSTA07        3DNADR          OGC                     # OGC,+1,IGC,+1,MGC,+1  
 
 LMRENDDL        EQUALS                                  # SEND ID BY SPECIAL CODING
                 DNPTR           LMREND01                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                DNPTR           LMREND07                # COLLECT SNAPSHOT
-                4DNADR          DNTMBUFF                # SEND SNAPSHOT
-                1DNADR          DELLT4                  # DELLT4,+1
-                3DNADR          RTARG                   # RTARG+0...+5
-                3DNADR          DELVSLV                 # DELVSLV+0...+5
+                DNPTR           LMREND02                # SEND SNAPSHOT
+                2DNADR          DNLRVELX                # DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT
+                1DNADR          SPARE
+                1DNADR          DNRRANGE                # DNRRANGE,DNRRDOT
+                2DNADR          AIG                     # AIG,AMG,AOG,TRKMKCNT
+                1DNADR          TANGNB                  # TANGNB,+1
+                2DNADR          MKTIME                  # MKTIME,+1,RM,+1
+                1DNADR          RDOTM                   # RDOTM,+1
+                2DNADR          X789                    # X789+0..+3
                 1DNADR          TCSI                    # TCSI,+1
                 3DNADR          DELVEET1                # DELVEET+0-..+5
                 1DNADR          SPARE
-                1DNADR          TPASS4                  # TPASS4,+1
-                DNPTR           LMREND06                # COMMON DATA
-                DNPTR           LMREND02                # COMMON DATA
+                1DNADR          SPARE
+                2DNADR          REDOCTR                 # REDOCTR,THETAD,+1,+2
+                DNPTR           LMREND05                # COMMON DATA
                 1DNADR          TIME2                   # TIME2/1
                 DNPTR           LMREND03                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                DNPTR           LMREND04                # COMMON DATA
-                2DNADR          POSTORKU                # POSTORKU,NEGTORKU,POSTORKV,NEGTORKV
-                1DNADR          SPARE
+                DNPTR           LMREND02                # SEND SNAPSHOT
+                2DNADR          DNLRVELX                # DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT
+                1DNADR          TIG                     # TIG,+1
+                3DNADR          DELVSLV                 # DELVSLV+0...+5
+                1DNADR          CENTANG                 # CENTANG,+1
                 1DNADR          TCDH                    # TCDH,+1
                 3DNADR          DELVEET2                # DELVEET2+0...+5
+                1DNADR          DIFFALT                 # DIFFALT,+1
+                1DNADR          NN                      # NN,+1
                 1DNADR          TTPI                    # TTPI,+1
                 3DNADR          DELVEET3                # DELVEET3+0...+5
                 1DNADR          ELEV                    # ELEV,+1
-                2DNADR          CDUS                    # CDUS,PIPAX,PIPAY,PIPAZ
-                1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
-                1DNADR          LEMMASS                 # LEMMASS,CSMMASS
-                1DNADR          IMODES30                # IMODES30,IMODES33
-                1DNADR          TIG                     # TIG,+1
-                DNPTR           LMREND05                # COMMON DATA
-                1DNADR          DELTAR                  # DELTAR,+1
-                1DNADR          CENTANG                 # CENTANG,+1
-                1DNADR          NN                      # NN,+1
-                1DNADR          DIFFALT                 # DIFFALT,+1
-                1DNADR          DELVTPF                 # DELVTPF,+1
-                -1DNADR         SPARE
+                1DNADR          TPASS4                  # TPASS4,+1
+                1DNADR          RADMODES                # RADMODES,DAPBOOLS
+                1DNADR          SUMRATEQ                # SUMRATEQ,SUMRATER
+                -DNPTR          LMREND06                # COMMON DATA
 
 #     -----------------  SUB-LISTS   ----------------------------
 
-LMREND01        EQUALS          LMORBM01                # COMMON DOWNLIST DATA
+LMREND01        EQUALS          LMCSTA01                # COMMON DOWNLIST DATA
 
-LMREND02        EQUALS          LMORBM02                # COMMON DOWNLIST DATA
+LMREND02        EQUALS          LMAGSI02                # COMMON DOWNLIST DATA
 
-LMREND03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
+LMREND03        EQUALS          LMCSTA03                # COMMON DOWNLIST DATA
 
-LMREND04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
+LMREND05        EQUALS          LMAGSI05                # COMMON DOWNLIST DATA
 
-LMREND05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
-
-LMREND06        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
-
-LMREND07        -1DNADR         AIG                     # AIG,AMG              SNAPSHOT
-                1DNADR          AOG                     # AOG,TRKMKCNT
-                1DNADR          TANGNB                  # TANGNB,+1
-                1DNADR          MKTIME                  # MKTIME,+1
-                -1DNADR         DNRRANGE                # DNRRANGE,DNRRDOT
-
-#     ------------------------------------------------------------
-
-# LM DESCENT AND ASCENT DOWNLIST
-
-#     -----------------  CONTROL LIST   --------------------------
-
-LMDSASDL        EQUALS                                  # SEND ID BY SPECIAL CODING
-                DNPTR           LMDSAS07                # COLLECT SNAPSHOT
-                DNPTR           LMDSAS08                # SEND SNAPSHOT
-                1DNADR          TEVENT                  # TEVENT,+1
-                3DNADR          UNFC/2                  # UNFC/2+0...+5
-                3DNADR          VGVECT                  # VGVECT+0...+5
-                1DNADR          TTF/8                   # TTF/8,+1
-                1DNADR          DELTAH                  # DELTAH,+1
-                3DNADR          RLS                     # RLS+0...+5
-                1DNADR          SPARE
-                DNPTR           LMDSAS09                # COMMON DATA
-                DNPTR           LMDSAS02                # COMMON DATA
-                1DNADR          TIME2                   # TIME2/1
-                DNPTR           LMDSAS03                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                DNPTR           LMDSAS04                # COMMON DATA
-                2DNADR          POSTORKU                # POSTORKU,NEGTORKU,POSTORKV,NEGTORKV
-                3DNADR          RGU                     # RGU+0...+5
-                3DNADR          VGU                     # VGU+0...+5
-                3DNADR          LAND                    # LAND+0...+5
-                1DNADR          AT                      # AT,+1
-                1DNADR          TLAND                   # TLAND,+1
-                1DNADR          FC                      # FC,GARBAGE
-                1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
-                1DNADR          LEMMASS                 # LEMMASS,CSMMASS
-                1DNADR          IMODES30                # IMODES30,IMODES33
-                1DNADR          TIG                     # TIG,+1
-                DNPTR           LMDSAS05                # COMMON DATA
-                DNPTR           LMDSAS06                # COMMON DATA
-                1DNADR          PSEUDO55                # PSEUDO55,GARBAGE
-                -1DNADR         TTOGO                   # TTOGO,+1
-#     -----------------  SUB-LISTS   ----------------------------
-
-LMDSAS02        EQUALS          LMORBM02                # COMMON DOWNLIST DATA
-
-LMDSAS03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
-
-LMDSAS04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
-
-LMDSAS05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
-
-LMDSAS06        EQUALS          LMORBM06                # COMMON DOWNLIST DATA
-
-LMDSAS07        -1DNADR         LRZCDUDL                # LRZCDUDL,GARBAGE               SNAPSHOT
-                1DNADR          VSELECT                 # VSELECT,GARBAGE
-                1DNADR          LRVTIMDL                # LRVTIMDL,+1
-
-                1DNADR          VMEAS                   # VMEAS,+1
-                1DNADR          MKTIME                  # MKTIME,+1
-                1DNADR          HMEAS                   # HMEAS,+1
-                1DNADR          RM                      # RM,+1
-                1DNADR          AIG                     # AIG,AMG
-                1DNADR          AOG                     # AOG,TRKMKCNT
-                1DNADR          TANGNB                  # TANGNB,+1
-                1DNADR          MKTIME                  # MKTIME,+1
-                -1DNADR         LRXCDUDL                # LRXCDUDL,LRYCDUDL
-
-LMDSAS08        6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                -5DNADR         DNTMBUFF        +12D
-
-LMDSAS09        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
-
-#     ---------------------------------------------------------
-
-# LM LUNAR SURFACE ALIGN DOWNLIST
-
-#     -----------------  CONTROL LIST  --------------------------
-
-LMLSALDL        EQUALS                                  # SEND ID BY SPECIAL CODING
-                DNPTR           LMLSAL01                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                DNPTR           LMLSAL07                # COLLECT SNAPSHOT
-                4DNADR          DNTMBUFF                # SEND SHAPSHOT
-                1DNADR          TALIGN                  # TALIGN,+1
-                6DNADR          REFSMMAT                # REFSMMAT+0...+11D
-                6DNADR          YNBSAV                  # YNBSAV+0...+5,ZNBSAV+0...+5
-                DNPTR           LMLSAL08                # COMMON DATA
-                DNPTR           LMLSAL02                # COMMON DATA
-                1DNADR          TIME2                   # TIME/1
-                DNPTR           LMLSAL03                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SHAPSHOT
-                DNPTR           LMLSAL04                # COMMON DATA
-                DNPTR           LMLSAL09                # COMMON DATA
-                3DNADR          GSAV                    # GSAV+0...+5
-                1DNADR          AGSK                    # AGSK,+1
-                1DNADR          LASTYCMD                # LASTYCMD,LASTXCMD
-                1DNADR          LEMMASS                 # LEMMASS,CSMMASS
-                1DNADR          IMODES30                # IMODES30,IMODES33
-                1DNADR          TIG                     # TIG,+1
-                DNPTR           LMLSAL05                # COMMON DATA
-                DNPTR           LMLSAL06                # COMMON DATA
-                1DNADR          SPARE
-                -1DNADR         SPARE
-
-#     -----------------  SUB-LISTS   ----------------------------
-
-LMLSAL01        EQUALS          LMORBM01                # COMMON DOWNLIST DATA
-
-LMLSAL02        EQUALS          LMORBM02                # COMMON DOWNLIST DATA
-
-LMLSAL03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
-
-LMLSAL04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
-
-LMLSAL05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
-
-LMLSAL06        EQUALS          LMORBM06                # COMMON DOWNLIST DATA
-
-LMLSAL07        EQUALS          LMREND07                # COMMON DOWNLIST DATA
-
-LMLSAL08        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
-
-LMLSAL09        EQUALS          LMCSTA07                # COMMON DOWNLIST DATA
-
-#     ---------------------------------------------------------
-
-# LM AGS INITIALIZATION AND UPDATE DOWNLIST
-
-#     -----------------  CONTROL LIST  --------------------------
-
-LMAGSIDL        EQUALS                                  # SEND IO BY SPECIAL CODING
-                3DNADR          AGSBUFF         +0      # AGSBUFF+0...+5
-                1DNADR          AGSBUFF         +12D    # AGSBUFF+12D,GARBAGE
-                3DNADR          AGSBUFF         +1      # AGSBUFF+1...+6
-                1DNADR          AGSBUFF         +13D    # AGSBUFF+13D, GARBAGE
-                3DNADR          AGSBUFF         +6      # AGSBUFF+6...+11
-                1DNADR          AGSBUFF         +12D    # AGSBUFF+12,GARBAGE
-                3DNADR          AGSBUFF         +7      # AGSBUFF+7...+12D
-                1DNADR          AGSBUFF         +13D    # AGSBUFF+13D,GARBAGE
-                6DNADR          COMPNUMB                # COMPNUMB,UPOLDMOD,UPVERB,UPCOUNT,
-                                                        # UPBUFF+0...+7
-                6DNADR          UPBUFF          +8D     # UPBUFF +8D...+19D
-                DNPTR           LMAGSI02                # COMMON DATA
-                1DNADR          TIME2                   # TIME2/1
-                DNPTR           LMAGSI03                # COLLECT SNAPSHOT
-                6DNADR          DNTMBUFF                # SEND SNAPSHOT
-                DNPTR           LMAGSI04                # COMMON DATA
-                2DNADR          POSTORKU                # POSTORKU,NEGTORKU,POSTORKV,NEGTORKV
-                1DNADR          SPARE
-                1DNADR          SPARE
-                1DNADR          AGSK                    # AGSK,+1
-                6DNADR          UPBUFF                  # UPBUFF+0...+11D
-                4DNADR          UPBUFF          +12D    # UPBUFF+12D...+19D
-                1DNADR          LEMMASS                 # LEMMASS,CSMMASS
-                1DNADR          IMODES30                # IMODES30,IMODES33
-                1DNADR          SPARE
-                DNPTR           LMAGSI05                # COMMON DATA
-                -6DNADR         DSPTAB                  # DSPTAB+0...+11D
-
-#     -----------------  SUB-LISTS   ----------------------------
-
-LMAGSI02        EQUALS          LMORBM02                # COMMON DOWNLIST DATA
-
-LMAGSI03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
-
-LMAGSI04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
-
-LMAGSI05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
+LMREND06        EQUALS          LMAGSI06                # COMMON DOWNLIST DATA
 
 #     ---------------------------------------------------------
 
 DNTABLE         GENADR          LMCSTADL                # LM COAST AND ALIGN DOWNLIST
                 GENADR          LMAGSIDL                # LM AGS INITIALIZATION/UPDATE DOWNLIST
                 GENADR          LMRENDDL                # LM RENDEZVOUS AND PRE-THRUST DOWNLIST
-                GENADR          LMORBMDL                # LM ORBITAL MANEUVERS DOWNLIST
-                GENADR          LMDSASDL                # LM DESCENT AND ASCENT DOWNLIST
-
-                GENADR          LMLSALDL                # LM LUNAR SURFACE ALIGN DOWNLIST
+                GENADR          LMPWRDDL                # LM POWERED DOWNLIST
 
 #     ---------------------------------------------------------------
 
