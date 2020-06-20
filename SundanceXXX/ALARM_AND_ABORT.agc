@@ -103,7 +103,7 @@ PRIOLARM        INHINT                  # * * * KEEP IN DISPLAY ROUTINES BANK
                 TS      ALMCADR
                 CA      BUF2 +1
                 TC      PRIOENT +1      # * LEAVE L ALONE
--2SEC           DEC     -200            # *** DONT MOVE
+-5SEC           DEC     -500            # *** DONT MOVE
                 CAF     V05N09
                 TCF     PRIODSPR
 

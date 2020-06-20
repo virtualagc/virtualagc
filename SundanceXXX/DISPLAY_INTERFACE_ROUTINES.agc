@@ -643,10 +643,32 @@ MAKEMARK        CAF     ONE
 
                 TCF     ENDOFJOB
 
+MARKBRAN        CA      FLAGWRD4
+                MASK    OCT40420
+                CCS     A
+                TCF     +2
+                TC      Q
+
+                CAF     ONE
+                TS      COPINDEX
+
+                CA      MONSAVE1
+                MASK    BIT14
+                AD      DSPLOCK
+                CCS     A
+                TCF     IMMEDRET -1
+
+                CA      FLAGWRD4
+                MASK    MRUPTBIT
+                CCS     A
+                TCF     IMMEDRET -1
+
+                CAF     TWO
+                ADS     R1SAVE
+
 MARKPLAY        INHINT
-                CS      FIVE            # RESET MARK OVER NORM, SET MARK
+                CS      MKOVBIT         # RESET MARK OVER NORM
                 MASK    FLAGWRD4
-                AD      ONE
                 TS      FLAGWRD4
                 RELINT
 
@@ -776,7 +798,7 @@ MAKEPRIO        CAF     ZERO
                 TC      LINUSCHR
                 TCF     HIPRIO          # LINUS RETURN
                 CA      FLAGWRD4
-                MASK    OCT20100        # IS PRIO IN ENDIDLE OR BUSY
+                MASK    OCT24100        # IS PRIO IN ENDIDLE OR BUSY
                 CCS     A
                 TCF     PRIOBORT        # YES, ABORT
 
@@ -812,6 +834,9 @@ KEEPPRIO        CAF     ZERO            # START UP PRIO DISPLAY
 MAKEPLAY        CA      PRIORITY        # SAVE USERS PRIORITY
                 MASK    PRIO37
                 TS      USERPRIO
+                EXTEND
+                ROR     SUPERBNK
+                TS      RESTREG
 
                 CAF     PRIO33          # RAISE PRIORITY FOR FAST JOBS AFTER WAKE
                 TC      PRIOCHNG
@@ -843,11 +868,6 @@ PRIOBORT        TC      ABORT
                 OCT     1502
 
 OKTOPLAY        TC      COPIES2
-
-                CA      USERPRIO
-                EXTEND
-                ROR     SUPERBNK
-                TS      RESTREG
 
                 CA      FLAGWRD4        # PRIO OR MARK GOING
                 MASK    PMMASK
@@ -904,25 +924,14 @@ GODSPRS1        INHINT                  # IMMEDIATE RETURN IS CALL CADR +4
                 MASK    PRIO37
                 TS      NEWPRIO
 
-                CA      PLAYTEM4        # IS THIS A FLASHING R DISPLAY
-                MASK    BIT4
-                CCS     A
-                TCF     VACDSP          # YES, MAKE DSPLAY JOB A VAC
-                CA      NEWPRIO         # NO, MAKE DSPLAY JOB A NOVAC
-                TC      NOVAC
-                EBANK=  WHOCARES
-                2CADR   MAKEPLAY
-
-                TCF     BOTHJOBS
-
-VACDSP          CA      BBANK
+                CA      BBANK
                 EXTEND
                 ROR     SUPERBNK
                 TS      L
                 CAF     MAKEGEN
                 TC      SPVAC
 
-BOTHJOBS        TC      SAVELOCS        # COPY TEMPS INTO PERMANENT REGISTERS
+                TC      SAVELOCS        # COPY TEMPS INTO PERMANENT REGISTERS
 
                 EXTEND                  # SAVE NVWORD AND USERS MPAC +2
                 DCA     MPAC    +1
@@ -1076,9 +1085,9 @@ INITDSP         CA      EBANKTEM        # RESTORE MOST RECECT NORMAL EBANK
                 TS      EBANK
 
                 CA      RESTREG         # SUPERBANK AND JOB PRIORITY
-                TC      SUPERSW         # RESTORE SUPERBANK
-
+## These two instructions are in the wrong order for Sundance 292. They may have been fixed for 306.
                 MASK    PRIO37
+                TC      SUPERSW         # RESTORE SUPERBANK
                 TC      PRIOCHNG
 
                 CS      THREE
@@ -1164,10 +1173,15 @@ GOANIDLE        CAF     BIT4
                 CCS     A
                 TCF     ISITN00
 
-                INDEX   COPINDEX
-                CA      CADRFLSH
-                TS      MPAC    +3
-                TCF     ENDIT
+                CA      COPINDEX
+                TS      PLAYTEM3
+                CA      USERPRIO
+                MASK    PRIO37
+                TC      PRIOCHNG
+
+                INDEX   PLAYTEM3
+                CA      NVWORD
+                TCF     BANKJUMP
 
 ISITN00         INDEX   COPINDEX        # IS THIS A PASTE
                 CA      NVWORD
@@ -1193,8 +1207,7 @@ ISITN00         INDEX   COPINDEX        # IS THIS A PASTE
                 MASK    BIT12
                 EXTEND
                 BZF     V50PASTE
-                CS      NVWORD1         # NVOWRD1= -0 IS V97. NVWORD1= -400 IS V99
-                AD      V97N00
+                CAF     V99N00
                 TCF     NV50DSP
 V50PASTE        CAF     V50N00
                 TCF     NV50DSP         # DISPLAY SECOND PART OF GOPERF
@@ -1303,7 +1316,7 @@ TIMECHEK        CS      TIME1
                 COM
                 AD      OCT37776
                 AD      ONE
-                AD      -2SEC
+                AD      -5SEC
                 EXTEND
                 BZMF    KEEPPRIO
 
@@ -1505,5 +1518,4 @@ PLAYTEM4        EQUALS  MPAC    +4
 OCT40420        OCT     40420
 MAKEGEN         GENADR  MAKEPLAY
 OCT10200        OCT     10200
-V97N00          VN      09700           # PASTE FOR V97 OR V99
-OCT20100        OCT     20100
+V99N00          VN      09900           # PASTE FOR V99

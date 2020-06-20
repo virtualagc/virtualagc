@@ -1297,6 +1297,7 @@ INITVELX        SETPD   VLOAD
 #       NAME    MEANING                                         UNITS/SCALING/MODE
 #
 #       AVFLAG  INT FLAG - 0 IS CSM ACTIVE, 1 IS LEM ACTIVE                     BIT
+#      COMPUTER INT FLAG - 0 IS LEM COMPUTER, 1 IS CSM COMPUTER                 BIT
 #       RINIT   ACTIVE VEHICLE RADIUS VECTOR                    METERS/CSEC (+7) VT
 #       VINIT   ACTIVE VEHICLE VELOCITY VECTOR                  METERS/CSEC (+7) VT
 #       0D(PL)  ACTIVE VEHICLE DELTA VELOCITY VECTOR            METERS/CSEC (+7) VT
@@ -1332,15 +1333,15 @@ INITVELX        SETPD   VLOAD
 
 HALFREV         2DEC    1 B-1
 
-MIDGIM          BOFF
+MIDGIM          BON     BOFF    
                         AVFLAG
+                        MIDGIM1
+                        COMPUTER
                         GET.LVC
-MIDGIM1         =       GET+MGA
-
-GET+MGA         VLOAD   UNIT            # (PL 0D) V (+7) TO MPAC, UNITIZE UV (+1)
-                UNIT
+# COMPUTE +MGA IF AVFLAG AND COMPUTER HAVE OPPOSITE VALUES.
+GET+MGA         VLOAD   UNIT            # (PL 0D) V (+7) TO MPAC, UNITIZE  UV (+1)
                 DOT     SL1             # DOT UV WITH Y(STABLE MEMBER) AND RESCALE
-                        REFSMMAT +6     # FROM +2 TO +1 FOR ASIN ROUTINE
+                        REFSMMAT +6     #  FROM +2 TO +1 FOR ASIN ROUTINE
                 ARCSIN  BPL
                         SETMGA
                 DAD     DAD             # CONVERT -MGA TO +MGA BY
@@ -1348,7 +1349,11 @@ GET+MGA         VLOAD   UNIT            # (PL 0D) V (+7) TO MPAC, UNITIZE UV (+1
                         HALFREV
 SETMGA          STORE   +MGA
                 CLR     RVQ             # CLEAR MGLVFLAG TO INDICATE +MGA CALC
-                        MGLVFLAG        # AND EXIT
+                        MGLVFLAG        #     AND EXIT
+MIDGIM1         BOFF
+                        COMPUTER
+                        GET+MGA
+# COMPUTE DELVLVC IF AVFLAG AND COMPUTER HAVE SAME VALUES.
 GET.LVC         VLOAD   UNIT            # (PL 6D) R (+29) IN MPAC, UNITIZE UR
                         RINIT
                 VCOMP                   # U(-R)
@@ -1391,6 +1396,9 @@ RTRNMU          STORE   RTMU
                 SXA,2   CLEAR
                         RTX2
                         FINALFLG
+                SET     SET
+                        UPDATFLG
+                        TRACKFLG
                 GOTO
                         VN1645
 
