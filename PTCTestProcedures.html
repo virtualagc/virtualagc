@@ -76,6 +76,21 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
       its own internal criteria is a pretty decisive judgement on the
       correctness of the emulator as well.<br>
     </p>
+    <p>In terms of emulating the PTC, what this means is that we
+      distinguish between emulation of the PTC's CPU and the remainder
+      of the PTC — i.e., its front panel and other support
+      electronics.&nbsp; The same dichotomy exists between emulating the
+      LVDC as a CPU, and emulating its "peripherals", such as the LVDC
+      Manual Exerciser (LVDCME, which is like the PTC's front panel but
+      specialized for use with a true LVDC) or the Saturn rocket.<br>
+    </p>
+    <p>The only available PTC documentation does not necessarily answer
+      all the questions one has in terms of creating the PTC emulation,
+      although in some limited respects <a
+        href="Documents/19730064345_1973064345.pdf">the LVDCME
+        documentation</a> can fill in some of those gaps, due to the
+      great similarity between the two.<br>
+    </p>
     <h2><a name="Setup"></a>One-Time Setup</h2>
     The PTC emulator comprises two programs that run on your local
     computer:&nbsp; the LVDC/PTC CPU emulator and the PTC front-panel
@@ -125,6 +140,7 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
 
 
 
+
           --ptc --cold-start --run --assembly=PAST</tt>".&nbsp; This
         starts the LVDC/PTC CPU emulation running the PAST
         program.&nbsp; At this point, it's just running freely, without
@@ -136,6 +152,7 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
         into yaLVDC's native debugger to resume the emulation.<br>
       </li>
       <li>At the second command line, execute this command:&nbsp; "<tt>./yaPTC.py</tt>".&nbsp;
+
 
 
 
@@ -330,35 +347,156 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
     its CPU or software.&nbsp; For example, the PTC had physical
     power-supply circuitry which needed to be adjusted and checked for
     proper voltage levels.&nbsp; The emulated PTC has no such thing, and
-    therefore obviously requires no calibration or checks.&nbsp; At some
-    point, though, the descriptions of the test procedures begin to
-    mention that they "can not be performed unless the special program
-    has been loaded into the central processor memory".&nbsp; That
-    "special program", of course, is the PTC ADAPT Self-Test Program
-    (PAST program), and it's at <i>that</i> point that the test
-    procedures become interesting to us.&nbsp; <br>
+    therefore obviously requires no calibration or checks.&nbsp;&nbsp;
+    Moreover, various of the test procedures require loading specific
+    test programs into the PTC CPU, and since we don't have the code for
+    most of those test programs, the associated test procedures are only
+    partially useful.&nbsp; <br>
     <br>
-    To save the trouble of poring through the original PTC
-    documentation, I've cloned the relevant test procedures into a
-    more-convenient form, correcting typos where I saw fit, and
+    With those thoughts in mind, here's a brief summary of how this
+    affects the utility of the test procedures available in the PTC
+    documentation.&nbsp; Also, to save the trouble of poring through the
+    original PTC documentation, I've cloned the relevant test procedures
+    into a more-convenient form, correcting typos where I saw fit, and
     providing my own comments as to how the instructions have to be
-    interpreted in order to use them in our emulation.&nbsp; Without
-    further ado, here are those test procedures:<br>
-    <ul>
-      <li><a href="Test%20procedure%20Figure%207-7.html">"Memory loader
-          manual checks".</a>&nbsp; (From Figure 7-7 in the PTC
-        documentation.)<br>
-      </li>
-      <li> "Data display check".&nbsp; (From Figure 7-8 in the PTC
-        documentation.)</li>
-      <li>"Central processor manual checks".&nbsp; (From Figure 7-9 in
-        the PTC documentation.)</li>
-      <li>"Central processor memory automatic checks".&nbsp; (From
-        Figure 7-10 in the PTC documentation.)<br>
-      </li>
-      <li>"Self-test program checks".&nbsp; (From Figure 7-11 in the PTC
-        documentation.) </li>
-    </ul>
+    interpreted in order to use them in our emulation.<br>
+    <br>
+    <table cellspacing="2" cellpadding="2" border="1" align="center">
+      <tbody>
+        <tr>
+          <th valign="bottom" align="left">Test Procedure #<br>
+          </th>
+          <th valign="bottom" align="left">Title<br>
+          </th>
+          <th valign="bottom" align="left">PTC Documentation Figure<br>
+          </th>
+          <th valign="bottom" align="left">Required Program Load<br>
+          </th>
+          <th valign="bottom" align="left">Assessment of Utility<br>
+          </th>
+          <th valign="bottom" align="left">Link to the Corrected Test
+            Procedure<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="middle">1<br>
+          </td>
+          <td valign="middle">Power Checks</td>
+          <td valign="middle">7-2<br>
+          </td>
+          <td valign="middle">(none)<br>
+          </td>
+          <td valign="middle">Useless; relates to non-emulated hardware.</td>
+          <td valign="middle">n/a<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">2<br>
+          </td>
+          <td valign="middle">Timing Adjustments<br>
+          </td>
+          <td valign="middle">7-3<br>
+          </td>
+          <td valign="middle">(none)<br>
+          </td>
+          <td valign="middle">Useless; relates to non-emulated hardware.</td>
+          <td valign="middle">n/a<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">3<br>
+          </td>
+          <td valign="middle">Tape Reader Controls and PTC and Printer
+            Timing Checks<br>
+          </td>
+          <td valign="middle">7-5<br>
+          </td>
+          <td valign="middle">(none)<br>
+          </td>
+          <td valign="middle">Useless; relates to non-emulated hardware.</td>
+          <td valign="middle">n/a<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">4<br>
+          </td>
+          <td valign="middle">Memory Loader Automatic Checks<br>
+          </td>
+          <td valign="middle">7-6<br>
+          </td>
+          <td valign="middle">(none)<br>
+          </td>
+          <td valign="middle">Useless; relates to non-emulated hardware.</td>
+          <td valign="middle">n/a<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">5<br>
+          </td>
+          <td valign="middle">Memory Loader Manual Checks</td>
+          <td valign="middle">7-7<br>
+          </td>
+          <td valign="middle">tape p/n 6001247 (do not have)<br>
+          </td>
+          <td valign="middle">Partially useful.<br>
+          </td>
+          <td valign="middle"><a
+              href="Test%20procedure%20Figure%207-7.html">Procedure</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">6<br>
+          </td>
+          <td valign="middle">Data Display Checks</td>
+          <td valign="middle">7-8<br>
+          </td>
+          <td valign="middle">tape p/n 6001247 (do not have<br>
+          </td>
+          <td valign="middle">TBD<br>
+          </td>
+          <td valign="middle">TBD<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">7<br>
+          </td>
+          <td valign="middle">Central Processor Manual Checks</td>
+          <td valign="middle">7-9<br>
+          </td>
+          <td valign="middle">tape p/n 6001247 (do not have)<br>
+          </td>
+          <td valign="middle">TBD<br>
+          </td>
+          <td valign="middle">TBD<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">8<br>
+          </td>
+          <td valign="middle">Central Processor Memory Automatic Check</td>
+          <td valign="middle">7-10<br>
+          </td>
+          <td valign="middle">tape p/n 6001232 (do not have)<br>
+          </td>
+          <td valign="middle">TBD<br>
+          </td>
+          <td valign="middle">TBD<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">9<br>
+          </td>
+          <td valign="middle">Self-Test Program Checks</td>
+          <td valign="middle">7-11</td>
+          <td valign="middle">tape p/n 6001236 (PAST program)<br>
+          </td>
+          <td valign="middle">The test procedure is 100% useful.</td>
+          <td valign="middle">TBD<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center> <br>
@@ -482,10 +620,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2020-05-27.<br>
+          2020-06-14.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
