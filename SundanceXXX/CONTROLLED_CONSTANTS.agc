@@ -198,8 +198,6 @@ TORKJET1        DEC             .03757                  # 550 / .2 SCALED AT (+1
                 BANK
                 COUNT*          $$/START
 
-FULLAPS         DEC             5050            B-16    # NOMINAL FULL ASCENT MASS -- 2(16) KG.
-
                 SETLOC          DAPS3
                 BANK
                 COUNT*          $$/DAPAO
@@ -472,40 +470,6 @@ CATLOG          DEC             6869
 
 # ************************************************************************
 
-
-                SETLOC          EPHEM1
-                BANK
-                COUNT*          $$/EPHEM
-
-KONMAT          2DEC            1.0             B-1     #         *************
-                2DEC            0                       #                     *
-                2DEC            0                       #                     *
-                2DEC            0                       #                     *
-                2DEC            .91745          B-1     # K1 COS(OBL)         *
-                2DEC            -.03571         B-1     # K2 SIN(OBL)SIN(IM)  *
-                2DEC            0                       #                     *
-                2DEC            .39784          B-1     # K3 SIN(OBL)         *
-
-                2DEC            .082354         B-1     # K4 COS(OBL)SIN(IM)  *
-CSTODAY         2DEC            8640000         B-33    #                     * NOTE           *
-RCB-13          OCT             00002                   #                     * TABLES CONTAIN *
-                OCT             00000                   #                     * CONSTANTS FOR  *
-RATESP          2DEC            .03660098       B+4     #                     * 1968 - 1969    *
-                2DEC            .00273779       B+4     # LOSR                *
-                2DEC            -.00014719      B+4     # LONR                *
-                2DEC            .455880394              # LOMO                *
-                2DEC            .275337971              # LOSO                *
-                2DEC            .0398987882             # LONO                *
-VAL67           2DEC*           .017361944      B+1     # AMOD                *
-                2DEC            .286523072              # AARG                *
-                2DEC            .036291712      B+1     # 1/27                *
-                2DEC            .003534722      B+1     # BMOD                *
-                2DEC            .113165625              # BARG                *
-                2DEC            .03125          B+1     # 1/32                *
-                2DEC            .005330555      B+1     # CMOD                *
-                2DEC            -.010415660             # CARG       VALUE COMPUTED USING 1/364.24
-                2DEC            .002737925      B+1     # 1/365   *************
-# ************************************************************************
 
                 SETLOC          PLANTIN
                 BANK

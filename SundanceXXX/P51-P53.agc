@@ -1390,10 +1390,6 @@ STORPOS         TS              A                       # DETECT OVF AZ = -120
                 STOVL           26D                     # STORE THET SCALED IN REVS
 
                 DOT                                     # UP 12-17, UP 6-11 FOR C2
-                BPL             DLOAD                   # IF THET NEG-GET 360-THET
-                                R59D
-
-                                ABOUTONE
                 DSU
                                 26D
                 STORE           26D                     # 360-THET SCALED IN REVS

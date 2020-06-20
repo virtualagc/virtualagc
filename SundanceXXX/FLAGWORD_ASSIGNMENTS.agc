@@ -102,6 +102,7 @@
 # INFINFLG        128             BIT 7  FLAG 8        INFINBIT
 # INITALGN        133             BIT 2  FLAG 8        INITABIT
 # INTFLAG         151             BIT 14 FLAG 10       INTFLBIT
+# INTFLG2         076             BIT 14 FLAG 5        INTF2BIT
 # INTYPFLG        056             BIT 4  FLAG 3        INTYPBIT
 # ITSWICH         105             BIT 15 FLAG 7        ITSWBIT
 # JSWITCH         001             BIT 14 FLAG 0        JSWCHBIT
@@ -665,8 +666,9 @@ DSKYFBIT        =               BIT15                   # DSKY
 #
 
 # BIT 14 FLAG 5
-#               =               076D
-#               =               BIT14
+INTFLG2         =               076D                    # ORBITAL INTEGRATION ORBITAL INTEGRATION
+                                                        # PROGRAM PACKAGE IN  PROGRAM PACKAGE NOT
+INTF2BIT        =               BIT14                   # USE                 IN USE
 #
 
 # BIT 13 FLAG 5 (S,L)

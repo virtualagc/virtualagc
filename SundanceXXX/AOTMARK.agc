@@ -55,7 +55,7 @@ MKVACFND        AD              TWO
                 INDEX           MARKSTAT
                 TS              0               -1      # ZERO IN VACUSE REG TO SHOW VAC OCCUPIED
 
-                CAF             PRIO15
+                CAF             PRIO32
                 TC              FINDVAC                 # SET UP JOB FOR GETDAT
                 EBANK=          XYMARK
                 2CADR           GETDAT
@@ -63,8 +63,7 @@ MKVACFND        AD              TWO
                 RELINT
                 TCF             SWRETURN
 
-MKABORT         DXCH            BUF2
-                TC              ABORT                   # CONFLICT WITH EXTENDED VERB
+MKABORT         TC              ABORT                   # CONFLICT WITH EXTENDED VERB
                 OCT             01211
 
 MKRELEAS        CAF             ZERO
@@ -77,19 +76,19 @@ MKRELEAS        CAF             ZERO
                 TC              IBNKCALL
                 CADR            GOODEND                 # GO WAKE UP CALLING JOB
 
-GETDAT          CS              MARKSTAT                # SET BIT12 TO DISCOURAGE MARKRUPT
-                MASK            BIT12                   #   BIT12 RESET AT GETMARK
-                ADS             MARKSTAT
-
-                CAF             V01N71                  # DISPLAY DETENT AND STAR CODE
+GETDAT          CAF             V01N71                  # DISPLAY DETENT AND STAR CODE
                 TC              BANKCALL
-                CADR            GOMARKF
+                CADR            GOFLASH
 
                 TC              GOTOPOOH                # V34-TERMINATE
                 TCF             DODAT                   # V33-PROCEED-USE THIS STAR FOR MARKS
 ENTERDAT        TCF             GETDAT                  # ENTER-REDISPLAY STAR CODE
 
-DODAT           CAF             HIGH9                   # PICK DETENT CODE FROM BITS7-9 OF AOTCODE
+DODAT           CS              MARKSTAT                # SET BIT12 TO DISCOURAGE MARKRUPT
+                MASK            BIT12                   #   BIT12 RESET AT GETMARK
+                ADS             MARKSTAT
+
+                CAF             HIGH9                   # PICK DETENT CODE FROM BITS7-9 OF AOTCODE
                 MASK            AOTCODE                 # AND SEE IF CODE IS 1,2 OR 3
                 EXTEND
                 MP              BIT9
@@ -106,7 +105,7 @@ DODAT           CAF             HIGH9                   # PICK DETENT CODE FROM 
 
 CODE4OR5        CAF             V06N87*                 # CODE 4 OR 5, GET OPTIC AXIS CALIBRATIONS
                 TC              BANKCALL                # AZ AND EL OF SIGHTING DEVICE FROM ASTRO
-                CADR            GOMARKF
+                CADR            GOFLASH
 
                 TC              GOTOPOOH                # V34-TERMINATE
                 TCF             +2                      # PROCEED
@@ -186,12 +185,6 @@ OPTAXIS         CALL                            # GO COMPUTE OA AND X AND Y PLAN
 #           X-PLANE 1/2VEC IN NB COORDS AT 24D OF VAC
 #           Y-PLANE 1/2VEC IN NB COORDS AT 18D OF VAC
 
-                BANK            05
-                SETLOC          AOTMARK2
-                BANK
-
-                COUNT*          $$/MARK
-
 OANB            SETPD           STQ
                                 0
                                 GCTR                    # STORE RETURN
@@ -224,73 +217,6 @@ OANB            SETPD           STQ
                 STORE           24D                     # STORE UXP
                 GOTO
                                 GCTR
-
-# SURFSTAR COMPUTES A STAR VECTOR IN SM COORDINATES FOR LUNAR
-# SURFACE ALIGNMENT AND EXITS TO AVEIT TO AVERAGE STAR VECTORS.
-# GIVEN X-MARK PLANE 1/4 VEC IN NB AT 18D OF LOCAL VAC
-#       Y-MARK PLANE 1/4 VEC IN NB AT 12D OF LOCAL VAC
-#       CURSOR SP 2COMP AT POSITION 1 OF INDEXED MARKVAC
-#       SPIRAL SP 2COMP AT POSITION 3 OF INDEXED MARKVAC
-#       CDUY,Z,X AT POSITIONS 0,2,4 OF INDEXED MARKVAC
-                BANK            15
-                SETLOC          P50S
-                BANK
-                COUNT*          $$/R59
-
-SURFSTAR        VLOAD*
-                                0,1                     # PUT X-MARK CDUS IN CDUSPOT FOR TRG*NBSM
-                STORE           CDUSPOT
-                SLOAD*          RTB
-                                1,1                     # PICK UP YROT
-                                CDULOGIC
-                STORE           24D                     # STORE CURSOR FOR SPIRAL COMP (REVS)
-                BZE
-                                YZCHK                   # IF YROT ZERO-SEE IF SROT ZERO
-JUSTZY          PUSH            COS
-                PDDL            SIN                     # 1/2COS(YROT) 0-1
-                VXSC            PDDL                    # UP 0-1  1/8SIN(YROT)UXP  0-5
-                                18D
-                VXSC            VSU                     # UP   0-5
-                                12D                     # UYP
-                UNIT            VXV
-                                SCAXIS
-                UNIT            PUSH
-                SLOAD*          RTB
-                                3,1                     # PICK UP SPIRAL
-                                CDULOGIC
-                STORE           26D                     # STORE SPIRAL (REVS)
-                DSU             DAD
-                                24D
-                                ABOUTONE
-                DMP
-                                DP1/12
-                STORE           26D                     # SEP=(360 + SPIRAL - CURSOR)/12
-                SIN             VXSC                    # UP  0-5
-                VSL1            PDDL                    # 1/2SIN(SEP)(UPP X OA)  0-5
-                                26D
-                COS             VXSC
-                                SCAXIS
-                VSL1            VAD                     # UP  0-5
-JUSTOA          UNIT            CALL
-                                TRG*NBSM
-                STCALL          24D                     # STAR VEC IN SM
-                                AVEIT                   # GO AVERAGE
-
-ABOUTONE        2DEC            .99999999
-DP1/12          EQUALS          DEG30                   # .08333333
-                BANK            7
-                SETLOC          AOTMARK1
-                BANK
-                COUNT*          $$/MARK
-YZCHK           SLOAD*          BZE                     # YROT ZERO AND IF SROT ZERO FORCE STAR
-                                3,1                     # ALONG OPTIC AXIS
-                                YSZERO
-                DLOAD           GOTO
-                                24D
-                                JUSTZY                  # SROT NOT ZERO-CONTINUE NORMALLY
-YSZERO          VLOAD           GOTO
-                                SCAXIS
-                                JUSTOA
 
 # THE GETMKS ROUTINE INITIALIZES THE SIGHTING MARK PROCEDURE
 
@@ -328,9 +254,7 @@ CNTCHK          CCS             MARKCNTR                # NO PAIR SHOWING-SEE IF
                 TCF             MKALARM                 # NO PAIR-ALARM
                 TS              MARKCNTR                # STORE DECREMENTED COUNTER
 
-AVESTAR         CAF             BIT12                   # INITIALIZE MKDEX FOR STAR LOS COUNTER
-                ADS             MKDEX                   # MKDEX WAS INITIALIZED ZERO IN MARKCHEX
-                CS              MARKCNTR
+AVESTAR         CA              MARKCNTR
                 EXTEND
                 MP              SIX                     # GET C(L) = - 6 MARKCNTR
                 CS              XYMARK
@@ -338,27 +262,28 @@ AVESTAR         CAF             BIT12                   # INITIALIZE MKDEX FOR S
                 INDEX           FIXLOC
                 TS              X1                      # JAM - CDU ADR OF X-MARK IN X1
 
-                CA              FIXLOC                  # SET PD POINTER TO ZERO
-                TS              PUSHLOC
+                CAF             BIT12                   # INITIALIZE MKDEX FOR STAR LOS COUNTER
+                ADS             MKDEX                   # MKDEX WAS INITIALIZED ZERO IN MARKCHEX
 
                 TC              INTPRET
 
-                BON             VLOAD*
-                                SURFFLAG                # IF ON SURFACE COMPUTE VEC AT SURFSTAR
-                                SURFSTAR
-                                1,1                     # PUT Y-MARK CDUS IN CDUSPOT FOR TRG*NBSM
-                STOVL           CDUSPOT
-                                12D                     # LOAD Y-PLANE VECTOR IN NB
-                CALL
-                                TRG*NBSM                # CONVERT IT TO STABLE MEMBER
-                PUSH            VLOAD*
-                                0,1                     # PUT X-MARK CDUS IN CDUSPOT FOR TRG*NBSM
-                STOVL           CDUSPOT
-                                18D                     # LOAD X-PLANE VECTOR IN NB
-                CALL
-                                TRG*NBSM                # CONVERT IT TO STABLE-MEMBER
-                VXV             UNIT                    # UNIT(XPSM * YPSM)
-                STADR
+                SETPD           VLOAD
+                                0                       # SET PD POINTER TO ZERO
+                                18D                     # LOAD STAR VECTOR IN NB
+                STCALL          32D
+                                NBSM                    # CONVERT IT TO STABLE MEMBER
+                STOVL           24D
+                                12D
+                XCHX,1          INCR,1
+                                S1
+                                1
+                XCHX,1
+                                S1
+                STCALL          32D
+                                NBSM
+                VXV
+                                24D
+                VCOMP           UNIT
                 STORE           24D
 
 AVEIT           SLOAD           PDVL                    # N(NUMBER OF VECS) IN 0-1
@@ -470,9 +395,6 @@ YMKRUPT         CAF             ONE
                 CAF             BIT11
                 TS              XYMARK                  # SET MARK IDENTIFIATION
 
-                TC              MARKTYPE                # SEE IF SURFACE MARK
-                TCF             SURFSTOR                # SURFACE MARK-JUST STORE CDUS
-
                 CAF             BIT14                   # GOT A MARK-SEE IF MARK PAIR MADE
                 MASK            MARKSTAT
                 EXTEND
@@ -497,18 +419,13 @@ VERIFYMK        CA              XYMARK
 
 5MKALARM        TC              ALARM                   # ATTEMPTING TO MAKE MORE THAN 5 MK PAIRS
                 OCT             107
-                TC              MARKTYPE                # SEE IF SURFACE MARK
-                TCF             DSPV6N79                # IT IS
                 TC              RESUME                  # DONT CHANGE DISPLAY-DO NOTHING
 
-MKREJ           TC              MARKTYPE                # SEE IF SURFACE
-                TCF             SURFREJ                 # SURFACE-JUST CHECK MARK COUNTER
-
-                CAF             PRIO3                   # INFLIGHT-SEE IF MARKS MADE
+MKREJ           CAF             PRIO3                   # INFLIGHT-SEE IF MARKS MADE
                 MASK            MARKSTAT
                 CCS             A
                 TCF             REJECT                  # MARKS MADE-REJECT ONE
-REJALM          TC              ALARM                   # NO MARK TO REJECT-BAD PROCEDURE-ALARM
+                TC              ALARM                   # NO MARK TO REJECT-BAD PROCEDURE-ALARM
                 OCT             115
                 TC              RESUME                  # DESIRED ACTION DISPLAYED
 
@@ -528,29 +445,6 @@ RENEWMK         MASK            MARKSTAT
 REJECT2         CS              PRIO3                   # ON SECOND REJECT-DISPLAY VB53 AGAIN
                 TCF             RENEWMK
 
-SURFREJ         CCS             MARKCNTR                # IF MARK DECREMENT COUNTER
-                TCF             +2
-                TCF             REJALM                  # NO MARKS TO REJECT-ALARM
-                TS              MARKCNTR
-                TC              RESUME
-
-#
-
-# MARKTYPE TESTS TO SEE IF LEM ON LUNAR SURFACE.  IF IT IS RETURN TO LOC+1
-
-MARKTYPE        CS              FLAGWRD8                # SURFFLAG*******TEMPORARY*****
-                MASK            BIT8
-                CCS             A
-                INCR            Q                       # IF SURFACE MARK REUTNR TO LOC +1
-                TC              Q                       # IF INFLIGHT MARK RETURN TO LOC +2
-
-SURFSTOR        CAF             ZERO                    # FOR SURFACE MARK ZERO MARK KIND INDEX
-                TS              RUPTREG1
-
-                CS              MARKSTAT                # SET BITS10,11 TO SHOW SURFACE MARK
-                MASK            PRIO3                   # FOR MARKCHEX
-                ADS             MARKSTAT
-
 VACSTOR         CAF             LOW9
                 MASK            MARKSTAT                # STORE MARK VAC ADR IN RUPTREG2
                 TS              RUPTREG2
@@ -563,7 +457,6 @@ VACSTOR         CAF             LOW9
                 XCH             L                       # GET INDEX FROM LOW ORDER PART
                 AD              RUPTREG2                # SET CDU STORE INDEX TO MARKVAC
                 ADS             RUPTREG1                # INCREMENT VAC PICKUP BY MARK FOR FLIGHT
-                TS              MKDEX                   # STORE HERE IN CASE OF SURFACE MARK
                 CA              ITEMP3
                 INDEX           RUPTREG1
                 TS              0                       # STORE CDUY
@@ -573,8 +466,6 @@ VACSTOR         CAF             LOW9
                 CA              ITEMP5
                 INDEX           RUPTREG1
                 TS              4                       # STORE CDUX
-                TC              MARKTYPE                # IF SURFACE MARK- JUST DO SURFJOB
-                TCF             SURFJOB
 
                 CAF             BIT13                   # CLEAR BIT13 TO SHOW MARK MADE
                 AD              XYMARK                  # SET MARK ID IN MARKSTAT
@@ -600,18 +491,17 @@ REMARK          CAF             PRIO3                   # BITS 10 AND 11
                 EXTEND
                 MP              BIT6                    # SHIFT MARK IDS TO BE 0 TO 3 FOR INDEX
                 TS              MKDEX                   # STORE VERB INDEX
-SURFJOB         CAF             PRIO15
+                CAF             PRIO32
                 TC              NOVAC                   # ENTER JOB TO CHANGE DISPLAY TO
                 EBANK=          XYMARK                  # REQUEST NEXT ACTION
                 2CADR           CHANGEVB
 
                 TC              RESUME
 
-CHANGEVB        TC              MARKTYPE
-                TCF             DSPV6N79                # SURFACE-DISPLAY V 06 N 79
-                INDEX           MKDEX                   # INFLIGHT-PICK UP MARK VB INDEX
+CHANGEVB        INDEX           MKDEX                   # INFLIGHT-PICK UP MARK VB INDEX
                 CAF             MKVB54
-                TC              PASTIT                  # PASTE UP NEXT MK VERB DISPLAY
+                TC              BANKCALL                # PASTE UP NEXT MK VERB DISPLAY
+                CADR            PASTIT
 
 # THE FOUR MKVBS ARE INDEXED-THEIR ORDER CANNOT BE CHANGED
 

@@ -705,6 +705,7 @@ MARKSTAT        ERASE
 #          T4RUPT ERASABLE.                                             (2D)
 
 DSRUPTSW        ERASE
+DIDFLG          ERASE                                   # (1)
 LGYRO           ERASE                                   # (1)
 
 #          RENDEZVOUS RADAR TASK STORAGE                                (3D)

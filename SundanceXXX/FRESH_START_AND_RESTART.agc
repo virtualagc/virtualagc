@@ -29,13 +29,8 @@ STARTSIM        CAF             BIT14
 SIM2CADR        OCT             77777                   # PATCH 2CADR (AND EBANK DESIGNATION) OF
                 OCT             77777                   # SIMULATION START ADDRESS.
 
-SKIPSIM         CA              DSPTAB          +11D    # TURN OFF ALL DSPTAB +11D LAMPS
-                MASK            BITS4&6                 # EXCEPT THE GIMBAL LOCK & NO ATT ONLY ON
-                AD              BIT15                   # REQUESTED FRESH START.
-                TS              DSPTAB          +11D
-
-                CA              BIT12                   # INITIALIZE DOWNLINK ERASABLE MEMORY
-                TS              DUMPCNT                 # DUMP FOR ONE PASS.
+SKIPSIM         CAF             BIT15                   # TURN OFF ALL DSPTAB+11D LAMPS ONLY ON
+                TS              DSPTAB          +11D    # REQUESTED FRESH START.
 
                 CA              ZERO
                 TS              ERCOUNT
@@ -47,22 +42,17 @@ SKIPSIM         CA              DSPTAB          +11D    # TURN OFF ALL DSPTAB +1
                 CS              PRIO12
                 TS              DSRUPTSW
 
-DOFSTART        CAF             BIT14                   # INSURE ENGINE IS OFF.
-                EXTEND
-                WRITE           DSALMOUT
-                CS              ZERO
-                TS              THRUST
-
-DOFSTRT1        CAF             FOUR
+DOFSTART        CAF             FOUR
                 TS              RCSFLAGS                # INITIALIZE ATTITUDE ERROR DISPLAYS.
                 CA              PRIO30
                 TS              RESTREG                 # SUPER BANK PRIORITY FOR DISPLAYS.
 
                 CA              ZERO
                 TS              ABDELV                  # DAP INITIALIZATION
+                TS              ABDELV +1
+                TS              RASFLAG
                 TS              NVSAVE
                 TS              EBANKTEM
-
                 TS              CH5MASK
                 TS              CH6MASK
                 TS              PVALVEST                # FOR RCS FAILURE MONITOR
@@ -81,22 +71,19 @@ DOFSTRT1        CAF             FOUR
                 WRITE           CHAN13
                 EXTEND
                 WRITE           CHAN14
-                CS              DSPTAB          +11D
-                MASK            BITS4&6
-                CCS             A
-                TC              +4
-                CA              BITS4&6
-                EXTEND                                  # THE IMU WAS IN COARSE ALIGN IN GIMBAL
-                WOR             CHAN12                  # LOCK, SO PUT IT BACK INTO COARSE ALIGN.
-    +4          TC              MR.KLEAN
+                CAF             BIT14                   # INSURE ENGINE IS OFF.
+                EXTEND
+                WRITE           DSALMOUT
+                TC              MR.KLEAN
 
                 CS              ZERO
+                TS              THRUST
                 TS              MODREG
 
                 CAF             IM30INIF                # FRESH START IMU INITIALIZATION.
                 TS              IMODES30
 
-                CAF             MAXDB
+                CAF             WIDEDB
                 TS              DB
                 CAF             FOUR
                 TS              RATEINDX                # INITIALIZE KALCMANU RATE
@@ -106,14 +93,9 @@ DOFSTRT1        CAF             FOUR
                 TS              EBANK
                 EBANK=          HIASCENT
 
-                CA              STIKSTRT
-                TS              STIKSENS
-                CA              RATESTRT
-                TS              -RATEDB
                 CAF             FULLAPS                 # INITIALIZE MAXIMUM ASCENT MASS FOR USE
                 TS              HIASCENT                #   BY 1/ACCS UNTIL THE PAD LOAD IS DONE.
                 CA              77001OCT                #     LOAD DAP FILTER GAINS PAD LOAD
-
                 TS              DKTRAP                  #    TO BEST PRESENT ESTIMATE OF GOODIES
                 TS              LMTRAP                  # .14 DEG
                 CA              60DEC
@@ -123,8 +105,6 @@ DOFSTRT1        CAF             FOUR
                 TS              LMOMEGAN                # UNITY GAIN
                 CA              TEN
                 TS              DKOMEGAN                # 1 SEC GAIN FOR OMEGA
-                CAF             BIT8                    # SET DOCKED DB TO 1.4 DEG.  MAY OVERWRITE
-                TS              DKDB                    #   WITH PAD LOAD.
                 CAF             IM33INIT
                 AD              BIT6                    # KEEP BOTH DAP AND ERROR-NEEDLES DISPLAY
                 TS              IMODES33                #   OFF UNTIL ICDU ZERO IS FINISHED.
@@ -132,39 +112,23 @@ DOFSTRT1        CAF             FOUR
                 EXTEND                                  # INITIALIZE SWITCHES ONLY ON FRESH START.
                 DCA             SWINIT
                 DXCH            STATE
-                CA              SWINIT          +2
-                TS              STATE           +2
-                CA              REFSMBIT                # DO NOT ALTER REFSMFLG ON FRESH START.
-                MASK            STATE           +3
-                AD              SWINIT          +3
-                TS              STATE           +3
+                EXTEND
+                DCA             SWINIT          +2
+                DXCH            STATE           +2
                 EXTEND
                 DCA             SWINIT          +4
                 DXCH            STATE           +4
                 EXTEND
                 DCA             SWINIT          +6
                 DXCH            STATE           +6
-                CA              SURFFBIT                # DO NOT ALTER  SURFFLAG ON FRESH START.
-                AD              CMOONBIT                #               CMOONFLG
-                AD              LMOONBIT                #               LMOONFLG
-                MASK            STATE           +8D
-                AD              SWINIT          +8D
-                TS              STATE           +8D
-                CA              SWINIT          +9D
-                TS              STATE           +9D
-                CA              APSFLBIT                # DO NOT ALTER APSFLAG ON FRESH START.
-                MASK            STATE           +10D
-                AD              SWINIT          +10D
-                TS              STATE           +10D
-                CAF             SWINIT          +11D
-                TS              STATE           +11D
+                EXTEND
+                DCA             SWINIT          +8
+                DXCH            STATE           +8
 
 ENDRSTRT        TC              POSTJUMP                # NOW IN ANOTHER BANK.
                 CADR            DUMMYJOB        +2      # PICKS UP AT RELINT.   (DONT ZERO NEWJOB)
 
-MR.KLEAN        INHINT
-
-                EXTEND
+MR.KLEAN        EXTEND
                 DCA             NEG0
                 DXCH            -PHASE2
 POOKLEAN        EXTEND
@@ -212,14 +176,14 @@ GOPROG          INCR            REDOCTR                 # ADVANCE RESTART COUNTE
                 MASK            ERESTORE
                 EXTEND
                 BZF             +2                      # IF ERESTORE NOT = +0 OR +N LESS THAN 2K,
-                TCF             DOFSTRT1                # DO FRESH START - E MEMORY MIGHT BE BAD.
+                TCF             DOFSTART                # DOUBT E MEMORY AND DO A FRESH START.
                 CS              ERESTORE
                 EXTEND
                 BZF             DORSTART                # = +0 CONTINUE WITH RESTART.
                 AD              SKEEP7
                 EXTEND
                 BZF             +2                      # = SKEEP7, RESTORE E MEMORY.
-                TCF             DOFSTRT1                # DO FRESH START - E MEMORY MIGHT BE BAD.
+                TCF             DOFSTART                # NOT = SKEEP7, DOUBE E MEM,DO FRESH START.
                 CA              SKEEP4
                 TS              EBANK                   # EBANK OF E MEMORY THAT WAS UNDER TEST.
                 EXTEND                                  # (NOT DXCH SINCE THIS MIGHT HAPPEN AGAIN)
@@ -228,15 +192,35 @@ GOPROG          INCR            REDOCTR                 # ADVANCE RESTART COUNTE
                 DXCH            0000                    # E MEMORY RESTORED.
                 CA              ZERO
                 TS              ERESTORE
-DORSTART        NOOP                                    # REMOVE OSC FAIL AND LGC WARNING LOGIC
-                                                        # SINCE SOFTWARE PROBLEMS NO LONGER
-                                                        # CAUSE HARDWARE RESTARTS (EXCEPT PARITY).
-BUTTONS         TC              LIGHTSET                # EXIT TO DOFSTART IF ERROR RESET AND
-                                                        # MARK REJECT DEPRESSED SIMULTANEOUSLY
+DORSTART        CA              BIT15                   # TEST OSC FAIL BIT TO SEE IF WE HAVE
+                EXTEND                                  # HAD A POWER TRANSIENT.  IF SO, ATTEMPT
+                WAND            CHAN33                  # A RESTART.  IF NOT, CHACK THE PRESENT
+                EXTEND                                  # STATE OF AGC WARNING.
+                BZF             LIGHTSET
+                
+                CA              BIT14                   # IF AGC WARNING ON (BIT = 0), DO A FRESH
+                EXTEND                                  # START ON THE ASSUMPTION THAT WE'RE IN A
+                RAND            CHAN33                  # RESTART LOOP.
+                EXTEND
+                BZF             DOFSTART
 
-SETINFL         CS              INTFLBIT
-                MASK            FLGWRD10
-                TS              FLGWRD10
+LIGHTSET        CAF             BIT5                    # CHECK FOR MARK REJECT AND ERROR RESET
+                EXTEND
+                RAND            NAVKEYIN
+                EXTEND
+                BZF             NONAVKEY                # NO MARK REJECT
+                EXTEND
+                READ            MNKEYIN                 # CHECK IF KEYS 2M AND 5M ON
+                AD              -ELR                    # MAIN DSKY KEYCODE (BITS 1-5)
+                EXTEND
+                BZF             DOFSTART
+
+NONAVKEY        CA              RASFLAG
+                MASK            LOW7
+                TS              RASFLAG
+                CCS             A
+                TCF             +2
+                TC              NOORBINT
 
                 CA              9,6,4                   # LEAVE PROG ALARM, GIMBAL LOCK, NO ATT
                 MASK            DSPTAB          +11D    # LAMPS INTACT ON HARDWARE RESTART
@@ -250,30 +234,43 @@ SETINFL         CS              INTFLBIT
                 CA              AGSWORD                 # BE SURE OF CORRECT DOWNLIST
                 TS              DNLSTCOD
 
+                CS              ACCSOKAY
+                MASK            DAPBOOLS
+                TS              DAPBOOLS
+
                 CA              BIT4                    # TURN ON THROTTLE COUNTER
                 EXTEND
                 WOR             CHAN14                  # TURN ON THRUST DRIVE
                 CS              FLAGWRD5
                 MASK            ENGONBIT
                 CCS             A
-                TCF             +5
+                TCF             GOPROG3
                 CAF             BIT13
                 EXTEND
                 WOR             DSALMOUT                # TURN ENGINE ON
                 TCF             GOPROG3
-     +5         CAF             BIT14
-                EXTEND
-                WOR             DSALMOUT                # TURN ENGINE OFF.
-                TCF             GOPROG3
 
-ENEMA           INHINT
-                TC              STARTSB1
-                TCF             GOPROG2A
-GOPROG2         TC              STARTSB2
-GOPROG2A        TC              LIGHTSET
-                CS              RSFLGBTS                # CLEAR BITS 7 AND 14.
-                MASK            FLGWRD10
-                TS              FLGWRD10
+ENEMA           TC              STARTSB2
+                CAF             ZERO
+                TS              RASFLAG
+                TC              NOORBINT
+
+                CA              CDUT
+                TC              MAGSUB
+                DEC             -.5
+                TCF             +3                      # IF MODE 2.
+
+                CAF             ZERO
+                TCF             +2
+                CAF             ANTENBIT
+                XCH             RADMODES
+                MASK            -BIT12
+                ADS             RADMODES
+
+                CAF             PRIO27
+                TC              NOVAC
+                EBANK=          AOSQ
+                2CADR           1/ACCSET
 
 GOPROG3         CAF             NUMGRPS                 # VERIFY PHASE TABLE AGREEMENTS
 PCLOOP          TS              MPAC            +5
@@ -296,10 +293,6 @@ PCLOOP          TS              MPAC            +5
                 TC              MMDSPLAY                # DISPLAY MAJOR MODE
 
                 INHINT                                  # RELINT DONE IN MMDSPLAY
-
-                CS              DIDFLBIT                # CLEAR DIDFLAG IN ORDER TO FORCE R10 TO
-                MASK            FLAGWRD1                # RE-INITIALIZE ITSELF IF IT HAD BEEN
-                TS              FLAGWRD1                # OPERATING AT THE TIME OF THE RESTART.
 
                 CAF             NUMGRPS                 # SEE IF ANY GROUPS RUNNING.
 NXTRST          TS              MPAC            +5
@@ -328,44 +321,42 @@ PINACT          CCS             MPAC            +5      # PROCESS ALL RESTART GR
 PTBAD           TC              ALARM                   # SET ALARM TO SHOW PHASE TABLE FAILURE.
                 OCT             1107
 
-                TCF             DOFSTRT1
+                TCF             DOFSTART                # IN R2).
+
+NOORBINT        CS              INTF2BIT
+                MASK            FLAGWRD5
+                TS              FLAGWRD5
+                TC              Q
+
 # ******** ****** ******
 #
 # DO NOT USE GOPROG2 OR ENEMA WITHOUT CONSULTING POOH PEOPLE
 
+GOPROG2         EQUALS          ENEMA
 OCT10000        =               BIT13
 
 OCT30000        =               PRIO30
+OCT32001        OCT             32001
 OCT7777         OCT             7777
-STIKSTRT        DEC             0.825268                # 20 D/S MAXIMUM COMMANDED RATE
-RATESTRT        DEC             -218
 RACTCADR        CADR            RESTARTS
 BOOLSTRT        OCT             21312
 77001OCT        OCT             77001                   # .14 DEG SCALED AT 4.5 DEG
 60DEC           DEC             60
-RSFLGBTS        OCT             20100
-MAXDB           OCTAL           03434                   # 5 DEG ATTITUDE DEADBAND, SCALED AT 45.
-
-LIGHTSET        CAF             BIT5                    # CHECK FOR MARK REJECT AND ERROR RESET
-                EXTEND
-                RAND            NAVKEYIN
-                EXTEND
-                BZF             NONAVKEY                # NO MARK REJECT
-                EXTEND
-                READ            MNKEYIN                 # CHECK IF KEYS 2M AND 5M ON
-                AD              -ELR                    # MAIN DSKY KEYCODE (BITS 1-5)
-                EXTEND
-                BZF             +2
-
-NONAVKEY        TC              Q
-
-                TC              STARTSUB
-                TCF             DOFSTART
+FULLAPS         DEC             5050            B-16    # NOMINAL FULL ASCENT MASS -- 2(16) KG.
 
 #          INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.
 
                 EBANK=          AOSQ
-STARTSUB        CAF             LDNPHAS1                # SET POINTER SO NEXT 20MS DOWNRUPT WILL
+STARTSUB        CAF             EBANK6
+                TS              EBANK
+
+                CAF             ZERO
+                TS              ACCSET
+                TS              NEXTP
+                TS              NEXTU
+                TS              NEXTV
+
+                CAF             LDNPHAS1                # SET POINTER SO NEXT 20MS DOWNRUPT WILL
                 TS              DNTMGOTO                # CAUSE THE CURRENT DOWNLIST TO BE
                                                         # INTERRUPTED AND START SENDING FROM THE
                                                         # BEGINNING OF THE CURRENT DOWNLIST.
@@ -382,24 +373,6 @@ STARTSUB        CAF             LDNPHAS1                # SET POINTER SO NEXT 20
                 AD              NEGONE
                 TS              TIME5
 
-STARTSB1        CAF             EBANK6
-                TS              EBANK
-
-                CS              BIT13                   # CAUSE DAPIDLER TO CALL 1/ACCS
-                MASK            RCSFLAGS
-                TS              RCSFLAGS                # ZERO BIT 13
-                CAF             POSMAX                  # DISABLE TIME6 CLOCK.  JUST IN CASE A T6
-                TS              T6NEXT                  #   RUPT IS ALREADY IN THE PRIORITY CHAIN,
-                EXTEND                                  #   ENSURE THAT IT'S INPUTS WILL RENDER IT
-                WAND            CHAN13                  #   INEFFECTUAL.
-                CAF             ZERO
-                TS              NXT6ADR
-                TS              NEXTP
-
-                CS              ACCSOKAY
-                MASK            DAPBOOLS
-                TS              DAPBOOLS
-
                 EXTEND                                  # SET T5RUPT FOR DAPIDLER PROGRAM.
                 DCA             IDLEADR
                 DXCH            T5ADR
@@ -408,29 +381,15 @@ STARTSB2        CAF             OCT30001                # DURING SOFTWARE RESTAR
                 EXTEND                                  # ENGINE ON, OFF AND ISS WARNING.
                 WAND            DSALMOUT
 
-                CS              READRBIT                # CLEAR READRFLG FOR R29.
-                MASK            FLAGWRD3
-                TS              FLAGWRD3
+                CS              XOVINHIB
+                MASK            DAPBOOLS
+                TS              DAPBOOLS
 
-
-                CS              FLAGWRD3                # DURING SOFTWARE RESTART,CLEAR TURNON,
-                MASK            NR29FBIT                # REPOSITION,CDU ZERO AND REMODE BITS
-                EXTEND                                  # IN RADMODES,SINCE TASKS ASSOCIATED
-                BZF             +2                      # WITH THESE BITS HAVE BEEN KILLED
-                CAF             BIT10                   # ALSO IF R29 HAD BEEN REQUESTED,
-                AD              OCT32001                # (NOR29FLG = 0) CLEAR BIT 10 RADMODES
-                COM                                     # TO MAKE R29 FORGET IT HAD STARTED
-                MASK            RADMODES                # DESIGNATING
-                TS              RADMODES
                 CAF             OCT27470                # DURING SOFTWARE RESTART, DO NOT DISTURB
                 EXTEND                                  # IMU FLAGS.  (COURSE ALIGN ENABLE, ZERO
                 WAND            CHAN12                  # IMU CDUS, ENABLE IMU COUNTER) AND GIMBAL
                                                         # TRIM DRIVES. LEAVE RR LOCKON ENABLE
                                                         # ALONE.
-
-                CS              NORRMBIT                # ENABLE R25.
-                MASK            FLAGWRD5
-                TS              FLAGWRD5
 
                 CAF             OCT74160                # DURING SOFTWARE RESTART, DO NOT DUSTURB
                 EXTEND                                  # TELEMETRY FLAGS, RESET TRAP FLAGS, AND
@@ -443,6 +402,11 @@ STARTSB2        CAF             OCT30001                # DURING SOFTWARE RESTAR
                 CAF             BIT6                    # DURING SOFTWARE RESTART, DO NOT DISTURB
                 EXTEND                                  # GYRO ENABLE FLAG.
                 WAND            CHAN14
+
+                CS              OCT32001                # DURING SOFTWARE RESTART,CLEAR TURNON,
+                MASK            RADMODES                # REPOSITION,CDU ZERO AND REMODE BITS
+                TS              RADMODES                # IN RADMODES,SINCE TASKS ASSOCIATED
+                                                        # WITH THESE BITS HAVE BEEN KILLED
 
                 EBANK=          LST1
                 CAF             STARTEB
@@ -488,7 +452,6 @@ STARTSB2        CAF             OCT30001                # DURING SOFTWARE RESTAR
                 TS              PRIORITY        +48D
                 TS              PRIORITY        +60D
                 TS              PRIORITY        +72D
-                TS              PRIORITY        +84D
 
                 TS              DSRUPTSW
                 TS              NEWJOB                  # SHOWS NO ACTIVE JOBS.
@@ -503,6 +466,9 @@ STARTSB2        CAF             OCT30001                # DURING SOFTWARE RESTAR
                 TS              VAC4USE
                 AD              LTHVACA
                 TS              VAC5USE
+
+                CAF             ONE
+                TS              DIDFLG
 
                 CAF             TEN
 DSPOFF          TS              MPAC                    # R1,R2,R3).
@@ -539,6 +505,10 @@ DSPOFF          TS              MPAC                    # R1,R2,R3).
                 CAF             NOUTCON
                 TS              NOUT
 
+                CS              NORRMBIT                # ENABLE R25.
+                MASK            FLAGWRD5
+                TS              FLAGWRD5
+
                 CS              ONE
                 TS              SAMPLIM
                 CAF             BIT6
@@ -555,11 +525,10 @@ DSPOFF          TS              MPAC                    # R1,R2,R3).
                 TC              Q
                 EBANK=          AOSQ
 IDLEADR         2CADR           DAPIDLER
-IFAILINH        OCT             435
+IFAILINH        OCT             35
 LDNPHAS1        GENADR          DNPHASE1
 LESCHK          GENADR          SELFCHK
 VAC1ADRC        ADRES           VAC1USE
-OCT32001        OCT             32001
 LTHVACA         DEC             44
 
 OCT27470        OCT             27470
@@ -570,23 +539,21 @@ STARTEB         EQUALS          EBANK3
 NUMGRPS         EQUALS          FIVE
 -ELR            OCT             -22                     # -ERROR LIGHT RESET KEY CODE.
 IM30INIF        OCT             37411                   # INHIBITS IMU FAIL FOR 5 SEC AND PIP ISSW
-IM30INIR        OCT             37000
+IM30INIR        OCT             37400
 IM33INIT        =               PRIO16                  # NO PIP OR TM FAIL SIGNALS.
 9,6,4           OCT             450
 RMODINIT        OCT             00102
 SWINIT          OCT             0
                 OCT             0
                 OCT             0
-                OCT             02000                   # BIT 11 = NOR29FLG
+                OCT             0
                 OCT             0
                 OCT             0
                 OCT             0
                 OCT             00100
 
                 OCT             0
-                OCT             0
-                OCT             0
-                OCT             40000                   # BIT 15 = LRBYPASS.
+                OCT             00010
 
 # PROGRAM NAME    GOTOPOOH                   ASSEMBLY       SUNDANCE
 # LOG SECTION     FRESH START AND RESTART

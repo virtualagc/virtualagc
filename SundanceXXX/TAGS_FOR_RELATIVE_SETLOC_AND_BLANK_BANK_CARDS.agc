@@ -64,8 +64,6 @@ E/PROG          EQUALS
                 BANK            05
 FRANDRES        EQUALS
 DOWNTELM        EQUALS
-AOTMARK2        EQUALS
-EPHEM1          EQUALS
                 BNKSUM          05
 
 
