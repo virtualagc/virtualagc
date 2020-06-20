@@ -73,6 +73,7 @@ DOWNTELM        EQUALS
 IMUCOMP         EQUALS
 T4RUP           EQUALS
 RCSMONT         EQUALS
+STGMONT         EQUALS
                 BNKSUM          06
 
 

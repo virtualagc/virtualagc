@@ -71,17 +71,47 @@
 IRIGCOMP        TS      GCOMPSW         # INDICATE COMMANDS 2 PULSES OR LESS.
                 TS      BUF             # INDEX COUNTER . IRIGX, IRIGY, IRIGZ.
                 
-                TC      IRIGX           # COMPENSATE ACCELERATION TERMS
+IRIGX           EXTEND
+                DCS     DELVX           # (PIPA PULSES) X 2(+14)
+                DXCH    MPAC
+                CA      ADIAX           # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
+                TC      GCOMPSUB        # -(ADIAX)(PIPAX)          (GYRO PULSES) X 2(+14)
                 
+                EXTEND                  # 
+                DCS     DELVY           #       (PIPA PULSES) X 2(+14)
+                DXCH    MPAC            # 
+                CS      ADSRAX          #       (GYRO PULSES)/(PIPA PULSE) X 2(-6)      *
+                TC      GCOMPSUB        #       -(ADSRAX)(PIPAY)   (GYRO PULSES) X 2(+14)
+
                 CS      NBDX            # (GYRO PULSES)/(CS) X 2(-5)
                 TC      DRIFTSUB        # -(NBOX)(DELTAT)   (GYRO PULSES) X 2(+14)
                 
-                TC      IRIGY           # COMPENSATE ACCELERATION TERMS
-                
+IRIGY           EXTEND
+                DCS     DELVY           # (PIPA PULSES) X 2(+14)
+                DXCH    MPAC
+                CA      ADIAY           # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
+                TC      GCOMPSUB        # -(ADIAY)(PIPAY)          (GYRO PULSES) X 2(+14)
+
+                EXTEND
+                DCS     DELVZ           # (PIPA PULSES) X 2(+14)
+                DXCH    MPAC
+                CS      ADSRAY          # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
+                TC      GCOMPSUB        # +(ADSRAY)(PIPAZ)              (GYRO PULSES) X 2(+14)
+
                 CS      NBDY            # (GYRO PULSES)/(CS) X 2(-5)
                 TC      DRIFTSUB        # -(NBDY)(DELTAT)   (GYRO PULSES) X 2(+14)
                 
-                TC      IRIGZ           # COMPENSATE ACCELERATION TERMS
+IRIGZ           EXTEND
+                DCS     DELVY           # (PIPA PULSES) X 2(+14)
+                DXCH    MPAC
+                CA      ADSRAZ          # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
+                TC      GCOMPSUB        # -(ADSRAZ)(PIPAY)        (GYRO PULSES) X 2(+14)
+                
+                EXTEND
+                DCS     DELVZ           # (PIPA PULSES) X 2(+14)
+                DXCH    MPAC
+                CA      ADIAZ           # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
+                TC      GCOMPSUB        # -(ADIAZ)(PIPAZ)          (GYRO PULSES) X 2(+14)
                 
                 CA      NBDZ            # (GYRO PULSES)/(CS) X 2(-5)
                 TC      DRIFTSUB        # +(NBDZ)(DELTAT)   (GYRO PULSES) X 2(+14)
@@ -100,72 +130,6 @@ IRIG1           CA      MODE            # RESTORE CALLERS EBANK
                 TS      EBANK
                 TCF     SWRETURN
                 
-IRIGX           EXTEND  
-                QXCH    MPAC +2         # SAVE Q
-                EXTEND
-                DCS     DELVX           # (PIPA PULSES) X 2(+14)
-                DXCH    MPAC
-                CA      ADIAX           # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
-                TC      GCOMPSUB        # -(ADIAX)(PIPAX)          (GYRO PULSES) X 2(+14)
-                
-                EXTEND                  # 
-                DCS     DELVY           #       (PIPA PULSES) X 2(+14)
-                DXCH    MPAC            # 
-                CS      ADSRAX          #       (GYRO PULSES)/(PIPA PULSE) X 2(-6)      *
-                TC      GCOMPSUB        #       -(ADSRAX)(PIPAY)   (GYRO PULSES) X 2(+14)
-
-#               EXTEND                  ***
-#               DCS     DELVZ           ***     (PIPA PULSES) X 2(+14)
-#               DXCH    MPAC            ***
-#               CA      ADOAX           ***     (GYRO PULSES)/(PIPA PULSE) X 2(-6)      *
-#               TC      GCOMPSUB        ***     -(ADOAX)(PIPAZ)    (GYRO PULSES) X 2(+14)
-
-                TC      MPAC +2
-
-IRIGY           EXTEND
-                QXCH    MPAC +2         # SAVE Q
-                EXTEND
-                DCS     DELVY           # (PIPA PULSES) X 2(+14)
-                DXCH    MPAC
-                CA      ADIAY           # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
-                TC      GCOMPSUB        # -(ADIAY)(PIPAY)          (GYRO PULSES) X 2(+14)
-
-                EXTEND
-                DCS     DELVZ           # (PIPA PULSES) X 2(+14)
-                DXCH    MPAC
-                CS      ADSRAY          # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
-                TC      GCOMPSUB        # +(ADSRAY)(PIPAZ)              (GYRO PULSES) X 2(+14)
-
-#               EXTEND                  ***
-#               DCS     DELVX           ***     (PIPA PULSES) X 2(+14)
-#               DXCH    MPAC            ***
-#               CA      ADOAY           ***     (GYRO PULSES)/(PIPA PULSE) X 2(-6)      *
-#               TC      GCOMPSUB        ***     -(ADOAY)(PIPAX)   (GYRO PULSES) X 2(+14)
-
-                TC      MPAC +2
-
-IRIGZ           EXTEND
-                QXCH    MPAC +2         # SAVE Q
-                EXTEND
-                DCS     DELVY           # (PIPA PULSES) X 2(+14)
-                DXCH    MPAC
-                CA      ADSRAZ          # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
-                TC      GCOMPSUB        # -(ADSRAZ)(PIPAY)        (GYRO PULSES) X 2(+14)
-                
-                EXTEND
-                DCS     DELVZ           # (PIPA PULSES) X 2(+14)
-                DXCH    MPAC
-                CA      ADIAZ           # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
-                TC      GCOMPSUB        # -(ADIAZ)(PIPAZ)          (GYRO PULSES) X 2(+14)
-                
-#               EXTEND                  ***
-#               DCS     DELVX           ***     (PIPA PULSE) X 2(+14)
-#               DXCH    MPAC            ***
-#               CS      ADOAZ           ***     (GYRO PULSES)/(PIPA PULSE) X 2(-6)      *
-#               TC      GCOMPSUB        ***     +(ADOAZ)(PIPAX)    (GYRO PULSES) X 2(+14)
-
-                TC      MPAC +2
-
 GCOMPSUB        XCH     MPAC            # ADIA OR ADSRA COEFFICIENT ARRIVES IN A
                 EXTEND                  # C(MPAC) = (PIPA PULSES) X 2(+14)
                 MP      MPAC            # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
@@ -283,60 +247,46 @@ NBDONLY         CCS     GCOMPSW         # BYPASS IF GCOMPSW NEGATIVE
                 TCF     ENDOFJOB
                 TCF     +1
                 
-                CA      FLAGWRD8        # IF SURFACE FLAG IS SET, SET TEM1
-                MASK    BIT8            # POSITIVE SO THAT THE ACCELERATION TERMS
-                TS      TEM1            # WILL BE COMPENSATED.
-                EXTEND
-                BZF     +3              # ARE WE ON THE SURFACE
-                
-                TC      IBNKCALL        # ON THE SURFACE
-                CADR    PIPASR +3       # READ PIPAS, BUT DO NOT SCALE THEM
-                
                 CA      TIME1           # (CS) X 2(+14)
                 XCH     1/PIPADT        # PREVIOUS TIME
                 RELINT
                 COM
                 AD      1/PIPADT        # PRESENT TIME - PREVIOUS TIME
-NBD2            AD      HALF            # CORRECT FOR POSSIBLE TIME1 TICK
-                AD      HALF
-                XCH     L               # IF TIME1 DID NOT TICK, REMOVE RESULTING
-                XCH     L               # OVERFLOW.
+NBD2            CCS     A               # CALCULATE ELAPSED TIME
+                AD      ONE             # NO TIME1 OVERFLOW
+                TCF     NBD3            # RESTORE TIME DIFFERENCE AND JUMP
+                TCF     +2              # TIME1 OVERFLOW
+                TCF     ENDOFJOB        # IF ELAPSED TIME = 0  (DIFFERENCE = -0)
+                
+                COM                     # CALCULATE ABSOLUTE DIFFERENCE
+                AD      POSMAX  
                 
 NBD3            EXTEND                  # C(A) = DELTAT         (CS) X 2(+14)
                 MP      BIT10           # SHIFT RIGHT 5
-                DXCH    VBUF +2
-                
-                CA      ZERO
-                TS      GCOMPSW         # INDICATE COMMANDS 2 PULSES OR LESS.
-                TS      BUF             # INDEX  X, Y, Z.
-                
-                CCS     TEM1            # IF SURFACE FLAG IS SET,
-                TC      IRIGX           # COMPENSATE ACCELERATION TERMS.
-                
+                DXCH    VBUF
                 EXTEND
-                DCA     VBUF +2
+                DCA     VBUF
                 DXCH    MPAC            # DELTAT NOW SCALED (CS) X 2(+19)
                 
-                CS      NBDX            # (GYRO PULSES)/(CS) X 2(-5)
-                TC      FBIASSUB        # -(NBOX)(DELTAT)       (GYRO PULSES) X 2(+14)
+                CAF     ZERO
+                TS      GCOMPSW         # INDICATE COMMANDS 2 PULSES OR LESS
+                TS      BUF             # PIPAX, PIPAY, PIPAZ
                 
-                CCS     TEM1            # IF SURFACE FLAG IS SET,
-                TC      IRIGY           # COMPENSATE ACCELERATION TERMS.
+                CS      NBDX            # (GYRO PULSES)/(CS) X 2(-5)
+                TC      FBIASSUB        # -(NBDX)(DELTAT)    (GYRO PULSES) X 2(+14)
+                
                 EXTEND
-                DCS     VBUF +2
+                DCS     VBUF
                 DXCH    MPAC            # DELTAT SCALED (CS) X 2(+19)
                 CA      NBDY            # (GYRO PULSES)/(CS) X 2(-5)
-                TC      FBIASSUB        # -(NBDY)(DELTAT)       (GYRO PULSES) X 2(+14)
-                
-                CCS     TEM1            # IF SURFACE FLAG IS SET,
-                TC      IRIGZ           # COMPENSATE ACCELERATION TERMS
+                TC      FBIASSUB        # -(NBDY)(DELTAT)    (GYRO PULSES) X 2(+14)
                 
                 EXTEND
-                DCS     VBUF +2
+                DCS     VBUF
                 DXCH    MPAC            # DELTAT SCALED (CS) X 2(+19)
                 CS      NBDZ            # (GYRO PULSES)/(CS) X 2(-5)
-                TC      FBIASSUB        # +(NBDZ)(DELTAT)       (GYRO PULSES) X 2(+14)
-                
+                TC      FBIASSUB        # +(NBDZ)(DELTAT)    (GYRO PULSES) X 2 (+14)
+
                 CCS     GCOMPSW         # ARE GYRO COMMANDS GREATER THAN 2 PULSES
                 TCF     1/GYRO          # YES
                 TCF     ENDOFJOB        # NO
@@ -360,7 +310,6 @@ FBIASSUB        XCH     Q
                 
                 TCF     DRFTSUB2        # CHECK MAGNITUDE OF COMPENSATION
 
-
 NORMBIAS        CAF     TWO
                 TC      NEWPHASE
                 OCT     5
@@ -371,17 +320,13 @@ NORMBIAS        CAF     TWO
                 2CADR   NORMLIZE
                 
 LASTBIAS        TC      BANKCALL
-                CADR    PIPUSE1
+                CADR    PIPUSE
                 
                 CCS     GCOMPSW
                 TCF     +3
                 TCF     +2
                 TCF     ENDOFJOB
                 
-                CA      FLAGWRD8        # IF SURFACE FLAG IS SET, SET TEM1
-                MASK    SURFFBIT        # POSITIVE SO THAT THE ACCELERATION TERMS
-                TS      TEM1            # WILL BE COMPENSATED.
-
                 CAF     PRIO31          # 2 SECONDS SCALED (CS) X 2(+8)
                 XCH     1/PIPADT
                 COM
@@ -401,5 +346,6 @@ GCOMPZER        CAF     LGCOMP          # ROUTINE TO ZERO GCOMP BEFORE FIRST
                 TS      GCOMP +4
                 TS      GCOMP +5
                 
-                TCF     IRIG1           # RESTORE EBANK AND RETURN
-                
+                CA      MODE
+                TS      EBANK
+                TCF     SWRETURN        # RETURN TO CALLER
