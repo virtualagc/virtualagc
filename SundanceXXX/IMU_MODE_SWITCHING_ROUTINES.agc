@@ -48,8 +48,9 @@ IMUZERO         INHINT                  # ROUTINE TO ZERO ICDUS.
 
                 TCF     CAGETSTJ +4     # IMMEDIATE FAILURE.
 
-IMUZEROA        TC      CAGETSTJ
-# DELETE
+IMUZEROA        TC      CAGETSTQ        # IF IMU COMING UP, TURN-ON PROGRAM WILL
+                TCF     MODEEXIT        # DO ALL THE WORK.
+    
                 CS      IMODES33        # DISABLE DAP AUTO AND HOLD MODES
                 MASK    SUPER011        #     BIT5 FOR GROUND
                 ADS     IMODES33
@@ -84,7 +85,8 @@ IMUZEROA        TC      CAGETSTJ
 MODEEXIT        RELINT                  # GENERAL MODE-SWITCHING EXIT.
                 TCF     SWRETURN
 
-IMUZERO2        TC      CAGETEST
+IMUZERO2        TC      CAGETSTQ        # POSSIBLY SWITCH TO TURN-ON PROGRAM.
+                TCF     TASKOVER
                 TC      ZEROICDU        # ZERO CDUX, CDUY, CDUZ
 
                 CS      BIT5            # REMOVE ZERO DISCRETE.
@@ -94,7 +96,9 @@ IMUZERO2        TC      CAGETEST
                 CAF     BIT11           # WAIT 10 SECS FOR CTRS TO FIND GIMBALS
                 TC      VARDELAY
 
-IMUZERO3        TC      CAGETEST
+IMUZERO3        TC      CAGETSTQ
+                TCF     TASKOVER
+
                 CS      BITS3&4         # REMOVE IMUFAIL AND ICDUFAIL INHIBIT.
                 MASK    IMODES30
                 TS      IMODES30
@@ -354,15 +358,15 @@ NOATTOFF        CS      OCT40010        # SUBROUTINE TO TURN OFF NO ATT LAMP.
 
 # ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
 
-PIPUSE          CS      ZERO
+PIPUSE          TC      CAGETSTQ        # DONT ENABLE PIPA FAIL IF IMU BEING CAGED
+                TCF     SWRETURN
+
+                INHINT
+                CAF     ZERO            # ZERO COUNTERS.
                 TS      PIPAX
                 TS      PIPAY
                 TS      PIPAZ
 
-PIPUSE1         TC      CAGETSTQ        # DO NOT ENABLE PIPA FAIL IF IMU IS CAGED
-                TCF     SWRETURN
-
-                INHINT
                 CS      BIT1            # IF PIPA FAILS FROM NOW ON (UNTIL
                 MASK    IMODES30        # PIPFREE), LIGHT ISS WARNING.
                 TS      IMODES30
@@ -569,7 +573,13 @@ LASTSEG         TS      GYROCMD
                 EBANK=  CDUIND
                 2CADR   STRTGYRO
 
-GYROEXIT        CAF     BIT10
+GYROEXIT        CAF     BIT4
+                EXTEND
+                RAND    CHAN12
+                CCS     A
+                TCF     IMUBAD
+
+                CAF     BIT10
                 EXTEND
                 WOR     CHAN14
                 TCF     TASKOVER
@@ -591,11 +601,6 @@ AUG3            EXTEND                  # GET WAITLIST DT TO TIME WHEN TRAIN IS
 
 8192AUG         TC      CAGETEST
 
-                CAF     BIT4
-                EXTEND
-                RAND    CHAN12
-                CCS     A
-                TCF     IMUBAD
                 CA      LGYRO           # ADD 8192 PULSES TO GYROCMD
                 TS      EBANK
                 MASK    LOW8
@@ -688,11 +693,8 @@ GOODEND         TS      RUPTREG2
                 TS      RUPTREG3
                 INDEX   RUPTREG2        # SEE IF USING PROGRAM ASLEEP.
                 CCS     MODECADR
-                TCF     +4              # YES - WAKE IT UP.
+                TCF     +2              # YES - WAKE IT UP.
                 TCF     ENDMODE         # IF 0, PROGRAM NOT IN YET.
-
-                EXTEND
-                BZF     ENDMODE +1      # BZF = TCF IF MODECADR = -0.
 
                 CAF     ZERO            # WAKE SLEEPING PROGRAM.
                 INDEX   RUPTREG2
