@@ -185,7 +185,7 @@
 # RRRSFLAG        192             BIT 3  FLAG 12       RRRSBIT
 # RVSW            111             BIT 9  FLAG 7        RVSWBIT
 # R04FLAG         051             BIT 9  FLAG 3        R04FLBIT        EQUIVALENT FLAG NAME:  READRFLG
-# R10FLAG         013             BIT 2  FLAG 0        R10FLBIT
+# B29FLAG         013             BIT 2  FLAG 0        B29FLBIT
 # R61FLAG         020             BIT 10 FLAG 1        R61FLBIT
 # R77FLAG         079             BIT 11 FLAG 5        R77FLBIT
 # SCALBAD         177             BIT 3  FLAG 11       SCABBIT
@@ -301,11 +301,10 @@ FREEFLAG        =               012D                    # (USED BY P51-53 TEMP I
 FREEFBIT        =               BIT3
 #
 
+## FIXME: Write description!
 # BIT 2 FLAG 0
-R10FLAG         =               013D                    # R10 OUTPUTS DATA TO BESIDES OUTPUT WHEN
-R10FLBIT        =               BIT2                    # ALTITUDE & ALTITUDE SET, R10 ALSO OUTPUT
-                                                        # RATE METERS ONLY    TO FORWARD & LATERAL
-                                                        #                     VELOCITY CROSSPOINTR
+B29FLAG         =               013D                    # 
+B29FLBIT        =               BIT2                    # 
 #
 
 # BIT 1 FLAG 0  (L)

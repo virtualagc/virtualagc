@@ -34,9 +34,6 @@ P12LM           TC      PHASCHNG
                 TC      UPFLAG          # INSURE 4-JET TRANSLATION CAPABILITY.
                 ADRES   ACC4-2FL
 
-                TC      UPFLAG          # PREVENT R10 FROM ISSUING CROSS-POINTER
-                ADRES   R10FLAG         # OUTPUTS.
-
                 TC      DOWNFLAG        # CLEAR RENDEZVOUS FLAG  FOR P22
                 ADRES   RNDVZFLG
 

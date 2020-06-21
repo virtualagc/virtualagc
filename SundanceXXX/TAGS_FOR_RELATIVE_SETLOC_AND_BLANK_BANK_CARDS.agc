@@ -109,7 +109,6 @@ LATLONG         EQUALS
 INTINIT         EQUALS
 LEMGEOM         EQUALS
 P76LOC          EQUALS
-ORBITAL2        EQUALS
                 BNKSUM          13
 
 

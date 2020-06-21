@@ -189,9 +189,6 @@ P74             TC      AVFLAGP
 P34/P74A        TC      P20FLGON        # SET UPDATFLG, TRACKFLG
                 CAF     V06N37          # TTPI
                 TC      VNPOOH
-                EXTEND
-                DCA     130DEG
-                DXCH    CENTANG
                 TC      DISPLAYE        # ELEV AND CENTANG
                 TC      INTPRET
                 CLEAR   DLOAD
@@ -997,9 +994,10 @@ ELEPS           2DEC    .27777777 E-3
 DECTWO          OCT     2
 DP-.01          OCT     77777           # CONSTANTS
                 OCT     61337           # ADJACENT      -.01 FOR MGA DSP
-EPSFOUR         2DEC    .0416666666
 
-130DEG          2DEC    .3611111111
+
+## FIXME: The INITVEL comments here reflect the rewrite that happened for
+## Colossus and Luminary.
 
 # ..... INITVEL .....
 
@@ -1068,14 +1066,32 @@ EPSFOUR         2DEC    .0416666666
                 BANK
 
                 COUNT*  $$/INITV
+EPSFOUR         2DEC    .0416666666
+
+PREINITV        SETPD   CLEAR
+                        0
+                        B29FLAG
+                PDDL    PDVL
+                        EPSFOUR
+                        RACT3
+                STOVL   RINIT
+                        VACT3
+                STORE   VINIT
+                AXC,1   BOFF
+                        2D
+                        CMOONFLG
+                        INITVEL
+                SET     AXC,1
+                        B29FLAG
+                        10D
+
 INITVEL         SET                     # COGA GUESS NOT AVAILABLE
                         GUESSW
-HAVEGUES        VLOAD   STQ
-                        RTARG
-                        NORMEX
-                STORE   RTARG1
-                SLOAD   BHIZ
-                        RTX2
+HAVEGUES        STQ
+                        RTRN
+                SXA,1   BOFF
+                        X1INPUT
+                        B29FLAG
                         INITVEL1
                 VLOAD   VSL2
                         RINIT           # B29
@@ -1139,28 +1155,11 @@ INITVEL2        BPL     SET
                         R2VEC
                 STORE   RTARG1
 INITVEL3        DLOAD   PDVL            #                                   (PL 2D)
-                        MUEARTH         # POSITIVE VALUE
-                        R2VEC
-                UNIT    PDVL            # 2D = UNIT(R2VEC)                  (PL 8D)
-                        R1VEC
-                UNIT    PUSH            # 8D = UNIT(R1VEC)                 (PL 14D)
-                VXV     VCOMP           # -N = UNIT(R2VEC) X UNIT(R1VEC)
-                        2D
-                PUSH                    #                                  (PL 20D)
-                LXA,1   DLOAD
-                        RTX1
-                        18D
-                BMN     INCR,1
-                        +2
-                DEC     -8
-                INCR,1  SLOAD
-                        10D
-                        X1
-                BHIZ    VLOAD           #                                  (PL 14D)
-                        +2
-                VCOMP   PUSH            #                                  (PL 20D)
-                VLOAD                   #                                  (PL 14D)
+                        EPSFOUR         # POSITIVE VALUE
+                        UN
                 VXV     DOT             #                                   (PL 2D)
+                        R1VEC
+                        R2VEC
                 BPL     DLOAD           #                                   (PL 0D)
                         INITVEL4
                 DCOMP   PUSH            #                                   (PL 2D)
@@ -1178,7 +1177,7 @@ INITVEL4        LXA,2   SXA,2
                         ITERCTR
                         5
                 LXA,1   CALL
-                        RTX1
+                        X1INPUT
 #  OPERATE THE LAMBERT CONIC ROUTINE (COASTFLT SUBROUTINE)
 
                         LAMBERT
@@ -1201,8 +1200,12 @@ INITVEL4        LXA,2   SXA,2
                 BHIZ    CALL
                         INITVEL7
                         INTSTALL
+
+                LXA,2   INCR,2
+                        X1INPUT
+                        2D
                 SLOAD   CLEAR
-                        RTX2
+                        X2
                         MOONFLAG
                 BHIZ    SET
                         INITVEL5
@@ -1258,11 +1261,9 @@ INITVEL7        VLOAD   VSU
                 STOVL   DELVEET3        # DELVEET3 = VIPRIME-VINIT (+7)
                         VTARGET
                 STORE   VTPRIME
-                SLOAD   BHIZ
-                        RTX2
+                BOFF    VSR2
+                        B29FLAG
                         INITVELX
-                VLOAD   VSR2
-                        VTPRIME
                 STOVL   VTPRIME
                         VIPRIME
                 VSR2
@@ -1273,11 +1274,11 @@ INITVEL7        VLOAD   VSU
                         DELVEET3
                 VSR2
                 STORE   DELVEET3
-INITVELX        SETPD   VLOAD
+INITVELX        SETPD   LXA,1
                         0D
-                        RTARG1
-                STCALL  RTARG
-                        NORMEX
+                        X1INPUT
+                GOTO
+                        RTRN
 
 # ..... END OF INITVEL ROUTINE .....
 

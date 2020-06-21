@@ -280,22 +280,6 @@ ROE             2DEC            .00257125
 
 OMEGMOON        2DEC*           2.66169947      E-8 B+23*
 
-                SETLOC          ORBITAL2
-                BANK
-                COUNT*          $$/ORBIT
-
-# *** THE ORDER OF THE FOLLOWING CONSTANTS MUST NOT BE CHANGED ***********
-
-                2DEC*           1.32715445      E16 B-54*       # S
-MUM             2DEC*           4.9027780       E8 B-30*        # M
-MUEARTH         2DEC*           3.986032        E10 B-36*
-                2DEC            0
-J4REQ/J3        2DEC*           .4991607391     E7 B-26*
-                2DEC            0
-2J3RE/J2        2DEC*           -.1355426363    E5 B-27*
-                2DEC*           .3067493316     E18 B-60*
-J2REQSQ         2DEC*           1.75501139      E21 B-72*
-3J22R2MU        2DEC*           9.20479048      E16 B-58*
 # ************************************************************************
 
                 SETLOC          TOF-FF1
