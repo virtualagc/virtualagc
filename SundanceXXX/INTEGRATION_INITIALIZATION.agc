@@ -257,9 +257,9 @@ STATEINT        TC      PHASCHNG
 
                 TC      TASKOVER
 STATINT1        TC      INTPRET
-                BON     RTB
+                BONCLR  RTB
                         QUITFLAG        # KILL INTEGRATION UNTIL NEXT POO.
-                        NOINT
+                        ENDINT
                         LOADTIME
                 STORE   TDEC1
                 CALL
@@ -289,13 +289,6 @@ SETIFLGS        SET     CLEAR
                         DIM0FLAG
                         D6OR9FLG
                 RVQ
-NOINT           EXIT
-                TC      PHASCHNG
-                OCT     00002
-
-                TC      DOWNFLAG
-                ADRES   QUITFLAG
-                TC      ENDOFJOB
 
 # ATOPCSM TRANSFERS RRECT TO RRECT +41 TO RRECTCSM TO RRECTCSM +41
 
@@ -419,8 +412,7 @@ USEPIOS         SETPD   VLOAD
                         TET
                 STODL   6D
                         5/8
-                SET     CALL            # NEEDED FOR SETTING X1 ON EXIT
-                        MOONFLAG
+                CALL
                         RP-TO-R
                 VXV     VXSC
                         RCV
@@ -433,6 +425,9 @@ USEPIOS         SETPD   VLOAD
                         PBODY
                 STCALL  TNUV
                         A-PCHK
+
+OMEGMOON        2DEC*           2.66169947      E-8 B+23*
+
 SETBANK         CAF     INTBANK
                 TS      BBANK
                 CAF     FORTYONE
@@ -589,8 +584,9 @@ A-PCHK          BOFCLR  EXIT
                         RECTOUT
                 TC      PHASCHNG
                 OCT     04022
-                TC      UPFLAG          # PHASE CHANGE HAS OCCURRED BETWEEN
-                ADRES   REINTFLG        # INTSTALL AND INTWAKE
+                CS      RASFLAG         # PHASE CHANGE HAS OCCURRED BETWEEN
+                MASK    REINTBIT        # INTSTALL AND INTWAKE
+                ADS     RASFLAG
                 TC      INTPRET
                 SSP
                         QPRET
@@ -733,8 +729,6 @@ P00HCHK         DLOAD   ABS
                 DLOAD   DSU
                         TDEC
                         TET
-                BMN                     # NO BACKWARD INTEGRATION
-                        INTEXIT
                 PDDL    SR4
                         DT/2            # IS 4(DT) LS (TDEC - TET)
                 SR2R    BDSU            # NO
@@ -746,6 +740,8 @@ DT/2MIN         2DEC    3 B-20
 DT/2MAX         2DEC    4000 E2 B-20
 
 INTSTALL        EXIT
+                TC      UPFLAG
+                ADRES   KILLROSE
                 CAF     ZERO
 ALLSTALL        TS      L
                 CA      RASFLAG
@@ -757,7 +753,6 @@ ALLSTALL        TS      L
                 CAF     WAKESTAL
                 TC      JOBSLEEP
 INTWAKE0        EXIT
-                TCF     INTWAKE1
 
 INTWAKE         CS      RASFLAG         # IS THIS INTSTALLED ROUTINE TO BE
                 MASK    REINTBIT        #      RESTARTED
@@ -780,7 +775,9 @@ INTWAKE         CS      RASFLAG         # IS THIS INTSTALLED ROUTINE TO BE
                 EXTEND
                 BZF     GOBAC           # DONT INTWAKE IF WE CAME HERE VIA RESTART
 
-INTWAKE1        CAF     ZERO
+INTWAKE1        TC      DOWNFLAG
+                ADRES   KILLROSE
+                CAF     ZERO
 WAKE            TS      STALTEM         # INDEX OF ANY STALL USER
 WAKE1           INDEX   STALTEM
                 CAF     WAKESTAL
@@ -849,6 +846,10 @@ OTHERS          DLOAD   CALL            # GET SET FOR OTHER VEHICLE INTEGRATION
                 SET     CALL
                         VINTFLAG        # CM
                         SETIFLGS        # SETS UP NONE W-MAT. PERMANENT INTEG.
+                BOF     CLEAR
+                        COMPUTER
+                        +2              # COMPUTER IS LM ,INTEG CM
+                        VINTFLAG        # COMPUTER IS CM ,INTEG LM
                 STCALL  TDEC1
                         INTEGRV
 
@@ -886,6 +887,12 @@ INT/W           DLOAD   CALL
                 SET     CLEAR
                         D6OR9FLG        # 9X9 FOR LM
                         VINTFLAG        # LM
+                BOF     SET
+                        COMPUTER
+                        +4              # LM TO DO
+                        VINTFLAG
+                CLEAR
+                        D6OR9FLG        # 6X6 FOR CM
                 STCALL  TDEC1
                         INTEGRV
                 GOTO
@@ -956,9 +963,6 @@ ENTMID1         CALL
                 STODL   VN1
                         TAT
                 STORE   PIPTIME1
-                SXA,2   SXA,1
-                        RTX2
-                        RTX1
                 EXIT
 
                 INHINT

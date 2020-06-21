@@ -802,8 +802,8 @@ REDFLBIT        =               BIT6                    # PERMITTED           PE
 #
 
 # BIT 5 FLAG 6
-#               =               100D
-3
+KILLROSE        =               100D
+KILLRBIT        =               BIT5
 
 # BIT 4 FLAG 6
 #               =               101D
@@ -925,8 +925,8 @@ RPQFLBIT        =               BIT15                   # TWEEN SECONDARY BODY
 #
 
 # BIT 14 FLAG 8
-#               =               121D
-#               =               BIT14
+R32FLAG         =               121D
+R32FBIT         =               BIT14
 #
 
 # BIT 13 FLAG 8 (S)

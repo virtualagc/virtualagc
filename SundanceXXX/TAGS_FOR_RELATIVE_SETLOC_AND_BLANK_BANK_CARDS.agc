@@ -108,7 +108,7 @@ CONICS          EQUALS
 LATLONG         EQUALS
 INTINIT         EQUALS
 LEMGEOM         EQUALS
-P76LOC          EQUALS
+R32LOC          EQUALS
                 BNKSUM          13
 
 

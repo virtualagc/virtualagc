@@ -274,12 +274,6 @@ ROE             2DEC            .00257125
                 COUNT*          $$/CONIC
 
 
-                SETLOC          INTINIT
-                BANK
-                COUNT*          $$/INTIN
-
-OMEGMOON        2DEC*           2.66169947      E-8 B+23*
-
 # ************************************************************************
 
                 SETLOC          TOF-FF1

@@ -1106,16 +1106,16 @@ DOINT           CLEAR           CALL
                                 PRECIFLG                # ENGAGES 4-TIME STEP LOGIC IN INTEGRATION
                                 INTEGRV                 # WHEN MODREG = 0
 
-                BON             DLOAD
-                                SURFFLAG
-                                NO-INT
+                DLOAD
                                 TETCSM
                 STCALL          TDEC1
                                 INTSTALL
                 CLEAR           CALL                    # EXTRAPOLATE LM STATE VECTOR
                                 VINTFLAG
                                 SETIFLGS
-                BOF                                     # ALSO 9X9 W-MATRIX IF W IS VALID
+                BON             BOF                     # ALSO 9X9 W-MATRIX IF W IS VALID
+                                SURFFLAG
+                                DOINT2
                                 RENDWFLG
                                 DOINT2
                 SET             SET
