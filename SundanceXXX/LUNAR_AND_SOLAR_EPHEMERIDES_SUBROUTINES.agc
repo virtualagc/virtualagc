@@ -173,6 +173,10 @@ GTMP		EQUALS	22D
 
 TIMEP		EQUALS	24D
 
+                SETLOC          EPHEM1
+                BANK
+                COUNT*          $$/EPHEM
+
 KONMAT          2DEC    1.0 B-1         #         *************
                 2DEC    0               #                     *
                 2DEC    0               #                     *

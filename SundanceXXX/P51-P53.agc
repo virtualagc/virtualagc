@@ -161,7 +161,7 @@ P52V            CA              OPTION2
                 TC              P52W
                 TC              INTPRET                 # OPTION 4 - GET LS ORIENTATION
                 GOTO
-                                P52LS
+                                P52D
 
 # START ALIGNMENT
 
@@ -177,7 +177,7 @@ P52D            CALL                                    # READ VEHICLE ATTITUDE 
                 TC              BANKCALL                # DISPLAY GIMBAL ANGLES
                 CADR            GOFLASH
                 TC              GOTOPOOH
-                TCF             COARSTYP                # V33-PROCEED, SEE IF GYRO TORQUE COARSE
+                TCF             REGCOARS                # V33-PROCEED, SEE IF GYRO TORQUE COARSE
                 TC              INTPRET                 # RECYCLE - VEHICLE HAS BEEN MANUEVERED
                 GOTO
                                 P52D
@@ -200,81 +200,6 @@ V06N22*         VN              00622
 V06N34*         VN              634
 
 V06N89*         VN              0689
-
-# CHECK FOR GRRO TORQUE COARSE ALIGNMENT
-COARSTYP        CAF             OCT13
-                TC              BANKCALL                # DISPLAY V 50N25 WITH COARSE ALIGN OPTION
-                CADR            GOPERF1
-                TCF             GOTOPOOH                # V34-TERMIN&OE
-                TCF             REGCOARS                # V33-NORMAL COARSE
-                TC              INTPRET                 # V32-GYRO TORQUE COARSE
-                VLOAD           MXV
-                                XSMD                    # GET SM(DESIRED) WRT SM(PRESENT)
-                                REFSMMAT
-                UNIT
-                STOVL           XDC
-                                YSMD
-                MXV             UNIT
-                                REFSMMAT
-                STOVL           YDC
-                                ZSMD
-                MXV             UNIT
-                                REFSMMAT
-                STCALL          ZDC
-                                GYCOARS
-                GOTO
-                                P52OUT
-OCT13           OCT             13
-
-# COMPUTE LANDING ORIENTATION FOR OPTION 4
-P52LS           SET             CLEAR                   # GET LANDING SITE ORIENTATION
-                                LUNAFLAG
-                                ERADFLAG                # TO PICK UP RLS
-                SETPD           VLOAD
-                                0
-                                RLS                     # PICK UP LANDING SITE VEC IN MF
-                PDDL            PUSH                    # RLS PD 0-5
-                                TALIGN
-                CALL
-                                RP-TO-R                 # TRANS RLS TO REF
-                VSR2
-                STODL           ALPHAV                  # INPUT TO LAT-LONG
-                                TALIGN
-                CALL
-                                LAT-LONG                # GET LAT, LONG, AND ALT
-                DLOAD           SR1                     # RESCALE LONG TO DEGREES/2
-                                LONG
-                STODL           LANDLONG
-                                ALT
-                STODL           LANDALT                 # ALT ALREADY AT 2(29) METERS
-                                LAT
-                STORE           LANDLAT
-                EXIT
-
-LSDISP          CAF             V06N89*                 # DISPLAY LAT,LONG/2, ALT
-                TC              BANKCALL
-                CADR            GOFLASH
-                TCF             GOTOPOOH                # VB34 TERMINATE
-                TCF             +2                      # VB33 PROCEED
-                TCF             LSDISP                  # VB32 RECYCLE
-
-                TC              INTPRET
-                DLOAD           SL1
-                                LANDLONG
-                STODL           LONG
-                                LANDALT
-                STODL           ALT
-                                LANDLAT
-                STODL           LAT
-                                TALIGN
-                CALL
-                                LALOTORV
-                VLOAD           UNIT                    # COMPUTE LANDING SITE ORIENT (XSMD)
-                                ALPHAV
-                STCALL          XSMD
-                                LSORIENT
-                GOTO
-                                P52D                    # NOW GO COMPUTE GIMBAL ANGLES
 
 # NAME -S50 ALIAS  LOCSAM
 # BY
@@ -402,6 +327,11 @@ CMOON           =               18D
 CSS5            2DEC            .2490475                # (COS 5)/4
 CSSUN           2DEC            .125                    # (COS 60)/4
 5DEGREES        2DEC            .013888889              #    SCALED IN REVS
+
+ROE             2DEC            .00257125
+RSUBEM          2DEC            384402000       B-29
+RSUBM           2DEC            1738090         B-29
+RSUBE           2DEC            6378166         B-29
 
 # PROGRAM NAME - R56              DATE  DEC 20 66
 # MOD 1                           LOG SECTION P51-P53
@@ -696,41 +626,6 @@ R51.4           TC              INTPRET
                                 R51.3
 TSIGHT1         2DEC            36000                   # 6 MIN TO MARKING
 
-# GYRO TORQUE COARSE ALIGNMENT
-GYCOARS         STQ             CALL
-                                QMAJ
-                                CALCGTA
-                CLEAR           CLEAR
-                                DRIFTFLG
-                                REFSMFLG
-                EXIT
-                CAF             V16N20                  # MONITOR GIMBALS
-                TC              BANKCALL
-                CADR            GODSPR
-                CA              R55CDR
-                TC              BANKCALL
-                CADR            IMUPULSE
-                TC              BANKCALL
-                CADR            IMUSTALL
-                TC              CURTAINS
-                TC              PHASCHNG
-                OCT             05024
-                OCT             13000
-                TC              INTPRET
-                AXC,1           AXC,2
-                                XSMD
-                                REFSMMAT
-                CALL                                    # STORE DESIRED REFSMMAT
-                                MATMOVE
-                CLEAR           SET
-                                PFRATFLG
-                                REFSMFLG
-                CALL
-                                NCOARSE                 # SET DRIFT AND INITIALIZE 1/PIPADT
-                GOTO
-                                R51K
-V16N20          VN              1620
-
 # R55  GYRO TORQUE
 # FUNCTION-COMPUTE AND SEND GYRO PULSES
 # CALLING SEQ- CALL R55
@@ -905,7 +800,7 @@ RDCDUS          INHINT                                  # READ CDUS
                 INDEX           FIXLOC
                 TS              3
                 RELINT
-                TC              DANZIG			#					+
+                TC              DANZIG                  #                                       +
                 COUNT*          $$/INFLT
 CALCSMSC        AXC,1
                                 XNB
@@ -1331,7 +1226,7 @@ R59A            CS              HIGH9                   # GRAB STARCODE FOR INDE
                                 CATLOG,1                # GRAB STAR VECTOR
                                 REFSMMAT                # TRANSFORM TO SM
                 UNIT            CALL
-                                *SMNB*			# TRANSFORM TO NB
+                                *SMNB*                  # TRANSFORM TO NB
                 STORE           STAR                    # TEMP STORE STAR VEC(NB)
                 EXIT
 
@@ -1572,7 +1467,7 @@ PIPSRINE        =               PIPASR          +3      # EBANK NOT 4 SO DONT LO
 #          *NBSM* ,*SNMB*, CALCGA,FOFLASH
 # DEBRIS-
 #          VAC,SAC,STARAD,XSM,XNB,THETAD,DELV,COSCDU,SINCDU
-GVDETER         CS              BIT13			# JAM 45 DEG IN DESIRED GIMBAL ANGLES
+GVDETER         CS              BIT13                   # JAM 45 DEG IN DESIRED GIMBAL ANGLES
                 TS              THETAD          +1
                 COM
                 TS              THETAD          +2

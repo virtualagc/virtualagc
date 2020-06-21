@@ -117,6 +117,7 @@ R32LOC          EQUALS
                 BANK            14
 P50S1           EQUALS
 STARTAB         EQUALS
+EPHEM1          EQUALS
                 BNKSUM          14
 
 
