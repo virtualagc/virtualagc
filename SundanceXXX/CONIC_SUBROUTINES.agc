@@ -47,7 +47,6 @@
 # PROGRAM DESCRIPTION - KEPLER SUBROUTINE                                 DATE - 11 OCTOBER 1967
 # MOD NO. -1                                                                       LOG SECTION - CONIC SUBROUTINES
 # MOD BY KRAUSE                                                           ASSEMBLY - COLOSSUS 103 AND SUNDANCE 222
-# MOD NO. - 2  (AUGUST 1968) BY ROBERTSON: TO PERMIT BACKDATING BY MORE THAN ONE ORBITAL PERIOD.
 
 
 # FUNCTIONAL DESCRIPTION -
@@ -59,12 +58,13 @@
 # TION TECHNIQUE IS UTILIZED IN THE COMPUTATION.
 #      IF A NEGATIVE TIME-OF-FLIGHT IS INPUT, THE PROGRAM WILL SOLVE FOR THE STATE WHICH WOULD BE PRODUCED BY
 # EXTRAPOLATING THE POSITION BACKWARD IN TIME.
-#      IF THE ABSOLUTE VALUE OF THE DESIRED TRANSFER TIME EXCEEDS THE ORBITAL PERIOD, THE SUBROUTINE, THROUGH A
-# MODULAR TECHNIQUE, WILL COMPUTE THE STATE CORRESPONDING TO THE DESIRED TIME (WHETHER POSITIVE OR NEGATIVE).
+#      IF THE DESIRED TRANSFER TIME IS POSITIVE AND EXCEEDS THE ORBITAL PERIOD, THE SUBROUTINE, THROUGH A MODULAR
+# TECHNIQUE, WILL COMPUTE THE STATE CORRESPONDING TO THE DESIRED TIME AS USUAL.
 #
 
 # THE RESTRICTIONS ARE -
-#      1. (PREVIOUS RESTRICTION ON THE NEGATIVE DESIRED TRANSFER TIME IS NOW DELETED.)
+#      1. A NEGATIVE DESIRED TIME MUST BE LESS THAN ONE PERIOD IN MAGNITUDE.  IF GREATER, THE ONE-PERIOD- SOLUTION
+# WILL BE RETURNED.
 #      2.  THE PARAMETERS IN THE PROBLEM CANNOT EXCEED THEIR SCALING LIMITS AS SPECIFIED IN THE GSOP.  IF
 # ANY OF THESE LIMITS ARE EXCEEDED, THE RESULTING SOLUTION WILL BE MEANINGLESS.
 #
@@ -217,10 +217,6 @@
 #         *              *MOMENTUM VECTOR.  THIS WILL BE IGNORED IF NORMSW IS CLEAR.
 # VTARGTAG* NONE         *A S.P. TAG TO BE SET TO ZERO IF LAMBERT IS TO COMPUTE THE VELOCITY AT R2VEC AS WELL AS
 #         *              *AT R1VEC.
-# ITERCTR * NONE         *A S.P. COUNTER WHICH SPECIFIES THE MAXIMUM NUMBER OF ITERATIONS ALLOWABLE.
-#         *              *(AN ITERATION MEANS A PASS THRU KEPLER EQN (DELTIME). AT LEAST ONE OF THESE MUST
-#         *              *ALWAYS OCCUR, EVEN IF COGA CORRESPONDING TO SOLUTION WERE INPUT AS A GUESS.)
-#         *              *TWENTY ITERATIONS ARE SUFFICIENT TO SOLVE ALL PROBLEMS INCLUDING THOSE WITHOUT GUESS.
 #
 
 # SUBROUTINES CALLED -
@@ -727,24 +723,24 @@ KEPLERN         SETPD   DLOAD
                         2PISC           # 2PISC (+6)
                 BOV
                         STOREMAX
-STOREMAX        STORE   XMAX
-                DMP     PDDL
+STOREMAX        SIGN    BMN
+                        TAU.
+                        BACKWARD
+                STORE   XMAX
+                DMP     PDDL            #                              PL AT 2
                         1/ROOTMU
                         ALPHA
-                NORM    PDDL
+                NORM    PDDL            # DXCH WITH 0D.  0D=ALPHA      PL AT 0,2
                         X1
-                SL*     DDV
+                SL*     DDV             #                              PL AT 0
                         0 -6,1
-                BOV     BMN
+PERIODCH        BOV     BMN
                         MODDONE
-                        MODDONE         # MPAC=PERIOD
-PERIODCH        PDDL    ABS             # 0D=PERIOD
-                        TAU.
-                DSU     BMN
-                        0D
                         MODDONE
-                SIGN
+                PUSH                    # 0D=PERIOD (+28)
+                BDSU    BMN
                         TAU.
+                        MODDONE
                 STODL   TAU.
                         XMAX
                 DAD
@@ -753,43 +749,25 @@ PERIODCH        PDDL    ABS             # 0D=PERIOD
                         0D
                 DAD
                         TMODULO
-                STODL   TMODULO
+                STODL   TMODULO         #                              PL AT 0
                 GOTO
                         PERIODCH
-MODDONE         SETPD
+
+MODDONE         SETPD   DLOAD
                         0
-                DLOAD   SIGN
-                        TMODULO
-                        TAU.
-                STORE   TMODULO
-                DLOAD   SIGN
-                        XMODULO
-                        TAU.
-                STORE   XMODULO
-                BDSU
+                        KEPZERO
+                STODL   XMIN
                         XKEPNEW
+                DSU
+                        XMODULO
                 STORE   X
-                SIGN    BZE
-                        TAU.
+                BZE     BMN
                         BADX
-                BMN     ABS
                         BADX
                 DSU     BPL
                         XMAX
                         BADX
-STORBNDS        DLOAD   BPL
-                        TAU.
-                        STOREMIN
-                DLOAD   DCOMP
-                        XMAX
-                STODL   XMIN
-                        KEPZERO
-                STORE   XMAX
-                GOTO
-                        DXCOMP
-STOREMIN        DLOAD
-                        KEPZERO
-                STORE   XMIN
+
 DXCOMP          DLOAD   DMPR
                         TAU.
                         BEE22
@@ -893,31 +871,44 @@ PDXCHNGE        DLOAD   DSU
                         NEWDELX
 
 
-BADX            DLOAD   SR1
+BADX            DLOAD   SR1             # RECIPE EXCEEDED X BOUNDS - USE XMAX/2
                         XMAX
-                SIGN
-                        TAU.
                 STORE   X
                 GOTO
-                        STORBNDS
-TIMEOVFL        DLOAD   BMN             # X WAS TOO BIG
+                        DXCOMP
+
+
+BACKWARD        STODL   XMIN
+                        KEPZERO
+                STODL   XMAX
+                        XKEPNEW
+                STORE   X
+                BZE     BPL
+                        BADBKWDX
+                        BADBKWDX
+                DSU     BPL
+                        XMIN
+                        DXCOMP
+BADBKWDX        DLOAD   SR1
+                        XMIN
+                STORE   X
+                GOTO
+                        DXCOMP
+
+
+TIMEOVFL        DLOAD
                         X
-                        NEGTOVFL
                 STORE   XMAX
 CMNTOVFL        DLOAD   SR1
                         DELX
                 STORE   DELX
-                BZE     BDSU
-                        KEPRTN
+                BDSU
                         X
                 STODL   X
                         TC
                 STORE   T
                 GOTO
-                        BRNCHCTR
-NEGTOVFL        STORE   XMIN
-                GOTO
-                        CMNTOVFL
+                        KEPLOOP
 KEPCONVG        DLOAD   SR4R
                         R1
                 DSU     VXSC
