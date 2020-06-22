@@ -1744,7 +1744,6 @@ SUMRATER        EQUALS          SUMRATEQ +1             # SCALED AT PI/4 RADIANS
 
 # RATE-COMMAND AND MINIMUM IMPULSE MODES
 
-CH31TEMP        ERASE
 STIKSENS        ERASE
 TCP             ERASE
 DXERROR         ERASE           +5
@@ -1761,6 +1760,7 @@ OLDQRMIN        ERASE
 TEMP31          EQUALS          DAPTEMP1
 
 SAVEHAND        ERASE           +1
+1/2JTSP         ERASE
 PERROR          ERASE
 QERROR          EQUALS          DYERROR
 RERROR          EQUALS          DZERROR
@@ -1775,6 +1775,7 @@ NEXTU           =               NEXTP           +1
 NEXTV           =               NEXTP           +2
 -2JETLIM        ERASE           +1                      # RATE COMMAND 4-JET RATE DIFFERENCE LIMIT
 -RATEDB         EQUALS          -2JETLIM        +1      # AND RATE DEADBAND FOR ASCENT OR DESCENT
+ZEROOR1         EQUALS          -RATEDB         +1
 
 TARGETDB        EQUALS          -RATEDB                 # MAN. CONTROL TARGET DB COMPLEMENT.
 
@@ -1872,6 +1873,8 @@ L,PVT-CG        ERASE
 1JACCR          EQUALS          1JACC           +2
 1JACCU          EQUALS          1JACC           +3      # FOR U,V-AXES THE SCALE FACTOR IS  DIFF:
 1JACCV          EQUALS          1JACC           +4      # SCALED AT PI/2 RADIANS/SECOND (FOR ASC)
+
+PJUMPADR        ERASE
 
 # ASCENT VARIABLES:                                                     (10D)
 

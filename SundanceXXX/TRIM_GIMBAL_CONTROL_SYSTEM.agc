@@ -170,11 +170,6 @@ FUNCT3          CAE     A2CNTRAL        # CALCULATE (2/3)*ALPHA(2)/2 = ALPHA(2)/
 
 .66667          DEC     .66667
 
-                BANK    16
-                EBANK=  NEGUQ
-                SETLOC  DAPS1
-                BANK
-
 # THE WRCHN12 SUBROUTINE SETS BITS 9,10,11,12 OF CHANNEL 12 ON THE BASIS OF THE CONTENTS OF NEGUQ,NEGUR WHICH ARE
 # THE NEGATIVES OF THE DESIRED ACCELERATION CHANGES.  ACDT+C12 SETS Q(R)ACCDOT TO REFLECT THE NEW DRIVES.
 #
@@ -209,9 +204,9 @@ ACDT+C12        CS      NEGUQ
                 AD      CHNL12
                 EXTEND
                 WRITE   CHAN12
-                CS      CALLGMBL        # TURN OFF REQUEST FOR ACDT+C12 EXECUTION.
-                MASK    RCSFLAGS
-                TS      RCSFLAGS
+                # CS      CALLGMBL        # TURN OFF REQUEST FOR ACDT+C12 EXECUTION.
+                # MASK    RCSFLAGS
+                # TS      RCSFLAGS
 
                 TC      Q               # RETURN TO CALLER.
 
@@ -490,10 +485,10 @@ POSDRIVE        CS      BIT1
                 CCS     L
                 TCF     LOUPE           # NON-ZERO GIMBAL DRIVE BEING CONTINUED.
 
-                TCF     ZEROLOUP        # NO REVERSAL PROBLEM HERE.
+                # TCF     ZEROLOUP        # NO REVERSAL PROBLEM HERE.
 
-                TCF     REVERSAL        # NON-ZERO GIMBAL DRIVE BEING REVERSED.
-                TCF     ZEROLOUP        # NO REVERSAL PROBLEM HERE.
+                # TCF     REVERSAL        # NON-ZERO GIMBAL DRIVE BEING REVERSED.
+                # TCF     ZEROLOUP        # NO REVERSAL PROBLEM HERE.
 
 REVERSAL        INDEX   QRCNTR          # A ZERO-DRIVE PAUSE IS NEEDED HERE.  ZERO
                 TS      QACCDOT         # IS IN A REGISTER FROM CCS ON (-1).
@@ -502,9 +497,9 @@ REVERSAL        INDEX   QRCNTR          # A ZERO-DRIVE PAUSE IS NEEDED HERE.  ZE
                 EXTEND
                 WAND    CHAN12
 
-ZEROLOUP        CS      RCSFLAGS        # SET UP REQUEST FOR ACDT+C12 CALL.
-                MASK    CALLGMBL
-                ADS     RCSFLAGS
+# ZEROLOUP        CS      RCSFLAGS        # SET UP REQUEST FOR ACDT+C12 CALL.
+#                 MASK    CALLGMBL
+#                 ADS     RCSFLAGS
 
 LOUPE           CCS     QRCNTR          # HAVE BOTH AXES BEEN PROCESSED?
                 TCF     GOQTRIMG        # NO.  DO Q AXIS NEXT.

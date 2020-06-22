@@ -213,7 +213,8 @@ CHEKSTIK        TS      INGTS           # NOT IN GTS WHEN IN ATT HOLD
                 CS      ONE             # 1/ACCS WILL DO THE NULLING DRIVES
                 TS      COTROLER        # COME BACK TO RCS NEXT TIME
                 CA      BIT15
-                MASK    CH31TEMP
+                EXTEND
+                RAND    CHAN31
                 EXTEND
                 BZF     RHCACTIV        # BRANCH IF OUT OF DETENT.
                 CA      OURRCBIT        # ***********

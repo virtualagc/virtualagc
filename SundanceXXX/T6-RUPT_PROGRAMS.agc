@@ -61,8 +61,8 @@
 # DEBRIS:       T6JOBCHK CLOBBERS A.  DOT6RUPT CLOBBERS NOTHING.
 
                 BLOCK   02
-                BANK    17
-                SETLOC  DAPS2
+                BANK    16
+                SETLOC  DAPS1
                 BANK
                 EBANK=  T6NEXT
                 COUNT*  $$/DAPT6
@@ -136,8 +136,8 @@ WRITEV          TS      L
                 TCF     -9D
 00314OCT        OCT     00314
 
-                BANK    17
-                SETLOC  DAPS2
+                BANK    16
+                SETLOC  DAPS1
                 BANK
 
                 EBANK=  T6NEXT
