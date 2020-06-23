@@ -94,7 +94,23 @@ POSTHRST        CA              HALF
 
                 NDX             AXISCTR
                 TS              TJU
+                CCS             AXISCTR
+                TCF             AFTERTJ -2
+                TCF             AFTERTJ -2
                 TC              Q
+
+                CA              FLAGWRD5
+                MASK            SNUFFBIT
+                EXTEND
+                BZF             AFTERTJ -2
+                CA              DAPBOOLS
+                MASK            DRIFTBIT
+                CCS             A
+                TCF             AFTERTJ -2
+
+                NDX             AXISCTR
+                TS              TJU
+                TCF             AFTERTJ -2
 
 JTONTEST        NDX             AXISCTR
                 CCS             TJU

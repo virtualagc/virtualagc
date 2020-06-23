@@ -21,16 +21,7 @@
 
                 COUNT*  $$/DAPQR
 
-CALLQERR        CA      BIT13           # CALCULATE Q,R ERRORS UNLESS THESE AXES
-                EXTEND                  # ARE IN MANUAL RATE COMMAND.
-                RAND    CHAN31
-                CCS     A
-                TCF     +5              # IN AUTO COMPUTE Q,R ERRORS
-                CS      DAPBOOLS        # IN MANUAL RATE COMMAND?
-                MASK    OURRCBIT
-                EXTEND
-                BZF     Q,RORGTS        # IF SO BYPASS CALCULATION OF ERRORS.
-                TC      QERRCALC
+CALLQERR        TC      QERRCALC
 
 Q,RORGTS        CCS     COTROLER        # CHOOSE CONTROL SYSTEM FOR THIS DAP PASS:
                 TCF     GOTOGTS         #   GTS (ALTERNATES WITH RCS WHEN DOCKED)
@@ -71,24 +62,29 @@ SENSEGET        CA      BIT7            # INPUT BITS OVERRIDE THE INTERNAL BITS
                 CCS     A
                 TCF     +XORULGE
 
-                TS      NEXTU           # STORE NULL TRANSLATION POLICIES
-                TS      NEXTV
-                CS      DAPBOOLS        # BURNING OR DRIFTING?
-                MASK    DRIFTBIT
-                EXTEND
-                BZF     TSENSE
-                CA      FLGWRD10        # DPS (INCLUDING DOCKED) OR APS?
-                MASK    APSFLBIT
-                CCS     A
-                CAF     TWO             # FAVOR +X JETS DURING AN APS BURN.
-TSENSE          TS      SENSETYP
-                TCF     QRCONTRL
+                CAF     ZERO
+                TS      ANYTRANS
+                TS      SENSETYP
 
-+XORULGE        CAF     ONE
--XTRANS         AD      FOUR
+                CA      BIT2            # DPS (INCLUDING DOCKED) OR APS?
+                EXTEND
+                RAND    CHAN30
+                EXTEND
+                BZF     TSENSE +1
+
+                CS      DRIFTBIT        # BURNING OR DRIFTING?
+                MASK    DAPBOOLS
+                CCS     A
+                TCF     TSENSE +1
+
+                AD      TWO             # FAVOR +X JETS DURING AN APS BURN.
+TSENSE          TS      SENSETYP
+                CCS     ANYTRANS
+                TCF     +3
+                TS      POLYTEMP
+                TCF     TSNEXTS
                 TS      ROTINDEX
-                AD      NEG3
-                TS      SENSETYP        # FAVOR APPROPRIATE JETS DURING TRANS.
+
                 CA      DAPBOOLS
                 MASK    ACC4OR2X
                 CCS     A
@@ -125,7 +121,7 @@ QRCONTRL        CA      BIT13           # CHECK MODE SELECT SWITCH.
                 RAND    CHAN31          # BITS INVERTED
                 CCS     A
                 TCF     ATTSTEER
-CHKBIT10        CAF     PULSES          # PULSES = 1 FOR MIN IMP USE OF RHC
+NORMALQ         CAF     PULSES          # PULSES = 1 FOR MIN IMP USE OF RHC
                 MASK    DAPBOOLS
                 EXTEND
                 BZF     CHEKSTIK        # IN ATT-HOLD/RATE-COMMAND IF BIT10=0
@@ -203,6 +199,12 @@ MINADR          GENADR  MINRTN
 OCT63           OCT     63
 14MS            =       +TJMINT6
 
++XORULGE        CAF     ONE
+-XTRANS         AD      FIVE
+                TS      ANYTRANS
+                AD      NEG4
+                TS      SENSETYP        # FAVOR APPROPRIATE JETS DURING TRANS.
+
 TRANS4          CA      FOUR
                 TCF     TSNUMBRT
 
@@ -220,133 +222,78 @@ CHEKSTIK        TS      INGTS           # NOT IN GTS WHEN IN ATT HOLD
                 CA      OURRCBIT        # ***********
                 MASK    DAPBOOLS        # *IN DETENT*   CHECK FOR MANUAL CONTROL
                 EXTEND                  # ***********   LAST TIME.
-                BZF     STILLRCS
-                CS      BIT9
-                MASK    RCSFLAGS
-                TS      RCSFLAGS        # BIT 9 IS 0.
-                TCF     DAMPING
-40CYCL          OCT     50
-1/10S           OCT     1
-LINRAT          DEC     46
+                BZF     ATTSTEER
 
-# ================================
+DBCHECK-        CA      OMEGAP          # STAY IN RATE DAMPING UNTIL P-AXIS
+                TC      CHKRTDB         # AUTOPILOT HAS TAKEN CARE OF P-RATE
 
-DAMPING         CA      ZERO
-                TS      SAVEHAND
-                TS      SAVEHAND +1
-RHCACTIV        CCS     SAVEHAND        # *******************
-                TCF     +3              # Q,R MANUAL CONTROL    WC = A*(B+|D|)*D
-                TCF     +2              # *******************
-                TCF     +1
-                DOUBLE                  # WHERE
-                DOUBLE                  #
-                AD      LINRAT          #       WC  = COMMANDED ROTATIONAL RATE
-                EXTEND                  #       A   = QUADRATIC SENSITIVITY FACTOR
-                MP      SAVEHAND        #       B   = LINEAR/QUADRATIC SENSITIVITY
-                CA      L               #       |D| = ABS. VALUE OF DEFLECTION
-                EXTEND                  #       D   = HAND CONTROLLER DEFLECTION
-                MP      STIKSENS
-                XCH     QLAST           # COMMAND Q RATE     SCALED 45 DEG/SEC
-                COM
-                AD      QLAST
-                TS      DAPTEMP3
-                CCS     SAVEHAND +1
-                TCF     +3
+                CA      OMEGAU          # DAMP U AND V AXES
+                TC      CHKRTDB
+                CA      OMEGAV
+                TC      CHKRTDB
+                TCF     WITHINDB
+
+CHKRTDB         CCS     A
                 TCF     +2
-                TCF     +1
-                DOUBLE
-                DOUBLE
-                AD      LINRAT
+RTDBGOOD        TC      Q
+
+                AD      -RATEDB
+                EXTEND
+                BZMF    RTDBGOOD
+
+                CS      OMEGAU
+                TS      URATEDIF
+                CS      OMEGAV
+                TS      VRATEDIF
+                TCF     ENTERUV
+
+WITHINDB        CS      OURRCBIT        # ALL RATES ARE GOOD SO EXIT RATE CMD
+                INHINT                  # MODE
+                MASK    DAPBOOLS
+                TS      DAPBOOLS
+                TC      IBNKCALL
+                CADR    ZATTEROR
+                RELINT
+                TCF     ATTSTEER
+
+RHCACTIV        CA      OURRCBIT
+                MASK    DAPBOOLS
+                EXTEND
+                BZF     XTRANS
+
+                CA      RHCSCALE        # LINEAR CONTROLLER SCALING
+                MASK    DAPBOOLS
+                CCS     A
+                CAF     143DEC          # SCALE FOR 20D/S MAX (177D)
+                AD      34DEC           # SCALE FOR 4D/S MAX (34D)
+                TS      RRATEDIF
+                EXTEND
+                MP      SAVEHAND
+                CS      OMEGAQ
+                AD      L
+                TS      QRATEDIF
+                CA      RRATEDIF
                 EXTEND
                 MP      SAVEHAND +1
-                CA      L
-                EXTEND
-                MP      STIKSENS
-                XCH     RLAST
-                COM
-                AD      RLAST
-                TS      DAPTEMP4
-                CS      QLAST           # INTERVAL.
-                AD      OMEGAQ
-                TS      QRATEDIF
-                CS      RLAST
-                AD      OMEGAR
+                CS      OMEGAR
+                AD      L
                 TS      RRATEDIF
-ENTERQR         DXCH    QRATEDIF        # TRANSFORM RATES FROM Q,R TO U,V AXES
+                DXCH    QRATEDIF
                 TC      ROT45DEG
                 DXCH    URATEDIF
-                CCS     DAPTEMP3        # CHECK IF Q COMMAND CHANGE EXCEEDS
-                TC      +3              # BREAKOUT LEVEL.  IF NOT, CHECK R.
-                TC      +2
-                TC      +1
-                AD      -RATEDB
-                EXTEND
-                BZMF    +2
-                TCF     ENTERUV -2      # BREAKOUT LEVEL EXCEEDED.  DIRECT RATE.
-                CCS     DAPTEMP4        # R COMMAND BREAKOUT CHECK.
-                TC      +3
-                TC      +2
-                TC      +1
-                AD      -RATEDB
-                EXTEND
-                BZMF    +2
-                TCF     ENTERUV -2      # BREAKOUT LEVEL EXCEEDED.  DIRECT RATE.
-                CA      RCSFLAGS        # BREAKOUT LEVEL NOT EXCEEDED.  CHECK FOR
-                MASK    QRBIT           # DIRECT RATE CONTROL LAST TIME.
-                EXTEND
-                BZF     +2
-                TCF     ENTERUV         # CONTINUE DIRECT RATE CONTROL.
-                TCF     STILLRCS        # PSEUDO-AUTO CONTROL.
-                CA      40CYCL
-                TS      TCQR
-ENTERUV         INHINT                  # DIRECT RATE CONTROL.
+                
+ENTERUV         CA      HANDADR
+                TS      RETJADR
+
+                CA      ZERO
+                TS      QERROR
+                TS      RERROR
+
+                INHINT                  # DIRECT RATE CONTROL.
                 TC      IBNKCALL
                 FCADR   ZATTEROR
                 RELINT
-                CA      ZERO
-                TS      DYERROR
-                TS      DYERROR +1
-                TS      DZERROR
-                TS      DZERROR +1
-                CCS     URATEDIF
-                TCF     +3
-                TCF     +2
-                TCF     +1
-                AD      TARGETDB        # IF TARGET DB IS EXCEEDED, CONTINUE
-                EXTEND                  # DIRECT RATE CONTROL.
-                BZMF    VDB
-                CCS     VRATEDIF
-                TCF     +3
-                TCF     +2
-                TCF     +1
-                AD      TARGETDB
-                EXTEND
-                BZMF    +2
-                TCF     QRTIME
-                CA      ZERO
-                TS      VRATEDIF
-                TCF     QRTIME
-VDB             CCS     VRATEDIF
-                TC      +3
-                TC      +2
-                TC      +1
-                AD      TARGETDB        # IF TARGET DB IS EXCEEDED, CONTINUE
-                EXTEND                  # DIRECT RATE CONTROL.  IF NOT, FIRE AND
-                BZMF    TOPSEUDO        # SWITCH TO PSEUDO-AUTO CONTROL ON NEXT
-                CA      ZERO            # PASS.
-                TS      URATEDIF
-QRTIME          CA      TCQR            # DIRECT RATE TIME CHECK.
-                EXTEND
-                BZMF    +5              # BRANCH IF TIME EXCEEDS 4 SEC.
-                CS      RCSFLAGS
-                MASK    QRBIT
-                ADS     RCSFLAGS        # BIT 11 IS 1.
-                TC      +4
-TOPSEUDO        CS      QRBIT
-                MASK    RCSFLAGS
-                TS      RCSFLAGS        # BIT 11 IS 0.
-                CA      HANDADR
-                TS      RETJADR
+
                 CA      ONE
 BACKHAND        TS      AXISCTR
 
@@ -362,14 +309,21 @@ BACKHAND        TS      AXISCTR
                 TCF     LOOPER
                 INDEX   AXISCTR
                 CCS     URATEDIF        #       INDEX   AXIS    QUANITY
-                CA      ZERO            #       0       -U      1/JETACC-AOSU
-                TCF     +2              #       1       +U      1/JETACC+AOSU
-                CA      ONE             #       16      -V      1/JETACC-AOSV
-                INDEX   AXISCTR         #       17      +V      1/JETACC+AOSV
-                AD      AXISDIFF        # JETACC = 2 JET ACCELERATION (1 FOR FAIL)
+                TCF     +2              #       0       -U      1/JETACC-AOSU
+                TCF     SETTIME         #       1       +U      1/JETACC+AOSU
+                AD      -RATEDB         #       16      -V      1/JETACC-AOSV
+                EXTEND                  #       17      +V      1/JETACC+AOSV
+                BZMF    ZEROTJ          # JETACC = 2 JET ACCELERATION (1 FOR FAIL)
 
+                INDEX   AXISCTR
+                CCS     URATEDIF
+                CAF     ONE
+                TCF     +2
+                CAF     ZERO
+                INDEX   AXISCTR
+                AD      AXISDIFF
                 INDEX   A
-                CS      1/ANET2 +1
+                CA      1/ANET2 +1
                 EXTEND
                 INDEX   AXISCTR         # URATEDIF IS SCALED AT PI/4 RAD/SEC
                 MP      URATEDIF        #  JET TIME IN A      SCALED 32 SEC
@@ -457,9 +411,8 @@ RERRCALC        CAE     DAPTEMP1        # R-ERROR CALCULATION:
 
 ATTSTEER        EQUALS  STILLRCS        # "STILLRCS" IS THE RCS EXIT FROM TRYGTS.
 
-STILLRCS        CA      RERROR
-                LXCH    A
-                CA      QERROR
+STILLRCS        EXTEND
+                DCA     QERROR
                 TC      ROT45DEG
                 DXCH    UERROR
 
@@ -493,7 +446,10 @@ TJLAW           CA      TJLAWADR
                 MASK    USEQRJTS        #  ON THE NEXT PASS.
                 CCS     A               # USEQRJTS BIT MUST NOT BE BIT 15.
                 TS      COTROLER        # GIMBAL USABLE.  STORE POSITIVE VALUE.
-                TC      SPSRCS          # DETERMINE RCS CONTROL.
+                TCF     SPSRCS          # DETERMINE RCS CONTROL.
+
+TJLAWADR        GENADR  TJLAW   +3      # RETURN ADDRESS FOR RCS ATTITUDE CONTROL
+
                 CAF     FOUR            # ALWAYS CALL FOR 2-JET CONTROL ABOUT U,V.
                 TS      NUMBERT         # FALL THROUGH TO JET SELECTION, ETC.
 
@@ -516,20 +472,7 @@ TJLAW           CA      TJLAWADR
 #               TIMES LESS THAN 14 MSEC ARE TAKEN TO CALL FOR A SINGLE-JET
 #               MINIMUM IMPULSE, WITH THE JET CHOSEN SEMI-RANDOMLY.
 
-AFTERTJ         CA      FLAGWRD5        # IF SNUFFBIT SET DURING A DPS BURN GO TO
-                MASK    SNUFFBIT        #  XTRANS; THAT IS, INHIBIT CONTROL.
-                EXTEND
-                BZF     DOROTAT
-                CS      FLGWRD10
-                MASK    APSFLBIT
-                EXTEND
-                BZF     DOROTAT
-                CA      DAPBOOLS
-                MASK    DRIFTBIT
-                EXTEND
-                BZF     XTRANS
-
-DOROTAT         CAF     TWO
+AFTERTJ         CAF     TWO
                 TS      L
                 INDEX   AXISCTR
                 CCS     TJU
@@ -652,7 +595,6 @@ INDEXES         DEC     4
 -150MS          DEC     -240
 BIT8,9          OCT     00600
 SCLNORM         OCT     266
-TJLAWADR        GENADR  TJLAW   +3      # RETURN ADDRESS FOR RCS ATTITUDE CONTROL
 
 # THE JET LIST:
 # THIS IS A WAITLIST FOR T6RUPTS.
