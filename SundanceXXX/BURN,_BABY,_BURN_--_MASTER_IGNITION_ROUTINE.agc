@@ -707,7 +707,7 @@ VB97DEX         =               34DEC
                 TCF             COMFAIL1
                 TCF             COMFAIL2
                 CS              ZERO
-V97ORV99        TS              NVWORD1
+#V97ORV99        TS              NVWORD1
                 CAF             VB99CON
                 TC              LINUS
                 TCF             ENDOFJOB
@@ -740,7 +740,7 @@ V99RECYC        EQUALS
                 TCF             *PROCEED
                 TCF             *ENTER
                 CS              BIT9
-                TCF             V97ORV99
+                #TCF             V97ORV99
 
                 NOOP
 BLANKDEX        =               TWO                     # NEGATIVE OF THIS IS PROPER FOR DISPDEX

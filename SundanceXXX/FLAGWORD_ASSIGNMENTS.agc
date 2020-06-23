@@ -1075,8 +1075,6 @@ AVEMDBIT        =               BIT1                    # DONT WRITE OVER RN, PI
 
 #
 
-RASFLAG         EQUALS          FLGWRD10                # WAS ONLY AN INSTALL- ERASTALL FLAG
-
 FLGWRD10        =               STATE           +10D    # (150-164)
 
                                                         # (SET)               (RESET)
@@ -1233,9 +1231,6 @@ HFLSHBIT        =               BIT1                    # LAMP SHOULD BE      LA
                                                         # FLASHING            FLASHING
 #
 
-RADMODES        EQUALS          FLGWRD12                # RADAR FLAG WORD
-#
-
 FLGWRD12        =               STATE           +12D    # (180-194)       WAS RADMODES
 
                                                         # (SET)               (RESET)
@@ -1323,9 +1318,6 @@ TURNONFL        =               194D                    # RR TURN-ON SEQUENCE NO
 TURNONBT        =               BIT1                    # IN PROGRESS. (ZERO  SEQUENCE IN PROGRESS
                                                         # CDU'S, FIX ANTENNA
                                                         # MODE)
-#
-
-DAPBOOLS        EQUALS          FLGWRD13                # DIGITAL AUTOPILOT FLAGWORD
 #
 
 FLGWRD13        =               STATE           +13D    # (195-209)       WAS DAPBOOLS

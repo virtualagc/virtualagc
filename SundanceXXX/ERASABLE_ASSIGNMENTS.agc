@@ -361,28 +361,20 @@ BANKSET         ERASE                                   # USUALLY CONTAINS BBANK
 PUSHLOC         ERASE                                   # WORD OF PACKED INTERPRETIVE PARAMETERS.
 PRIORITY        ERASE                                   # PRIORITY OF PRESENT JOB AND WORK AREA.
 
-                ERASE           +83D                    # EIGHT SETS OF  12 REGISTERS EACH
+                ERASE           +71D                    # SEVEN SETS OF 12 REGISTERS EACH.
 
-# INCORP STORAGE: R22 (N29)    (SHARES WITH FOLLOWING SECTION)         (4D)
+# P27  (UPDATE PROGRAM ) STORAGE.                                       (26D)
 
-R22DISP         EQUALS          TIME2SAV                # I(4) N49 DISPLAY OF DELTA R AND DELTA V
+UPVERBSV        ERASE                                   # B(1) UPDATE VERB ATTEMPTED.
+UPTEMP          ERASE           +24D                    # B(1)TMP SCRATCH
+INTWAK1Q        EQUALS          UPTEMP                  #     (BORROWS UPTEMP REGISTERS)
+# RETAIN THE ORDER OF COMPNUMB THRU UPBUFF +19D FOR DOWNLINK PURPOSES.
+COMPNUMB        EQUALS          UPTEMP          +1      # B(1)TMP NUMBER OF ITEMS TO BE UPLINKED
+UPOLDMOD        EQUALS          COMPNUMB        +1      # B(1)TMP INTERRUPTED PROGRAM MM
+UPVERB          EQUALS          UPOLDMOD        +1      # B(1)TMP VERB NUMBER
+UPCOUNT         EQUALS          UPVERB          +1      # B(1)TMP UPBUFF INDEX
+UPBUFF          EQUALS          UPCOUNT         +1      # B(20D)
 #
-
-# STANDBY VERB ERASABLES.  REDOCTR BEFORE THETADS.                      (14D)
-
-TIME2SAV        ERASE           +1
-SCALSAVE        ERASE           +1
-REDOCTR         ERASE                                   # CONTAINS NUMBER OF RESTARTS
-THETAD          ERASE           +2
-CPHI            =               THETAD                  # O   DESIRED GIMBAL ANGLES
-CTHETA          =               THETAD          +1      # I   FOR
-CPSI            =               THETAD          +2      # M   MANEUVER.
-DELV            ERASE           +5
-DELVX           =               DELV
-DELVY           =               DELV            +2
-DELVZ           =               DELV            +4
-#
-
 
 #          DOWNLINK STORAGE.                                            (28D)
 
@@ -411,6 +403,7 @@ CADRMARK        ERASE
 TEMPFLSH        ERASE
 FAILREG         ERASE           +2                      # B(3)PRM 3 ALARM CODE REGISTERS
 
+
 #          VAC AREAS. -BE CAREFUL OF PLACEMENT-                         (220D)
 
 VAC1USE         ERASE
@@ -429,6 +422,7 @@ VAC5            ERASE           +42D
 RUPTAGN         ERASE
 KEYTEMP2        =               RUPTAGN                 # TEMP FOR KEYRUPT, UPRUPT
 #
+
 
 #          STARALIGN ERASABLES.                                         (13D)
 
@@ -449,7 +443,6 @@ COSCDUZ         =               COSCDU          +2
 #          PHASE TABLE AND RESTART COUNTERS.                            (12D)
 
 -PHASE1         ERASE
-
 PHASE1          ERASE
 -PHASE2         ERASE
 PHASE2          ERASE
@@ -469,6 +462,9 @@ CDUSPOT         ERASE           +5                      # B(6)
 CDUSPOTY        =               CDUSPOT
 CDUSPOTZ        =               CDUSPOT         +2
 CDUSPOTX        =               CDUSPOT         +4
+
+# INTSTALL-ERASTALL FLAG    (1D)
+RASFLAG         ERASE
 
 #          VERB 37 STORAGE.                                             (2D)
 
@@ -522,6 +518,12 @@ DSPTEMX         EQUALS          DSPTEM2         +1      # B(2) S-S DISPLAY BUFFE
 NORMTEM1        EQUALS          DSPTEM1                 # B(3)DSP NORMAL DISPLAY REGISTERS.
 #
 
+# INCORP STORAGE: R22 (N29)    (SHARES WITH PREVIOUS SECTION)         (4D)
+
+R22DISP         EQUALS          DSPTEM1                 # I(4) N49 DISPLAY OF DELTA R AND DELTA V
+#
+
+
 #          DISPLAY FOR EXTENDED VERBS (V82, R04(V62), V41(N72) )        (2D)
 
 OPTIONX         EQUALS          DSPTEMX                 # (2) EXTENDED VERB OPTION CODE
@@ -543,7 +545,6 @@ PHSPRDT6        ERASE
 
 #          UNSWITCHED FOR DISPLAY INTERFACE ROUTINES.                   (6D)
 
-NVWORD1         ERASE                                   # B(1) PROBABLY FOR DISPLAY DURING SERVICER
 EBANKSAV        ERASE
 MARKEBAN        ERASE
 EBANKTEM        ERASE
@@ -562,8 +563,13 @@ TEMK            ERASE                                   # (1)
 SQ              ERASE                                   # (1)
 #
 
+## FIXME: Is this erasable unreferenced?
+UNUSED1         ERASE
+
 #          UNSWITCHED RADAR ERASABLE                                    (13D)
 
+RADMODES        ERASE
+DAPBOOLS        ERASE
 SAMPLIM         ERASE
 SAMPLSUM        ERASE           +3
 TIMEHOLD        ERASE           +1
@@ -593,6 +599,9 @@ ZV              EQUALS          YV              +6      # I(6)
 
 #          MISCELLANEOUS UNSWITCHED.                                    (20D)
 
+## FIXME: Is this erasable unreferenced?
+UNUSED2         ERASE           +5
+
 P40/RET         ERASE                                   # (WILL BE PUT IN E6 WHEN THERE IS ROOM)
 GENRET          ERASE                                   # B(1)  R61 RETURN CADR.
 OPTION1         ERASE                                   # B(1)   NOUN 06 USES THIS
@@ -601,6 +610,8 @@ OPTION3         ERASE                                   # B(1)  NOUN 06 USES THI
 LONGCADR        ERASE           +1                      # B(2)  LONGCALL REGISTER
 LONGBASE        ERASE           +1
 LONGTIME        ERASE           +1                      # B(2)    LONGCALL REGISTER
+## FIXME: Is this erasable unreferenced?
+UNUSED3         ERASE
 CDUTEMPX        ERASE                                   # B(1)TMP
 CDUTEMPY        ERASE                                   # B(1)TMP
 CDUTEMPZ        ERASE                                   # B(1)TMP
@@ -612,17 +623,20 @@ DISPDEX         ERASE                                   # B(1)
 TEMPR60         ERASE                                   # B(1)
 PRIOTIME        ERASE                                   # B(1)
 
-# P27  (UPDATE PROGRAM ) STORAGE.                                       (26D)
 
-UPVERBSV        ERASE                                   # B(1) UPDATE VERB ATTEMPTED.
-UPTEMP          ERASE           +24D                    # B(1)TMP SCRATCH
-INTWAK1Q        EQUALS          UPTEMP                  #     (BORROWS UPTEMP REGISTERS)
-# RETAIN THE ORDER OF COMPNUMB THRU UPBUFF +19D FOR DOWNLINK PURPOSES.
-COMPNUMB        EQUALS          UPTEMP          +1      # B(1)TMP NUMBER OF ITEMS TO BE UPLINKED
-UPOLDMOD        EQUALS          COMPNUMB        +1      # B(1)TMP INTERRUPTED PROGRAM MM
-UPVERB          EQUALS          UPOLDMOD        +1      # B(1)TMP VERB NUMBER
-UPCOUNT         EQUALS          UPVERB          +1      # B(1)TMP UPBUFF INDEX
-UPBUFF          EQUALS          UPCOUNT         +1      # B(20D)
+# STANDBY VERB ERASABLES.  REDOCTR BEFORE THETADS.                      (14D)
+
+TIME2SAV        ERASE           +1
+SCALSAVE        ERASE           +1
+REDOCTR         ERASE                                   # CONTAINS NUMBER OF RESTARTS
+THETAD          ERASE           +2
+CPHI            =               THETAD                  # O   DESIRED GIMBAL ANGLES
+CTHETA          =               THETAD          +1      # I   FOR
+CPSI            =               THETAD          +2      # M   MANEUVER.
+DELV            ERASE           +5
+DELVX           =               DELV
+DELVY           =               DELV            +2
+DELVZ           =               DELV            +4
 #
 
 #          SPECIAL DEFINITION FOR SYSTEM TEST ERASABLE PGMS.            (2D)
