@@ -61,7 +61,7 @@ DAPIDLER        LXCH    BANKRUPT        # INTERRUPT LEAD INS (CONTINUED)
                 TS      ACCSET          # ACCSET IS POSITIVE.
                 TC      NOVAC           # SET UP JOB TO DO A LITTLE INITIALIZATION
                 EBANK=  AOSQ            #       AND EXECUTE 1/ACCS.
-                2CADR   1/ACCSET        # (WILL BRANCH TO MOREIDLE ON ACCSOKAY)
+1/ACCSAD        2CADR   1/ACCSET        # (WILL BRANCH TO MOREIDLE ON ACCSOKAY)
 
 CHECKUP         TC      CHEKBITS        # CHECK TO SEE IF LM DAP IS TO GO ON AND
                                         #       DO ERROR DISPLAY.
@@ -165,7 +165,8 @@ BGIM23          OCTAL   07400
                 EBANK=  OMEGAP
 PAXADIDL        2CADR   PAXIS
 
-CHKVISAD        CADR    CHKVISFZ
+CHKVISAD        ADRES   CHKVISFZ
+ACCSETAD        ADRES   1/ACCSAD
 
 MS100           =       OCT37766
 COSMG           =       ITEMP1

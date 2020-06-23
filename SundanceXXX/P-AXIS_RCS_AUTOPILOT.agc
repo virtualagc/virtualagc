@@ -709,9 +709,9 @@ PJETSLEC        CA      ONE
                 DXCH    T6FURTHA
                 TC      IBNKCALL
                 CADR    JTLST
-                CS      BIT12
-                MASK    RCSFLAGS
-                TS      RCSFLAGS        # BIT 12 SET TO 0.
+                CA      PSKIPADR
+                TS      PJUMPADR
+
                 TC      ALTSYST
                 TCF     QRAXIS
 
