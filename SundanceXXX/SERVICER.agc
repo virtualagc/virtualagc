@@ -251,10 +251,10 @@ COPYCYCL        TC              COPYCYC
                 CCS             A
                 TCF             NODVMON1                # IDLEFLAG = 1, HENCE SET AUXFLAG TO 0.
 
-                CS              FLAGWRD6
-                MASK            AUXFLBIT
-                CCS             A
-                TCF             NODVMON2                # AUXFLAG = 0, HENCE SET AUXFLAG TO 1.
+                # CS              FLAGWRD6
+                # MASK            AUXFLBIT
+                # CCS             A
+                # TCF             NODVMON2                # AUXFLAG = 0, HENCE SET AUXFLAG TO 1.
 
 
 DVMON           CS              DVTHRUSH
@@ -285,12 +285,12 @@ USEGTS          CS              USEQRJTS
                 TS              DAPBOOLS
                 TCF             SERVOUT
 
-NODVMON1        CS              AUXFLBIT                # SET AUXFLAG TO 0.
+NODVMON1        CS              ZERO
                 MASK            FLAGWRD6
                 TS              FLAGWRD6
                 TCF             USEJETS
 NODVMON2        CS              FLAGWRD6                # SET AUXFLAG TO 1.
-                MASK            AUXFLBIT
+                MASK            ZERO
                 ADS             FLAGWRD6
                 TCF             USEJETS
 

@@ -134,7 +134,7 @@ P52B            CAF             BIT1
                 INDEX           A
                 TC              +1
                 TC              P52T
-                TC              P52H
+                TC              P52J
                 TC              P52T
 P52E            TC              INTPRET
                 GOTO
@@ -148,18 +148,36 @@ P52T            EXTEND
                 TC              GOTOPOOH
                 TC              +2
                 TC              -5
-                DXCH            DSPTEM1
-                EXTEND
-                BZMF            +2                      # IF TIME ZERO OR NEG USE TIME2
-                TCF             +3
+                CCS             DSPTEM1
+                TCF             P52V
+                TCF             +2                      # IF TIME ZERO OR NEG USE TIME2
+                TCF             +1
                 EXTEND
                 DCA             TIME2
-                DXCH            TALIGN
+                DXCH            DSPTEM1
 P52V            CA              OPTION2
                 MASK            BIT2
                 CCS             A
                 TC              P52W
+
+LSDISP          CAF             V06N89*                 # DISPLAY LAT,LONG/2, ALT
+                TC              BANKCALL
+                CADR            GOFLASH
+                TCF             GOTOPOOH                # VB34 TERMINATE
+                TCF             +2                      # VB33 PROCEED
+                TCF             LSDISP                  # VB32 RECYCLE
+
                 TC              INTPRET                 # OPTION 4 - GET LS ORIENTATION
+                SET             SET
+                                ERADFLAG
+                                LUNAFLAG
+                DLOAD           CALL
+                                DSPTEM1
+                                LALOTORV
+                VLOAD           UNIT                    # COMPUTE LANDING SITE ORIENT (XSMD)
+                                ALPHAV
+                STCALL          XSMD
+                                LSORIENT
                 GOTO
                                 P52D
 
@@ -167,7 +185,7 @@ P52V            CA              OPTION2
 
 P52W            TC              INTPRET
                 DLOAD
-                                TALIGN                  # PICK UP ALIGN TIME
+                                DSPTEM1                 # PICK UP ALIGN TIME
                 CALL                                    # COMPUTE NOMINAL IMU
                                 S52.3                   #  ORIENTATION
 P52D            CALL                                    # READ VEHICLE ATTITUDE AND
@@ -177,7 +195,7 @@ P52D            CALL                                    # READ VEHICLE ATTITUDE 
                 TC              BANKCALL                # DISPLAY GIMBAL ANGLES
                 CADR            GOFLASH
                 TC              GOTOPOOH
-                TCF             REGCOARS                # V33-PROCEED, SEE IF GYRO TORQUE COARSE
+                TC              REGCOARS                # V33-PROCEED, SEE IF GYRO TORQUE COARSE
                 TC              INTPRET                 # RECYCLE - VEHICLE HAS BEEN MANUEVERED
                 GOTO
                                 P52D
@@ -191,6 +209,20 @@ P52F            CALL
                                 R51
 P52OUT          EXIT
                 TC              GOTOPOOH
+P52J            CAF             PFRATBIT
+                MASK            FLAGWRD2
+                CCS             A
+                TC              P52H
+
+                TC              ALARM
+                OCT             215
+                CAF             VB05N09
+                TC              BANKCALL
+                CADR            GOFLASH
+                TC              GOTOPOOH
+                TCF             -4
+                TC              P52B
+
 P52H            TC              INTPRET                 # PREFERRED OPTION, GO COMPUTE GIMBALS
                 GOTO
                                 P52D
@@ -1184,189 +1216,6 @@ AZEL            INDEX           FIXLOC                  # JAM AZ AND EL IN 8 AND
 V01N70          VN              0170
 V06N87          VN              687
 
-# LUNAR SURFACE STAR AQUISITION
-
-                BANK            15
-                SETLOC          P50S
-                BANK
-                COUNT*          $$/R59
-
-R59             CS              FLAGWRD3
-                MASK            REFSMBIT                # IF REFSMMAT FLAG CLEAR BYPASS STAR AQUIR
-                CCS             A
-                TCF             R59OUT                  # NO REFSMMAT GO TO AOTMARK
-
-                CAF             V01N70*                 # SELECT STAR CODE FOR ACQUISITION
-                TC              BANKCALL
-                CADR            GOFLASH
-                TC              GOTOPOOH                # V34-TERMINATE
-                TCF             R59A                    # V33-PROCEED
-                TCF             R59                     # V32-RECYCLE
-
-R59A            CS              HIGH9                   # GRAB STARCODE FOR INDEX
-                MASK            AOTCODE
-                EXTEND
-                MP              REVCNT                  # JUST 6
-                XCH             L
-                INDEX           STARIND
-                TS              BESTI
-                INDEX           FIXLOC
-                TS              X1                      # CODE X 6 FOR CATLOG STAR INDEX
-                EXTEND
-                BZF             R59OUT                  # BYPASS AQUISITION IF NOT CATLOG STAR
-                COM
-                AD              DEC227
-                EXTEND
-                BZMF            R59OUT
-
-                TC              INTPRET
-                CALL
-                                CDUTRIG                 # GET CDU JAZZ FOR SMNB
-                VLOAD*          MXV
-                                CATLOG,1                # GRAB STAR VECTOR
-                                REFSMMAT                # TRANSFORM TO SM
-                UNIT            CALL
-                                *SMNB*                  # TRANSFORM TO NB
-                STORE           STAR                    # TEMP STORE STAR VEC(NB)
-                EXIT
-
-                CAF             BIT1                    # INITIALIZE POS TO ONE
-                TS              POSCODE
-                CS              DEG60                   # AS(N) TO -60 DEG
-                TS              QMIN
-
-
-
-STORPOS         TS              A                       # DETECT OVF AZ = -120
-                TCF             +3                      # NO OVF
-                CAF             BIT15                   # OVF SKIP-ADD NEGMAX TO OVF CORRECT QMIN
-                ADS             QMIN
-                CAF             BIT13                   # ELV=45 DEG
-                TS              L
-                CA              QMIN
-                INDEX           FIXLOC
-                DXCH            8D                      # JAM AZ IN 8D, 45 DEG IN 9D FOR OANB
-
-                TC              INTPRET
-                CALL
-                                OANB                    # GO CALC OPTIC AXIS WRT NB
-                VLOAD           DOT
-                                STAR                    # DOT STAR WITH OA
-                                SCAXIS
-                SL1             ARCCOS
-                STORE           24D                     # TEMP STORE ARCCOS(STAR.OPTAXIS)
-
-                DSU             BPL
-                                DEG30                   # SEE IF STAR IN AOT FIELD-OF-VIEW
-                                NXAX                    # NOT IN FIELD - TRY NEXT POSITION
-                DLOAD           DSU                     # SEE IF STAR AT FIELD CENTER
-                                24D
-                                DEG.5
-                BMN             DLOAD                   # CALC SPIRAL AND CURSOR
-                                ZSPCR                   # GO ZERO CURSOR AND SPIRAL
-                                24D                     # GET SPIRAL
-                DMP             SL4
-                                3/4                     # 12 SCALED AT 16
-                STOVL           24D                     # 12(ARCCOS(AO.STAR)) SCALED IN REVS
-
-                                SCAXIS                  # OA
-                VXV             UNIT
-                                XUNIT
-                PUSH            VXV                     #  OA X UNITX   PD 0-5
-                                SCAXIS
-                VCOMP
-                UNIT            PDVL                    # UNIT(OA X(OA X UNITX))  PD 6-11
-                                SCAXIS
-                VXV             UNIT
-                                STAR
-                PUSH            DOT                     # 1/2(OA X STAR)   PD 12-17
-                                0                       # DOT WITH 1/2(OA X UNITX)  FOR YROT
-                SL1             ARCCOS
-                STOVL           26D                     # STORE THET SCALED IN REVS
-
-                DOT                                     # UP 12-17, UP 6-11 FOR C2
-                DSU
-                                26D
-                STORE           26D                     # 360-THET SCALED IN REVS
-
-R59D            SLOAD           SR1
-                                QMIN                    # RESCALE AZ(N) TO REVS
-                DAD             PUSH                    # PUSH YROT + AZ(N) REVS
-                                26D
-                RTB
-                                1STO2S
-                STODL           CURSOR                  # YROT IN 1/2 REVS
-                                24D                     # LOAD SROT IN REVS
-                DAD                                     # 12(SEP) + YROT
-                RTB
-                                1STO2S
-                STORE           SPIRAL                  # SROT IN 1/2 REVS
-                EXIT
-                TCF             79DISP                  # GO DISPLAY CURSOR-SPIRAL-POS CODE
-
-ZSPCR           EXIT
-                CAF             ZERO                    # STAR ALMOST OPTIC AXIS,ZERO CURSOR
-                TS              CURSOR                  # AND SPIRAL ANGLES
-                TS              SPIRAL
-                TCF             79DISP
-
-NXAX            EXIT
-                INCR            POSCODE
-                CS              POSCODE
-                AD              SEVEN
-                EXTEND
-                BZMF            R59ALM                  # THIS STAR NOT AT ANY POSITION
-                CAF             DEG60                   # ADVANCE AZ(N) BY 60 DEG
-                ADS             QMIN                    # IF OVF, QMIN CONTAINS OVF CORRECTED
-                TCF             STORPOS
-R59ALM          TC              ALARM                   # THIS STAR CANT BE LOCATED IN AOT FIELD
-                OCT             404
-                CAF             VB05N09                 # DISPLAY ALARM
-                TC              BANKCALL
-                CADR            GOFLASH
-                TCF             GOTOPOOH                # VB34-TERMINATE
-                TCF             R59OUT                  # VB33-PROCEED, GO WITHOUT AQUIRE
-                TCF             R59                     # VB32-RECYCLE AND TRY ANOTHER STAR
-
-79DISP          CAF             V06N79                  # DISPLAY CURSOR, SPIRAL AND POS CODE
-                TC              BANKCALL
-                CADR            GOFLASH
-                TCF             GOTOPOOH                # V34-TERMINATE
-                TCF             R59E                    # V33-PROCEED TO MARK ROUTINE
-                TCF             R59                     # V32-RECYCLE TO TOP OF R59 AGAIN
-
-R59E            CAF             BIT3                    # GET DETENT CORRESPONDING TO POSITION COD
-                MASK            POSCODE                 # KEYED IN POS CODE
-                EXTEND
-                BZF             +2                      # FORWARD DETENT
-                TCF             +3                      # ITS REAR DETENT, 4 ALREADY IN (A)
-                CAF             SEVEN                   # GET FORWARD DETENT
-                MASK            POSCODE
-                EXTEND
-                MP              BIT7
-                XCH             L
-                TS              QMIN
-                CS              HIGH9
-                MASK            AOTCODE
-                AD              QMIN
-                TS              AOTCODE                 # STORE DETENT IN 7-9
-
-R59OUT          TC              BANKCALL                # GO TO AOTMARK FOR SIGHTING
-                CADR            AOTMARK
-                TC              BANKCALL
-                CADR            AOTSTALL                # SLEEP TILL SIGHTING DONE
-                TC              CURTAINS                # BADEND RETURN FROM AOTMARK
-                TCF             R59RET                  # RETURN TO 1 STAR OR 2STAR
-
-V01N70*         VN              170
-V06N79          VN              679
-DEG30           2DEC            .083333333              # 30 DEGRESS
-DEG.5           2DEC            .00138888               # .5 DEGRESS SCALED IN REVS
-DEG60           OCT             12525                   # 60 DEG CDU SCALING
-CURSOR          EQUALS          DSPTEM1
-SPIRAL          EQUALS          DSPTEM1         +1
-POSCODE         EQUALS          DSPTEM2         +2
-
 # NAME -    PLANET
 # FUNCTION -TO PROVIDE THE REFERENCE VECTOR FOR THE SIGHTED CELESTIAL
 #           BODY. STARS ARE FETCHED FROM THE CATALOG,SUN,EARTH AND
@@ -1467,7 +1316,7 @@ PIPSRINE        =               PIPASR          +3      # EBANK NOT 4 SO DONT LO
 #          *NBSM* ,*SNMB*, CALCGA,FOFLASH
 # DEBRIS-
 #          VAC,SAC,STARAD,XSM,XNB,THETAD,DELV,COSCDU,SINCDU
-GVDETER         CS              BIT13                   # JAM 45 DEG IN DESIRED GIMBAL ANGLES
+GVDETER         CS              BIT3                    # JAM 45 DEG IN DESIRED GIMBAL ANGLES
                 TS              THETAD          +1
                 COM
                 TS              THETAD          +2
@@ -1544,16 +1393,13 @@ GRAVEL          VLOAD*          CALL
                 STORE           DSPTEM1
 
                 EXIT
-                TC              DOWNFLAG                # CLEAR FREEFLAG IN CASE OF RECYCLE
-                ADRES           FREEFLAG
 
                 CA              DISGRVER
                 TC              BANKCALL
                 CADR            GOFLASH
                 TC              GOTOPOOH
                 TCF             PROGRAV                 # VB33-PROCEED
-                TC              UPFLAG                  # VB32-RECYCLE-STORE GRAV AND DO IT AGAIN
-                ADRES           FREEFLAG                # AND SET FREEFLAG TO SHOW RECYCLE
+                TCF             -5                      # VB32-RECYCLE
 
 PROGRAV         TC              PHASCHNG
                 OCT             05024
@@ -1563,11 +1409,7 @@ PROGRAV         TC              PHASCHNG
                                 STARSAV1
                 STORE           GSAV
                 EXIT
-                CAF             FREEFBIT                # IF FREEFLAG SET, RE-COMPUTE GRAVITY.
-                MASK            FLAGWRD0
-                CCS             A
-                TCF             GVDETER                 # SET
-                TCF             ATTCHK                  # EXIT FROM GVDETER
+                TC              P57OPT3
 
 LUNG            STQ             VLOAD
                                 QMIN
@@ -1599,26 +1441,19 @@ LUNG            STQ             VLOAD
                 OCT             13000
                 TC              BANKCALL                #  DONT NEED TO INHINY  THIS USED TO
                 CADR            PIPSRINE                # INITIALIZE PIPAS  DONT USE DATA
-                TC              INTPRET
+
 GREED           EXIT                                    # = MASK 7776 IN BASIC SO DONT CARE
                 CAF             2SECS
-                TC              TWIDDLE                 # SET UP 2 SEC TASK TO READ PIPAS
-                ADRES           GRABGRAV
+                TC              BANKCALL                # SET UP 2 SEC TASK TO READ PIPAS
+                CADR            DELAYJOB
 
-                TC              ENDOFJOB
-
-GRABGRAV        TC              IBNKCALL
-                CADR            PIPSRINE
-                CAF             PRIO13                  # RE-ESTABLISH MAINLINE JOB
-                TC              FINDVAC
-                EBANK=          STARAD
-                2CADR           ADDGRAV
-
-                TC              TASKOVER
-
-ADDGRAV         TC              BANKCALL
-                CADR            1/PIPA
                 INCR            GCTR
+                INHINT
+                TC              BANKCALL
+                CADR            PIPSRINE
+                RELINT
+                TC              BANKCALL
+                CADR            1/PIPA
                 TC              INTPRET
                 VLOAD           VAD
                                 DELV
@@ -1642,7 +1477,7 @@ ADDGRAV         TC              BANKCALL
                 GOTO
                                 QMIN
 T/2SEC          DEC             -22
-DISGRVER        VN              0604
+DISGRVER        VN              0605
 
 # NAME  GYROTRIM
 #
@@ -1690,8 +1525,8 @@ GYROTRIM        STQ             DLOAD
                                 AXISGEN
                 CALL
                                 CALCGTA
-JUSTTRIM        EXIT
-                TC              BANKCALL
+                EXIT
+JUSTTRIM        TC              BANKCALL
                 CADR            IMUFINE
                 TC              BANKCALL
 
@@ -1708,91 +1543,91 @@ JUSTTRIM        EXIT
                                 QMIN
 GYRCDR          ECADR           OGC
 
+V16N20          VN              1620
+V04N05          VN              0405
+V04N23          VN              0423
+V04N20          VN              0420
+
 # PERFORM STAR AQUISITION AND STAR SIGHTINGS
 
-2STARS          CAF             ZERO                    # INITALIZE STARIND
-                TCF             +2                      # ZERO FOR 1ST STAR, ONE FOR 2ND STAR
-1STAR           CAF             BIT1
+2STARS          CAF             BIT1                    # INITALIZE STARIND
+                TCF             +2                      # ONE FOR 1ST STAR, ZERO FOR 2ND STAR
+1STAR           CAF             ZERO
                 TS              STARIND
 
-                TC              PHASCHNG
-                OCT             04024
+                TC              BANKCALL                # GO TO AOTMARK FOR SIGHTING
+                CADR            AOTMARK
+                TC              BANKCALL
+                CADR            AOTSTALL                # SLEEP TILL SIGHTING DONE
+                TC              CURTAINS                # BADEND RETURN FROM AOTMARK
 
-                TCF             R59                     # GO DO STAR AQUIRE AND AOTMARK
-
-R59RET          CA              STARIND                 # BACK FROM SURFACE MARKING
+                CS              HIGH9                   # GRAB STARCODE FOR INDEX
+                MASK            AOTCODE
                 EXTEND
-                BZF             ASTAR                   # 1ST STAR MARKED
+                MP              REVCNT                  # JUST 6
+                INDEX           FIXLOC
+                TS              X1                      # CODE X 6 FOR CATLOG STAR INDEX
+                INDEX           STARIND
+                TS              BESTI
 
-                TC              INTPRET                 # 2ND STAR MARKED
-                VLOAD
+                CCS             STARIND
+                TC              ASTAR
+                TC              INTPRET
+                VLOAD*
+                                CATLOG,1
+                STOVL           VEC2                    # STORE 2ND CATALOG VEC (REF)
                                 STARAD          +6
                 STORE           STARSAV2                # 2ND STAR IN SM
-
                 EXIT
-                TC              PHASCHNG
-                OCT             05024
-                OCT             13000
 
-                TC              INTPRET
-                DLOAD           CALL
-                                TSIGHT                  # TIME OF 2ND MARK
-                                PLANET
-                STCALL          VEC2                    # STORE 2ND CATALOG VEC (REF)
-                                SURFLINE
+                TC              SURFLINE
 
 ASTAR           TC              INTPRET
-                VLOAD
+                VLOAD*
+                                CATLOG,1
+                STOVL           VEC1
                                 STARAD          +6
                 STORE           STARSAV1                # 1ST OBSERVED STAR (SM)
-                DLOAD           CALL
-                                TSIGHT                  # TIME OF 1ST MARK
-                                PLANET
-                STORE           VEC1                    # STORE 1ST CATALOG VEC (REF)
                 EXIT
-                TCF             1STAR                   # GO GET 2ND STAR SIGHTING
+                TC              1STAR                   # GO GET 2ND STAR SIGHTING
 
 # DO FINE OR COARSE ALIGNMENT OF IMU
 
-SURFLINE        SSP             AXT,2
+SURFLINE        CAF             ZERO
+                TS              STARIND
+                TC              INTPRET
+                SSP             AXT,2
                                 S2
                                 6
                                 12D
-WRTDESIR        VLOAD*          MXV
+WRTDESIR        VLOAD*          RTB
                                 VEC1            +12D,2  # PICK UP VEC IN REF, TRANS TO DESIRED SH
-                                XSMD
-                UNIT
-                STORE           STARAD          +12D,2  # VEC IN SM
-                VLOAD*
-                                STARSAV1        +12D,2  # PICK UP VEC IN PRESENT SM
-                STORE           18D,2
-                TIX,2           BON
-                                WRTDESIR
-                                INITALGN                # IF INITIAL PASS (OPTION 0) BYPASS R54
-                                INITBY
-DOALIGN         CALL
-                                R54                     # DO CHKSDATA
-                BOFF
+                                UPDATFRF
+                BON
                                 FREEFLAG
-                                P57POST                 # ASTRO DOES NOT LIKE DATA TEST RESULTS
-INITBY          CALL
-                                AXISGEN                 # GET DESIRED ORIENT WRT PRES.XDC,YDC,ZDC
+                                MFREF
+WRTDSBAK        MXV             UNIT
+                                XSMD
+                STORE           STARAD          +12D,2  # VEC IN SM
+                TIX,2
+                                WRTDESIR
+                AXT,2
+                                12D
+WRTDESR2        VLOAD*          RTB
+                                STARSAV1 +12D,2
+                                UPDATFRF
+                BON
+                                FREEFLAG
+                                CALCANG
+DOALIGN         STORE           18D,2
+                TIX,2           CALL
+                                WRTDESR2
+                                R54                     # DO CHKSDATA
                 CALL
-                                CALCGTA                 # GET GYRO TORQ ANGLES, OGC,IGC,MGC
-                EXIT
-                CAF             INITABIT                # IF INITIAL PASS BYPASS NOUN 93 DISPLAY
-                MASK            FLAGWRD8
-                CCS             A
-                TCF             5DEGTEST
-                CAF             DISPGYRO                # DISPLAY GYRO TORQ ANGLES V 06N93
-                TC              BANKCALL
-                CADR            GOFLASH
-                TC              GOTOPOOH                # V34-TERMINATE
-                TCF             5DEGTEST                # VB33-PROCEED TO COARSE OR FINE
-                TCF             P57POST         +1      # VB32-RECYCLE, MAYBE RE-ALIGN
-
-5DEGTEST        TC              INTPRET                 # IF ANGLES GREATER THAN 5 DEGS, DO COARSE
-                VLOAD           BOV
+                                AXISGEN
+                CALL
+                                CALCGTA
+5DEGTEST        VLOAD           BOV                     # IF ANGLES GREATER THAN 5 DEGS, DO COARSE
                                 OGC
                                 SURFSUP
 SURFSUP         STORE           OGCT
@@ -1802,7 +1637,6 @@ SURFSUP         STORE           OGCT
                 SSP             GOTO
                                 QMIN
                                 SURFDISP
-
                                 JUSTTRIM                # ANGLES LESS THAN 5 DEG, DO GYRO TORQ
 
 SURFDISP        EXIT
@@ -1816,25 +1650,44 @@ SURFDISP        EXIT
                 SET             CALL
                                 REFSMFLG
                                 MATMOVE
+                SETPD           CALL
+                                0D
+                                CDUTRIG
+                AXT,2           CALL
+                                12D
+                                CALCSMSC
+REFMF           VLOAD*          VXM
+                                STARAD,2
+                                REFSMMAT
+                UNIT
+                PUSH            RTB
+                                LOADTIME
+                PUSH            CALL
+                                R-TO-RP
+                SSP
+                                S2
+                                6
+                STORE           STARVSAV,2
+                TIX,2           VLOAD
+                                REFMF
+                                OGCT
+                STORE           OGC
                 EXIT
-                CCS             OPTION2                 # IF OPTION ZERO DO FINISH
-                TCF             B2F8
-                TCF             P57POST         +1
 
-B2F8            CAF             INITABIT                # IF INITIAL FLAG SET, RE-CYCLE.
-                MASK            FLAGWRD8
-                CCS             A
-                TCF             P57JUMP                 # ITS SET
-                TC              INTPRET
-                CALL
-                                REFMF                   # GO GET ATTITUDE VEC IN MF(YNBSAV,XNBSAV)
-P57POST         EXIT
-                CAF             OCT14                   # DISPLAY V50N25 CHK CODE 14
+                CAF             DISPGYRO                # DISPLAY GYRO TORQ ANGLES V 06N93
                 TC              BANKCALL
-                CADR            GOPERF1
-                TCF             GOTOPOOH                # VB34-TERMINATE
-                TCF             P57JUMP                 # VB33-PROCEED TO RE-ALIGN
-                TCF             GOTOPOOH                # VB32-R59 DONE-GO TO PROG 00
+                CADR            GOFLASH
+                TC              GOTOPOOH                # V34-TERMINATE
+                TC              GOTOPOOH                # VB33-PROCEED TO COARSE OR FINE
+                CS              OPTION1                 # VB32-RECYCLE, MAYBE RE-ALIGN
+                MASK            BIT2
+                CCS             A
+                TC              GOTOPOOH                # IF OPTION ZERO DO FINISHH
+                CA              OPTION1
+                MASK            BIT1
+                CCS             A
+                TC              1STAR
+                TC              2STARS
 
 # COARSE AND FINE ALIGN IMU
 COATRIM         AXC,1           AXC,2
@@ -1851,11 +1704,53 @@ COATRIM         AXC,1           AXC,2
                 CALL
                                 COARSE
                 CALL
-                                NCOARSE
-                CALL
                                 GYROTRIM
                 GOTO
                                 SURFDISP
+
+UPDATFRF        CS              FREEFBIT
+                MASK            FLAGWRD0
+                TS              FLAGWRD0
+                
+                CAF             REFSMBIT
+                MASK            FLAGWRD3
+                CCS             A
+                CAF             BIT3
+                AD              OPTION1
+                INDEX           A
+                CAF             BIT8
+                INDEX           STARIND
+                MASK            FREEFTAB
+                CCS             A
+                TC              +4
+                CAF             FREEFBIT
+                AD              FLAGWRD0
+                TS              FLAGWRD0
+
+                INCR            STARIND
+                TCF             DANZIG
+
+FREEFTAB        OCT             00052
+                OCT             00077
+                OCT             00042
+                OCT             00063
+
+MFREF           SETPD           PUSH
+                                0
+                RTB             PUSH
+                                LOADTIME
+                CALL
+                                RP-TO-R
+                GOTO
+                                WRTDSBAK
+
+CALCANG         CALL
+                                CDUTRIG
+                CALL
+                                *NBSM*
+                GOTO
+                                DOALIGN
+
 DISPGYRO        VN              0693
 
 # LUNAR SURFACE IMU ALIGNMENT PROGRAM
@@ -1864,241 +1759,139 @@ P57             TC              BANKCALL                # IS ISS ON - IF NOT, IM
                 CADR            IMUCHK                  # ALARM CODE 210 AND EXIT VIA GOTOPOOH.
 
                 TC              INTPRET
+                DLOAD           BOFF
+                                ZEROVEC                 # LOAD ZERO FOR DISPLAY IF ASCNTFLG IS
+                                ASCNTFLG                # NOT SET
+                                P57A
                 DLOAD
                                 TIG                     # LOAD ASCENT TIME FOR DISPLAY
 P57A            STORE           DSPTEM1
                 EXIT
-P57AA           CAF             V06N34*                 # DISPLAY TALIGN, TALIGN : DSPTEM1
+P57AA           CAF             V06N34                  # DISPLAY TALIGN, TALIGN : DSPTEM1
                 TC              BANKCALL
                 CADR            GOFLASHR
-                TCF             GOTOPOOH                # V34-TERMINATE
-                TCF             +5
-                TCF             P57AA                   # VB32-RECYCLE
-
-                TC              PHASCHNG
-                OCT             00014
-                TC              ENDOFJOB
+                TC              P57AA                   # V34-TERMINATE
+                TC              +2                      # V33-PROCEED
+                TC              P57AA                   # VB32-RECYCLE
 
                 TC              INTPRET
-                DLOAD           BMN
+                DLOAD           BHIZ
                                 DSPTEM1
-                                PACKOPTN        -1      # NEG TIME-PREF ORIENT IN XSMD MATRIX
-                RTB             PDDL
-                                LOADTIME                # PUSH CURRENT TIME AND PICK UP KEY IN
-                                DSPTEM1
-                BZE             PDDL
-                                P57C                    # IF KEY IN TIME ZERO-TALIGN=CURRENT TIME
-                DSU             BPL                     # NOT ZERO SO EXCHANGE PD WITH DSPTEM1
-                                DSPTEM1
-                                P57C
-                DLOAD           STADR                   # IF KEYIN TIME GREATER THAN CURRENT TIME
-                STORE           TIG                     # STORE IT IN TIG
-                STCALL          TALIGN
+                                P57B
+                GOTO
                                 P57D
-P57C            DLOAD           STADR
-                STORE           TALIGN
+P57B            RTB
+                                LOADTIME                # LOAD CURRENT TIME
+                STORE           DSPTEM1
 P57D            STCALL          TDEC1
                                 LEMPREC                 # COMPUTE DESIRED IMU ORIENTATION STORE
                 VLOAD           UNIT                    # IN  X,Y,ZSMD
                                 RATT
                 STCALL          XSMD
                                 LSORIENT
-                EXIT
-PACKOPTN        CAF             ZERO                    # PACK FLAG BITS FOR OPTION DISPLAY
-                TS              OPTION1         +1      # JAM ZERO IN ALIGNMENT OPTION
-                TS              OPTION1         +2      # INITIALIZE FLAG BIT CONFIGURATION
-                CAF             REFSMBIT
+PACKOPTN        AXT,1           BOFF                    # PACK FLAG BITS FOR OPTION DISPLAY
+                                0
+                                REFSMFLG                # REFSMFLG
+                                +3                      # CLEAR-JUST ZERO
+                INCR,1                                  # SET
+                                100
+                BOFF            INCR,1
+                                ATTFLAG                 # ATTFLG
+                                +2                      # CLEAR-JUST ZERO
+                                10                      # SET
+                BOFF            INCR,1
+                                ASCNTFLG                # ASCNTFLG
+                                +2                      # CLEAR-JUST ZERO
+                                1                       # SET
+                SXA,1           EXIT
+                                OPTION1         +1
 
-                MASK            FLAGWRD3                # REFSMFLG
-                CCS             A
-                CAF             BIT7                    # SET
-                ADS             OPTION1         +2      # CLEAR-JUST ZERO
-                CAF             ATTFLBIT
-                MASK            FLAGWRD6                # ATTFLG
-                CCS             A
-                CAF             BIT4                    # SET
-                ADS             OPTION1         +2      # CLEAR-ZERO IN A
-                CAF             BIT4
-                TS              OPTION1                 # JAM 00010 IN OPTION1 FOR CHECK LIST
+                CAF             ZERO
+                TS              OPTION1                 # JAM 00000 IN OPTION1 FOR CHECK LIST
 
-DSPOPTN         CAF             VB05N06                 # DISPLAY OPTION CODE AND FLAG BITS
+DSPOPTN         CAF             VB04N06                 # DISPLAY OPTION CODE AND FLAG BITS
                 TC              BANKCALL
                 CADR            GOFLASH
-                TCF             GOTOPOOH                # VB34-TERMINATE
-                TCF             +2                      # V33-PROCEED
-                TCF             DSPOPTN                 # V32-RECYCLE
+                TC              DSPOPTN                 # VB34-TERMINATE
+                TC              +2                      # V33-PROCEED
+                TC              DSPOPTN                 # V32-RECYCLE
 
                 TC              PHASCHNG
                 OCT             05024
                 OCT             13000
-                CAF             REFSMBIT
-                MASK            FLAGWRD3
+                CA              OPTION1                 # SEE IF OPTION 2 OR 3
+                MASK            BIT2
                 CCS             A
-                TCF             GETLMATT                # SET, GO COMPUTE LM ATTITUDE
-                CAF             ATTFLBIT                # CLEAR-CHECK ATTFLAG FOR STORED ATTITUDE.
-                MASK            FLAGWRD6
-                CCS             A
-                TCF             BYLMATT                 # ALLFLG SET, CHK OPTION FOR GRAVITY COMP
-                CAF             BIT2                    # SEE IF OPTION 2 OR 3
-                MASK            OPTION2
-                CCS             A
-                TCF             BYLMATT                 # OPTION 2 OR 3 BUT DONT HAVE ATTITUDE
-                TC              ALARM                   # OPTION INCONSISTANT WITH FLAGS-ALARM 701
-                OCT             701
-                CAF             VB05N09                 # DISPLAY ALARM FOR ACTION
+                TC              BYLMATT
+
+                TC              INTPRET
+                BON             BON
+                                REFSMFLG
+                                GETLMATT                # SET, GO COMPUTE LM ATTITUDE
+                                ATTFLAG                 # CLEAR-CHECK ATTFLAG FOR STORED ATTITUDE.
+                                P57OPT0                 # ALLFLG SET
+                EXIT
+BADOPTN         CAF             BADOPT
                 TC              BANKCALL
-                CADR            GOFLASH
-                TCF             GOTOPOOH                # VB34-TERMINATE
-                TCF             DSPOPTN                 # V33-PROCEED   ********TEMPORARY
-                TCF             DSPOPTN                 # VB32-RECYCLE TO OPTION DISPLAY V 05N06
+                CADR            PRIOLARM
+                TC              BADOPTN
+                TC              BADOPTN
+                TC              DSPOPTN
+                TC              ENDOFJOB
 
-# TRANSFORM VEC1,2 FROM MOON FIXED TO REF AND JAM BACK IN VEC1,2
+# BRANCH TO ALIGNMENT OPTION
 
-MFREF           STQ             SETPD
-                                QMAJ
-                                0
-                RTB
-                                LOADTIME
-                STOVL           TSIGHT
-                                VEC1
-                PDDL            PUSH
-                                TSIGHT
-                CALL
-                                RP-TO-R
-                STOVL           VEC1
-                                VEC2
-                SETPD           PDDL
-                                0
-                                TSIGHT
-                PUSH            CALL
-                                RP-TO-R
-                STCALL          VEC2
-                                QMAJ
-
-# COMPUTE LM ATTITUDE IN MOON FIXED COORDINATES USING REFSMMAT AND
-# STORE IN YNBSAV AND ZNBSAV
-
-REFMF           STQ             CALL
-                                QMAJ
+GETLMATT        CALL
                                 CDUTRIG                 # GET SIN AND COS OF CDUS
-                RTB             SETPD
-                                LOADTIME
-                                0
-                STCALL          TSIGHT
+                CALL
                                 CALCSMSC                # GET YNB IN SM
                 VLOAD           VXM
                                 YNB
                                 REFSMMAT                #  YNB TO REF
-                UNIT            PDDL
-                                TSIGHT
-                PUSH            CALL
-                                R-TO-RP
-                STOVL           YNBSAV                  # YNB TO MF
+                UNIT
+                STOVL           YNBSAV
                                 ZNB
                 VXM             UNIT
                                 REFSMMAT                # ZNB TO REF
-                PDDL            PUSH
-                                TSIGHT
-                CALL
-                                R-TO-RP                 # ZNB TO MF
                 STORE           ZNBSAV
-                SETGO
-                                ATTFLAG
-                                QMAJ
 
-# BRANCH TO ALIGNMENT OPTION
-
-GETLMATT        TC              INTPRET
-                CALL
-                                REFMF                   # GO TRANSFORM TO MF IN YNBSAV,ZNBSAV
-                EXIT
-
-BYLMATT         TC              UPFLAG                  # SET INITIAL ALIGN FLAG
-                ADRES           INITALGN
-                CAF             BIT1
-                MASK            OPTION2                 # SEE IF OPTION 1 OR 3
-                CCS             A
-                TCF             GVDETER                 # OPTION 1 OR 2, GET GRAVITY
-
-ATTCHK          TC              PHASCHNG
-                OCT             04024
-
-                CAF             ATTFLBIT                # NOT 1 OR 3, CHECK ATTFLAG
-                MASK            FLAGWRD6
-                CCS             A
-                TCF             P57OPT0                 # GET ALIGNMENT VECS FOR OPTION 0
-P57JUMP         TC              PHASCHNG
-                OCT             04024
-
-                TC              DOWNFLAG                # ATTFLG CLEAR-RESET INTALIGN FLAG
-                ADRES           INITALGN
-                CAF             THREE
-                MASK            OPTION2                 # BRANCH ON OPTION CODE
-                INDEX           A
-                TCF             +1
-                TCF             P57OPT0                 # OPTION IS 0
-                TCF             P57OPT1                 # OPTION IS 1
-                TCF             P57OPT2                 # OPTION IS 2
-                TCF             P57OPT3                 # OPTION IS 3
-
-# OPTION 0, GET TWO ATTITUDE VECS
-
-P57OPT0         TC              INTPRET
-                VLOAD
-                                YNBSAV                  # Y AND Z ATTITUDE WILL BE PUT IN REF
-                STOVL           VEC1
-                                ZNBSAV
-                STCALL          VEC2
-                                CDUTRIG
-                CALL
-                                CALCSMSC                # COMPUTE SC AXIS WRT PRESENT SM
-                VLOAD
-                                YNB
-SAMETYP         STOVL           STARSAV1                # Y SC AXIS WRT PRESENT SM
-                                ZNB
-                STCALL          STARSAV2                # Z SC AXIS WRT PRESENT SM
-                                MFREF                   # TRANSFORM VEC1,2 FROM MF TO REF
-                GOTO
-                                SURFLINE
-
-# OPTION 1, GET LANDING SITE AND Z-ATTITUDE VEC
-
-P57OPT1         TC              INTPRET
-                VLOAD           UNIT
-                                RLS                     # LANDING SITE VEC
+P57OPT0         VLOAD
+                                YNBSAV                  # Y ATTITUDE VEC
                 STOVL           VEC1
                                 ZNBSAV                  # Z ATTITUDE VEC
-                STCALL          VEC2
-                                CDUTRIG
-                CALL
-                                CALCSMSC                # GET ZNB AXIS WRT PRES SM FOR STARSAV2
-                VLOAD           CALL
-                                GSAV                    # TRANS GSAV FROM NB TO SM FOR STARSAV1
-                                CDU*NBSM
-                GOTO
-                                SAMETYP                 # NOW DO SAME AS OPTION 0
+                STOVL           VEC2
+                                YUNIT
+                STOVL           STARSAV1
+                                ZUNIT
+                STORE           STARSAV2
+                EXIT
+                CS              OPTION1
+                MASK            BIT1                    # SEE IF OPTION 1 OR 3
+                CCS             A
+                TC              SURFLINE
 
-# OPTION 2, GET TWO STAR SIGHTINGS
-
-P57OPT2         TCF             2STARS                  # DO SIGHTING ON 2 STARS
+BYLMATT         CS              OPTION1                 # SEE IF OPTION 1 OR 3
+                MASK            BIT1
+                CCS             A
+                TC              2STARS
+                TC              GVDETER
 
 # OPTION 3, GET LANDING SITE VEC AND ONE STAR SIGHTING
 
 P57OPT3         TC              INTPRET
-                VLOAD           UNIT
+                VLOAD           VCOMP
                                 RLS                     # LANDING SITE VEC
+                UNIT
                 STORE           VEC1
-                STOVL           VEC2                    # DUMMY VEC2 FOR 2ND CATALOG STAR
-                                GSAV                    # GRAVITY VEC NB
-                CALL
-                                CDU*NBSM                # TRANS GSAV FROM NB TO SM FOR STARSAV1
-                STCALL          STARSAV1
-                                MFREF                   # STARSAV2 IS STORED AS 2ND OBSERVED STAR
                 EXIT
-                TCF             1STAR                   # 1STAR GET VEC2,STARSAV2,GOES TO SURFLINE
+                CA              OPTION1
+                MASK            BIT2
+                TC              1STAR
+                TC              SURFLINE
 
 BADOPT          OCT             00701                   # **** TEMP ****
-VB05N06         VN              506
+VB04N06         VN              406
+V06N34          VN              634
 
 # CHECK IMODES30 TO VARIFY IMU IS ON
 
@@ -2116,13 +1909,16 @@ IMUCHK          CS              IMODES30
 
                 TC              SWRETURN
 
-LSORIENT        STQ             VLOAD
+LSORIENT        STQ             DLOAD
                                 QMAJ
-                                RRECTCSM
-                VXV             VXV
-                                VRECTCSM
+                                DSPTEM1
+                STCALL          TDEC1
+                                CSMPREC
+                VLOAD           VXV
+                                0D
+                                6D
+                VXV             UNIT
                                 XSMD
-                UNIT
                 STORE           ZSMD
                 VXV             UNIT
                                 XSMD

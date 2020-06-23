@@ -733,9 +733,9 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           RSTACK                  # 78 RR RANGE                         DP1
                 ECADR           RSTACK          +2      # 78 RR RANGE RATE                    DP1
                 OCT             00000                   # 78 SPARE COMPONENT
-                ECADR           CURSOR                  # 79 CDU DEG                          CDU
-                ECADR           SPIRAL                  # 79 CDU DEG                          CDU
-                ECADR           POSCODE                 # 79 WHOLE                            ARTH
+                ECADR           ATY                     # 79 CDU DEG                          CDU
+                ECADR           ATY                     # 79 CDU DEG                          CDU
+                ECADR           ATY                     # 79 WHOLE                            ARTH
                 ECADR           DATAGOOD                # 80 WHOLE                            ARTH
                 ECADR           OMEGAD                  # 80 DPDEG(360)                       DP4
                 OCT             0                       # 80 SPARE COMPONENT

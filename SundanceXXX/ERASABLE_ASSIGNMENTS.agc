@@ -1128,6 +1128,7 @@ DELVOV          ERASE           +5D                     # (6)
 GSAV            ERASE           +17D                    # I(6)
 YNBSAV          EQUALS          GSAV            +6      # I(6)
 ZNBSAV          EQUALS          YNBSAV          +6      # I(6)
+STARVSAV        EQUALS          ZNBSAV          +6      # I(6)
 #
 
 

@@ -39,7 +39,7 @@
 # AUTOMODE        193             BIT 2  FLAG 12       AUTOMBIT
 # AUTR1FLG        209             BIT 1  FLAG 13       AUTRATE1
 # AUTR2FLG        208             BIT 2  FLAG 13       AUTRATE2
-# AUXFLAG         103             BIT 2  FLAG 6        AUXFLBIT
+# ASCNTFLG        103             BIT 2  FLAG 6        ASCNTBIT
 # AVEGFLAG        115             BIT 5  FLAG 7        AVEGFBIT
 # AVEMIDSW        149             BIT 1  FLAG 9        AVEMDBIT
 # AVFLAG          040             BIT 5  FLAG 2        AVFLBIT
@@ -816,12 +816,8 @@ NTARGBIT        =               BIT3                    # VELOCITY AT TPI     VE
 
 # BIT 2 FLAG 6
 
-AUXFLAG         =               103D                    # PROVIDING IDLEFLAG  SERVICER WILL SKIP
-AUXFLBIT        =               BIT2                    # IS NOT SET, SERV-   DVMON ON ITS NEXT
-                                                        # ICER WILL EXERCISE  PASS EVEN IF THE
-                                                        # DVMON ON ITS NEXT   IDLEFLAG IS NOT SET.
-                                                        # PASS.               IT WILL THEN SET
-                                                        # AUXFLAG.
+ASCNTFLG        =               103D
+ASCNTBIT        =               BIT2
 
 # BIT 1 FLAG 6  (L)
 ATTFLAG         =               104D                    # LEM ATTITUDE EXISTS NO LEM ATTITUDE
