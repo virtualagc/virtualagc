@@ -955,6 +955,9 @@ T-OTHER         =               TETCSM                  #             TIME (OTHE
 
 REFSMMAT        ERASE           +17D                    # I(18D)PRM
 
+#          UNIT R.
+UNITR           ERASE           +7D
+
 
 #          ACTIVE VEHICLE CENTANG.  MUST BE DISPLAYED ANYTIME (ALMOST.)  (2D)
 

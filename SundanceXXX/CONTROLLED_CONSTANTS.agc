@@ -186,14 +186,7 @@ ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO
                 COUNT*          $$/P07
 
 OMEG/MS         2DEC            .24339048
-                SETLOC          R30LOC
-                BANK
-                COUNT*          $$/R30
 
-# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST BE PRESERVED *********
-
-1/RTMUM         2DEC*           .45162595       E-4 B14*
-1/RTMUE         2DEC*           .50087529       E-5 B17*
 # ************************************************************************
 
                 SETLOC          P40S1

@@ -83,9 +83,9 @@ V82CALL         TC      INTPRET
 
 V82GOFF         EXIT                    # ALLOW ASTRONAUT TO SELECT VEHICLE
                 CAF     TWO             # DESIRED FOR ORBITAL PARAMETERS
-                TS      OPTIONX         # CALCULATION AND DISPLAY.
+                TS      OPTION1         # CALCULATION AND DISPLAY.
                 CAF     ONE
-                TS      OPTIONX +1
+                TS      OPTION1 +1
                 CAF     OPTIONVN        # V 04 N 06
                 TC      BANKCALL
                 CADR    GOXDSPF
@@ -93,6 +93,7 @@ V82GOFF         EXIT                    # ALLOW ASTRONAUT TO SELECT VEHICLE
                 TC      +2              # PROCEED
                 TC      -5              # DATA IN.  OPTION1+1 = 1 FOR THIS VEHICLE.
                                         #               UNEQ 1 FOR OTHER VEHICLE.
+                INHINT
                 CAF     BIT4            # 80 MS
                 TC      WAITLIST
                 EBANK=  TFF
@@ -104,7 +105,8 @@ V82GOFLP        CAF     TFFBANK         # MAJOR RECYCLE LOOP ENTRY
                 CAF     ZERO
                 TS      V82FLAGS        # ZERO FLAGS FOR TICKTEST. INHIBITS
                                         # DECREMENTING OF TFF AND -TPER.
-                CAF     PRIO7
+                INHINT
+                CAF     PRIO10
                 TC      FINDVAC         # V82GOFF1 WILL EXECUTE STATE VECTOR
                 EBANK=  TFF             # UPDATE AND ORBIT CALCULATIONS FOR
                 2CADR   V82GOFF1        # SELECTED VEHICLE ABOUT PROPER BODY.
@@ -119,14 +121,15 @@ V82STALL        CAF     THREE           # STALL IN THIS LOOP AND WITHOLD V 16 N 
                 CADR    DELAYJOB
                 TC      V82STALL
 
-FLAGGON         CAF     V16N44          # MONITOR HAPO,HPER,TFF.
+FLAGGON         TC      UNK7766
+                CAF     V16N44          # MONITOR HAPO,HPER,TFF.
                 TC      BANKCALL
                 CADR    GOXDSPF
                 TC      B5OFF           # TERM  THIS TELLS TICKTEST TO KILL ITSELF
                 TC      B5OFF           # PROCEED   DITTO
                 TC      V82GOFLP        # RECYCLE   RECOMPUTE STATE VECT + DISPLAY
 
-OPTIONVN        VN      412
+OPTIONVN        VN      406
 V16N44          VN      1644
 TFFBANK         ECADR   TFF
 
@@ -136,7 +139,7 @@ V82GOFF1        TC      INTPRET
                 STORE   TDEC1           # TIME FOR STATE VECTOR UPDATE.
                 STORE   TSTART82        # TIME FOR INTERNAL USE.
                 EXIT
-                CS      OPTIONX +1      # 1 FOR THIS VEHICLE, NOT 1 FOR OTHER.
+                CS      OPTION1 +1      # 1 FOR THIS VEHICLE, NOT 1 FOR OTHER.
                 AD      ONE
                 EXTEND
                 BZF     THISSHIP
@@ -145,11 +148,13 @@ OTHSHIP         TC      INTPRET
                         OTHPREC
 BOTHSHIP        VLOAD                   # MOVE RESULTS INTO TFFCONIC STORAGE AREAS
                         RATT            # TO BE CALLED BY SR30.1.
-                STOVL   RONE            # RATT AT (-29)M FOR EARTH OR MOON
+                STORE   RONE            # RATT AT (-29)M FOR EARTH OR MOON
+                UNIT
+                STOVL   UNITR
                         VATT
                 STORE   VONE            # VATT AT (-7)M/CS FOR EARTH OR MOON
                 DLOAD*
-                        1/RTMUE,2       # X2 IS 0 FOR EARTH CENTERED STATE VEC
+                        RTMUE,2         # X2 IS 0 FOR EARTH CENTERED STATE VEC
                 STORE   TFF/RTMU        # X2 IS 2 FOR MOON
                 DLOAD*                  # AS LEFT BY THISPREC OR OTHPREC.
                         MINPERE,2
@@ -166,24 +171,26 @@ THISSHIP        TC      INTPRET
                         BOTHSHIP
 
 # THE FOLLOWING CONSTANTS ARE PAIRWISE INDEXED.  DO NOT SEPARATE PAIRS.
+RTMUM           2DEC*   2.21422176 E4 B-18*
+RTMUE           2DEC*   1.996504951 E5 B-18*
 
-MINPERM         2DEC    10668 B-27      # 35 KFT MIN PERIGEE HEIGHT FOR MOON(-27)M
+MINPERM         2DEC    10668 B-29      # 35 KFT MIN PERIGEE HEIGHT FOR MOON(-29)M
 
 MINPERE         2DEC    91440 B-29      # 300 KFT (-29)M FOR EARTH
 
-EARTHPAD        DLOAD   CLRGO           # PAD 37-B RADIUS.  SCALED AT (-29)M.
+EARTHPAD        DLOAD   GOTO            # PAD 37-B RADIUS.  SCALED AT (-29)M.
                         RPAD
-                        V82EMFLG        # INDICATE EARTH SCALING FOR SR30.1
                         BOTHPAD
 
 MOONPAD         VLOAD   ABVAL           # COMPUTE MOON PAD RADIUS FROM RLS VECTOR.
                         RLS             # SCALED AT (-27)M.
-                SET
-                        V82EMFLG        # INDICATE MOON  SCALING FOR SR30.1
-BOTHPAD         STCALL  RPADTEM
+                SR2R
+BOTHPAD         STORE   RPADTEM
+                CALL
                         SR30.1          # CALCULATE ORBITAL PARAMETERS
-                RTB     DSU
+                RTB
                         LOADTIME
+                DSU
                         TSTART82        # PRESENT TIME - TIME V82GOFF1 BEGAN
                 STORE   TSTART82        #                 SAVE IT
                 DLOAD   BZE             # SR30.1 SETS -TPER=0 IF HPER L/
@@ -241,17 +248,17 @@ TPERTICK        CAF     1SEC
                 TC      TASKOVER
 
 V82GON          EXIT                    # AVERAGE G ON.  USE CURRENT STATE VECTOR
-                                        # FOR ORBITAL PARAMETER CALCULATIONS.
+                INHINT                  # FOR ORBITAL PARAMETER CALCULATIONS.
                 CAF     PRIO7           # LESS THAN LAMBERT
                 TC      FINDVAC         # V82GON1 WILL PERFORM ORBIT CALCULATIONS
                 EBANK=  TFF             # ABOUT PROPER BODY APPROX ONCE PER SEC.
                 2CADR   V82GON1
 
                 RELINT
-                CCS     NEWJOB          # WITHOLD V16 N44 UNTIL FIRST ORBIT CALC
-                TC      CHANG1          # IS DONE.  NOTE:  V82GON1 (PRIO7, FINDVAC
-                                        # JOB) IS COMPLETED BEFORE V82GON (PRIO7,
-                                        # NOVAC JOB).
+                CAF     1SEC            # WITHOLD V16 N44 UNTIL FIRST ORBIT CALC
+                TC      BANKCALL        # IS DONE.  NOTE:  V82GON1 (PRIO7, FINDVAC
+                CADR    DELAYJOB        # JOB) IS COMPLETED BEFORE V82GON (PRIO7,
+                TC      UNK7766         # NOVAC JOB).
 V82REDSP        CAF     V16N44          # MONITOR HAPO, HPER, TFF
                 TC      BANKCALL
                 CADR    GOXDSPF
@@ -272,24 +279,33 @@ NEXTLINE        STOVL   RONE            # RN AT (-29)M FOR EARTH OR MOON
                         MOONGON         # CALCULATIONS ARE TO BE PERFORMED.
                         EARTHGON        # IF SET - MOON, IF RESET - EARTH.
 
-MOONGON         SET     DLOAD
-                        V82EMFLG        # INDICATE MOON SCALING FOR SR30.1
-                        1/RTMUM         # LUNAR PARAMETERS LOADED HERE FOR SR30.1
+MOONGON         DLOAD
+                        RTMUM           # LUNAR PARAMETERS LOADED HERE FOR SR30.1
                 STODL   TFF/RTMU
                         MINPERM
-                STOVL   HPERMIN
+                STORE   HPERMIN
+                VLOAD   ABVAL
                         RLS             # SCALED AT (-27)M.
-                ABVAL   GOTO
+                SR2R
+                GOTO
                         V82GON2
-EARTHGON        CLEAR   DLOAD
-                        V82EMFLG        # INDICATE EARTH SCALING FOR SR30.1
-                        1/RTMUE         # EARTH PARAMETERS LOADED HERE FOR SR30.1
+EARTHGON        DLOAD
+                        RTMUE           # EARTH PARAMETERS LOADED HERE FOR SR30.1
                 STODL   TFF/RTMU
                         MINPERE
                 STODL   HPERMIN
                         RPAD
-V82GON2         STCALL  RPADTEM         # COMMON CODE FOR EARTH & MOON.
+V82GON2         STORE   RPADTEM         # COMMON CODE FOR EARTH & MOON.
+                CALL  
                         SR30.1
+                EXIT
+                TC      CHECKMM
+                DEC     11
+                TC      V82GON3
+                TC      INTPRET
+                DLOAD   CALL
+                        TFF
+                        V82GON3 -1
                 EXIT
 V82GON3         CAF     BIT5
                 MASK    EXTVBACT        # SEE IF ASTRONAUT HAS SIGNALLED TERMINATE
@@ -370,43 +386,22 @@ SR30.1          SETPD   STQ             # INITIALIZE PUSHDOWN LIST.
                                         # MOON CENTERED (RESCALING REQUIRED)
                                         #       RONE SCALED TO B-27 M
                                         #       VONE SCALED TO B-5  M/CS
-                BOFF    VLOAD
-                        V82EMFLG        # OFF FOR EARTH, ON FOR MOON.
-                        TFFCALLS
-                        RONE
-                VSL2
-                STOVL   RONE
-                        VONE
-                VSL2
-                STORE   VONE
-TFFCALLS        CALL
+                CALL
                         TFFCONMU
                 CALL                    # TFFRP/RA COMPUTES RAPO,RPER.
                         TFFRP/RA
                                         # RETURNS WITH RAPO IN D(MPAC).
-                DSU
+                DAD     BOV
+                        1BITDP
+                        MAXCHK
+                DLOAD   DSU
+                        RAPO
                         RPADTEM
-                BOFF    SR2R            # NEED HAPO AT (-29)M FOR DISPLAY.
-                                        # IF MOON CENTERED, RESCALE FROM (-27)M.
-                                        # IF EARTH CENTERED ALREADY AT (-29)M.
-                        V82EMFLG        # OFF FOR EARTH, ON FOR MOON.
-                        +1
-                CALL                    # IF HAPO > MAXNM, SET HAPO =9999.9 NM.
-                        MAXCHK          # OTHERWISE STORE (RAPO-RPADTEM) IN HAPO.
 STORHAPO        STODL   HAPOX
                         RPER
                 DSU
                         RPADTEM         # GIVES HPER AT (-29)M EARTH, (-27)M MOON.
-                STORE   MPAC +4         # SAVE THIS FOR COMPARISON TO HPERMIN.
-                BOFF    SR2R            # NEED HPER AT (-29)M FOR DISPLAY.
-                                        # IF MOON CENTERED, RESCALE FROM (-27)M.
-                                        # IF EARTH CENTERED ALREADY AT (-29)M.
-                        V82EMFLG        # OFF FOR EARTH, ON FOR MOON.
-                        +1
-                CALL                    # IF HPER > MAXNM, SET HPER = 9999.9 NM.
-                        MAXCHK
-STORHPER        STODL   HPERX           # STORE (RPER - RPADTEM) INTO HPERX.
-                        MPAC    +4
+STORHPER        STORE   HPERX           # STORE (RPER - RPADTEM) INTO HPERX.
                 DSU     BPL             # HPERMIN AT (-29)M FOR EARTH, (-27)M MOON
                         HPERMIN         # IF HPER L/ HPERMIN (300 OR 35) KFT,
                         DOTPER          # THEN ZERO INTO -TPER.
@@ -423,18 +418,14 @@ SKIPTPER        STODL   -TPER
                         RPADTEM         # RPADTEM AT (-29)M FOR EARTH, (-27)M MOON
                         CALCTFF         # GIVES 59M59S FOR TFF IF RPER G/
                 DCOMP                   # HPERMIN + RPADTEM.  (TPER WAS NON ZERO)
-                STCALL  TFF             # OTHERWISE COMPUTES TFF.       (GOTO)
+                STORE   TFF             # OTHERWISE COMPUTES TFF.       (GOTO)
+                GOTO
                         S2
 
-MAXCHK          DSU     BPL             # IF C(MPAC) > 9999.9 NM, MPAC = 9999.9 NM
+MAXCHK          DLOAD   GOTO            # IF C(MPAC) > 9999.9 NM, MPAC = 9999.9 NM
                         MAXNM
-                        +3              # OTHERWISE C(MPAC) = B(MPAC).
-                DAD     RVQ
-                        MAXNM
- +3             DLOAD   RVQ             # (USED BY P30 - P37 ALSO)
-                        MAXNM
+                        STORHAPO
 
 MAXNM           2OCT    01065 05603
 
-## Empty page.
 
