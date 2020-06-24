@@ -71,7 +71,8 @@ GTSQAXIS        DXCH    WCENTRAL
                 DCA     KQ
                 DXCH    KCENTRAL
 
-                INDEX   QRCNTR          # QDIFF, RDIFF ARE STORED IN D.P.
+                CCS     QRCNTR
+                INDEX   A               # QDIFF, RDIFF ARE STORED IN D.P.
                 CAE     QDIFF
 
 ALGORTHM        EXTEND                  # Q(R)DIFF IS THETA (ERROR) SCALED AT PI.
@@ -168,8 +169,6 @@ FUNCT3          CAE     A2CNTRAL        # CALCULATE (2/3)*ALPHA(2)/2 = ALPHA(2)/
 
                 TCF     RSTOFGTS
 
-.66667          DEC     .66667
-
 # THE WRCHN12 SUBROUTINE SETS BITS 9,10,11,12 OF CHANNEL 12 ON THE BASIS OF THE CONTENTS OF NEGUQ,NEGUR WHICH ARE
 # THE NEGATIVES OF THE DESIRED ACCELERATION CHANGES.  ACDT+C12 SETS Q(R)ACCDOT TO REFLECT THE NEW DRIVES.
 #
@@ -177,7 +176,15 @@ FUNCT3          CAE     A2CNTRAL        # CALCULATE (2/3)*ALPHA(2)/2 = ALPHA(2)/
 
 BGIM            OCTAL   07400
 CHNL12          EQUALS  ITEMP6
-ACDT+C12        CS      NEGUQ
+ACDT+C12        CA      DAPBOOLS
+                MASK    USEQRJTS
+                EXTEND
+                BZF     +4
+                CAF     ZERO
+                TS      NEGUQ
+                TS      NEGUR
+
+                CS      NEGUQ
                 EXTEND                  # GIMBAL DRIVE REQUESTS.
                 MP      ACCDOTQ
                 LXCH    QACCDOT
@@ -200,13 +207,10 @@ ACDT+C12        CS      NEGUQ
 
                 CS      BGIM
                 EXTEND
-                RAND    CHAN12
-                AD      CHNL12
+                WAND    CHAN12
+                CA      CHNL12
                 EXTEND
-                WRITE   CHAN12
-                # CS      CALLGMBL        # TURN OFF REQUEST FOR ACDT+C12 EXECUTION.
-                # MASK    RCSFLAGS
-                # TS      RCSFLAGS
+                WOR     CHAN12
 
                 TC      Q               # RETURN TO CALLER.
 
@@ -254,6 +258,7 @@ ACDT+C12        CS      NEGUQ
 #       AOSR            EQUALS  AOSQ +2         R-AXIS ACCELERATION SCALED AT PI/2 R/S2
 
 QRNDXER         EQUALS  ITEMP6
+.66667          DEC     .66667
 OCT23146        OCTAL   23146                   # DECIMAL .6
 NZACCDOT        EQUALS  ITEMP3
 
@@ -337,14 +342,7 @@ DRIVEON         INDEX   QRNDXER
 DONEYET         CCS     QRNDXER
                 TCF     TIMQGMBL
 
-                DXCH    RUPTREG3                # PROTECT IBNKCALL ERASABLES.  ACDT+C12
-                DXCH    ITEMP2                  # LEAVES ITEMPS2,3 ALONE.
-
-                TC      IBNKCALL                # TURN OF CHANNEL BITS, SET Q(R)ACCDOTS.
-                CADR    ACDT+C12
-
-                DXCH    ITEMP2                  # RESTORE ERASABLES FOR IBNKCALL.
-                DXCH    RUPTREG3
+                TC      ACDT+C12                # TURN OF CHANNEL BITS, SET Q(R)ACCDOTS.
 
                 TC      RUPTREG2                # RETURN TO CALLER.
 
@@ -356,15 +354,13 @@ OCT00240        OCTAL   00240                   # DECIMAL 10/1024
 RSTOFGTS        CCS     FUNCTION
                 TCF     GOODARG         # FUNCTION IS POSITIVE.  GET 3/2 POWER.
                 TCF     +2              # HIGH ORDER WORD IS ZERO.  TRY THE LOWER.
-                TCF     ZEROOT          # NEGATIVE.  USE ZERO FOR 3/2 POWER.
+                TCF     NEGUSUM         # NEGATIVE.  USE ZERO FOR 3/2 POWER.
 
                 CS      FUNCTION +1     # IF ARG IS LESS THAN 2(-18), THEN THE 3/2
                 AD      BIT11           # POWER IS LESS THAN 2(-27).  USE ZERO.
                 EXTEND
                 BZMF    ZEROHIGH        # BRANCH IF ARG NOT LESS THAN 2(-18).
 
-ZEROOT          EXTEND
-                DCA     ZERO
                 TCF     NEGUSUM
 
 ZEROHIGH        CA      FOURTEEN        # ARG LESS THAN 2(-14) MEANS 3/2 POWER
@@ -476,33 +472,15 @@ NEGUSUM         CCS     K2THETA         # TEST SIGN OF HIGH ORDER PART.
 NEGDRIVE        CA      BIT1
                 TCF     +2              # STOP GIMBAL DRIVE FOR A ZERO NEGUSUM.
 POSDRIVE        CS      BIT1
-                TS      L               # SAVE FOR DRIVE REVERSAL TEST.
                 INDEX   QRCNTR
-                XCH     NEGUQ
+                TS      NEGUQ
 
-                EXTEND
-                MP      L               # MULTIPLY OLD NEGU AND NEW NEGU.
-                CCS     L
-                TCF     LOUPE           # NON-ZERO GIMBAL DRIVE BEING CONTINUED.
-
-                # TCF     ZEROLOUP        # NO REVERSAL PROBLEM HERE.
-
-                # TCF     REVERSAL        # NON-ZERO GIMBAL DRIVE BEING REVERSED.
-                # TCF     ZEROLOUP        # NO REVERSAL PROBLEM HERE.
-
-REVERSAL        INDEX   QRCNTR          # A ZERO-DRIVE PAUSE IS NEEDED HERE.  ZERO
-                TS      QACCDOT         # IS IN A REGISTER FROM CCS ON (-1).
-                INDEX   QRCNTR
-                CS      GMBLBITA
-                EXTEND
-                WAND    CHAN12
-
-# ZEROLOUP        CS      RCSFLAGS        # SET UP REQUEST FOR ACDT+C12 CALL.
-#                 MASK    CALLGMBL
-#                 ADS     RCSFLAGS
-
-LOUPE           CCS     QRCNTR          # HAVE BOTH AXES BEEN PROCESSED?
+                CCS     QRCNTR          # HAVE BOTH AXES BEEN PROCESSED?
                 TCF     GOQTRIMG        # NO.  DO Q AXIS NEXT.
+
+                INHINT
+                TC      ACDT+C12
+                RELINT
 
                 CA      SAVESR          # RESTORE THE SR
                 TS      SR
@@ -515,9 +493,7 @@ GOCLOSE         EXTEND                  # TERMINATE THE JASK.
 CLOSEADR        2CADR   CLOSEOUT        # TERMINATE THE JASK.
 
 TWELVE          EQUALS  OCT14
-GMBLBITA        OCTAL   01400           # INDEXED WRT GMBLBITB   DO NOT MOVE ******
 STARTER         DEC     .53033          # INITIAL VALUE FOR SQRT ALGORITHM.
-GMBLBITB        OCTAL   06000           # INDEXED WRT GMBLBITA   DO NOT MOVE ******
 
 # SUBROUTINE ROOTCYCL:  BY CRAIG WORK,3 APRIL 68
 #

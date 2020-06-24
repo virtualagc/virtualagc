@@ -20,14 +20,11 @@
                 EBANK=  UNIT/R/
                 COUNT*  $$/R10
 
-LANDISP         LXCH    PIPCTR1         # UPDATE TBASE2 AND PIPCTR SIMULTANEOUSLY.
-                CS      TIME1
-                DXCH    TBASE2
-
-                CS      FLAGWRD7        # IS LANDING ANALOG DISPLAYS FLAG SET?
-                MASK    SWANDBIT
+LANDISP         CAF     SWANDBIT        # IS LANDING ANALOG DISPLAYS FLAG SET?
+                MASK    FLAGWRD7
                 CCS     A
-                TCF     DISPRSET        # NO.
+                TCF     +3              # YES.
+GODSPRST        TCF     DISPRSET        # NO.
                 CA      IMODES33        # BIT 7 = 0 (DO ALTRATE), =1 (DO ALT.)
                 MASK    BIT7
                 CCS     A
@@ -43,11 +40,11 @@ ARCOMP          CA      RUNIT           # COMPUTE ALTRATE = RUNIT.VVECT M/CS *2(
                 EXTEND
                 MP      VVECT           # MULTIPLY X-COMPONENTS.
                 XCH     RUPTREG1        # SAVE SINGLE PRECISION RESULT M/CS*2(-6).
-                CA      RUNIT +1        # MULTIPLY Y-COMPONENTS.
+                CA      RUNIT +2        # MULTIPLY Y-COMPONENTS.
                 EXTEND
                 MP      VVECT +1
                 ADS     RUPTREG1        # ACCUMULATE PARTIAL PRODUCTS.
-                CA      RUNIT +2        # MULTIPLY Z-COMPONENTS.
+                CA      RUNIT +4        # MULTIPLY Z-COMPONENTS.
                 EXTEND
                 MP      VVECT +2
                 ADS     RUPTREG1        # ALTITUDE RATE IN M/CS *2(-6).
@@ -69,10 +66,18 @@ ARCOMP          CA      RUNIT           # COMPUTE ALTRATE = RUNIT.VVECT M/CS *2(
                 CA      ALTRATE         # POSITIVE OR ZERO - SET SIGN BIT = 1 AND
                 AD      BIT15           # SEND TO ALTM REGISTER.  *DO NOT SEND +0*
 DATAOUT         TS      ALTM            # ACTIVATE THE LANDING ANALOG DISPLAYS - -
-                CAF     BIT3
+                CAF     DATABITS
                 EXTEND
                 WOR     CHAN14          # BIT3 DRIVES THE ALT/ALTRATE METER.
                 TCF     TASKOVER        # EXIT
+
+LANDELAY        CCS     PIPCTR
+                TCF     +2
+                TCF     TASKOVER
+                TS      PIPCTR
+                TC      FIXDELAY
+                DEC     30
+                TCF     LANDISP
 
 ALTOUT          TC      DISINDAT        # CHECK MODE SELECT SWITCH AND DIDFLG.
                 CS      BIT7
@@ -88,23 +93,12 @@ ALTOUT          TC      DISINDAT        # CHECK MODE SELECT SWITCH AND DIDFLG.
                 TS      ALTBITS         # SET ALTBITS FROM -0 TO +0.
                 CS      ONE
                 DXCH    ALTBITS         # SET ALTBITS = -1 FOR SWITCH USE NEXT PASS.
-                DXCH    ALTSAVE
-                CA      BIT10           # NEW ALTITUDE EXTRAPOLATION WITH ALTRATE.
-                XCH     Q
-                LXCH    7               # ZL
-                CA      DT
-                EXTEND
-                DV      Q               # RESCALE DT*2(-14) TO *2(-9) TIME IN CS.
-                EXTEND
-                MP      ARTOA2          # .0021322 *2(+8)
-                TCF     OLDDATA +1      # RATE APPLIES FOR DT CS.
 
 ZDATA2          DXCH    ALTSAVE
                 TCF     NEWDATA
 OLDDATA         CA      ARTOA           # RATE APPLIES FOR .5 SEC. (4X/SEC. CYCLE)
                 EXTEND
                 MP      ALTRATE         # EXTRAPOLATE WITH ALTITUDE RATE.
-                DDOUBL
                 AD      ALTSAVE +1
                 TS      ALTSAVE +1
                 CAF     ZERO
@@ -133,29 +127,26 @@ DISINDAT        EXTEND
                 EXTEND                  # WISHETH THE ASTRONAUT THE ANALOG
                 RAND    CHAN30          # DISPLAYS?  I.E.,
                 CCS     A               # IS THE MODE SELECT SWITCH IN PGNCS?
-                TCF     DISPRSET        # NO.  ASTRONAUT REQUESTS NO INERTIAL DATA
-                CS      FLAGWRD1        # YES. CHECK STATUS OF DIDFLAG.
-                MASK    DIDFLBIT
-                EXTEND
-                BZF     SPEEDRUN        # SET. PERFORM DATA DISPLAY SEQUENCE.
-                CS      FLAGWRD1        # RESET. PERFORM INITIALIZATION FUNCTIONS.
-                MASK    DIDFLBIT
-                ADS     FLAGWRD1        # SET DIDFLAG.
-                CS      BIT7
-                MASK    IMODES33        # TO DISPLAY ALTRATE FIRST AND ALT. SECOND
-                TS      IMODES33
-                CAF     BIT8            # YES.
+                TCF     GODSPRST        # NO.  ASTRONAUT REQUESTS NO INERTIAL DATA
+                CCS     DIDFLG          # YES. CHECK STATUS OF DIDFLAG.
+                TCF     GODSPRST
+                TCF     SPEEDRUN        # SET. PERFORM DATA DISPLAY SEQUENCE.
+                CAF     BIT8
                 EXTEND
                 WOR     CHAN12          # SET DISPLAY INERTIAL DATA OUTBIT.
                 CAF     ZERO
+                TS      DIDFLG
                 TS      TRAKLATV        # LATERAL VELOCITY MONITOR FLAG
                 TS      TRAKFWDV        # FORWARD VELOCITY MONITOR FLAG
                 TS      LATVMETR        # LATVEL MONITOR METER
                 TS      FORVMETR        # FORVEL MONITOR METER
+                CS      BIT7
+                MASK    IMODES33
+                TS      IMODES33
                 CAF     BIT4
                 TC      TWIDDLE
                 ADRES   INTLZE
-                TCF     TASKOVER
+                TCF     LANDELAY
 INTLZE          CAF     BIT2
                 EXTEND
                 WOR     CHAN12          # ENABLE RR ERROR COUNTER.
@@ -229,18 +220,13 @@ SPEEDRUN        CS      PIPTIME +1      # UPDATE THE VELOCITY VECTOR
                 MP      KPIP1(5)
                 ADS     VVECT +2
 
-                CAF     BIT3            # PAUSE 30 MS TO LET OTHER RUPTS IN.
-                TC      VARDELAY
-
-                TC      LADQSAVE        # NO.
-
-                CA      DELVS           # HI X OF VELOCITY CORRECTION TERM.
+                CS      DELVS           # HI X OF VELOCITY CORRECTION TERM.
                 AD      VVECT           # HI X OF UPDATED VELOCITY VECTOR.
                 TS      ITEMP1          # = VX - DVX M/CS *2(-5).
-                CA      DELVS +2        #    Y
+                CS      DELVS +2        #    Y
                 AD      VVECT +1        #    Y
                 TS      ITEMP2          # = VY - DVY M/CS *2(-5).
-                CA      DELVS +4        #    Z
+                CS      DELVS +4        #    Z
                 AD      VVECT +2        #    Z
                 TS      ITEMP3          # = VZ - DVZ M/CS *2(-5).
                 CA      ITEMP1          # COMPUTE VHY, VELOCITY DIRECTED ALONG THE
@@ -314,159 +300,201 @@ LATFWDV         CA      ITEMP4          # COMPUTE LATERAL AND FORWARD VELOCITIES
                 CS      MAXVBITS        # ACC.=-199.9989 FT./SEC.
                 TS      ITEMP6          # -547 BIT UNITS (OCTAL) AT 0.5571 FPS/BIT
 
-                CAF     ONE             # LOOP TWICE.
-VMONITOR        TS      ITEMP5          # FORWARD AND LATERAL VELOCITY LANDING
-                INDEX   ITEMP5          #       ANALOG DISPLAYS MONITOR.
-                CCS     LATVEL
+VMONITOR        CCS     LATVEL
                 TCF     +4
                 TCF     LVLIMITS
-                TCF     +8D
+                TCF     +7
                 TCF     LVLIMITS
-                INDEX   ITEMP5
                 CS      LATVEL
                 AD      MAXVBITS        # +199.9989 FT./SEC.
                 EXTEND
                 BZMF    CHKLASTY
                 TCF     LVLIMITS
-                INDEX   ITEMP5
                 CA      LATVEL
                 AD      MAXVBITS
                 EXTEND
                 BZMF    +2
                 TCF     LVLIMITS
-CHKLASTY        INDEX   ITEMP5
-                CCS     LATVMETR
-                TCF     +4
-                TCF     LASTOK
-                TCF     +7
-                TCF     LASTOK
-                INDEX   ITEMP5
-                CA      LATVEL
-                EXTEND
-                BZMF    LASTPOSY +5
-                TCF     +5
-                INDEX   ITEMP5
-                CS      LATVEL
-                EXTEND
-                BZMF    LASTNEGY +4
-LASTOK          INDEX   ITEMP5
-                CCS     TRAKLATV
+CHKLASTY        CCS     TRAKLATV
                 TCF     LASTPOSY
                 TCF     +2
                 TCF     LASTNEGY
-                INDEX   ITEMP5
                 CA      LATVEL
                 EXTEND
                 BZMF    NEGVMAXY
                 TCF     POSVMAXY
-LASTPOSY        INDEX   ITEMP5
-                CA      LATVEL
+LASTPOSY        CA      LATVEL
                 EXTEND
                 BZMF    +2
                 TCF     POSVMAXY
                 CS      MAXVBITS
                 TCF     ZEROLSTY
-POSVMAXY        INDEX   ITEMP5
-                CS      LATVMETR
+POSVMAXY        CS      LATVMETR
                 AD      MAXVBITS
-                INDEX   ITEMP5
                 XCH     RUPTREG3
                 CAF     ONE
                 TCF     ZEROLSTY +3
-LASTNEGY        INDEX   ITEMP5
-                CA      LATVEL
+LASTNEGY        CA      LATVEL
                 EXTEND
                 BZMF    NEGVMAXY
                 CA      MAXVBITS
                 TCF     ZEROLSTY
-NEGVMAXY        INDEX   ITEMP5
-                CA      LATVMETR
+NEGVMAXY        CA      LATVMETR
                 AD      MAXVBITS
                 COM
-                INDEX   ITEMP5
                 XCH     RUPTREG3
                 CS      ONE
                 TCF     ZEROLSTY +3
-LVLIMITS        INDEX   ITEMP5
-                CCS     TRAKLATV
+LVLIMITS        CCS     TRAKLATV
                 TCF     LATVPOS
                 TCF     +2
                 TCF     LATVNEG
-                INDEX   ITEMP5
                 CS      LATVMETR
                 EXTEND
                 BZMF    +2
                 TCF     NEGLMLV
-                INDEX   ITEMP5
                 CS      LATVEL
                 EXTEND
                 BZMF    LVMINLM
                 AD      ITEMP6
-                INDEX   ITEMP5
                 AD      LATVMETR
                 EXTEND
                 BZMF    LVMINLM
-                INDEX   ITEMP5
                 AD      LATVEL
                 EXTEND
-                INDEX   ITEMP5
                 SU      LATVMETR
                 TCF     ZEROLSTY
-LATVPOS         INDEX   ITEMP5
-                CS      LATVEL
+LATVPOS         CS      LATVEL
                 EXTEND
                 BZMF    LVMINLM
-                TCF     +5
-LATVNEG         INDEX   ITEMP5
-                CA      LATVEL
+                TCF     +4
+LATVNEG         CA      LATVEL
                 EXTEND
                 BZMF    LVMINLM
-                INDEX   ITEMP5
                 CS      LATVMETR
                 TCF     ZEROLSTY
-NEGLMLV         INDEX   ITEMP5
-                CA      LATVEL
+NEGLMLV         CA      LATVEL
                 EXTEND
                 BZMF    LVMINLM
                 CA      MAXVBITS
-                INDEX   ITEMP5
                 AD      LATVMETR
                 COM
-                INDEX   ITEMP5
                 AD      LATVEL
                 EXTEND
                 BZMF    LVMINLM
                 EXTEND
-                INDEX   ITEMP5
                 SU      LATVEL
-                INDEX   ITEMP5
                 AD      LATVMETR
                 COM
                 TCF     ZEROLSTY
-LVMINLM         INDEX   ITEMP5
-                CS      LATVMETR
-                INDEX   ITEMP5
+LVMINLM         CS      LATVMETR
                 AD      LATVEL
-ZEROLSTY        INDEX   ITEMP5
-                XCH     RUPTREG3
+ZEROLSTY        XCH     RUPTREG3
                 CAF     ZERO
-                INDEX   ITEMP5
                 TS      TRAKLATV
-                INDEX   ITEMP5
                 CA      RUPTREG3
                 AD      NEG0            # AVOIDS +0 DINC HARDWARE MALFUNCTION
-                INDEX   ITEMP5
                 TS      CDUTCMD
-                INDEX   ITEMP5
                 CA      RUPTREG3
-                INDEX   ITEMP5
                 ADS     LATVMETR
-                CCS     ITEMP5          # FIRST MONITOR FORWARD THEN LATERAL VEL.
-                TCF     VMONITOR
 
-                CAF     BITSET          # DRIVE THE X-POINTER DISPLAY.
+                CCS     FORVEL
+                TCF     +4
+                TCF     FVLIMITS
+                TCF     +7
+                TCF     FVLIMITS
+                CS      FORVEL
+                AD      MAXVBITS        # +199.9989 FT./SEC.
                 EXTEND
-                WOR     CHAN14
+                BZMF    CHKLASTZ
+                TCF     FVLIMITS
+                CA      FORVEL
+                AD      MAXVBITS
+                EXTEND
+                BZMF    +2
+                TCF     LVLIMITS
+CHKLASTZ        CCS     TRAKFWDV
+                TCF     LASTPOSZ
+                TCF     +2
+                TCF     LASTNEGZ
+                CA      FORVEL
+                EXTEND
+                BZMF    NEGVMAXZ
+                TCF     POSVMAXZ
+LASTPOSZ        CA      FORVEL
+                EXTEND
+                BZMF    +2
+                TCF     POSVMAXZ
+                CS      MAXVBITS
+                TCF     ZEROLSTZ
+POSVMAXZ        CS      FORVMETR
+                AD      MAXVBITS
+                XCH     RUPTREG3
+                CAF     ONE
+                TCF     ZEROLSTZ +3
+LASTNEGZ        CA      FORVEL
+                EXTEND
+                BZMF    NEGVMAXZ
+                CA      MAXVBITS
+                TCF     ZEROLSTZ
+NEGVMAXZ        CA      FORVMETR
+                AD      MAXVBITS
+                COM
+                XCH     RUPTREG3
+                CS      ONE
+                TCF     ZEROLSTZ +3
+FVLIMITS        CCS     TRAKFWDV
+                TCF     FORVPOS
+                TCF     +2
+                TCF     FORVNEG
+                CS      FORVMETR
+                EXTEND
+                BZMF    +2
+                TCF     NEGLMFV
+                CS      FORVEL
+                EXTEND
+                BZMF    FVMINLM
+                AD      ITEMP6
+                AD      FORVMETR
+                EXTEND
+                BZMF    FVMINLM
+                AD      FORVEL
+                EXTEND
+                SU      FORVMETR
+                TCF     ZEROLSTZ
+FORVPOS         CS      FORVEL
+                EXTEND
+                BZMF    FVMINLM
+                TCF     +4
+FORVNEG         CA      FORVEL
+                EXTEND
+                BZMF    FVMINLM
+                CS      FORVMETR
+                TCF     ZEROLSTZ
+NEGLMFV         CA      FORVEL
+                EXTEND
+                BZMF    FVMINLM
+                CA      MAXVBITS
+                AD      FORVMETR
+                COM
+                AD      FORVEL
+                EXTEND
+                BZMF    FVMINLM
+                EXTEND
+                SU      FORVEL
+                AD      FORVMETR
+                COM
+                TCF     ZEROLSTZ
+FVMINLM         CS      FORVMETR
+                AD      FORVEL
+ZEROLSTZ        XCH     RUPTREG3
+                CAF     ZERO
+                TS      TRAKFWDV
+                CA      RUPTREG3
+                AD      NEG0            # AVOIDS +0 DINC HARDWARE MALFUNCTION
+                TS      CDUTCMD
+                CA      RUPTREG3
+                ADS     FORVMETR
                 TC      LADQSAVE        # GO TO ALTROUT +1 OR TO ALTOUT +1
 ZERODATA        CAF     ZERO            # ZERO ALTSAVE AND ALTSAVE +1 - - -
                 TS      L               #        NO NEGATIVE ALTITUDES ALLOWED.
@@ -482,18 +510,24 @@ DISPRSET        CAF     BIT8
                 COM
                 EXTEND
                 WAND    CHAN12
-ABORTON         CS      BITS8/7         # RESET INERTIAL DATA, INTERLEAVE FLAGS.
+                CS      BITS8/7         # RESET INERTIAL DATA, INTERLEAVE FLAGS.
                 MASK    IMODES33
                 TS      IMODES33
-                CS      DIDFLBIT
-                MASK    FLAGWRD1
-                TS      FLAGWRD1        # RESET DIDFLAG.
-                TCF     TASKOVER
+                CS      ONE
+                TS      DIDFLG
+                TC      Q
 
 # ************************************************************************
 
 BITS8/7         OCT     00300           # INERTIAL DATA AND INTERLEAVE FLAGS.
 BITSET          =       PRIO6
+ARCONV          OCT     24402           # 656.1679798B-10 CONV ALTRATE TO BIT UNIT
+ARTOA           DEC     .2051 B-1
+DATABITS        OCT     06004
+VELCONV         OCT     22316           # 588.914 B-10 CONV VEL. TO BIT UNITS.
+KPIP1(5)        DEC     .0512           # SCALES DELV TO M/CS*2(-5).
+OCT33427        OCT     33427
+MAXVBITS        OCT     00547           # MAX. DISPLAYED VELOCITY 199.9989 FT/SEC.
 
 # ************************************************************************
 

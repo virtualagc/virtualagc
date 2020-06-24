@@ -169,21 +169,6 @@ KPIP2           2DEC            .0064                   # SCALES DELV TO UNITS O
 
 ALTCONV         2DEC            1.399078846     B-4     # CONVERTS M*2(-24) TO BIT UNITS *2(-28).
 ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO BIT UNITS<
-                SETLOC          R10
-                BANK
-                COUNT*          $$/R10
-
-ARCONV          OCT             24402                   # 656.1679798B-10 CONV ALTRATE TO BIT UNIT
-
-ARTOA           DEC             .1066098        B-1     # .25/2.345 B-1 4X/SEC CYCLE RATE.
-
-ARTOA2          DEC             .0021322        B8      # (.5)/(2.345)(100)
-
-VELCONV         OCT             22316                   # 588.914 B-10 CONV VEL. TO BIT UNITS.
-
-KPIP1(5)        DEC             .0512                   # SCALES DELV TO M/CS*2(-5).
-
-MAXVBITS        OCT             00547                   # MAX. DISPLAYED VELOCITY 199.9989 FT/SEC.
 
                 SETLOC          DAPS3
                 BANK
