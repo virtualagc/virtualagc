@@ -1242,62 +1242,52 @@ DAPDISP         TC              TESTXACT
 
                 SBANK=          LOWSUPER                # FOR SUBSEQUENT LOW 2CADR'S.
 
-DAPDATA1        CAF             BOOLSMSK                # SET DISPLAY ACCORDING TO DAPBOOLS BITS.
+DAPDATA1        TC              UNK7766
+                CAF             BOOLSMSK                # SET DISPLAY ACCORDING TO DAPBOOLS BITS.
                 MASK            DAPBOOLS                # LM
                 TS              DAPDATR1                # LM
-                CS              FLGWRD10                # SET BIT 14 TO BE COMPLEMENT OF APSFLAG.
-                MASK            APSFLBIT
-                CCS             A
-                CAF             BIT14
-                ADS             DAPDATR1
-CHKDATA1        CAE             DAPDATR1                # IF BITS 13 AND 14 ARE BOTH ZERO, FORCE
-                MASK            BIT13-14                #   A ONE INTO BIT 13.
-                EXTEND
-                BZF             FORCEONE
-                CAE             DAPDATR1                # ENSURE THAT NO ILLEGAL BITS SET BY CREW.
-MSKDATR1        MASK            DSPLYMSK
-                TS              DAPDATR1
-                CAF             V01N46                  # LM
+
+RELOAD          CAF             V01N46                  # LM
                 TC              BANKCALL
                 CADR            GOXDSPFR
                 TCF             ENDEXT                  # V34E  TERMINATE
                 TCF             DPDAT1                  # V33E  PROCEED
-                TCF             CHKDATA1                # E     NEW DATA    CHECK AND REDISPLAY
+                TCF             MSKDATR1                # E     NEW DATA    CHECK AND REDISPLAY
                 CAF             REVCNT                  # BITS 2 & 3:  BLANKS R2 & R3.
                 TC              BLANKET
                 TCF             ENDOFJOB
-FORCEONE        CAF             BIT13
-                ADS             DAPDATR1
-                TCF             MSKDATR1
+MSKDATR1        CAF             BOOLSMSK
+                MASK            DAPDATR1
+                TCF             RELOAD
 
 DPDAT1          INHINT                                  # INHINT FOR SETTING OF FLAG BITS AND MASS
-                CS              APSFLBIT                #   ON BASIS OF DISPLAYED DAPDATR1.
-                MASK            FLGWRD10
-                TS              L                       # SET APSFLAG TO BE COMPLEMENT OF BIT 14.
+                CA              DAPDATR1                #   ON BASIS OF DISPLAYED DAPDATR1.
+                MASK            CSMDOCKD
+                EXTEND
+                BZF             ONEMASS
 
-                CS              DAPDATR1
-                MASK            BIT14
-                CCS             A
-                CAF             APSFLBIT
-                AD              L
-                TS              FLGWRD10
-                CS              DAPDATR1                # SET BITS OF DAPBOOLS ON BASIS OF DISPLAY
-                MASK            BIT13-14                #   MASK OUT CSMDOCKD (BIT 13) UNLESS BOTH
-                CCS             A                       #   13 AND 14 ARE SET.
-                CS              CSMDOCKD
-                AD              BOOLSMSK
-                MASK            DAPDATR1
-                TS              L
+                CAF             BIT2
+                EXTEND
+                RAND            CHAN30
+                EXTEND
+                BZF             ONEMASS -1
+
+                TC              ALARM
+                OCT             1706
+                CAF             VB05N09
+                TC              BANKCALL
+                CADR            GOXDSPF
+                TCF             ENDEXT
+                TCF             -4
+                TCF             DAPDATA1
+
+                CAE             CSMMASS
+ONEMASS         AD              LEMMASS
+                TS              MASS
                 CS              BOOLSMSK
                 MASK            DAPBOOLS
-                AD              L
+                AD              DAPDATR1
                 TS              DAPBOOLS
-                MASK            CSMDOCKD                # LOAD MASS IN ACCORDANCE WITH CSMDOCKD.
-                CCS             A                       #   MASS IS USUALLY ALREADY OKAY, SO DO
-                CAE             CSMMASS                 #   NOT TOUCH ITS LOW-ORDER PART.
-                AD              LEMMASS
-                TS              MASS
-                CAE             DAPBOOLS
                 MASK            ACC4OR2X                # 2 OR 4 JET X-TRANSLATION
                 EXTEND                                  # (BIT ACC4OR2X = 1 FOR 4 JETS)
                 BZF             +5
@@ -1312,10 +1302,12 @@ DPDAT1          INHINT                                  # INHINT FOR SETTING OF 
                 MASK            THREE                   # MANEUVER RATE
                 DOUBLE                                  # RATEINDX HAS TO BE 0,2,4,6 SINCE RATES
                 TS              RATEINDX                # ARE DP
+                RELINT
+                TC              DAPDATA2
 
-V01N46          VN              0146
-DSPLYMSK        OCT             33113
 BOOLSMSK        OCT             13113
+V0647           VN              0647
+V01N46          VN              0146
 MINLMD          DEC             -2850           B-16    # MIN. DESCENT STAGE MASS -- 2(16) KG.
 MINMINLM        DEC             -2200           B-16    # MIN ASCENT STAGE MASS -- 2(16) KG.
 MINCSM          =               BIT11                   # MIN CSM MASS (OK FOR 1/ACCS) = 9050 LBS
@@ -1334,8 +1326,10 @@ ENDR03          INHINT
                 CADR            RESTORDB
                 TCF             ENDEXT                  # DOES RELINT
 
-DAPDAT2         CS              FLGWRD10                # DETERMINE STAGE FROM APSFLAG
-                MASK            APSFLBIT
+DAPDAT2         EXTEND                                  # DETERMINE STAGE
+                READ            CHAN30
+                COM
+                MASK            BIT2
                 CCS             A
                 CA              MINLMD
                 AD              MINMINLM
@@ -1360,10 +1354,11 @@ LEMALONE        AD              LEMMASS                 # LEM ALONE:  MASS = LEM
                 CADR            RESTORDB                #   INERTIA.
                 RELINT                                  # PROCEED TO NOUN 48 (OR END).
 
-DAPDATA3        CS              FLGWRD10
-                MASK            APSFLBIT
-                EXTEND                                  # END ROUTINE IF LEM HAS STAGED,
-                BZF             ENDEXT
+DAPDATA3        CAF             BIT2
+                EXTEND
+                RAND            CHAN30
+                CCS             A                       # END ROUTINE IF LEM HAS STAGED,
+                TCF             ENDEXT
                 CAF             V06N48                  # DISPLAY TRIM ANGLES AND REQUEST RESPONSE
                 TC              BANKCALL
                 CADR            GOXDSPFR
@@ -1389,18 +1384,9 @@ TRIMDONE        CAF             V50N48
                 TC              BLANKET
                 TCF             ENDOFJOB
 
-V0647           VN              0647
 V06N48          VN              0648
 
 V50N48          VN              5048
-NORMAL          DEC             .660214
-                                                        # NORMAL SCALING IS 20 D/S
-FINE            DEC             .165054                 # FINE STICK SCALING (4 D/S).
-1/10            DEC             .1                      # FACTOR FOR CSM-DOCKED SCALING
--0.6D/S         DEC             -218
-
-
--0.3D/S         DEC             -109
 
 # VERB 66.  VEHICLES ARE ATTACHED.  MOVE THIS VEHICLE STATE VECTOR TO
 #           OTHER VEHICLE STATE VECTOR.

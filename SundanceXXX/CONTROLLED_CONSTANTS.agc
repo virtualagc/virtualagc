@@ -189,24 +189,9 @@ MAXVBITS        OCT             00547                   # MAX. DISPLAYED VELOCIT
                 BANK
                 COUNT*          $$/DAPAO
 
-TORKJET1        DEC             .03757                  # 550 / .2 SCALED AT (+16) 64 / 180
 
 # PARAMETERS RELATING TO MASS, INERTIA, AND VEHICLE DIMENSTIONS
 
-
-                SETLOC          FRANDRES
-                BANK
-                COUNT*          $$/START
-
-                SETLOC          DAPS3
-                BANK
-                COUNT*          $$/DAPAO
-
-LOASCENT        DEC             2200            B-16    # MIN ASCENT LEM MASS -- 2(16) KG.
-
-HIDESCNT        DEC             15300           B-16    # MAX DESCENT LEM MASS -- 2(16) KG.
-
-LODESCNT        DEC             1750            B-16    # MIN DESCENT STAGE (ALONE) -- 2(16) KG.
 
 # PHYSICAL CONSTANTS ( TIME - INVARIANT )
 

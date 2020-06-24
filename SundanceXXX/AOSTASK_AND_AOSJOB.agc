@@ -104,12 +104,23 @@
 #       SET MPAC, WHICH INDICATES THE PROPER SET OF COEFFICIENTS FOR THE LEM-ALONE F(MASS) CALCULATIONS
 #       ENSURE THAT THE LEM MASS VALUE IS WITHIN THE ACCEPTABLE RANGE
 
+                CAF     BIT2            # DETERMINE WHETHER STAGED.
+                EXTEND
+                RAND    CHAN30
                 INHINT
-                CAE     FLGWRD10        # DETERMINE WHETHER STAGED.
-                MASK    APSFLBIT
+                CCS     A
+                TCF     APS/SURF
+
+                CA      FLAGWRD8        # DETERMINE IF ON SURFACE.
+                MASK    SURFFBIT
                 EXTEND
                 BZF     DPSFLITE
-                CS      POSMAX          # ASCENT (OR ON LUNAR SURFACE)
+
+APS/SURF        CS      FLAGWRD1        # ASCENT (OR ON LUNAR SURFACE)
+                MASK    APSFLBIT        # SET APSFLAG.
+                ADS     FLAGWRD1
+
+                CAF     NEGMAX          
                 TS      -2JETLIM        # ALWAYS 2 JETS FOR P-AXIS RATE COMMAND
                 CAF     OCT14           # INITIALIZE INDEX AT 12.
                 TS      MPAC
@@ -130,7 +141,10 @@ MASSFIX         ADS     LEMMASS         # STORE THE VIOLATED LIMIT AS LEMMASS.
                 DXCH    MASS
                 TCF     F(MASS)
 
-DPSFLITE        CS      BIT10           # FOUR JETS FOR P-AXIS RATE COMMAND ERRORS
+DPSFLITE        CS      APSFLBIT
+                MASK    FLAGWRD1
+                TS      FLAGWRD1
+                CAF     -1.4D/S         # FOUR JETS FOR P-AXIS RATE COMMAND ERRORS
                 TS      -2JETLIM        #   EXCEEDING 1.4 DEG/SEC (SCALED AT 45)
                 CAF     SIX             # INITIALIZE INDEX AT 6.
                 TS      MPAC
@@ -155,7 +169,8 @@ STCTR           TS      MPAC    +1      # J=2,1,0 FOR 1JACCR,1JACCQ,1JACC
                 CS      TWO
                 ADS     MPAC            # JX=10,8,6 OR 4,2,0 TO INDEX COEFS.
 
-STCTR1          CAE     LEMMASS
+STCTR1          CAE     MASS
+                TS      LEMMASS
                 INDEX   MPAC
                 AD      INERCONC
                 TS      MPAC    +2      # MASS + C
@@ -181,10 +196,16 @@ COMMEQS         CA      1JACCR          # SCALED AT PI/4
                 TS      1JACCU
                 TS      1JACCV          # SCALED AT PI/2 RAD/SEC**2
 
+                CAF     BIT8
+                ZL
+                EXTEND
+                DV      1JACC
+                TS      1/2JTSP
+
                 CCS     MPAC            # COMPUTE L,PVT-CG IF IN DESCENT
-                CAF     ZERO            # ZERO SWITCHES AND GO TO 1/ACCONT IN
-                TS      ALLOWGTS        #   ASCENT
-                TCF     1/ACCONT -1
+                TCF     1/ACCONT
+                TCF     CCSHOLE
+                TCF     CCSHOLE
 
                 CS      TWO
                 TS      MPAC
@@ -268,20 +289,7 @@ STACCDOT        INDEX   MPAC
                 CCS     MPAC
                 TCF     LOOP3   -1      # NOW DO QACCDOT.
 
-                CS      DAPBOOLS        # IS GIMBAL USABLE?
-                MASK    USEQRJTS
-                EXTEND
-                BZF     DOWNGTS         # NO. BE SURE THE GIMBAL SWITCHES ARE DOWN
-                CS      T5ADR           # YES.  IS THE DAP RUNNING?
-                AD      PAXISADR
-                EXTEND
-                BZF     +2
-                TCF     DOWNGTS         # NO. BE SURE THE GIMBAL SWITCHES ARE DOWN
-                CCS     INGTS           # YES.  IS GTS IN CONTROL?
-                TCF     DOCKTEST        # YES.  PROCEED WITH 1/ACCS.
-                TC      IBNKCALL        # NO. NULL OFFSET AND FIND ALLOWGTS
-                CADR    TIMEGMBL
-
+                RELINT
 DOCKTEST        CCS     DOCKTEMP        # BYPASS 1/ACCONT WHEN DOCKED.
                 TCF     1/ACCRET
                 TCF     1/ACCONT
@@ -388,6 +396,10 @@ INERCONC        DEC     +.008721        # 1JACCP        C               DESCENT
                 DEC     +.009312        # 1JACCR        B               ASCENT
                 DEC     -.023608        # 1JACCR        C               ASCENT
 
+LOASCENT        DEC     2200 B-16       # MIN ASCENT LEM MASS -- 2(16) KG.
+HIDESCNT        DEC     15300 B-16      # MAX DESCENT LEM MASS -- 2(16) KG.
+LODESCNT        DEC     1750 B-16       # MIN DESCENT STAGE (ALONE) -- 2(16) KG.
+
 GIMBLBTS        OCTAL   01400
                 OCTAL   01000
                 OCTAL   06000
@@ -395,6 +407,7 @@ GIMBLBTS        OCTAL   01400
 DGBF            DEC     0.6             # .3 SCALED AT 1/2
 0.35356         DEC     0.35356         # .70711 SCALED AT 2
 GFACTM          OCT     337             # 979.24/2.20462 AT B+15
+-1.4D/S         OCT     77001           # -1.4 DEG/SEC
 
 # CSM-DOCKED INERTIA COMPUTATIONS
 
@@ -444,12 +457,6 @@ TORQCONS        2DEC    0.51443 B-14    # CORRESPONDS TO 500 LB-FT
                 CA      BIT10           # CORRESPONDS TO 1. 4 DEG/SEC(2)
                 TS      1JACC           # SCALED AT PI/4
 
-                CA      POSMAX          # SET INVERSE JET ACCELERATIONS TO POSMAX,
-                TS      1/ANETP         # WHICH CORRESPONDS TO ACCEL. OF 1.4 D/SS.
-                TS      1/ANET2 +1
-                TS      1/ANET2 +2
-                TS      1/ANET2 +17D
-                TS      1/ANET2 +18D
                 EXTEND
                 DCA     TORQCONS
                 EXTEND
@@ -463,8 +470,8 @@ TORQCONS        2DEC    0.51443 B-14    # CORRESPONDS TO 500 LB-FT
                 MP      MPAC            # SCALED AT 4 PI RAD-CM/SEC
                 EXTEND
                 MP      ABDELV          # SCALED AT 2(13) CM/SEC(2)
-                TC      DVOVSUB         # GET QUOTIENT WITH OVERFLOW PROTECTION
-                ADRES   MPAC    +1
+                EXTEND
+                DV      MPAC    +1      # GET QUOTIENT
 
                 TS      ACCDOTR
                 TCF     SPSCONT         # CONTINUE K, KSQ CALCULATIONS
@@ -486,6 +493,8 @@ COEFF           DEC     .19518          # C  COEFFICIENT OF INERTIA
                 DEC     -.63117         # E          ''
                 DEC     .41179          # D          ''
 
+TORKJET1        DEC     .03757          # 550 / .2 SCALED AT (+16) 64 / 180
+
 # ASSIGNMENT OF TEMPORARIES FOR 1/ACCS (EXCLUDING 1/ACCONT)
 # MPAC, MPAC +1, MPAC +2  USED EXPLICITLY
 COEFCTR         EQUALS  MPAC    +4
@@ -504,7 +513,6 @@ DOCKTEMP        EQUALS  MPAC    +3      # RECORD OF CSMDOCKED BIT OF DAPBOOLS
 
                 COUNT*  $$/DAPAO
 
- -1             TS      INGTS           # ZERO INGTS IN ASCENT
 1/ACCONT        CA      DB              # INITIALIZE DBVAL1,2,3
                 EXTEND
                 MP      BIT13
@@ -515,8 +523,23 @@ DOCKTEMP        EQUALS  MPAC    +3      # RECORD OF CSMDOCKED BIT OF DAPBOOLS
                 AD      L
                 TS      DBVAL2          # -.75 DB
 
-GETAOSUV        INHINT
-                CAE     AOSR            # COMPUTE AOSU AND AOSV BY ROTATING
+                INHINT
+                CS      DAPBOOLS        # IS GIMBAL USABLE?
+                MASK    USEQRJTS
+                EXTEND
+                BZF     DOWNGTS         # NO. BE SURE THE GIMBAL SWITCHES ARE DOWN
+                CS      T5ADR           # YES.  IS THE DAP RUNNING?
+                AD      PAXISADR
+                EXTEND
+                BZF     +2
+                TCF     DOWNGTS         # NO. BE SURE THE GIMBAL SWITCHES ARE DOWN
+                CCS     INGTS           # YES.  IS GTS IN CONTROL?
+                TCF     GETAOSUV        # YES.  PROCEED WITH 1/ACCS.
+                TC      IBNKCALL        # NO. NULL OFFSET AND FIND ALLOWGTS
+                CADR    TIMEGMBL
+
+
+GETAOSUV        CAE     AOSR            # COMPUTE AOSU AND AOSV BY ROTATING
                 TS      L               #       AOSQ AND AOSR.
                 CAE     AOSQ
                 TC      IBNKCALL
@@ -840,7 +863,7 @@ INVERT          TS      HOLD            # ROUTINE TO INVERT -INPUT AT PI/2
 DOWNGTS         CAF     ZERO            # ZERO SWITCHES WHEN USEQRJTS BIT IS UP
                 TS      ALLOWGTS        #       OR DAP IS OFF.
                 TS      INGTS
-                TCF     DOCKTEST
+                TCF     GETAOSUV
 
 1/ANET-         ZL
                 LXCH    ACCSW           # ZERO ACCSW

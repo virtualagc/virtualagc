@@ -140,12 +140,12 @@ DAPS2           EQUALS
                 BANK            20
 DAPS3           EQUALS
 LOADDAP         EQUALS
-RODTRAP         EQUALS
                 BNKSUM          20
 
 
                 BANK            21
 DAPS4           EQUALS
+RODTRAP         EQUALS
 F2DPS*21        EQUALS
 R10             EQUALS
 R11             EQUALS
