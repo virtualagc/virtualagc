@@ -148,7 +148,6 @@ DAPS4           EQUALS
 RODTRAP         EQUALS
 F2DPS*21        EQUALS
 R10             EQUALS
-R11             EQUALS
                 BNKSUM          21
 
 
@@ -240,6 +239,7 @@ R47             EQUALS
                 BANK            33
 SERVICES        EQUALS
 R29/SERV        EQUALS
+R11             EQUALS
                 BNKSUM          33
 
 

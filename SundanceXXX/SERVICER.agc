@@ -227,12 +227,6 @@ MOONSPOT        CA              KPIP1                   # TP MPAC = ABDELV AT 2(
                 CA              PRIO20                  # RESTORE PRIO 20
                 TC              PRIOCHNG
 
-                TC              INTPRET
-AVERAGEG        BON             CALL
-                                MUNFLAG
-                                RVBOTH
-                                CALCRVG
-                EXIT
 GOSERV          TC              QUIKFAZ5
 
 COPYCYCL        TC              COPYCYC
@@ -363,11 +357,7 @@ AVGEND          CA              PIPTIME         +1      # FINAL AVERAGE G EXIT
                 OCT             20000
 
                 TC              INTPRET
-                SET             CLEAR
-                                NOR29FLG                # SHUT OFF R29 WHEN SERVICER ENDS.
-                                SWANDISP                # SHUT OFF R10 WHEN SERVICER ENDS.
-                CLEAR           CALL                    # RESET MUNFLAG.
-                                MUNFLAG
+                CALL                                    # RESET MUNFLAG.
                                 AVETOMID
                 CLEAR           EXIT
                                 V37FLAG
@@ -647,8 +637,8 @@ TMPTOSPT        CA              CDUTEMPY                # THIS SUBROUTINE, CALLE
 # LANDING RADAR MEASUREMENT JOB (LRHJOB) TO TAKE A ALTITUDE MEASUREMENT
 # 50 MS PRIOR TO THE NEXT READACCS TASK.
 
-                BANK            21
-                SETLOC          R10
+                BANK            33
+                SETLOC          R11
                 BANK
 
                 COUNT*          $$/SERV
@@ -656,26 +646,24 @@ TMPTOSPT        CA              CDUTEMPY                # THIS SUBROUTINE, CALLE
 LRHTASK         CS              FLGWRD11
                 MASK            LRBYBIT
                 EXTEND
-                BZF             GRP2OFF                 # LR BYPASS SET - BYPASS ALL LR READING.
+                BZF             TASKOVER                # LR BYPASS SET - BYPASS ALL LR READING.
 
                 CA              READLBIT
                 MASK            FLGWRD11                # IS READLR FLAG SET?
                 EXTEND
-                BZF             GRP2OFF                 # NO.  BYPASS LR READ.
+                BZF             TASKOVER                # NO.  BYPASS LR READ.
 
                 CS              FLGWRD11
                 MASK            NOLRRBIT                # IS LR READ INHIBITED?
                 EXTEND
-                BZF             GRP2OFF                 # YES.  BYPASS LR READ.
+                BZF             TASKOVER                # YES.  BYPASS LR READ.
 
                 CA              PRIO32                  # LR READ OK   SET JOB TO DO IT
                 TC              NOVAC                   # ABOUT 50 MS PRIOR TO PIPA READ
                 EBANK=          HMEAS
                 2CADR           LRHJOB
-GRP2OFF         EXTEND
-                DCA             NEG0
-                DXCH            -PHASE2
-                TCF             R10,R11A
+
+                TC              TASKOVER
 
 
                 BANK            33
@@ -740,19 +728,6 @@ POS2CHK         CAF             BIT7                    # VERIFY LR IN POS2
 
 HIGATCHK        CA              TTF/8                   # IS TTF > CRITERION?   (TTF IS NEGATIVE)
                 AD              RPCRTIME
-                EXTEND
-                BZMF            POS1CHK                 # NO
-
-                CA              EBANK4                  # MUST SWITCH EBANKS
-                XCH             EBANK
-                TS              L                       # SAVE IN L
-
-                EBANK=          XNBPIP
-                CS              XNBPIP                  # UXBXP IN GSOP CH5
-                EBANK=          DVCNTR
-                LXCH            EBANK                   # RESTORE EBANK
-                AD              RPCRTQSW                # QSW - UXBXP
-
 
                 EXTEND
                 BZMF            HIGATASK                # IF UXBXP > QSW, THEN REPOSITION
@@ -771,28 +746,6 @@ CONTSERV        INHINT
                 TS              FLGWRD11
 
 COPYCYC1        TC              QUIKFAZ5
-
-R29?            CA              FLAGWRD3
-                MASK            NR29&RDR
-                CCS             A                       # IS NOR29FLG OR READRFLG SET?
-                TCF             R29NODES                # YES, SO DON'T DESIGNATE.
-
-                CA              RADMODES                # NO, SO R29 IS CALLED FOR.
-                MASK            OCT10002                # IS THE RR NOT ZEROING ITS CDUS, AND
-                CCS             A                       # IS THE RENDEZVOUS RADAR IN AUTO MODE?
-                TCF             R29NODES                # NO, SO DON'T DESIGNATE.
-
-                CA              RADMODES
-                MASK            PRIO22
-                CCS             A                       # IS RR REPOSITIONING OR REMODING?
-                TCF             NOR29NOW                # YES; COME BACK IN 2 SECONDS & TRY AGAIN.
-
-                TCF             R29
-
-R29NODES        INHINT                                  # R29 NOT ALLOWED THIS CYCLE.
-                CS              DESIGBIT                # SHOW THAT DESIGNATION IS OFF.
-                MASK            RADMODES
-                TS              RADMODES
 
 NOR29NOW        TC              INTPRET                 # INTPRET DOES A RELINT.
                 VLOAD           ABVAL                   # MPAC = ABVAL( NEW SM. POSITION VECTOR)
@@ -989,34 +942,6 @@ SHIFT11         2DEC            1               B-11
 # THE INPUT AND OUTPUT QUANTITIES ARE REFERENCED TO THE STABLE MEMBER
 # COORDINATE SYSTEM.
 
-RVBOTH          VLOAD           PUSH
-                                G(CSM)
-                VAD             PDDL
-                                V(CSM)
-                                PGUIDE
-                DDV             VXSC
-                                SHIFT11
-                VAD
-                                R(CSM)
-                STCALL          R1S
-                                MUNGRAV
-                VAD             VAD
-                                V(CSM)
-                STADR
-                STORE           V1S
-                EXIT
-                TC              QUIKFAZ5
-                TC              INTPRET
-                VLOAD
-                                GDT1/2
-                STOVL           G(CSM)
-                                R1S
-                STOVL           R(CSM)
-                                V1S
-                STORE           V(CSM)
-                EXIT
-                TC              QUIKFAZ5
-                TC              INTPRET
 MUNRVG          VLOAD           VXSC
                                 DELV
                                 KPIP2
@@ -1408,43 +1333,16 @@ LRVJOB          CA              170MS                   # SET TASK TO READ CDUS 
                 CADR            LRVEL
                 TC              BANKCALL                # PUT LRVJOB TO SLEEP ABOUT 500 MS
                 CADR            RADSTALL
-                TCF             VBAD
-                CCS             STILBADV                # IS DATA GOOD JUST PRESENT?
-                TCF             VSTILBAD                # JUST GOOD - MUST WAIT 4 SECONDS.
+                TC              ENDOFJOB
 
-                INHINT
                 EXTEND                                  # GOOD RETURN-STOW AWAY VMEAS
                 DCA             SAMPLSUM
                 DXCH            VMEAS
-                CA              EBANK4                  # FOR DOWNLINK
-                TS              EBANK
-                EBANK=          LRVTIME
-
-                EXTEND
-                DCA             LRVTIME
-                DXCH            LRVTIMDL
-                EXTEND
-                DCA             LRXCDU
-                DXCH            LRXCDUDL
-                CA              LRZCDU
-                TS              LRZCDUDL
-                CA              EBANK7
-                TS              EBANK
-                EBANK=          VSELECT
 
                 CS              FLGWRD11                # SET BIT TO INDICATE VELOCITY
                 MASK            VELDABIT                # MEASUREMENT MADE.
 
-                ADS             FLGWRD11
-ENDLRV          CCS             VSELECT                 # UPDATE VSELECT
-                TCF             +2
-                CA              TWO
-                TS              VSELECT
                 TCF             ENDOFJOB
-
-VBAD            CAF             TWO                     # SET STILBAD TO WAIT 4 SECONDS
-VSTILBAD        TS              STILBADV
-                TCF             ENDLRV
 
 # LRHJOB IS SET BY LRHTASK WHEN LEM IS BELOW 25000 FT.  THIS JOB
 # INITIALIZES THE LR READ ROUTINE FOR AN ALT MEASUREMENT AND GOES TO
@@ -1461,24 +1359,11 @@ LRHJOB          TC              BANKCALL                # INITIATE LR ALT MEASUR
                 CADR            LRALT
                 TC              BANKCALL                # LRHJOB TO SLEEP ABOUT 95MS
                 CADR            RADSTALL
-                TCF             HBAD
-                CCS             STILBADH                # IS DATA GOOD JUST PRESENT?
-                TCF             HSTILBAD                # JUST GOOD - MUST WAIT 4 SECONDS.
+                TC              ENDOFJOB
 
-                INHINT
                 EXTEND
                 DCA             SAMPLSUM                # GOOD RETURN-STORE AWAY LRH DATA
                 DXCH            HMEAS                   # LRH DATA 1.079 FT/BIT
-                EXTEND                                  # FOR DOWNLINK
-                DCA             PIPTIME1
-                DXCH            MKTIME
-
-                EXTEND
-                DCA             CDUTEMPY                # CDUY,Z = AIG,AMG
-                DXCH            AIG
-
-                CA              CDUTEMPX                # CDUX = AOG
-                TS              AOG
 
                 CS              FLGWRD11                # SET BIT TO INDICATE RANGE
                 MASK            RNGEDBIT                # MEASUREMENT MADE.
