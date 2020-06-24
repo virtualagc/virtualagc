@@ -1757,17 +1757,6 @@ OLDZFORQ        EQUALS          OLDXFORP        +2
 SUMRATEQ        ERASE           +1                      # SUM OF UN-WEIGHTED JETRATE TERMS
 SUMRATER        EQUALS          SUMRATEQ +1             # SCALED AT PI/4 RADIANS/SECOND
 
-# RATE-COMMAND AND MINIMUM IMPULSE MODES
-
-STIKSENS        ERASE
-TCP             ERASE
-DXERROR         ERASE           +5
-DYERROR         EQUALS          DXERROR         +2
-DZERROR         EQUALS          DXERROR         +4
-PLAST           ERASE
-QLAST           ERASE
-RLAST           ERASE
-TCQR            ERASE
 # OTHER VARIABLES.                                                      (5D)
 
 OLDPMIN         ERASE                                   # THESE THREE USED IN MIN IMPULSE MODE.
@@ -1777,8 +1766,8 @@ TEMP31          EQUALS          DAPTEMP1
 SAVEHAND        ERASE           +1
 1/2JTSP         ERASE
 PERROR          ERASE
-QERROR          EQUALS          DYERROR
-RERROR          EQUALS          DZERROR
+QERROR          ERASE
+RERROR          ERASE
 # JET STATE CHANGE VARIABLES- TIME (TOFJTCHG),JET BITS WRITTEN NOW      (10D)
 #   (JTSONNOW), AND JET BITS WRITTEN AT T6 RUPT (JTSATCHG).
 
@@ -1790,7 +1779,7 @@ NEXTU           =               NEXTP           +1
 NEXTV           =               NEXTP           +2
 -2JETLIM        ERASE           +1                      # RATE COMMAND 4-JET RATE DIFFERENCE LIMIT
 -RATEDB         EQUALS          -2JETLIM        +1      # AND RATE DEADBAND FOR ASCENT OR DESCENT
-ZEROOR1         EQUALS          -RATEDB         +1
+ZEROOR1         ERASE
 
 TARGETDB        EQUALS          -RATEDB                 # MAN. CONTROL TARGET DB COMPLEMENT.
 
@@ -1798,7 +1787,7 @@ TARGETDB        EQUALS          -RATEDB                 # MAN. CONTROL TARGET DB
 
 PBIT            EQUALS          BIT10
 QRBIT           EQUALS          BIT11
-UERROR          EQUALS          DAPTREG5        # U,V-AXES ATT ERROR FOR RCS CONTROL LAWS
+UERROR          ERASE           +1                      # U,V-AXES ATT ERROR FOR RCS CONTROL LAWS
 VERROR          =               UERROR          +1
 RETJADR         ERASE
 
@@ -1839,7 +1828,11 @@ DEL             EQUALS          GTSTEMPS        +8D     # S.P. SGN FUNCTION VALU
 
 QRCNTR          EQUALS          GTSTEMPS        +9D     # INDEX FOR GTS LOOP THROUGH Q,R AXES.
 
-FUNCTION        EQUALS          GTSTEMPS        +10D    # D.P. WORD FOR DRIVE FUNCTION
+FUNCTION        ERASE           +1                      # D.P. WORD FOR DRIVE FUNCTION
+
+SCRATCHX        ERASE           +2                      # SCRATCH AREA FOR DVOVSUB ROUTINE.
+SCRATCHY        EQUALS          SCRATCHX        +1
+SCRATCHZ        EQUALS          SCRATCHX        +2
 
 NEGUQ           ERASE           +2                      # NEGATIVE OF Q-AXIS GIMBAL DRIVE
 #                               NEGUQ +1               DEFINED AND USED ELSEWHERE
@@ -1867,14 +1860,6 @@ JETRATE         EQUALS          DAPTREG1
 JETRATEQ        EQUALS          JETRATE         +1      # THE LAST CONTROL SAMPLE PERIOD OF 100 MS
 JETRATER        EQUALS          JETRATE         +2      # SCALED AT PI/4 RADIANS/SECOND
 
-
-DOWNTORK        ERASE           +5                      # ACCUMULATED JET TORQUE COMMANDED ABOUT
-POSTORKP        EQUALS          DOWNTORK                #   +,-P, +,-U, +,-V RESPECTIVELY.
-NEGTOTKP        EQUALS          DOWNTORK        +1      #   EMPLOYED EXCLUSIVELY FOR DOWNLIST.
-POSTORKU        EQUALS          DOWNTORK        +2      #   NOT INITIALIZED; PERMITTED TO OVERFLOW
-NEGTORKU        EQUALS          DOWNTORK        +3      # SCALED AT 32 JET-SEC, OR ABOUT 2.0 JET-
-POSTORKV        EQUALS          DOWNTORK        +4      #     MSEC PER BIT.
-NEGTORKV        EQUALS          DOWNTORK        +5
 
 NO.PJETS        ERASE           +2
 NO.UJETS        =               NO.PJETS        +1
@@ -1921,8 +1906,8 @@ ADRSDIF1        EQUALS          DAPTREG2
 HH              EQUALS          DAPTREG3                # DOUBLE PRECISION
 
 # HH +1         EQUALS          DAPTREG4
-E               EQUALS          DAPTREG6                # TIME SHARE WITH VERROR
-EDOT            EQUALS          OMEGAV
+E               ERASE           +1
+EDOT            EQUALS          E               +1
 
 # INPUT TO TJET LAW (PERMANENT ERASABLES).                              (48D)
 
@@ -1946,7 +1931,7 @@ ZONE3LIM        =               BLOCKTOP        +7      # HEIGHT OF MINIMUM IMPU
 
 # VARIABLES FOR GTS-QRAXIS CONTROL EXCHANGE.                            (4)
 
-ALLOWGTS        EQUALS          NEGUQ           +1      # INSERT INTO UNUSED LOCATION
+ALLOWGTS        ERASE                                   # INSERT INTO UNUSED LOCATION
 COTROLER        ERASE                                   # INDICATES WHICH CONTROL SYSTEM TO USE.
 QGIMTIMR        ERASE           +2                      # Q-GIMBAL DRIVE ITMER, DECISECONDS.
 INGTS           EQUALS          QGIMTIMR        +1      # INDICATOR OF CURRENT GTS CONTROL.
@@ -2062,9 +2047,9 @@ UNZ/2           =               14
 # *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
 
 # THE FOLLOWING ARE THE DAP REPLACEMENTS FOR THE ITEMPS AND RUPTREGS,NEEDED BECAUSE DAP IS NOW A TOB,JASK,JAB,TOSK
-# ...ANYWAY, THE DAP CAN NOW BE INTERRUPTED.                            (18D)
+# ...ANYWAY, THE DAP CAN NOW BE INTERRUPTED.                            (16D)
 
-DAPTEMP1        ERASE           +17D
+DAPTEMP1        ERASE           +15D
 DAPTEMP2        EQUALS          DAPTEMP1        +1
 DAPTEMP3        EQUALS          DAPTEMP1        +2
 DAPTEMP4        EQUALS          DAPTEMP1        +3
@@ -2078,7 +2063,7 @@ DAPTREG4        EQUALS          DAPTEMP1        +9D
 DAPTREG5        EQUALS          DAPTEMP1        +10D
 DAPTREG6        EQUALS          DAPTEMP1        +11D
 
-DAPARUPT        EQUALS          DAPTEMP1        +12D
+DAPARUPT        EQUALS          DAPTEMP1        +10D
 DAPLRUPT        EQUALS          DAPARUPT        +1
 DAPBQRPT        EQUALS          DAPARUPT        +2
 DAPZRUPT        EQUALS          DAPARUPT        +4
