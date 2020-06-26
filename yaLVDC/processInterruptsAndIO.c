@@ -233,7 +233,9 @@ processInterruptsAndIO(void)
           // of PROG REG A either to pause the processor or else to
           // continue free run.
           if ((state.cio[0214] & (1 << 9)) == 0)
-            printf("PROG ERR ... no change in run mode.\n");
+            {
+              // printf("PROG ERR ... no change in run mode.\n");
+            }
           else
             {
               printf("PROG ERR ... pausing CPU.\n");
@@ -244,6 +246,9 @@ processInterruptsAndIO(void)
 
       if (channel == 0234)
         state.ai3Shifter = payload;
+
+      if (channel == 074)
+        state.cio210CarrBusy &= ~0000010000;
 
       remainder = channel % 4;
       quotient = channel / 4;
@@ -260,6 +265,7 @@ processInterruptsAndIO(void)
           else if (channel <= 0104)
             {
               resetLatch(quotient - 1);
+              state.cio264Buffer &= ~(1 << (quotient - 2));
             }
           else if (channel == 0110)
             {
@@ -351,29 +357,40 @@ processInterruptsAndIO(void)
             {
               // Route the discrete outputs back into the (gated) discrete inputs.
               state.progRegA17_22 = (payload & 077) << 3;
-              if ((payload & 035) != 0 && !state.bbPrinter)
+              if ((payload & 035) != 0 && !state.bbPrinter) // D.O. 1, 3, 4, or 5.
                 {
                   state.bbPrinter = 1;
                   dPrintoutsTypewriter("PI CIO 210 D.O. 1");
-                  state.busyCountPrinter = SHORT_BUSY_CYCLES;
+                  state.busyCountPrinter = MEDIUM_BUSY_CYCLES;
                 }
               else if ((payload & 035) == 0 && state.bbPrinter)
                 {
                   state.bbPrinter = 0;
                   state.busyCountPrinter = 0;
                 }
-              if ((payload & 4) != 0)
+              if ((payload & 05) == 0 && state.bbTypewriter)
+                {
+                  state.bbTypewriter = 0;
+                  state.busyCountTypewriter = 0;
+                }
+              if ((payload & 4) != 0) // D.O. 3
                 {
                   state.cio210CarrBusy = 0001020000 >> 1;
                   state.cio[0154] |= PATN134[4];
                   state.bbTypewriter = 4;
                   dPrintoutsTypewriter("PI CIO 210 D.O. 3");
                   typewriterCharsInLine = 0;
-                  state.busyCountTypewriter = MEDIUM_BUSY_CYCLES;
+                  state.busyCountTypewriter = SHORT_BUSY_CYCLES;
                   state.busyCountPrinter = MEDIUM_BUSY_CYCLES;
+                  state.busyCountCarriagePrinter = 3;
                 }
-              if ((payload & 32) != 0)
-                state.cio[0154] = (state.cio[0154] & ~0377770000) | 0305010000;
+              if ((payload & 32) != 0) // D.O. 6
+                {
+                  state.cio[0154] = (state.cio[0154] & ~0377770000) | 0305010000;
+                  state.prsDelayedParity[1] = 0;
+                  state.prsDelayedParity[2] = 0;
+                  state.prsDelayedParity[3] = 0;
+                }
               goto moreCIO;
             }
           else if (channel == 0224)

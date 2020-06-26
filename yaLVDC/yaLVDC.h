@@ -187,6 +187,7 @@ typedef struct
   int busyCountPlotter;
   int busyCountPrinter;
   int busyCountTypewriter;
+  int busyCountCarriagePrinter;
   int bbPlotter;
   int bbPrinter;
   int bbTypewriter;
@@ -201,6 +202,8 @@ typedef struct
   int riLastInstruction; // Just used for debugging.
   int ai3Shifter;
   int cio210CarrBusy;
+  int cio264Buffer;
+  int lastWasPrinter; // As opposed to typewriter.
   // The following are used only for generating the check-parity bit in the interrupt
   // latch in the aftermath of a PRS instruction.  prsDelayedParity[0] and [4] are
   // permanently 0, and represent the condition in which a readback of CIO 154 are
@@ -319,6 +322,7 @@ extern int virtualWireErrorCodes;
 extern int typewriterMargin;
 extern int typewriterTabStop;
 extern int typewriterCharsInLine;
+extern int printerOctalMode;
 // Functions.
 int
 InitializeSocketSystem(void);

@@ -381,16 +381,23 @@ runOneInstruction(int *cyclesUsed)
       if (!state.busyCountPlotter)
         state.bbPlotter = 0;
     }
-  if (state.busyCountPrinter)
+  if (state.busyCountPrinter /* && (state.cio[0210] & 035) == 0*/)
     {
       state.busyCountPrinter--;
       if (!state.busyCountPrinter)
         {
           state.bbPrinter = 0;
+        };
+    }
+  if (state.busyCountCarriagePrinter && (state.cio[0210] & 4) == 0)
+    {
+      state.busyCountCarriagePrinter--;
+      if (!state.busyCountCarriagePrinter)
+        {
           state.cio210CarrBusy = 0;
         };
     }
-  if (state.busyCountTypewriter)
+  if (state.busyCountTypewriter && (state.cio[0210] & 5) == 0)
     {
       state.busyCountTypewriter--;
       if (!state.busyCountTypewriter)
@@ -563,6 +570,8 @@ runOneInstruction(int *cyclesUsed)
       location = operand | (residual << 8);
       state.prs[location] = data;
       state.prsChange = location;
+      state.cio264Buffer = state.cio[0264];
+      state.lastWasPrinter = 1;
     }
   else if (ptc && op == 005)
     {
@@ -601,12 +610,27 @@ runOneInstruction(int *cyclesUsed)
             }
           else if (operand9 == 0154)
             {
-              state.acc |= state.cio210CarrBusy;
+              if (state.lastWasPrinter)
+                state.acc |= state.cio210CarrBusy;
+              else
+                state.acc |= state.cio210CarrBusy & ~0000400000;
               if (state.prsParityDelayCount > 0
                   && state.prsParityDelayCount < 4)
                 {
                   state.acc = (state.acc & ~0002000000)
                       | state.prsDelayedParity[state.prsParityDelayCount];
+                }
+              // Has parity-check bit been set for CIO 264 since last PRS?
+              // This is purely ad hoc ... i.e., empirically determined by looking
+              // at the results of self-tests using PAST source code. It is
+              // undoubtedly bogus.
+              if ((state.cio264Buffer & 02) != 0 && (state.cio[0210] & 4) == 0)
+                {
+                  if (printerOctalMode)
+                    state.acc |= 0000400000 | ((state.cio264Buffer & 3) << 24);
+                  else
+                    state.acc |= 0100000000;
+                  //state.cio264Buffer &= ~2;
                 }
             }
         }

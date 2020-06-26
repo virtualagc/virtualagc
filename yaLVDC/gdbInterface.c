@@ -1047,6 +1047,9 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
           printf("  PR1 = %09o ", state.prsDelayedParity[1]);
           printf("  PR2 = %09o ", state.prsDelayedParity[2]);
           printf("  PR3 = %09o ", state.prsDelayedParity[3]);
+          printf("  CCB = %d ", state.busyCountCarriagePrinter);
+          printf("  CB = %09o ", state.cio210CarrBusy);
+          //printf("  264 = %09o ", state.cio264Buffer);
 
           printf(" INT = %09o", state.cio[0154]);
           printf("  INH = %09o", state.interruptInhibitLatches);

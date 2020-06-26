@@ -418,14 +418,26 @@ pendingVirtualWireActivity(void /* int id, int mask */)
           state.bbPrinter = 1;
           state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
           state.cio[0154] = (payload & 0374000000) | (0002100000 >> 1) | oddParity6((payload >> 20) & 077);
+          state.lastWasPrinter = 1;
         }
       else if (channel == 0164)
-        printerOctalMode = 1;
+        {
+          printerOctalMode = 1;
+          state.cio264Buffer = 0;
+          state.cio[0264] = 0;
+          state.lastWasPrinter = 1;
+        }
       else if (channel == 0170)
-        printerOctalMode = 0;
+        {
+          printerOctalMode = 0;
+          state.cio264Buffer = 0;
+          state.cio[0264] = 0;
+          state.lastWasPrinter = 1;
+        }
       else if (channel == 0120 || channel == 0124 || channel == 0130 || channel == 0134)
         {
           state.bbTypewriter = 4;
+          state.lastWasPrinter = 0;
           if (typewriterCharsInLine >= typewriterMargin)
             {
               dPrintoutsTypewriter("VW HIT MARGIN or RETURN");
