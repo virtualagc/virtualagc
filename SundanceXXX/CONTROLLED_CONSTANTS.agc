@@ -238,20 +238,3 @@ RESQ            2DEC*           40.6809913      E12 B-58*
 
 REMDIST         2DEC            384402000       B-29    # MEAN DISTANCE BETWEEN EARTH AND MOON.
 
-# ************************************************************************
-
-
-                SETLOC          PLANTIN
-                BANK
-                COUNT*          $$/LUROT
-
-COSI            2DEC            .99964115       B-1     # COS(1 DEG 32.1 MIN) B-1
-SINI            2DEC            .02678760       B-1     # SIN(1 DEG 32.1 MIN) B-1
-NODDOT          2DEC            -.457335143     E-2     # REVS/CSEC B+28=-1.07047016 E-8  RAD/SEC
-FDOT            2DEC            .570862491              # REVS/CSEC B+27= 2.67240019 E-6  RAD/SEC
-
-BDOT            2DEC            -3.07500412     E-8     # REVS/CSEC B+28=-7.19756666 E-14 RAD/SEC
-NODIO           2DEC            -.960101269             # REVS B-O    = -6.03249419  RAD
-FSUBO           2DEC            .415998375              # REVS B-O    =  2.61379488  RAD
-BSUBO           2DEC            .0651205006             # REVS B-O    =  0.409164173 RAD
-WEARTH          2DEC            .973561855              # REVS/CSEC B+23=7.29211515 E-5 RAD/SEC

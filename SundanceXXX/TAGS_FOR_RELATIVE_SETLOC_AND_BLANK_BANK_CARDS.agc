@@ -194,7 +194,6 @@ P20S3           EQUALS
 BAWLANGS        EQUALS
 MANUVER         EQUALS
 MANUVER1        EQUALS
-PLANTIN1        EQUALS
                 BNKSUM          26
 
 

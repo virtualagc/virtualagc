@@ -58,152 +58,16 @@
 
                 EBANK=          LOSCOUNT
                 COUNT*          $$/P20
-PROG22          =               PROG20
 PROG20          TC              2PHSCHNG
                 OCT             4
                 OCT             05022
                 OCT             26000                   # PRIORITY 26
-                TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE
-
-                TC              ORBCHGO                 # YES
-                TC              PROG20A         -2      # NO - CONTINUE WITH P20
-ORBCHGO         TC              UPFLAG                  # SET VEHUPFLG - CSM STATE
-                ADRES           VEHUPFLG                # VECTOR TO BE UPDATED
-                CAF             ONE                     # SET R2 FOR OPTION CSM WILL NOT
-                TS              OPTION2                 # CHANGE PRESENT ORBIT
-                CAF             OCT00012
-                TC              BANKCALL                # DISPLAY ASSUMED CSM ORBIT OPTION
-                CADR            GOPERF4
-                TC              GOTOPOOH                # TERMINATE
-                TC              ORBCHG1                 # PROCEED VALUE OF ASSUMED OPTION OK
-                TC              -5                      # R2 LOADED THRU DSKY
-ORBCHG1         CS              P22ONE
-                AD              OPTION2
-                EXTEND
-                BZF             PROG20A
-                CAF             V06N33*
-                TC              BANKCALL                # FLASH VERB-NOUN TO REQUEST ESTIMATED
-                CADR            GOFLASH                 # TIME OF LAUNCH
-                TC              GOTOPOOH                # TERMINATE
-                TC              ORBCHG2                 # PROCEED VALUES OK
-                TC              -5                      # TIME LOADED THRU DSKY
-ORBCHG2         TC              INTPRET
-                GOTO
-                                ORBCHG3
-                BANK            32
-                SETLOC          P20S4
-                BANK
-                COUNT*          $$/P20
-
-ORBCHG3         CALL
-                                INTSTALL
-                DLOAD
-                                TIG
-                STORE           LNCHTM
-                STORE           TDEC1                   # ESTIMATED LAUNCH TIME
-                CLEAR           CLEAR
-                                VINTFLAG                # LM INTEGRATION
-                                INTYPFLG                # PRECISION - ENCKE
-                CLEAR           CLEAR
-                                DIM0FLAG                # NO W-MATRIX
-                                D6OR9FLG
-                CALL
-                                INTEGRV                 # PLANETARY INERTIAL ORIENTATION
-                CALL
-                                GRP2PC
-                VLOAD
-                                RATT1
-                STODL           RSUBL                   # SAVE LM POSITION
-                                TAT
-
-                STCALL          TDEC1
-                                INTSTALL
-                SET             CLEAR
-                                VINTFLAG                # CSM INTEGRATION
-                                INTYPFLG
-                CLEAR           BOFF
-                                DIM0FLAG
-                                RENDWFLG                # W MATRIX VALID
-                                NOWMATX                 # NO
-                SET             SET                     # YES - SET FOR W MATRIX
-                                DIM0FLAG
-                                D6OR9FLG
-NOWMATX         CALL
-                                INTEGRV                 # CSM INTEGRATION
-                CALL
-                                GRP2PC
-                VLOAD
-                                VATT1
-                STOVL           VSUBC                   # SAVE CSM VELOCITY
-                                RATT1
-                STORE           RSUBC                   # SAVE CSM POSITION
-                VXV             UNIT                    # COMPUTE NORMAL TO CSM ORBITAL PLANE
-                                VSUBC                   # NSUB1=UNIT(R(CM) CROSS V(CM)
-                STOVL           20D                     # SAVE NSUB1
-                                RSUBL                   # COMPUTE ESTIMATED ORBITAL
-                VXV             UNIT                    # PLANE CHANGE
-                                20D                     # UCSM = UNIT(R(LM) CROSS NSUB1)
-                STOVL           UCSM
-                                RSUBC                   # COMPUTE ANGLE BETWEEN UCSM
-                UNIT            DOT                     # AND RSUBC
-                                UCSM                    # COS A = UCSM DOT UNIT (R(CM))
-                SL1
-                STORE           CSTH                    # SAVE DOE TIME-THETA SUBROUTINE
-                DSQ             BDSU                    # COMPUTE SINE A
-                                ONEB-2
-                SQRT
-                STOVL           SNTH                    # SAVE FOR TIME-THETA SUBROUTINE
-                                RSUBC                   # POSITION OF CSM AT EST. LAUNCH
-                STOVL           RVEC                    # TIME FOR TIME-THETA   B-27
-                                VSUBC                   # VELOCITY OF CSM AT EST. LAUNCH
-                VCOMP
-                STORE           VVEC                    # TIME FOR TIME THETA   B-5
-                CLEAR           CALL
-                                RVSW
-                                TIMETHET
-                VCOMP
-                STORE           NEWVEL                  # TERMINAL VELOCITY OF CSM
-                DLOAD
-                                T
-                STOVL           TRANSTM                 # TRANSFER TIME
-
-                                NEWVEL
-                ABVAL
-                STOVL           20D
-                                0D
-                STORE           NEWPOS                  # TERMINAL POSITION OF CSM
-                VXV             UNIT                    # COMPUTE NORMAL TO CSM ORBITAL PLANE
-                                RSUBL                   # NSUB2 = UNIT(NEWPOS CROSS R(LM))
-                VXV             UNIT                    # ROTATE TERMINAL VEL INTO DESIRED
-                                NEWPOS                  # ORBITAL PLANE
-                VXSC            VSL1                    # VSUBC = ABVAL(NEWVEL) $ UNIT (NSUB2
-                                20D
-                STCALL          NCSMVEL                 # NEW CSM VELOCITY
-                                GRP2PC
-                CALL
-                                INTSTALL
-                DLOAD           BDSU
-                                TRANSTM                 # LAUNCH TIME - TRANSFER TIME
-                                LNCHTM
-                STOVL           TET
-                                NEWPOS
-                STORE           RCV
-                STOVL           RRECT
-                                NCSMVEL
-                STCALL          VRECT
-                                MINIRECT
-                AXT,2           CALL
-                                2
-                                ATOPCSM
-                CALL
-                                INTWAKE0
-                EXIT
-                TC              BANKCALL
-                CADR            PROG20A
-                BANK            24
-                SETLOC          P20S
-                BANK
-                COUNT*          $$/P20
+                
+                INHINT
+                CS              SURFFBIT
+                MASK            FLAGWRD8
+                TS              FLAGWRD8
+                RELINT
 
                 TC              DOWNFLAG                # RESET VEHUPFLG- LM STATE VECTOR
                 ADRES           VEHUPFLG                # TO BE UPDATED
@@ -224,8 +88,10 @@ PROG20A         TC              BANKCALL
                 ADRES           R04FLAG                 # ALARM 521 IF CANT READ RADAR
                 TC              DOWNFLAG                # ENSURE R25 GIMBAL MONITOR IS ENABLED
                 ADRES           NORRMON                 # (RESET NORRMON FLAG)
-                TC              DOWNFLAG                # RESET LOS BEING COMPUTED FLAG
-                ADRES           LOSCMFLG
+                TC              INTPRET
+                CALL            
+                                UPPSV
+                EXIT
 P20LEM1         TC              PHASCHNG
                 OCT             04022
                 CAF             ZERO                    # ZERO MARK COUNTER
@@ -261,10 +127,6 @@ P20LEMB         TC              PHASCHNG
                 OCT             10000                   # REQUESTED PROGRAM TO RUN FIRST
                 CAF             PRIO26                  # RESTORE PRIORITY 26
                 TC              PRIOCHNG
-                CA              FLAGWRD1                # IS THE TRACK FLAG SET
-                MASK            TRACKBIT
-                EXTEND
-                BZF             P20LEMWT                #  BRANCH - NO - WAIT FOR IT TO BE SET
 P20LEMB7        CAF             BIT2                    # IS RR AUTO MODE DISCRETE PRESENT
                 EXTEND
                 RAND            CHAN33
@@ -277,16 +139,16 @@ P20LEMB5        CS              OCT24                   # RADAR NOT IN AUTO CHEC
                 EXTEND
                 BZF             P20LEMB6                # BRANCH - YES-OK TO DO PLEASE PERFORM
 
-
-                AD              NEG2                    # ALSO CHECK FOR P22
+                CA              FLAGWRD1                # IS THE TRACK FLAG SET
+                MASK            TRACKBIT
                 EXTEND
-                BZF             P20LEMB6                # BRANCH - YES OK TO DO PLEASE PERFORM
+                BZF             P20LMWT1                #  BRANCH - NO - WAIT FOR IT TO BE SET
                 CAF             ALRM514                 # TRACK FLAG SET-FLASH PRIORITY ALARM 514-
                 TC              BANKCALL                # RADAR GOES OUT OF AUTO MODE WHILE IN USE
                 CADR            PRIOLARM
                 TC              GOTOV56                 # TERMINATE EXITS VIA V56
-                TC              P20LEMB                 # PROCEED AND ENTER BOTH GO BACK
-                TC              P20LEMB                 # TO CHECK AUTO MODE AGAIN
+                TC              P20LEMB7                # PROCEED AND ENTER BOTH GO BACK
+                TC              P20LEMB7                # TO CHECK AUTO MODE AGAIN
                 TC              ENDOFJOB
 P20LEMB6        CAF             OCT201                  # REQUEST RR AUTO MODE SELECTION
                 TC              BANKCALL
@@ -314,7 +176,7 @@ P20LEMB3        CS              RADMODES                # ARE RR CDUS BEING ZERO
                 CAF             BIT13-14                # IS SEARCH OR MANUAL ACQUISITION FLAG SET
                 MASK            FLAGWRD2
                 EXTEND
-                BZF             P20LEMC3                # ZERO MEANS AUTOMATIC RR ACQUISTION
+                BZF             P20LEMC                 # ZERO MEANS AUTOMATIC RR ACQUISTION
                 TC              DOWNFLAG                # RESET TO AUTO MODE
                 ADRES           SRCHOPTN
                 TC              DOWNFLAG
@@ -328,20 +190,6 @@ P20LEMB4        CAF             250DEC
                 CADR            DELAYJOB                # ZEROED-THEN GO BACK AND CHECK AGAIN
                 TC              P20LEMB3
 
-
-P20LEMC3        TC              INTPRET
-                CALL                                    # DO A PERMANENT MEMORY PRECISION
-                                UPPSV                   # INTEGRATION TO ESTABLISH AN UP-TO-DATE
-                BOFF            VLOAD                   # BASE FOR CONICS (KEPLER) IN R21
-                                SURFFLAG
-                                P20LEMC4
-                                RCVLEM                  # WHEN ON LUNAR SURFACE
-                VSR2                                    # SCALE B-29
-                STOVL           LMPOS
-                                VCVLEM
-                VSR2
-                STORE           LMVEL
-P20LEMC4        EXIT
 P20LEMC         TC              PHASCHNG
                 OCT             04022
                 CAE             FLAGWRD0                # IS THE RENDEZVOUS FLAG SET
@@ -352,7 +200,9 @@ P20LEMC         TC              PHASCHNG
                 MASK            TRACKBIT
                 EXTEND
                 BZF             P20LEMD                 # BRANCH-TRACK FLAG NOT ON-WAIT 15 SECONDS
-P20LEMF         TC              R21LEM
+P20LEMF         TC              UPFLAG
+                ADRES           LOSCMFLG
+                TC              R21LEM
 
 
 P20LEMWT        CAF             250DEC
@@ -407,7 +257,7 @@ P20LEMD1        CAE             FLAGWRD1                # IS TRACK FLAG SET
 P20LEMD2        CAF             PRIO26                  # SCHEDULE JOB TO DO R21
                 TC              FINDVAC
                 EBANK=          LOSCOUNT
-                2CADR           P20LEMC3                # START AT PERM. MEMORY INTEGRATION
+                2CADR           P20LEMF                 # START AT PERM. MEMORY INTEGRATION
                 TC              TASKOVER
 
 
@@ -416,11 +266,7 @@ ALRM526         OCT             00526
 OCT201          OCT             00201
 ALRM514         OCT             514
 MAXTRIES        DEC             60
-OCT00012        OCT             00012
-P22ONE          OCT             00001
 
-ONEB-2          2DEC            1.0             B-2
-V06N33*         VN              0633
 UPPSV           STQ             CALL                    # UPDATES PERMANENT STATE VECTORS
                                 LS21X                   #  TO PRESENT TIME
                                 INTSTALL
@@ -477,6 +323,22 @@ UPPSV3          CLEAR           RTB
                 EBANK=          LOSCOUNT
                 COUNT*          $$/P22
 
+PROG22          TC              2PHSCHNG
+                OCT             4
+                OCT             05022
+                OCT             26000
+
+                INHINT
+                CS              FLAGWRD8
+                MASK            SURFFBIT
+                ADS             FLAGWRD8
+                RELINT
+
+                TC              UPFLAG
+                ADRES           VEHUPFLG
+
+                TC              PROG20A
+
 # PROGRAM DESCRIPTION
 # PREFERRED TRACKING ATTITUDE PROGRAM P25
 # MOD NO - 3
@@ -518,8 +380,8 @@ PROG25          TC              2PHSCHNG
                 ADRES           TRACKFLG                # SET TRACK FLAG
                 TC              UPFLAG
                 ADRES           P25FLAG                 # SET P25FLAG
-P25LEM1         TC              PHASCHNG
-                OCT             04022
+P25LEM1         TC              BANKCALL
+                CADR            R61LEM
                 CAF             P25FLBIT
                 MASK            STATE                   # IS P25FLAG SET
                 EXTEND
@@ -527,12 +389,24 @@ P25LEM1         TC              PHASCHNG
                 CAF             TRACKBIT                # IS TRACKFLAG SET?
                 MASK            STATE           +1
                 EXTEND
-
                 BZF             P25LMWT1                # NO-SKIP PHASE CHANGE AND WAIT 1 MINUTE
-                CAF             SEVEN                   # CALL R65 - FINE PREFERRED
-                TS              R65CNTR
-                # TC              BANKCALL                # TRACKING ATTITUDE ROUTINE
-                # CADR            R65LEM
+                TC              INTPRET
+                RTB
+                                LOADTIME
+                STCALL          TDEC1
+                                LPS20.1
+                CALL
+                                CDUTRIG
+                VLOAD           CALL
+                                RRTARGET
+                                *SMNB*
+                DLOAD           ACOS
+                                MPAC +5
+                DSU             BMN
+                                30DEG
+                                P25OK
+                EXIT
+
                 TC              P25LEM1                 # THEN GO CHECK FLAGS
 P25LEMWT        TC              PHASCHNG
                 OCT             00112
@@ -547,6 +421,7 @@ P25LEM2         CAF             PRIO14
                 2CADR           P25LEM1
                 TC              TASKOVER
 60SCNDS         DEC             6000
+30DEG           2DEC            .083333333              # THIRTY DEGREES,SCALED REVS,B0
 P25OK           EXIT
                 TC              P25LEMWT
 
@@ -583,7 +458,7 @@ P25OK           EXIT
                 EBANK=          LRS22.1X
                 COUNT*          $$/R22
 R22LEM          TC              PHASCHNG
-                OCT             04022
+                OCT             00152
                 CAF             RNDVZBIT                # IS RENDESVOUS FLAG SET?
                 MASK            STATE
                 EXTEND
@@ -607,9 +482,7 @@ R22LEM12        CAF             BIT14                   # IS RR AUTO TRACK ENABL
                 CS              RADMODES                # ARE RR CDUS BEING ZEROED
                 MASK            BIT13                   # (BIT 13 RADMODES EQUAL ONE)
                 EXTEND
-                BZF             R22LEM42                # CDUS BEING ZEROED
-                TC              PHASCHNG                # IF A RESTART OCCURS,AN EXTRA RADAR
-                OCT             00152                   # READING IS TAKEN,SO BAD DATA ISN'T USED
+                BZF             R22WAIT                 # CDUS BEING ZEROED
                 TC              BANKCALL                # YES READ DATA + CALCULATE LOS
                 CADR            LRS22.1                 # DATA READ SUBROUTINE
                 INDEX           MPAC
@@ -657,7 +530,7 @@ R22LEM3         CS              FLAGWRD1                # SHOULD WE BYPASS STATE
                 CA              FLAGWRD1                # IS UPDATE FLAG SET
                 MASK            UPDATBIT
                 EXTEND
-                BZF             R22LEM42                # UPDATE FLAG NOT SET
+                BZF             R22WAIT                 # UPDATE FLAG NOT SET
                 CAF             PRIO26                  # INSURE HIGH PRIO IN RESTART
                 TS              PHSPRDT2
 
@@ -665,61 +538,62 @@ R22LEM3         CS              FLAGWRD1                # SHOULD WE BYPASS STATE
                 GOTO
                                 LSR22.3
 R22LEM93        EXIT                                    # NORMAL EXIT FROM LSR22.3
-                TC              PHASCHNG                # PHASE CHANGE TO PROTECT AGAINST
-                OCT             04022                   # CONFLICT WITH GRP2PC ERASEABLE
                 TCF             R22LEM44
 R22LEM96        EXIT
                 CAF             ZERO                    # SET N49FLAG = ZERO TO INDICATE
                 TS              N49FLAG                 # V06 N49 DISPLAY HASNT BEEN ANSWERED
                 TC              PHASCHNG
                 OCT             04022                   # TO PROTECT DISPLAY
-                CAF             PRIO27                  # PROTECT DISPLAY
-                TC              NOVAC
-                EBANK=          N49FLAG
-                2CADR           N49DSP
+                CAF             PRIO26                  # PROTECT DISPLAY
+                TC              PRIOCHNG
+
+                CAF             V06N49NB
+                TC              BANKCALL                # EXCESSIVE STATE VECTOR UPDATE - FLASH
+                CADR            PRIODSPR                # VERB 06 NOUN 49 R1=DELTA R, R2=DELTA V
+                TC              N49TERM                 # TERMINATE - EXIT R22 AND P20
+                TC              N49PROC                 # PROCEED - N49FLAG = -1
+                TC              N49RECYC                # RECYCLE - N49FLAG = + VALUE
+                CAF             PRIO34
+                TC              PRIOCHNG
                 TC              INTPRET
-                SLOAD
+                STORE           MPAC
+                SLOAD           BZE                     # LOOP TO CHECK IF FLAG
                                 N49FLAG
-                BZE             BMN                     # LOOP TO CHECK IF FLAG
                                 -3                      # SETTING CHANGED-BRANCH - NO
+                BMN             CALL
                                 R22LEM7                 # PROCEED
-                EXIT                                    # DISPLAY ANSWERED BY RECYCLE
-                TC              LUNSFCHK                # ARE WE ON LUNAR SURFACE
-                TC              R22WAIT                 # YES - 15 SECOND DELAY
-                CA              ZERO                    # NO - SET R65COUNTER = 0, DO FINE
-                TC              R22LEM45                # TRACKING TAKE ANOTHER RADAR READING
-R22LEM7         CALL                                    # PROCEED
                                 GRP2PC                  # PHASE CHANGE AND
                 GOTO                                    # GO TO INCORPORATE DATA.
                                 ASTOK
+                EXIT                                    # DISPLAY ANSWERED BY RECYCLE
 R22LEM44        INCR            MARKCTR                 # INCREMENT COUNT OF MARKS INCORPORATED.
-                TC              LUNSFCHK                # ARE WE ON LUNAR SURFACE
-                TC              R22LEM46                # YES - WAIT 2 SECONDS
-                CA              FIVE                    # NOT ON LUNAR SURFACE
-                TC              R22LEM45                # R65COUNTER = 5
 R22LEM42        TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE (P22FLAG SET)
                 TC              R22LEM46                # YES - WAIT 2 SECONDS
-                CA              TWO                     # NO-SET R65COUNTER = 2
-R22LEM45        TS              R65CNTR
+                
+R22LEM45        CAF             45SECNDS
+                TC              P20LEMWT +1
 
-                # TC              BANKCALL
-                # CADR            R65LEM                  # FINE PREFERRED TRACKING ATTITUDE
-                TC              R22LEM
+R22LEM46        CAF             30SECNDS
+                TC              P20LEMWT +1
+
 R22WAIT         CAF             1500DEC
                 TC              P20LEMWT        +1
 
+N49TERM         CS              ONE
+                TS              N49FLAG
+                TC              GOTOV56
 
-R22LEM46        CAF             2SECS
-                TC              P20LEMWT        +1
-
-
-N49DSP          CAF             V06N49NB
-                TC              BANKCALL                # EXCESSIVE STATE VECTOR UPDATE - FLASH
-                CADR            PRIODSP                 # VERB 06 NOUN 49 R1=DELTA R, R2=DELTA V
-                TC              GOTOV56                 # TERMINATE - EXIT R22 AND P20
-                CS              ONE                     # PROCEED - N49FLAG = -1
-                TS              N49FLAG                 # RECYCLE - N49FLAG = + VALUE
+N49PROC         CAF             ONE
+                TS              N49FLAG
                 TC              ENDOFJOB
+
+N49RECYC        CS              ONE
+                TS              N49FLAG
+                TC              R22LEM
+
+R22LEM7         EXIT
+                TC              ENDOFJOB
+
 R22RSTRT        TC              PHASCHNG                # IF A RESTART OCCURS WHILE READING RADAR
                 OCT             00152                   # COME HERE TO TAKE A RANGE-RATE READING
                 TC              BANKCALL                # WHICH ISNT USED TO PREVENT TAKING A BAD
@@ -729,12 +603,13 @@ R22RSTRT        TC              PHASCHNG                # IF A RESTART OCCURS WH
                 TC              P20LEMC                 # COULD NOT READ RADAR - TRY TO REDESIGNATE
                 TC              R22LEM                  # READ SUCCESSFUL - CONTINUE AT R22
 
-
 ALRM525         OCT             00525
 V06N05          VN              00605
 V06N49NB        VN              00649
 1500DEC         DEC             1500
+80DEC           DEC             80
 45SECNDS        DEC             4500
+30SECNDS        DEC             3000
 # LUNSFCHK-CLOSED SUBROUTINE TO CHECK IF ON LUNAR SURFACE (P22FLAG)
 #          RETURNS TO CALLER +1 IF P22FLAG SET
 #                  TO CALLER +2 IF P22FLAG NOT SET
@@ -743,7 +618,8 @@ V06N49NB        VN              00649
                 COUNT*          $$/P22
 LUNSFCHK        CS              FLAGWRD8                # CHECK IF ON LUNAR SURFACE
                 MASK            SURFFBIT                # IS SURFFLAG SET?
-                CCS             A                       # BRANCH - P22FLAG SET
+                EXTEND                                  # BRANCH - P22FLAG SET
+                BZF             +2
                 INCR            Q                       # NOT SET
                 TC              Q                       # RETURN
 
@@ -782,36 +658,32 @@ LUNSFCHK        CS              FLAGWRD8                # CHECK IF ON LUNAR SURF
                 COUNT*          $$/R21
 R21LEM          CAF             MAXTRIES                # ALLOW 60 PASSES (APPROX 45 SECS.) TO
                 TS              DESCOUNT                # DESIGNATE AND LOCKON
-                TC              LUNSFCHK
-                TC              R21LEM5
-                CAF             ZERO                    #      COMMAND ANTENNA TO MODE CENTER
-                TS              TANG                    # IF NOT ON SURFACE-MODE 1-(T=0,S=0)
-                TS              TANG            +1
-                TC              R21LEM6
-R21LEM5         CAF             BIT15                   # IF ON LUNAR SURFACE-MODE 2-(T=180,S=-90)
-                TS              TANG
-                CS              HALF
-                TS              TANG            +1
-R21LEM6         TC              DOWNFLAG
-                ADRES           LOKONSW
-                TC              BANKCALL
-                CADR            RRDESNB
-                TC              +1
-
-                TC              BANKCALL
-                CADR            RADSTALL
-                TC              R21-503                 # BAD RETURN FROM DESIGNATE -ISSUE ALARM
-R21LEM10        TC              UPFLAG                  # INDICATES LOS TO BE COMPUTED
-                ADRES           LOSCMFLG                # EVERY FOURTH PASS THRU DODES
                 CS              BIT14                   # REMOVE RR SELF TRACK ENABLE
                 EXTEND
                 WAND            CHAN12
-R21LEM2         CAF             THREE
+R21LEM2         CAF             FOUR
                 TS              LOSCOUNT
+                TC              LUNSFCHK
+                TC              +2
+                TC              R21LEM1
+                CS              RADMODES
+                MASK            ANTENBIT
+                EXTEND
+                BZF             R21LEM1
+                CAF             REMODBIT
+                INHINT
+                ADS             RADMODES
+                CAF             TWO
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           REMODE
+                RELINT
+                TC              BANKCALL
+                CADR            RADSTALL
+                TC              +1
 R21LEM1         TC              INTPRET
-                RTB             DAD
+                RTB
                                 LOADTIME
-                                HALFSEC                 # EXTRAPOLATE TO PRESENT TIME + .5 SEC.
                 STCALL          TDEC1                   # LOS DETERMINATION ROUTINE
                                 LPS20.1
                 EXIT
@@ -833,7 +705,7 @@ R21-503         CAF             ALRM503                 # ISSUE ALARM 503
                 CADR            PRIOLARM
                 TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
                 TC              R21SRCH                 # PROC
-                TC              P20LEMC3
+                TC              R21LEM
                 TC              ENDOFJOB
 R21END          TC              DOWNFLAG
                 ADRES           LOSCMFLG                # RESET LOSCMFLG
@@ -850,10 +722,9 @@ R21LEM4         CAF             ALRM527                 # ALARM 527-LOS NOT IN M
                 CADR            PRIOLARM
 
                 TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
-                TC              P20LEMC3
+                TC              R21LEM
                 TC              -5                      # ENTER
                 TC              ENDOFJOB
-HALFSEC         2DEC            50
 
 # MANUAL ACQUISITION ROUTINE R23LEM
 # PROGRAM DESCRIPTION
@@ -895,11 +766,11 @@ R23LEM1         CAF             BIT14                   # ENABLE TRACKER
                 TC              R23LEM11                # PROCEDE
                 TC              R23LEM3                 # ENTER- DO ANOTHER MANUVER
 R23LEM11        INHINT
+                TC              IBNKCALL                # RESTORE DEADBAND TO
+                CADR            RESTORDB                # ASTRONAUT SELECTED VALUE
                 TC              RRLIMCHK                # YES - CHECK IF ANTENNA IS WITHIN LIMITS
                 ADRES           CDUT
                 TC              OUTOFLIM                # NOT WITHIN LIMITS
-                TC              IBNKCALL                # RESTORE DEADBAND TO
-                CADR            RESTORDB                # ASTRONAUT SELECTED VALUE
                 RELINT
                 TC              DOWNFLAG                # CLEAR NO ANGLE MONITOR FLAG
                 ADRES           NORRMON
@@ -957,8 +828,6 @@ OCT205          OCT             205
                 COUNT*          $$/R24
 R24LEM          TC              UPFLAG
                 ADRES           SRCHOPTN                # SET SRCHOPT FLAG
-                TC              DOWNFLAG                # RESET LOS BEING COMPUTED FLAG TO MAKE
-                ADRES           LOSCMFLG                # SURE DODES DOESN'T GO TO R21
 R24LEM1         CAF             ZERO
                 TS              DATAGOOD                # ZERO OUT DATA INDICATOR
                 TS              OMEGAD                  # ZERO OMEGA DISPLAY REGS
@@ -979,8 +848,9 @@ R24LEM2         TC              PHASCHNG
 R24END          INHINT
                 TC              KILLTASK
                 CADR            CALLDGCH
+                RELINT
                 TC              CLRADMOD                # CLEAR BITS 10 & 15 OF RADMODES.
-                TCF             P20LEM1                 # AND GO TO 400 MI. RANGE CHECK IN P20.
+                TC              P20LEM1                 # AND GO TO 400 MI. RANGE CHECK IN P20.
 
 CLRADMOD        CS              BIT10+15
                 INHINT
@@ -992,27 +862,27 @@ CLRADMOD        CS              BIT10+15
 
                 TC              Q
 
-BIT10+15        OCT             41000
-
 R24LEM3         TC              PHASCHNG
                 OCT             04022
                 INHINT
                 TC              KILLTASK
                 CADR            CALLDGCH                # KILL WAITLIST FOR NEXT POINT IN PATTERN
-                TC              CLRADMOD                # CLEAR BITS 10 + 15 OF RADMODES TO KILL
                 RELINT                                  # HALF SECOND DESIGNATE LOOP
-                CAF             .5SEC
-                TC              BANKCALL                # WAIT FOR DESIGNATE LOOP TO DIE
-                CADR            DELAYJOB
+                TC              CLRADMOD
+                CS              BIT2
+                EXTEND
+                WAND            CHAN12
                 TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE
                 TC              R24LEM2                 # YES-DONT DO ATTITUDE MANEUVER
+                TC              UPFLAG
+                ADRES           MANUFLAG
                 TC              BANKCALL                # CALL R61 TO DO PREFERRED TRACKING
                 CADR            R61LEM                  # ATTITUDE MANEUVER
-                CAF             ZERO                    # ZERO OUT RADCADR (WHICH WAS SET BY
-                TS              RADCADR                 # ENDRADAR WHEN DESIGNATE STOPPED) SO THAT
-                                                        # RRDESSM WILL RETURN TO CALLER
+                TC              DOWNFLAG
+                ADRES           MANUFLAG
                 TC              R24LEM2                 # AND GO BACK TO PUT UP V16 N80 DISPLAY
 
+BIT10+15        OCT             41000
 V16N80          VN              01680
 
 # PREFERRED TRACKING ATTITUDE ROUTINE R61LEM
@@ -2822,7 +2692,7 @@ BIN3            EQUALS          THREE
 # MPAC DESTROYED BY THIS ROUTINE
 
                 BANK            23
-                SETLOC          P20S
+                SETLOC          P20S1
                 BANK
 
                 COUNT*          $$/LPS20
@@ -3133,7 +3003,7 @@ RRLOSVEC        EQUALS          RRTARGET
 
 # DEBRIS -  A,L,Q MPAC -PUSHLIST AND PUSHLOC ARE NOT CHANGED BY THIS ROUTINE
 
-                SETLOC          P20S
+                SETLOC          P20S1
                 BANK
 LRS22.2         TC              MAKECADR
                 TS              LRS22.1X
@@ -3156,8 +3026,6 @@ OKEXIT          EXIT                                    # NORMAL EXIT-SET MPAC =
                 TS              MPAC
 OUT22.2         CAE             LRS22.1X
                 TC              BANKJUMP
-
-30DEG           2DEC            .083333333              # THIRTY DEGREES,SCALED REVS,B0
 
 # PROGRAM NAME - LSR22.3                                                  DATE - 29 MAY 1967
 # MOD. NO 3                                                               LOG SECTION - P20-25

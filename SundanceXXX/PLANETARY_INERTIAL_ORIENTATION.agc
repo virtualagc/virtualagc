@@ -277,11 +277,6 @@ NEWANGLE        DLOAD   SR              # ENTER PD 12D
 # OUTPUT
 #       MMATRIX= 3X3 M MATRIX B-1       (STORED IN VAC AREA)
 
-                BANK    26
-                SETLOC  PLANTIN1
-                BANK
-                COUNT*  $$/LUROT
-
 EARTHMX         STQ     SETPD           # SET 8-9D=AZO
                         EARTHMXX
                         8D              # 10-11D=WEARTH
@@ -335,6 +330,17 @@ EARTHL          DLOAD   DCOMP
                 RVQ
 
 # CONSTANTS AND ERASABLE ASSIGNMENTS
+#
+COSI            2DEC    .99964115 B-1   # COS(1 DEG 32.1 MIN) B-1
+SINI            2DEC    .02678760 B-1   # SIN(1 DEG 32.1 MIN) B-1
+NODDOT          2DEC    -.457335143 E-2 # REVS/CSEC B+28=-1.07047016 E-8  RAD/SEC
+FDOT            2DEC    .570862491      # REVS/CSEC B+27= 2.67240019 E-6  RAD/SEC
+
+BDOT            2DEC    -3.07500412 E-8 # REVS/CSEC B+28=-7.19756666 E-14 RAD/SEC
+NODIO           2DEC    -.960101269     # REVS B-O    = -6.03249419  RAD
+FSUBO           2DEC    .415998375      # REVS B-O    =  2.61379488  RAD
+BSUBO           2DEC    .0651205006     # REVS B-O    =  0.409164173 RAD
+WEARTH          2DEC    .973561855      # REVS/CSEC B+23=7.29211515 E-5 RAD/SEC
 
 1B1             =       DP1/2           # 1  SCALED B-1
 RPREXIT         =       S1              # R-TO-RP AND RP-TO-R SUBR EXIT
