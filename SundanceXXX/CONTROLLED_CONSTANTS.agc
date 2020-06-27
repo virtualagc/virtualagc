@@ -123,22 +123,6 @@ THROTLAG        DEC             20                      # EMPIRICALLY DETERMINED
 
 DPSTHRSH        DEC             36                      # (THRESH1 + THRESH3 FOR P63)
 
-# LM HARDWARE-RELATED PARAMETERS
-
-
-                SETLOC          RADARUPT
-                BANK
-                COUNT*          $$/RRUPT
-
-LVELBIAS        DEC             -12288                  # LANDING RADAR BIAS FOR 153.6 KC.
-RDOTBIAS        2DEC            17000                   # BIAS COUNT FOR RR RANGE RATE.
-
-                SETLOC          LRS22
-                BANK
-                COUNT*          $$/LRS22
-
-RDOTCONV        2DEC            -.0019135344    B7      # CONVERTS RR RDOT READING TO M/CS AT 2(7)
-RANGCONV        2DEC            2.859024        B-3     # CONVERTS RR RANGE READING TO M. AT 2(-29
                 SETLOC          FTHROT
                 BANK
                 COUNT*          $$/THROT

@@ -102,7 +102,9 @@ CDUX            EQUALS          32
 CDUY            EQUALS          33
 CDUZ            EQUALS          34
 CDUT            EQUALS          35                      # REND RADAR TRUNNION CDU
+OPTY            EQUALS          35
 CDUS            EQUALS          36                      # REND RADAR SHAFT CDU
+OPTX            EQUALS          36
 PIPAX           EQUALS          37
 PIPAY           EQUALS          40
 PIPAZ           EQUALS          41
@@ -572,6 +574,7 @@ RADMODES        ERASE
 DAPBOOLS        ERASE
 SAMPLIM         ERASE
 SAMPLSUM        ERASE           +3
+OPTYHOLD        ERASE           +1
 TIMEHOLD        ERASE           +1
 RRTARGET        EQUALS          SAMPLSUM                # HALF U IT VECTOR IN SM OR NB AXES.
 TANG            ERASE           +1                      # DESIRE TRUNNION AND SHAFT ANGLES.

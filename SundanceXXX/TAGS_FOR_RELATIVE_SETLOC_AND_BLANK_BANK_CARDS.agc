@@ -183,6 +183,7 @@ P20S            EQUALS
                 BANK            25
 P20S1           EQUALS
 P20S2           EQUALS
+LRS22           EQUALS
 RADARUPT        EQUALS
 RRLEADIN        EQUALS
 R29S1           EQUALS
@@ -227,7 +228,6 @@ VB67            EQUALS
 P20S4           EQUALS
 F2DPS*32        EQUALS
 ABORTS          EQUALS
-LRS22           EQUALS
 FLOGSUB         EQUALS
 SERV2           EQUALS
 R47             EQUALS
