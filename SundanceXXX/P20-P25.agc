@@ -531,8 +531,8 @@ P25LEM1         TC              PHASCHNG
                 BZF             P25LMWT1                # NO-SKIP PHASE CHANGE AND WAIT 1 MINUTE
                 CAF             SEVEN                   # CALL R65 - FINE PREFERRED
                 TS              R65CNTR
-                TC              BANKCALL                # TRACKING ATTITUDE ROUTINE
-                CADR            R65LEM
+                # TC              BANKCALL                # TRACKING ATTITUDE ROUTINE
+                # CADR            R65LEM
                 TC              P25LEM1                 # THEN GO CHECK FLAGS
 P25LEMWT        TC              PHASCHNG
                 OCT             00112
@@ -702,8 +702,8 @@ R22LEM42        TC              LUNSFCHK                # CHECK IF ON LUNAR SURF
                 CA              TWO                     # NO-SET R65COUNTER = 2
 R22LEM45        TS              R65CNTR
 
-                TC              BANKCALL
-                CADR            R65LEM                  # FINE PREFERRED TRACKING ATTITUDE
+                # TC              BANKCALL
+                # CADR            R65LEM                  # FINE PREFERRED TRACKING ATTITUDE
                 TC              R22LEM
 R22WAIT         CAF             1500DEC
                 TC              P20LEMWT        +1
@@ -1052,120 +1052,33 @@ V16N80          VN              01680
                 COUNT*          $$/R61
 R61LEM          TC              MAKECADR
                 TS              GENRET
-                TC              UPFLAG                  # SET R61 FLAG
-                ADRES           R61FLAG
-                TC              R61C+L01
-R65LEM          TC              MAKECADR
-                TS              GENRET
-                TC              DOWNFLAG                # RESET R61 FLAG
-                ADRES           R61FLAG
+                TC              PHASCHNG
+                OCT             04022
 R61C+L01        CAF             TRACKBIT                # TRACKFLAG
                 MASK            STATE           +1
                 EXTEND
                 BZF             R61C+L1                 # NOT SET
 R61C+L03        TC              INTPRET                 # SET
                 VLOAD
-
                                 HIUNITZ
                 STORE           SCAXIS                  # TRACK AXIS UNIT VECTOR
                 RTB
                                 LOADTIME                # PRESENT TIME
-                DAD                                     # EXTRAPULATE FORWARD FORWARD TO CENTER OF
-                                3SECONDS                # SIX SECOND PERIOD.
                 STCALL          TDEC1
                                 LPS20.1                 # LOS DETERMINATION + VEH ATTITUDE
                 VLOAD
                                 RRTARGET
                 STORE           POINTVSM                # DIRECTION IN WHICH TRACK AXIS IS TO BE
-                CALL
-                                VECPOINT                # TO COMPUTE FINAL ANGLES
-                STORE           CPHI                    # STORE FINAL ANGLES - CPHI,CTHETA,CPSI
-                EXIT
-                TC              PHASCHNG
-                OCT             04022
-                CAF             TRACKBIT                #  IS TRACK FLAG SET
-                MASK            FLAGWRD1
-                EXTEND
-                BZF             R61C+L1                 # BRANCH - NO SKIP THIS CYCLE OF R61/65
-                EXTEND
-                READ            CHAN30                  # CHECK AUTO MODE
-                MASK            BIT10
-                CCS             A
-                TC              R61C+L04                # NOT IN G+N  C(A) = +
-                EXTEND
-                READ            CHAN31
-                MASK            BIT14                   # (+) = NOT IN AUTO, (+0) =AOK
-                CCS             A
-                TC              R61C+L04                # NOT IN AUTO MODE
-                TC              INTPRET
-                VLOAD           CALL
-                                RRTARGET
-                                CDU*SMNB
-                DLOAD           ACOS
-                                MPAC            +5
-                STODL           PHI
-                                TENDEG
-                BDSU            BPL
-                                PHI
-                                R61C+L05                # PHI GRE 10DEG
-                EBANK=          CDUXD
-                EXIT
-                CAF             CDUBANK
-                TS              BBANK
-                INHINT
-                EXTEND
-                DCA             CPHI
-                DXCH            CDUXD
-
-                CA              CPSI
-                TS              CDUZD
-                RELINT
-                EBANK=          LOSCOUNT
-                CAF             R61BANK
-                TS              BBANK
-                TC              R61C+L06
-R61C+L05        EXIT
-                INHINT
-                TC              IBNKCALL
-                FCADR           ZATTEROR
-                TC              IBNKCALL
-                FCADR           SETMINDB                # REDUCE ATTITUDE ERROR
-                TC              DOWNFLAG
-                ADRES           3AXISFLG
+                CLEAR           EXIT
+                                3AXISFLG
                 TC              UPFLAG
                 ADRES           PDSPFLAG                # SET PRIORITY DISPLAY FLAG
                 TC              BANKCALL
                 CADR            R60LEM
-                INHINT
-                TC              IBNKCALL
-                FCADR           RESTORDB
                 TC              PHASCHNG
                 OCT             04022
                 TC              DOWNFLAG
                 ADRES           PDSPFLAG                # RESET PRIORITY DISPLAY FLAG
-R61C+L06        CAF             R61FLBIT
-                MASK            STATE           +1
-                EXTEND
-                BZF             +2
-                TC              R61C+L4
-                CA              R65CNTR
-                CCS             A
-                TC              +2
-                TC              R61C+L4                 # R65CNTR = 0 - EXIT ROUTINE
-                TS              R65CNTR
-                CAF             06SEC
-                INHINT
-                TC              TWIDDLE
-                ADRES           R61C+L2
-                TC              ENDOFJOB
-R61C+L2         CAF             PRIO26
-                TC              FINDVAC
-                EBANK=          LOSCOUNT
-                2CADR           R61C+L01
-                TC              TASKOVER
-R61C+L04        TC              BANKCALL                # TO CONVERT ANGLES TO FDAI
-                CADR            BALLANGS
-                TC              R61C+L06
 
 R61C+L4         CAE             GENRET
                 TCF             BANKJUMP                # EXIT R61
@@ -1173,15 +1086,9 @@ R61C+L1         CAF             BIT7+9PV                # IS RENDEZVOUS OR P25FL
                 MASK            STATE
                 EXTEND
                 BZF             ENDOFJOB                # NO-EXIT ROUTINE AND PROGRAM.
-                TC              R61C+L06                # YES EXIT ROUTINE
+                TC              R61C+L4                 # YES EXIT ROUTINE
 BIT7+9PV        OCT             00500
-TENDEG          2DEC            .02777777               # SCALED UNITS OF REVOLUTION B0
-06SEC           DEC             600
-PHI             EQUALS          20D
-                EBANK=          CDUXD
-CDUBANK         BBCON           R61C+L05
-                EBANK=          LOSCOUNT
-R61BANK         BBCON           R61C+L05
+
                 BLOCK           02
                 SETLOC          RADARFF
                 BANK
@@ -3377,8 +3284,8 @@ MARKTEST        BON             CALL                    # HAS W-MATRIX BEEN INVA
                 EXIT
                 CA              ZERO
                 TS              R65CNTR
-                TC              BANKCALL
-                CADR            R65LEM
+                # TC              BANKCALL
+                # CADR            R65LEM
                 TC              INTPRET
 RANGEBQ         AXT,2           BON                     # CLEAR X2.
                                 0

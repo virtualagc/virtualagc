@@ -171,7 +171,6 @@ R62             EQUALS
 INTPRET1        EQUALS
 MEASINC         EQUALS
 MEASINC1        EQUALS
-EXTVB1          EQUALS
                 BNKSUM          23
 
 
@@ -292,12 +291,14 @@ PINBALL2        EQUALS
                 BANK            42
 SBAND           EQUALS
 PINBALL3        EQUALS
+EXTVB1          EQUALS
                 BNKSUM          42
 
 
                 BANK            43
 EXTVERBS        EQUALS
 SELFCHEC        EQUALS
+SBAND1          EQUALS
 
                 BNKSUM          43
 

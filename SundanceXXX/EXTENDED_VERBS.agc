@@ -43,8 +43,8 @@ LST2FAN         TC              VBZERO                  # VB40 ZERO (USED WITH N
                 TC              GOLOADLV                # VB54 PLEASE MARK X OR Y - RETICLE
                 TC              ALINTIME                # VB55 ALIGN TIME
                 TC              TRMTRACK                # VB56 TERMINATE TRACKING - P20 + P25
-                TC              LRON                    # VB57 PERMIT  LANDING RADAR UPDATES
-                TC              LROFF                   # VB58 INHIBIT LANDING RADAR UPDATES
+                TC              ALM/END                 # VB57 SPARE
+                TC              ALM/END                 # VB58 SPARE
                 TC              ALM/END                 # VB59 SPARE
                 TC              LRPOS2K                 # VB60 COMMAND LR TO POSITION 2.
                 TC              DAPATTER                # VB61 DISPLAY DAP ATTITUDE ERROR
@@ -358,11 +358,11 @@ OCT41000        OCT             41000                   # CONTINUOUS DESIGNATE -
 AURLOKON        TC              MAKECADR
                 TS              DESRET
                 CAF             TWO
-                TS              OPTIONX         +1
+                TS              OPTION1         +1
                 CAF             SIX                     # OPTION CODE FOR V04N12
-                TS              OPTIONX
+                TS              OPTION1
 
-    -5          CAF             V04N1272
+    -5          CAF             V04N0672
                 TC              BANKCALL                #      R2   00001  LOCK-ON
                 CADR            GOMARKFR
                 TCF             ENDEXT                  # V34
@@ -372,41 +372,37 @@ AURLOKON        TC              MAKECADR
                 TC              BLANKET
                 TC              ENDOFJOB
 
-    +5          CA              OPTIONX         +1
+    +5          CA              OPTION1         +1
                 MASK            BIT2
                 CCS             A
-                TCF             NOLOKON
+                TCF             +3                      # ON TERM.
+                CAF             LOKONBIT
+                TCF             +2
+                CAF             ZERO
+                INHINT
+                XCH             STATE
+                MASK            -LOKONFG
+                ADS             STATE
+                
+                MASK            LOKONBIT                # IF NO LOCK-ON CALLED FOR, SET BIT15 OF
+                CCS             A                       # RADMODES TO INDICATE THAT ARBITRARILY-
+                TCF             +5                      # LONG DESIGNATION IS WANTED (TO BE
+                
+                CAF             BIT15                   # TERMINATED BY FRESH START).
+                ADS             RADMODES
                 TC              UPFLAG
-                ADRES           LOKONSW
-                TCF             AURLKON1
-
-NOLOKON         TC              DOWNFLAG                # IF NO LOCK-ON, SET BIT15 OF RADMODES TO
-                ADRES           LOKONSW                 # INDICATE THAT CONTINUOUS DESIGNATION IS
-                TC              UPFLAG                  # WANTED (TO BE TERMINATED BY V44.)
-                ADRES           CDESFLAG
-                TC              UPFLAG                  # SET NO RR ANGLE MONITOR FLAG.
-                ADRES           NORRMON                 # (DISABLE R25 RR GIMBAL MONITOR IN T4RUPT
-AURLKON1        RELINT
+                ADRES           NORRMON
+                RELINT
                 CA              DESRET
-                TCF             BANKJUMP
+                TCF             BANKJUMP        
 
-
-V04N1272        VN              412
+V04N0672        VN              406
 -LOKONFG        OCT             -20
 
                 BANK            43
                 SETLOC          EXTVERBS
                 BANK
                 COUNT*          $$/EXTVB
-
-LRON            TC              UPFLAG                  # PERMIT  INCORPORATION OF LR DATA     V57
-
-                ADRES           LRINH
-                TCF             GOPIN
-
-LROFF           TC              DOWNFLAG                # INHIBIT INCORPORATION OF LR DATA      V58
-                ADRES           LRINH
-                TCF             GOPIN
 
 
 # THIS EXTENDED VERB CAUSES P63 TO SWITCH INTO P64.
@@ -520,8 +516,8 @@ ALINTIME        TC              TESTXACT
                 TC              POSTJUMP                # NO ROOM IN 43
                 CADR            R33
 
-                BANK            42
-                SETLOC          SBAND
+                BANK            43
+                SETLOC          SBAND1
                 BANK
                 COUNT*          $$/R33
 
@@ -869,7 +865,7 @@ ATTCK2          CAF             TWO                     # PUT OUT COMMANDS.
                 WOR             CHAN14
                 TCF             TASKOVER                # LEAVE ERROR COUNTERS ENABLED.
 
-ATTSCALE        DEC             0.1
+ATTSCALE        =               BIT11
 
                 BANK            7
                 SETLOC          EXTVERBS
