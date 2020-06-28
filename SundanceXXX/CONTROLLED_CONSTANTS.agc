@@ -31,15 +31,6 @@ ATDECAY         2DEC            -10
 
 FRCS4           2DEC            0.17792         B-7     # 400 LBS FORCE IN NEWTONS
 
-                SETLOC          P40S1
-                BANK
-                COUNT*          $$/P40
-
-# *** APS IMPULSE DATA FOR P42 *******************************************
-
-
-# ************************************************************************
-
                 SETLOC          ABORTS
                 BANK
                 COUNT*          $$/P70
@@ -146,29 +137,11 @@ KPIP2           2DEC            .0064                   # SCALES DELV TO UNITS O
 
 ALTCONV         2DEC            1.399078846     B-4     # CONVERTS M*2(-24) TO BIT UNITS *2(-28).
 ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO BIT UNITS<
-
-                SETLOC          DAPS3
-                BANK
-                COUNT*          $$/DAPAO
-
-
 # PARAMETERS RELATING TO MASS, INERTIA, AND VEHICLE DIMENSTIONS
 
 
 # PHYSICAL CONSTANTS ( TIME - INVARIANT )
-
-
-                SETLOC          IMU2
-                BANK
-                COUNT*          $$/P07
-
-OMEG/MS         2DEC            .24339048
-
 # ************************************************************************
-
-                SETLOC          P40S1
-                BANK
-                COUNT*          $$/S40.9
 
                 SETLOC          F2DPS*31
                 BANK
@@ -196,11 +169,6 @@ MOONRATE        2DEC*           .26616994890062991 E-7 B+19*# RAD/CS.
 RESQ            2DEC*           40.6809913      E12 B-58*
 20J             2DEC            3.24692010      E-2
 2J              2DEC            3.24692010      E-3
-                SETLOC          P50S1
-                BANK
-                COUNT*          $$/LOSAM
-
-# ************************************************************************
 
                 SETLOC          SBAND
                 BANK

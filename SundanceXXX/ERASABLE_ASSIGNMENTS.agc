@@ -1121,8 +1121,8 @@ RONE            EQUALS          RTHETA          +2      # I(6)TMP VECTOR STORAGE
 VONE            EQUALS          RONE            +6      # I(6)TMP VECTOR STORAGE.  (SCRATCH)
 
 
-WWPOS           =               RANGE                   # NOUN 99 (V67)
-WWVEL           =               RRATE                   # NOUN 99 (V67)
+WWPOS           =               RANGE                   # NOUN 99 (V45)
+WWVEL           =               RRATE                   # NOUN 99 (V45)
 #          V82 STORAGE. (CANNOT OVERLAY RONE OR VONE)                   (11D) TWO SEPARATE LOCATIONS
 
 V82FLAGS        EQUALS          VECTAB          +6      #  (1) FOR V82 BITS.

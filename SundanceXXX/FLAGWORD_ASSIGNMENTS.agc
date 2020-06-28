@@ -217,7 +217,7 @@
 # VINTFLAG        057             BIT 3  FLAG 3        VINTFBIT
 # VXINH           168             BIT 12 FLAG 11       VXINHBIT
 # V37FLAG         114             BIT 6  FLAG 7        V37FLBIT
-# V67FLAG         112             BIT 8  FLAG 7        V67FLBIT
+# V45FLAG         112             BIT 8  FLAG 7        V45FLBIT
 # V82EMFLG        118             BIT 2  FLAG 7        V82EMBIT
 # XDELVFLG        037             BIT 8  FLAG 2        XDELVBIT
 # XDSPFLAG        074             BIT 1  FLAG 4        XDSPBIT
@@ -869,9 +869,9 @@ RVSWBIT         =               BIT9                    # IN TIME-THETA
 #
 
 # BIT 8 FLAG 7  (S)
-V67FLAG         =               112D                    # ASTRONAUT OVERWRITE  ASTRONAUT DOES NOT
+V45FLAG         =               112D                    # ASTRONAUT OVERWRITE  ASTRONAUT DOES NOT
                                                         # W-MATRIX INITIAL    OVERWRITE W-MATRIX
-V67FLBIT        =               BIT8                    # VALUES              INITIAL VALUES
+V45FLBIT        =               BIT8                    # VALUES              INITIAL VALUES
 #
 
 # BIT 7 FLAG 7  (S)
@@ -1053,8 +1053,8 @@ QUITBIT         =               BIT5                    #
 #
 
 # BIT 4 FLAG 9
-#               =               146D
-#               =               BIT4
+R31FLAG         =               146D
+R31FLBIT        =               BIT4
 #
 
 # BIT 3 FLAG 9  (L)

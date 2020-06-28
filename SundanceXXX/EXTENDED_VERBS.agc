@@ -31,7 +31,7 @@ LST2FAN         TC              VBZERO                  # VB40 ZERO (USED WITH N
                 TC              IMUFINEK                # VB42 FINE ALIGN IMU
                 TC              IMUATTCK                # VB43  LOAD IMU ATTITUDE ERROR METERS.
                 TC              RRDESEND                # VB44 TERMINATE CONTINUOUS DESIGNATE
-                TC              ALM/END                 # VB45 SPARE
+                TC              V45                     # VB45 W MATRIX MONITOR
                 TC              ALM/END                 # VB46 SPARE
                 TC              V47TXACT                # VB47 AGS INITIALIZATION
                 TC              DAPDISP                 # VB48  LOAD A/P DATA
@@ -53,7 +53,7 @@ LST2FAN         TC              VBZERO                  # VB40 ZERO (USED WITH N
                 TC              VB64                    # VB64 CALCULATE,DISPLAY S-BAND ANT ANGLES
                 TC              SNUFFOUT                # VB65 DISABLE U,V JETS DURING DPS BURNS.
                 TC              ATTACHED                # VB66 ATTACHED   MOVE THIS TO OTHER STATE
-                TC              V67                     # VB67 W MATRIX MONITOR
+                TC              ALM/END                 # VB67 SPARE
                 TC              P64NOW                  # VB68 START P64 IMMEDIATELY.
 VERB69          TC              VERB69                  # VB69 FORCE A HARDWARE RESTART
                 TC              V70UPDAT                # VB70 UPDATE LIFTOFF TIME.
@@ -923,10 +923,10 @@ V82CON          2CADR           V82CALL
 
 V83PERF         TC              TESTXACT
 
-                CAF             BIT2
-                TC              WAITLIST
+                CAF             PRIO5
+                TC              FINDVAC
                 EBANK=          TSTRT
-                2CADR           R31CALL
+                2CADR           V83CALL
 
                 TC              ENDOFJOB
 
@@ -1456,13 +1456,13 @@ VERB96          TC              UPFLAG                  # QUITFLAG WILL CAUSE IN
                 CADR            V37                     # GO TO POO
 
 
-# VERB 67:     DISPLAY OF W MATRIX
+# VERB 45:     DISPLAY OF W MATRIX
 
-V67             TC              TESTXACT
+V45             TC              TESTXACT
                 CAF             PRIO5
                 TC              FINDVAC
                 EBANK=          WWPOS
-                2CADR           V67CALL
+                2CADR           V45CALL
 
                 TC              ENDOFJOB
 

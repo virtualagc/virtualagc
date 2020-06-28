@@ -3916,50 +3916,33 @@ VB56CADR        2CADR           TRMTRACK
 # W-MATRIX MONITOR
 
                 BANK            31
-                SETLOC          VB67
+                SETLOC          VB45
                 BANK
                 COUNT*          $$/EXTVB
 
                 EBANK=          WWPOS
 
-V67CALL         TC              INTPRET
+V45CALL         TC              UNK7766
+                TC              INTPRET
                 CALL
-                                V67WW
+                                V45WW
                 EXIT
-                EXTEND                                  # SAVE THE PRESENT N99 VALUES FOR
-                DCA             WWPOS                   # COMPARISON AFTER THE DISPLAY
-                DXCH            WWVEL           +2
-                EXTEND
-                DCA             WWVEL
-                DXCH            WWVEL           +4
 V06N99DS        CAF             V06N99
                 TC              BANKCALL
                 CADR            GOXDSPFR
                 TCF             ENDEXT
-                TCF             +5
-                TCF             V06N99DS
+                TCF             V06N9933
+                TC              +4
                 CAF             BIT3
                 TC              BLANKET
                 TC              ENDOFJOB
- +5             ZL
-                CA              THREE
-N99LOOP         TS              Q
-                INDEX           Q
-                CS              WWPOS
-                INDEX           Q
-                AD              WWPOS           +4
-                ADS             L
-                CCS             Q                       # THE SUM OF ALL DIFFERENCES MUST BE ZERO.
-                TCF             N99LOOP
-                LXCH            A
-                EXTEND
-                BZF             V06N9933
-                TC              UPFLAG
-                ADRES           V67FLAG
+ +4             TC              UPFLAG
+                ADRES           V45FLAG
+                TC              V06N99DS
 
 V06N9933        TC              INTPRET
                 BON             EXIT
-                                V67FLAG
+                                V45FLAG
                                 +2
                 TCF             ENDEXT
                 DLOAD           DMP
@@ -3974,28 +3957,28 @@ V06N9933        TC              INTPRET
                 STORE           2D
                 BON             LXA,1
                                 SURFFLAG
-                                V67SURF
+                                V45SURF
                                 0D
                 SXA,1           LXA,1
                                 WRENDPOS
                                 2D
                 SXA,1           GOTO
                                 WRENDVEL
-                                V67CLRF
-V67SURF         LXA,1           SXA,1
+                                V45CLRF
+V45SURF         LXA,1           SXA,1
                                 0D
-                                WSURFPOS
+                                WRENDPOS
                 LXA,1           SXA,1
                                 2D
-                                WSURFVEL
-V67CLRF         CLEAR           EXIT
+                                WRENDVEL
+V45CLRF         CLEAR           EXIT
                                 RENDWFLG
                 TCF             ENDEXT
-V67WW           STQ             BOV
+V45WW           STQ             BOV
                                 S2
                                 +1
                 CLEAR           CALL
-                                V67FLAG
+                                V45FLAG
                                 INTSTALL
                 SSP             DLOAD
                                 S1
@@ -4024,17 +4007,17 @@ NXPOSVEL        VLOAD*          VSQ
                 STORE           WWPOS
                 BOV             GOTO
                                 +2
-                                V67XXX
+                                V45XXX
                 DLOAD
                                 DPPOSMAX
                 STORE           WWPOS
                 STORE           WWVEL
-V67XXX          LXA,1           SXA,1
+V45XXX          LXA,1           SXA,1
                                 S2
                                 QPRET
                 EXIT
                 TC              POSTJUMP
                 CADR            INTWAKE
 
-1/SQRT3         2DEC            0.5773502
 V06N99          VN              0699
+1/SQRT3         2DEC            0.5773502

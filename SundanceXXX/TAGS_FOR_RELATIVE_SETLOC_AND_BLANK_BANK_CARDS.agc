@@ -219,7 +219,6 @@ FCDUW           EQUALS
                 BANK            31
 FTHROT          EQUALS
 F2DPS*31        EQUALS
-VB67            EQUALS
                 BNKSUM          31
 
 
@@ -231,6 +230,7 @@ FLOGSUB         EQUALS
 SERV2           EQUALS
 R47             EQUALS
 ASENT1          EQUALS
+SERV1           EQUALS
                 BNKSUM          32
 
 
@@ -266,12 +266,12 @@ P40S            EQUALS
 
 
                 BANK            37
+VB45            EQUALS
 P05P06          EQUALS
 IMU2            EQUALS
 IMU4            EQUALS
 R31             EQUALS
 IMUSUPER        EQUALS
-SERV1           EQUALS
                 BNKSUM          37
 
 

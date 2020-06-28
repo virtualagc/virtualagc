@@ -19,32 +19,25 @@
 
                 COUNT*  $$/R31
 
-R31CALL         CAF     PRIO3
-                TC      FINDVAC
-                EBANK=  SUBEXIT
-                2CADR   V83CALL
-
-DSPDELAY        TC      FIXDELAY
-                DEC     100
-                CA      EXTVBACT
-                MASK    BIT12
+DISPN5X         CA      FLAGWRD9        # TEST R31FLAG (IN SUNDANCE R31FLAG WILL
+                MASK    BIT4            #     ALWAYS BE SET AS R34 DOES NOT EXIST)
                 EXTEND
-                BZF     DSPDELAY
-
-                CAF     PRIO5
-                TC      NOVAC
-                EBANK=  TSTRT
-                2CADR   DISPN5X
-
-                TCF     TASKOVER
-
-DISPN5X         CAF     V16N54
+                BZF     +3
+                CAF     V06N54          # R31    USE NOUN 54
+                TC      +2
+                CAF     V06N53          # R34    USE NOUN 53
                 TC      BANKCALL
-                CADR    GOMARKF
+                CADR    GOMARKFR
                 TC      B5OFF
                 TC      B5OFF
-                TCF     DISPN5X
-                
+                TC      ENDOFJOB
+
+                CAF     PRIO4
+                TC      PRIOCHNG
+                CAF     .5SEC
+                TC      BANKCALL
+                CADR    DELAYJOB
+
 V83             TC      INTPRET
                 CALL
                         REDOEXTP
@@ -67,12 +60,18 @@ COMPDISP        VLOAD   VSU
                         VONE
                 DOT                     # (VATT-VONE).UNIT(LOS)        PD = 0
                 SL1
-                STOVL   RRATE           # RANGE RATE M/CS B-7
+                STCALL  RRATE           # RANGE RATE M/CS B-7
+                        CDUTRIG         # TO INITIALIZE FOR *NBSM*
+R34ANG          VLOAD   UNIT
                         RONE
-                UNIT    PDVL            # UR TO 0D                           PD = 6
-                        THISAXIS        # UNITX FOR CM, UNTIZ FOR LM
-                CALL
-                        CDU*NBSM
+                PDVL                    # UR TO 0D                    PD= 6
+                        THISAXIS        # UNITX FOR CM, UNITZ FOR LM
+                BON     VLOAD           # CHK R31FLAG. ON=R31 THETA, OFF=R34 PHI
+                        R31FLAG
+                        +2              #     R31-THETA
+                        THISAXIS
+                CALL    
+                        *NBSM*
                 VXM     PUSH            # UXORZ TO 6D                  PD=12D
                         REFSMMAT
                 VPROJ   VSL2
@@ -105,13 +104,14 @@ COMPDISP        VLOAD   VSU
                 MASK    EXTVBACT
                 EXTEND
                 BZF     ENDEXT          # YES, DIE
-                
-                CS      EXTVBACT
-                MASK    BIT12
-                ADS     EXTVBACT
-                
-                TCF     V83
-V16N54          VN      1654
+
+                TC      UNK7766
+                TC      BANKCALL
+                CADR    MARKBRAN
+
+                TCF     DISPN5X
+V06N54          VN      0654
+V06N53          VN      0653
                 
 # THE STATEXTP SUBROUTINE DOES A PRECISION EXTRAPOLATION OF BOTH VEHICLES
 # STATE VECTORS TO PRESENT TIME AND SAVES THEM AS BASE VECTORS.
@@ -144,13 +144,9 @@ STATEXTP        STQ     RTB
                         VATT1
                 STORE   BASETHV         # THIS VEL
 HAVEBASE        BON     RTB
-                        AVEGFLAG
+                        V37FLAG
                         GETRVN          # IF AVG ON ,GET RN ETC.
                         LOADTIME
-                BON     GOTO            # TEST FOR LM ON SURFACE.
-                        SURFFLAG
-                        R31SURF
-                        +1
                 STCALL  TDEC1           # BEGIN SET UP FOR CONIC EXTRAP. FOR THIS.
                         INTSTALL
                 VLOAD   CLEAR
@@ -193,25 +189,17 @@ OTHINT          STORE   TDEC1
                         INTEGRVS
                 GOTO
                         STATEXIT        # THIS VEHICLES POS.,VEL. IN PUSHLIST.
-GETRVN          VLOAD   GOTO
+GETRVN          VLOAD
                         RN
-                        +1
-                STCALL  RONE
-                        +1
-                VLOAD   GOTO
+                STOVL   RONE
                         VN
-                        +1
                 STODL   VONE
                         PIPTIME
-GETRVN2         CALL
+                CALL
                         INTSTALL
                 CLEAR   GOTO
                         INTYPFLG        # PREC EXTRAP FOR OTHER
                         OTHINT
-R31SURF         STCALL  TDEC1           # LM ON SURFACE.
-                        LEMPREC
-                GOTO                    # DO CSM CONIC
-                        OTHCONIC
 REDOEXTP        STQ     GOTO
                         STATEXIT
                         HAVEBASE
