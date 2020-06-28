@@ -238,7 +238,7 @@ STARTP64        CAF             DELTTFAP                # AUGMENT TTF/8 (TWO-PHA
 # ****************************************************************************************************************
 
 LINSET?         CA              FLAGWRD6                # ONE-PHASE OR TWO-PHASE?
-                MASK            2PHASBIT
+                # MASK            2PHASBIT
                 EXTEND
                 BZF             STARTP64        +2      # ONE-PHASE: GO DIRECTLY TO APPROACH PHASE
 
@@ -580,10 +580,10 @@ AFCCALC1        VXM             VSL1                    # VERTGUID COMES HERE
                 STORE           UNFC/2                  # UNFC/2 NEED NOT BE UNITIZED
                 ABVAL
 AFCCALC2        STORE           /AFC/                   # MAGNITUDE OF AFC FOR THROTTLE
-                BON             DLOAD
-                                2PHASFLG
-                                AFCCLEND
-                                UNFC/2                  # VERTICAL COMPONENT
+                # BON             DLOAD
+                #                 2PHASFLG
+                #                 AFCCLEND
+                #                 UNFC/2                  # VERTICAL COMPONENT
                 DSQ             PDDL
                                 UNFC/2          +2      # OUT-OF-PLANE
                 DSQ             PDDL

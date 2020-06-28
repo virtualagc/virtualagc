@@ -242,18 +242,16 @@ R11             EQUALS
 
                 BANK            34
 STBLEORB        EQUALS
+GLM             EQUALS
 P30S1           EQUALS
 CSI/CDH1        EQUALS
-ASCFILT         EQUALS
-R12STUFF        EQUALS
                 BNKSUM          34
 
 
                 BANK            35
 CSI/CDH         EQUALS
-
 P30S            EQUALS
-GLM             EQUALS
+GLM1            EQUALS
 P40S2           EQUALS
                 BNKSUM          35
 

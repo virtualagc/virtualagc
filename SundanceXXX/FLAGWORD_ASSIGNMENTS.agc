@@ -223,7 +223,7 @@
 # XDSPFLAG        074             BIT 1  FLAG 4        XDSPBIT
 # XORFLG          171             BIT 9  FLAG 11       XORFLBIT
 # XOVINFLG        201             BIT 9  FLAG 13       XOVINHIB
-# 2PHASFLG        096             BIT 9  FLAG 6        2PHASBIT
+# LTCPFLG         096             BIT 9  FLAG 6        LTCPFBIT
 # 3AXISFLG        084             BIT 6 FLAG 5         3AXISBIT
 # 360SW           134             BIT 1 FLAG  8        360SWBIT
 #
@@ -780,10 +780,8 @@ GMBDRBIT        =               BIT10                   #
 #
 
 # BIT 9 FLAG 6
-2PHASFLG        =               096D                    # 2-PHASE GUIDANCE IE  ONE-PHASE GUIDANCE
-2PHASBIT        =               BIT9                    # TTF GOES TO ZERO    I.E. SWITCH OUT OF
-                                                        # BEFORE YOU ENTER    BRAKING PHASE BEFORE
-                                                        # APPROACH PHASE      TTF GETS SMALL
+LTCPFLG         =               096D
+LTCPFBIT        =               BIT9
 #
 
 # BIT 8 FLAG 6  (S)

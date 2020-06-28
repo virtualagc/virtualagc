@@ -20,12 +20,7 @@
                 EBANK=  DVCNTR
                 COUNT*  $$/P12
 
-P10             =       P12LM           ## TEMPORARY
-P11             =       P12LM
-P12LM           TC      PHASCHNG
-                OCT     04024
-
-                TC      BANKCALL
+P12LM           TC      BANKCALL
                 CADR    R02BOTH         # CHECK THE STATUS OF THE IMU.
 
                 TC      UPFLAG
@@ -50,9 +45,6 @@ P12LM           TC      PHASCHNG
                 TCF     GOTOPOOH
                 TCF     +2              # PROCEED
                 TCF     -5              # ENTER
-
-                TC      PHASCHNG
-                OCT     04024
 
                 TC      INTPRET
                 CALL                    # INITIALIZE WM AND /LAND/

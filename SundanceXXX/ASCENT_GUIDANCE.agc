@@ -13,13 +13,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-                BANK            34
-                SETLOC          ASCFILT
+                BANK            30
+                SETLOC          ASENT
                 BANK
+                COUNT*          $$/ASENT
 
                 EBANK=          DVCNTR
-
-                COUNT*          $$/ASENT
 
 ATMAG           TC              PHASCHNG
                 OCT             00035
@@ -70,12 +69,6 @@ ATMAG           TC              PHASCHNG
                                 TBUP
                 STCALL          AT
                                 ASCENT
-
-                BANK            30
-                SETLOC          ASENT
-                BANK
-                COUNT*          $$/ASENT
-
 
 ASCENT          VLOAD           ABVAL
                                 R
@@ -231,11 +224,6 @@ RATES           DLOAD           DSU
                                 06D                     # (D21 DRDOT-DR)/E*2(-9)
                                 TGO
                 STORE           PRATE                   # B * 2(8)
-                BMN             DLOAD                   # B>0 NOT PERMITTED
-                                CHKBMAG
-                                HI6ZEROS
-                STCALL          PRATE
-                                PROK
 CHKBMAG         SR4             DDV                     # B*2(4)
                                 TBUP                    # (B / TAU) * 2(21)
                 DSU             BPL
@@ -244,7 +232,7 @@ CHKBMAG         SR4             DDV                     # B*2(4)
                 DLOAD           DMP
                                 PRLIMIT
                                 TBUP                    # B MAX. * 2(4)
-                SL4                                     # BMAX*2(8)
+                SL4             SIGN                    # BMAX*2(8)
                 STORE           PRATE
 PROK            DLOAD
                                 TGO
@@ -278,9 +266,7 @@ CONST           DLOAD           DMP                     # LOAD B*2(8)
                 DSU                                     # (-DYDOT/L-D12 D)=C*2(-9)
                                 00D
                 STORE           YCONS
-CMPONENT        CALL
-                                ASCRSTRT
-                SETPD           DLOAD
+CMPONENT        SETPD           DLOAD
                                 00D
                                 100CS
                 DMP
@@ -351,21 +337,11 @@ MAINLINE        VLOAD           VCOMP
 CLRXFLAG        CLEAR           CLEAR
                                 NOR29FLG                # START R29 IN ASCENT PHASE.
                                 XOVINFLG                # ALLOW X-AXIS OVERRIDE
-ASCTERM         EXIT
-                EXTEND
-                DCA             NEG0
-                DXCH            -PHASE3
-                CA              FLAGWRD9
-                MASK            FLRCSBIT
-                CCS             A
-                TCF             ASCTERM3
-                TC              INTPRET
-                CALL
+ASCTERM         BON             CALL
+                                FLRCS
+                                ASCTERM2
                                 FINDCDUW        -2
 ASCTERM1        EXIT
-   +1           EXTEND
-                DCA             NEG0
-                DXCH            -PHASE3
 ABRTDISP        CA              FLAGWRD9                # INSURE THAT THE NOUN 63 DISPLAY IS
                 MASK            FLRCSBIT                # BYPASSED IF WE ARE IN THE RCS TRIMMING
                 CCS             A                       # MODE OF OPERATION

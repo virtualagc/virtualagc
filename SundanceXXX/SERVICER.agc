@@ -1349,12 +1349,6 @@ LRVJOB          CA              170MS                   # SET TASK TO READ CDUS 
 # SLEEP WHILE THE SAMPLING IS DONE-ABOUT 95 MS.  WITH A GOODEND RETURN
 # THE ALT DATA IS STORED IN HMEAS AND BIT7 OF LRSTAT IS SET.
 
-                BANK            34
-                SETLOC          R12STUFF
-                BANK
-
-                COUNT*          $$/SERV
-
 LRHJOB          TC              BANKCALL                # INITIATE LR ALT MEASUREMENT
                 CADR            LRALT
                 TC              BANKCALL                # LRHJOB TO SLEEP ABOUT 95MS

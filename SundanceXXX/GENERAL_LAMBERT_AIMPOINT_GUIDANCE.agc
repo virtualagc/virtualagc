@@ -84,64 +84,131 @@
                 EBANK=  SUBEXIT
                 
                 COUNT*  $$/P31
-P31LM           TC      P20FLGON
-                CAF     V06N33          # TIG
-                TC      VNPOOH
+P31LM           TC      PHASCHNG
+                OCT     05024
+                OCT     13000
+
+                CAF     V06N33*         # TIG
+                TC      BANKCALL
+                CADR    GOFLASH
+                TCF     GOTOPOOH
+                TCF     +2
+                TCF     -5
+
                 TC      INTPRET
-                CLEAR   DLOAD
-                        UPDATFLG
+                CALL
+                        P31INT
+                EXIT
+
+                CAF     V06N42*         # HAPO, HPER, VGDISP
+                TC      BANKCALL
+                CADR    GOFLASHR
+                TCF     GOTOPOOH
+                TCF     +5
+                TCF     -5
+                TC      PHASCHNG
+                OCT     00014
+                TC      ENDOFJOB
+
+                TC      BANKCALL
+                CADR    COMPTGO
+                CAF     V16N35
+                TC      VNPOOH2
+                CAF     POSMAX
+                TS      DISPDEX
+                TC      P31EXIT
+
+VNPOOH2         EXTEND
+                QXCH    RTRN
+                TS      VERBNOUN
+                CA      VERBNOUN
+                TCR     BANKCALL
+                CADR    GOFLASHR
+                TC      GOTOPOOH
+                TC      RTRN
+                TC      -5
+                TC      PHASCHNG
+                OCT     00014
+                TC      ENDOFJOB
+
+P31EXIT         TC      BANKCALL
+                CADR    R02BOTH
+                TC      INTPRET
+                VLOAD   PUSH
+                        DELVEET3
+                CALL
+                        MIDGIM
+                CALL
+                        REVN1645
+                EXIT
+                TC      DOWNFLAG
+                ADRES   XDELVFLG
+                TC      GOTOPOOH
+
+V06N33*         VN      0633
+V06N42*         VN      0642
+V16N35          VN      1635
+
+P31INT          STQ     DLOAD
+                        QTEMP
                         TIG
                 STCALL  TDEC1           # INTEGRATE STATE VECTORS TO TIG
                         LEMPREC
-                VLOAD   SETPD
-                        RATT
+                SXA,1   VLOAD
+                        P30EXIT
+                        VATT1
+                STOVL   VINIT
+                        RATT1
+                STORE   RINIT
+                SETPD   SLOAD
                         0D
-                STORE   RTIG
-                STOVL   RINIT
-                        VATT
-                STORE   VTIG
-                STODL   VINIT
-                        P30ZERO
-                PUSH    PDDL            # E4 AND NUMIT = 0
-                        DELLT4
-                DAD     SXA,1
-                        TIG
-                        RTX1
-                STORE   TPASS4
-                SXA,2   CALL
-                        RTX2
+                        P31ZERO
+                PDDL    PUSH            # E4 AND NUMIT = 0
+                        P31ANGLE
+                CALL
                         INITVEL
-                VLOAD   PUSH
+                LXA,1   VLOAD
+                        P30EXIT
                         DELVEET3
-                STORE   DELVSIN
-                ABVAL   CLEAR
-                        XDELVFLG
-                STCALL  VGDISP
-                        GET.LVC
-                VLOAD   PDVL
-                        RTIG
+                ABVAL
+                STOVL   VGDISP
                         VIPRIME
-                CALL
-                        PERIAPO1
-                CALL
-                        SHIFTR1
-                CALL                    # LIMIT DISPLAY TO 9999.9 N. MI.
-                        MAXCHK
-                STODL   HPER
+                STOVL   VVEC
+                        RINIT
+                STCALL  RVEC
+                        PERIAPO
+                DLOAD
                         4D
-                CALL
-                        SHIFTR1
-                CALL                    # LIMIT DISPLAY TO 9999.9 N. MI.
-                        MAXCHK
-                STORE   HAPO
-                EXIT
-                CAF     V06N81          # DELVLVC
-                TC      VNPOOH
-                CAF     V06N42          # HAPO, HPER, VGDISP
-                TC      VNPOOH
+                STODL   HAPO
+                        8D
+                STCALL  HPER
+                        QTEMP
+
+P31ANGLE        2DEC    .0555555555
+P31ZERO         =       1BITDP
+
+                SETLOC  GLM1
+                BANK
+                COUNT*  $$/P31
+
+REVN1645        STQ     EXIT            # TRKMKCNT, TTOGO, +MGA
+                        QTEMP1
+                
+                TC      COMPTGO
+                CAF     V16N45
+                TC      BANKCALL
+                CADR    GOFLASHR
+                TC      GOTOPOOH
+                TC      +5
+                TC      -5
+                TC      PHASCHNG
+                OCT     00014
+                TC      ENDOFJOB
+
+                CAF     ONE
+                TS      DISPDEX
                 TC      INTPRET
-REVN1645        SET     CALL            # TRKMKCNT, TTOGO, +MGA
-                        FINALFLG
-                        VN1645
                 GOTO
-                        REVN1645
+                        QTEMP1
+
+

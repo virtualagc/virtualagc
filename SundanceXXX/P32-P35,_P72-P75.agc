@@ -617,11 +617,11 @@ DVMAX2          2DEC    3.014472 B-7    #                     989 FPS
 
 1DPB28          2DEC    1
 
-PMINE           2DEC    157420 B-29     # 85 NM    - MUST BE 8 WORDS BEFORE PMINM
+PMINE           2DEC    157521 B-29     # 85 NM    - MUST BE 8 WORDS BEFORE PMINM
 
 EPSILN1         2DEC    .0003048 B-7    #      .1 FPS
 
-NICKELDP        2DEC    .021336 B-7     # 7 FPS (CHANGED FROM .05 FPS)
+NICKELDP        2DEC    .0001524 B-7    # .05 FPS
 
 FIFPSDP         2DEC    -.152400 B-7    #      50 FPS
 
@@ -733,11 +733,6 @@ CSI/B23D        STCALL  VACT4
                 CALL
                         SHIFTR1
                 STODL   POSTCSI
-                        CENTANG
-                BZE     GOTO
-                        +2
-                        CIRCL
-                DLOAD
                         ECC
                 DSU     BMN
                         ONETHTH
@@ -1067,7 +1062,7 @@ CSI/SOL         DLOAD   AXT,2
                 STORE   T2TOT3
                 DSU     BPL
                         TMIN
-                        P32/P72C
+                        P10CHECK
 SCNDSOL         BON     BOFF
                         S32.1F3A
                         ALMXIT
@@ -1084,6 +1079,11 @@ SCNDSOL         BON     BOFF
                         S32.1F3B
                 STCALL  LOOPCT
                         CSI/B
+
+P10CHECK        BOFF    GOTO
+                        LTCPFLG
+                        P10ALARM
+                        P32/P72C
 
 # ..... ADVANCE   .....
 
