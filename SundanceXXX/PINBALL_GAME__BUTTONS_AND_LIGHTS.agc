@@ -1283,10 +1283,8 @@ TSTFORDP        LXCH    Q               # TEST FOR DP. IF SO, GET MINOR PART ONL
                 TC      L
 
                 
-CHANDSP         CA      NOUNCADR
-                MASK    LOW9
-                EXTEND
-                INDEX   A
+CHANDSP         EXTEND
+                INDEX   NOUNCADR
                 READ    0
                 CS      A
                 TCF     DSPCOM1
@@ -1858,7 +1856,6 @@ LOADLV          CAF     ZERO
                 TS      DECBRNCH
                 CS      ZERO
                 TS      LOADSTAT
-                TC      RELDSP          # RELEASE FOR PRIORITY DISPLAY PROBLEM.
                 CS      VD1             # TO BLOCK NUMERICAL CHARACTERS AND
                 TS      DSPCOUNT        # CLEARS AFTER A COMPLETED LOAD
                 TC      POSTJUMP        # AFTER COMPLETED LOAD, GO TO RECALTST
@@ -1997,11 +1994,9 @@ CHANLOAD        CS      SEVEN           # DONT LOAD CHAN 7. (IT = SUPERBANK).
                 AD      NOUNCADR
                 EXTEND
                 BZF     LOADLV
-                CA      NOUNCADR
-                MASK    LOW9
-                XCH     MPAC
+                CA      MPAC
                 EXTEND
-                INDEX   MPAC
+                INDEX   NOUNCADR
                 WRITE   0
                 TC      LOADLV
                 
@@ -3664,7 +3659,7 @@ FULLDSP1        OCT     07675           # DISPLAY ALL 8:S AND +
 TSTCON1         OCT     00175
                                         # UPLINK ACTIVITY, TEMP, KEY RLSE,
                                         # V/N FLASH, OPERATOR ERROR.
-TSTCON2         OCT     40674           # DSPTAB+11D BITS 3,4,5,6,8,9. LR LITES,
+TSTCON2         OCT     40650           # DSPTAB+11D  BITS 4,6,8,9.
                                         # NO ATT, GIMBAL LOCK, TRACKER, PROG ALM.
 TSTCON3         OCT     00115           # CHAN 11  BITS 1, 3, 4, 7.
                                         # UPLINK ACTIVITY, TEMP, OPERATOR ERROR.
