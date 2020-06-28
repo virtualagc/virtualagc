@@ -297,7 +297,6 @@ EXTVB1          EQUALS
                 BANK            43
 EXTVERBS        EQUALS
 SELFCHEC        EQUALS
-SBAND1          EQUALS
 
                 BNKSUM          43
 

@@ -923,7 +923,7 @@ RPQFLBIT        =               BIT15                   # TWEEN SECONDARY BODY
 
 # BIT 14 FLAG 8
 R32FLAG         =               121D
-R32FBIT         =               BIT14
+R32FLBIT        =               BIT14
 #
 
 # BIT 13 FLAG 8 (S)

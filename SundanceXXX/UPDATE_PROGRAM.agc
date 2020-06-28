@@ -146,12 +146,11 @@ V73UPDAT        CAF     UP73            # COMES HERE ON V73E
 
                 CA      MODREG          # CHECK IF UPDATE ALLOWED
                 EXTEND                  # FIRST CHECK FOR MODREG = +0, -0
-                BZF     +3              # (+0 = P00, -0 = FRESHSTART)
-UPERROR         TC      POSTJUMP        # TURN ON 'OPERATOR ERROR' LIGHT
-                CADR    UPERROUT +2     # GO TO COMMON UPDATE PROGRAM EXIT
+                BZF     +2              # (+0 = P00, -0 = FRESHSTART)
+                TC      CKMDMORE        # NOW CHECK FOR PROGRAM WHICH CAN BE
+#                                         INTERRUPTED BY P27.
 
                 CAE     MODREG          # UPDATE ALLOWED.
-CKMDMORE        =       UPERROR
                 TS      UPOLDMOD        # SAVE CURRENT MAJOR MODE
                 CAE     UPVERBSV        # SET UPVERB TO INDICATE TO P27
 
@@ -162,6 +161,19 @@ CKMDMORE        =       UPERROR
 
                 TC      POSTJUMP        # LEAVE EXTENDED VERB BANK AND
                 CADR    UPPART2         # GO TO UPDATE PROGRAM (P27) BANK.
+
+CKMDMORE        CS      FLAGWRD5
+                MASK    BIT8            # CHECK IF COMPUTER IS LGC
+                CCS     A               # IS COMPUTER LGC OR AGC
+UPERLEM         TCF     UPERROR         # ERROR- IT'S THE LEM + MODE IS NOT POO.
+                CS      THREE
+                MASK    MODREG
+                CCS     A
+UPERCMC         TCF     UPERROR         # ERROR- IT'S THE CMC AND MODE IS NOT
+#                                         P00 OR P02.
+                TC      Q               # ALLOW UPDATE TO PROCEED
+UPERROR         TC      POSTJUMP        # TURN ON 'OPERATOR ERROR' LIGHT
+                CADR    UPERROUT +2     # GO TO COMMON UPDATE PROGRAM EXIT
 
 UP70            EQUALS  ZERO
 UP71            EQUALS  ONE
