@@ -484,7 +484,8 @@ FLAGWRD3        =               STATE           +3      # (045-059)
                                                         # (SET)               (RESET)
 
 # BIT 15 FLAG 3
-#               =               045D
+AUTMANSW        =               045D
+AUTMNBIT        =               BIT15
 #
 
 # BIT 14 FLAG 3 (S)

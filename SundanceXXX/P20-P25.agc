@@ -3106,12 +3106,7 @@ MARKTEST        BON             CALL                    # HAS W-MATRIX BEEN INVA
                                 RENDWFLG                # HAS W-MATRIX BEEN INVALIDATED
                                 RANGEBQ
                                 WLINIT                  # YES - REINITIALIZE
-                EXIT
-                CA              ZERO
-                TS              R65CNTR
-                # TC              BANKCALL
-                # CADR            R65LEM
-                TC              INTPRET
+
 RANGEBQ         AXT,2           BON                     # CLEAR X2.
                                 0
                                 LMOONFLG                # IS MOON SPHERE OF INFLUENCE
@@ -3121,12 +3116,6 @@ RANGEBQ         AXT,2           BON                     # CLEAR X2.
 SETX2           SXA,2           CALL
                                 SCALSHFT                # 0-MOON. 2-EARTH
                                 GRP2PC
-                SLOAD           SR                      # GET SINGLE PRECISION RVARMIN (B-12)
-                                RVARMIN                 # SHIFT TO TRIPLE PRECISION    (B-40)
-                                28D
-                RTB
-                                TPMODE                  # AND SAVE IN 20D
-                STORE           20D
                 CALL                                    # BEGIN COMPUTING THE B-VECTORS, DELTAQ
                                 GETULC                  # B-VECTORS FOR RANGE
                 BON             VCOMP                   # B0, COMP. IF LM BEING CORRECTED
@@ -3158,10 +3147,10 @@ SETX2           SXA,2           CALL
                                 TPMODE
                 STORE           VARIANCE                # B-40
                 DCOMP           TAD
-                                20D                     #   B-40
+                                RVARMIN                 #   B-40
                 BMN             TLOAD
                                 QOK
-                                20D                     #   B-40
+                                RVARMIN                 #   B-40
                 STORE           VARIANCE
 QOK             CALL
                                 LGCUPDTE
@@ -3172,7 +3161,7 @@ QOK             CALL
                                 GETULC
                 PDDL            SR*                     # GET RLC SCALED B-29/B-27
                                 36D                     # AND SHIFT TO B-23
-                                0 -4,2
+                                0 -7,2
                 STOVL           36D                     # THEN STORE BACK IN 36D
                 BON             VCOMP                   # B1, COMP. IF LM BEING CORRECTED
                                 VEHUPFLG
@@ -3197,16 +3186,23 @@ QOK             CALL
                                 2,2                     # SHIFT FROM EARTH/MOON SPHERE TO B-8
                 DSQ             DMPR                    # RDOT**2 B-16 X RATEVAR B12
                                 RATEVAR
+                DMPR            DMP
+                                36D
+                                36D
+                VSL4            RTB
+                                TPMODE
                 STORE           VARIANCE
-                SLOAD           SR
-                                VVARMIN                 # GET SINGLE PRECISION VVARMIN (B+12)
-                                16D                     # SHIFT TO DP (B -4)
-                STORE           24D                     # AND SAVE IN 24D
-                DSU             BMN                     # IS MIN. VARIANCE > COMPUTED VARIANCE
+                DLOAD           DSQ
+                                36D
+                DMP             RTB
+                                VVARMIN
+                                TPMODE
+                STORE           30D
+                DCOMP           TAD
                                 VARIANCE
-                                VOK                     # BRANCH - NO
-                DLOAD                                   # YES - USE MINIMUM VARIANCE
-                                24D
+                BPL             TLOAD
+                                +3
+                                30D
                 STORE           VARIANCE
 VOK             DLOAD           SR2                     # RDOT(PD12) FROM B-8/B-6
                 PDDL            SLR*                    # TO B-10/B-8
@@ -3221,49 +3217,17 @@ VOK             DLOAD           SR2                     # RDOT(PD12) FROM B-8/B-
                 BON             VCOMP                   # B0, COMP. IF LM BEING CORRECTED
                                 VEHUPFLG
                                 +1
-                VSR*
-                                0 -2,2                  # SCALED B-5
-                STOVL           BVECTOR
-                                ZEROVECS
-                STORE           20D                     # ZERO OUT 20 TO 25 IN PUSHLIST
-                STOVL           BVECTOR         +12D
-                                BVECTOR
-                ABVAL           NORM                    # LOAD B0, GET MAGNITUDE AND NORMALIZE
-                                20D                     # SHIFT COUNT IN 20D
-                VLOAD           ABVAL
-                                BVECTOR         +6D     # LOAD B1, GET MAGNITUDE AND NORMALIZE
-                NORM            DLOAD
-                                22D                     # SHIFT COUNT IN 22D
-                                22D                     # FIND WHICH SHIFT IS SMALLER
-                DSU             BMN                     # BRANCH- B0 HAS SMALLER SHIFT COUNT
-                                20D
-
+                BOVB            VSR*
+                                TCDANZIG
+                                0 -5,2                  # SCALED B-5
+                BOV             GOTO
                                 VOK1
-                LXA,1           GOTO
-                                22D                     # LOAD X2 WITH THE SMALLER SHIFT COUNT
                                 VOK2
-VOK1            LXA,1
-                                20D
-VOK2            VLOAD           VSL*                    # THEN ADJUST B0,B1,DELTAQ AND VARIANCE
-                                BVECTOR                 # WITH THI SSHIFT COUNT
-                                0,1
-                STOVL           BVECTOR
-                                BVECTOR         +6
-                VSL*
-                                0,1
-                STODL           BVECTOR         +6
-                                DELTAQ
-                SL*
-                                0,1
-                STORE           DELTAQ
-                DLOAD           SL*                     # GET RLC AND ADJUST FOR SCALE SHIFT
-                                36D
-                                0 -1,1
-                DSQ             DMP                     # MULTIPLY RLC**2 BY VARIANCE
-                                VARIANCE
-                SL4             RTB                     # SHIFT TO CONFORM TO BVECTORS AND DELTAQ
-                                TPMODE
-                STCALL          VARIANCE                # AND STORE TP VARIANCE
+VOK1            VLOAD
+                                ZEROVECS
+VOK2            STOVL           BVECTOR
+                                ZEROVECS
+                STCALL          BVECTOR +12D
                                 LGCUPDTE
 
                 CALL
@@ -3506,28 +3470,15 @@ WLINIT          EXIT
                 CAF             AIGBANK                 # RESTORE EBANK 7
                 TS              BBANK
                 TC              INTPRET
-                BON             SLOAD                   # IF ON LUNAR SURFACE,INITIALIZE WITH
-                                SURFFLAG                # WSURFPOS AND WSURFVEL INSTEAD OF
-                                WLSRFPOS                # WRENDPOS AND WRENDVEL
+                SLOAD           SR                      # SHIFT TO B-19 SCALE
                                 WRENDPOS
-                GOTO
-                                WPOSTORE
-WLSRFPOS        SLOAD
-                                WSURFPOS
-WPOSTORE        SR                                      # SHIFT TO B-19 SCALE
                                 5
                 STORE           W
                 STORE           W               +8D
                 STORE           W               +16D
-                BON             SLOAD
-                                SURFFLAG
-                                WLSRFVEL
+                SLOAD
                                 WRENDVEL
-                GOTO
-                                WVELSTOR
-WLSRFVEL        SLOAD
-                                WSURFVEL
-WVELSTOR        STORE           W               +72D
+                STORE           W               +72D
                 STORE           W               +80D
                 STORE           W               +88D
                 SLOAD
@@ -3576,6 +3527,8 @@ GETULC          SETPD           VLOAD
                 STOVL           36D                     # ULC IN PD0 AND MPAC,RLC IN 36D
                                 ULC
                 RVQ
+
+                PUSH            RVQ
 
 # RADARANG
 
@@ -3693,6 +3646,10 @@ CHKSRCH         CAF             BIT14                   # ISSUE AUTO TRACK ENABL
                 EXTEND
                 BZF             ENDOFJOB                # NO-TERMINATE JOB
 
+                CAF             MANUFBIT
+                MASK            FLAGWRD7
+                CCS             A
+                TC              ENDOFJOB
 
                 CAF             6SECONDS                # SCHEDULE TASK TO DRIVE RADAR TO NEXT PT.
                 INHINT
@@ -3778,11 +3735,17 @@ CONTDESG        STOVL           RRTARGET
                 INHINT
                 TC              KILLTASK                # KILL ANY PRESENTLY WAITLISTED TASK
                 CADR            DESLOOP         +2      # WHICH WOULD DESIGNATE TO THE LAST
+
+                CS              FLAGWRD7
+                MASK            MANUFBIT
+                EXTEND
+                BZF             ENDOFJOB
                                                         # POINT IN THE PATTERN
 CONTDES2        CS              BIT15
                 MASK            RADMODES                # SET BIT 15 OF RADMODES TO INDICATE
                 AD              BIT15                   # A CONTINUOUS DESIGNATE WANTED
                 TS              RADMODES
+                RELINT
                 TC              INTPRET
 
                 CALL
@@ -3796,9 +3759,11 @@ CONTDES2        CS              BIT15
 
                                                         # COMPUTE OMEGA,ANGLE BETWEEN RR LOS AND
                                                         # SPACECRAFT +Z AXIS
+                INHINT
 OMEGCALC        EXTEND
                 DCA             CDUT
                 DXCH            TANGNB
+                RELINT
                 TC              INTPRET
                 CALL
                                 RRNB

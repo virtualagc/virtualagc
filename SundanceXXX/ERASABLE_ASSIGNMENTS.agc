@@ -987,8 +987,8 @@ VSUBC           EQUALS          LOSVEL                  # I(6) S-S  CSM VELOCITY
 
 RANGEVAR        ERASE           +1                      # I(2) RR RANGE ERROR VARIANCE
 RATEVAR         ERASE           +1                      # I(2) RR RANGE-RATE ERROR VARIANCE
-RVARMIN         ERASE                                   # I(1) MINIMUM RANGE ERROR VARIANCE
-VVARMIN         ERASE                                   # I(1) MINIMUM RANGE-RATE ERROR VARIANCE
+RVARMIN         ERASE           +2                      # I(3) MINIMUM RANGE ERROR VARIANCE
+VVARMIN         ERASE           +2                      # I(3) MINIMUM RANGE-RATE ERROR VARIANCE
 #
 
 END-E3          EQUALS                                  # NEXT UNUSED E3 ADDRESS
