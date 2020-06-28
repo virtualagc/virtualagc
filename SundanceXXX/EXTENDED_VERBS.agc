@@ -73,7 +73,7 @@ VERB69          TC              VERB69                  # VB69 FORCE A HARDWARE 
                 TC              V82PERF                 # VB82 REQUEST ORBIT PARAM DISPLAY (R30)
                 TC              V83PERF                 # VB83 REQUEST REND PARAM DISPLAY (R31)
                 TC              ALM/END                 # VB84 SPARE
-                TC              VERB85                  # VB85 DISPLAY RR LOS AZ AND ELEV
+                TC              ALM/END                 # VB85 SPARE
                 TC              ALM/END                 # VB86 SPARE
                 TC              ALM/END                 # VB87 SPARE
                 TC              ALM/END                 # VB88 SPARE
@@ -1477,89 +1477,3 @@ SNUFFOUT        TC              UPFLAG
 OUTSNUFF        TC              DOWNFLAG
                 ADRES           SNUFFER
                 TC              GOPIN
-# VERB 85         DISPLAY RR LOS AZIMUTH AND ELEVATION.
-
-#          AZIMUTH IS THE ANGLE BETWEEN THE LOS AND THE X-Z NB PLANE, 0 - 90 DEG IN THE +Y HEMISPHERE,
-# 360 - 270 DEG IN THE -Y HEMISPHERE.
-
-#          ELEVATION IS THE ANGLE BETWEEN +ZNB AND THE PROJECTION OF THE LOS INTO THE X-Z PLANE, 0 - 360 ABOUT +Y.
-
-                EBANK=          TANGNB
-
-VERB85          TC              TESTXACT
-                TC              POSTJUMP
-                CADR            DSPRRLOS
-
-                SETLOC          PINBALL1
-                BANK
-
-                COUNT*          $$/EXTVB
-
-DSPRRLOS        CAF             PRIO5
-                TC              FINDVAC
-                EBANK=          TANGNB
-                2CADR           RRLOSDSP
-                CAF             PRIO4
-                TC              PRIOCHNG
-                CAF             V16N56
-                TC              BANKCALL
-                CADR            GOMARKFR
-                TC              B5OFF
-                TC              B5OFF
-                TC              B5OFF
-
-                CAF             BIT3
-                TC              BLANKET
-                TC              ENDOFJOB
-
-RRLOSDSP        EXTEND
-                DCA             CDUT
-                DXCH            TANGNB
-                TC              INTPRET
-                CALL
-                                RRNB                    # GET RR LOS IN BODY AXES.
-                STORE           0D                      # UNIT LOS
-                STODL           6D
-                                HI6ZEROS
-                STOVL           8D
-                                6D
-                UNIT
-                STORE           6D                      # UNIT OF LOS PROJ IN X-Z PLANE
-                DOT
-                                UNITZ
-                STOVL           COSTH                   # 16D
-                                UNITX
-                DOT
-                                6D
-                STCALL          SINTH                   # 18D
-                                ARCTRIG
-                BPL             DAD                     # INSURE DISPLAY OF 0 - 360 DEG.
-                                +2
-
-                                DPPOSMAX                # INTRODUCES AN ERROR OF B-28 REVS.
-                STOVL           RR-ELEV
-                                0D
-                DOT
-                                UNITY
-                STOVL           SINTH
-                                0D
-                DOT
-                                6D
-                STCALL          COSTH
-                                ARCTRIG
-                BPL             DAD                     # INSURE DISPLAY OF 0 - 360 DEG.
-                                +2
-                                DPPOSMAX                # INTRODUCES AN ERROR OF B-28 REVS.
-                STORE           RR-AZ
-                EXIT
-                CA              1SEC
-                TC              BANKCALL
-                CADR            DELAYJOB
-
-                CA              BIT5
-                MASK            EXTVBACT
-                CCS             A
-                TC              RRLOSDSP
-                TC              ENDEXT
-
-V16N56          VN              1656

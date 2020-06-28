@@ -228,7 +228,6 @@ F2DPS*32        EQUALS
 ABORTS          EQUALS
 FLOGSUB         EQUALS
 SERV2           EQUALS
-R47             EQUALS
 ASENT1          EQUALS
 SERV1           EQUALS
                 BNKSUM          32
@@ -276,6 +275,7 @@ IMUSUPER        EQUALS
 
 
                 BANK            40
+R47             EQUALS
 PINBALL1        EQUALS
 SELFSUPR        EQUALS
 PINSUPER        EQUALS

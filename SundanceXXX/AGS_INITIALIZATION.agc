@@ -202,8 +202,8 @@ V00N34          EQUALS          34DEC
 V50N16          VN              5016
 TSCALE          2DEC            100             B-10    # CSEC TO SEC SCALE FACTOR
 20SEC           DEC             2000
-RSCALE          2DEC            3.280839        B-3     # METERS TO FEET SCALE FACTOR
-VSCALE          2DEC            3.280839        E2 B-9  # METERS/CS TO FEET/SEC SCALE FACTOR
+RSCALE          2DEC            3.280833        B-3     # METERS TO FEET SCALE FACTOR
+VSCALE          2DEC            3.280833        E2 B-9  # METERS/CS TO FEET/SEC SCALE FACTOR
 AGSRND1         2OCT            0000060000
                 2OCT            0000060000
                 2OCT            0000060000
