@@ -396,8 +396,8 @@ AURLOKON        TC              MAKECADR
                 CA              DESRET
                 TCF             BANKJUMP        
 
-V04N0672        VN              406
 -LOKONFG        OCT             -20
+V04N0672        VN              406
 
                 BANK            43
                 SETLOC          EXTVERBS
@@ -865,7 +865,7 @@ ATTCK2          CAF             TWO                     # PUT OUT COMMANDS.
                 WOR             CHAN14
                 TCF             TASKOVER                # LEAVE ERROR COUNTERS ENABLED.
 
-ATTSCALE        =               BIT11
+ATTSCALE        =               BIT13
 
                 BANK            7
                 SETLOC          EXTVERBS
@@ -1065,17 +1065,7 @@ TRMTRACK        CA              BITS9+7                 # IS REND OR P25 FLAG ON
                 EXTEND
                 BZF             GOPIN
 
-                TC              POSTJUMP
-                CADR            TRMTRAK1
-
-BITS9+7         OCT             500
-
-                SETLOC          SBAND                   # BANK 42
-                BANK
-
-                COUNT*          $$/EXTVB
-
-TRMTRAK1        TC              DOWNFLAG
+                TC              DOWNFLAG
                 ADRES           UPDATFLG                # UPDATE FLAG DOWN
                 TC              DOWNFLAG
                 ADRES           TRACKFLG                # TRACK FLAG DOWN
@@ -1105,6 +1095,9 @@ TRMTRAK1        TC              DOWNFLAG
                 WAND            CHAN12
                 TC              POSTJUMP
                 CADR            GOPROG2                 # CAUSE RESTART.
+
+BITS9+7         OCT             500
+
 
 #          DNEDUMP     VERB 74             DESCRIPTION
 #              INITIALIZE DOWN-TELEMETRY PROGRAM FOR ERASABLE MEMORY DUMP.

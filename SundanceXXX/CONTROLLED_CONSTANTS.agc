@@ -169,10 +169,3 @@ MOONRATE        2DEC*           .26616994890062991 E-7 B+19*# RAD/CS.
 RESQ            2DEC*           40.6809913      E12 B-58*
 20J             2DEC            3.24692010      E-2
 2J              2DEC            3.24692010      E-3
-
-                SETLOC          SBAND
-                BANK
-                COUNT*          $$/R05
-
-REMDIST         2DEC            384402000       B-29    # MEAN DISTANCE BETWEEN EARTH AND MOON.
-
