@@ -203,7 +203,6 @@ TOF-FF          EQUALS
 TOF-FF1         EQUALS
 P40S1           EQUALS
 VECPT           EQUALS
-ASENT1          EQUALS
                 BNKSUM          27
 
 
@@ -231,6 +230,7 @@ ABORTS          EQUALS
 FLOGSUB         EQUALS
 SERV2           EQUALS
 R47             EQUALS
+ASENT1          EQUALS
                 BNKSUM          32
 
 

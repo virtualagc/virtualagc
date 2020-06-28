@@ -720,7 +720,6 @@ S40.1B          DLOAD
                 STORE           RTIG
                 STOVL           RINIT
                                 VATT
-                STORE           VTIG
                 STORE           VINIT
                 DLOAD           PDDL                    # NUMIT = 0
                                 ZEROVECS
@@ -729,10 +728,9 @@ S40.1B          DLOAD
                                 NORMSW
                                 SMALLEPS
                                 EPS2                    # EPSILON4 = 10 DEGREES OR 45 DEGREES.
-SMALLEPS        PUSH            SXA,1
-                                RTX1
-                SXA,2           CALL
-                                RTX2
+SMALLEPS        PUSH            AXC,1
+                                2
+                CALL
                                 INITVEL
                 VLOAD           PUSH
                                 DELVEET3                # VGTIG = VR - VN.
@@ -809,10 +807,6 @@ S40.2,3         VLOAD                                   # UT: DESIRED THRUST DIR
 PLUSX           STORE           XSCREF                  # XSCREF = UT (DESIRED THRUST DIRECTION.)
                 VXV             UNIT                    # RTIG = POSITION AT TIME-OF-IGNITION.
                                 RTIG                    # YSCREF = UNIT(UT X RTIG)
-                PDDL            BHIZ
-                                36D                     # TEST MAGNITUDE OF UT X RTIG
-                                FIXY                    # IF SMALL, USE UT X VTIG AS YSC
-STORY           VLOAD           STADR
                 STORE           YSCREF
                 VXV             VSL1                    # COMPUTE (YSCREF X XSCREF),BUT FOR A
                                 XSCREF                  # RIGHT HANDED SYSTEM, NEED (X CROSS Y).
@@ -821,12 +815,6 @@ STORY           VLOAD           STADR
 
                 SET             RVQ
                                 PFRATFLG
-FIXY            VLOAD           VXV                     # IN THIS CASE,
-                                XSCREF                  # YSCREF = UNIT(XSCREF X VTIG)
-                                VTIG
-                UNIT            PUSH
-                GOTO
-                                STORY
 
 # SUBROUTINE S40.8
 
@@ -892,29 +880,32 @@ VGNEW           VSU
 VGAIN*          STORE           VG                      # VELOCITY TO BE GAINED SCALED AT (7)M/CS
                 MXV             VSL1
                                 REFSMMAT
+                UNIT
                 STORE           UNFC/2
                 BON             VLOAD
                                 FIRSTFLG
                                 BDTOK
                                 HI6ZEROS
                 STORE           BDT
-BDTOK           VLOAD           ABVAL
-                                VG
+BDTOK           DLOAD
+                                36D
                 STORE           VGDISP
-TGDCALC         SETPD           VLOAD
+TGDCALC         SETPD           STQ
                                 0
+                                S40EXIT
+                VLOAD
                                 VG
                 STOVL           VGPREV
                                 DELVREF
                 BOFF            VCOMP
                                 STEERSW
-                                QPRET
+                                S40EXIT
                 UNIT
                 DOT             PUSH
                                 VG
                 BPL             DDV
                                 ALARMIT                 # DELV IS MORE THAN 90 DEGREES FROM VG.
-                                VEX
+                                2VEXHUST
                 DAD             DMP
                                 DPHALF
                 SR              DDV
@@ -931,23 +922,117 @@ TGDCALC         SETPD           VLOAD
 
                 DSU             BPL
                                 FOURSECS                # 400 CS
-                                FINDCDUW        -2
+                                XPSTEER
                 SET             CLRGO
                                 IMPULSW
                                 STEERSW
-                                QPRET
+                                S40EXIT
 
+XPSTEER         SETPD           STQ
+                                0
+                                S40EXIT
+                RTB
+                                TMPTOSPT
+                VLOAD           CALL
+                                UNFC/2
+                                TRG*SMNB
+                STORE           UNFC/2
+                VLOAD
+                                DELV
+                UNIT            CALL
+                                *SMNB*
+                VSU             VSR3
+                                UNFC/2A
+                VAD             UNIT
+                                UNFC/2A
+                STORE           UNFC/2A
+                VLOAD           VXV
+                                UNFC/2A
+                                UNFC/2
+                STORE           10D
+                ABVAL           PUSH
+                DSU             BMN
+                                SIN20DEG
+                                SCALPROD
+                DLOAD
+                DSU             BPL
+                                SIN45DEG
+                                ALARMIT
+                VLOAD           UNIT
+                                10D
+                VXSC            VSL1
+                                SIN20DEG
+                STORE           10D
+
+SCALPROD        VLOAD           VXSC
+                                10D
+                                1/PI
+                STORE           10D
+                SETPD           CALL
+                                0
+                                CALCCMD
+                VLOAD           VAD
+                                20D
+                                CDUSPOT
+                RTB             EXIT
+                                V1STO2S
+
+                DXCH            MPAC
+                DXCH            CTHETA
+                CA              CDUXD
+                TS              CPHI
+
+                CAF             BIT13
+                EXTEND
+                RAND            CHAN31
+                EXTEND
+                BZF             S40.8XIT
+
+                EXTEND
+                DCA             CTHETA
+                DXCH            CDUYD
+                TCF             S40.8XIT
 
 ALARMIT         EXIT
                 TC              ALARM
                 OCT             01407
+S40.8XIT        CAE             TEMPR60
+                TS              EBANK
                 TC              INTPRET
-                GOTO                                    # SKIP TGO COMPUTATION BUT CALL FINDCDUW.
-                                FINDCDUW        -2      # FINDCDUW WILL EXIT TO UPDATEVG +3.
+                GOTO
+                                S40EXIT
+
+1/PI            2DEC            0.3183099       B-27
+UNUSEDC1        2OCT            00002 00545
 
 -FOURDT         2DEC            -800            B-18    # -4 (200 CS.)  B(-18)
+2VEXHUST        2DEC            3000            E-2 B-6
 FOURSECS        2DEC            400                     # 400 CS SCALED AT 2(+28)CS
-2VEXHUST        =               VEX
+SIN45DEG        2DEC            0.7071001       B-30
+SIN20DEG        2DEC            0.34229         B-30
+
+CALCCMD         DLOAD           DMP
+                                12D
+                                COSCDUX
+                PDDL            DMP
+                                14D
+                                SINCDUX
+                BDSU
+                DDV
+                                COSCDUZ
+                STORE           20D
+                DLOAD           DCOMP
+                                CDUSPOTX
+                STODL           24D
+                                12D
+                DMP             PDDL
+                                SINCDUX
+                                14D
+                DMP             DAD
+                                COSCDUX
+                SL1
+                STORE           22D
+                RVQ
 
 # NAME     S40.13 - TIMEBURN
 # FUNCTION        (1) DETERMINE WHETHER A GIVEN COMBINATION OF VELOCITY TO
@@ -1078,16 +1163,22 @@ STORETGO        DLOAD                                   # LOAD TGO AT 2(14)
                 EXIT
                 TCF             S40.132*
 
-APSTGO          DDV             SL2
+APSTGO          DDV             GOTO
                                 FAPS
-                GOTO
                                 STORETGO        +1
+K1VAL           2DEC            124.57          B-23    # 2800 LB-SEC
+K2VAL           2DEC            31.138          B-24    # 700  LB-SEC
+K3VAL           2DEC            1.556802        B-10    # FAPS ( 3500 LBS THRUST)
 1SEC2D          2DEC            100.0           B-14    # 100.0 CS AT +14
 3.5SEC          2DEC            350.0           B-13    # 350 CS AT +13
 5SECS           2DEC            500.0           B-14    # 500.0 CS AT +14
 6SEC            2DEC            600.0           B-14    # 600.0 CS AT +14
-7SEC            2DEC            700.0           B-18    # 700.0 CS AT + 18
+7SEC            2DEC            700.0                   # 700.0 CS
+FRCS2           2DEC            0.08896         B2      # 200 LBS FORCE IN NEWTONS
+S40.136         2DEC            .4671           B-9     # .4671 M NEWTONS (DPS)
+S40.136_        2DEC            .4671           B+1     # S40.136 SHIFTED LEFT 10.
 89SECS          2DEC            8900.0          B-14
+FAPS            2DEC            1.556802        B-9     # 3500 LBS FORCE IN NEWTONS
 # FUNCTION    (1) GENERATES REQUIRED VELOCITY AND VELOCITY-TO-BE-GAINED
 #             VECTORS FOR USE DURING AIMPOINT MANEUVERS EVERY TWO
 #             COMPUTATION CYCLES (4 SECONDS).
@@ -1136,7 +1227,8 @@ S40.9           TC              INTPRET
                                 NORMSW
                                 EPSSMALL
                                 EPS2
-EPSSMALL        PUSH
+EPSSMALL        PUSH            AXC,1
+                                2
 S40.92          BOFSET          CALL
                                 FIRSTFLG
                                 INITINIT
@@ -1148,17 +1240,14 @@ S40.92          BOFSET          CALL
                                 TNIT
                                 TNITPREV
 
-                BDDV            VXSC
-                                100B28
+                SL              BDDV
+                                18D
+                                100B10
+                VXSC
                 VSU             VSL1
                                 GDT/2
                 STORE           BDT
-FIRSTTME        SLOAD           BZE
-                                RTX2
-                                GETGOBL
-                VLOAD           GOTO                    # NO OBLATENESS COMP IF IN MOON SPHERE
-                                DELVEET3
-                                NOGOBL
+
 GETGOBL         VLOAD           UNIT                    # CALCULATE OBLATENESS TERM.
                                 RN
                 DLOAD           DSU
@@ -1185,7 +1274,8 @@ NOGOBL          ABVAL
                 STORE           VRPREV
                 EXIT
                 TC              PHASCHNG
-                OCT             04022
+                OCT             05022
+                OCT             14000
                 TC              INTPRET
                 BON             VLOAD
                                 CYCLESW
@@ -1208,11 +1298,14 @@ ENDS40.9        EXIT
                 TC              PHASCHNG
                 OCT             2
                 TC              ENDOFJOB
-100B28          2DEC            100
+100B10          2DEC            100             B-10
 INITINIT        CALL
                                 HAVEGUES
                 GOTO
-                                FIRSTTME
+                                GETGOBL
+
+EARTHMU         2DEC*           -3.986032       E10 B-36*# M(3)/CS(2)
+
 # MOD 0     24 FEB 67     PETER ADLER
 # FUNCTION:
 #          TRIMS DPS ENGINE TO MINIMIZE THRUST/CG OFFSET. ENGINE IS GIMBALLED TO FULL + PITCH AND + ROLL (TO LOCK)
@@ -1231,6 +1324,10 @@ INITINIT        CALL
 
 TRIMGIMB        TC              DOWNFLAG                # GMBDRVSW FLAG IS SET WHEN EITHER ROLL OR
                 ADRES           GMBDRVSW                # PITCH IS COMPLETED, WHICHEVER IS FIRST.
+
+                CAF             EBANK6
+                XCH             EBANK
+                TS              ITEMP1
 
                 CS              PRIO5                   # TURN OFF - PITCH, - ROLL, IF ON.
                 EXTEND
@@ -1260,6 +1357,8 @@ ROLLOVER        CA              FLAGWRD6                # IF HERE INLINE (ROLL D
                 MASK            GMBDRBIT                # IF HERE FROM PITCHOFF, IS ROLL DONE?
                 EXTEND
                 BZF             PITCHOFF        +4      # NO.  SET FLAG, ROLL OR PITCH DONE.
+                CA              ITEMP1
+                TS              EBANK
                 CAF             PRIO10                  # RETURN TO R03
                 TC              NOVAC
                 EBANK=          WHOCARES

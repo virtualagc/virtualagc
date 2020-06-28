@@ -2026,6 +2026,9 @@ DELDCDU2        =               DELCDUZ
 
 # STORAGE FOR FINDCDUW
 
+## FIXME: FIND BETTER HOME
+UNFC/2A         EQUALS          DELDV
+
 #          OVERLAYING KALCMANU STORAGE:                                 (26D)
 
 ECDUW           EQUALS          MIS
@@ -2040,6 +2043,7 @@ UNFV/2          EQUALS          UNWC/2          +6      # I(6) S-S
 UNFVX/2         =               UNFV/2
 UNFVY/2         =               UNFV/2          +2
 UNFVZ/2         =               UNFV/2          +4
+S40EXIT         =               UNFV/2          +6
 -DELGMB         EQUALS          UNFV/2          +6      # B(3)TMP
 #
 #          DEFINED IN THE WORK AREA:                                    (18D)

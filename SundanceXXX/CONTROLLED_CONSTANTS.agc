@@ -24,14 +24,12 @@
 FDPS            2DEC            4.3670          B-7     # 9817.5 LBS FORCE IN NEWTONS
 MDOTDPS         2DEC            0.1480          B-3     # 32.62 LBS/SEC IN KGS/CS.
 DTDECAY         2DEC            -38
-FAPS            2DEC            1.5569          B-7     # 3500 LBS FORCE IN NEWTONS
 MDOTAPS         2DEC            0.05135         B-3     # 11.32 LBS/SEC IN KGS/CS
 ATDECAY         2DEC            -10
 
 # ************************************************************************
 
 FRCS4           2DEC            0.17792         B-7     # 400 LBS FORCE IN NEWTONS
-FRCS2           2DEC            0.08896         B-7     # 200 LBS FORCE IN NEWTONS
 
                 SETLOC          P40S1
                 BANK
@@ -39,14 +37,9 @@ FRCS2           2DEC            0.08896         B-7     # 200 LBS FORCE IN NEWTO
 
 # *** APS IMPULSE DATA FOR P42 *******************************************
 
-K1VAL           2DEC            124.55          B-23    # 2800 LB-SEC
-K2VAL           2DEC            31.138          B-24    # 700  LB-SEC
-K3VAL           2DEC            1.5569          B-10    # FAPS ( 3500 LBS THRUST)
 
 # ************************************************************************
 
-S40.136         2DEC            .4671           B-9     # .4671 M NEWTONS (DPS)
-S40.136_        2DEC            .4671           B+1     # S40.136 SHIFTED LEFT 10.
                 SETLOC          ABORTS
                 BANK
                 COUNT*          $$/P70
@@ -177,7 +170,6 @@ OMEG/MS         2DEC            .24339048
                 BANK
                 COUNT*          $$/S40.9
 
-EARTHMU         2DEC*           -3.986032       E10 B-36*# M(3)/CS(2)
                 SETLOC          F2DPS*31
                 BANK
                 COUNT*          $$/F2DPS
@@ -209,12 +201,6 @@ RESQ            2DEC*           40.6809913      E12 B-58*
                 COUNT*          $$/LOSAM
 
 # ************************************************************************
-
-                SETLOC          TOF-FF1
-                BANK
-                COUNT*          $$/TFF
-
-1/RTMU          2DEC*           .5005750271     E-5 B17*        # MODIFIED EARTH MU
 
                 SETLOC          SBAND
                 BANK
