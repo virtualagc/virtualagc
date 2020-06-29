@@ -42,34 +42,98 @@
                 BANK
                 EBANK=  +MGA
                 COUNT*  $$/P30
+
+REVN1645        STQ     EXIT            # TRKMKCNT, TTOGO, +MGA
+                        QTEMP1
+                
+                TC      COMPTGO
+                CAF     V16N45
+                TC      BANKCALL
+                CADR    GOFLASHR
+                TC      GOTOPOOH
+                TC      +5
+                TC      -5
+                TC      PHASCHNG
+                OCT     00014
+                TC      ENDOFJOB
+
+                CAF     ONE
+                TS      DISPDEX
+                TC      INTPRET
+                GOTO
+                        QTEMP1
+
 P30             TC      UPFLAG          # SET UPDATE FLAG
                 ADRES   UPDATFLG
                 TC      UPFLAG          # SET TRACK FLAG
                 ADRES   TRACKFLG
                 
 P30N33          CAF     V06N33          # T OF IGN
-                TC      VNPOOH          # RETURNS ON PROCEED, POOH ON TERMINATE
+                TC      BANKCALL
+                CADR    GOFLASHR
+                TCF     GOTOPOOH
+                TCF     +5
+                TCF     -5
+                TC      PHASCHNG
+                OCT     00014
+                TC      ENDOFJOB
                 
-                CAF     V06N81          # DISPLAY DELTA V (LV)
-                TC      VNPOOH          #       REDISPLAY ON RECYCLE
+                CAF     V06N82          # DISPLAY DELTA V (LV)
+                TC      BANKCALL
+                CADR    GOFLASH
+                TCF     GOTOPOOH
+                TCF     +2
+                TCF     -5
                                         
                 TC      DOWNFLAG        # RESET UPDATE FLAG
                 ADRES   UPDATFLG
                 TC      INTPRET
                 CALL
                         S30.1
+                DLOAD
+                        4D
+                STODL   HAPO
+                        8D
+                STORE   HPER
                 SET     EXIT
                         UPDATFLG
 PARAM30         CAF     V06N42          # DISPLAY APOGEE,PERIGEE ,DELTA V
-                TC      VNPOOH
-                
+                TC      BANKCALL
+                CADR    GOFLASH
+                TC      GOTOPOOH
+                TCF     +2
+                TCF     PARAM30
+
+                CAF     REFSMBIT
+                MASK    FLAGWRD3
+                EXTEND
+                BZF     MINMGA
+
                 TC      INTPRET
-                SETGO
-                        XDELVFLG        # FOR P40'S: EXTERNAL DELTA-V GUIDANCE.
-                        REVN1645        # TRKMKCNT, TGO, +MGA  DISPLAY
-                        
+                SET     VLOAD
+                        AVFLAG
+                        DELVSIN
+                PUSH    CALL
+                        MIDGIM
+                GOTO
+                        DISPMANV
+
+MINMGA          TC      INTPRET
+                DLOAD   DAD
+                        DP-.01
+                        DP-.01
+                STORE   +MGA
+DISPMANV        CALL
+                        REVN1645
+                SET     EXIT
+                        XDELVFLG
+
+                TC      GOTOPOOH
+                
 V06N33          VN      0633
+V06N82          VN      0682
 V06N42          VN      0642
+V06N45          VN      0645
 
 # PROGRAM DESCRIPTION S30.1     DATE 9NOV66
 #

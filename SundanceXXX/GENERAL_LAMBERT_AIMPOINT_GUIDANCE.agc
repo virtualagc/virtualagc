@@ -187,28 +187,5 @@ P31INT          STQ     DLOAD
 P31ANGLE        2DEC    .0555555555
 P31ZERO         =       1BITDP
 
-                SETLOC  GLM1
-                BANK
-                COUNT*  $$/P31
-
-REVN1645        STQ     EXIT            # TRKMKCNT, TTOGO, +MGA
-                        QTEMP1
-                
-                TC      COMPTGO
-                CAF     V16N45
-                TC      BANKCALL
-                CADR    GOFLASHR
-                TC      GOTOPOOH
-                TC      +5
-                TC      -5
-                TC      PHASCHNG
-                OCT     00014
-                TC      ENDOFJOB
-
-                CAF     ONE
-                TS      DISPDEX
-                TC      INTPRET
-                GOTO
-                        QTEMP1
 
 

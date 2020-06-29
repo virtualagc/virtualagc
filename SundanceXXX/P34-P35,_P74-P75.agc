@@ -186,8 +186,7 @@
 P34             TC      AVFLAGA
                 TC      P34/P74A
 P74             TC      AVFLAGP
-P34/P74A        TC      P20FLGON        # SET UPDATFLG, TRACKFLG
-                CAF     V06N37          # TTPI
+P34/P74A        CAF     V06N37          # TTPI
                 TC      VNPOOH
                 TC      DISPLAYE        # ELEV AND CENTANG
                 TC      INTPRET
@@ -407,16 +406,16 @@ P75             TC      AVFLAGP
                 EXTEND
                 DCA     PTIGINC
 P35/P75A        DXCH    KT
-                TC      P20FLGON        # SET UPDATFLG, TRACKFLG
                 TC      INTPRET
-                CALL
-                        SELECTMU
-P35/P75B        RTB
+                RTB
                         LOADTIME
                 STORE   TSTRT
                 DAD
                         KT
-                STORE   TIG
+                STCALL  TIG
+                        SELECTMU
+P35/P75B        DLOAD
+                        TIG
                 STORE   INTIME          # FOR INITVEL
                 STCALL  TDEC1
                         PRECSET         # ADVANCE BOTH VEHICLES
@@ -428,7 +427,12 @@ P35/P75B        RTB
                         S34/35.5
                 CALL
                         VN1645
-                GOTO
+                RTB
+                        LOADTIME
+                STORE   TSTRT
+                DAD
+                        KT
+                STCALL  TIG
                         P35/P75B
 # ..... S33/34.1 .....
 
@@ -654,7 +658,7 @@ S34/35.1        VLOAD   VSU
 # ADVANCE PASSIVE VEH TO RENDEZVOUS TIME AND GET REQ VEL FROM LAMBERT
 
 S34/35.2        STQ     VLOAD
-                        SUBEXIT
+                        NORMEX
                         VPASS3
                 PDVL    PDDL
                         RPASS3
@@ -687,16 +691,9 @@ NOPIE           STODL   ACTCENT
                 DSU
                         INTIME
                 STORE   DELLT4
-                SLOAD   SETPD
+                SLOAD   CALL
                         DECTWO
-                        0D
-                PDDL    PDVL
-                        EPSFOUR
-                        RACT3
-                STOVL   RINIT
-                        VACT3
-                STCALL  VINIT
-                        INITVEL
+                        PREINITV
                 CALL
                         LOMAT
                 VLOAD   MXV
@@ -704,7 +701,7 @@ NOPIE           STODL   ACTCENT
                         0D
                 VSL1
                 STCALL  DELVLVC
-                        SUBEXIT
+                        NORMEX
 
 # ..... S34/35.3 .....
 
@@ -814,35 +811,17 @@ S34/35.5        STQ     BON
                 SET     GOTO
                         UPDATFLG
                         FLAGOFF
-FLAGON          CLEAR   VLOAD
+FLAGON          CLEAR   EXIT
                         NTARGFLG
-                        DELVLVC
-                STORE   GDT/2
-                EXIT
- +5             CAF     V06N81
+ +2             CAF     V06N81
                 TC      BANKCALL
                 CADR    GOFLASH
                 TC      GOTOPOOH
-                TC      +2              # PRO
-                TC      FLAGON  +5      # LOAD
- +2             CA      EBANK7
-                TS      EBANK           # TO BE SURE
-
-                ZL
-                CA      FIVE
-NTARGCHK        TS      Q
-                INDEX   Q
-                CS      DELVLVC
-                INDEX   Q
-                AD      GDT/2
-                ADS     L
-                CCS     Q
-                TCF     NTARGCHK
-                LXCH    A
-                EXTEND
-                BZF     +3
-                TC      UPFLAG
-                ADRES   NTARGFLG
+                TC      +5              # PRO
+                TC      INTPRET
+                SET     EXIT
+                        NTARGFLG
+                TC      FLAGON +2
 
                 TC      INTPRET
                 BOFF    CALL
@@ -909,7 +888,7 @@ GET45           EXIT
                 TC      KILCLOCK        # TERMINATE
                 TC      N45PROC         # PROCEED
                 TC      CLUPDATE        # RECYCLE - RETURN FOR INITIAL COMPUTATION
-KILCLOCK        CA      Z
+KILCLOCK        CA      TWOPI
                 TS      DISPDEX
                 TC      GOTOPOOH
 N45PROC         CS      FLAGWRD2

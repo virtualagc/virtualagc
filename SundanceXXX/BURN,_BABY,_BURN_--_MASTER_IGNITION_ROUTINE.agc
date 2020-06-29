@@ -845,7 +845,7 @@ IGNITE1         CS              CNTDNDEX                # RESTORE OLD DISPLAY.
 #               ****************************************
 
                 BANK            31
-                SETLOC          P40S2
+                SETLOC          P40S
                 BANK
 
                 COUNT*          $$/P40

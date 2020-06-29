@@ -182,16 +182,15 @@
                 EBANK=  SUBEXIT
                 COUNT*  $$/P3272
 P32             TC      AVFLAGA
-                TC      P32STRT
+                TC      P32/P72A
 P72             TC      AVFLAGP
-P32STRT         EXTEND
-                DCA     P30ZERO
-                DXCH    CENTANG
                 TC      P32/P72A
 ALMXITA         SXA,2
                         CSIALRM
-ALMXIT          LXC,1
+ALMXIT          LXC,1   BOFF
                         CSIALRM
+                        LTCPFLG
+                        P10ALARM
                 SLOAD*  EXIT
                         ALARM/TB -1,1
                 CA      MPAC
@@ -201,17 +200,19 @@ ALMXIT          LXC,1
                 CADR    GOFLASH
                 TC      GOTOPOOH
                 TC      -4
-P32/P72A        TC      P20FLGON
-                CAF     P30ZERO
+P32/P72A        CAF     P30ZERO
                 TS      NN      +1
-                CAF     V06N11          # TCSI
+                CAF     V06N30          # TCSI
                 TC      VNPOOH
                 CAF     V06N55          # NN, ELEV(RGLOS)
                 TC      BANKCALL
-                CADR    GOFLASH
+                CADR    GOFLASHR
                 TC      GOTOPOOH
-                TC      +2
+                TC      +5
                 TC      -5
+                CAF     BIT3
+                TC      BLANKET
+                TC      ENDOFJOB
                 CAF     V06N37          # TTPI
                 TC      VNPOOH
                 TC      INTPRET
@@ -219,7 +220,8 @@ P32/P72A        TC      P20FLGON
                         TCSI
                 STCALL  TIG
                         SELECTMU
-P32/P72B        CALL
+P32/P72B        SET     CALL
+                        LTCPFLG
                         ADVANCE
                 SETPD   VLOAD
                         0D
@@ -253,7 +255,7 @@ P32/P72F        STORE   T2TOT3
                         60MIN
                         P32/P72F
                 EXIT
-                CAF     V06N75
+                CAF     V06N50
                 TC      VNPOOH
                 TC      INTPRET
                 VLOAD   CALL
@@ -429,8 +431,7 @@ P32/P72F        STORE   T2TOT3
 P33             TC      AVFLAGA
                 TC      P33/P73A
 P73             TC      AVFLAGP
-P33/P73A        TC      P20FLGON
-                CAF     V06N13          # TCDH
+P33/P73A        CAF     V06N31          # TCDH
                 TC      VNPOOH
                 TC      INTPRET
                 DLOAD
@@ -505,7 +506,7 @@ P33/P73F        ABS     DSU
                 SIGN    STADR
                 STORE   T2TOT3
                 EXIT
-                CAF     V06N75
+                CAF     V06N50
                 TC      VNPOOH
                 TC      INTPRET
                 VLOAD   CALL
@@ -527,15 +528,12 @@ AVFLAGA         EXTEND                  # AVFLAG = LEM
                 QXCH    SUBEXIT
                 TC      UPFLAG
                 ADRES   AVFLAG
-                TC      SUBEXIT
+                TC      P20FLGON
 AVFLAGP         EXTEND                  # AVFLAG = CSM
                 QXCH    SUBEXIT
                 TC      DOWNFLAG
                 ADRES   AVFLAG
-                TC      SUBEXIT
-P20FLGON        EXTEND
-                QXCH    SUBEXIT
-                TC      UPFLAG
+P20FLGON        TC      UPFLAG
                 ADRES   UPDATFLG        # SET UPDATFLG
                 TC      UPFLAG
                 ADRES   TRACKFLG        # SET TRACKFLG
@@ -567,9 +565,9 @@ DISDVLVC        STORE   DELVLVC
 
 # ..... CONSTANTS .....
 
-V06N11          VN      0611
-V06N13          VN      0613
-V06N75          VN      0675
+V06N30          VN      0630
+V06N31          VN      0631
+V06N50          VN      0650
 SN359+          2DEC    -.000086601
 
 CS359+          2DEC    +.499999992

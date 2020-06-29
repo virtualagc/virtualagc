@@ -251,8 +251,6 @@ CSI/CDH1        EQUALS
                 BANK            35
 CSI/CDH         EQUALS
 P30S            EQUALS
-GLM1            EQUALS
-P40S2           EQUALS
                 BNKSUM          35
 
 # MODULE 6 CONTAINS BANKS 36 THROUGH 43
