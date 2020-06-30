@@ -946,6 +946,8 @@ AZO             ERASE           +1
 AXO             ERASE           +1
 #
 
+UNUSED4         ERASE           +1
+
 
 #          STATE VECTORS FOR DOWNLINK.                                  (12D)
 
@@ -972,23 +974,13 @@ ACTCENT         ERASE           +1                      # I(2) S-S CENTRAL ANGLE
 TIMSUBO         EQUALS          TEPHEM                  # CSEC B-42 (TRIPLE PRECISION)
 #
 
-#          LPS20.1 STORAGE     -ALL ARE PRM -                           (9D)
-
-LS21X           ERASE                                   # I(1)
-LOSVEL          ERASE           +5                      # I(6)
-MLOSV           ERASE           +1                      # I(2) MAGNITUDE OF LOS, METERS B-29
-#
-
 #      ***** P22  *****  (OVERLAYS LPS 20.1 STORAGE)                    (6D)
 VSUBC           EQUALS          LOSVEL                  # I(6) S-S  CSM VELOCITY VECTOR
 #
 
-#          PADLOADED ERASABLES FOR P20/P22                              (6D)
+#          INITVEL STORAGE. ALSO USED BY P34,35,74,75,10,11 OTHERS      (8D)
 
-RANGEVAR        ERASE           +1                      # I(2) RR RANGE ERROR VARIANCE
-RATEVAR         ERASE           +1                      # I(2) RR RANGE-RATE ERROR VARIANCE
-RVARMIN         ERASE           +2                      # I(3) MINIMUM RANGE ERROR VARIANCE
-VVARMIN         ERASE           +2                      # I(3) MINIMUM RANGE-RATE ERROR VARIANCE
+RTARG           ERASE           +5                      # I(6) TARGET VECTOR
 #
 
 END-E3          EQUALS                                  # NEXT UNUSED E3 ADDRESS
@@ -1010,12 +1002,6 @@ WTRUN           ERASE                                   # B(1)PL                
 RMAX            ERASE                                   # B(1)PL                     METERS*2(-19)
 VMAX            ERASE                                   # B(1)PL                      M/CSEC*2(-7)
 
-
-#          LUNAR SURFACE NAVIGATION                                     (2D)
-
-WSURFPOS        ERASE                                   # B(1)PL
-WSURFVEL        ERASE                                   # B(1)PL
-
 #          P22 STORAGE. -PAD LOADED-                                    (2D)
 
 SHAFTVAR        ERASE                                   # B(1)PL                      RAD SQ*2(12)
@@ -1030,8 +1016,11 @@ TRUNVAR         ERASE                                   # B(1)PL                
 
 AGSK            ERASE           +1
 
+
 #          LUNAR LANDING STORAGE. -PAD LOADED-                          (6D)
 
+TLAND           ERASE           +1                      # I(2)  NOMINAL TIME OF LANDING
+/LAND/          ERASE           +1                      # B(2) LUNAR RADIUS AT LANDING SITE
 RLS             ERASE           +5                      # I(6) LANDING SITE VECTOR -MOON REF
 #
 
@@ -1181,12 +1170,15 @@ PIPTEM          =               LRZCDU          +1      # B(3)     LR
 T1TOT2          ERASE           +1                      #  (2)     TIME FROM CSI TO CDH
 T2TOT3          ERASE           +1                      #  (2)
 ELEV            ERASE           +1                      #  (2)
+DELVLVC         ERASE           +5                      # I(6) DELTA VELOCITY - LOCAL VERTICAL COO
+DELVSLV         =               DELVLVC                 # (TEMP STORAGE OF SAME VECTOR)   -RDINATE
 UP1             ERASE           +5                      #  (6)
 DELVEET1        ERASE           +5                      # I(6)     DV CSI IN REF
 DELVEET2        ERASE           +5                      # I(6)     DV CSH IN REF
 RACT1           ERASE           +5                      #  (6)     POS VEC OF ACTIVE AT CSI TIME
 RACT2           ERASE           +5                      #  (6)     POS VEC OF ACTIVE AT CDH TIME
-
+RTX1            ERASE                                   # I(1) X1  -2 FOR EARTH, -10 FOR MOON
+RTX2            ERASE                                   # I(1) X2 FOR SHIFT-EARTH 0, MOON 2
 RTSR1/MU        ERASE           +1                      # (2)      SQ ROOT 1/MU STORAGE
 RTMU            ERASE           +1                      # (2)      MU STORAGE
 #
@@ -1209,7 +1201,7 @@ NOMTPI          EQUALS          RTSR1/MU                # (2) S-S NOMINAL TPI TI
 
 #          SOME P30 STORAGE.                                            (4D)
 
-HAPO            EQUALS          RTSR1/MU                # I(2)
+HAPO            EQUALS          T1TOT2                  # I(2)
 HPER            EQUALS          HAPO            +2      # I(2)
 #
 
@@ -1227,7 +1219,7 @@ TINTSOI         EQUALS          DELTAR                  # I(2) TIME OF INTERCEPT
 #          THE FOLLOWING ARE ERASABLE LOADS DURING A PERFORMANCE TEST.
 
 TRANSM1         =               WRENDPOS                # E4,1400
-ALFDK           =               TRANSM1         +18D
+ALFDK           =               /LAND/
 
 
 # ******* THE FOLLOWING SECTIONS OVERLAY V83 AND DISPLAY STORAGE *******
@@ -1276,29 +1268,27 @@ RSTACK          EQUALS          RANGE                   # B(8) BUFFER FOR R04 NO
 
 RINIT           ERASE           +5                      # I(6) ACTIVE VEHICLE POSITION
 VINIT           ERASE           +5                      # I(6) ACTIVE VEHICLE VELOCITY
+DELLT4          ERASE           +1                      # I(2) TIME DIFFERENCE
 VIPRIME         ERASE           +5                      # I(6) NEW VEL REQUIRED AT INITIAL RADIUS.
 
-#          VARIOUS DISPLAY REGISTERS.  BALLANGS                         (3D)
+#          PADLOADED ERASABLES FOR P20/P22                              (6D)
 
-FDAIX           ERASE                                   # I(1)
-FDAIY           ERASE                                   # I(1)
-FDAIZ           ERASE                                   # I(1)
+RANGEVAR        ERASE           +1                      # I(2) RR RANGE ERROR VARIANCE
+RATEVAR         ERASE           +1                      # I(2) RR RANGE-RATE ERROR VARIANCE
+RVARMIN         ERASE           +2                      # I(3) MINIMUM RANGE ERROR VARIANCE
+VVARMIN         ERASE           +2                      # I(3) MINIMUM RANGE-RATE ERROR VARIANCE
+#
 
-#         P34-P35 STORAGE.  DOWNLINKED.
-
-# (2D)
-
-DELVTPF         ERASE           +1                      # I(2) DELTA V FOR TPF
 #
 #          SOME R04(V62)-R77 RADAR TEST STORAGE                         (6D)
 
-RTSTDEX         ERASE                                   # (1)
-RTSTMAX         ERASE                                   # (1)
-RTSTBASE        ERASE                                   # (1)
-RTSTLOC         ERASE                                   # (1)
+RTSTDEX         EQUALS          HAPOX                   # (1)
+RTSTMAX         =               RTSTDEX         +1      # (1)
+RTSTBASE        =               RTSTMAX         +1      # (1)
+RTSTLOC         =               RTSTBASE        +1      # (1)
 RSTKLOC         =               RTSTLOC
-RSAMPDT         ERASE                                   # (1)
-RFAILCNT        ERASE                                   # (1)
+RSAMPDT         =               RTSTLOC         +1      # (1)
+RFAILCNT        =               RSAMPDT         +1      # (1)
 #
 
 #         LPS20.1 STORAGE 
@@ -1369,7 +1359,6 @@ G(CSM)          EQUALS          GEFF            +2      # I(6) FOR UPDATE OF COM
 R(CSM)          EQUALS          R-OTHER                 #      VECTORS BY LEM; ANALOGS OF GDT/2,
 V(CSM)          EQUALS          V-OTHER                 #      R, AND V, RESPECTIVELY OF THE CSM
 WM              EQUALS          G(CSM)          +6      # I(6) TMP - LUNAR ROTATION VECTOR (SM)
-/LAND/          EQUALS          WM              +6      # B(2) LUNAR RADIUS AT LANDING SITE
 
 #          EBANK-5 ASSIGNMENTS
 
@@ -1389,8 +1378,7 @@ ENDW            EQUALS          W               +162D
 
 #  PLEASE RETAIN THE ORDER OF TLAND THRU JAPFG
 
-TLAND           EQUALS          W                       # I(2)  NOMINAL TIME OF LANDING
-RBRFG           EQUALS          TLAND           +2      # I(6) BRAKING
+RBRFG           EQUALS          W               +2      # I(6) BRAKING
 VBRFG           EQUALS          RBRFG           +6      # I(6)      PHASE
 ABRFG           EQUALS          VBRFG           +6      # I(6)         TARGET
 VBRFG*          EQUALS          ABRFG           +6      # I(2)            PARAMETERS:
@@ -1427,7 +1415,7 @@ ABTVINJ2        EQUALS          ABTVINJ1        +2      # I(2) ABORT VEL ;TFI GR
 
 #          SOME VARIABLES FOR SECOND DPS GUIDANCE                       (34D)
 
-CG              EQUALS          ABTVINJ2        +2      # I(18D) GUIDANCE
+CG              =               W                       # I(18D) GUIDANCE
 RANGEDSP        =               CG              +18D    # B(2)     DISPLAY
 OUTOFPLN        =               RANGEDSP        +2      # B(2)    DISPLAY
 R60VSAVE        EQUALS          OUTOFPLN        +2      # I(6)TMP SAVES VALUE OF POINTVSM THRU R51
@@ -2105,13 +2093,6 @@ DELVEET3        ERASE           +5                      # I(6)     DELTA V IN IN
 TCDH            ERASE           +1                      #  I(2) T2 CDH TIME IN C.S. ALSO DWNLINKED
 #
 
-
-#          P32 - 35                                                     (2D)
-
-RTX1            ERASE                                   # I(1) X1  -2 FOR EARTH, -10 FOR MOON
-RTX2            ERASE                                   # I(1) X2 FOR SHIFT-EARTH 0, MOON 2
-#
-
 END-E6          EQUALS          RTX2                    # LAST LOCATION USED IN E6.
 
 #                 EBANK-7 ASSIGNMENTS
@@ -2162,24 +2143,10 @@ RPCRTIME        ERASE                                   # B(1) REPOSITIONING CRI
 RPCRTQSW        ERASE                                   # B(1) REPOSITIONING CRITERION (ANGLE)
 #
 
-# *** RETAIN THE ORDER OF DELVSLV, TIG, RTARG, DELLT4 FOR UPDATE. ***
-
-#          P32-35  P72-75 STORAGE.                        (6D)
-
-DELVLVC         ERASE           +5                      # I(6) DELTA VELOCITY - LOCAL VERTICAL COO
-DELVSLV         =               DELVLVC                 # (TEMP STORAGE OF SAME VECTOR)   -RDINATE
-#
-
 
 #          P30-P40 INTERFACE UNSHARED.                   (2D)
 
 TIG             ERASE           +1                      # B(2)
-
-#          INITVEL STORAGE. ALSO USED BY P34,35,74,75,10,11 OTHERS      (8D)
-
-RTARG           ERASE           +5                      # I(6) TARGET VECTOR
-DELLT4          ERASE           +1                      # I(2) TIME DIFFERENCE
-#
 
 #          P30-P40 INTERFACE UNSHARED.                                  (3D)
 
@@ -2187,6 +2154,14 @@ TTOGO           ERASE           +1                      # B(2)
 TFI             EQUALS          TTOGO
 WHICH           ERASE                                   # B(1)
 #
+
+#          LPS20.1 STORAGE     -ALL ARE PRM -                           (9D)
+
+LS21X           ERASE                                   # I(1)
+LOSVEL          ERASE           +5                      # I(6)
+MLOSV           ERASE           +1                      # I(2) MAGNITUDE OF LOS, METERS B-29
+#
+
 
 #          ***  R21  ***                                                (1D)
 
@@ -2263,6 +2238,12 @@ DELTEE          EQUALS          DELDV                   # I(2)S-S
 SECMAX          EQUALS          DELVCSI                 # I(2) S-S MAX STOP SIZE FOR ROUTINE
 DELTEEO         EQUALS          POSTTPI                 # I(2) S-S BACK VALUES OF DELTA TIME
 CENTANG         ERASE           +1                      # I(2) S-S CENTRAL ANGLE COVERED(TPI-TPF)
+
+#         P34-P35 STORAGE.  DOWNLINKED.
+
+# (2D)
+
+DELVTPF         EQUALS          DELDV                   # I(2) DELTA V FOR TPF
 
 #          SOME P47 STORAGE                                             (6D)
 
@@ -2341,6 +2322,13 @@ VEX             ERASE           +1                      # I(2) EXHAUST VELOCITY 
 #          MIDTOAV1(2) STORAGE.  (CALLED BY P40,P41,P42)                (1D)
 
 IRETURN1        ERASE                                   # B(1)     RETURN FROM MIDTOAV1 AND 2
+
+#          VARIOUS DISPLAY REGISTERS.  BALLANGS                         (3D)
+
+FDAIX           ERASE                                   # I(1)
+FDAIY           ERASE                                   # I(1)
+FDAIZ           ERASE                                   # I(1)
+
 
 # ******* OVERLAY  NUMBER 1 IN EBANK 7  *******
 #
