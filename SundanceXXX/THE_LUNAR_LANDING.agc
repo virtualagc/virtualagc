@@ -180,7 +180,7 @@ DDUMGOOD        SLOAD   SR
                         LAND
 R60INIT         STOVL   OUTOFPLN        # INITIALIZATION FOR CALCMANU
                         UNFC/2
-                STORE   R60VSAVE        # STORE UNFC/2 TEMPORARILY IN R60SAVE
+                #STORE   R60VSAVE        # STORE UNFC/2 TEMPORARILY IN R60SAVE
                 EXIT
                                         # ****************************************
 
@@ -198,7 +198,7 @@ ASTNRET         TC      INTPRET
                 FCADR   P63SPOT2        #       "ENTER" WILL RETURN TO P63SPOT2
                         R51P63
 P63SPOT2        VLOAD   UNIT            # INITIALIZE KALCMANU FOR BURN ATTITUDE
-                        R60VSAVE
+                        #R60VSAVE
                 STOVL   POINTVSM
                         UNITX
                 STORE   SCAXIS

@@ -81,16 +81,10 @@ TRIMACCL        2DEC*           +3.7055         E-5 B+8*# ACCELERATION DURING TR
                 COUNT*          $$/P40
 
 THRESH1         DEC             24
-
+THRESH2         DEC             308
 THRESH3         DEC             12
 
 HIRTHROT        =               BIT13
-
-                SETLOC          FFTAG5
-                BANK
-                COUNT*          $$/P40
-
-THRESH2         DEC             308
 
                 SETLOC          FTHROT
                 BANK

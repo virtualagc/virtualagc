@@ -208,14 +208,16 @@ RUPTREG4        ERASE
 KEYTEMP1        EQUALS          RUPTREG4
 DSRUPTEM        EQUALS          RUPTREG4
 
-#          FLAGWORD RESERVATIONS.                (16D)
+#          FLAGWORD RESERVATIONS.                (13D)
 
-STATE           ERASE           +15D                    # FLAGWORD REGISTERS.
+STATE           ERASE           +12D                    # FLAGWORD REGISTERS.
 
-#          P25 RADAR STORAGE.  (MAY BE UNSHARED IN E7)  (TEMP OVERLAY)  (2D)  OVERLAYS FLGWRD 14 & 15
 
-LASTYCMD        EQUALS          STATE           +14D    # B(1)PRM  THESE ARE CALLED BY T4RUPT
-LASTXCMD        EQUALS          LASTYCMD        +1      # B(1)PRM  THEY MUST BE CONTIGUOUS,Y FIRST
+#          RENDEZVOUS RADAR TASK STORAGE                                (3D)
+
+RRRET           ERASE           +2D                     # B(1)TMP  P20'S, PERHAPS R29 & R12
+RDES            EQUALS          RRRET           +1      # B(1)TMP
+RRINDEX         EQUALS          RDES            +1      # B(1)TMP
 #
 
 
@@ -573,7 +575,7 @@ UNUSED1         ERASE
 RADMODES        ERASE
 DAPBOOLS        ERASE
 SAMPLIM         ERASE
-SAMPLSUM        ERASE           +3
+SAMPLSUM        ERASE           +1
 OPTYHOLD        ERASE           +1
 TIMEHOLD        ERASE           +1
 RRTARGET        EQUALS          SAMPLSUM                # HALF U IT VECTOR IN SM OR NB AXES.
@@ -626,6 +628,8 @@ DISPDEX         ERASE                                   # B(1)
 TEMPR60         ERASE                                   # B(1)
 PRIOTIME        ERASE                                   # B(1)
 
+UNUSED5         ERASE
+
 
 # STANDBY VERB ERASABLES.  REDOCTR BEFORE THETADS.                      (14D)
 
@@ -654,21 +658,25 @@ VN              ERASE           +5                      # B(6)PRM
 PIPTIME         ERASE           +1                      # B(2)PRM  (MUST BE FOLLOWED BY GDT/2)
 
 
-#          SERVICER   -MUST FOLLOW PIPTIME-                             (19D)
+#          SERVICER   -MUST FOLLOW PIPTIME-                             (22D)
 
-GDT/2           ERASE           +19D                    # B(6)TMP (MUST FOLLOW PIPTIME)
+GDT/2           ERASE           +22D                    # B(6)TMP (MUST FOLLOW PIPTIME)
 MASS            EQUALS          GDT/2           +6      # B(2)
 WEIGHT/G        =               MASS
 ABDELV          EQUALS          MASS            +2      # ALCMANU STORAGE)
-PGUIDE          EQUALS          ABDELV          +1      # (2)
-DVTHRUSH        EQUALS          PGUIDE          +2      # (1)
+DVTHRUSH        EQUALS          ABDELV          +4      # (1)
 AVEGEXIT        EQUALS          DVTHRUSH        +1      #  (2)
 AVGEXIT         =               AVEGEXIT
 TEMX            EQUALS          AVEGEXIT        +2      #  (1)
 TEMY            EQUALS          TEMX            +1      #  (1)
 TEMZ            EQUALS          TEMY            +1      #  (1)
-PIPAGE          EQUALS          TEMZ            +1      # B(1)
+PIPCTR          EQUALS          TEMZ            +1      # B(1)
+DVCOUNT         EQUALS          PIPCTR          +1      # B(1)
+PIPAGE          EQUALS          DVCOUNT         +1      # B(1)
 OUTROUTE        EQUALS          PIPAGE          +1      # B(1)
+LRSTAT          EQUALS          OUTROUTE        +1      # B(1)
+## FIXME: DELETE
+PGUIDE          EQUALS          PIPTIME1                # (2)
 
 #
 
@@ -723,13 +731,13 @@ MARKSTAT        ERASE
 
 DSRUPTSW        ERASE
 DIDFLG          ERASE                                   # (1)
+UNUSED6         ERASE           +1                      # (1)
 LGYRO           ERASE                                   # (1)
 
-#          RENDEZVOUS RADAR TASK STORAGE                                (3D)
+#          P25 RADAR STORAGE.                                           (2D)
 
-RRRET           ERASE           +2D                     # B(1)TMP  P20'S, PERHAPS R29 & R12
-RDES            EQUALS          RRRET           +1      # B(1)TMP
-RRINDEX         EQUALS          RDES            +1      # B(1)TMP
+LASTYCMD        ERASE           +1                      # B(1)PRM  THESE ARE CALLED BY T4RUPT
+LASTXCMD        EQUALS          LASTYCMD        +1      # B(1)PRM  THEY MUST BE CONTIGUOUS,Y FIRST
 #
 
 
@@ -779,19 +787,24 @@ W.INDI          EQUALS          W.IND           +1      # I(1)
 
 BALLEXIT        ERASE                                   # B(1)SAVE LOCATION FOR BALLINGS SUBR EXIT
 
+#          NOUN 87                                                      (2D)
+
+AZ              ERASE           +1D                     # B(1)  AZ AND EL MUST BE CONTIGUOUS
+EL              EQUALS          AZ              +1D     # B(1)
+#
+
+
+#          NOUN 29                                                      (1D)
+## FIXME: is this unused?
+UNUSED7         ERASE
+LRFLAGS         ERASE
+
 
 #          SOME LEM DAP STORAGE.                         (4D)
 
 DAPDATR1        ERASE                                   # B(1)DSP DAP CONFIG.
 TEVENT          ERASE           +1                      # B(2)DSP
 DB              ERASE                                   # B(1)TMP DEAD BAND.
-#
-
-
-#          NOUN 87                                                      (2D)
-
-AZ              ERASE           +1D                     # B(1)  AZ AND EL MUST BE CONTIGUOUS
-EL              EQUALS          AZ              +1D     # B(1)
 #
 
 END-UE          EQUALS                                  # NEXT UNUSED UE ADDRESS
@@ -1417,9 +1430,8 @@ ABTVINJ2        EQUALS          ABTVINJ1        +2      # I(2) ABORT VEL ;TFI GR
 
 CG              =               W                       # I(18D) GUIDANCE
 RANGEDSP        =               CG              +18D    # B(2)     DISPLAY
-OUTOFPLN        =               RANGEDSP        +2      # B(2)    DISPLAY
-R60VSAVE        EQUALS          OUTOFPLN        +2      # I(6)TMP SAVES VALUE OF POINTVSM THRU R51
-RGU             EQUALS          R60VSAVE        +6      # I(6) UNSHARED FOR DOWNLINK
+DELTAH          =               RANGEDSP        +2      # B(2)    DISPLAY
+OUTOFPLN        =               DELTAH          +2      # B(2)    DISPLAY
 
 #          ALIGNMENT/SYSTEST/CALCSMSC COMMON STORAGE.                   (36D)
 
@@ -2541,6 +2553,7 @@ ZNB1            =               WHOCARES
 # THESE ERASABLES MAY BE SHARED WITH CARE
 
 OURTEMPS        =               RN1                     # OVERLAY LAST PART OF SERVICER
+RGU             =               OURTEMPS                # I(6)    GUIDANCE
 LANDTEMP        =               OURTEMPS                # B(6)     GUIDANCE
 TTF/8TMP        =               LANDTEMP        +6      # B(2)    GUIDANCE
 ELINCR          =               TTF/8TMP        +2      # B(2)    GUIDANCE
@@ -2595,8 +2608,7 @@ VN2             =               HMEAS           +2      # B(6)    LR
 GNUR            =               VN2                     # B(6)     LR
 GNUV            =               VN2                     # B(6)     LR
 LRADRET1        =               VN2                     # B(1)     LR
-DELTAH          =               VN2             +6      # B(2)    DISPLAY
-FUNNYDSP        =               DELTAH          +2      # B(2)    DISPLAY
+FUNNYDSP        =               VN2             +6      # B(2)    DISPLAY
 EOURPERM        EQUALS          FUNNYDSP        +2      # NEXT AVAILABLE ERASABLE AFTER OURPERMS
 #
 

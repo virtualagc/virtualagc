@@ -643,7 +643,7 @@ GOTO            CA      POLISH          # BASIC BRANCHING SEQUENCE.
                 MASK    LOW10
                 AD      2K
                 TS      LOC
-                TCF     INTPRET +3
+                TCF     INTPRET +2
                 
                 EBANK=  1400            # SO YUL DOESN'T CUSS THE "CA 1400" BELOW.
                 
