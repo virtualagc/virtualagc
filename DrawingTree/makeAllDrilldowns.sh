@@ -22,7 +22,15 @@ then
 fi
 
 current=`pwd`
-dest=~/git/virtualagc-web
+if [[ "$dest" == "" ]]
+then
+	dest=~/git/virtualagc-web
+fi
+if [[ ! -f "$dest"/changes.html ]]
+then
+	echo "The specified or default web folder seems incorrect."
+	exit 1
+fi
 function drilldown {
 	assembly=$1
 	echo Drilling $assembly ...
