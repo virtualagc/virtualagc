@@ -646,7 +646,7 @@ CGCALC          TC              INTPRET
 
 EXTLOGIC        CCS             WCHPHASE
                 INDEX           A                       # WCHPHASE = +2    APPRQUAD    A = 1
-                CA              TENDBRAK                # WCHPHASE = +0    BRAKQUAD    A = 0
+                #CA              TENDBRAK                # WCHPHASE = +0    BRAKQUAD    A = 0
                 TCF             EXSPOT1         -1      # WCHPHASE = -1    IGNALG      A = 0
 
 LINXLOGC        CA              3SEC*17

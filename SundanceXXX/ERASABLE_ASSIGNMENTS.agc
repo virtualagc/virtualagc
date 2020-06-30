@@ -664,7 +664,8 @@ GDT/2           ERASE           +22D                    # B(6)TMP (MUST FOLLOW P
 MASS            EQUALS          GDT/2           +6      # B(2)
 WEIGHT/G        =               MASS
 ABDELV          EQUALS          MASS            +2      # ALCMANU STORAGE)
-DVTHRUSH        EQUALS          ABDELV          +4      # (1)
+SCAXIS          EQUALS          ABDELV          +2      # (6)
+DVTHRUSH        EQUALS          SCAXIS          +2      # (1)
 AVEGEXIT        EQUALS          DVTHRUSH        +1      #  (2)
 AVGEXIT         =               AVEGEXIT
 TEMX            EQUALS          AVEGEXIT        +2      #  (1)
@@ -2126,38 +2127,37 @@ AOTEL           ERASE           +2                      # B(3)PL
 
 #          LANDING RADAR.         -PAD LOADED-                          (10D)
 
-LRALPHA         ERASE           +3                      # B(1)    POS1 X ROTATION      * MUST *
+LRALPHA         ERASE           +4                      # B(1)    POS1 X ROTATION      * MUST *
 LRBETA1         EQUALS          LRALPHA         +1      # B(1)    POS1 Y ROTATION    *  BE  *
 LRALPHA2        EQUALS          LRBETA1         +1      # B(1)    POS2 X ROTATION    *  IN  *
 LRBETA2         EQUALS          LRALPHA2        +1      # B(1)    POS2 Y ROTATION    * ORDER *
-LRHMAX          ERASE                                   # B(1)
-LRVMAX          ERASE                                   # B(1)
-LRWH            ERASE                                   # B(1)
-LRWVZ           ERASE                                   # B(1)    * MUST  *
-LRWVY           ERASE                                   # B(1)    * BE IN *
-LRWVX           ERASE                                   # B(1)    * ORDER *
+HBEAMANT        EQUALS          LRBETA2         +1      # B(1)
+#E FIXME: DELETE THESE
+LRHMAX          EQUALS          ATIGINC                 # B(1)
+LRVMAX          EQUALS          ATIGINC                 # B(1)
+LRWH            EQUALS          ATIGINC                 # B(1)
+LRWVZ           EQUALS          ATIGINC                 # B(1)    * MUST  *
+LRWVY           EQUALS          ATIGINC                 # B(1)    * BE IN *
+LRWVX           EQUALS          ATIGINC                 # B(1)    * ORDER *
 #
-
 
 #          THROTTLE STORAGE.      -PAD LOADED-                          (1D)
 
-ZOOMTIME        ERASE                                   # B(1)PL TIME OF DPS THROTTLE-UP COMMAND
-
-#          P63 AND P64 CONSTANTS.    -PAD LOADED-                       (2D)
-
-TENDBRAK        ERASE                                   # B(1) LANDING PHASE SWITCHING CRITERION
-TENDAPPR        ERASE                                   # B(1) LANDING PHASE SWITCHING CRITERION
-#
+PIF             ERASE                                   # B(2)   THROTTLE
+ZOOMTDP         ERASE           +1
+ZOOMTIME        EQUALS          ZOOMTDP         +1      # B(1)PL TIME OF DPS THROTTLE-UP COMMAND
 
 #          LANDING RADAR      -PAD LOADED-                              (2D)
 
-RPCRTIME        ERASE                                   # B(1) REPOSITIONING CRITERION  (TIME)
-RPCRTQSW        ERASE                                   # B(1) REPOSITIONING CRITERION (ANGLE)
+## FIXME: DELETE
+RPCRTIME        EQUALS          ZOOMTIME                # B(1) REPOSITIONING CRITERION  (TIME)
+RPCRTQSW        EQUALS          ZOOMTIME                # B(1) REPOSITIONING CRITERION (ANGLE)
 #
 
 
 #          P30-P40 INTERFACE UNSHARED.                   (2D)
 
+TIG(AS)         ERASE           +1                      # B(2)
 TIG             ERASE           +1                      # B(2)
 
 #          P30-P40 INTERFACE UNSHARED.                                  (3D)
@@ -2170,15 +2170,12 @@ WHICH           ERASE                                   # B(1)
 #          LPS20.1 STORAGE     -ALL ARE PRM -                           (9D)
 
 LS21X           ERASE                                   # I(1)
+UNUSED8         ERASE
+LOSCOUNT        ERASE                                   # B(1)
 LOSVEL          ERASE           +5                      # I(6)
 MLOSV           ERASE           +1                      # I(2) MAGNITUDE OF LOS, METERS B-29
 #
 
-
-#          ***  R21  ***                                                (1D)
-
-LOSCOUNT        ERASE                                   # B(1)
-#
 
 #          L SR22.3 (RENDEZVOUS NAVIGATION) STORAGE.                    (4D)
 
@@ -2227,6 +2224,7 @@ VACT4           ERASE           +5D                     # VELOCITY VECTOR OF ACT
 UNVEC           EQUALS          VACT3                   # CDHMVR UNIT VECTOR TEMP STORAGE.
 DELVCSI         ERASE           +1D                     # THRUST VALUE AT CSI
 DELVTPI         ERASE           +1D                     # THRUST VALUE AT TPI OR MID
+DELDV           ERASE           +1D
 DELVMID         EQUALS          DELVTPI
 DIFFALT         ERASE           +1D                     # ALT DIFFERENCE AT CDH
 POSTCSI         ERASE           +1                      # PERIGEE ALTITUDE AFTER CSI MANEUVER
@@ -2236,7 +2234,6 @@ LOOPCT          EQUALS          POSTTPI                 # CSI NEWTON ITERATION C
 HAFPA1          EQUALS          POSTCDH                 # HALF PERIOD
 GAMPREV         ERASE           +1                      # PREVIOUS GAMMA
 DVPREV          EQUALS          DELVTPI                 # PREVIOUS DELVCSI
-DELDV           ERASE           +1D
 CSIALRM         ERASE           +1                      # FIRST SOLUTION ALARM
 VERBNOUN        ERASE
 TITER           EQUALS          CSIALRM                 # ITERATION COUNTER
@@ -2327,7 +2324,6 @@ TNITPREV        EQUALS          TNIT            +2      # I(2)TMP PREVIOUS INIT.
 F               ERASE           +5                      # I(2)TMP  S40.1 GENERATES THIS FOR S40.3
 MDOT            EQUALS          F               +2      # I(2)TMP MASS CHNG RATE, KG/CS AT 2**3.
 TDECAY          EQUALS          MDOT            +2      # I(2)IN  DELTA-T TAILOFF, (2**28)CS.
-VEX             ERASE           +1                      # I(2) EXHAUST VELOCITY FOR TGO COMPUTAT'N
 #
 
 
@@ -2335,21 +2331,10 @@ VEX             ERASE           +1                      # I(2) EXHAUST VELOCITY 
 
 IRETURN1        ERASE                                   # B(1)     RETURN FROM MIDTOAV1 AND 2
 
-#          VARIOUS DISPLAY REGISTERS.  BALLANGS                         (3D)
-
-FDAIX           ERASE                                   # I(1)
-FDAIY           ERASE                                   # I(1)
-FDAIZ           ERASE                                   # I(1)
-
 
 # ******* OVERLAY  NUMBER 1 IN EBANK 7  *******
 #
 
-
-#          INITVEL  (CALLED BY P34,35,38,39,10,11,S40.9,S40.1)          (6D)
-
-RTARG1          EQUALS          VACT1                   # I(6)S TEMP STORAGE OF RTARG
-#
 
 #          P35-P40 INTERFACE.                                           (6D)
 
@@ -2412,10 +2397,10 @@ TSIGHT          EQUALS          PLANVEC         +6      # (2) TIME OF MARK OR ES
 
 #          LRS22.3 STORAGE. (CAN SHARE WITH P30'S AND OVERLAY LRS24.1   (30D).
 
-LGRET           EQUALS          RLMSRCH                 # I(1) TMP
+LGRET           EQUALS          INCORPEX                # I(1) TMP
 RDRET           EQUALS          LGRET                   # B(1)  TEMP RETURN.
 IGRET           EQUALS          LGRET                   # B(1)  TEMP RETURN.
-MX              EQUALS          RDRET           +1      # I(6)
+MX              EQUALS          RDRET           +2      # I(6)
 MY              EQUALS          MX              +6      # I(6)
 MZ              EQUALS          MY              +6      # I(6)
 E0              EQUALS          MX                      # I(2)
@@ -2468,7 +2453,6 @@ P21TIME         EQUALS          RM              +2     # I(2)TMP
 
 #          KALCMANU, VECPOINT STORAGE.  CALLED BY R63, R61, R65.         (12D)
 
-SCAXIS          EQUALS          P21TIME         +2      # I(6)
 POINTVSM        EQUALS          SCAXIS          +6      # I(6)
 #
 
@@ -2577,8 +2561,7 @@ E2DPS           EQUALS          OURPERMS
 PIFPSET         =               XSMD                    # B(1)    THROTTLE
 RTNHOLD         =               PIFPSET         +1      # B(1)    THROTTLE
 FWEIGHT         =               RTNHOLD         +1      # B(2)    THROTTLE
-PIF             =               FWEIGHT         +2      # B(2)   THROTTLE
-PSEUDO55        =               PIF             +2      # B(1)   THROTTLE DOWNLINK
+PSEUDO55        =               FWEIGHT         +2      # B(1)   THROTTLE DOWNLINK
 FC              =               PSEUDO55        +1      # B(2)    THROTTLE
 TTHROT          =               FC              +2      # B(1)    THROTTLE
 FCOLD           =               TTHROT          +1      # B(1)    THROTTLE
@@ -2693,6 +2676,13 @@ TXO             EQUALS          VGVECT          +6      # I(2)TMP  TIME AT WHICH
                                                         # IS ALLOWED.
 
 # END OF THE ASCENT GUIDANCE ERASABLES.
+
+## FIXME: FIND HOME
+#          VARIOUS DISPLAY REGISTERS.  BALLANGS                         (3D)
+
+FDAIX           ERASE                                   # I(1)
+FDAIY           ERASE                                   # I(1)
+FDAIZ           ERASE                                   # I(1)
 
 # THE FOLLOWING CARDS KEEP THE ASSEMBLER HAPPY UNTIL THE SYMBOLS ARE DELETED FROM THE PINBALL NOUN TABLES.
 

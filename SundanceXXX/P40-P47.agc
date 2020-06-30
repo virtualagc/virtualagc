@@ -120,10 +120,7 @@ P40LM           TC              PHASCHNG
                                 FDPS
                                 NOTHROTL
                 STORE           F
-                SLOAD
-                                DPSVEX
-P40IN           DCOMP           SR1
-                STCALL          VEX                     # LOAD EXHAUST VELOCITY FOR TGO COMP.
+P40IN           CALL
                                 S40.1                   # COMPUTES UT AND VGTIG
                 CALL
                                 S40.2,3                 # COMPUTES PREFERRED IMU ORIENTATION

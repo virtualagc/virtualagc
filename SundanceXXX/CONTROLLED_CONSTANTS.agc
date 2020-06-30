@@ -112,10 +112,6 @@ SCALEFAC        2DEC            51.947          B-12    # SCALES A (AT 2(-4) M/C
                 BANK
                 COUNT*          $$/SERV
 
-HBEAMANT        2DEC            -.4687018041            # RANGE BEAM IN LR ANTENNA COORDINATES.
-                2DEC            0
-                2DEC            -.1741224271
-
 HSCAL           2DEC            -.3288792               # SCALES 1.079 FT/BIT TO 2(22)M.
 # ***** THE SEQUENCE OF THE FOLLOWING CONSTANTS MUST BE PRESERVED ********
 

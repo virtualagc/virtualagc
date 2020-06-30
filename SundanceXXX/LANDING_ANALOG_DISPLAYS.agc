@@ -24,7 +24,8 @@ LANDISP         CAF     SWANDBIT        # IS LANDING ANALOG DISPLAYS FLAG SET?
                 MASK    FLAGWRD7
                 CCS     A
                 TCF     +3              # YES.
-GODSPRST        TCF     DISPRSET        # NO.
+GODSPRST        TC      DISPRSET        # NO.
+                TCF     LANDELAY
                 CA      IMODES33        # BIT 7 = 0 (DO ALTRATE), =1 (DO ALT.)
                 MASK    BIT7
                 CCS     A
@@ -69,7 +70,6 @@ DATAOUT         TS      ALTM            # ACTIVATE THE LANDING ANALOG DISPLAYS -
                 CAF     DATABITS
                 EXTEND
                 WOR     CHAN14          # BIT3 DRIVES THE ALT/ALTRATE METER.
-                TCF     TASKOVER        # EXIT
 
 LANDELAY        CCS     PIPCTR
                 TCF     +2

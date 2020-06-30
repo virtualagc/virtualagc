@@ -26,6 +26,7 @@ AOTMARK         INHINT
                 TC              EXTVBCHK
                 TC              ALARM
                 OCT             00105
+                TC              ENDOFJOB
 
 EXTVBCHK        CAF             SIX                     # SEE IF EXT. VERB WORKING
                 MASK            EXTVBACT
@@ -44,7 +45,6 @@ MKVAC           CCS             VAC1USE                 # LOOK FOR A VAC AREA-DO
                 TCF             MKVACFND
                 CCS             VAC5USE
                 TCF             MKVACFND
-                DXCH            BUF2
                 TC              ABORT                   # ALL VAC AREAS OCCUPIED - ABORT.
                 OCT             01207
 

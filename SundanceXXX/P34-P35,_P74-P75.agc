@@ -1078,9 +1078,9 @@ HAVEGUES        STQ
                         VINIT           # B7
                 VSL2
                 STOVL   VINIT           # B5
-                        RTARG1
+                        RTARG
                 VSL2
-                STORE   RTARG1
+                STORE   RTARG
 # INITIALIZATION
 
 INITVEL1        SSP     DLOAD           # SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 2D)
@@ -1094,7 +1094,7 @@ INITVEL1        SSP     DLOAD           # SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 
                 VLOAD
                         RINIT
                 STOVL   R1VEC           # R1VEC EQ RINIT
-                        RTARG1
+                        RTARG
                 STODL   R2VEC           # R2VEC EQ RTARG
                         DELLT4
                 STORE   TDESIRED        # TDESIRED EQ DELLT4
@@ -1105,7 +1105,7 @@ INITVEL1        SSP     DLOAD           # SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 
                 VXV     UNIT
                         VINIT           # MPAC EQ UNIT(RI) X VI   (+8)
                 STOVL   UN
-                        RTARG1
+                        RTARG
                 UNIT    DOT             # TEMP=URT.URI (+2)                 (PL 0D)
                 DAD     CLEAR
                         COZY4
@@ -1132,7 +1132,7 @@ INITVEL2        BPL     SET
                 BPL     VLOAD
                         INITVEL3
                         R2VEC
-                STORE   RTARG1
+                STORE   RTARG
 INITVEL3        DLOAD   PDVL            #                                   (PL 2D)
                         EPSFOUR         # POSITIVE VALUE
                         UN
@@ -1221,7 +1221,7 @@ INITVEL5        VLOAD
 # OFFSET CONIC TARGET VECTOR
 
                 VLOAD   VSU
-                        RTARG1
+                        RTARG
                         RATT1
                 VAD
                         R2VEC
@@ -1233,7 +1233,7 @@ INITVEL5        VLOAD
 
 INITVEL6        VLOAD
                         R2VEC
-                STORE   RTARG1
+                STORE   RTARG
 INITVEL7        VLOAD   VSU
                         VIPRIME
                         VINIT
@@ -1247,9 +1247,9 @@ INITVEL7        VLOAD   VSU
                         VIPRIME
                 VSR2
                 STOVL   VIPRIME
-                        RTARG1
+                        RTARG
                 VSR2
-                STOVL   RTARG1
+                STOVL   RTARG
                         DELVEET3
                 VSR2
                 STORE   DELVEET3

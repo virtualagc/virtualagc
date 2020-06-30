@@ -376,9 +376,8 @@ TURNOFFR        TS      NEGUR
                 TCF     CHKRTIMR +3
 QGIMBITS        EQUALS  OCT1400         # BITS 9 AND 10 (OF CHANNEL 12).
 RGIMBITS        EQUALS  PRIO6           # BITS 11 AND 12 (OF CHANNEL 12).
-SKIPPAXS        CS      RCSFLAGS
-                MASK    BIT12
-                ADS     RCSFLAGS        # BIT 12 SET TO 1.
+SKIPPAXS        CA      CHKVISAD
+                TS      PJUMPADR
                 TCF     QRAXIS          # GO TO QRAXIS OR TO GTS.
 
 # Y-Z TRANSLATION
@@ -425,6 +424,7 @@ ABORTYZ         TC      ALARM
                 CA      ZERO
                 TCF     TSNEXTP
 ALTERYZ         INCR    ZEROOR1
+                CA      ZEROOR1
                 MASK    BIT1
                 AD      FOUR
                 ADS     ROTINDEX
