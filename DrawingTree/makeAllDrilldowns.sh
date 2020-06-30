@@ -22,11 +22,11 @@ then
 fi
 
 current=`pwd`
-if [[ "$dest" == "" ]]
+if [[ "$HTML" == "" ]]
 then
-	dest=~/git/virtualagc-web
+	HTML=~/git/virtualagc-web
 fi
-if [[ ! -f "$dest"/changes.html ]]
+if [[ ! -f "$HTML"/changes.html ]]
 then
 	echo "The specified or default web folder seems incorrect."
 	exit 1
@@ -35,14 +35,14 @@ function drilldown {
 	assembly=$1
 	echo Drilling $assembly ...
 	./drilldown.py $assembly >temp.html
-	if diff --brief temp.html $dest/$assembly.html
+	if diff --brief temp.html "$HTML"/$assembly.html
 	then
 		echo No change in $assembly
 		rm temp.html
 	else
-		#meld temp.html $dest/$assembly.html
+		#meld temp.html "$HTML"/$assembly.html
 		#exit
-		mv temp.html $dest/$assembly.html
+		mv temp.html "$HTML"/$assembly.html
 	fi
 }
 
@@ -50,7 +50,7 @@ if [[ "$1" == "" ]]
 then
 
 	# Rebuild master drawing index.
-	cd $dest
+	cd "$HTML"
 	cat AgcDrawingIndex*.html | AgcDrawingIndex.py >temp.csv
 	if diff --brief temp.csv $current/drawings.csv
 	then
