@@ -1,0 +1,618 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  </head>
+  <body>
+    <h1>Virtual AGC Project Website Maintenance</h1>
+    <h2>Table of Contents</h2>
+    <ul>
+      <li><a href="#Introduction">Introduction</a></li>
+      <li><a href="#Local-Storage_Setup">Local-Storage Setup</a><br>
+      </li>
+      <li><a href="#GitHub_Repository">GitHub Repository</a></li>
+      <li><a href="#Virtual_AGC_Project_on_the_Internet">Virtual AGC
+          Project Collection on the Internet Archive</a></li>
+      <ul>
+        <li><a href="#Internet_Archive_Backup">Internet Archive Backup</a><br>
+        </li>
+      </ul>
+      <li><a href="#Main_Website_at_IBIBLIO">Main Website at IBIBLIO</a></li>
+      <li><a href="#Mailing_List_at_IBIBLIO">Mailing List at IBIBLIO</a><br>
+      </li>
+    </ul>
+    <h2><a name="Introduction"></a>Introduction<br>
+    </h2>
+    <p>This page is a guide for Virtual AGC Project administrators,
+      describing how to maintain the various online sites associated
+      with the Virtual AGC Project.&nbsp; However, it is still necessary
+      to have the appropriate administrative credentials to do so, and
+      this page does not give you such credentials.&nbsp; In general,
+      becoming an administrator requires manual action by existing
+      administrators, and should only be done for trusted contributors
+      having a long-term previous association with the project.<br>
+    </p>
+    <h2><a name="Local-Storage_Setup"></a>Local-Storage Setup</h2>
+    <p>Because <a href="#Main_Website_at_IBIBLIO">the main Virtual AGC
+        website</a> is stored on a Linux filesystem at ibiblio.org, with
+      Linux filenames and permission structures, and because the helper
+      scripts I provide here are BASH scripts, it would seem prudent
+      only to maintain the main website using a Linux computer or
+      virtual machine as well.&nbsp; Note that if the advice given on
+      this page is followed completely, approximately 700GB (not a
+      typo!) is currently required, with about 2TB for future
+      expansion.&nbsp; See the section on <a
+        href="#Internet_Archive_Backup">Internet Archive backup</a>.&nbsp;
+      A minimal requirement (no Internet Archive backup) is closer to
+      50GB plus room for expansion.<br>
+    </p>
+    <p>In order to maintain the main website conveniently, certain data
+      needs to be maintained in local storage.&nbsp; To understand this
+      data, one needs to distinguish between <i>development files</i>
+      for the website and <i>downloadable files</i> from the
+      website.&nbsp; "Development files" are things like HTML and
+      JPG/PNG image files, JavaScript, CSS, and so on, needed to render
+      the web pages correctly in browsers.&nbsp; These are development
+      files because they tend to change over time, as the website is
+      written and rewritten.&nbsp; The files themselves are stored on
+      the Virtual AGC Project's GitHub repository, in a special branch
+      named "gh-pages".<br>
+    </p>
+    <p>"Downloadable files" tend to be files which are very large in
+      size and which never change after they are acquired.&nbsp;
+      Typically they are digitizations of Apollo-era documents, usually
+      scans which have been converted into PDF format.&nbsp; Regardless,
+      because they almost never change and because they are very large,
+      they are not stored in the Virtual AGC Project's GitHub
+      repository, which has allocation limits that would constrain
+      storage of this kind of information.&nbsp; In terms of megabytes,
+      the Virtual AGC website consists almost entirely of these
+      downloadable files, with the development-type files merely being
+      the icing on the cake.<br>
+    </p>
+    <p>Two local-storage folders are absolutely required for updates to
+      the main website, and two more are "optional" but are required for
+      certain specific types of data:<br>
+    </p>
+    <ul>
+      <li>Required development-file directory:&nbsp; This would be a
+        local clone of the "gh-pages" branch of the Virtual AGC GitHub
+        repository.&nbsp; By default, it is the directory
+        ~/git/virtualagc-web/.&nbsp; However, it can be any directory,
+        by storing the name in an environment variable called "HTML".</li>
+      <li>Required website-image directory:&nbsp; This would be an exact
+        image of the desired structure of the main website, except that
+        the development files could be out of date.&nbsp; (The scripts
+        provided for updating the website copy the development files
+        into this directory before performing any uploads.)&nbsp; By
+        default, it is the directory
+        ~/Desktop/sandroid.org/public_html/apollo/.&nbsp; However, it
+        can be any directory, by storing the name in an environment
+        variable called "DOCS".</li>
+      <li>Optional source-tree directory:&nbsp; This would be a local
+        clone of the "master" branch of the Virtual AGC GitHub
+        repository.&nbsp; On my own computer it's ~/git/virtualagc/, but
+        it can be any folder, and there's no need for an environment
+        variable.&nbsp; This directory is necessary if the local
+        administrator wishes to update colorized AGC/AGS software
+        listings.<br>
+      </li>
+      <li>Optional schematics directory:&nbsp; This would be a local
+        clone of the "schematics" branch of the Virtual AGC GitHub
+        repository.&nbsp; On my own computer, it's
+        ~/git/virtualagc-schematics, but it can be any folder, and
+        there's no need for an environment variable.&nbsp; This
+        directory is necessary if the local administrator wishes to
+        update Apollo guidance-system drilldowns or the
+        engineering-drawing search engine.<br>
+      </li>
+    </ul>
+    <p></p>
+    <h2><a name="GitHub_Repository"></a>GitHub Repository</h2>
+    <p><a href="https://github.com/virtualagc/virtualagc">The Virtual
+        AGC Project GitHub repository is found at this link</a>.&nbsp;
+      This site is used for storing and tracking software source code
+      and other engineering files (such as electrical schematics)
+      subject to development and change.<br>
+    </p>
+    <p>Most administrative activities should be pretty straightforward,
+      and can generally be understood by consulting GitHub's own
+      documentation.<br>
+    </p>
+    <p>Some familiarity with the various branches of the repository is
+      useful.&nbsp; The most-significant branches are:</p>
+    <ul>
+      <li>master:&nbsp; All available Apollo-era software source code
+        (especially the AGC, AGS, LVDC, and Gemini OBC flight
+        computers), plus all assemblers and emulators for them.&nbsp;
+        LVDC flight programs are not included at the present time
+        because of potential concerns about "exporting" them under ITAR.</li>
+      <li>gh-pages:&nbsp; Development files (HTML, JPG/PNG images, and
+        similar materials) corresponding to the <a
+          href="#Main_Website_at_IBIBLIO">main project website</a>.&nbsp;
+        It does not include large, archival objects (such as digitized
+        PDF of Apollo-era documents) that are intended only for download
+        rather than for website development, because those materials are
+        very large in comparison to the GitHub resources allocated to
+        the project.&nbsp; <a
+          href="https://virtualagc.github.io/virtualagc/index.html">GitHub
+          presents this material also in a form accessible to browsers</a>,
+        which I call "the staging area" for the main website.&nbsp; At
+        any given time, the contents of the staging area may or may not
+        be identical to that of the main website, and links on the
+        staging area to downloadable files (available only on the main
+        website) may or may not work. <br>
+      </li>
+      <li>mechanical:&nbsp; 2D mechanical drawings and 3D models created
+        for original Apollo-era mechanical drawings of things like the
+        AGC, DSKY, and so on.</li>
+      <li>scenarios:&nbsp; Setup data for NASSP/Orbiter of various
+        Apollo mission scenarios.</li>
+      <li>schematics:&nbsp; Electrical CAD files and simulation files
+        created from AGC electrical schematics.</li>
+      <li>wiki:&nbsp; Wiki files for the GitHub wiki associated with the
+        project.</li>
+    </ul>
+    <p>Other branches are all, or mostly, created for temporary purposes
+      and don't necessarily have any permanent significance.<br>
+    </p>
+    <p>To obtain administrative privileges, it's necessary to have a
+      GitHub account, and to have an existing project administrator
+      assign administrative privileges to that account.<br>
+    </p>
+    <h2><a name="Virtual_AGC_Project_on_the_Internet"></a>Virtual AGC
+      Project Collection on the Internet Archive</h2>
+    <p></p>
+    <p><a href="https://archive.org/details/virtualagcproject">The
+        Virtual AGC Project collection at the Internet Archive is found
+        at this link</a>.&nbsp; This site is used for archival storage
+      of the highest-quality original scans available to us of
+      Apollo-era documents.&nbsp; In almost all cases, this means that
+      the scans were performed by the Virtual AGC Project, or at its
+      request, without being available elsewhere online.&nbsp; For
+      example, all original scans of AGC software assembly listings are
+      stored here.&nbsp; Such scans are generally too large (in
+      megabytes) for convenient day-to-day use.&nbsp; Thus, smaller,
+      lower-quality versions are created for day-to-day use, and stored
+      at <a href="#Main_Website_at_IBIBLIO">the main Virtual AGC
+        Project website</a>.&nbsp; Nevertheless, it's desirable to
+      retain the highest-quality scans as well, for purposes such as
+      checking for possible errors in the lower-quality scans, for
+      occasionally providing imagery to graphic artists (or just other
+      people in general) on request, and so on, and that's what our
+      Internet Archive collection is used for.&nbsp; If you have simply
+      obtained a PDF of a document from someone and want to use it
+      as-is, it would generally be posted directly to the main website,
+      and there would be no purpose in uploading it to our Internet
+      Archive collection.<br>
+    </p>
+    <p>A slight exception is that a large number of scans (100,000+) of
+      Apollo engineering drawings are stored <i>only</i> in our
+      Internet Archive collection, without being made available in a
+      lower-resolution form on the main project website.<br>
+    </p>
+    <p>Administrative access to this Internet Archive collection allows
+      you to:<br>
+    </p>
+    <ul>
+      <li>Upload new documents to the collection.&nbsp; An upload will
+        usually, but not always, be a zipfile or tarball of scanned
+        images representing the individual pages of an Apollo-era
+        document.&nbsp; Occasionally the file might be a PDF of such a
+        document.</li>
+      <li>Change the metadata for the document (using an "Edit" tool on
+        that document's web-page in the collection).</li>
+      <li>Change the specific uploaded files comprising the document
+        (also using the "Edit" tool).</li>
+      <li>Perform other technical operations, such as removing the
+        document from the Internet Archive's index (using the "Manage"
+        tool).</li>
+    </ul>
+    <p>While there are many variations to the number, format, and naming
+      of files uploaded, I would recommend the following:<br>
+    </p>
+    <ul>
+      <li>For any given document, upload it as a single zipfile or
+        uncompressed tarball of JPG or PNG images.&nbsp; Use the
+        highest-quality images available.&nbsp; PNG is preferable in
+        terms of quality, but if JPG is <i>much</i> smaller without any
+        detectable difference in quality, that's fine too.</li>
+      <li>The page-ordering in which the Internet Archive displays the
+        individual images is determined by the alphabetical order of the
+        filenames.&nbsp; However, the alphabetical collation may not be
+        what you expect, so it's best to name the PNG or JPG files
+        according to some predictable pattern, such as:&nbsp; <i>basename</i>_0001.jpg,
+        <i>basename</i>_0002.jpg, ..., with all the page numbers being
+        padded with zeroes to have the same number of digits.&nbsp; This
+        always results in page-numbering that's exactly what you expect.<br>
+      </li>
+      <li>The zipfile or tarball name <i>must</i> end literally with
+        "_images.zip" or "_images.tar" (note the underline)!&nbsp; For
+        example, "MyDocument_images.tar".&nbsp; If you leave out the
+        "_images", then the Internet Archive will not attempt to display
+        the individual pages online, and you'll have to correct the
+        file's name and re-upload it.</li>
+    </ul>
+    <p>When uploading a document, you are asked to specify various
+      metadata about it.&nbsp; As mentioned above, this metadata can be
+      edited afterwards, but it's usually more convenient to get it
+      right the first time.&nbsp; Pay particular attention to the
+      following metadata fields:<br>
+    </p>
+    <ul>
+      <li>title:&nbsp; By default, this will be some trivial variant of
+        the filename, and that's usually inadequate, so make it
+        something decent instead.<br>
+      </li>
+      <li>creator:&nbsp; That's whoever wrote the original document
+        (such as the author's name, or MIT Instrumentation Laboratory,
+        or something of that nature); it's not <i>your</i> name.</li>
+      <li>collection:&nbsp; That's literally "virtualagcproject"
+        (without the quotes).</li>
+      <li>description:&nbsp; Self-explanatory.</li>
+      <li>subject keywords:&nbsp; These will vary, so you'll have to use
+        your own judgement, but it's often some combination of "nasa",
+        "apollo", "agc", "guidance", "computer", etc.</li>
+      <li>language:&nbsp; Almost always English.</li>
+      <li>license:&nbsp; Public Domain.&nbsp; The legal theory here is
+        that material produced under contract for the U.S. Government is
+        not subject to copyright, so it's always in the public
+        domain.&nbsp; I.e., The People paid to create it, so The People
+        own it; and if everyone owns it, then nobody does.&nbsp; This
+        reasoning does <i>not</i> apply to commercial material which
+        the government simply chose to purchase after the fact, so if
+        there's reason to believe that that's the case, and that the
+        material has a valid copyright, do <i>not</i> upload it.&nbsp;
+        Similarly, do not upload material which you believe may be
+        subject to ITAR restrictions.&nbsp; In terms of material marked
+        as "classified" or "confidential", such material is
+        automatically periodically downgraded in terms of it's
+        classification level, and hence any Apollo-era documents should
+        have been declassified decades ago, regardless of how they were
+        originally marked; nevertheless, it is probably wiser <i>not</i>
+        to upload such material.&nbsp; (I've not personally seen any
+        such documents, except for a few instances in which they were
+        specifically marked has having become unclassified.)</li>
+    </ul>
+    <p>You can only be added as an admin by a direct action of the
+      Internet Archive itself; i.e., a Virtual AGC administrator cannot
+      make you a Virtual AGC administrator of their own volition,
+      unassisted.&nbsp; A Virtual AGC administrator should submit a
+      request at info@archive.org for the addition of a specific email
+      address as an <i>extra</i> new administrator.<br>
+    </p>
+    <h3><a name="Internet_Archive_Backup"></a>Internet Archive Backup</h3>
+    <p>One problem with the Virtual AGC Project's Internet Archive
+      collection is that it provides no natural backup mechanism.&nbsp;
+      With <a href="#GitHub_Repository">the GitHub site</a> and <a
+        href="#Main_Website_at_IBIBLIO">the IBIBLIO site</a> described
+      above and below, there are natural backup-like mechanisms:&nbsp;
+      For the GitHub site, many people have local clones of the
+      repository (<i>I</i> certainly do), so the information is
+      inherently redundant, or at least mostly so.&nbsp; For the IBIBLIO
+      site, administrators need to have complete local clones of the
+      site in order to maintain it; so, again, there are natural backups
+      that are complete or nearly complete.&nbsp;&nbsp;&nbsp; For the
+      Internet Archive collection, however, there's no such natural
+      backup mechanism, since after a file is uploaded there's no
+      particular necessity to keep a local copy of it, and hence in the
+      event of catastrophic failure of the Internet Archive, there's no
+      reasonable expectation that any of the information uploaded to it
+      is easily recoverable.<br>
+    </p>
+    <p>It is therefore my own practice as an administrator to maintain a
+      complete local copy of all Virtual AGC Project files from the
+      Internet Archive collection, whether explicitly uploaded by me or
+      whether internally generated by the Internet Archive.&nbsp; It's a
+      tad wasteful of space, but it's the safest way to go about
+      it.&nbsp; (I would note that a couple hundred boxes of aperture
+      cards comprising the LM engineering drawings are scheduled for
+      scanning, and while the uploads for them are on the order of 1GB
+      each, the processing performed by the Internet Archive turns them
+      into nearly 10GB downloads.&nbsp; One might, therefore, argue that
+      a full download is unwarranted.)<br>
+    </p>
+    <p>This task is simplified by the fact that the Internet Archive
+      itself provides <a
+        href="https://archive.org/services/docs/api/internetarchive/">a
+        Python 3 script called 'internetarchive' or 'ia'</a>, which
+      which can download Internet Archive files in a very flexible
+      way.&nbsp; I store these downloads in a dedicated directory called
+      virtualagcproject/, and the download command is simply:<br>
+    </p>
+    <blockquote><font face="Courier New, Courier, monospace">cd
+        virtualagcproject<br>
+        python3 /<i>PATH</i>/<i>TO</i>/ia download --search
+        'collection:virtualagcproject'</font><br>
+    </blockquote>
+    This creates a subfolder of virtualagcproject/ for each document
+    I've uploaded to our Virtual AGC Project collection, and stores each
+    file (either downloaded or generated) in those subfolders.<br>
+    <br>
+    Though time-consuming, the downloading process is a very efficient
+    one, in that it splits the download into blocks, and only downloads
+    blocks which haven't previously been downloaded, or whose
+    downloading has failed.&nbsp; This is helpful, since some files to
+    be downloaded are 1GB+ in size; failure of a download only requires
+    later download of blocks that have failed, rather than attempting to
+    completely download the entire 1GB+.<br>
+    <br>
+    On the other hand, some care is necessary in interpreting the
+    results of the download operation.&nbsp; Each document has a printed
+    message indicating whether the result was a "success" or a
+    "failure", but there are many hundreds of documents in the
+    collection already, so it is easy not to notice if there were some
+    failures.&nbsp; In other words, it may be necessary to re-run 'ia'
+    twice or even more times, but it's necessary first to <i>notice</i>
+    that a failure had occurred, and that's not always so easy. <br>
+    <br>
+    Note also that due to internal process changes (presumably,
+    improvements) at the Internet Archive, files which were generated
+    ("derived") by the Internet Archive may from time to time be
+    re-derived even though new uploads have not occurred.&nbsp;
+    Therefore, even when 'ia' has been completely successful, re-running
+    it at some later time may still result in portions of some documents
+    being re-downloaded.<br>
+    <h2><a name="Main_Website_at_IBIBLIO"></a>Main Website at IBIBLIO</h2>
+    <p></p>
+    <p><a href="http://www.ibiblio.org/apollo">The main Virtual AGC
+        Project website is at this link</a>, but it is not administered
+      at that link.&nbsp; Various means are used to administer the site,
+      as follows:<br>
+    </p>
+    <ul>
+      <li>Synchronizing the website contents with the contents of local
+        storage: Assuming that <a href="#Local-Storage_Setup">the setup
+          instructions for local storage</a> have been obeyed, I do this
+        via <a href="ProjectMaintenance/UpdateApollo.sh">the BASH
+          script UpdateApollo.sh</a>, of which there is more discussion
+        below.</li>
+      <li>Individual files can also be uploaded via 'scp', although
+        proper setup of local storage there is little reason to do so,
+        since bulky synchronization is easier and generally requires
+        little more time.&nbsp; The primary use case, in my experience,
+        would be if there are new documents to upload but a full bulk
+        synchronization isn't immediately desired because the HTML files
+        happen to be in a buggy state.<br>
+      </li>
+      <li>Certain precision changes to the website can be performed
+        directly via 'ssh'.&nbsp; For example, file permissions can be
+        changed, files can be deleted, etc.</li>
+      <li>Some answers to administrative questions supposedly can be
+        found on <a href="https://answers.ibiblio.org/index.html">the
+          IBIBLIO Interactive Q&amp;A page</a>.&nbsp; I say
+        "supposedly", because there are generally no answers to
+        questions I have asked there.</li>
+      <li>Help tickets can be filed at <a
+          href="https://www.ibiblio.org/help/request/">the IBIBLIO Help
+          Request page</a>.&nbsp; I wouldn't count on getting any help.</li>
+    </ul>
+    While you would not normally administer the site using 'ssh', it's
+    helpful to explore how to do that, so that you understand the issues
+    involved in using 'rsync' or 'scp'.&nbsp; When accessing the site
+    via 'ssh', you find yourself at a Linux command line (at this
+    writing, CentOS 6.10).&nbsp; Thus any tasks you need to perform at
+    the command line are via normal Linux utilities.&nbsp; Your "home"
+    directory after login is not where the project website's files are
+    stored, but is basically an empty directory.&nbsp; The website
+    files, rather, are stored in the directory /public/html/apollo/.<br>
+    <br>
+    The directory hierarchy of the website is rather complex and
+    inconsistent, having evolved over time without much planning, but in
+    general you can say the following:<br>
+    <ul>
+      <li>Most HTML files and PNG/JPG images displayed from HTML pages
+        are stored at the top level (/public/html/apollo/).</li>
+      <li>Most downloadable documents are PDF files stored in the
+        "Documents" directory (/public/html/apollo/Documents/).</li>
+      <li>Colorized HTML assembly listings of AGC and AGS programs are
+        stored in subdirectories of the "listings" directory
+        (/public/html/apollo/listings/).</li>
+      <li>The files for the online search engine for guidance-system
+        engineering drawings are stored in the "TipueSearch" directory
+        (/public/html/apollo/TipueSearch/).</li>
+    </ul>
+    There are many more, but these are the most-immediately relevant in
+    terms of day-to-day maintenance of the website.<br>
+    <br>
+    For example, you could log in to the directory containing the
+    website files and view the HTML files in that directory with the
+    command-line commands:<br>
+    <blockquote><font face="Courier New, Courier, monospace">ssh <i>username</i>@login.ibiblio.org
+        # Will prompt you for password.<br>
+        cd /public/html/apollo<br>
+        ls -l *.html</font><br>
+    </blockquote>
+    <p>At this point you could also use 'chmod' to change file
+      permissions, 'passwd' to change your password, and so on.<br>
+    </p>
+    <p>The same login credentials for 'ssh' are used with 'scp' and
+      'rsync', and file you upload needs to be sent to
+      /public/html/apollo/ or to subdirectories thereof.&nbsp; For
+      example, to upload a single file called MyNewDocument.pdf from
+      your current local directory to the Documents directory of the
+      website:<br>
+    </p>
+    <blockquote><font face="Courier New, Courier, monospace">scp
+        MyNewDocument.pdf</font> <font face="Courier New, Courier,
+        monospace"><i>username</i>@login.ibiblio.org:/public/html/apollo/Documents</font></blockquote>
+    <p>But in performing an operation like this, you may find that the
+      uploaded document is not actually viewable from the website.&nbsp;
+      That could happen, for example, if the file permissions are that
+      it is readable by the owner or the owner and the group, but not by
+      everybody.&nbsp; Since the browser won't be the file owner or
+      belong to the owner's group, the browser cannot open the
+      file.&nbsp; This is an example in which cleanup of by an 'ssh'
+      login may be needed afterward.<br>
+    </p>
+    <p>Problems like that don't occur when you use bulk synchronization
+      of the website to the image of the website on your local storage
+      device(s).&nbsp; Such bulk synchronization is not normally done
+      using 'rsync' directly, but ranter by using <a
+        href="ProjectMaintenance/UpdateApollo.sh">the BASH script
+        UpdateApollo.sh</a>, which automatically takes care of all such
+      permission problems.&nbsp; <a href="#Local-Storage_Setup">Assuming
+        that local storage is set up properly</a>, and that
+      UpdateApollo.sh is in the PATH, the process is very simple; from
+      any directory, simply do:<br>
+    </p>
+    <blockquote>
+      <p><font face="Courier New, Courier, monospace">UpdateApollo.sh</font><br>
+      </p>
+    </blockquote>
+    and give the appropriate password when prompted to do so.&nbsp; From
+    the setup instructions, you'll recall that there are two local
+    directories needed:&nbsp; $HTML, which is the complete is the local
+    "gh-pages" branch of the Virtual AGC Projects' git source tree,
+    containing stuff like the HTML and PNG/JPG files for the website;
+    and $DOCS, which contains a <i>complete</i> local image of the
+    website, but potentially with the HTML/JPG/PNG out-of-date.&nbsp;
+    What the script does is to bring the $DOCS directory up to date (by
+    copying in the contents of $HTML), perform various cleanup (such a
+    fixing file permissions, adding .htaccess files), and then uploading
+    the entire contents of $DOCS to the website via 'rsync'.<br>
+    <br>
+    Useful variants are:<br>
+    <blockquote><font face="Courier New, Courier, monospace">UpdateApollo.sh
+        --dry-run&nbsp;&nbsp;&nbsp; # Don't actually upload.</font><br>
+      <font face="Courier New, Courier, monospace">UpdateApollo.sh
+        --delete&nbsp;&nbsp;&nbsp;&nbsp; # Delete remote files that are
+        absent from local storage.<br>
+      </font></blockquote>
+    <p>The latter variant (<font face="Courier New, Courier, monospace">--delete</font>)
+      highlights a danger if there are multiple administrators whose
+      local storage areas are <i>not</i> mutually synchronized.&nbsp;
+      In that case, administrator A may have files that administrator B
+      does not have; if <font face="Courier New, Courier, monospace">--delete</font>
+      is used, then successive update operations by administrators A and
+      B will keep removing and adding back the same file.&nbsp; Thus,
+      multiple administrators must take care to insure that their
+      actions are coordinated and their local storage areas are
+      synchronized.<br>
+    </p>
+    <p>Here are some other traps into which it is all to easy to fall:<br>
+    </p>
+    <ul>
+      <li>The "listings" directory:&nbsp; Although colorized listings of
+        AGC and AGS code are <i>created</i> by building the Virtual AGC
+        Project software from source, those colorized HTML files simply
+        remain in the build directories.&nbsp; In other words, they
+        don't automatically get copied into the local image of the
+        "listings" directory, and hence they don't automatically get
+        updated on the website.&nbsp; It's necessary to explicitly copy
+        the colorized HTML files from the project's build directories
+        into the website's "listings" directory.&nbsp; I'll illustrate
+        from my own computer's setup.&nbsp; There, the "master" branch
+        of the Virtual AGC source tree is in the folder git/virtualagc/,
+        while the "gh-pages" branch (i.e., the website's HTML/PNG/JPG)
+        is in the git/virtualagc-web/ folder.&nbsp; If there's a <i>new</i>
+        AGC software version available that has never appeared online
+        before, coming (say) from the source directory
+        git/virtualagc/Artichoke123/, then you'll need to explicitly
+        create a target directory for it the first time it's going to be
+        used:</li>
+    </ul>
+    <blockquote>
+      <blockquote><font face="Courier New, Courier, monospace">mkdir
+          git/virtualagc-web/listings/Artichoke123<br>
+          cd git/virtualagc/Artichoke123/Apollo32.png</font><br>
+      </blockquote>
+      In general, though, to simply update the "listings" directory
+      using existing listings, you just do this:<br>
+      <blockquote><font face="Courier New, Courier, monospace">cd
+          git/virtualagc<br>
+          find -name "*.agc.html" -exec cp {} ../virtualagc-web/listings
+          \;</font><br>
+      </blockquote>
+      Having done this, an UpdateApollo.sh operation now sends
+      up-to-date listings to the website.&nbsp; Of course, given that
+      you are working in the local clone of the "gh-pages" branch of the
+      git repository, you also need to use whatever git commands are
+      appropriate for adding any new directories to the repository or
+      for committing the newly-changed HTML files to the
+      repository.&nbsp; Note that while the operation above has
+      overwritten all of the listings/*.html files, the new files are
+      almost always identical to the older ones they replaced, and hence
+      committing them has no negative effect on bandwidth or storage
+      allocated in the git repository.<br>
+    </blockquote>
+    <ul>
+      <li>The "TipueSearch" directory:&nbsp; This directory, as already
+        mentioned, contains files for the online search engine for
+        Apollo guidance-system engineering drawings.&nbsp; The directory
+        is updated by running the script called "makeAllDrilldowns.sh"
+        from the DrawingTree/ directory of the "schematics" branch of
+        the Virtual AGC git repository.&nbsp; Running that script also
+        updates all of the HTML files (<i>NNNNNNN-NNN</i>.html)
+        associated with "drilldowns" of Apollo guidance-system
+        assemblies.&nbsp; Thus, if changes had been made to the
+        DrawingTree/ directory of the "schematics" branch, one might
+        want to run "makeAllDrilldowns.sh" prior to UpdateApollo.sh.</li>
+    </ul>
+    <p>The traps mentioned above are also problematic when there are
+      multiple administrators for the website, since typically you'd
+      expect only one of them, rather than <i>all</i> of them, to work
+      on issues related to AGC assembly listings or to Apollo
+      guidance-system assemblies.&nbsp; So not all of them would be
+      keeping the associated files up-to-date in their local storage.<br>
+    </p>
+    <p>I have requested information from IBIBLIO, both by Interactive
+      Q&amp;A and Help Ticket, as to how to add additional
+      administrators for the Virtual AGC Project's collection at
+      IBIBLIO.&nbsp; Alas, I do not expect to receive any help, though
+      if I do then I'll update the description here.&nbsp; At present,
+      there is a single administrative account, with <i>username</i>
+      "apollo" and a single associated password.<br>
+    </p>
+    <h2><a name="Mailing_List_at_IBIBLIO"></a>Mailing List at IBIBLIO</h2>
+    <p></p>
+    <p><a href="https://lists.ibiblio.org/mailman/admin/apollo">The
+        mailing list is administered at this link</a>.&nbsp; As an
+      admin, you can administer the obvious stuff, such as mailing-list
+      settings, user lists, and so on.<br>
+    </p>
+    <p>Administrative access to <a href="#Main_Website_at_IBIBLIO">the
+        main website</a> as described above does <i>not</i> give you
+      administrative access to the associated mailing list.&nbsp; A
+      mailing-list administrator can add other mailing-list
+      administrators at the link above, and then inform the new
+      administrators of the administrative password.<br>
+    </p>
+    <p><b>Warning:</b>&nbsp; All that happens when an administrator is
+      added is that the new email address begins to receive email
+      messages targeted at administrators; it does not allow the new
+      administrator to actually log in and administer anything.&nbsp;
+      Rather, the administrative interface has a <i>single</i> password
+      (same password for all administrators!), and anybody with this
+      password can log into the administrative interface and administer
+      anything they like, regardless of whether they've been registered
+      as an administrator or not.&nbsp; Thus, anybody with the password,
+      administrator or not, could log in, change the password, and lock
+      out all of the registered administrators.&nbsp; Or a registered
+      administrator could do so, and lock out all of the other
+      registered administrators.&nbsp; Indeed, I'd think this is very
+      likely to happen with a new administrator, simply by accident, if
+      they thought the password they were changing was their own
+      personal password.&nbsp; If they subsequently forgot the password,
+      thinking there was some easy recover method (there isn't),
+      everybody is locked out!&nbsp; Poor, poor system.<br>
+    </p>
+    <p>In addition to list administrators, there is also the separate
+      role of list moderators.&nbsp; Moderators have elevated
+      permissions and can deal with various problems, but cannot change
+      some of the configuration settings that administrators can.&nbsp;
+      Most importantly, there is a separate moderator password from the
+      administrator password, and therefore (where possible) it is
+      preferable to give moderator status rather than administrative
+      status.<br>
+      <br>
+    </p>
+    <hr width="100%" size="2">
+    <div align="center">Last Updated by Ron Burkey, 2020-06-29<br>
+      <br>
+    </div>
+    <p><br>
+    </p>
+  </body>
+</html>
