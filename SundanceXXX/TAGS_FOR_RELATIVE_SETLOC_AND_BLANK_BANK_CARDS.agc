@@ -226,7 +226,6 @@ F2DPS*31        EQUALS
 P20S4           EQUALS
 F2DPS*32        EQUALS
 ABORTS          EQUALS
-FLOGSUB         EQUALS
 SERV2           EQUALS
 ASENT1          EQUALS
 SERV1           EQUALS

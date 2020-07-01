@@ -37,10 +37,6 @@ K(1/DV)         2DEC            436.70          B-9     # DPS ENGINE THRUST IN N
                                                         # ADDITIONAL ASSUMPTION THAT NET MASS-FLOW
                                                         # RATE = 5.299 KG/SEC = 5.135 (APS) +
                                                         # .164 (1 RCS JET).
-                SETLOC          ASENT
-                BANK
-                COUNT*          $$/ASENT
-AT/RCS          2DEC            .0000785        B+10    # 4 JETS IN A DRY LEM
                 SETLOC          SERVICES
                 BANK
                 COUNT*          $$/SERV
@@ -113,12 +109,7 @@ ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO
                 COUNT*          $$/F2DPS
 
 MOONG           2DEC            -1.6226         E-4 B2
-                SETLOC          P12
-                BANK
-                COUNT*          $$/P12
 
-MUM(-37)        2DEC*           4.9027780       E8 B-37*
-MOONRATE        2DEC*           .26616994890062991 E-7 B+19*# RAD/CS.
                 SETLOC          SERVICES
                 BANK
                 COUNT*          $$/SERV

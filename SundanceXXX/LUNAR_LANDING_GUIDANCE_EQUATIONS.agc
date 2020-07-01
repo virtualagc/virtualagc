@@ -466,9 +466,9 @@ RGVGCALC        TC              INTPRET                 # ENTER HERE TO RECOMPUT
 
                 CA              MPAC                    # COMPUTE LOOKANGL ITSELF
                 DOUBLE
-                TC              BANKCALL
+                # TC              BANKCALL
 
-                CADR            SPARCSIN        -1
+                # CADR            SPARCSIN        -1
                 AD              1/2DEG
                 EXTEND
                 MP              180DEGS

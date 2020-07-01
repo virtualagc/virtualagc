@@ -122,36 +122,13 @@ FINDCDUW        BOV             SETPD                   # FINDCDUW: ENTRY WHEN U
                 CA              ONE                     # INDEX IF CSM DOCKED
                 TS              NDXCDUW
 
-                CA              XOVINHIB                # XOVINHIB MUST NOT BE BIT15
-                TS              FLPAUTNO                # SET TO POS-NON-ZERO FLAG PNGCS AUTO NOT
-
-                MASK            DAPBOOLS
+                CA              DAPBOOLS
+                MASK            XOVINHIB                # XOVINHIB MUST NOT BE BIT15
                 TS              FLAGOODW                # FLAGOODW = ANY PNZ NUMBER IF XOV INHIBTD
 
 # FETCH BASIC DATA
 
                 INHINT                                  # RELINT AT PAUTNO (TC INTPRET)
-
-                CA              CDUX                    # FETCH CDUX,CDUY,CDUZ IN ALL CASES, BUT
-                TS              CDUSPOTX                #      REPLACE BELOW IF PNGCS AUTO
-                CA              CDUY
-                TS              CDUSPOTY
-                CA              CDUZ
-                TS              CDUSPOTZ
-
-                CA              BIT10                   # PNGCS CONTROL BIT
-                EXTEND
-                RAND            CHAN30
-                CCS             A
-                TCF             PAUTNO                  # NOT PNGCS (BITS INVERTED)
-
-                CA              BIT14                   # AUTO MODE BIT
-                EXTEND
-                RAND            CHAN31
-                CCS             A
-                TCF             PAUTNO                  # NOT AUTO (BITS INVERTED)
-
-                TS              FLPAUTNO                # RESET FLAG PNGCS AUTO NOT
 
                 CA              CDUXD                   # PNGCS AUTO: FETCH CDUXD,CDUYD,CDUZD
                 TS              CDUSPOTX
@@ -160,23 +137,25 @@ FINDCDUW        BOV             SETPD                   # FINDCDUW: ENTRY WHEN U
                 CA              CDUZD
                 TS              CDUSPOTZ
 
+                RELINT
+
 # FETCH INPUTS
 
-PAUTNO          TC              INTPRET                 # ENTERING THRUST CMD STILL IN MPAC
+                TC              INTPRET                 # ENTERING THRUST CMD STILL IN MPAC
                 RTB
                                 NORMUNIT
                 STOVL           UNX/2                   # SEMI-UNIT THRUST CMD AS INITIAL UNX/2
                                 UNWC/2
-                RTB             RTB
+                RTB
                                 NORMUNIT
-                                QUICTRIG                # ALWAYS RQD TO OBTAIN TRIGS OF CDUD'S
                 STOVL           UNZ/2                   # SEMI-UNIT WINDOW CMD AS INITIAL UNZ/2
                                 DELV
-                BOVB            UNIT
+                BOVB            CALL
                                 NOATTCNT                # AT LEAST ONE ENTERING CMD VCT ZERO
-                BOV             CALL
+                                TRG*SMNB
+                BOFF            UNIT                    # YIELDS UNIT(DELV) IN VEH COORDS FOR FLTR
+                                STEERSW
                                 AFTRFLTR                # IF UNIT DELV OVERFLOWS, SKIP FILTER
-                                *SMNB*                  # YIELDS UNIT(DELV) IN VEH COORDS FOR FLTR
 
 # THRUST DIRECTION FILTER
 
@@ -214,34 +193,18 @@ FETCHZNB        VLOAD
 
 # COMPUTE THE REQUIRED DIRECTION COSINE MATRIX
 
-DCMCL           VLOAD           VXV
-                                UNZ/2
+DCMCL           VLOAD           CALL
                                 UNX/2
-                UNIT            PUSH                    # UNY/2 FIRST ITERATION
-                VXV             VSL1
-                                UNX/2
-                STORE           UNZ/2                   # -UNZ/2 FIRST ITERATION
-                VXSC            PDVL                    # EXCHANGE -UNFVZ/2 UNZ/2 FOR UNY/2
-                                UNFVZ/2                 # MUST BE SMALL
-                VXSC            BVSU                    # YIELDS -UNFVY/2 UNY/2-UNFVZ/2 UNZ/2
-                                UNFVY/2                 # MUST BE SMALL
-                VSL1            VAD
-                                UNX/2
-                UNIT                                    # TOTALLY ELIMINATES THRUST POINTING ERROR
-                STORE           UNX/2                   # UNX/2
-                VXV             VSL1
-                                UNZ/2                   # -UNZ/2 WAS STORED HERE REMEMBER
-                STORE           UNY/2                   # UNY/2
-                VCOMP           VXV
-                                UNX/2
-                VSL1
-                STORE           UNZ/2                   # UNZ/2
-
-# COMPUTE THE REQUIRED GIMBAL ANGLES
-
+                                DCMCL1
                 CALL
-                                NB2CDUSP                # YIELDS THE RQD GIMBAL ANGLES, 2'S, PI
-                EXIT
+                                DCMCL2
+                CALL
+                                TRNSPSPD
+                AXC,1           CALL
+                                0
+                                DCMTOCDU
+                RTB             EXIT
+                                V1STO2S
 
 # LIMIT THE MIDDLE GIMBAL ANGLE & COMPUTE THE UNLIMITED GIMBAL ANGLE CHGS
 
@@ -252,48 +215,25 @@ DCMCL           VLOAD           VXV
                 XCH             MPAC            +2      #      BECAUSE USING 2'S COMP. WHO CARES?
                 EXTEND
                 MSU             MPAC            +2      # THIS BETTER YIELD ZERO
-                EXTEND
-                BZF             +2
+                CCS             A
+                TCF             ALARMMGA
+                TCF             +2
                 TCF             ALARMMGA
 
 MGARET          INHINT                                  # RELINT AT TC INTPRET AFTER TCQCDUW
 
-                ZL
                 CA              TWO
 DELGMBLP        TS              TEM2
 
-                CA              L                       # TO PREVENT FALSE STARTS ABOUT X, ZERO
-                EXTEND                                  #      FLAGOODW IF DELGMBZ OR Y TOO BIG.
-                SQUARE
-                AD              HI5                     # WITHIN 1 BIT OF -(45 DEG SQUARED)
-                EXTEND
-                BZMF            +3
-                CA              ZERO
-                TS              FLAGOODW
-
                 INDEX           TEM2
-                CA              MPAC
-                INDEX           TEM2
-                TS              CPHI                    # OUTPUTS TO NOUN22
+                CA              CDUXD
                 EXTEND
                 INDEX           TEM2
-                MSU             CDUXD                   # NO MATTER THAT THESE SLIGHTLY DIFFERENT
-                COM                                     #      FROM WHEN WE INITIALLY FETCHED THEM
+                MSU             MPAC
                 INDEX           TEM2
                 TS              -DELGMB                 # -UNLIMITED GIMBAL ANGLE CHGS, 1'S, PI
-                TS              L                       # FOR PRECEDING TEST ON NEXT LOOP PASS
                 CCS             TEM2
                 TCF             DELGMBLP
-
-# BRANCHES TO NOATTCNT
-
-                CCS             FLPAUTNO
-                TCF             NOATTCNT        +2      # NOT PNGCS AUTO
-
-                CA              FLAGWRD5
-                MASK            ENGONBIT
-                EXTEND
-                BZF             NOATTCNT        +2      # ENGINE NOT ON
 
 # LIMIT THE ATTITUDE ANGLE CHANGES
 #
@@ -328,23 +268,18 @@ DELGMBLP        TS              TEM2
                 EXTEND
                 MP              SINCDUZ
                 DDOUBL
-                COM
-                EXTEND                                  # YIELDS +DELATTX UNLIMITD, MAG < 180 DEG,
-                MSU             -DELGMB                 #       BASED ON UNLIMITED DELGMBY.
+                TS              TEM2                    # YIELDS +DELATTX UNLIMITD, MAG < 180 DEG,
+                AD              -DELGMB                 #       BASED ON UNLIMITED DELGMBY.
                 TS              L                       #       ONE BIT ERROR IF OPERANDS IN MSU
                 INDEX           NDXCDUW                 #       OF MIXED SIGNS.  WHO CARES?
                 CA              DAXMAX
                 TC              LIMITSUB
-                TS              -DELGMB                 # SAVE LIMITED +DELATTX
+                TS              TEM3                    # SAVE LIMITED +DELATTX
                 CCS             FLAGOODW
-                CS              -DELGMB                 # FETCH IT BACK CHGING SIGN IF WINDOW GOOD
-                TS              -DELGMB                 # OTHERWISE USE ZERO FOR -DELATTX
-                CS              -DELGMB         +1
+                CA              TEM3                    # FETCH IT BACK CHGING SIGN IF WINDOW GOOD
                 EXTEND
-                MP              SINCDUZ
-                DDOUBL                                  # YIELDS -CNTRIB TO -DELATTX FROM -DELGMBY
-                ADS             -DELGMB                 # -DELGMBX.  NO OVERFLOW SINCE LIMITED TO
-                                                        # 20DEG(1+SIN(70DEG)/COS(70DEG)) < 180DEG
+                SU              TEM2
+                TS              -DELGMB
 
 # COMPUTE COMMANDED ATTITUDE RATES
 
@@ -427,6 +362,7 @@ CDUWXFR         TS              TEM2
                 TS              DELPEROR                # LAG ANGLE = OMEGA ABS(OMEGA)/2 ACCEL
                 CCS             TEM2
                 TCF             CDUWXFR
+                RELINT
 
 # HAUSKEEPING AND RETURN
 
@@ -446,7 +382,6 @@ FLTRSUB         EXTEND
                 COM                                     # ONE MCT, NO WDS, CAN BE SAVED IF NEG OF
                 AD              L                       #      ORIG OFFSET ARRIVES IN A, BUT IT'S
                 EXTEND                                  #      NOT WORTH THE INCREASED OBSCURITY.
-                INDEX           NDXCDUW
                 MP              GAINFLTR
                 TS              L                       # INCR TO OFFSET, UNLIMITED
                 CA              DUNFVLIM                # SAME LIMIT FOR Y AND Z
@@ -468,172 +403,26 @@ UNWCTEST        DOT             DSQ
                                 FLAGOODW                #      ZEROING WINDOW GOOD FLAG
                                 0
 
-# NB2CDUSP RETURNS THE 2'S COMPLEMENT, PI, SP CDU ANGLES X,Y,Z IN MPAC,+1,+2 GIVEN THE MATRIX WHOSE ROW VECTORS
-# ARE THE SEMI-UNIT NAV BASE VECTORS X,Y,Z EXPRESSED IN STABLE MEMBER COORDINATES, LOCATED AT 0 IN THE PUSH LIST.
+DCMCL2          DLOAD           VXSC
+                                UNFVZ/2                 # MUST BE SMALL
+                                UNZ/2                   # -UNZ/2 FIRST ITERATION
+                PDDL            VXSC                    # EXCHANGE -UNFVZ/2 UNZ/2 FOR UNFVY/2
+                                UNFVY/2                 # MUST BE SMALL
+                                UNY/2
+                VAD             VSL1
+                BVSU            UNIT                    # YIELDS -UNFVY/2 UNY/2-UNFVZ/2 UNZ/2
+                                UNX/2
+                STORE           UNX/2
 
-# NB2CDUSP USES ARCTRGSP WHICH HAS A MAXIMUM ERROR OF +-4 BITS.
-
-NB2CDUSP        DLOAD           DSQ
-                                2
-                BDSU            BPL
-                                DP1/4TH
-                                +3
-                DLOAD
-                                ZEROVECS                # IN CASE SIN WAS SLIGHTLY > 1/2
-                SQRT            EXIT                    # YIELDS COS(CDUZ) IN UNITS OF 2
-
-                EXTEND
-                DCA             MPAC
-                DDOUBL
-                TS              TEM5
-                TCF             +3
-                CA              POSMAX                  # OVERFLOW. FETCH POSMAX, MPAC ALWAYS POS
-                TS              TEM5                    # COS(CDUZ) IN TEM5, UNITS 1
-
-                INDEX           FIXLOC
-                CA              2
-                LXCH            MPAC
-                TC              ARCTRGSP
-                TS              MPAC            +2      # CDUZ
-
-                CA              ZERO
-                TC              DVBYCOSM
-                CA              FOUR
-                TC              DVBYCOSM
-                CS              TEM1
-                TC              ARCTRGSP
-                TS              MPAC            +1      # CDUY
-
-                CA              BIT4
-                TC              DVBYCOSM
-                CA              16OCT
-                TC              DVBYCOSM
-                CS              TEM1
-                TC              ARCTRGSP
-                TS              MPAC                    # CDUX
-
-                TC              INTPRET
+DCMCL1          VCOMP           VXV
+                                UNZ/2
+                UNIT
+                STORE           UNY/2                   # UNY/2 FIRST ITERATION
+                VCOMP           VXV
+                                UNX/2
+                VSL1
+                STORE           UNZ/2
                 RVQ
-
-16OCT           OCT             16
-
-# THE ELEMENTS OF THE NAV BASE MATRIX WHICH WE MUST DIVIDE BY COS(MGA)
-# ALREADY CONTAIN COS(MGA)/2 AS A FACTOR. THEREFORE THE QUOTIENT SHOULD
-# ORDINARILY NEVER EXCEED 1/2 IN MAGNITUDE.  BUT IF THE MGA IS NEAR PI/2
-# THEN COS(MGA) IS NEAR ZERO, AND THERE MAY BE SOME CHAFF IN THE OTHER
-# ELEMENTS OF THE MATRIX WHICH WOULD PRODUCE CHAOS UNDER DIVISION.
-# BEFORE DIVIDING WE MAKE SURE COS(MGA) IS AT LEAST ONE BIT LARGER
-# THAN THE MAGNITUDE OF THE HIGH ORDER PART OF THE OPERAND.
-
-# IF ONE OR MORE DIVIDES CANNOT BE PERFORMED, THIS MEANS THAT THE
-# REQUIRED MGA IS VERY NEARLY +-PI/2 AND THEREFORE THE OTHER GIMBAL
-# ANGLES ARE INDETERMINATE.  THE INNER AND OUTER GIMBAL ANGLES RETURNED
-# IN THIS CASE WILL BE RANDOM MULTIPLES OF PI/2.
-
-DVBYCOSM        AD              FIXLOC
-                TS              ADDRWD                  # ADRES OF OPERAND
-
-                INDEX           ADDRWD                  # FETCH NEG ABS OF OPERAND, AD TEM5, AND
-                CA              0                       #     SKIP DIVIDE IF RESULT NEG OR ZERO
-                EXTEND
-                BZMF            +2
-                COM
-                AD              TEM5                    # C(A) ZERO OR NEG, C(TEM5) ZERO OR POS
-                EXTEND
-                BZMF            TSL&TCQ                 # DIFFERENCE ALWAYS SMALL IF BRANCH
-
-                EXTEND                                  # TEM5 EXCEEDS ABS HIGH ORDER PART OF
-                INDEX           ADDRWD                  #      OPERAND BY AT LEAST ONE BIT.
-                DCA             0                       #      THEREFORE IT EXCEEDS THE DP OPERAND
-                EXTEND                                  #      AND DIVISION WILL ALWAYS SUCCEED.
-                DV              TEM5
-TSL&TCQ         TS              L
-                LXCH            TEM1
-                TC              Q
-
-# ARCTRGSP RETURNS THE 2'S COMPLEMENT, PI, SP ANGLE IN THE A REGISTER GIVEN ITS SINE IN A AND ITS COSINE IN L IN
-# UNITS OF 2.  THE RESULT IS AN UNAMBIGUOUS ANGLE ANYWHERE IN THE CIRCLE, WITH A MAXIMUM ERROR OF +-4 BITS.
-# THE ERROR IS PRODUCED BY THE SUBROUTINE SPARCSIN WHICH IS USED ONLY IN THE REGION +-45 DEGREES.
-
-ARCTRGSP        EXTEND
-                BZF             SINZERO                 # TO AVOID DIVIDING BY ZERO
-
-                EXTEND
-                QXCH            TEM4
-                TS              TEM2
-                CA              L
-                TS              TEM3
-                CA              ZERO
-                EXTEND
-                DV              TEM2
-                EXTEND
-                BZF             USECOS
-
-                CCS             TEM3                    # SIN IS SMALLER OR EQUAL
-                CA              ZERO
-                TCF             +4
-                CS              TEM2                    # IF COS NEG, REVERSE SIGN OF SIN,
-                TS              TEM2                    #      ANGLE = PI-ARCSIN(SIN)
-                CA              NEGMAX                  # PICK UP PI, 2'S COMPLEMENT
-                TS              TEM3                    # WE NO LONGER NEED COS
-                CA              TEM2
-                TC              SPARCSIN        -1
-                TC              ONESTO2S
-                EXTEND
-                MSU             TEM3
-1TO2&TCQ        TC              ONESTO2S
-                TC              TEM4
-
-USECOS          CS              TEM3                    # COS IS SMALLER
-                TC              SPARCSIN        -1      # ANGLE = SIGN(SIN)(PI/2-ARCSIN(COS))
-                AD              HALF
-                TS              TEM3                    # WE NO LONGER NEED COS
-                CCS             TEM2
-                CA              TEM3
-                TCF             1TO2&TCQ
-                CS              TEM3
-                TCF             1TO2&TCQ
-
-SINZERO         CCS             L
-                CA              ZERO
-                TC              Q
-                CA              NEGMAX                  # PI, 2'S COMP
-                TC              Q
-
-# SPARCSIN TAKES AN ARGUMENT SCALED UNITY IN A AND RETURNS AN ANGLE SCALED
-# 180 DEGREES IN A.  IT HAS BEEN UNIT TESTED IN THE REGION +-.94 (+-70
-# DEGREES) AND THE MAXIMUM ERROR IS +-5 BITS WITH AN AVERAGE TIME OF
-# 450 MICROSECONDS.  SPARCSIN -1 TAKES THE ARGUMENT SCALED TWO.(BOB CRISP)
-
-                DOUBLE
-SPARCSIN        TS              SR
-                TCF             +4
-                INDEX           A
-                CS              LIMITS
-                TS              SR
-                EXTEND
-                MP              A
-                TS              TEM1
-                EXTEND
-                MP              DPL9
-                AD              DPL7
-                EXTEND
-                MP              TEM1
-                AD              DPL5
-                EXTEND
-                MP              TEM1
-                AD              DPL3
-                EXTEND
-                MP              TEM1
-                AD              DPL1
-                EXTEND
-                MP              SR
-                TC              Q
-DPL1            DEC             10502
-DPL3            DEC             432
-DPL5            DEC             7300
-DPL7            DEC             -11803
-DPL9            DEC             8397
 
 # LIMITSUB LIMITS THE MAGNITUDE OF THE POSITIVE OR NEGATIVE VARIABLE
 # ARRIVING IN L TO THE POSITIVE LIMIT ARRIVING IN A.
@@ -667,8 +456,7 @@ ONESTO2S        CCS             A
 NOATTCNT        TC              ALARM
                 OCT             00402                   # NO ATTITUDE CONTROL
 
- +2             INHINT                                  # COME HERE FOR NOATTCNT WITHOUT ALARM
-                TC              IBNKCALL                # RELINT AT TC INTPRET AFTER TCQCDUW
+ +2             TC              BANKCALL
                 FCADR           STOPRATE
                 TCF             TCQCDUW                 # RETURN TO USER SKIPPING AUTOPILOT CMDS
 
@@ -688,8 +476,7 @@ ECDUWL          ECADR           ECDUW
 
 # THRUST DIRECTION FILTER CONSTANTS
 
-GAINFLTR        DEC             .2                      # GAIN FILTER SANS CSM
-                DEC             .1                      # GAIN FILTER WITH CSM
+GAINFLTR        DEC             .2                      # GAIN FILTER
 
 DUNFVLIM        DEC             .007            B-1     # 7 MR MAX CHG IN F DIR IN VEH IN 2 SECS.
                                                         # THIS DOES NOT ALLOW FOR S/C ROT RATE.

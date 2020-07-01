@@ -20,36 +20,32 @@
 
                 EBANK=          DVCNTR
 
-ATMAG           TC              PHASCHNG
-                OCT             00035
-                TC              PHASCHNG
-                OCT             05023
-                OCT             21000
-                TC              INTPRET
-                BON
+ATMAG           TC              INTPRET
+                SETPD           BON
+                                0
                                 FLRCS
                                 ASCENT
-                DLOAD           DSU
+                BOFF            DLOAD
+                                ENGONFLG
+                                ASCTERM2
                                 ABDVCONV
+                DSU             BMN
                                 MINABDV
-                BMN             CLEAR
-                                ASCTERM4
-                                SURFFLAG
+                                ASCTERM1
                 CLEAR           SLOAD
-                                RENDWFLG
-                                BIT3H
+                                SURFFLAG
+                                BIT4H
                 DDV             EXIT
                                 ABDVCONV
                 DXCH            MPAC
                 DXCH            1/DV3
                 DXCH            1/DV2
                 DXCH            1/DV1
-                DXCH            1/DV0
+                DXCH            MPAC
                 TC              PHASCHNG
-                OCT             04023
+                OCT             10035
                 TC              INTPRET
-                DLOAD           DAD
-                                1/DV0
+                DAD
                                 1/DV1
                 DAD             DAD
                                 1/DV2
@@ -67,8 +63,7 @@ ATMAG           TC              PHASCHNG
                                 VE
                 SR1             DDV
                                 TBUP
-                STCALL          AT
-                                ASCENT
+                STORE           AT
 
 ASCENT          VLOAD           ABVAL
                                 R
@@ -130,47 +125,43 @@ ASCENT          VLOAD           ABVAL
                 BON
                                 FLZONE0
                                 PREBRET1
-                CALL
-                                ASCRSTRT
-                DLOAD           DMP                     # LOAD TGO
-                                TGO                     # TGO GEFF
-                                GEFF
-                VXSC            VSL1
-                                UNIT/R/                 # TGO GEFF UR
-                BVSU
-                                VGVECT                  # COMPENSATED FOR GEFF
-                STORE           VGVECT                  # STORE FOR DOWNLINK
                 MXV             VSL1                    # GET VGBODY FOR N85 DISPLAY
                                 XNBPIP
-                STOVL           VGBODY
-                                VGVECT
-                ABVAL           BOFF                    # MAGNITUDE OF VGVECT
-                                FLRCS                   # IF FLRCS=0,DO NORMAL GUIDANCE
-                                MAINENG
-                DDV                                     # USE TGO=VG/AT  WITH RCS
-                                AT/RCS
-                STCALL          TGO                     # THIS WILL BE USED ON NEXT CYCLE
+                STORE           VGBODY
+                BON             DLOAD
+                                FLRCS
                                 ASCTERM2
-MAINENG         DDV             PUSH                    # VG/VE IN PDL(0)                       (2)
+                                TGO
+                DSU
+                                2SEC(17)
+                STORE           TGO
+                DMP             VXSC                    # TGO GEFF
+                                GEFF
+                                UNIT/R/                 # TGO GEFF UR
+                VSL1            BVSU
+                                VGVECT                  # COMPENSATED FOR GEFF
+                ABVAL           DDV
                                 VE
-                DMP             BDSU                    # 1-KT VG/VE
+                PUSH            DMP                     # VG/VE IN PDL(0)                       (2)
                                 KT1
+                BDSU            DMP                     # 1-KT VG/VE
                                 NEARONE
-                DMP             DMP                     # TBUP VG(1-KT VG/VE)/VE                (0)
+                DMP             DSU                     # TBUP VG(1-KT VG/VE)/VE                (0)
                                 TBUP                    #  = TGO
-                DSU                                     # COMPENSATE FOR TAILOFF
-                                TTO
+                                TTO                     # COMPENSATE FOR TAILOFF
                 STORE           TGO
                 SR              DCOMP
 
                                 11D
                 STODL           TTOGO                   # TGO*2(-28)CS
                                 TGO
-                BON             DSU
-                                IDLEFLAG
+                BON             BON
+                                ENGOFFSW
                                 T2TEST
+                                FLIC
+                                T2TEST
+                DSU             BMN
                                 4SEC(17)                # ( TGO - 4 )*2(-17)CS.
-                BMN
                                 ENGOFF
 T2TEST          DLOAD
                                 TGO
@@ -226,13 +217,14 @@ RATES           DLOAD           DSU
                 STORE           PRATE                   # B * 2(8)
 CHKBMAG         SR4             DDV                     # B*2(4)
                                 TBUP                    # (B / TAU) * 2(21)
-                DSU             BPL
+                DSU             BMN
                                 PRLIMIT                 # ( B/ TAU) * 2(21) MAX.
                                 PROK
                 DLOAD           DMP
                                 PRLIMIT
                                 TBUP                    # B MAX. * 2(4)
                 SL4             SIGN                    # BMAX*2(8)
+                                PRATE
                 STORE           PRATE
 PROK            DLOAD
                                 TGO
@@ -317,13 +309,28 @@ AIMER           SIGN
                                 ZAXIS1                  # ATP ZAXIS *2(8).
                 VSL1            VAD                     # AT*2(9)
                                 00D
+                UNIT
                 STORE           UNFC/2                  # WILL BE OVERWRITTEN IF IN VERT. RISE.
-                SETPD           BON
+                SETPD           DLOAD
                                 00D
+                                ATP                     # ATP(2)*2(18)
+                DSQ             PDDL
+                                ATY                     # ATY(2)*2(18)
+                DSQ             DAD
+                SQRT            SL1
+                BDDV            ARCSIN
+                                ATY
+                STOVL           YAW
+                                UNIT/R/
+                DOT             SL1
+                                UNFC/2
+                ARCCOS          DCOMP
+                STORE           PITCH
+                BON             BON
                                 FLPI
                                 P12RET
-                CALL
-                                ASCRSTRT
+                                FLIC
+                                ABORTIGN
                 BON
                                 FLVR
                                 CHECKALT
@@ -334,9 +341,8 @@ MAINLINE        VLOAD           VCOMP
                 DSU             BPL
                                 PIPTIME
                                 ASCTERM
-CLRXFLAG        CLEAR           CLEAR
-                                NOR29FLG                # START R29 IN ASCENT PHASE.
-                                XOVINFLG                # ALLOW X-AXIS OVERRIDE
+                RTB
+                                CLRXFLAG                # ALLOW X-AXIS OVERRIDE
 ASCTERM         BON             CALL
                                 FLRCS
                                 ASCTERM2
@@ -356,14 +362,9 @@ ABRTDISP        CA              FLAGWRD9                # INSURE THAT THE NOUN 6
                 CADR            GODSPR
                 TCF             ASCTERM3
 ASCTERM2        EXIT
-                TC              PHASCHNG
-                OCT             00003
-ASCTERM3        TCF             ENDOFJOB
-ASCTERM4        EXIT
-                INHINT
-                TC              IBNKCALL                # NO GUIDANCE THIS CYCLE -- HENCE ZERO
-                CADR            ZATTEROR                # THE DAP ATTITUDE ERRORS.
-                TCF             ASCTERM1        +1
+ASCTERM3        TC              PHASCHNG
+                OCT             00035
+                TCF             ENDOFJOB
 
 CHECKALT        DLOAD           DSU
                                 /R/MAG
@@ -371,36 +372,16 @@ CHECKALT        DLOAD           DSU
                 DSU             BMN                     # IF H LT 25K CHECK Z AXIS ORIENTATION.
                                 25KFT
                                 CHECKYAW
-EXITVR          DLOAD           DAD
+                DLOAD           DAD
                                 PIPTIME
                                 10SECS
                 STORE           TXO
-                CLRGO
+EXITVR          CLRGO
                                 FLVR
                                 MAINLINE
 
-ASCRSTRT        STQ             EXIT
-                                TEMPR60
-                CA              FLPIBIT
-                AD              FLZONBIT
-                MASK            FLAGWRD9
-                CCS             A
-                TCF             +3
-                TC              PHASCHNG
-                OCT             04023
-    +3          TC              INTPRET
-                GOTO
-                                TEMPR60
-
-                BANK            27
-                SETLOC          ASENT1
-                BANK
-
-SETXFLAG        =               CHECKYAW
-
-CHECKYAW        SET
-                                XOVINFLG                # PROHIBIT X-AXIS OVERRIDE
-
+CHECKYAW        RTB
+                                SETXFLAG                # PROHIBIT X-AXIS OVERRIDE
                 DLOAD           VXSC
                                 ATY
                                 LAXIS
@@ -416,7 +397,7 @@ CHECKYAW        SET
                                 KEEPVR
                                 RDOT
                 DSU             BPL
-                                40FPS
+                                50FPS
                                 EXITVR
 
 KEEPVR          VLOAD           STADR                   # RECALL LOSVEC FROM PUSHLIST
@@ -425,17 +406,17 @@ KEEPVR          VLOAD           STADR                   # RECALL LOSVEC FROM PUS
                 STCALL          UNFC/2
                                 ASCTERM
 
-ENGOFF          RTB
+ENGOFF          RTB             DSU
                                 LOADTIME
-                DSU             DAD
                                 PIPTIME
+                DAD             DCOMP
                                 TTOGO
-                DCOMP           EXIT
+                EXIT
                 TC              TPAGREE                 # FORCE SIGN AGREEMENT ON MPAC, MPAC +1.
                 CAF             EBANK7
                 TS              EBANK
                 EBANK=          TGO
-BIT3H           INHINT                                  # USED AS A CONSTANT
+                INHINT                                  # USED AS A CONSTANT
                 CCS             MPAC            +1
                 TCF             +3                      # C(A) = DT - 1 BIT
                 TCF             +2                      # C(A) = 0
@@ -445,26 +426,26 @@ BIT3H           INHINT                                  # USED AS A CONSTANT
                 TC              TWIDDLE
                 ADRES           ENGOFF1
                 TC              PHASCHNG
-                OCT             47014
+                OCT             47016
                 -GENADR         ENGOFFDT
                 EBANK=          TGO
                 2CADR           ENGOFF1
 
                 TC              INTPRET
                 SET             GOTO
-                                IDLEFLAG                # DISABLE DELTA-V MONITOR
+                                ENGOFFSW                # DISABLE DELTA-V MONITOR
                                 T2TEST
 
 ENGOFF1         TC              IBNKCALL                # SHUT OFF THE ENGINE.
                 CADR            ENGINOF2
 
-                CAF             PRIO17                  # SET UP A JOB FOR THE ASCENT GUIDANCE
+                CAF             PRIO21                  # SET UP A JOB FOR THE ASCENT GUIDANCE
                 TC              FINDVAC                 # POSTBURN LOGIC.
                 EBANK=          WHICH
                 2CADR           CUTOFF
                 TC              PHASCHNG
-                OCT             07024
-                OCT             17000
+                OCT             07026
+                OCT             21000
                 EBANK=          TGO
                 2CADR           CUTOFF
                 TCF             TASKOVER
@@ -475,35 +456,30 @@ CUTOFF          TC              UPFLAG                  # SET FLRCS FLAG.
   -5            CAF             V16N63
                 TC              BANKCALL
                 CADR            GOFLASH
-                TCF             TERMASC
+                TCF             GOTOPOOH
                 TCF             CUTOFF1
                 TCF             -5
 
 CUTOFF1         INHINT
-                TC              IBNKCALL                # ZERO ATTITUDE ERRORS BEFORE REDUCING DB.
-                CADR            ZATTEROR
                 TC              IBNKCALL
                 CADR            SETMINDB
                 TC              PHASCHNG
-                OCT             04024
+                OCT             04026
 
    -5           CAF             V16N85C
                 TC              BANKCALL
                 CADR            GOFLASH
-                TCF             TERMASC
-                TCF             +2                      # PROCEED
+                TCF             GOTOPOOH
+                TCF             GOTOPOOH                # PROCEED
                 TCF             -5
 
-TERMASC         TC              PHASCHNG
-                OCT             04024
+SETXFLAG        TC              UPFLAG
+                ADRES           XOVINFLG
+                TCF             DANZIG
 
-                INHINT                                  # RESTORE DEADBAND DESIRED BY ASTRONAUT.
-
-                TC              IBNKCALL
-                CADR            RESTORDB
-                TC              DOWNFLAG                # DISALLOW ABORTS AT THIS TIME.
-                ADRES           LETABORT
-                TCF             GOTOPOOH
+CLRXFLAG        TC              DOWNFLAG
+                ADRES           XOVINFLG
+                TCF             DANZIG
 
 YCOMP           VLOAD           DOT
                                 UNIT/R/
@@ -516,39 +492,7 @@ YCOMP           VLOAD           DOT
                 STORE           Y
                 RVQ
 
-V16N63          VN              1663
-V16N85C         VN              1685
-
-                BANK            30
-                SETLOC          ASENT
-                BANK
-
-# ASCENT GUIDANCE CONSTANTS
-
-100CS           EQUALS          2SEC(18)
-T2A             EQUALS          2SEC(17)
-4SEC(17)        2DEC            400             B-17
-2SEC(17)        2DEC            200             B-17
-T3              2DEC            1000            B-17
-40FPS           2DEC            .12192          B-7     # 40 FT/SEC EXPRESSED IN M/CS.
-6SEC(18)        2DEC            600             B-18
-BIT4H           OCT             10
-2SEC(9)         2DEC            200             B-9
-V06N63*         VN              0663
-V06N76          VN              0676
-V06N33A         VN              0633
-
-KT1             2DEC            0.5000
-PRLIMIT         2DEC            -.0639                  # (B/TBUP)MIN=-.1FT.SEC(-3)
-SIN5DEG         2DEC            .08716          B-2
-MINABDV         2DEC            .0356           B-5     # 10 PERCENT BIGGER THAN GRAVITY
-1/DV0           =               MASS1
-
 # THE LOGARITHM SUBROUTINE
-
-                BANK            24
-                SETLOC          FLOGSUB
-                BANK
 
 # INPUT ..... X IN MPAC
 # OUTPUT ..... -LOG(X) IN MPAC
@@ -583,4 +527,26 @@ LOGSUB          NORM            BDSU
                 TC              INTPRET
                 DCOMP           RVQ
 
+# ASCENT GUIDANCE CONSTANTS
+
+100CS           EQUALS          2SEC(18)
+T2A             EQUALS          2SEC(17)
+4SEC(17)        2DEC            400             B-17
+2SEC(17)        2DEC            200             B-17
+T3              2DEC            1000            B-17
+50FPS           2DEC            .1524           B-7     # 40 FT/SEC EXPRESSED IN M/CS.
+6SEC(18)        2DEC            600             B-18
 CLOG2/32        2DEC            .0216608494
+BIT4H           OCT             10
+2SEC(9)         2DEC            200             B-9
+V16N85C         VN              1685
+V16N63          VN              1663
+V06N63*         VN              0663
+V06N76          VN              0676
+V06N33A         VN              0633
+
+KT1             2DEC            0.5000
+PRLIMIT         2DEC            -.0639                  # (B/TBUP)MIN=-.1FT.SEC(-3)
+SIN5DEG         2DEC            .08716          B-2
+MINABDV         2DEC            .0356           B-5     # 10 PERCENT BIGGER THAN GRAVITY
+

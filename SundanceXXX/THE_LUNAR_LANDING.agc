@@ -70,8 +70,8 @@ IGNALG          SETPD   VLOAD           # FIRST SET UP INPUTS FOR RP-TO-R:-
                         RP-TO-R
                 VSL4    MXV
                         REFSMMAT
-                STCALL  LAND
-                        GUIDINIT        # GUIDINIT INITIALIZES WM AND /LAND/
+                # STCALL  LAND
+                #         GUIDINIT        # GUIDINIT INITIALIZES WM AND /LAND/
                 DLOAD   DSU
                         TLAND
                         GUIDDURN

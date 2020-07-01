@@ -512,7 +512,6 @@ P71IGN          =               P42IGN                  # (13)
 P42IGN          TC              UPFLAG                  # INSURE ENGONFLG IS SET.
                 ADRES           ENGONFLG
                 CS              DRIFTBIT                # ENSURE THAT POWERED-FLIGHT SWITCHING
-                CS              DRIFTBIT                # ENSURE THAT POWERED-FLIGHT SWITCHING
                 MASK            DAPBOOLS                #   CURVES ARE USED.
                 TS              DAPBOOLS
                 CAF             IMPULBIT                # EXAMINE IMPULSE SWITCH
@@ -754,6 +753,7 @@ STOPCLOK        TC              NULLCLOK                # STOP CLOKTASK & TURN O
                 TCF             GOTOPOOH                #     WAY TO P00  (GOTOPOOH RELINTS)
 
 ASTNRETN        CAF             PRIO13
+                INHINT
                 TC              FINDVAC
                 EBANK=          STARIND
                 2CADR           GOBACK

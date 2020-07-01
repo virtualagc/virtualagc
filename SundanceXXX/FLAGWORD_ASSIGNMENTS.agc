@@ -997,8 +997,8 @@ FLAGWRD9        =               STATE           +9D     # (135-149)
 #
 
 # BIT 15 FLAG 9
-#               =               135D
-#               =               BIT15
+ENGOFFSW        =               135D
+ENGOFBIT        =               BIT15
 
 # BIT 14 FLAG 9 (L)
 FLVR            =               136D                    # VERTICAL RISE       NON-VERTICAL RISE
@@ -1006,7 +1006,8 @@ FLVRBIT         =               BIT14                   # (ASCENT GUIDANCE)
 #
 
 # BIT 13 FLAG 9
-#               =               137D
+FLP70           =               137D
+FLP70BIT        =               BIT13
 #
 
 # BIT 12 FLAG 9 (L)
@@ -1037,7 +1038,8 @@ FLAPBIT         =               BIT8                    # (ASCENT GUIDANCE)
 #
 
 # BIT 7 FLAG 9  (L)
-#               =               143D
+FLIC            =               143D
+FLICBIT         =               BIT7
 
 # BIT 6 FLAG 9  (L)
 FLZONE0         =               144D                    # EARLY ABORT          LATE ABORT

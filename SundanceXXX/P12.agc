@@ -26,19 +26,16 @@ P12LM           TC      BANKCALL
                 TC      UPFLAG
                 ADRES   MUNFLAG
 
-                TC      UPFLAG          # INSURE 4-JET TRANSLATION CAPABILITY.
-                ADRES   ACC4-2FL
+                TC      UPFLAG
+                ADRES   FLP70
 
-                TC      DOWNFLAG        # CLEAR RENDEZVOUS FLAG  FOR P22
-                ADRES   RNDVZFLG
+                TC      UPFLAG
+                ADRES   SURFFLAG
 
-                CAF     THRESH2         # INITIALIZE DVMON
-                TS      DVTHRUSH
-                CAF     FOUR
-                TS      DVCNTR
+                EXTEND
+                DCA     TIG(AS)
+                DXCH    TIG
 
-                CA      ZERO
-                TS      TRKMKCNT        # SHOW THAT R29 DOWNLINK DATA ISN'T READY.
                 CAF     V06N33A
                 TC      BANKCALL        # FLASH TIG
                 CADR    GOFLASH
@@ -47,11 +44,46 @@ P12LM           TC      BANKCALL
                 TCF     -5              # ENTER
 
                 TC      INTPRET
-                CALL                    # INITIALIZE WM AND /LAND/
-                        GUIDINIT
-                SET     CALL
-                        FLPI
-                        P12INIT
+                VLOAD   ABVAL
+                        RLS
+                SL3
+                STORE   /LAND/
+                SSP
+                        QPRET
+                        P12LMB
+
+P12INIT         DLOAD                   # INITIALIZE ENGINE DATA.  USED FOR P12 AND
+                        (1/DV)A         # P71.
+                STORE   1/DV3
+                STORE   1/DV2
+                STODL   1/DV1
+                        (AT)A
+                STODL   AT
+                        (TBUP)A
+                STODL   TBUP
+                        ATDECAY
+                STODL   TTO
+                        APSVEX
+                STORE   VE
+COMMINIT        DLOAD   DAD             # INITIALIZE TARGET DATA. USED BY P12, P70
+                        HINJECT         # AND P71 IF IT DOES NOT FOLLOW P70.
+                        /LAND/
+                STODL   RCO
+                        HI6ZEROS
+                STORE   TXO
+                STORE   YCO
+                STORE   RDOTD
+                STODL   YDOTD
+                        ABTVINJ2        # TENTATIVELY STORE LOW INJECTION VELOCITY
+                STOVL   ZDOTD
+                        V-OTHER
+                VXV     MXV
+                        R-OTHER
+                        REFSMMAT
+                UNIT
+                STORE   QAXIS
+
+                RVQ
 
 P12LMB          DLOAD
                         (TGO)A          # SET TGO TO AN INITIAL NOMINAL VALUE.
@@ -93,9 +125,6 @@ NEWLOAD         CAF     V06N76          # FLASH CROSS-RANGE AND APOLUNE VALUES.
                 CAF     P12ADRES
                 TS      WHICH
 
-                TC      PHASCHNG
-                OCT     04024
-
                 TC      INTPRET
                 DLOAD   SL
                         XRANGE
@@ -103,7 +132,7 @@ NEWLOAD         CAF     V06N76          # FLASH CROSS-RANGE AND APOLUNE VALUES.
                 DAD
                         Y
                 STODL   YCO
-                        APO		# RA = APO + /LAND/
+                        APO             # RA = APO + /LAND/
                 SL
                         5D
                 DAD     PUSH            # RA*2(-24) IN MPAC AND PDL
@@ -118,30 +147,14 @@ NEWLOAD         CAF     V06N76          # FLASH CROSS-RANGE AND APOLUNE VALUES.
                 STOVL   ZDOTD
                         UNIT/R/
                 VXSC    VAD
-                        49FPS
+                        28.5FPS
                         V1S
                 STORE   V               # V(TIPOVER) = V(IGN) + 57FPS (UNIT/R/)
-                SETGO
+                SET     SETGO
+                        FLPI
                         FLVR
                         ASCENT
-P12RET          DLOAD
-                        ATP             # ATP(2)*2(18)
-                DSQ     PDDL
-                        ATY             # ATY(2)*2(18)
-                DSQ     DAD
-                BZE     SQRT
-                        YAWDUN
-                SL1     BDDV
-                        ATY
-                ARCSIN
-YAWDUN          STOVL   YAW
-                        UNFC/2
-                UNIT    DOT
-                        UNIT/R/
-                SL1     ARCCOS
-                DCOMP
-                STORE   PITCH
-                EXIT
+P12RET          EXIT
                 TC      PHASCHNG
                 OCT     04024
 
@@ -155,74 +168,11 @@ YAWDUN          STOVL   YAW
 
                 TC      POSTJUMP
                 CADR    BURNBABY
-P12INIT         DLOAD                   # INITIALIZE ENGINE DATA.  USED FOR P12 AND
-                        (1/DV)A         # P71.
-                STORE   1/DV3
-                STORE   1/DV2
-                STODL   1/DV1
-                        (AT)A
-                STODL   AT
-                        (TBUP)A
-                STODL   TBUP
-                        ATDECAY
-                DCOMP   SL
-                        11D
-                STORE   TTO
-                SLOAD   DCOMP
-                        APSVEX
-                SR2
-                STORE   VE
-                BOFF    RVQ
-                        FLAP
-                        COMMINIT
-COMMINIT        DLOAD   DAD             # INITIALIZE TARGET DATA. USED BY P12, P70
-                        HINJECT         # AND P71 IF IT DOES NOT FOLLOW P70.
-                        /LAND/
-                STODL   RCO
-                        HI6ZEROS
-                STORE   TXO
-                STORE   YCO
-                STORE   RDOTD
-                STOVL   YDOTD
-                        VRECTCSM
-                VXV     MXV
-                        RRECTCSM
-                        REFSMMAT
-                UNIT
-                STODL   QAXIS
-                        ABTVINJ2        # TENTATIVELY STORE LOW INJECTION VELOCITY
-                STORE   ZDOTD
-                BON
-                        FLPI
-                        LOVEL
-                SLOAD   DSU
-                        TBRKPNT         # TBRKPNT-TGO
-                        TGO
-                BMN     DLOAD           # IF TGO>TBRKPNT,LOW VINJECT IS OK;RETURN
-                        LOVEL
-                        ABTVINJ1	# FOR TGO.TBRKPNT USE HI VELOCITY.
-                STORE   ZDOTD
-LOVEL           RVQ
-GUIDINIT        STQ     SETPD
-                        TEMPR60
-                        0D
-                VLOAD   PUSH
-                        UNITZ
-                RTB     PUSH
-                        LOADTIME
-                SLOAD   CALL
-                        (APO)
-                        RP-TO-R
-                MXV     VXSC
-                        REFSMMAT
-                        MOONRATE
-                STOVL   WM
-                        RLS
-                ABVAL   SL3
-                STCALL  /LAND/
-                        TEMPR60
+
 
 P12ADRES        REMADR  P12TABLE        # NOT IN SAME BANK.
-49FPS           2DEC    .149352 B-6     # EXPECTED RDOT AT TIPOVER
+28.5FPS         2DEC    .08685 B-6      # EXPECTED RDOT AT TIPOVER
+
+MUM(-37)        2DEC*   4.9027780 E8 B-37*
 
 (APO)           2DEC    55597.5 B-29    # 30 N.M. EXPRESSED IN METERS.
