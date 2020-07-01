@@ -230,6 +230,7 @@ FLOGSUB         EQUALS
 SERV2           EQUALS
 ASENT1          EQUALS
 SERV1           EQUALS
+P40S2           EQUALS
                 BNKSUM          32
 
 

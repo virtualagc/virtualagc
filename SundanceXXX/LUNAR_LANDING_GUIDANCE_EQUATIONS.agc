@@ -54,6 +54,7 @@ PREGUIDE        TCF             RGVGCALC                # BRAKQUAD
 
 # GUIDANCE EQUATIONS:
 
+BRAKQUAD        EQUALS
                 TCF             TTF/8CL                 # IGNALG
 WHATGUID        TCF             TTF/8CL                 # BRAKQUAD
                 TCF             LINGUID                 # BRAKLING

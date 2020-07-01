@@ -93,16 +93,15 @@
                 SETLOC          P40S
                 BANK
 
-P40LM           TC              PHASCHNG
-                OCT             04024
-
-                CAF             P40ADRES                # INITIALIZATION FOR BURNBABY.
+P40LM           CAF             P40ADRES                # INITIALIZATION FOR BURNBABY.
                 TS              WHICH
 
-                CA              FLGWRD10
-                MASK            APSFLBIT
-                CCS             A
-                TCF             P40ALM
+                EXTEND
+                READ            CHAN30
+                COM
+                MASK            BIT2
+                EXTEND
+                BZF             P40ALM
                 TC              BANKCALL                # GO DO IMU STATUS CHECK ROUTINE.
                 CADR            R02BOTH
 
@@ -112,6 +111,9 @@ P40LM           TC              PHASCHNG
                 CAF             THRESH1
                 AD              THRESH3
                 TS              DVTHRUSH
+                CAF             ONE
+## FIXME: This is probably not TIME2SAV +1
+                TS              TIME2SAV +1
                 CAF             FOUR
                 TS              DVCNTR
 
@@ -151,7 +153,7 @@ P41MANU         RELINT
 
 
                 EBANK=          TRKMKCNT
-POSTBURN        CA              Z
+POSTBURN        CA              LOW10
                 TS              DISPDEX
                 EXTEND
                 DCA             ACADN85
@@ -187,7 +189,7 @@ TERM40          EXTEND
                 DXCH            AVEGEXIT
                 CAF             ZERO
                 TS              TRKMKCNT                #      ZERO RENDZVS CNTERS
-                CA              Z
+                CA              LOW10
                 TS              DISPDEX
                 INHINT
                 TC              IBNKCALL
@@ -304,20 +306,20 @@ CALCN85         TC              INTPRET
                 COUNT*          $$/P42
                 EBANK=          WHICH
 
-P42LM           TC              PHASCHNG
-                OCT             04024
-
-                CAF             P42ADRES                # INITIALIZATION FOR BURNBABY.
+P42LM           CAF             P42ADRES                # INITIALIZATION FOR BURNBABY.
                 TS              WHICH
 
-                CS              FLGWRD10
-                MASK            APSFLBIT
+                EXTEND
+                READ            CHAN30
+                COM
+                MASK            BIT2
                 CCS             A
                 TC              P40ALM
                 TC              BANKCALL
-
                 CADR            R02BOTH
                 CAF             THRESH2                 # INITIALIZE DVMON
+                CAF             ONE
+                TS              TIME2SAV +1
                 TS              DVTHRUSH
                 CAF             FOUR
                 TS              DVCNTR
@@ -326,9 +328,7 @@ P42LM           TC              PHASCHNG
                 SET             VLOAD                   # LOAD FAPS, MDOTAPS, AND ATDECAY INTO
                                 AVFLAG                  # F, MDOT, AND TDECAY BY VECTOR LOAD.
                                 FAPS
-                STORE           F
-                SLOAD           GOTO
-                                APSVEX
+                STCALL          F
                                 P40IN
 
                 EBANK=          WHICH
@@ -337,12 +337,24 @@ P42LM           TC              PHASCHNG
 P47LM           TC              BANKCALL
                 CADR            R02BOTH
                 TC              INTPRET
-                CALRB
-                                MIDTOAV2
+                RTB             DAD
+                                LOADTIME
+                                SEC60DP
+                STORE           TIG
+                EXIT
 
-                CA              MPAC            +1
-                TC              TWIDDLE
-                ADRES           STARTP47
+                EXTEND
+                DCA             SEC60DP
+                TC              LONGCALL
+                EBANK=          WHICH
+                2CADR           STARTP47
+
+                RELINT
+                TC              INTPRET
+                DLOAD           CALL
+                                TIG
+                                TIGINT
+                EXIT
 
                 TCF             ENDOFJOB
 
@@ -402,7 +414,6 @@ P47BODY         TC              INTPRET
 
                 COUNT*          $$/P40
 IMPLBURN        CA              TGO             +1
-                TC              GETDT
                 TC              TWIDDLE
                 ADRES           ENGOFTSK
                 TC              DOWNFLAG                # TURN OFF IGNFLAG
@@ -430,35 +441,38 @@ ENGINOFF        CAF             PRIO12                  # MUST BE LOWER PRIO THA
                 EBANK=          TRKMKCNT
                 2CADR           POSTBURN
 
-ENGINOF2        CAF             BIT1
-                TC              WAITLIST
-                EBANK=          OMEGAQ
-                2CADR           COASTSET
 ENGINOF1        CS              FLAGWRD7                # SET THE IDLE BIT.
                 MASK            IDLEFBIT
                 ADS             FLAGWRD7
 
                 TC              NOULLAGE
 
-ENGINOF4        EXTEND
+                EXTEND
                 DCA             TIME2
                 DXCH            TEVENT
 
-ENGINOF3        CS              ENGONBIT                # INSURE ENGONFLG IS CLEAR.
-                MASK            FLAGWRD5
-                TS              FLAGWRD5
-                CS              PRIO30                  # ENGINOF3 IS USED AS A PRE-ENGINE ARM
+ENGINOF2        CAF             BIT1
+                TC              WAITLIST
+                EBANK=          OMEGAQ
+                2CADR           COASTSET
+
+ENGINOF3        CS              PRIO30                  # ENGINOF3 IS USED AS A PRE-ENGINE ARM
                 EXTEND                                  # SUBROUTINE.
                 RAND            DSALMOUT
                 AD              PRIO20                  # TURN OFF THE ENGINE - DPS OR APS
                 EXTEND
                 WRITE           DSALMOUT
 
+                CS              ENGONBIT                # INSURE ENGONFLG IS CLEAR.
+                MASK            FLAGWRD5
+                TS              FLAGWRD5
+
                 CS              DAPBOOLS                # TURN OFF TRIM GIMBAL
                 MASK            USEQRJTS
                 ADS             DAPBOOLS
 
                 CS              HIRTHROT                # ZERO AUTO-THROTTLE WHENEVER THE ENGINE
+                TS              PIF
                 TS              THRUST                  # IS TURNED OFF.
                 CAF             BIT4                    # THE HARDWARE DOES SO ONLY WHEN THE
                 EXTEND                                  # ENGINE IS DISARMED.
@@ -524,9 +538,6 @@ NSTEER          INHINT
                 TC              POSTJUMP                # DVMON OFF-->IMPULSW ON VIA S40.13-->EXIT
                 CADR            SERVEXIT
 
-                TC              IBNKCALL
-                CADR            STOPRATE
-
                 TC              DOWNFLAG                # TURN OFF IMPULSW
                 ADRES           IMPULSW
 
@@ -542,16 +553,7 @@ NSTEER          INHINT
                 DAS             MPAC
                 TC              TPAGREE
                 CAE             MPAC            +1
-                TC              GETDT
-                TC              TWIDDLE
-                ADRES           ENGOFTSK
-                TC              2PHSCHNG
-                OCT             40114                   # ENGOFTSK (ENGINOFF)
-                OCT             00035                   # SERVICER--REREADAC
-
-                TCF             ENDOFJOB
-
-GETDT           CCS             A
+                CCS             A
                 TCF             +3
                 TCF             +2
                 CAF             ZERO
@@ -560,7 +562,14 @@ GETDT           CCS             A
                 CAF             ZERO
                 DXCH            TGO
                 CA              TGO             +1
-                TC              Q
+                TC              TWIDDLE
+                ADRES           ENGOFTSK
+                TC              2PHSCHNG
+                OCT             40114                   # ENGOFTSK (ENGINOFF)
+                OCT             00035                   # SERVICER--REREADAC
+
+                TCF             ENDOFJOB
+
 P40ALM          TC              ALARM                   # ASTRONAUT DOESN'T AGREE WITH STAGE
                 OCT             01706                   # VERIFY DISCRETE.  HE HAS SELECTED P40,
                 CAF             V05N09                  # BUT THE DAP THINKS THAT THE DESCENT UNIT
@@ -573,6 +582,20 @@ P40ALM          TC              ALARM                   # ASTRONAUT DOESN'T AGRE
 
 # ************************************************************************
 
+FDPS            2DEC            4.319223        B-7     # 9710.0 LBS FORCE IN NEWTONS
+## FIXME: SCALING?
+MDOTDPS         2DEC            0.00891025      B-3     # 32.62 LBS/SEC IN KGS/CS.
+DTDECAY         2DEC            -38
+
+FRCS4           2DEC            0.177929        B-7     # 400 LBS FORCE IN NEWTONS
+FRCS2           2DEC            0.0889645       B-7     # 200 LBS FORCE IN NEWTONS
+
+FAPS            2DEC            1.5568          B-7     # 3500 LBS FORCE IN NEWTONS
+MDOTAPS         2DEC            0.05137812      B-3     # 11.32 LBS/SEC IN KGS/CS
+ATDECAY         2DEC            -10
+
+SEC60DP         OCT             00000                   # DON'T SEPARATE
+SEC60           DEC             6000                    # DON'T SEPARATE
 SEC15DP         OCT             00000                   # DON'T SEPARATE
 SEC15           DEC             1500                    # DON'T SEPARATE
 SEC30DP         2DEC            3000
@@ -581,6 +604,11 @@ SEC45           DEC             4500
 5SECDP          OCT             00000                   # DON'T MOVE FROM JUST BEFORE 5SEC
 5SEC            DEC             500
 26SECS          DEC             2600
+THRESH1         DEC             24
+THRESH2         DEC             308
+THRESH3         DEC             12
+HIRTHROT        =               BIT13
+P40A/PMD        OCT             00203
 V16N40          VN              1640
 V16N85B         VN              1685
 V1683           VN              1683
@@ -1069,7 +1097,7 @@ S40.13          TC              INTPRET
                                 VGTIG                   # VELOCITY TO BE GAINED AT +7
                 PDDL            DMP                     # 00D = MAG OF VGTIG AT +7
                                 7SEC                    # 700 CS AT + 18
-                                FRCS2
+                                FRCS2B2
                 DDV             SL2                     # SCALE
                                 WEIGHT/G
                 BDSU            PUSH
@@ -1161,7 +1189,7 @@ STORETGO        DLOAD                                   # LOAD TGO AT 2(14)
                 TCF             S40.132*
 
 APSTGO          DDV             GOTO
-                                FAPS
+                                FAPSB9
                                 STORETGO        +1
 K1VAL           2DEC            124.57          B-23    # 2800 LB-SEC
 K2VAL           2DEC            31.138          B-24    # 700  LB-SEC
@@ -1171,11 +1199,11 @@ K3VAL           2DEC            1.556802        B-10    # FAPS ( 3500 LBS THRUST
 5SECS           2DEC            500.0           B-14    # 500.0 CS AT +14
 6SEC            2DEC            600.0           B-14    # 600.0 CS AT +14
 7SEC            2DEC            700.0                   # 700.0 CS
-FRCS2           2DEC            0.08896         B2      # 200 LBS FORCE IN NEWTONS
+FRCS2B2         2DEC            0.08896         B2      # 200 LBS FORCE IN NEWTONS
 S40.136         2DEC            .4671           B-9     # .4671 M NEWTONS (DPS)
 S40.136_        2DEC            .4671           B+1     # S40.136 SHIFTED LEFT 10.
 89SECS          2DEC            8900.0          B-14
-FAPS            2DEC            1.556802        B-9     # 3500 LBS FORCE IN NEWTONS
+FAPSB9          2DEC            1.556802        B-9     # 3500 LBS FORCE IN NEWTONS
 # FUNCTION    (1) GENERATES REQUIRED VELOCITY AND VELOCITY-TO-BE-GAINED
 #             VECTORS FOR USE DURING AIMPOINT MANEUVERS EVERY TWO
 #             COMPUTATION CYCLES (4 SECONDS).

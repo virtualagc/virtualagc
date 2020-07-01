@@ -369,8 +369,8 @@ TRACKFLG        =               025D                    # TRACKING ALLOWED    TR
 TRACKBIT        =               BIT5
 
 # BIT 4 FLAG 1
-#               =               026D
-#               =               BIT4
+GIMBFLG         =               026D
+GIMBFBIT        =               BIT4
 #
 
 # BIT 3 FLAG 1  (S)

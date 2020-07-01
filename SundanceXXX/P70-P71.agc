@@ -474,7 +474,7 @@ HINJECT		2DEC	18288 B-24	# 60,000 FEET EXPRESSED IN METERS.
 
 K(AT)		2DEC	.02		# SCALING CONSTANT
 
-WHICHADR	REMADR	ABRTABLE
+WHICHADR	REMADR	P70TABLE
 
 # ************************************************************************
 		EBANK=	DVCNTR

@@ -13,23 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-# DPS AND APS ENGINE PARAMETERS
-
-                SETLOC          P40S
-                BANK
-                COUNT*          $$/P40
-
-# *** THE ORDER OF THE FOLLOWING SIX CONSTANTS MUST NOT BE CHANGED ***
-
-FDPS            2DEC            4.3670          B-7     # 9817.5 LBS FORCE IN NEWTONS
-MDOTDPS         2DEC            0.1480          B-3     # 32.62 LBS/SEC IN KGS/CS.
-DTDECAY         2DEC            -38
-MDOTAPS         2DEC            0.05135         B-3     # 11.32 LBS/SEC IN KGS/CS
-ATDECAY         2DEC            -10
 
 # ************************************************************************
-
-FRCS4           2DEC            0.17792         B-7     # 400 LBS FORCE IN NEWTONS
 
                 SETLOC          ABORTS
                 BANK
@@ -75,16 +60,6 @@ DPSVEX          DEC*            -2952           E-2 B-5 # 9684 FT/SEC IN M/CS.
 TRIMACCL        2DEC*           +3.7055         E-5 B+8*# ACCELERATION DURING TRIM PHASE.
 
 # THROTTLING AND THRUST DETECTION PARAMETERS
-
-                SETLOC          P40S
-                BANK
-                COUNT*          $$/P40
-
-THRESH1         DEC             24
-THRESH2         DEC             308
-THRESH3         DEC             12
-
-HIRTHROT        =               BIT13
 
                 SETLOC          FTHROT
                 BANK

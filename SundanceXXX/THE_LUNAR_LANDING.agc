@@ -187,11 +187,6 @@ R60INIT         STOVL   OUTOFPLN        # INITIALIZATION FOR CALCMANU
 IGNALGRT        TC      PHASCHNG        # PREVENT REPEATING IGNALG
                 OCT     04024
 
-ASTNCLOK        CS      ASTNDEX
-                TC      BANKCALL
-                CADR    STCLOK2
-                TCF     ENDOFJOB        # RETURN IN NEW JOB AND IN EBANK FIVE
-
 ASTNRET         TC      INTPRET
                 SSP     RTB             # GO PICK UP DISPLAY AT END OF R51:
                         QMAJ            #       "PROCEED" WILL DO A FINE ALIGNMENT
@@ -242,14 +237,14 @@ P63SPOT4        TC      BANKCALL        # ENTER         INITIALIZE LANDING RADAR
 
 P63ADRES        GENADR  P63TABLE
 
-ASTNDEX         OCT     00027           # INDEX FOR CLOKTASK
-
 CODE500         OCT     00500
 
 99999CON        2DEC    30479.7 B-24
 
 GUIDDURN        2DEC    +65164
 DDUMCRIT        2DEC    +8 B-28         # CRITERION FOR IGNALG CONVERGENCE
+
+ROSEN           EQUALS
 
 #       ----------------------------------------
 
