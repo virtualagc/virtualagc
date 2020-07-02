@@ -33,7 +33,6 @@ AFDUMP          TC      MASSMULT
                 EXTEND
                 DCA     /AFC/
                 TC      MASSMULT
-                TS      FC              # FC = THRUST DESIRED BY GUIDANCE
                 DXCH    FCODD           # FCODD = WHAT IT IS GOING TO GET
 
 # IF IT HAS BEEN LESS THAN 3 SECONDS SINCE THE LAST THROTTLING, AUGMENT FP USING THE FWEIGHT CALCULATED THEN.
@@ -53,22 +52,13 @@ AFDUMP          TC      MASSMULT
 # MINIMUM BY ASTRONAUT OR MISSION CONTROL PROGRAMS, PROVIDES THE LOWER BOUND.  A STOP IN THE THROTTLE HARDWARE
 # PROVIDES THE UPPER.
 
-WHERETO         CA      EBANK5          # INITIALIZE L*WCR*T AND H*GHCR*T FROM
-                TS      EBANK           #   PAD LOADED ERASABLES IN W-MATRIX
-                EBANK=  LOWCRIT
-                EXTEND
-                DCA     LOWCRIT
-                DXCH    L*WCR*T
-                CA      EBANK7
-                TS      EBANK
-                EBANK=  PIF
-                CS      ZERO            # INITIALIZE PIFPSET
+WHERETO         CS      ZERO            # INITIALIZE PIFPSET
                 TS      PIFPSET
-                CS      H*GHCR*T
+                CS      HIGHCRIT
                 AD      FCOLD
                 EXTEND
                 BZMF    LOWFCOLD        # BRANCH IF FCOLD < OR = HIGHCRIT
-                CS      L*WCR*T
+                CS      LOWCRIT
                 AD      FCODD
                 EXTEND
                 BZMF    FCOMPSET        # BRANCH IF FC < OR = LOWCRIT
@@ -79,19 +69,10 @@ FCOMPSET        CS      FMAXODD         # SEE NOTE 2
                 AD      FP
                 TCF     FLATOUT2
 
-LOWFCOLD        CS      H*GHCR*T
+LOWFCOLD        CS      HIGHCRIT
                 AD      FCODD
                 EXTEND
                 BZMF    DOPIF           # BRANCH IF FC < OR = HIGHCRIT
-
-                CA      FLAGWRD6        # IS POUTFLAG SET?
-                MASK    POUTBIT
-                EXTEND
-                BZF     FLATOUT1 -1
-
-                CA      H*GHCR*T	# YES:  THROTTLE-UP ONLY TO HIGHCRIT
-                TS      FCODD
-                TCF     DOPIF
 
                 CA      FMAXPOS         # NO:  THROTTLE-UP
 FLATOUT1        DXCH    FCODD
@@ -172,7 +153,6 @@ THDUMP          TC      RTNHOLD
 FLATOUT         CAF     BIT13           # 4096 PULSES
 WHATOUT         TS      PIFPSET         # USE PIFPSET SO FWEIGHT WILL BE ZERO
                 CS      ZERO
-                TS      FCOLD
                 TS      PIF
                 EXTEND
                 QXCH    RTNHOLD
@@ -187,19 +167,22 @@ MASSMULT        EXTEND
                 DXCH    MPAC
                 TC      DMP             # LEAVES PROPERLY SCALED FORCE IM MPAC
                 ADRES   SCALEFAC
-                TC      TPAGREE
-                CA      MPAC
-                EXTEND
-                BZF     +3
-                CAF     POSMAX
-                TC      BUF
                 DXCH    MPAC +1
                 TC      BUF
 
 # CONSTANTS:-
 
+FMAXMAX         DEC     +3882
+FMAXODD         DEC     +3866           # THROTTLE SATURATION THRESHOLD
+FMAXPOS         DEC     +3592           # FMAX    43245 NEWTONS
+HIGHCRIT        DEC     2446
+LOWCRIT         DEC     2135
 FEXTRA          =       BIT13
-2.PG.FRT        =       PRIO31          # DECIMAL 12800
+DEC438          DEC     438
+THROTLAG        DEC     20              # EMPIRICALLY DETERMINED THROTTLE LAG TIME
+2.PG.FRT        DEC     12800
 /AF/CNST        DEC     .13107
+SCALEFAC        2DEC    51.947 B-12     # SCALES A (AT 2(-4) M/CS/CS) TIMES MASS
+                                        # (AT 2(16) KGS. ) TO PULSE UNITS.
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

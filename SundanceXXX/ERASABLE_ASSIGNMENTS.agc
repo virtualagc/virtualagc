@@ -1392,31 +1392,14 @@ ENDW            EQUALS          W               +162D
 
 #  PLEASE RETAIN THE ORDER OF TLAND THRU JAPFG
 
-RBRFG           EQUALS          W               +2      # I(6) BRAKING
-VBRFG           EQUALS          RBRFG           +6      # I(6)      PHASE
-ABRFG           EQUALS          VBRFG           +6      # I(6)         TARGET
-VBRFG*          EQUALS          ABRFG           +6      # I(2)            PARAMETERS:
-ABRFG*          EQUALS          VBRFG*          +2      # I(2)               HIGH
-JBRFG*          EQUALS          ABRFG*          +2      # I(2)                  GATE
-RAPFG           EQUALS          JBRFG*          +2      # I(6) APPROACH
-VAPFG           EQUALS          RAPFG           +6      # I(6)      PHASE
-AAPFG           EQUALS          VAPFG           +6      # I(6)         TARGET
-VAPFG*          EQUALS          AAPFG           +6      # I(2)            PARAMETERS:
-AAPFG*          EQUALS          VAPFG*          +2      # I(2)               LOW
-JAPFG*          EQUALS          AAPFG*          +2      # I(2)                  GATE
-VIGN            EQUALS          JAPFG*          +2      # I(2)  DESIRED SPEED FOR IGNITION
+VIGN            EQUALS          W               +2      # I(2)  DESIRED SPEED FOR IGNITION
 RIGNX           EQUALS          VIGN            +2      # I(2)  DESIRED 'ALTITUDE' FOR IGNITION
 RIGNZ           EQUALS          RIGNX           +2      # I(2)  DESIRED GROUND RANGE FOR IGNITION
 KIGNX/B4        EQUALS          RIGNZ           +2      # I(2)
 KIGNY/B8        EQUALS          KIGNX/B4        +2      # I(2)
 KIGNV/B4        EQUALS          KIGNY/B8        +2      # I(2)
-LOWCRIT         EQUALS          KIGNV/B4        +2      # B(1) (HIGHCRIT MUST FOLLOW LOWCRIT)
-HIGHCRIT        EQUALS          LOWCRIT         +1      # B(1) %S OF NOMINAL MAXIMUM THRUST
 
-L*WCR*T         =               BUF                     #     TEMPORARY STORAGE IN UNSWITCHED
-H*GHCR*T        =               BUF             +1      #      FOR USE IN EBANK SWITCHING LOWCRIT
-
-DELQFIX         EQUALS          HIGHCRIT        +1      # I(2) LR ALTITUDE DATA REASONABLE PARM.
+DELQFIX         EQUALS          KIGNV/B4        +1      # I(2) LR ALTITUDE DATA REASONABLE PARM.
 
 #
 
@@ -2575,6 +2558,7 @@ WCHPHOLD        =               OURPERMS                # B(1)    GUIDANCE
 
 WCHPHASE        =               WCHPHOLD        +1      # B(1)    GUIDANCE
 FLPASS0         =               WCHPHASE        +1      # B(1)    GUIDANCE
+TARGTDEX        =               FLPASS0         +1      # B(1)    GUIDANCE
 TPIP            =               FLPASS0         +1      # B(2)
 VGU             =               TPIP            +2      # B(6)    GUIDANCE
 LAND            =               VGU             +6      # B(6)    GUIDANCE    CONTIGUOUS

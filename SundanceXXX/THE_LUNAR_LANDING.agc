@@ -61,7 +61,7 @@ FLAGORGY        TC      INTPRET         # DIONYSIAN FLAG WAVING
 
                                         # ****************************************
 
-IGNALG          SETPD   VLOAD           # FIRST SET UP INPUTS FOR RP-TO-R:-
+IGNALG1         SETPD   VLOAD           # FIRST SET UP INPUTS FOR RP-TO-R:-
                         0               #       AT 0D LANDING SITE IN MOON FIXED FRAME
                         RLS             #       AT 6D ESTIMATED TIME OF LANDING
                 PDDL    PUSH            #       MPAC NON-ZERO TO INDICATE LUNAR CASE
@@ -249,7 +249,7 @@ ROSEN           EQUALS
 #       ----------------------------------------
 
 #       ****************************************
-#       P68: LANDING CONFIRMATION
+#       LANDING CONFIRMATION
 #       ****************************************
 
                 BANK    31
@@ -258,25 +258,31 @@ ROSEN           EQUALS
 
                 COUNT*  $$/P6567
 
-LANDJUNK        TC      PHASCHNG
-                OCT     04024
+LANDJUNK        TC      UPFLAG
+                ADRES   FLUNDISP
+                TC      FASTCHNG
+                TC      PHASCHNG
+                OCT     00005
 
                 INHINT
-                TC      BANKCALL        # ZERO ATTITUDE ERROR
-                CADR    ZATTEROR
+                TC      IBNKCALL
+                CADR    ENGINOF3
 
-                TC      BANKCALL        # SET 5 DEGREE DEADBAND
-                CADR    SETMAXDB
+                TC      UPFLAG
+                ADRES   LRBYPASS
 
                 TC      INTPRET         # TO INTERPRETIVE AS TIME IS NOT CRITICAL
-                SET     CLEAR
+                RTB     TLOAD
+                        RDCDUS
+                        1D
+                STORE   CDUXD
+                SET     SET
                         SURFFLAG
-                        LETABORT
-                SET     CLEAR
-                        APSFLAG
+                        KILLROSE
+                CLEAR   CLEAR
+                        AVEGFLAG
                         SWANDISP
-                SET     VLOAD
-                        LRBYPASS
+                VLOAD   VSL2
                         RN
                 STODL   ALPHAV
                         PIPTIME
@@ -299,14 +305,98 @@ LANDJUNK        TC      PHASCHNG
                 TCF     +2              # PROCEED
                 TCF     -5              # RECYCLE
 
-                TC      INTPRET
-                VLOAD                   # INITIALIZE GSAV AND (USING REFMF)
-                        UNITX           # YNBSAV, ZNBSAV AND ATTFLAG FOR P57
-                STCALL  GSAV
-                        REFMF
-                EXIT
+                CAF     OCT501
+                TC      BANKCALL
+                CADR    GOPERF1
+                TCF     GOTOPOOH
+                TCF     +2
+                TCF     -5
 
                 TCF     GOTOPOOH        # ASTRONAUT:  PLEASE SELECT P57
 
 V06N43*         VN      0643
+OCT501          OCT     501
+OCT71           OCT     71
 
+#       ****************************************
+#       LANDING TEST PROGRAM
+#       ****************************************
+
+LANDTEST        CA      VERTCADR
+                TS      WCHPHASE
+                TS      FLPASS0
+                TS      TARGTDEX
+
+                TC      INTPRET
+                VLOAD   MXV
+                        MOONRATE
+                        REFSMMAT
+                STODL   WM
+                        LUNLANAD
+                STOVL   AVEGEXIT
+                        RGU
+                UNIT    VXSC
+                        LANDSCAL
+                STORE   LAND
+                ABVAL   SET
+                        IDLEFLAG
+                STOVL   /LAND/
+                        UNITX
+                STOVL   CG
+                        UNITY
+                STOVL   CG +6
+                        UNITZ
+                STORE   CG +12D
+                SET     RTB
+                        MUNFLAG
+                        LOADTIME
+                STORE   TPIP
+                EXIT
+
+                INHINT
+                CAF     ONE
+                TC      WAITLIST
+                EBANK=  DVCNTR
+                2CADR   PREREAD
+
+                CAF     BIT13
+                EXTEND
+                RAND    DSALMOUT
+                CCS     A
+                TCF     TSTENGON
+
+                TC      IBNKCALL
+                CADR    ONULLAGE
+
+                CAF     3SECS
+                TC      TWIDDLE
+                ADRES   TESTIGN
+
+                CAF     LOW9
+                TC      BANKCALL
+                CADR    DELAYJOB
+
+TSTENGON        INHINT
+                CS      DRIFTBIT
+                MASK    DAPBOOLS
+                TS      DAPBOOLS
+                
+                CAF     ZERO
+                TS      FLPASS0
+
+                CAF     TESTDB
+                TS      DB
+                TCF     ENDOFJOB
+
+TESTIGN         CS      PRIO30
+                EXTEND
+                RAND    DSALMOUT
+                AD      BIT13
+                EXTEND
+                WRITE   DSALMOUT
+                TC      UPFLAG
+                ADRES   ENGONFLG
+                TCF     TASKOVER
+
+LANDSCAL        2DEC    0.20719647
+TESTDB          DEC     0.02222

@@ -21,163 +21,97 @@
 # LUNAR LANDING FLIGHT SEQUENCE TABLES
 # ****************************************************************************************************************
 
-# FLIGHT SEQUENCE TABLES ARE ARRANGED BY FUNCTION.   THEY ARE REFERENCED USING AS AN INDEX THE REGISTER WCHPHASE:
-#                                                  WCHPHASE  =  -1  --->  IGNALG
-#                                                  WCHPHASE  =   0  --->  BRAKQUAD
-#                                                  WCHPHASE  =   1  --->  BRAKLING
-#                                                  WCHPHASE  =   2  --->  APPRQUAD
-#                                                  WCHPHASE  =   3  --->  APPRLING
-#                                                  WCHPHASE  =   4  --->  VERTICAL
+# FLIGHT SEQUENCE TABLES ARE ARRANGED BY PHASE.   THEY ARE REFERENCED USING AS AN INDEX THE REGISTER WCHPHASE:
+#                                                  WCHPHASE  -1  --->  DISPLAY ROUTINES
+#                                                  WCHPHASE  +0  --->  ROUTINE FOR STARTING NEW GUIDANCE PHASES
+#                                                  WCHPHASE  +1  --->  GUIDANCE EQUATIONS
+#                                                  WCHPHASE  +2  --->  WINDOW VECTOR COMPUTATIONS
+#                                                  WCHPHASE  +3  --->  EXIT CRITERION
+#                                                  WCHPHASE  +4  --->  POST GUIDANCE EQUATION COMPUTATIONS
+#                                                  WCHPHASE  +5  --->  INDICES FOR REFERENCING TARGET PARAMETERS
+#                                                  WCHPHASE  +6  --->  AUGMENT FOR TTF/8
 
 # ***************************************************************************************************************
 
-# ROUTINES FOR STARTING NEW GUIDANCE PHASES:
+# IGNITION ALGORITHM:
+                                                        # -1  NO DISPLAYS
+IGNALG          TCF             TTFINCR                 # +0
+                TCF             TTF/8CL                 # +1
+                TCF             EXGSUB                  # +2
+                DEC             0                       # +3
+                TCF             CGCALC                  # +4
+                OCT             0                       # +5
+                DEC             108 E2 B-17             # +6
 
-                TCF             TTFINCR                 # IGNALG
-NEWPHASEL       TCF             TTFINCR                 # BRAKQUAD
-                TCF             LINSET?                 # BRAKLING
-                TCF             STARTP64                # APPRQUAD
-                TCF             LINSET                  # APPRLING
-                TCF             P65START                # VERTICAL
-#
 
+# BRAKING QUADRATIC:
+                TCF             P63DISPS                # -1
+BRAKQUAD        TCF             TTFINCR                 # +0
+                TCF             TTF/8CL                 # +1
+                TCF             EXBRAK                  # +2
+                DEC             -20 E2 B-17             # +3
+                TCF             CGCALC                  # +4
+                OCT             0                       # +5
+                DEC             0                       # +6
 
-# PRE-GUIDANCE COMPUTATIONS:
+# BRAKING LINEAR:
+                TCF             P63DISPS                # -1
+BRAKLING        TCF             LINSET                  # +0
+                TCF             LINGUID                 # +1
+                TCF             EXBRAK                  # +2
+                DEC             -2 E2 B-17              # +3
+                TCF             RGVGCALC                # +4
+                OCT             0                       # +5
+                DEC             0                       # +6
 
-                TCF             CALCRGVG                # IGNALG
-PREGUIDE        TCF             RGVGCALC                # BRAKQUAD
-                TCF             RGVGCALC                # BRAKLING
-                TCF             REDESIG                 # APPRQUAD
-                TCF             RGVGCALC                # APPRLING
-                TCF             RGVGCALC                # VERTICAL
-#
+# APPROACH QUADRATIC:
+                TCF             P64DISPS                # -1
+APPRQUAD        TCF             STARTP64                # +0
+                TCF             TTF/8CL                 # +1
+                TCF             EXNORM                  # +2
+                DEC             -10 E2 B-E7             # +3
+                TCF             REDESIG                 # +4
+                OCT             30                      # +5
+                DEC             -158 E2 B-17            # +6
 
-# GUIDANCE EQUATIONS:
+# APPROACH LINEAR:
+                TCF             P64DISPS                # -1
+APPRLING        TCF             LINSET                  # +0
+                TCF             LINGUID                 # +1
+                TCF             EXNORM                  # +2
+                DEC             -2 E2 B-17              # +3
+                TCF             RGVGCALC                # +4
+                OCT             30                      # +5
+                DEC             0                       # +6
 
-BRAKQUAD        EQUALS
-                TCF             TTF/8CL                 # IGNALG
-WHATGUID        TCF             TTF/8CL                 # BRAKQUAD
-                TCF             LINGUID                 # BRAKLING
-                TCF             TTF/8CL                 # APPRQUAD
-                TCF             LINGUID                 # BRAKLING
-                TCF             VERTGUID                # VERTICAL
-
-# POST GUIDANCE EQUATION COMPUTATIONS:
-
-                TCF             CGCALC                  # IGNALG
-AFTRGUID        TCF             CGCALC                  # BRAKQUAD
-                TCF             LINXLOGC                # BRAKLING
-                TCF             CGCALC                  # APPRQUAD
-                TCF             LINXLOGC                # APPRLING
-                TCF             EXVERT                  # VERTICAL
-#
-
-# WINDOW VECTOR COMPUTATIONS:
-
-                TCF             EXGSUB                  # IGNALG
-WHATEXIT        TCF             EXBRAK                  # BRAKQUAD
-                TCF             EXBRAK                  # BRAKLING
-                TCF             EXNORM                  # APPRQUAD
-                TCF             EXNORM                  # APPRLING
-#
-
-# DISPLAY ROUTINES:
-
-WHATDISP        TCF             P63DISPS                # BRAKQUAD
-                TCF             P63DISPS                # BRAKLING
-                TCF             P64DISPS                # APPRQUAD
-                TCF             P64DISPS                # APPRLING
-                TCF             VERTDISP                # VERTICAL
-#
-
-# INDICES FOR REFERENCING TARGET PARAMETERS:
-
-                OCT             0                       # IGNALG
-TARGTDEX        OCT             0                       # BRAKQUAD
-                OCT             0                       # BRAKLING
-                OCT             30                      # APPRQUAD
-                OCT             30                      # APPRLING
-#
+# VERTICAL:
+                TCF             VERTDISP                # -1
+VERTICAL        TCF             P65START                # +0
+                TCF             VERTGUID                # +1
+                TCF             EXVERT                  # +2
+                OCT             37777                   # +3
+                TCF             RGVGCALC                # +4
 
 # ****************************************************************************************************************
-# ENTRY POINTS:   2GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
+# ENTRY POINTS:   ?GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
 # ****************************************************************************************************************
 
 # IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC QUIDANCE
 
 ?GUIDSUB        EXIT
-                CAF             TWO                     # N = 3
-                TS              NGUIDSUB
+                CAF             ONE                     # N = 2
+GUIDSUB         TS              NGUIDSUB
                 TCF             GUILDRET
-
-GUIDSUB         TS              NGUIDSUB                # ON SUCEEDING PASSES SKIP TTFINCR
-                TCF             CALCRGVG
 
 
 # NORMAL ENTRY:  CONTROL COMES HERE FROM SERVOUT
 
-LUNLAND         TC              PHASCHNG
+LUNLAND         TC              2PHSCHNG
                 OCT             00035                   # GROUP 5:  RETAIN ONLY PIPA TASK
-                TC              PHASCHNG
-                OCT             05023                   # GROUP 3:  PROTECT GUIDANCE WITH PRIO 21
+                OCT             05022                   # GROUP 2:  PROTECT GUIDANCE WITH PRIO 21
                 OCT             21000                   #       JUST HIGHER THAN SERVICER'S PRIORITY
 
-# ****************************************************************************************************************
-# GUILDENSTERN:  AUTO-MODES MONITOR (R13)
-# ****************************************************************************************************************
-
-                COUNT*          $$/R13
-
-#    HERE IS THE PHILOSOPHY OF GUILDENSTERN:    ON EVERY APPEARANCE OR DISAPPEARANCE OF THE MANUAL THROTTLE
-# DISCRETE TO SELECT P67 OR P66 RESPECTIVELY;   ON EVERY APPEARANCE OF THE ATTITUDE-HOLD DISCRETE TO SELECT P66
-# UNLESS THE CURRENT PROGRAM IS P67 IN WHICH CASE THERE IS NO CHANGE.
-
-GUILDEN         EXTEND                                  # IS UN-AUTO-THROTTLE DISCRETE PRESENT?
-  STERN         READ            CHAN30
-                MASK            BIT5
-                CCS             A
-                TCF             STARTP67                # YES
-P67NOW?         TC              CHECKMM                 # NO:   ARE WE IN P67 NOW?
-                DEC             67
-                TCF             STABL?                  # NO
-STARTP66        TC              FASTCHNG                # YES
-                TC              NEWMODEX
-DEC66           DEC             66
-                EXTEND                                  # INITIALIZE VDGVERT USING
-                DCA             VGU                     #   PRESENT DOWNWARD VELOCITY
-                DXCH            VDGVERT
-                CAF             ZERO
-                TS              RODCOUNT
-VRTSTART        TS              WCHVERT
-                CAF             FOUR                    # WCHPHASE = 4 --> VERTICAL: P65,P66,P67
-                TS              WCHPHOLD
-                TS              WCHPHASE
-                TC              BANKCALL                # TEMPORARY, I HOPE HOPE HOPE
-                CADR            STOPRATE                # TEMPORARY, I HOPE HOPE HOPE
-                TC              DOWNFLAG                # PERMIT X-AXIS OVERRIDE
-                ADRES           XOVINFLG
-                TC              DOWNFLAG
-                ADRES           REDFLAG
-                TC              DOWNFLAG
-                ADRES           POUTFLAG                # PERMIT PULSE-OUTS
-                TCF             GUILDRET
-
-STARTP67        TC              NEWMODEX                # NO HARM IN "STARTING" P67 OVER AND OVER
-                DEC             67                      #   SO NO NEED FOR A FASTCHNG AND NO NEED
-
-                CAF             TEN                     #   TO SEE IF ALREADY IN P67
-                TCF             VRTSTART
-
-STABL?          CAF             BIT13                   # IS UN-ATTITUDE-HOLD DISCRETE PRESENT?
-                EXTEND
-                RAND            CHAN31
-                CCS             A
-                TCF             GUILDRET                # YES: ALL'S WELL
-P66NOW?         TC              CHECKMM                 # NO:  ARE WE IN P66 NOW?
-                DEC             66
-                TCF             STARTP66                # NO
-
-#                                               (CONTINUE TO GUILDRET) YES
+                TC              GUILDEN
 
 # ****************************************************************************************************************
 # INITIALIZATION FOR THIS PASS
@@ -185,14 +119,21 @@ P66NOW?         TC              CHECKMM                 # NO:  ARE WE IN P66 NOW
 
                 COUNT*          $$/F2DPS
 
-GUILDRET        EXTEND
+GUILDRET        INDEX           WCHPHASE
+                CA              5
+                TS              TARGTDEX
+                COM
+                INDEX           FIXLOC
+                TS              X1
+
+                EXTEND
                 DCA             TPIP
                 DXCH            TPIPOLD
 
                 TC              FASTCHNG
 
                 EXTEND
-                DCA             PIPTIME1
+                DCA             PIPTIME
                 DXCH            TPIP
 
                 EXTEND
@@ -203,7 +144,10 @@ GUILDRET        EXTEND
                 TCF             TTFINCR
 
 BRSPOT1         INDEX           WCHPHASE
-                TCF             NEWPHASE
+                CA              6
+                ADS             TTF/8TMP
+                INDEX           WCHPHASE
+                TCF             0
 
 # ****************************************************************************************************************
 # ROUTINES TO START NEW PHASES
@@ -216,38 +160,27 @@ P65START        TC              NEWMODEX
                 TC              DOWNFLAG                # PERMIT X-AXIS OVERRIDE
                 ADRES           XOVINFLG
 
-COMSTART        TC              DOWNFLAG
-                ADRES           POUTFLAG
                 TCF             TTFINCR
 
 
-STARTP64        CAF             DELTTFAP                # AUGMENT TTF/8 (TWO-PHASE ONLY)
-                ADS             TTF/8TMP
- +2             TC              NEWMODEX
+STARTP64        TC              NEWMODEX
                 DEC             64
-                CAF             TWO
-                TS              WCHPHASE
                 CA              BIT12                   # ENABLE RUPT10
                 EXTEND
                 WOR             CHAN13
                 TC              DOWNFLAG                # INITIALIZE REDESIGNATION FLAG
                 ADRES           REDFLAG
-                TCF             COMSTART
+                TCF             TTFINCR
 
 # ****************************************************************************************************************
 # SET LINEAR GUIDANCE COEFFICIENTS
 # ****************************************************************************************************************
 
-LINSET?         CA              FLAGWRD6                # ONE-PHASE OR TWO-PHASE?
-                # MASK            2PHASBIT
-                EXTEND
-                BZF             STARTP64        +2      # ONE-PHASE: GO DIRECTLY TO APPROACH PHASE
-
-LINSET          TC              INTPRETX
+LINSET          TC              INTPRET
                 VLOAD           VSU*                    # -        -     -
                                 ACG                     # JLING = (ACG - ADG)/TTF
                                 ADG,1
-                VSR3            V/SC
+                V/SC
                                 TTF/8TMP                # TTF/8 NOT YET UPDATED
                 STORE           JLING                   # JLING IS IN UMITS OF 2(-18) M/CS/CS/CS
                 EXIT
@@ -291,7 +224,13 @@ TTFINCR         TC              INTPRET
                 STORE           LANDTEMP
                 VSU             ABVAL
                                 R
-                STODL           RANGEDSP
+                STORE           RANGEDSP
+                VLOAD           VXV
+                                R
+                                WM
+                VAD             VSR2                    # RESCALE TO UNITS OF 2(9) M/CS
+                                V
+                STODL           ANGTERM
                 EXIT
 
                 DXCH            MPAC
@@ -314,23 +253,25 @@ TTFINCR         TC              INTPRET
                 DXCH            LAND            +4
 
                 TC              TDISPSET
-                TC              FASTCHNG                # SINCE REDESIG MAY CHANGE LANDTEMP
 
 BRSPOT2         INDEX           WCHPHASE
-                TCF             PREGUIDE
+                TCF             4
 
 # ****************************************************************************************************************
 # LANDING SITE PERTURBATION EQUATIONS
 # ****************************************************************************************************************
 
-REDESIG         CA              FLAGWRD6                # IS REDFLAG SET?
+REDESIG         TC              FASTCHNG
+                CA              FLAGWRD6                # IS REDFLAG SET?
                 MASK            REDFLBIT
-                EXTEND
-                BZF             RGVGCALC                # NO:   SKIP REDESIGNATION LOGIC
+                CCS             A
+                TCF             +3
+                TS              ELINCR1
+                TS              AZINCR1
 
                 CA              TREDES                  # YES:  HAS TREDES REACHED ZERO?
                 EXTEND
-                BZF             RGVGCALC                # YES:  SKIP REDESIGNATION LOGIC
+                BZF             CGCALC                  # YES:  SKIP REDESIGNATION LOGIC
 
                 INHINT
                 CA              ELINCR1
@@ -346,27 +287,33 @@ REDESIG         CA              FLAGWRD6                # IS REDFLAG SET?
                 TS              ELINCR          +1
                 TS              AZINCR          +1
 
-                CA              FIXLOC                  # SET PD TO 0
-                TS              PUSHLOC
-
                 TC              INTPRET
-                VLOAD           VSU
+                SETPD           VLOAD
+                                0
                                 LAND
-                                R                       #                 -      -
-                RTB             PUSH                    # PUSH DOWN UNIT (LAND - R)
+                VSU             RTB                     #                 -      -
+                                R                       # PUSH DOWN UNIT (LAND - R)
                                 NORMUNIT
-                VXV             VSL1
-                                YNBPIP                  #                    -          -      -
-                VXSC            PDDL                    # PUSH DOWN - ELINCR(YNB * UNIT(LAND - R))
+                MXV             VSL1
+                                XNBPIP
+                STODL           20D
+                                20D
+                DMP             BDSU
                                 ELINCR
+                                24D
+                PDDL            VSR1
                                 AZINCR
-                VXSC            VSU
-                                YNBPIP
-                VAD             PUSH                    # RESULTING VECTOR IS 1/2 REAL SIZE
-
-                DLOAD           DSU                     # MAKE SURE REDESIGNATION IS NOT
-                                0                       #   TOO CLOSE TO THE HORIZON
-
+                DAD             PDDL
+                                22D
+                                24D
+                DMP             DAD
+                                ELINCR
+                                20D
+                VDEF            VXM
+                                XNBPIP
+                PUSH            DLOAD
+                                0
+                DSU
                                 DEPRCRIT
                 BMN             DLOAD
                                 REDES1
@@ -382,7 +329,24 @@ REDES1          DLOAD           DSU
                 VXSC            VSL1
                                 /LAND/
                 STORE           LANDTEMP
+                VSU             RTB
+                                R
+                                NORMUNIT
+                DOT             SL1
+                                XNBPIP
+                VCOMP           ASIN
                 EXIT                                    # LOOKANGL WILL BE COMPUTED AT RGVGCALC
+
+                CAF             360DEGS
+                TC              SHORTMP
+
+                CAF             BIT14
+                TS              L
+                CAF             ZERO
+                DAS             MPAC
+                DXCH            MPAC
+                TC              ALSIGNAG
+                TS              GEFF
 
                 TC              FASTCHNG
 
@@ -396,7 +360,32 @@ REDES1          DLOAD           DSU
                 DCA             LANDTEMP        +4
                 DXCH            LAND            +4
 
-                TCF             RGVGCALC
+# ***************************************************************************************************************
+# ERECT GUIDANCE-STABLE MEMBER TRANSFORMATION MATRIX
+# ***************************************************************************************************************
+
+CGCALC          TC              INTPRET
+                VLOAD           UNIT
+                                LAND
+
+                STOVL           CG                      # FIRST ROW
+                                ANGTERM
+                VXSC            VAD                     # REMEMBER THAT ANGTERM IS DOUBLE-SIZED
+                                TTF/8
+                                LAND
+                VSU             RTB
+                                R
+                                NORMUNIT
+                VXV             RTB
+                                LAND
+                                NORMUNIT
+                STOVL           CG              +6      # SECOND ROW
+                                CG
+                VXV             VSL1
+                                CG              +6
+                STORE           CG              +14
+                EXIT
+
 
 # ****************************************************************************************************************
 # COMPUTE STATE IN GUIDANCE COORDINATES
@@ -427,88 +416,72 @@ REDES1          DLOAD           DSU
 #                                                        -   -     -
 #                                 LOOKANGL = ARCSIN(UNIT(R - LAND).XMBPIP)
 
-CALCRGVG        TC              INTPRET                 # IN IGNALG, COMPUTE V FROM INTEGRATION
-                VLOAD           MXV                     #   OUTPUT AND TRIM CORRECTION TERM
-                                VATT1                   #   COMPUTED LAST PASS AND LEFT IN UNFC/2
-                                REFSMMAT
-                VSR1            VAD
-                                UNFC/2
-                STORE           V
-                EXIT
-
 RGVGCALC        TC              INTPRET                 # ENTER HERE TO RECOMPUTE RG AND VG
-                VLOAD           VXV
-                                R
-                                WM
-                VAD             VSR2                    # RESCALE TO UNITS OF 2(9) M/CS
-                                V
-                STORE           ANGTERM
+                VLOAD           VSU
+                                R                       #           -   -
+                                LAND                    # PUSH DOWN R - LAND
+                MXV             VSL1
+                                CG
+                STOVL           RGU
+                                ANGTERM
                 MXV
                                 CG                      # NO SHIFT SINCE ANGTERM IS DOUBLE SIZED
                 STORE           VGU
                 PDDL            VDEF                    # FORM (0,VG ,VG ) IN UNITS OF 2(10) M/CS
                                 ZEROVECS                #           2   1
                 ABVAL           SL3
-                STOVL           VHORIZ                  # VHORIZ FOR DISPLAY DURING P65, P66, P67
-                                R                       #           -   -
-                VSU             PUSH                    # PUSH DOWN R - LAND
-                                LAND
-                MXV             VSL1
-                                CG
-                STOVL           RGU
-                RTB             DOT                     # NOW IN MPAC IS SINE(LOOKANGL)/4
-                                NORMUNIT
-                                XNBPIP
+                STODL           VHORIZ                  # VHORIZ FOR DISPLAY DURING P65, P66, P67
                 EXIT
 
-                CA              FIXLOC                  # RESET PUSH DOWN POINTER
-                TS              PUSHLOC
-
-                CA              MPAC                    # COMPUTE LOOKANGL ITSELF
-                DOUBLE
-                # TC              BANKCALL
-
-                # CADR            SPARCSIN        -1
-                AD              1/2DEG
-                EXTEND
-                MP              180DEGS
-                TS              LOOKANGL                # LOOKANGL FOR DISPLAY DURING P64
-
 BRSPOT3         INDEX           WCHPHASE
-                TCF             WHATGUID
+                TCF             1
 
 #****************************************************************************************************************
 # LINEAR GUIDANCE EQUATION
 #****************************************************************************************************************
 
-LINGUID         TC              INTPRETX
+LINGUID         TC              INTPRET
                 VLOAD           VXSC                    # -     -     -
                                 JLING                   # ACG = ADG + JLING TTF
                                 TTF/8
-                VSL3            GOTO                    # PICK UP THE VAD* AT AFCCALC
-                                AFCCALC
+                VAD*            GOTO
+                                ADG,1
+                                AFCCALC         +2
 
 #****************************************************************************************************************
 # TTF/4 COMPUTATION
 #****************************************************************************************************************
 
-TTF/8CL         TC              INTPRETX
-                DLOAD*
-                                JDG2TTF,1
-                STODL*          TABLTTF         +6      # A(3) = 8 JDG  TO TABLTTF
-                                ADG2TTF,1               #             2
-                STODL           TABLTTF         +4      # A(2) = 6 ADG  TO TABLTTF
-                                VGU             +4      #             2
-                DMP             DAD*
-                                3/4DP
-                                VDG2TTF,1
-                STODL*          TABLTTF         +2      # A(1) = (6 VGU  + 18 VDG )/8 TO TABLTTF
-                                RDG             +4,1    #              2         2
-                DSU             DMP
-                                RGU             +4
-                                3/8DP
-                STORE           TABLTTF                 # A(0) = -24 (RGU  - RDG )/64 TO TABLTTF
-                EXIT                                    #                2      2
+TTF/8CL         EXTEND
+                INDEX           TARGTDEX
+                DCA             JDG2TTF                 # A(3) = 8 JDG  TO TABLTTF
+                DXCH            TABLTTF         +6      #             2
+                EXTEND
+                INDEX           TARGTDEX
+                DCA             ADG2TTF                 # A(2) = 6 ADG  TO TABLTTF
+                DXCH            TABLTTF         +4      #             2
+                EXTEND
+                DCA             VGU             +4
+                DXCH            MPAC
+                CAF             3/4DP
+                TC              SHORTMP
+                EXTEND
+                INDEX           TARGTDEX
+                DCA             VDG2TTF
+                DAS             MPAC
+                DXCH            MPAC                    # A(1) = (6 VGU  + 18 VDG )/8 TO TABLTTF
+                DXCH            TABLTTF         +2      #              2         2
+                EXTEND
+                DCS             RGU             +4
+                DXCH            MPAC
+                EXTEND
+                INDEX           TARGTDEX
+                DCA             RDG             +4
+                DAS             MPAC
+                CAF             3/8
+                TC              SHORTMP
+                DXCH            MPAC                    # A(0) = -24 (RGU  - RDG )/64 TO TABLTTF
+                DXCH            TABLTTF                 #                2      2
 
                 CA              BIT8
                 TS              TABLTTF         +10     # FRACTIONAL PRECISION FOR TTF TO TABLE
@@ -516,10 +489,8 @@ TTF/8CL         TC              INTPRETX
                 EXTEND
                 DCA             TTF/8
                 DXCH            MPAC                    # LOADS TTF/8 (INITIAL GUESS) INTO MPAC
-                CAF             TWO                     # DEGREE - ONE
-                TS              L
-
-                CAF             TABLTTFL
+                EXTEND
+                DCA             TABLTTFL
                 TC              ROOTPSRS                # YIELDS TTF/8 IN MPAC
 
                 EXTEND
@@ -550,13 +521,7 @@ TTF/8CL         TC              INTPRETX
 #                                ACG = ---------------------------- + ADG
 #                                                 TTF/8
 
-QUADGUID        CAF             30SEC*17                # PULSE-OUTS ARE INHIBITED WHENEVER
-                AD              TTF/8                   #   TTF < 30 SECONDS, REGARDLESS OF
-                EXTEND                                  #   THE DURATION OF LINEAR GUIDANCE
-                BZMF            Q**DG**D
-                TC              UPFLAG
-                ADRES           POUTFLAG
-Q**DG**D        TC              INTPRETX
+QUADGUID        TC              INTPRET
                 VLOAD*          VSU
                                 RDG,1
                                 RGU
@@ -567,7 +532,6 @@ Q**DG**D        TC              INTPRETX
                                 VGU
                 V/SC            VXSC
                                 TTF/8
-
                                 3/4DP
 AFCCALC         VAD*
                                 ADG,1                   # CURRENT TARGET ACCELERATION
@@ -581,61 +545,10 @@ AFCCALC1        VXM             VSL1                    # VERTGUID COMES HERE
                 STORE           UNFC/2                  # UNFC/2 NEED NOT BE UNITIZED
                 ABVAL
 AFCCALC2        STORE           /AFC/                   # MAGNITUDE OF AFC FOR THROTTLE
-                # BON             DLOAD
-                #                 2PHASFLG
-                #                 AFCCLEND
-                #                 UNFC/2                  # VERTICAL COMPONENT
-                DSQ             PDDL
-                                UNFC/2          +2      # OUT-OF-PLANE
-                DSQ             PDDL
-                                HIGHESTF
-                DDV             DSQ
-                                MASS                    #                        2    2    2
-                DSU             DSU                     # AMAXHORIZ = SQRT(ATOTAL - A  - A  )
-                BPL             DLOAD                   #                            1    0
-                                AFCCALC3
-                                ZEROVECS
-AFCCALC3        SQRT            DAD
-                                UNFC/2          +4
-                BPL             BDSU
-                                AFCCLEND
-                                UNFC/2          +4
-                STORE           UNFC/2          +4
-AFCCLEND        EXIT
+                EXIT
                 TC              FASTCHNG
 
-                CA              WCHPHASE                # PREPARE FOR PHASE SWITCHING LOGIC
-                TS              WCHPHOLD
                 INCR            FLPASS0                 # INCREMENT PASS COUNTER
-
-BRSPOT4         INDEX           WCHPHASE
-                TCF             AFTRGUID
-
-# ***************************************************************************************************************
-# ERECT GUIDANCE-STABLE MEMBER TRANSFORMATION MATRIX
-# ***************************************************************************************************************
-
-CGCALC          TC              INTPRET
-                VLOAD           UNIT
-                                LAND
-
-                STOVL           CG                      # FIRST ROW
-                                ANGTERM
-                VXSC            VAD                     # REMEMBER THAT ANGTERM IS DOUBLE-SIZED
-                                TTF/8
-                                LAND
-                VSU             RTB
-                                R
-                                NORMUNIT
-                VXV             RTB
-                                LAND
-                                NORMUNIT
-                STOVL           CG              +6      # SECOND ROW
-                                CG
-                VXV             VSL1
-                                CG              +6
-                STORE           CG              +14
-                EXIT
 
 #                                             (CONTINUE TO EXTLOGIC)
 
@@ -645,27 +558,24 @@ CGCALC          TC              INTPRET
 
 # DECIDE (1) HOW TO EXIT, AND (2) WHETHER TO SWITCH PHASES
 
-EXTLOGIC        CCS             WCHPHASE
-                INDEX           A                       # WCHPHASE = +2    APPRQUAD    A = 1
-                #CA              TENDBRAK                # WCHPHASE = +0    BRAKQUAD    A = 0
-                TCF             EXSPOT1         -1      # WCHPHASE = -1    IGNALG      A = 0
-
-LINXLOGC        CA              3SEC*17
+EXTLOGIC        INDEX           WCHPHASE
+                CS              3
                 AD              TTF/8
-
-EXSPOT1         EXTEND
+                EXTEND
                 INDEX           WCHPHASE
-                BZMF            WHATEXIT
+                BZMF            2
+
+                CA              WCHPHASE                # PREPARE FOR PHASE SWITCHING LOGIC
+                TS              WCHPHOLD
 
                 TC              FASTCHNG
 
                 CA              WCHPHOLD
-                AD              ONE
+                AD              BIT4
                 ZL                                      # +0
                 DXCH            WCHPHASE                # ADVANCING WCHPHASE AND RESETTING FLPASS0
-
                 INDEX           WCHPHOLD
-                TCF             WHATEXIT
+                TCF             2
 
 # ****************************************************************************************************************
 # ROUTINES FOR EXITING FROM LANDING GUIDANCE
@@ -680,32 +590,24 @@ EXSPOT1         EXTEND
 
 #          (EXOVFLOW IS A SUBROUTINE OF EXBRAK AND EXNORM CALLED WHEN OVERFLOW OCCURRED ANYWHERE IN GUIDANCE.)
 
-EXGSUB          TC              INTPRET                 # COMPUTE TRIM VELOCITY CORRECTION TERM
-                VLOAD           RTB
-                                UNFC/2
-                                NORMUNIT
-                VXSC            VXSC
-                                ZOOMTIME
-                                TRIMACCL
-                STORE           UNFC/2
-                EXIT
-
-                CCS             NGUIDSUB
+EXGSUB          CCS             NGUIDSUB
                 TCF             GUIDSUB
-                CCS             NIGNLOOP
-                TCF             +3
+                INCR            NIGNLOOP
+                CS              BIT5
+                AD              NIGNLOOP
+                EXTEND
+                BZF             +3
                 TC              ALARM
                 OCT             01412
 
- +3             TC              POSTJUMP
-                CADR            DDUMCALC
+ +3             TC              INTPRET
+                GOTO            
+                                DDUMCALC
 
 EXBRAK          TC              INTPRET
-                VLOAD
+                VLOAD           GOTO
                                 UNIT/R/
-                STORE           UNWC/2
-                EXIT
-                TCF             STEER?
+                                STEER?
 
 EXNORM          TC              INTPRET
                 VLOAD           VSU
@@ -713,66 +615,49 @@ EXNORM          TC              INTPRET
                                 R
                 RTB
                                 NORMUNIT
-                STORE           UNWC/2                  # UNIT(LAND - R) IS TENTATIVE CHOICE
+                STORE           20D                     # UNIT(LAND - R) IS TENTATIVE CHOICE
                 VXV             DOT
                                 XNBPIP
                                 CG              +6
-                EXIT                                    # WITH PROJ IN MPAC 1/8 REAL SIZE
+                STORE           18D                     # PROJ 1/8 REAL SIZE
+                DSU             BMN
+                                PROJMAX
+                                +4
+                VLOAD           GOTO
+                                20D
+                                STEER?
+                DLOAD
+                                18D
+                DSU             BPL
+                                PROJMIN
+                                +4
+                VLOAD           GOTO
+                                CG              +12D
+                                STEER?
+                DLOAD           DSU
+                                18D
+                                PROJMAX
+                VXSC            PDDL
+                                CG              +12D
+                                18D
+                DSU             VXSC
+                                PROJMIN
+                                20D
+                VSU
+                V/SC
+                                PROJDIV
 
-                CS              MPAC                    # GET COEFFICIENT FOR CG +14
-
-                AD              PROJMAX
-                AD              POSMAX
-                TS              BUF
-                CS              BUF
-                ADS             BUF                     # RESULT IS 0 IF PROJMAX - PROJ NEGATIVE
-
-                CS              PROJMIN                 # GET COEFFICIENT FOR UNIT(LAND - R)
-                AD              MPAC
-                AD              POSMAX
-                TS              BUF             +1
-                CS              BUF             +1
-                ADS             BUF             +1      # RESULT IS 0 IF PROJ - PROJMIN NEGATIVE
-
-                CAF             FOUR
-UNWCLOOP        MASK            SIX
-                TS              Q
-                CA              EBANK5
-                TS              EBANK
-                EBANK=          CG
-                CA              BUF
-                EXTEND
-                INDEX           Q
-                MP              CG              +14
-                INCR            BBANK
-                EBANK=          UNWC/2
-                INDEX           Q
-                DXCH            UNWC/2
-                EXTEND
-                MP              BUF             +1
-                INDEX           Q
-                DAS             UNWC/2
-                CCS             Q
-                TCF             UNWCLOOP
-
-                INCR            BBANK
-                EBANK=          PIF
-
-STEER?          CA              FLAGWRD2                # IF STEERSW DOWN NO OUTPUTS
-                MASK            STEERBIT
-                EXTEND
-                BZF             RATESTOP
+STEER?          STORE           UNWC/2
+                BOFF            EXIT                    # IF STEERSW DOWN NO OUTPUTS
+                                STEERSW
+                                DISPEXIT        -1
 
 EXVERT          CA              OVFIND                  # IF OVERFLOW ANYWHERE IN GUIDANCE
                 EXTEND                                  #   DON'T CALL THROTTLE OR FINDCDUW
-                BZF             +6
+                BZF             +4
 
 EXOVFLOW        TC              ALARM                   # SOUND THE ALARM NON-ABORTIVELY.
                 OCT             01410
-
-RATESTOP        TC              BANKCALL                # CLEAN UP AFTER LAST FINDCDUW
-
-                CADR            STOPRATE
 
                 TCF             DISPEXIT
 
@@ -798,23 +683,16 @@ DISPEXIT        EXTEND                                  # KILL GROUP 3:  DISPLAY
                 EXTEND
                 BZF             ENDLLJOB                # TO PICK UP THE TAG
 
-                INDEX           WCHPHOLD
-                TCF             WHATDISP
-
- -2             TC              PHASCHNG                # KILL GROUP 5
-                OCT             00035
+                INDEX           WCHPHASE
+                TCF             -1
 
 P63DISPS        CAF             V06N63
 DISPCOMN        TC              BANKCALL
-                CADR            REGODSPR
+                CADR            GODSPR
 
 ENDLLJOB        TCF             ENDOFJOB
 
-P64DISPS        CA              TREDES                  # HAS TREDES REACHED ZERO?
-                EXTEND
-                BZF             RED-OVER                # YES:  CLEAR REDESIGNATION FLAG
-
-                CS              FLAGWRD6                # NO:   IS REDFLAG SET?
+P64DISPS        CS              FLAGWRD6                # NO:   IS REDFLAG SET?
                 MASK            REDFLBIT
                 EXTEND
                 BZF             REDES-OK                # YES:  DO STATIC DISPLAY
@@ -838,15 +716,26 @@ P64CEED         CAF             ZERO
 
                 TCF             ENDOFJOB
 
-RED-OVER        TC              DOWNFLAG
-                ADRES           REDFLAG
 REDES-OK        CAF             V06N64
                 TCF             DISPCOMN
 
 
-VERTDISP        CAF             V06N60
-                TCF             DISPCOMN
+VERTDISP        CAF             FOUR
+                TC              BANKCALL
+                CADR            ALTCHK
+                TCF             VERTDSP2
 
+                CAF             V06N60
+                TC              BANKCALL
+                CADR            REFLASHR
+                TCF             GOTOPOOH
+                TCF             LANDJUNK
+                TCF             VERTDISP
+
+                TCF             ENDLLJOB
+
+VERTDSP2        CAF             V06N60
+                TCF             DISPCOMN
 
 # ****************************************************************************************************************
 # GUIDANCE FOR VERTICAL DESCENT
@@ -1157,10 +1046,6 @@ ROOTLOOP        EXTEND
                 DAS             MPAC                    # ABS(DX)-ABS(DXCRIT) IN MPAC
 
                 INCR            MODE                    # INCREMENT ITERATION COUNTER
-                CA              MODE
-                MASK            BIT4                    # KLUMPP SAYS GIVE UP AFTER EIGHT PASSES
-                CCS             A
-BADROOT         TC              RETROOT
 
                 CCS             MPAC                    # TEST HI ORDER DX
                 TCF             ROOTLOOP
@@ -1174,8 +1059,7 @@ ROOTSTOR        DXCH            ROOTPS
                 DXCH            MPAC
                 CA              MODE
                 TS              MPAC            +2      # STORE SP ITERATION COUNT IN MPAC+2
-                INDEX           RETROOT
-                TCF             2
+                TC              RETROOT
 
 
 DERTABLL        ADRES           DERCOFN         -3
@@ -1183,13 +1067,6 @@ DERTABLL        ADRES           DERCOFN         -3
 # ****************************************************************************************************************
 # TRASHY LITTLE SUBROUTINES
 # ****************************************************************************************************************
-
-INTPRETX        INDEX           WCHPHASE                # SET X1 ON THE WAY TO THE INTERPRETER
-                CS              TARGTDEX
-                INDEX           FIXLOC
-                TS              X1
-                TCF             INTPRET
-
 
 TDISPSET        CA              TTF/8
                 EXTEND
@@ -1225,7 +1102,7 @@ TDISPSET        CA              TTF/8
 FASTCHNG        CA              EBANK3                  # SPECIALIZED 'PHASCHNG' ROUTINE
                 XCH             EBANK
                 DXCH            L
-                TS              PHSNAME3
+                TS              PHSNAME2
                 LXCH            EBANK
 
                 EBANK=          E2DPS
@@ -1247,23 +1124,42 @@ JDG2TTF         =               JBRFG*
 # LUNAR LANDING CONSTANTS
 # ***************************************************************************************************************
 
-3SEC*17         DEC             +3              E2 B-17
+#          LUNAR LANDING TARGET PARAMETERS
+#
+ABRFG           2DEC*           -3.43285501     E-5 B+4
+                2DEC*           +0.00000000     E+0 B+4*
+                2DEC*           -2.74418853     E-4 B+4*
 
+RBRFG           2DEC*           +3.12375000     E+3 B-24*
+                2DEC*           +0.00000000     E+0 B-24*
+                2DEC            -1.07834375     E+4 B-24*
 
-10SEC*17        DEC             +10             E2 B-17
+VBRFG           2DEC*           -4.92340088     E-1 B-10*
+                2DEC*           +0.00000000     E+0 B-10*
+                2DEC*           +1.80714798     E+0 B-10*
 
+VBRFG*          2DEC*           +4.06608200     E+0 B-10*
+ABRFG*          2DEC*           -1.64651359     E-3 B+4*
+JBRFG*          2DEC*           -2.69203326     E-8 B+18*
 
-20SEC*17        DEC             +20             E2 B-17
+AAPFG           2DEC*           +1.52399999     E-6 B+4*
+                2DEC*           +0.00000000     E+0 B+4*
+                2DEC*           -1.98119999     E-5 B+4*
 
+RAPFG           2DEC*           +2.35092239     E+1 B-24*
+                2DEC*           +0.00000000     E+0 B-24*
+                2DEC*           -5.28319999     E-1 B-24*
 
-30SEC*17        DEC             +30             E2 B-17
+VAPFG           2DEC*           -9.44879999     E-3 B-10*
+                2DEC*           +0.00000000     E+0 B-10*
+                2DEC*           +3.96239999     E-3 B-10*
 
+VAPFG*          2DEC*           +8.91539999     E-3 B-10*
+AAPFG*          2DEC*           -1.18871999     E-4 B+04*
+JAPFG*          2DEC*           +8.37250411     E-8 B+18*
 
 TABLTTFL        ADRES           TABLTTF         +3      # ADDRESS FOR REFERENCING TTF TABLE
-
-
-HIGHESTF        2DEC            +43245          E-4 B-12# THRUST FOR RADIAL CONTROL
-TTFSCALE        =               BIT12
+                DEC             2                       # DEGREE - ONE
 
 
 TSCALINV        =               BIT4
@@ -1278,13 +1174,7 @@ TSCALINV        =               BIT4
 SCTTFDSP        DEC             .08                     # RESCALES FROM 2(-17) CS TO WHOLE SECONDS
 
 
-180DEGS         DEC             +180
-
-
-1/2DEG          DEC             +.00278
-
-
-DELTTFAP        DEC             -158            E2 B-17
+360DEGS         DEC             +1360
 
 
 TAUVERT         2DEC            600             B-14
@@ -1296,14 +1186,30 @@ TAUROD          2DEC            300             B-12
 GSCALE          2DEC            100             B-11
 
 
-3/8DP           2DEC            .375000000
+3/8             DEC             .375000000
+
+
+2/3DP           2DEC            .666666667
 
 
 3/4DP           2DEC            .750000000
+
+
+MOONRATE        2DEC            0.0
+                2DEC*           .26616994890062991 E-7 B+18* # RAD/CS.
+                2DEC            0.0
+
+
+MOONG           2DEC            -1.6226         E-4 B2
+
+
 +1FPS           DEC             .3048           E-2 B+4
 
 
 +3FPS           2DEC            +0.9144         E-2 B-10
+
+
++5FPS           2DEC            +1.524          E-2 B-10
 
 
 DEPRCRIT        2DEC            -.02            B-2     # DEPRESSION ANGLE CRITERION
@@ -1313,6 +1219,9 @@ PROJMAX         DEC             .42262          B-3     # SIN(25')/8 TO COMPARE 
 
 
 PROJMIN         DEC             .25882          B-3     # SIN(15')/8 TO COMPARE WITH PROJ
+
+
+PROJDIV         DEC             .198            B-3
 
 
 V06N63          VN              0663                    # P63

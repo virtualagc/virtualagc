@@ -47,37 +47,14 @@ APSVEX          DEC             -3030           E-2 B-5 # 9942 FT/SEC IN M/CS.
 
 DPSVEX          DEC*            -2952           E-2 B-5 # 9684 FT/SEC IN M/CS.
 
-# ************************************************************************
-
-                SETLOC          F2DPS*31
-                BANK
-                COUNT*          $$/F2DPS
-
-TRIMACCL        2DEC*           +3.7055         E-5 B+8*# ACCELERATION DURING TRIM PHASE.
 
 # THROTTLING AND THRUST DETECTION PARAMETERS
-
-                SETLOC          FTHROT
-                BANK
-                COUNT*          $$/THROT
-
-FMAXODD         DEC             +3866                   # THROTTLE SATURATION THRESHOLD
-
-FMAXPOS         DEC             +3594                   # FMAX    43245 NEWTONS
-THROTLAG        DEC             20                      # EMPIRICALLY DETERMINED THROTTLE LAG TIME
 
                 SETLOC          F2DPS*32
                 BANK
                 COUNT*          $$/F2DPS
 
 DPSTHRSH        DEC             36                      # (THRESH1 + THRESH3 FOR P63)
-
-                SETLOC          FTHROT
-                BANK
-                COUNT*          $$/THROT
-
-SCALEFAC        2DEC            51.947          B-12    # SCALES A (AT 2(-4) M/CS/CS) TIMES MASS
-                                                        # (AT 2(16) KGS. ) TO PULSE UNITS.
 
                 SETLOC          SERVICES
                 BANK
@@ -103,13 +80,6 @@ ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO
 
 # PHYSICAL CONSTANTS ( TIME - INVARIANT )
 # ************************************************************************
-
-                SETLOC          F2DPS*31
-                BANK
-                COUNT*          $$/F2DPS
-
-MOONG           2DEC            -1.6226         E-4 B2
-
                 SETLOC          SERVICES
                 BANK
                 COUNT*          $$/SERV
