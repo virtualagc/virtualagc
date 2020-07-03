@@ -664,20 +664,18 @@ GDT/2           ERASE           +22D                    # B(6)TMP (MUST FOLLOW P
 MASS            EQUALS          GDT/2           +6      # B(2)
 WEIGHT/G        =               MASS
 ABDELV          EQUALS          MASS            +2      # ALCMANU STORAGE)
-SCAXIS          EQUALS          ABDELV          +2      # (6)
-DVTHRUSH        EQUALS          SCAXIS          +2      # (1)
+/AF/            EQUALS          ABDELV          +2      # (6)
+DVTHRUSH        EQUALS          /AF/            +2      # (1)
 AVEGEXIT        EQUALS          DVTHRUSH        +1      #  (2)
 AVGEXIT         =               AVEGEXIT
 TEMX            EQUALS          AVEGEXIT        +2      #  (1)
 TEMY            EQUALS          TEMX            +1      #  (1)
 TEMZ            EQUALS          TEMY            +1      #  (1)
 PIPCTR          EQUALS          TEMZ            +1      # B(1)
-DVCOUNT         EQUALS          PIPCTR          +1      # B(1)
-PIPAGE          EQUALS          DVCOUNT         +1      # B(1)
+SETDVCNT        EQUALS          PIPCTR          +1      # B(1)
+PIPAGE          EQUALS          SETDVCNT        +1      # B(1)
 OUTROUTE        EQUALS          PIPAGE          +1      # B(1)
 LRSTAT          EQUALS          OUTROUTE        +1      # B(1)
-## FIXME: DELETE
-PGUIDE          EQUALS          PIPTIME1                # (2)
 
 #
 
@@ -1392,14 +1390,7 @@ ENDW            EQUALS          W               +162D
 
 #  PLEASE RETAIN THE ORDER OF TLAND THRU JAPFG
 
-VIGN            EQUALS          W               +2      # I(2)  DESIRED SPEED FOR IGNITION
-RIGNX           EQUALS          VIGN            +2      # I(2)  DESIRED 'ALTITUDE' FOR IGNITION
-RIGNZ           EQUALS          RIGNX           +2      # I(2)  DESIRED GROUND RANGE FOR IGNITION
-KIGNX/B4        EQUALS          RIGNZ           +2      # I(2)
-KIGNY/B8        EQUALS          KIGNX/B4        +2      # I(2)
-KIGNV/B4        EQUALS          KIGNY/B8        +2      # I(2)
-
-DELQFIX         EQUALS          KIGNV/B4        +1      # I(2) LR ALTITUDE DATA REASONABLE PARM.
+DELQFIX         EQUALS          W               +1      # I(2) LR ALTITUDE DATA REASONABLE PARM.
 
 #
 
@@ -1407,7 +1398,6 @@ DELQFIX         EQUALS          KIGNV/B4        +1      # I(2) LR ALTITUDE DATA 
 
 TBRKPNT         EQUALS          DELQFIX         +2      # I(1) TFI BRANCH TIME:ABORT TARGET PCR133
 ABTVINJ1        EQUALS          TBRKPNT         +1      # I(2) ABORT VELOCITY;TFI LESSTHAN TBRKPNT
-ABTVINJ2        EQUALS          ABTVINJ1        +2      # I(2) ABORT VEL ;TFI GREATER THAN TBRKPNT
 #
 
 #          SOME VARIABLES FOR SECOND DPS GUIDANCE                       (34D)
@@ -2116,12 +2106,6 @@ LRALPHA2        EQUALS          LRBETA1         +1      # B(1)    POS2 X ROTATIO
 LRBETA2         EQUALS          LRALPHA2        +1      # B(1)    POS2 Y ROTATION    * ORDER *
 HBEAMANT        EQUALS          LRBETA2         +1      # B(1)
 #E FIXME: DELETE THESE
-LRHMAX          EQUALS          ATIGINC                 # B(1)
-LRVMAX          EQUALS          ATIGINC                 # B(1)
-LRWH            EQUALS          ATIGINC                 # B(1)
-LRWVZ           EQUALS          ATIGINC                 # B(1)    * MUST  *
-LRWVY           EQUALS          ATIGINC                 # B(1)    * BE IN *
-LRWVX           EQUALS          ATIGINC                 # B(1)    * ORDER *
 #
 
 #          THROTTLE STORAGE.      -PAD LOADED-                          (1D)
@@ -2131,12 +2115,6 @@ ZOOMTDP         ERASE           +1
 ZOOMTIME        EQUALS          ZOOMTDP         +1      # B(1)PL TIME OF DPS THROTTLE-UP COMMAND
 
 #          LANDING RADAR      -PAD LOADED-                              (2D)
-
-## FIXME: DELETE
-RPCRTIME        EQUALS          ZOOMTIME                # B(1) REPOSITIONING CRITERION  (TIME)
-RPCRTQSW        EQUALS          ZOOMTIME                # B(1) REPOSITIONING CRITERION (ANGLE)
-#
-
 
 #          P30-P40 INTERFACE UNSHARED.                   (2D)
 
@@ -2436,6 +2414,7 @@ P21TIME         EQUALS          RM              +2     # I(2)TMP
 
 #          KALCMANU, VECPOINT STORAGE.  CALLED BY R63, R61, R65.         (12D)
 
+SCAXIS          EQUALS          /AF/
 POINTVSM        EQUALS          SCAXIS          +6      # I(6)
 #
 
@@ -2667,6 +2646,32 @@ TXO             EQUALS          VGVECT          +6      # I(2)TMP  TIME AT WHICH
 FDAIX           ERASE                                   # I(1)
 FDAIY           ERASE                                   # I(1)
 FDAIZ           ERASE                                   # I(1)
+
+# P10-P11 ERASABLES.
+## FIXME: Determine overlay and relative addresses
+INJTIME         =               TIG
+INJANGLE        =               TIG
+TCSITPF         =               TIG
+P1XITCNT        =               TIG
+RCSMINT         =               TIG
+VCSMINT         =               TIG
+INJALT          =               TIG
+RLEMT2          =               TIG
+P1XMAX          =               TIG
+P1XTMIN         =               TIG
+P1XDT           =               TIG
+ULVEC           =               TIG
+RP1XROT         =               TIG
+VP1XROT         =               TIG
+P11VTPF         =               TIG
+RLSBRCS         =               TIG
+CDHDELH         =               TIG
+DELTPI          =               TIG
+P1XDELTT        =               TIG
+TPITIME         =               TIG
+TPIANGLE        =               TIG
+P1XVVER         =               TIG
+P1XVHOR         =               TIG
 
 # THE FOLLOWING CARDS KEEP THE ASSEMBLER HAPPY UNTIL THE SYMBOLS ARE DELETED FROM THE PINBALL NOUN TABLES.
 

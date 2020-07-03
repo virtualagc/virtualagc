@@ -223,20 +223,18 @@ F2DPS*31        EQUALS
 
 
                 BANK            32
-P20S4           EQUALS
+P10S            EQUALS
 F2DPS*32        EQUALS
 ABORTS          EQUALS
-SERV2           EQUALS
 ASENT1          EQUALS
-SERV1           EQUALS
 P40S2           EQUALS
+R11             EQUALS
                 BNKSUM          32
 
 
                 BANK            33
 SERVICES        EQUALS
 R29/SERV        EQUALS
-R11             EQUALS
                 BNKSUM          33
 
 

@@ -16,36 +16,6 @@
 
 # ************************************************************************
 
-                SETLOC          ABORTS
-                BANK
-                COUNT*          $$/P70
-
-(1/DV)A         2DEC            15.20           B-7     # 2 SECONDS WORTH OF INITIAL ASCENT
-
-                                                        # STAGE ACCELERATION -- INVERTED (M/CS)
-                                                        # 1) PREDICATED ON A LIFTOFF MASS OF
-                                                        #    4869.9 KG (SNA-8-D-027  7/11/68)
-                                                        # 2) PREDICATED ON A CONTRIBUTION TO VEH-
-                                                        #    ICLE ACCELERATION FROM RCS THRUSTERS
-                                                        #    EQUIV. TO 1 JET ON CONTINUOUSLY.
-K(1/DV)         2DEC            436.70          B-9     # DPS ENGINE THRUST IN NEWTONS / 100 CS.
-
-(AT)A           2DEC            3.2883          E-4 B9  # INITIAL ASC. STG. ACCELERATION ** M/CS.
-                                                        # ASSUMPTIONS SAME AS FOR (1/DV)A.
-(TBUP)A         2DEC            91902           B-17    # ESTIMATED BURN-UP TIME OF THE ASCENT STG
-                                                        # ASSUMPTIONS SAME AS FOR (1/DV)A WITH THE
-                                                        # ADDITIONAL ASSUMPTION THAT NET MASS-FLOW
-                                                        # RATE = 5.299 KG/SEC = 5.135 (APS) +
-                                                        # .164 (1 RCS JET).
-                SETLOC          SERVICES
-                BANK
-                COUNT*          $$/SERV
-
-# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST NOT BE CHANGED *******
-
-APSVEX          DEC             -3030           E-2 B-5 # 9942 FT/SEC IN M/CS.
-
-DPSVEX          DEC*            -2952           E-2 B-5 # 9684 FT/SEC IN M/CS.
 
 
 # THROTTLING AND THRUST DETECTION PARAMETERS
@@ -60,22 +30,7 @@ DPSTHRSH        DEC             36                      # (THRESH1 + THRESH3 FOR
                 BANK
                 COUNT*          $$/SERV
 
-HSCAL           2DEC            -.3288792               # SCALES 1.079 FT/BIT TO 2(22)M.
-# ***** THE SEQUENCE OF THE FOLLOWING CONSTANTS MUST BE PRESERVED ********
-
-VZSCAL          2DEC            +.5410829105            # SCALES .8668 FT/SEC/BIT TO 2(18) M/CS.
-VYSCAL          2DEC            +.7565672446            # SCALES 1.212 FT/SEC/BIT TO 2(18) M/CS.
-VXSCAL          2DEC            -.4020043770            # SCALES -.644 FT/SEC/BIT TO 2(18) M/CS.
-
 # ************************************************************************
-
-KPIP            DEC             .0512                   # SCALES DELV TO UNITS OF 2(5) M/CS.
-KPIP1           2DEC            .0128                   # SCALES DELV TO UNITS OF 2(7) M/CS.
-KPIP2           2DEC            .0064                   # SCALES DELV TO UNITS OF 2(8) M/CS.
-
-ALTCONV         2DEC            1.399078846     B-4     # CONVERTS M*2(-24) TO BIT UNITS *2(-28).
-ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO BIT UNITS<
-# PARAMETERS RELATING TO MASS, INERTIA, AND VEHICLE DIMENSTIONS
 
 
 # PHYSICAL CONSTANTS ( TIME - INVARIANT )
@@ -84,14 +39,6 @@ ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO
                 BANK
                 COUNT*          $$/SERV
 
-# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST BE PRESERVED *********
-
--MUDT           2DEC*           -7.9720645      E+12 B-44*
--MUDT1          2DEC*           -9.8055560      E+10 B-44*
-
 # ************************************************************************
 
 -MUDTMUN        2DEC*           -9.8055560      E+10 B-38*
-RESQ            2DEC*           40.6809913      E12 B-58*
-20J             2DEC            3.24692010      E-2
-2J              2DEC            3.24692010      E-3

@@ -13,8 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-                BANK            37
-                SETLOC          SERV1
+                BANK            33
+                SETLOC          SERVICES
                 BANK
 
                 EBANK=          DVCNTR
@@ -24,7 +24,8 @@
                 COUNT*          $$/SERV
 
 PREREAD         CAF             SEVEN                   # 5.7 SPOT TO SKIP LASTBIAS AFTER
-                TC              GNUFAZE5                # RESTART.
+                TC              NEWPHASE                # RESTART.
+                OCT             5
                 CAF             PRIO21
                 TC              NOVAC
                 EBANK=          NBDX
@@ -33,16 +34,21 @@ PREREAD         CAF             SEVEN                   # 5.7 SPOT TO SKIP LASTB
 BIBIBIAS        TC              PIPASR          +3      # CLEAR + READ PIPS LAST TIME IN FRE5+F133
                                                         # DO NOT DESTROY VALUE OF PIPTIME1
 
-                CS              FLAGWRD7
-                MASK            SUPER011                # SET V37FLAG AND AVEGFLAG (BITS 5 AND 6
-                ADS             FLAGWRD7                #    OF FLAGWRD7)
+                TC              UPFLAG
+                ADRES           V37FLAG                 # SET V37FLAG AND AVEGFLAG (BITS 5 AND 6
+                TC              UPFLAG                  #    OF FLAGWRD7)
+                ADRES           AVEGFLAG
 
-                CS              DRFTBIT
-                MASK            FLAGWRD2                # RESET DRIFTFLAG
-                TS              FLAGWRD2
+                TC              DOWNFLAG                # RESET DRIFTFLAG
+                ADRES           DRIFTFLG
 
                 CAF             FOUR                    # INITIALIZE DV MONITOR
+                TS              DVCNTR
                 TS              PIPAGE
+                TS              SETDVCNT
+
+                CAF             LRBYBIT
+                TS              LRSTAT
 
                 CAF             ENDJBCAD                # POINT OUTROUTE TO END-OF-JOB.
                 TS              OUTROUTE
@@ -52,108 +58,90 @@ BIBIBIAS        TC              PIPASR          +3      # CLEAR + READ PIPS LAST
                 EBANK=          DVCNTR
                 2CADR           NORMLIZE
 
-                CA              TWO                     # 5.2SPOT FOR REREADAC AND NORMLIZE
-GOREADAX        TC              GNUTFAZ5
-                CA              2SECS                   # WAIT TWO SECONDS FOR READACCS
-                TC              VARDELAY
+                CAF             2SECS                   # WAIT TWO SECONDS FOR READACCS
+                TC              WAITLIST
+                EBANK=          DVCNTR
+                2CADR           READACCS
+
+                CS              TWO                     # 5.2SPOT FOR REREADAC AND NORMLIZE
+                TC              NEWPHASE
+                OCT             5
+
+                TCF             TASKOVER
 
 # *************************************   READACCS   *************************************************************
-READACCS        CS              OCT37771                # THIS PIECE OF CODING ATTEMPTS TO
-                AD              TIME5                   # SYNCHRONIZE READACCS WITH THE DIGITAL
-                CCS             A                       # AUTOPILOT SO THAT A PAXIS RUPT WILL
-                CS              ONE                     # OCCUR APPROXIMATELY 70 MILLISECONDS
-                TCF             +2                      # FOLLOWING THE READACCS RUPT.  THE 70 MS
-                CA              ONE                     # OFFSET WAS CHOSEN SO THAT THE PAXIS
-  +2            ADS             TIME5                   # RUPT WOULD NOT OCCUR SIMULTANEOUSLY
-                                                        # WITH ANY OF THE 8 SUBSEQUENT R10,R11
-                                                        # INTERRUPTS -- THUS MINIMIZING THE POSS-
-                                                        # IBILITY OF LOSING DOWNRUPTS.
+READACCS        CS              FLAGWRD6
+                MASK            MUNFLBIT
+                CCS             A
+                TCF             PIPSDONE        -1
+
+                TC              FLAGWRD7
+                MASK            SWANDBIT
+                CCS             A
+                TCF             SWANDOFF
+
+                CAF             TWELVE
+                TC              WAITLIST
+                EBANK=          UNIT/R/
+                2CADR           LANDISP
+
+                TCF             PIPSDONE        -1
+
+SWANDOFF        TC              IBNKCALL
+                CADR            DISPRSET
 
                 TC              PIPASR                  # READ THE PIPAS.
 
 PIPSDONE        CA              FIVE
-                TC              GNUFAZE5
+                TC              NEWPHASE
+                OCT             5
 REDO5.5         CAF             ONE
                 TS              PIPAGE
 
-                CA              PRIO20
+                CAF             SEVEN                   # SET PIPCTR FOR 4X/SEC RATE.
+                TS              PIPCTR
+
+                CS              FLAGWRD7
+                MASK            AVEGFBIT
+                CCS             A
+                TC              AVEGOUT                 # AVEGFLAG DOWN - SET UP FINAL EXIT
+
+MAKEACCS        CAF             2SECS
+                TC              TWIDDLE
+                ADRES           READACCS
+
+                CS              LRSTAT
+                MASK            LRBYBIT
+                EXTEND
+                BZF             STRTSERV
+
+                CAF             1.95SECS
+                TC              TWIDDLE
+                ADRES           LRHTASK
+
+STRTSERV        CA              PRIO20
                 TC              FINDVAC
                 EBANK=          DVCNTR
                 2CADR           SERVICER                # SET UP SERVICER JOB
+
+                TC              PHASCHNG
+                OCT             40045
 
                 CA              BIT9
                 EXTEND
                 WOR             DSALMOUT                # TURN ON TEST CONNECTOR OUTBIT
 
-                CA              FLAGWRD7
-                MASK            AVEGFBIT
-                EXTEND
-                BZF             AVEGOUT                 # AVEGFLAG DOWN - SET UP FINAL EXIT
-
-                CA              FLAGWRD6
-                MASK            MUNFLBIT
-                EXTEND
-                BZF             MAKEACCS                # MUNFLAG CLEAR - BYPASS LR AND DISP.
-
-                CCS             PHASE2
-                TCF             MAKEACCS                # PHASE 2 ACTIVATED - AVOID MULTIPLE R10.
-
-                CAF             SEVEN                   # SET PIPCTR FOR 4X/SEC RATE.
-                TS              PIPCTR
-
-                CS              TIME1                   # SET TBASE2 .05 SECONDS IN THE PAST.
-                AD              FIVE
-                AD              NEG1/2
-                AD              NEG1/2
-                XCH             TBASE2
-
-                CAF             DEC17                   # 2.21SPOT FOR R10,R11
-                TS              L
-                COM
-                DXCH            -PHASE2
-
-                CAF             OCT24                   # FIRST R10,R11 IN .200 SECONDS.
-                TC              WAITLIST
-                EBANK=          UNIT/R/
-                2CADR           R10,R11
-
-MAKEACCS        CA              FOUR
-                TCF             GOREADAX                # DO PHASE CHANGE AND RECALL READACCS
-
+                TCF             TASKOVER
 
 AVEGOUT         EXTEND
                 DCA             AVOUTCAD                # SET UP FINAL SERVICER EXIT
                 DXCH            AVGEXIT
 
-                CA              FOUR                    # SET 5.4 SPOT FOR REREADAC AND SERVICER
-                TC              GNUTFAZ5                # IF REREADAC IS CALLED, IT WILL EXIT
-                TC              TASKOVER                # END TASK WITHOUT CALLING READACCS
-
-
-GNUTFAZ5        TS              L                       # SAVE INPUT IN L
-                CS              TIME1
-                TS              TBASE5                  # SET TBASE5
-                TCF             +2
-
-
-GNUFAZE5        TS              L                       # SAVE INPUT IN L
-                CS              L                       # -PHASE IN A, PHASE IN L
-                DXCH            -PHASE5                 # SET -PHASE5,PHASE5
-                TC              Q
+                TCF             STRTSERV                # END TASK WITHOUT CALLING READACCS
 
 
                 EBANK=          DVCNTR
 AVOUTCAD        2CADR           AVGEND
-
-ENDJBCAD        CADR            SERVEXIT        +2
-
-OCT37771        OCT             37771
-
-                BANK            33
-                SETLOC          SERVICES
-                BANK
-
-                COUNT*          $$/SERV
 
 # *************************************   SERVICER   *************************************************************
 
@@ -173,97 +161,83 @@ SERVICER        TC              PHASCHNG                # RESTART REREADAC + SER
 GETABVAL        TC              INTPRET
                 VLOAD           ABVAL
                                 DELV
-                EXIT
-                CA              MPAC
-                TS              ABDELV                  # ABDELV = CM/SEC*2(-14).
-                EXTEND
-                MP              KPIP
-                DXCH            ABDVCONV                # ABDVCONV = M/CS * 2(-5).
-                EXTEND
-                DCA             MASS
-                DXCH            MASS1                   # INITIALIZE MASS1 IN CASE WE SKIP MASSMON
-MASSMON         CS              FLAGWRD8                # ARE WE ON THE SURFACE?
-                MASK            SURFFBIT
-                EXTEND
-                BZF             MOONSPOT                # YES:  BYPASS MASS MESS
+                STORE           ABDELV                  # ABDELV = CM/SEC*2(-14).
+                DMP
+                                KPIP
+                STORE           ABDVCONV                # ABDVCONV = M/CS * 2(-5).
+MASSMON         BON             AXT,1                   # ARE WE ON THE SURFACE?
+                                SURFFLAG
+                                MOONSPOT                # YES:  BYPASS MASS MESS
+                                0
+                DDV             BON                     # NO:   WHICH VEX SHOULD BE USED?
+                                1SEC(7)
+                                APSFLAG
+                                +3
+                AXT,1
+                                2
+                STODL           /AF/                    # /AF/ = MAGNITUDE DV/DT
+                                ABDVCONV
+                VSR4            DDV*
+                                APSVEX1
+                DMP             DAD
+                                MASS
+                                MASS
+                STORE           MASS1
 
-                CA              FLGWRD10                # NO:   WHICH VEX SHOULD BE USED?
-                MASK            APSFLBIT
-                CCS             A
-                EXTEND                                  # IF EXTEND IS EXECUTED, APSVEX --> A,
-                DCA             APSVEX                  #   OTHERWISE DPSVEX --> A
-                TS              Q
+MOONSPOT        DLOAD           VSR6
+                                ABDVCONV
+                DAD
+                                DVTOTAL
+                STORE           DVTOTAL                 # UPDATE DVTOTAL FOR DISPLAY
 
-                EXTEND
-                DCA             ABDVCONV
-                EXTEND
-OCT10002        DV              Q                       # WHERE APPROPRIATE VEX RESIDES
-                EXTEND
-                MP              MASS
-                DXCH            MASS1
-                EXTEND
-                DCA             MASS
-                DAS             MASS1
-
-MOONSPOT        CA              KPIP1                   # TP MPAC = ABDELV AT 2(14) CM/SEC
-                TC              SHORTMP                 # MULTIPLY BY KPIP1 TO GET
-                DXCH            MPAC                    # ABDELV AT 2(7) M/CS
-                DAS             DVTOTAL                 # UPDATE DVTOTAL FOR DISPLAY
-
-                CA              PRIO24                  # PROTECT NBSM IN XNBNDX
-                TC              PRIOCHNG
-
-                TC              TMPTOSPT
-
-                TC              BANKCALL
-                CADR            QUICTRIG
-
-                TC              INTPRET
+                RTB             CALL
+                                TMPTOSPT
+                                CD*TR*G
                 AXC,1           CALL
                                 XNBPIP
                                 XNBNDX
+
+AVERAGEG        BON             CALL
+                                MUNFLAG
+                                MUNRVG
+                                CALCRVG
                 EXIT
 
-                CA              PRIO20                  # RESTORE PRIO 20
-                TC              PRIOCHNG
-
-GOSERV          TC              QUIKFAZ5
+GOSERV          TC              PHASCHNG
+                OCT             10035
 
 COPYCYCL        TC              COPYCYC
 
-#               CA              ZERO                     A IS ZERO ON RETURN FROM COPYCYC
-                TS              PIPATMPX                # STILL UNDER INHINT
-                TS              PIPATMPY
-                TS              PIPATMPZ
-
-                CS              STEERBIT                # CLEAR STEERSW PRIOR TO DVMON.
-                MASK            FLAGWRD2
-                TS              FLAGWRD2
+                TC              DOWNFLAG                # CLEAR STEERSW PRIOR TO DVMON.
+                ADRES           STEERSW
 
                 CAF             IDLEFBIT                # IS THE IDLE FLAG SET?
                 MASK            FLAGWRD7
                 CCS             A
-                TCF             NODVMON1                # IDLEFLAG = 1, HENCE SET AUXFLAG TO 0.
+                TCF             USEJETS                 # IDLEFLAG = 1, HENCE SET AUXFLAG TO 0.
 
-                # CS              FLAGWRD6
-                # MASK            AUXFLBIT
-                # CCS             A
-                # TCF             NODVMON2                # AUXFLAG = 0, HENCE SET AUXFLAG TO 1.
-
-
-DVMON           CS              DVTHRUSH
+DVMON           INHINT
+                CS              DVTHRUSH
                 AD              ABDELV
                 EXTEND
                 BZMF            LOTHRUST
+
+                TC              IBNKCALL
+                CADR            NOULLAGE
 
                 CS              FLAGWRD2                # SET STEERSW.
                 MASK            STEERBIT
                 ADS             FLAGWRD2
 
-DVCNTSET        CAF             ONE                     # ALLOW TWO PASSES MAXIMUM NOW THAT
+DVCNTSET        CA              SETDVCNT                # UPDATE MAXIMUM NOW THAT
                 TS              DVCNTR                  # THRUXT HAS BEEN DETECTED.
 
-                CA              FLGWRD10                # BRANCH IF APSFLAG IS SET.
+                CA              FLAGWRD1
+                MASK            GIMBFBIT
+                EXTEND
+                BZF             USEJETS
+
+                CA              FLAGWRD1                # BRANCH IF APSFLAG IS SET.
                 MASK            APSFLBIT
                 CCS             A
                 TCF             USEJETS
@@ -279,63 +253,36 @@ USEGTS          CS              USEQRJTS
                 TS              DAPBOOLS
                 TCF             SERVOUT
 
-NODVMON1        CS              ZERO
-                MASK            FLAGWRD6
-                TS              FLAGWRD6
-                TCF             USEJETS
-NODVMON2        CS              FLAGWRD6                # SET AUXFLAG TO 1.
-                MASK            ZERO
-                ADS             FLAGWRD6
-                TCF             USEJETS
-
-LOTHRUST        TC              QUIKFAZ5
-                CCS             DVCNTR
+LOTHRUST        CCS             DVCNTR
                 TCF             DECCNTR
 
-                CCS             PHASE4                  # COMFAIL JOB ACTIVE?
-                TCF             SERVOUT                 # YES   WON'T NEED ANOTHER.
+                TC              PHASCHNG
+                OCT             10035
 
-                TC              PHASCHNG                # 4.37SPOT FOR COMFAIL.
-                OCT             00374
+                TC              POSTJUMP
+                CADR            COMFAIL2
 
-                CAF             PRIO25
-                TC              NOVAC
-                EBANK=          WHICH
+DECCNTR         TS              DVCNTR
 
-                2CADR           COMFAIL
-                TCF             SERVOUT
-
-DECCNTR         TS              DVCNTR1
-                TC              QUIKFAZ5
-                CA              DVCNTR1
-                TS              DVCNTR
-                INHINT
-                TC              IBNKCALL                # IF THRUST IS LOW, NO STEERING IS DONE
-                CADR            STOPRATE                # AND THE DESIRED RATES ARE SET TO ZERO.
-USEJETS         CS              DAPBOOLS
+USEJETS         INHINT
+                CS              DAPBOOLS
                 MASK            USEQRJTS
                 ADS             DAPBOOLS
 SERVOUT         RELINT
                 TC              BANKCALL
                 CADR            1/ACCS
 
-                CAF             EBANK7                  # RESTORE EBANK AFTER 1/ACCS.
-                TS              EBANK
                 CA              PRIORITY
                 MASK            LOW9
                 TS              PUSHLOC
                 ZL
                 DXCH            FIXLOC                  # FIXLOC AND OVFIND
 
-                TC              QUIKFAZ5
+                TC              PHASCHNG
+                OCT             10035
                 EXTEND                                  # EXIT TO SELECTED ROUTINE WHETHER THERE
                 DCA             AVGEXIT                 # IS THRUST OR NOT.  THE STATE OF STEERSW
                 DXCH            Z                       # WILL CONVEY THIS INFORMATION.
-
-                BANK            32
-                SETLOC          SERV2
-                BANK
-                COUNT*          $$/SERV
 
 AVGEND          CA              PIPTIME         +1      # FINAL AVERAGE G EXIT
                 TS              1/PIPADT                # SET UP FREE FALL GYRO COMPENSATION.
@@ -357,125 +304,90 @@ AVGEND          CA              PIPTIME         +1      # FINAL AVERAGE G EXIT
                 OCT             20000
 
                 TC              INTPRET
-                CALL                                    # RESET MUNFLAG.
+                CALL
                                 AVETOMID
-                CLEAR           EXIT
-                                V37FLAG
+                BON             BOFF
+                                RNDVZFLG
+                                AVG2.7
+                                P25FLAG
+                                GRP2OFF 
+                EXIT
+
+                TC              PHASCHNG
+                OCT             40112
+
 AVERTRN         CA              OUTROUTE                # RETURN TO DESIRED POINT.
                 TC              BANKJUMP
+
+GRP2OFF         EXIT
+                TC              PHASCHNG
+                OCT             00002
+                TCF             AVERTRN
+
+AVG2.7          EXIT
+                TC              PHASCHNG
+                OCT             40072
+                TCF             AVERTRN
 
 OUTGOAVE        =               AVERTRN
 
 DVCNTR1         =               MASS1
 
-SERVIDLE        EXTEND                                  # DISCONNECT SERVICER FROM ALL GUIDANCE
-                DCA             SVEXTADR
-                DXCH            AVGEXIT
-
-                CS              FLAGWRD7                # DISCONNECT THE DELTA-V MONITOR
-                MASK            IDLEFBIT
-                ADS             FLAGWRD7
-
-                CAF             LRBYBIT                 # TERMINATE R12 IF RUNNING.
-                TS              FLGWRD11
-
-                EXTEND
-                DCA             NEG0
-                DXCH            -PHASE1
-
-                CA              FLAGWRD6                # DO NOT TURN OFF PHASE 2 IF MUNFLAG SET.
-                MASK            MUNFLBIT
-                CCS             A
-                TCF             +4
-
-                EXTEND
-                DCA             NEG0
-                DXCH            -PHASE2
-
-   +4           EXTEND
-                DCA             NEG0
-                DXCH            -PHASE3
-
-                EXTEND
-                DCA             NEG0
-                DXCH            -PHASE6
-
-                TCF             WHIMPER                 # PERFORM A SOFTWARE RESTART AND PROCEED
-                                                        # TO GOTOPOOH WHILE SERVICER CONTINUES TO
-                                                        # RUN, ALBEIT IN A GROUND STATE WHERE
-                                                        # ONLY STATE-VECTOR DEPENDENT FUNCTIONS
-                                                        # ARE MAINTAINED.
-
-                EBANK=          DVCNTR
-SVEXTADR        2CADR           SERVEXIT
-                BANK            32
-                SETLOC          SERV1
-
-                BANK
-                COUNT*          $$/SERV
-
-SERVEXIT        CA              THREE
-                TC              GNUFAZE5
+SERVEXIT        TC              PHASCHNG
+                OCT             00035
 
    +2           TCF             ENDOFJOB
 
-                BANK            23
-                SETLOC          SERVICES
-                BANK
-
-                COUNT*          $$/SERV
+ENDJBCAD        CADR            SERVEXIT        +2
 
 # NORMLIZE AND COPYCYCL
 
 NORMLIZE        TC              INTPRET
-                VLOAD           BOFF
-                                RN1
+                DLOAD
+                                MASS
+                STOVL           MASS1
+                                UNITX
+                STORE           UNFC/2A
+                BON             VLOAD
                                 MUNFLAG
                                 NORMLIZ1
-                VSL6            MXV
+                                VN1
+                MXV             VSL1
+                                REFSMMAT
+                STOVL           V
+                                RN1
+                MXV             VSL6
                                 REFSMMAT
                 STCALL          R
                                 MUNGRAV
-                VLOAD           VSL1
-                                VN1
-                MXV
-                                REFSMMAT
-                STOVL           V
-                                V(CSM)
+                BON             VLOAD
+                                FLP70
+                                ASCSPOT
+                                V
                 VXV             UNIT
-                                R(CSM)
+                                R
                 STORE           UHYP
 ASCSPOT         EXIT
-                EXTEND                                  # MAKE SURE GOUP 2 IS OFF.
-                DCA             NEG0
-                DXCH            -PHASE2
-
                 TCF             NORMLIZ2
 
-NORMLIZ1        CALL
+NORMLIZ1        VLOAD           CALL
+                                RN1
                                 CALCGRAV
                 EXIT
 
-NORMLIZ2        CA              EIGHTEEN
-                TC              COPYCYC         +1      # DO NOT COPY MASS IN NORMLIZE
+NORMLIZ2        TC              COPYCYC
                 TC              ENDOFJOB
 
 
-COPYCYC         CA              OCT24                   # DEC 20
- +1             INHINT
- +2             MASK            NEG1                    # REDUCE BY 1 IF ODD
-                TS              ITEMP1
-                EXTEND
-                INDEX           ITEMP1
-                DCA             RN1
-                INDEX           ITEMP1
-                DXCH            RN
-                CCS             ITEMP1
-                TCF             COPYCYC         +2
-                TC              Q                       # RETURN UNDER INHINT
+COPYCYC         EXTEND
+                QXCH            COPEXIT
+                CAF             OCT25
+                TC              GENTRAN
+                ADRES           RN1
+                ADRES           RN
+                TC              COPEXIT
 
-
-EIGHTEEN        DEC             18
+COPEXIT         =               MPAC            +3
 
 # ******************* PIPA READER ********************
 
@@ -518,12 +430,6 @@ EIGHTEEN        DEC             18
 
 #          TEMX   TEMY   TEMZ   PIPAGE
 
-                BANK            37
-                SETLOC          SERV1
-                BANK
-
-                COUNT*          $$/SERV
-
 PIPASR          EXTEND
 
                 DCA             TIME2
@@ -550,14 +456,7 @@ REPIP3          CS              PIPAZ                   # REPEAT PROCESS FOR Z P
                 XCH             PIPAZ
 DODELVZ         TS              DELVZ
 
-REPIP4          EXTEND                                  # COMPUTE GUIDANCE PERIOD
-                DCA             PIPTIME1
-                DXCH            PGUIDE
-                EXTEND
-                DCS             PIPTIME
-                DAS             PGUIDE
-
-                CA              CDUX                    # READ CDUS INTO HIGH ORDER CDUTEMPS
+REPIP4          CA              CDUX                    # READ CDUS INTO HIGH ORDER CDUTEMPS
                 TS              CDUTEMPX
                 CA              CDUY
                 TS              CDUTEMPY
@@ -573,7 +472,11 @@ REPIP4          EXTEND                                  # COMPUTE GUIDANCE PERIO
                 TC              Q
 
 
-REREADAC        CCS             PIPAGE
+REREADAC        CCS             PHASE5
+                TCF             +2
+                TCF             TASKOVER
+
+                CCS             PIPAGE
                 TCF             READACCS                # PIP READING NOT STARTED. GO TO BEGINNING
 
 
@@ -617,19 +520,13 @@ CHKTEMX         CCS             TEMX                    # HAS THIS CHANGED
 
 DONEADR         GENADR          PIPSDONE
 
-                BANK            33
-                SETLOC          SERVICES
-                BANK
-
-                COUNT*          $$/SERV
-
 TMPTOSPT        CA              CDUTEMPY                # THIS SUBROUTINE, CALLED BY AN RTB FROM
                 TS              CDUSPOTY                # INTERPRETIVE, LOADS THE CDUS CORRESPON-
                 CA              CDUTEMPZ                # DING TO PIPTIME INTO THE CDUSPOT VECTOR.
                 TS              CDUSPOTZ
                 CA              CDUTEMPX
                 TS              CDUSPOTX
-                TC              Q
+                TCF             DANZIG
 
 # LRHTASK IS A WAITLIST TASK SET BY READACCS DURING THE DESCENT BRAKING
 # PHASE WHEN THE ALT TO THE LUNAR SURFACE IS LESS THAN 25,000 FT.  THIS
@@ -637,23 +534,12 @@ TMPTOSPT        CA              CDUTEMPY                # THIS SUBROUTINE, CALLE
 # LANDING RADAR MEASUREMENT JOB (LRHJOB) TO TAKE A ALTITUDE MEASUREMENT
 # 50 MS PRIOR TO THE NEXT READACCS TASK.
 
-                BANK            33
-                SETLOC          R11
-                BANK
-
-                COUNT*          $$/SERV
-
-LRHTASK         CS              FLGWRD11
-                MASK            LRBYBIT
-                EXTEND
-                BZF             TASKOVER                # LR BYPASS SET - BYPASS ALL LR READING.
-
-                CA              READLBIT
-                MASK            FLGWRD11                # IS READLR FLAG SET?
+LRHTASK         CA              READLBIT
+                MASK            LRSTAT                  # IS READLR FLAG SET?
                 EXTEND
                 BZF             TASKOVER                # NO.  BYPASS LR READ.
 
-                CS              FLGWRD11
+                CS              LRSTAT
                 MASK            NOLRRBIT                # IS LR READ INHIBITED?
                 EXTEND
                 BZF             TASKOVER                # YES.  BYPASS LR READ.
@@ -665,12 +551,6 @@ LRHTASK         CS              FLGWRD11
 
                 TC              TASKOVER
 
-
-                BANK            33
-                SETLOC          SERVICES
-                BANK
-
-                COUNT*          $$/SERV
 
 # HIGATASK IS ENTERED APPROXIMATELY 6 SECS PRIOR TO HIGATE DURING THE
 # DESCENT PHASE.  HIGATASK SETS THE HIGATE FLAG (BIT11) AND THE LR INHIBIT
@@ -688,26 +568,27 @@ HIGATASK        INHINT
                 TC              FINDVAC                 # SET LR POSITIONING JOB (POS2)
                 EBANK=          HMEAS
                 2CADR           HIGATJOB
+                RELINT
                 TCF             CONTSERV                # CONTINUE SERVICER
 
 #   MUNRETRN IS THE RETURN LOC FROM SPECIAL AVE G ROUTINE (MUNRVG)
 
 MUNRETRN        EXIT
 
-                CS              FLGWRD11
+                CAF             XORFLBIT                # WERE WE BELOW 30000 FT LAST PASS?
+                MASK            LRSTAT
+                EXTEND
+                BZF             XORCHK                  # NO - TEST THIS PASS
+
+                CS              LRSTAT
                 MASK            LRBYBIT
                 EXTEND
                 BZF             COPYCYC1                # BYPASS LR LOGIC IF BIT15 IS SET.
 
                 CA              READLBIT                # SEE IF ALT < 35000 FT LAST CYCLE
-                MASK            FLGWRD11
+                MASK            LRSTAT
                 EXTEND
-                BZF             35KCHK                  # ALT WAS > 35000 FT LAST CYCLE   CHK NOW
-
-                CAF             XORFLBIT                # WERE WE BELOW 30000 FT LAST PASS?
-                MASK            FLGWRD11
-                EXTEND
-                BZF             XORCHK                  # NO - TEST THIS PASS
+                BZF             25KCHK                  # ALT WAS > 35000 FT LAST CYCLE   CHK NOW
 
 HITEST          CAF             PSTHIBIT                # CHECK FOR HIGATE
                 MASK            FLGWRD11
@@ -726,7 +607,7 @@ POS2CHK         CAF             BIT7                    # VERIFY LR IN POS2
                 BZF             LRPOSALM                # LR NOT IN POS2 OR REPOSITIONING-BAD
                 TCF             CONTSERV                # LR BEING REPOSITIONED-CONTINUE SERV
 
-HIGATCHK        CA              TTF/8                   # IS TTF > CRITERION?   (TTF IS NEGATIVE)
+HIGATCHK        CS              TTF/8                   # IS TTF > CRITERION?
                 AD              RPCRTIME
 
                 EXTEND
@@ -742,71 +623,69 @@ LRPOSALM        TC              ALARM                   # LR NOT IN PROPER POS-A
                 OCT             511                     # AND CONTINUE SERVICER
 CONTSERV        INHINT
                 CS              BITS4-7
-                MASK            FLGWRD11                # CLEAR LR MEASUREMENT MADE DISCRETES.
-                TS              FLGWRD11
+                MASK            LRSTAT                  # CLEAR LR MEASUREMENT MADE DISCRETES.
+                TS              LRSTAT
 
-COPYCYC1        TC              QUIKFAZ5
+COPYCYC1        TC              PHASCHNG
+                OCT             10035
 
-NOR29NOW        TC              INTPRET                 # INTPRET DOES A RELINT.
-                VLOAD           ABVAL                   # MPAC = ABVAL( NEW SM. POSITION VECTOR)
-                                R1S
-                PUSH            DSU                     #                                     (2)
-                                /LAND/
-                STORE           HCALC                   # NEW HCALC*2(24)M.
-                DMPR            RTB
-                                ALTCONV
-                                SGNAGREE
-                STOVL           ALTBITS                 # ALTITUDE FOR R10 IN BIT UNITS.
-                                UNIT/R/
-                VXV             VSL1
-                                UHYP
-                STOVL           UHZP                    # DOWNRANGE HALF-UNIT VECTOR FOR R10.
+                TC              INTPRET                 # INTPRET DOES A RELINT.
+                VLOAD           VXM
+                                V1S
+                                REFSMMAT
+                VSL1
+                STORE           VN1                     # TEMP. REF. VELOCITY VECTOR*2(7)M/CS.
+                ABVAL
+                STOVL           ABVEL
                                 R1S
                 VXM             VSR4
                                 REFSMMAT
-                STOVL           RN1                     # TEMP. REF. POSITION VECTOR*2(29)M.
+                STORE           RN1                     # TEMP. REF. POSITION VECTOR*2(29)M.
+                UNIT
+                STORE           UNITR
+                BOFF            RTB
+                                FLP70
+                                +2
+                                COPYCYC3
+                VLOAD           UNIT
+                                R1S
+                VXV             VSL1
+                                UHYP
+                STOVL           UHZP                    # DOWNRANGE HALF-UNIT VECTOR FOR R10.
+                                WM
+                VXV             VSL2
+                                R1S
+                STODL           DELVS
+                                36D
+                DSU
+                                /LAND/
+                STORE           HCALC                   # NEW HCALC*2(24)M.
+                DMP
+                                ALTCONV
+                STOVL           ALTBITS                 # ALTITUDE FOR R10 IN BIT UNITS.
                                 V1S
-                VXM             VSL1
-                                REFSMMAT
-                STOVL           VN1                     # TEMP. REF. VELOCITY VECTOR*2(7)M/CS.
-                                UNIT/R/
-                VXV             ABVAL
-                                V1S
-
-                SL1             DSQ
-                DDV
-                DMPR            RTB
+                VSQ             DDV
+                                36D
+                DMP             SIGN
                                 ARCONV1
-                                SGNAGREE
+                                HDOTDISP
 COPYCYC2        EXIT                                    # LEAVE ALTITUDE RATE COMPENSATION IN MPAC
-                INHINT
-                CA              UNIT/R/                 # UPDATE RUNIT FOR R10.
-                TS              RUNIT
-                CA              UNIT/R/         +2
-                TS              RUNIT           +1
-                CA              UNIT/R/         +4
-                TS              RUNIT           +2
-                CA              MPAC                    # LOAD NEW DALTRATE FOR R10.
+                CAF             FIVE
+                TC              GENTRAN
+                ADRES           UNIT/R/
+                ADRES           RUNIT
+
+                CA              MPAC
                 TS              DALTRATE
 
-                EXTEND
-                DCA             R1S
-                DXCH            R
-                EXTEND
-                DCA             R1S             +2
-                DXCH            R               +2
-                EXTEND
-                DCA             R1S             +4
-                DXCH            R               +4
-                EXTEND
-                DCA             V1S
-                DXCH            V
-                EXTEND
-                DCA             V1S             +2
-                DXCH            V               +2
-                EXTEND
-                DCA             V1S             +4
-                DXCH            V               +4
+COPYCYC3        CAF             ELEVEN
+                TC              GENTRAN
+                ADRES           R1S
+                ADRES           R
+
+                TS              PIPATMPX
+                TS              PIPATMPY
+                TS              PIPATMPZ
 
                 TCF             COPYCYCL                # COMPLETE THE COYPCYCL.
 
@@ -837,46 +716,55 @@ ALTCHK          EXTEND
 ALTCRIT         =               25KFT
 
 25KFT           2DEC            7620            B-24    # (0)
-50KFT           2DEC            15240           B-24    # (2)
+15KFT           2DEC            4572            B-24    # (2)
 50FT            2DEC            15.24           B-24    # (4)
 30KFT           2DEC            9144            B-24    # (6)
-2KFT/SEC        DEC             6.096           B-7     # 2000 FT/SEC AT 2(7) M/CS
 
 
 XORCHK          CAF             SIX                     # ARE WE BELOW 30000 FT?
                 TC              BANKCALL
                 CADR            ALTCHK
-                TCF             HITEST                  # CONTINUE LR UPDATE
+                TCF             CONTSERV                # CONTINUE LR UPDATE
                 TC              UPFLAG                  # YES: INHIBIT X-AXIS OVERRIDE
                 ADRES           XOVINFLG
                 TC              UPFLAG
                 ADRES           XORFLG
-                TCF             HITEST                  # CONTINUE LR UPDATE
+                TCF             CONTSERV                # CONTINUE LR UPDATE
 
 
-35KCHK          CAF             TWO                     # ARE WE BELOW 35000 FT?
+25KCHK          CAF             ZERO                    # ARE WE BELOW 25000 FT?
 
                 TC              BANKCALL
                 CADR            ALTCHK
                 TCF             CONTSERV
-                TC              UPFLAG
-                ADRES           READLR                  # SET READLR FLAG TO ENABLE LR READING.
+                CAF             READLBIT                # SET READLR FLAG TO ENABLE LR READING.
+SETLRSTT        ADS             LRSTAT
                 TCF             CONTSERV
+
+15KCHK          CAF             TWO                     # ARE WE BELOW 15000 FT?
+
+                TC              BANKCALL
+                CADR            ALTCHK
+                TCF             CONTSERV
+                LXCH            VSELECT
+                CAF             READVBIT
+                TCF             SETLRSTT
 
 # *********************************************************************************************************
 #
 
-CALCGRAV        UNIT            PUSH                    # SAVE UNIT/R/ IN PUSHLIST            (18)
-                STORE           UNIT/R/
-                LXC,1           SLOAD                   # RTX2 = 0 IF EARTH ORBIT, =2 IF LUNAR.
-                                RTX2
-                                RTX2
-                DCOMP           BMN
+CALCGRAV        UNIT            PDVL                    # SAVE UNIT/R/ IN PUSHLIST            (18)
+                                ZEROVECS
+                STOVL           UNITGOBL
+                AXC,1           PUSH
+                                2
+                STORE           UNITR
+                BON             AXC,1
+                                LMOONFLG
                                 CALCGRV1
-                VLOAD           DOT                     #                                     (12)
-                                UNITZ
-                                UNIT/R/
-                SL1             PUSH                    #                                     (14)
+                                0
+                DOT             PUSH
+                                -AYO
                 DSQ             BDSU
                                 DP1/20
                 PDDL            DDV
@@ -886,13 +774,13 @@ CALCGRAV        UNIT            PUSH                    # SAVE UNIT/R/ IN PUSHLI
                 DMP             DMP
                                 20J
                 VXSC            PDDL
-                                UNIT/R/
+                                UNITR
                 DMP             DMP
                                 2J
                                 32D
-                VXSC            VSL1
-                                UNITZ
-                VAD             STADR
+                VXSC            VAD
+                                -AYO
+                STADR
                 STORE           UNITGOBL
                 VAD             PUSH                    # MPAC = UNIT GRAVITY VECTOR.         (18)
 CALCGRV1        DLOAD           NORM                    # PERFORM A NORMALIZATION ON RMAGSQ IN
@@ -917,9 +805,11 @@ CALCRVG         VLOAD           VXM
                                 GDT/2
                 VAD             PDDL                    #                                     (18)
                                 VN
-                                PGUIDE
-                SL              VXSC
+                                PIPTIME1
+                DSU             SL
+                                PIPTIME
                                 6D
+                VXSC
                 VAD             STQ
                                 RN
                                 31D
@@ -932,8 +822,26 @@ CALCRVG         VLOAD           VXM
                 STCALL          VN1                     # TEMP STORAGE OF VN SCALED 2(+7)M/CS
                                 31D
 
+KPIP1           2DEC            .0128                   # SCALES DELV TO UNITS OF 2(7) M/CS.
+KPIP            2DEC            .1024                   # SCALES DELV TO UNITS OF 2(4) M/CS.
+
+# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST BE PRESERVED *********
+
+-MUDT           2DEC*           -7.9720645      E+12 B-44*
+-MUDT1          2DEC*           -9.8055560      E+10 B-44*
+
+UNUSEDF3        2DEC            0.390625        B-14
+
 DP1/20          2DEC            0.05
-SHIFT11         2DEC            1               B-11
+RESQ            2DEC*           40.6809913      E12 B-58*
+20J             2DEC            3.24692010      E-2
+2J              2DEC            3.24692010      E-3
+ALTCONV         2DEC            1.399078846     B-4     # CONVERTS M*2(-24) TO BIT UNITS *2(-28).
+ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO BIT UNITS<
+1SEC(7)         2DEC            100             B-7
+DPSVEX1         2DEC            -3004.7575      E-2 B-5
+APSVEX1         2DEC            -3030.0259      E-2 B-5
+200B17          =               2SEC(17)
 
 #****************************************************************************************************************
 
@@ -949,11 +857,8 @@ MUNRVG          VLOAD           VXSC
                                 GDT/2
                 PUSH            VAD                     # 2ND PUSH: (DELV + GDT)/2, UNITS OF 2(7)
                                 V                       #                                     (12)
-                PDDL            DDV
-                                PGUIDE
-                                SHIFT11
-                VXSC
-                VAD
+                VXSC            VAD
+                                200B17
                                 R
                 STCALL          R1S                     # STORE R SCALED AT 2(+24)M.
                                 MUNGRAV
@@ -967,11 +872,7 @@ MUNRVG          VLOAD           VXSC
                                 UNIT/R/
                 DOT             SL1
                                 V1S
-                STOVL           HDOTDISP                # HDOT = V. UNIT(R)*2(7)M/CS.
-                                R1S
-                VXV             VSL2
-                                WM
-                STODL           DELVS                   # LUNAR ROTATION CORRECTION TERM*2(5)M/CS.
+                STODL           HDOTDISP                # HDOT = V. UNIT(R)*2(7)M/CS.
                                 36D
                 DSU
                                 /LAND/
@@ -980,19 +881,38 @@ MUNRVG          VLOAD           VXSC
 MUNGRAV         UNIT                                    # AT 36D HAVE ABVAL(R), AT 34D R.R
                 STODL           UNIT/R/
                                 34D
-                SL              BDDV
-                                6D
-                                -MUDTMUN
-                DMP             VXSC
-                                SHIFT11
+                NORM            BDDV
+                                X2
+                                -MUDT1
+                SR*             VXSC
+                                11D,2
                                 UNIT/R/
                 STORE           GDT1/2                  # 1/2GDT SCALED AT 2(7) M/CS.
                 RVQ
 
+KPIP2           2DEC            .0064                   # SCALES DELV TO UNITS OF 2(8) M/CS.
 1.95SECS        DEC             195
-7.5             2DEC            .02286          B-6     # 7.5 FT/SEC AT 2(6) M/CS
+RPCRTIME        DEC             -6              E2 B-17
+0.175           2DEC            0.175
+0.155           2DEC            0.155
+LRWH            2DEC            0.45454545
+VSCAL3          2DEC            -9.44882011     B-8
+6.25            2DEC            .01905          B-6     # 7.5 FT/SEC AT 2(6) M/CS
+LRHMAX          2DEC            170688              
 2SEC(18)        2DEC            200             B-18
 2SEC(28)        2OCT            00000   00310           # 2SEC AT 2(28)
+
+HSCAL           2DEC            -.3288792               # SCALES 1.079 FT/BIT TO 2(22)M.
+# ***** THE SEQUENCE OF THE FOLLOWING CONSTANTS MUST BE PRESERVED ********
+
+VZSCAL          2DEC            +.5410829105            # SCALES .8668 FT/SEC/BIT TO 2(18) M/CS.
+VYSCAL          2DEC            +.7565672446            # SCALES 1.212 FT/SEC/BIT TO 2(18) M/CS.
+VXSCAL          2DEC            -.4020043770            # SCALES -.644 FT/SEC/BIT TO 2(18) M/CS.
+
+LRWVZ           2DEC            0.7
+LRWVY           2DEC            0.7
+LRWVX           2DEC            0.4
+
 BITS4-7         OCT             110
 
 UPDATCHK        CAF             NOLRRBIT                # SEE IF LR UPDATE INHIBITED.
@@ -1005,91 +925,81 @@ UPDATCHK        CAF             NOLRRBIT                # SEE IF LR UPDATE INHIB
                 BZF             VMEASCHK                # NO ALT MEAS THIS CYCLE-CHECK FOR VEL
 
 POSUPDAT        TC              INTPRET
-                DLOAD           SL
-                                HMEAS                   # COMPUTE SLANT RANGE
-                                7
-                DMP             VXSC
-                                HSCAL                   # SLANT RANGE AT 2(21) M
+                VLOAD           VXM
                                 HBEAMNB                 # RANGE VECTOR IN NB COORDINATES AT 2(22)M
-                VXM
                                 XNBPIP                  # CONVERT TO SM COORDINATES AT 2(23)M
-                DOT             DSU
+                VSL1            SETPD
+                                0
+                DOT             DMP
                                 UNIT/R/                 # ALTITUDE AT 2(24)M
-                                HCALC                   # DELTA H AT 2(24) M
-                STORE           DELTAH
-                EXIT
-
-                CA              FLGWRD11
-                MASK            PSTHIBIT
-                EXTEND                                  # DO NOT PERFORM DATA REASONABLENESS TEST
-                BZF             NOREASON                # UNTIL AFTER HIGATE
-
-                TC              INTPRET
-                ABS             DSU
-                                DELQFIX                 # ABS(DELTAH) - DQFIX   50 FT NOM
-                SL3             DSU                     # SCALE TO 2(21)
-                                HCALC                   # ABS(DELTAH) - (50 + HCALC/8) AT 2(21)
+                                HMEAS
+                SL              DMP
+                                6D
+                                HSCAL
+                DSU             PUSH
+                                HCALC
+                STODL           DELTAH
+                                HCALC
+                DMP             DAD
+                                0.175
+                                50FT
+                PDDL            ABS
+                                DELTAH
+                BOVB            DDV
+                                TCDANZIG
                 EXIT
 
                 INCR            LRLCTR
-                TC              BRANCH
+                CCS             OVFIND
                 TCF             HFAIL                   # DELTA H TOO LARGE
-                TCF             HFAIL                   # DELTA H TOO LARGE
-                TC              DOWNFLAG                # TURN OFF ALT FAIL LAMP
-                ADRES           HFLSHFLG
 
-NOREASON        CS              FLGWRD11
-                MASK            LRINHBIT
+                CS              FLAGWRD1
+                MASK            HINHFBIT
                 CCS             A
                 TCF             VMEASCHK                # UPDATE INHIBITED - TEST VELOCITY ANYWAY
 
                 TC              INTPRET                 # DO POSITION UPDATE
 
-                DLOAD           SR4
+                DLOAD           DDV
                                 HCALC                   # RESCALE H TO 2(28)M
-                EXIT
-                EXTEND
-                DCA             DELTAH                  # STORE DELTAH IN MPAC AND
-                DXCH            MPAC                    # BRING HCALC INTO A,L
-                TC              ALSIGNAG
-                EXTEND                                  # IF HIGH PART OF HCALC IS NON ZERO, THEN
-                BZF             +2                      # HCALC > HMAX,
-                TCF             VMEASCHK                # SO UPDATE IS BYPASSED
-                TS              MPAC            +2      #   FOR LATER SHORTMP
-
-                CS              L                       # -H AT 2(14) M
-                AD              LRHMAX                  # HMAX - H
-                EXTEND
-                BZMF            VMEASCHK                # IF H >HMAX, BYPASS UPDATE
-                EXTEND
-                MP              LRWH                    # WH(HMAX - H)
-                EXTEND
-                DV              LRHMAX                  # WH(1 - H/HMAX)
-                TS              MPTEMP
-                TC              SHORTMP2                # DELTAH (WH)(1 - H/HMAX) IN MPAC
-                TC              INTPRET                 # MODE IS DP FROM ABOVE
-                SL1
+                                LRHMAX
+                BOVB            BDSU
+                                VMEASCHK
+                                NEARONE
+                DMP             DDV
+                                DELTAH
+                                LRWH
                 VXSC            VAD
-                                UNIT/R/                 # DELTAR = DH(WH)(1 - H/HMAX) UNIT/R/
+                                UNIT/R/
                                 R1S
-                STCALL          GNUR
+                STORE           GNUR
+                EXIT
+
+                TC              PHASCHNG
+                OCT             10035
+
+                CA              FIVE
+                TC              GENTRAN
+                ADRES           GNUR
+                ADRES           R1S
+                RELINT
+
+                TC              INTPRET
+                VLOAD           CALL
+                                R1S
                                 MUNGRAV
                 EXIT
 
-                TC              QUIKFAZ5
-
-                CA              ZERO
-                TC              GNURVST
-
-VMEASCHK        TC              QUIKFAZ5                # RESTART AT NEXT LOCATION
-                CS              FLGWRD11
-                MASK            VELDABIT                # IS V READING AVAILABLE?
-                CCS             A
-                TCF             VALTCHK                 # NO   SEE IF V READING TO BE TAKEN
+VMEASCHK        TC              PHASCHNG                # RESTART AT NEXT LOCATION
+                OCT             10035
+                CAF             VELDABIT                # IS V READING AVAILABLE?
+                MASK            LRSTAT
+                EXTEND
+                BZF             VALTCHK                 # NO   SEE IF V READING TO BE TAKEN
 
 VELUPDAT        CS              VSELECT                 # PROCESS VELOCITY DATA
-                TS              L
-                ADS             L                       # -2 VSELECT IN L
+                DOUBLE
+                TS              L                       # -2 VSELECT IN L
                 AD              L
                 AD              L                       # -6 VSELECT IN A
                 INDEX           FIXLOC
@@ -1099,32 +1009,6 @@ VELUPDAT        CS              VSELECT                 # PROCESS VELOCITY DATA
                 CA              EBANK4
                 TS              EBANK
                 EBANK=          LRXCDU
-
-                CA              LRYCDU                  # STORE LRCDUS IN CDUSPOTS
-                TS              CDUSPOT
-                CA              LRZCDU
-                TS              CDUSPOT         +2
-                CA              LRXCDU
-                TS              CDUSPOT         +4
-
-                TC              BANKCALL
-                CADR            QUICTRIG                # GET SINES AND COSINES FOR NBSM
-
-                CA              FIXLOC
-                TS              PUSHLOC                 # SET PD TO ZERO
-
-                TC              INTPRET
-                VLOAD*          CALL
-                                VZBEAMNB,1              # CONVERT VBEAM FROM NB TO SM
-                                *NBSM*
-                PDDL            SL                      # STORE IN PD 0-5
-                                VMEAS                   # LOAD VELOCITY MEASUREMENT
-                                12D
-                DMP*            PUSH                    # SCALE TO M/CS AT 2(6)
-                                VZSCAL,2                # AND STORE IN PD 6-7
-                EXIT
-                CS              ONE
-                TS              MODE                    # CHANGE STORE MODE TO VECTOR
 
                 CA              PIPTEM                  # STORE DELV IN MPAC
                 ZL
@@ -1138,155 +1022,62 @@ VELUPDAT        CS              VSELECT                 # PROCESS VELOCITY DATA
                 ZL
                 DXCH            MPAC            +5
 
+                CA              LRYCDU                  # STORE LRCDUS IN CDUSPOTS
+                TS              CDUSPOT
+                CA              LRZCDU
+                TS              CDUSPOT         +2
+                CA              LRXCDU
+                TS              CDUSPOT         +4
+
+                CS              ONE
+                TS              MODE                    # CHANGE STORE MODE TO VECTOR
+
                 CA              EBANK7
                 TS              EBANK                   # RESTORE EBANK 7
                 EBANK=          DVCNTR
+
+                CA              FIXLOC
+                TS              PUSHLOC                 # SET PD TO ZERO
+
                 TC              INTPRET
+                PDVL*           CALL
+                                VZBEAMNB,1              # CONVERT VBEAM FROM NB TO SM
+                                TRG*NBSM
+                PDVL
                 VXSC            PDDL
                                 KPIP1                   # SCALE DELV TO 2(7) M/CS AND PUSH
                                 LRVTIME                 # TIME OF DELV AT 2(28)CS
                 DSU             DDV
-
                                 PIPTIME                 # TU - T(N-1)
                                 2SEC(28)
                 VXSC            VSL1                    # G(N-1)(TU - T(N-1))
                                 GDT/2                   # SCALED AT 2(7) M/CS
                 VAD             VAD                     # PUSH UP FOR DELV
-                                V                       # VU = V(N-1) + DELVU + G(N-1) DTU
-                VSL2            VAD                     # SCALE TO 2(5) M/CS AND SUBTRACT
-                                DELVS                   #               MOON ROTATION.
-                PUSH            ABVAL                   # STORE IN PD
-                SR4             DAD                     # ABS(VM)/8 + 7.5 AT 2(6)
-                                7.5
-                STOVL           20D                     # STORE IN 20D AND PICK UP VM
-                DOT             BDSU                    # V(EST) AT 2(6)
-                                0                       # DELTAV = VMEAS - V(EST)
-                PUSH            ABS
-                DSU             EXIT                    # ABS(DV) - (7.5 + ABS(VM)/8))
-                                20D
+                                DELVREF
+                PDVL            VXV
+                                R
+                                WM
+                VAD
+                DOT             PDDL
+                                0
+                                VMEAS
+                SL              DMP*
+                                10D
+                                VZSCAL,2
+                DSU             PDDL
+                                6
+                ABS             DMP
+                                0.155
+                DAD             PDDL
+                                6.25
+                                6
+                ABS             BDSU
+                EXIT
 
                 INCR            LRMCTR
                 TC              BRANCH
+                TCF             VUPDAT
                 TCF             VFAIL                   # DELTA V TOO LARGE     ALARM
-                TCF             VFAIL                   # DELTA V TOO LARGE     ALARM
-
-                TC              DOWNFLAG                # TURN OFF VEL FAIL LAMP
-                ADRES           VFLSHFLG
-
-                CA              FLGWRD11
-                MASK            VXINHBIT
-                EXTEND
-                BZF             VUPDAT                  # IF VX INHIBIT RESET, INCORPORATE DATA.
-
-                TC              DOWNFLAG
-                ADRES           VXINH                   # RESET VX INHIBIT
-
-                CA              VSELECT
-                AD              NEG2                    # IF VSELECT = 2 (X AXIS),
-                EXTEND                                  # BYPASS UPDATE
-                BZF             ENDVDAT
-
-VUPDAT          CS              FLGWRD11
-                MASK            LRINHBIT
-                CCS             A
-                TCF             VALTCHK                 # UPDATE INHIBITED
-
-                TS              MPAC            +1      # ZERO MPAC +1 FOR MULTIPLY LATER
-                CS              ABVEL
-                AD              LRVMAX                  # VMAX - V
-                EXTEND
-                BZMF            VALTCHK                 # IF V > VMAX BYPASS UPDATE
-                EXTEND
-
-                INDEX           VSELECT                 # WV(VMAX - V)
-                MP              LRWVZ
-                EXTEND
-                DV              LRVMAX                  # WV(1 - V/VMAX)
-                TS              MPAC                    # STORE IN MPAC, MODE IS DP FROM ABOVE
-
-                TC              INTPRET
-                DMP             VXSC                    # W(DELTA V)(VBEAMSM) UP 6-7, 0-5
-                VSL1            VAD
-                                V1S                     # ADD WEIGHTED DELTA V TO VELOCITY
-                STORE           GNUV
-                EXIT
-
-                TC              QUIKFAZ5                # DO NOT RE-UPDATE
-
-                CA              SIX
-                TC              GNURVST                 # STORE NEW VELOCITY VECTOR
-
-ENDVDAT         =               VALTCHK
-
-VALTCHK         TC              QUIKFAZ5                # DO NOT REPEAT ABOVE
-
-                CAF             READVBIT                # TEST READVEL TO SEE IF VELOCITY READING
-                MASK            FLGWRD11                # IS DESIRED.
-                CCS             A
-                TCF             READV                   # TES - READ VELOCITY
-                CS              ABVEL                   # NO - SEE IF VELOCITY < 2000 FT/SEC
-                AD              2KFT/SEC
-                EXTEND
-                BZMF            CONTSERV                # V > 2000 FT/SEC   DO NOT READ VEL
-
-                TC              UPFLAG                  # V < 2000 FT/SEC   SET READVEL AND READ
-                ADRES           READVEL
-
-                CAF             ZERO                    # INITIALIZE VSELECT
-                TS              VSELECT
-
-READV           CAF             PRIO32                  # SET UP JOB TO READ VELOCITY BEAMS.
-                TC              NOVAC
-                EBANK=          HMEAS
-                2CADR           LRVJOB
-
-                TCF             CONTSERV                # CONTINUE WITH SERVICER
-
-
-GNURVST         TS              BUF                     # STORE GNUR (=GNUV) IN R1S OR V1S
-                EXTEND                                  # A = 0 FOR R, A = 6 FOR V
-                DCA             GNUR
-                INDEX           BUF
-                DXCH            R1S
-
-                EXTEND
-                DCA             GNUR            +2
-                INDEX           BUF
-                DXCH            R1S             +2
-                EXTEND
-                DCA             GNUR            +4
-                INDEX           BUF
-                DXCH            R1S             +4
-                TC              Q
-
-
-QUIKFAZ5        CA              EBANK3
-                XCH             EBANK                   # SET EBANK 3
-                DXCH            L                       # Q TO A, A TO L
-                EBANK=          PHSNAME5
-                TS              PHSNAME5
-                LXCH            EBANK
-                EBANK=          DVCNTR
-                TC              A
-
-
-HFAIL           CS              LRRCTR
-                EXTEND
-                BZF             NORLITE                 # IF R = 0, DO NOT TURN ON TRK FAIL
-                AD              LRLCTR
-                MASK            NEG3
-                EXTEND                                  # IF L-R LT 4, DO NOT TURN ON TRK FAIL
-                BZF             +2
-                TCF             NORLITE
-
-                TC              UPFLAG                  # AND SET BIT TO TURN ON TRACKER FAIL LITE
-                ADRES           HFLSHFLG
-
-NORLITE         CA              LRLCTR
-                TS              LRRCTR                  # SET R = L
-
-                TCF             VMEASCHK
-
 
 VFAIL           CS              LRSCTR                  #   DELTA Q LARGE
                 EXTEND                                  # IF S = 0, DO NOT TURN ON TRACKER FAIL
@@ -1294,21 +1085,91 @@ VFAIL           CS              LRSCTR                  #   DELTA Q LARGE
                 AD              LRMCTR                  # M-S
                 MASK            NEG3                    # TEST FOR M-S > 3
                 EXTEND                                  # IF M-S > 3, THEN TWO OR MORE OF THE
-                BZF             +2                      #   LAST FOUR V READINGS WERE BAD,
-                TCF             NOLITE                  #   SO TURN ON VELOCITY FAIL LIGHT
+                BZF             +1                      #   LAST FOUR V READINGS WERE BAD,
+#               TCF             NOLITE                  #   SO TURN ON VELOCITY FAIL LIGHT
 
-                TC              UPFLAG                  # AND SET BIT TO TURN ON TRACKER FAIL LITE
-                ADRES           VFLSHFLG
+#               TC              UPFLAG                  # AND SET BIT TO TURN ON TRACKER FAIL LITE
+#               ADRES           VFLSHFLG
 
 NOLITE          CA              LRMCTR                  # SET S = M
                 TS              LRSCTR
 
-                CCS             VSELECT                 # TEST FOR Z COMPONENT
-                TCF             ENDVDAT                 # NOT Z, DO NOT SET VX INHIBIT
+                CS              FLAGWRD0
+                MASK            ZMEASBIT
+                EXTEND
+                BZF             VUPDAT1
 
-                TC              UPFLAG                  # Z COMPONENT - SET FLAG TO SKIP X
-                ADRES           VXINH                   # COMPONENT,AS ERROR MAY BE DUE TO CROSS
-                TCF             ENDVDAT                 # LOBE LOCK UP NOT DETECTED ON X AXIS.
+                CCS             VSELECT                 # TEST FOR Z COMPONENT
+                TCF             VALTCHK                 # NOT Z, DO NOT SET VX INHIBIT
+
+                CAF             TWO
+                TS              VSELECT
+                TCF             VALTCHK
+
+VUPDAT          CS              FLAGWRD0
+                MASK            VINHFBIT
+                CCS             A
+                TCF             VALTCHK                 # UPDATE INHIBITED
+
+VUPDAT1         TC              INTPRET
+                DLOAD           DDV
+                                ABVEL
+                                VSCAL3
+                BOVB            DAD
+                                VALTCHK
+                                NEARONE
+                DMP*            DMP
+                                LRWVZ,2
+                VXSC
+                VAD
+                                V1S                     # ADD WEIGHTED DELTA V TO VELOCITY
+                STORE           GNUV
+                EXIT
+
+                TC              PHASCHNG                # DO NOT RE-UPDATE
+                OCT             10035
+
+                CA              FIVE
+                TC              GENTRAN                 # STORE NEW VELOCITY VECTOR
+                ADRES           GNUV
+                ADRES           V1S
+
+ENDVDAT         =               VALTCHK
+
+VALTCHK         TC              PHASCHNG                # DO NOT REPEAT ABOVE
+                OCT             10035
+
+                CAF             READVBIT                # TEST READVEL TO SEE IF VELOCITY READING
+                MASK            LRSTAT                  # IS DESIRED.
+                EXTEND
+                BZF             15KCHK                  # TES - READ VELOCITY
+
+READV           INHINT    
+                CAF             PRIO32                  # SET UP JOB TO READ VELOCITY BEAMS.
+                TC              NOVAC
+                EBANK=          HMEAS
+                2CADR           LRVJOB
+
+                TCF             CONTSERV                # CONTINUE WITH SERVICER
+
+HFAIL           CS              LRRCTR
+                EXTEND
+                BZF             NORLITE                 # IF R = 0, DO NOT TURN ON TRK FAIL
+                AD              LRLCTR
+                MASK            NEG3
+                EXTEND                                  # IF L-R LT 4, DO NOT TURN ON TRK FAIL
+                BZF             +1
+#                TCF             NORLITE
+
+#                TC              UPFLAG                  # AND SET BIT TO TURN ON TRACKER FAIL LITE
+#                ADRES           HFLSHFLG
+
+NORLITE         CA              LRLCTR
+                TS              LRRCTR                  # SET R = L
+                TS              LRMCTR
+
+                TCF             VMEASCHK
+
 
 # ********************************************************************************************************
 #    LRVJOB IS SET WHEN THE LEM IS BELOW 15000 FT DURING THE LANDING PHASE
@@ -1317,10 +1178,9 @@ NOLITE          CA              LRMCTR                  # SET S = M
 #    WITH A GOODEND RETURN THE DATA IS STORED IN VMEAS AND BIT7 OF LRSTAT
 #    IS SET.  THE GIMBAL ANGLES ARE READ ABOUT MIDWAY IN THE SAMPLING .
 
-170MS           EQUALS          ND1
 
-
-LRVJOB          CA              170MS                   # SET TASK TO READ CDUS + PIPAS
+LRVJOB          INHINT
+                CA              24MS                    # SET TASK TO READ CDUS + PIPAS
                 TC              WAITLIST
                 EBANK=          LRVTIME
                 2CADR           RDGIMS
@@ -1328,6 +1188,7 @@ LRVJOB          CA              170MS                   # SET TASK TO READ CDUS 
                 CCS             VSELECT                 # SEQUENCE LR VEL BEAM SELECTOR
                 TCF             +2
                 CAF             TWO                     # IF ZERO-RESET TO TWO
+                TS              VSELECT
                 DOUBLE                                  # 2XVSELECT USED FOR VBEAM INDEX IN LRVEL
                 TC              BANKCALL                # GO INITIALIZE LR VEL READ ROUTINE
                 CADR            LRVEL
@@ -1339,8 +1200,9 @@ LRVJOB          CA              170MS                   # SET TASK TO READ CDUS 
                 DCA             SAMPLSUM
                 DXCH            VMEAS
 
-                CS              FLGWRD11                # SET BIT TO INDICATE VELOCITY
+                CS              LRSTAT                  # SET BIT TO INDICATE VELOCITY
                 MASK            VELDABIT                # MEASUREMENT MADE.
+                ADS             LRSTAT
 
                 TCF             ENDOFJOB
 
@@ -1359,29 +1221,10 @@ LRHJOB          TC              BANKCALL                # INITIATE LR ALT MEASUR
                 DCA             SAMPLSUM                # GOOD RETURN-STORE AWAY LRH DATA
                 DXCH            HMEAS                   # LRH DATA 1.079 FT/BIT
 
-                CS              FLGWRD11                # SET BIT TO INDICATE RANGE
+                CS              LRSTAT                  # SET BIT TO INDICATE RANGE
                 MASK            RNGEDBIT                # MEASUREMENT MADE.
-                ADS             FLGWRD11
-ENDLRH          TC              ENDOFJOB                # TERMINATE LRHJOB
-
-HBAD            CA              FLAGWRD5
-                MASK            RNGSCBIT                # IS BAD RETURN DUE TO SCALE CHANGE?
-                EXTEND
-                BZF             HSTILBAD        -1      # NO    RESET HSTILBAD
-                TC              DOWNFLAG                # YES   RESET SCALE CHANGE BIT AND IGNORE
-                ADRES           RNGSCFLG
-                TC              ENDOFJOB
-
-
-                CAF             TWO                     # SET STILBAD TO WAIT 4 SECONDS
-HSTILBAD        TS              STILBADH
-                TC              ENDOFJOB
-
-                BANK            32
-                SETLOC          SERV2
-                BANK
-
-                COUNT*          $$/SERV
+                ADS             LRSTAT
+                TC              ENDOFJOB                # TERMINATE LRHJOB
 
 #     RDGIMS  IS A TASK SET UP BY LRVJOB TO PICK UP THE IMU CDUS AND TIME
 #     AT ABOUT THE MIDPOINT OF THE LR VEL READ ROUTINE WHEN 5 VEL SAMPLES
@@ -1407,14 +1250,6 @@ RDGIMS          EXTEND
                 DXCH            PIPTEM          +1      #    AND SAVE IN PIPTEM +1 AND PIPTEM +2
                 TC              TASKOVER
 
-                BANK            33
-                SETLOC          SERVICES
-                BANK
-
-                COUNT*          $$/SERV
-
-                EBANK=          DVCNTR
-
 #    HIGATJOB IS SET APPROXIMATELY 6 SECONDS PRIOR TO HIGH GATE DURING
 #    THE DESCENT BURN PHASE OF LUNAR LANDING.  THIS JOB INITIATES THE
 #    LANDING RADAR REPOSITIONING ROUTINE AND GOES TO SLEEP UNTIL THE
@@ -1428,48 +1263,24 @@ HIGATJOB        TC              BANKCALL                # START LRPOS2 JOB
                 CADR            LRPOS2
                 TC              BANKCALL                # PUT HIGATJOB TO SLEEP UNTIL JOB IS DONE
                 CADR            RADSTALL
-                TCF             POSALARM                # BAD END   ALARM
-
-POSGOOD         CA              PRIO24                  # REDUCE PRIORITY FOR INTERPRETIVE STUFF
-                TC              PRIOCHNG
+                TCF             ENDOFJOB                # BAD END
 
                 TC              SETPOS2                 # LR IN POS2 - SET UP TRANSFORMATIONS
 
-                TC              DOWNFLAG
-                ADRES           NOLRREAD                # RESET NOLRREAD FLAG TO ENABLE LR READING
+                CS              NOLRRBIT                # RESET NOLRREAD FLAG TO ENABLE LR READING
+                MASK            LRSTAT
+                TS              LRSTAT
                 TC              ENDOFJOB
-
-POSALARM        CA              OCT523
-                TC              BANKCALL
-                CADR            PRIOLARM                # FLASH ALARM CODE
-                TCF             GOTOPOOH                # TERMINATE
-                TCF             +3                      # PROCEED - TRY AGAIN
-                TCF             ENDOFJOB                # V 32 E    TERMINATE R12
-                TC              ENDOFJOB
-
- +3             CA              BIT7                    # SEE IF IN POS2 YET
-                EXTEND
-                RAND            CHAN33
-                EXTEND
-                BZF             POSGOOD                 # POS2 ACHIEVED   SET UP ANTENNA BEAMS
-                TCF             POSALARM                # STILL DIDN'T MAKE IT   REALARM
-
-OCT523          OCT             00523
-
 
 SETPOS1         TC              MAKECADR                # MUST BE CALLED BY BANKCALL
                 TS              LRADRET1                # SAVE RETURN CADR, SINCE BUF2 CLOBBERED
 
-                CAF             TWO
-                TS              STILBADH                # INITIALIZE STILBAD
-                TS              STILBADV                # INITIALIZE STILBAD
-
                 CA              ZERO                    # INDEX FOR LRALPHA,LRBETA IN POS 1.
 
-                TS              LRLCTR                  # SET L,M,R, ANS S TO ZERO
-                TS              LRMCTR
-                TS              LRRCTR
-                TS              LRSCTR
+#                TS              LRLCTR                  # SET L,M,R, ANS S TO ZERO
+#                TS              LRMCTR
+#                TS              LRRCTR
+#                TS              LRSCTR
                 TC              SETPOS                  # CONTINUE WITH COMPUTATIONS
 
                 CA              LRADRET1
@@ -1499,10 +1310,18 @@ SETPOS          EXTEND
                 STORE           VXBEAMNB
                 VXV             VSL1
                                 VYBEAMNB
-                STOVL           VZBEAMNB                # Z = X * Y
+                STODL           VZBEAMNB                # Z = X * Y
                                 HBEAMANT
-                CALL
+                RTB             PUSH
+                                CDULOGIC
+                SIN             PDDL
+                COS             PDDL
+                                ZEROVECS
+                PDDL            VDEF
+                VCOMP           CALL
                                 *SMNB*                  # CONVERT TO NB
                 STORE           HBEAMNB
                 EXIT
                 TC              LRADRET
+
+24MS            DEC             24

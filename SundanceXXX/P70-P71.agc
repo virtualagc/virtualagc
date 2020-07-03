@@ -13,158 +13,56 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-		BANK	21
-		SETLOC	R11
-		BANK
+                BANK    21
+                SETLOC  R11
+                BANK
 
-		EBANK=	DVCNTR
-		COUNT*	$$/R11
+                EBANK=  DVCNTR
+                COUNT*  $$/R11
 
-R10,R11		CS	FLAGWRD7	# IS SERVICER STILL RUNNING?
-		MASK	AVEGFBIT
-		CCS	A
-		TCF	TASKOVER	# LET AVGEND TAKE CARE OF GROUP 2.
-		CCS	PIPCTR
-		TCF	+2
-		TCF	LRHTASK		# LAST PASS. CALL LRHTASK.
- +2		TS	PIPCTR1
+ROSEN           TC      FIXDELAY
+ CRANTZ         DEC     50
 
-PIPCTR1		=	LADQSAVE
-		CAF	OCT31
-		TC	TWIDDLE
-		ADRES	R10,R11
-R10,R11A	CS	IMODES33	# IF LAMP TEST, DO NOT CHANGE LR LITES.
-		MASK	BIT1
-		EXTEND
-		BZF	10,11
+                CS      FLAGWRD6
+                MASK    KILLRBIT
+                EXTEND
+                BZF     TASKOVER
 
-FLASHH?		MASK	FLGWRD11	# C(A) = 1 = HFLASH BIT
-		EXTEND
-		BZF	FLASHV?		# H FLASH OFF, SO LEAVE ALONE
+P71NOW?         CS      MODREG          # YES.  ARE WE IN P71 NOW?
+                AD      MODE71
+                EXTEND
+                BZF     TASKOVER        # YES.  EXIT.
+                
+                EXTEND                  # NO.  IS AN ABORT STAGE COMMANDED?
+                READ    CHAN30
+                TS      L
+                MASK    BIT4
+                CCS     A
+                TCF     P70NOW?         # NO.
 
+                TC      NEWMODEX
+MODE71          DEC     71
 
-FLASHV?		CA	VFLSHBIT	# VFLASHBIT MUST BE BIT 2.
-		MASK	FLGWRD11
-		EXTEND
-		BZF	10,11		# V FLASH OFF
+STRTABRT        CAF     PRIO25
+                TC      FINDVAC
+                EBANK=  WHICH
+                2CADR   ABORTJOB
 
+                TCF     ROSEN
 
-10,11		CA	FLAGWRD9	# IS THE LETABORT FLAG SET ?
-		MASK	LETABBIT
-		EXTEND
-		BZF	LANDISP		# NO. PROCEED TO R10.
+P70NOW?         CS      MODREG          # NO. ARE WE IN P70 NOW?
+                AD      MODE70
+                EXTEND
+                BZF     ROSEN           # YES.  CHECK AGAIN IN 50MS.
 
-P71NOW?		CS	MODREG		# YES.  ARE WE IN P71 NOW?
-		AD	MODE71
-		EXTEND
-		BZF	LANDISP		# YES.  PROCEED TO R10.
-		
-		EXTEND			# NO.  IS AN ABORT STAGE COMMANDED?
-		READ	CHAN30
-		COM
-		TS	L
-		MASK	BIT4
-		CCS	A
-		TCF	P71A		# YES.
+                CS      L               # NO.  IS AN ABORT COMMANDED?
+                MASK    BIT1
+                EXTEND
+                BZF     ROSEN           # NO.
 
-P70NOW?		CS	MODREG		# NO. ARE WE IN P70 NOW?
-		AD	MODE70
-		EXTEND
-		BZF	LANDISP		# YES.  PROCEED TO R10.
-
-		CA	L		# NO.  IS AN ABORT COMMANDED?
-		MASK	BIT1
-		CCS	A
-		TCF	P70A		# YES.
-		TCF	LANDISP		# NO.  PROCEED TO R10.
-
-		COUNT*	$$/P70
-
-P70		TC	LEGAL?
-P70A		CS	ZERO
-		TCF	+3
-P71		TC	LEGAL?
-P71A		CAF	TWO
-   +3		TS	Q
-		INHINT
-		CAF	ABRTJADR
-		TS	BRUPT
-		RESUME
-
-ABRTJADR	TCF	ABRTJASK
-
-ABRTJASK	CAF	OCTAL27
-		AD	Q
-		TS	L
-		COM
-		DXCH	-PHASE4
-		INDEX	Q
-		CAF	MODE70
-		TS	MODREG
-
-		TS	DISPDEX		# INSURE DISPDEX IS POSITIVE.
-
-		CCS	Q		# SET APSFLAG IF P71.
-		CS	FLGWRD10	# SET APSFLAG PRIOR TO THE ENEMA.
-		MASK	APSFLBIT
-		ADS	FLGWRD10
-		CS	DAPBITS		# DAPBITS = OCT 640 = BITS 6, 8, 9
-		MASK	DAPBOOLS	# (TURN OFF: ULLAGE, DRIFT, AND XOVINHIB )
-		TS	DAPBOOLS
-
-		CS	FLAGWRD5	# SET ENGONFLG.
-		MASK	ENGONBIT
-		ADS	FLAGWRD5
-
-		CS	PRIO30		# INSURE THAT THE ENGINE IS ON, IF ARMED.
-		EXTEND
-		RAND	DSALMOUT
-		AD	BIT13
-		EXTEND
-		WRITE	DSALMOUT
-
-		CAF	LRBYBIT		# TERMINATE R12.
-		TS	FLGWRD11
-
-		EXTEND			# LOAD TEVENT FOR THE DOWNLINK.
-		DCA	TIME2
-		DXCH	TEVENT
-
-		EXTEND
-		DCA	SVEXITAD
-		DXCH	AVGEXIT
-
-		EXTEND
-		DCA	NEG0
-		DXCH	-PHASE1
-		
-		EXTEND
-		DCA	NEG0
-		DXCH	-PHASE3
-		
-		EXTEND
-		DCA	NEG0
-		DXCH	-PHASE6
-		
-		CAF	THREE		# SET UP 4.3SPOT FOR GOABORT
-		TS	L
-		COM
-		DXCH	-PHASE4
-
-		CAF	OCT37774	# SET T5RUPT TO CALL DAPIDLER IN	
-		TS	TIME5		# 40 MILLISECONDS.
-		
-		TC	POSTJUMP
-		CADR	ENEMA
-
-		EBANK=	DVCNTR
-SVEXITAD	2CADR	SERVEXIT
-
-MODE70		DEC	70
-OCTAL27		OCT	27
-MODE71		DEC	71
-
-DAPBITS		OCT	00640
+                TC      NEWMODEX        # YES.
+MODE70          DEC     70
+                TCF     STRTABRT
 
 		BANK	32
 		SETLOC	ABORTS
@@ -172,314 +70,404 @@ DAPBITS		OCT	00640
 
 		COUNT*	$$/P70
 
-ABORTIGN        =       GOABORT
-GOABORT		TC	INTPRET
-		CALL
-			INITCDUW
-		EXIT
-		CAF	FOUR
-		TS	DVCNTR
 
-		CAF	WHICHADR
-		TS	WHICH
+P70             TC      LEGAL?
+                TC      NEWMODEX
+                DEC     70
 
-		TC	DOWNFLAG
-		ADRES	FLRCS
+ABORTJOB        EXTEND                  # LOAD TEVENT FOR THE DOWNLINK.
+                DCA     TIME2
+                DXCH    TEVENT
 
-		TC	DOWNFLAG
-		ADRES	FLUNDISP
-		
-		TC	DOWNFLAG
-		ADRES	IDLEFLAG
-		
-		TC	UPFLAG		# INSURE 4-JET TRANSLATION CAPABILITY.
-		ADRES	ACC4-2FL
-		
-		TC	CHECKMM
-70DEC		DEC	70
-		TCF	P71RET
+                TC      2PHSCHNG
+                OCT     00001
+                OCT     00002
 
-P70INIT		TC	INTPRET
-		CALL
-			TGOCOMP
-		DLOAD	SL
-			MDOTDPS
-			4D
-		BDDV
-			MASS
-		STODL	TBUP
-			MASS
-		DDV	SR1
-			K(1/DV)
-		STORE	1/DV1
-		STORE	1/DV2
-		STORE	1/DV3
-		BDDV
-			K(AT)
-		STODL	AT
-			DTDECAY
-		DCOMP	SL
-			11D
-		STORE	TTO
-		SLOAD	DCOMP
-			DPSVEX
-		SR2
-		STORE	VE		# INITIALIZE DPS EXHAUST VELOCITY
-		SET	CALL
-			FLAP
-			COMMINIT
-INJTARG		GOTO			# *** BYPASS ZONE 0 ***
-			UPTHROT		# *** BYPASS ZONE 0 ***
-#		DLOAD	DSU
-#			TGO
-#			50SECS
-#		BPL	EXIT
-#			UPTHROT
+                TC      2PHSCHNG
+                OCT     00003
+                OCT     00004
 
-		TC	CHECKMM
-		DEC	70
-		CAF	DEC299		# P71.  DELAY 3 SECONDS.
-		AD	BIT1		# P70.  DELAY 1 CENTISECOND.
-		TS	ENGOFFDT
-		TC	TWIDDLE
-		ADRES	ZONEZERO
+                TC      PHASCHNG
+                OCT     07024
+                OCT     25000
+                EBANK=  WHICH
+                2CADR   GOABORT
 
-		TC	PHASCHNG
-		OCT	47014
-		-GENADR	ENGOFFDT
-		EBANK=	DVCNTR
-		2CADR	ZONEZERO
-		TCF	ENDOFJOB
+                INHINT
+                TC      POSTJUMP
+                CADR    GOPROG2
 
-ZONEZERO	TC	IBNKCALL
-		CADR	ENGINOF2
+GOABORT         TC      PHASCHNG
+                OCT     04024
 
-		CAF	ZERETAD
-		TS	OUTROUTE
+                CAF     SIX             # SET UP R60 FOR A 10 DEG/SEC MANUV. RATE.
+                TS      RATEINDX
+
+                CAF     LRBYBIT
+                TS      LRSTAT
+
+                EXTEND
+                DCA     SVEXITAD
+                DXCH    AVEGEXIT
+
+                CAF     THREE           # INITIALIZE FOR POWERED DOWNLIST.
+                TS      DNLSTCOD
+                TS      AGSWORD
 
                 TC      DOWNFLAG
-                ADRES   AVEGFLAG
+                ADRES   SWANDISP
+                TC      UPFLAG
+                ADRES   FLP70
+                TC      DOWNFLAG
+                ADRES   XOVINFLG
                 
-		TC	DOWNFLAG
-		ADRES	V37FLAG
+                TC      CHECKMM
+                DEC     70
+                TCF     P71RET
 
-		TC	PHASCHNG
-		OCT	00004
-		
-		TCF	TASKOVER
+P70INIT         CAF     P70ADR
+                TS      WHICH
 
-UPTHROT		SET	EXIT
-			FLVR
-		
-		TC	THROTUP
+                TC      INTPRET
+                CALL
+                        TGOCOMP
+                DLOAD   
+                        MASS
+                PUSH    DDV
+                        MDOTDPS*
+                STODL   TBUP
+                DDV     SR1
+                        K(1/DV)
+                STORE   1/DV1
+                STORE   1/DV2
+                STORE   1/DV3
+                BDDV
+                        K(AT)
+                STODL   AT
+                        DTDECAY
+                STODL   TTO
+                        DPSVEX
+                STORE   VE              # INITIALIZE DPS EXHAUST VELOCITY
+                SET     CALL
+                        FLAP
+                        COMMINIT
 
-		TC	PHASCHNG
-		OCT	04024
+INJTARG         DLOAD   DSU
+                        TGO
+                        50SECS
+                BPL     EXIT
+                        UPTHROT
 
-  -3		TC	BANKCALL	# VERIFY THAT THE PANEL SWITCHES 
-		CADR	P40AUTO		# ARE PROPERLY SET.
-		
-		TC	THROTUP
+                INHINT
+                TC      IBNKCALL
+                CADR    ENGINOF2
+                RELINT
 
-UPTHROT1	EXTEND			# SET SERVICER TO CALL ASCENT GUIDANCE.
-		DCA	ATMAGAD
-		DXCH	AVGEXIT
+                TC      ZONEZERO
 
-GRP4OFF		TC	PHASCHNG	# TERMINATE USE OF GROUP 4.
-		OCT	00004
+ABRTGUID        TC      INTPRET
+                SET     CALL
+                        FLIC
+                        ASCENT
 
-		TCF	ENDOFJOB
+ABORTIGN        VLOAD
+                        UNFC/2
+                STOVL   POINTVSM
+                        UNITX
+                STORE   SCAXIS
+                CLEAR   EXIT
+                        NOTHROTL
 
-ZERETAD		CADR	ZONE0RET
-ZONE0RET	TC	2PHSCHNG
-		OCT	00002
-		OCT	05024
-		OCT	25000
-		
-		TC	INTPRET
-		RTB	DAD
-			LOADTIME
-			90SEC
-		STORE	PIPTIME1	# STORE TEMPORARILY IN PIPTIME1.
-		STCALL	TDEC1
-			LEMPREC
-		VLOAD
-			VATT
-		STORE	VN1		# STORE VTIG TEMPORARILY IN VN1.
-		MXV	VSL1
-			REFSMMAT
-		STOVL	V
-			RATT
-		STORE	RN1		# STORE RTIG TEMPORARILY IN RN1.
-		MXV	VSL6
-			REFSMMAT
-		STCALL	R
-			MUNGRAV
-		SET	CALL
-			FLZONE0
-			ASCENT
-PREBRET1	EXIT
-		TC	PHASCHNG
-		OCT	04024
-		TC	INTPRET
-		CLEAR	VLOAD
-			FLZONE0
-			VGVECT
-		VXM	VSL1
-			REFSMMAT
-		STORE	DELVSIN
-		ABVAL
-		STOVL	DELVSAB
-			RN1
+                TC      PHASCHNG
+                OCT     04024
+
+                TC      DOWNFLAG
+                ADRES   3AXISFLG
+
+                INHINT
+                TC      IBNKCALL
+                CADR    SETMINDB
+
+                TC      DOWNFLAG
+                ADRES   FLIC
+
+                TC      BANKCALL
+                CADR    R60LEM
+
+                TC      BANKCALL
+                CADR    GOASTCLK
+                
+                CAF     ZERO
+                TS      DVTOTAL
+                TS      DVTOTAL +1
+
+                TC      INTPRET
+                CALL
+                        INITCDUW
+                EXIT
+
+                CAF     6.5SEC
+                INHINT
+                TC      WAITLIST
+                EBANK=  DVCNTR
+                2CADR   ULLGTASK
+
+                CAF     5.0SEC
+                TC      WAITLIST
+                EBANK=  TTOGO
+                2CADR   TIG-5
+
+                EXTEND
+                DCA     TIME2
+                DXCH    TIG
+                EXTEND
+                DCA     10SECS
+                DAS     TIG
+                TC      BANKCALL
+                CADR    STCLOK3
+
+                TCF     UPTHROT1
+
+UPTHROT         SET     EXIT
+                        FLVR
+                
+                INHINT
+                CAF     ONE
+                TC      WAITLIST
+                EBANK=  DVCNTR
+                2CADR   ZOOM
+
+  -2            TC      BANKCALL        # VERIFY THAT THE PANEL SWITCHES 
+                CADR    P40AUTO         # ARE PROPERLY SET.
+                
+UPTHROT1        EXTEND                  # SET SERVICER TO CALL ASCENT GUIDANCE.
+                DCA     ATMAGAD
+                DXCH    AVGEXIT
+
+                TCF     ENDOFJOB
+
+
+ZONEZERO        TC      INTPRET
+                SSP
+                        OUTROUTE
+                CADR    ZONE0RET
+                CLEAR   EXIT
+                        AVEGFLAG
+                
+                TC      PHASCHNG
+                OCT     00004
+                
+                TCF     ENDOFJOB
+
+ZONE0RET        TC      PHASCHNG
+                OCT     05024
+                OCT     20000
+                
+                TC      INTPRET
+                RTB     DAD
+                        LOADTIME
+                        80SEC
+                STORE   PIPTIME1        # STORE TEMPORARILY IN PIPTIME1.
+                STCALL  TDEC1
+                        LEMPREC
+                VLOAD
+                        VATT
+                STORE   VN1             # STORE VTIG TEMPORARILY IN VN1.
+                MXV     VSL1
+                        REFSMMAT
+                STOVL   V
+                        RATT
+                STORE   RN1             # STORE RTIG TEMPORARILY IN RN1.
+                MXV     VSL6
+                        REFSMMAT
+                STCALL  R
+                        MUNGRAV
+                SET     CALL
+                        FLZONE0
+                        ASCENT
+PREBRET1        EXIT
+                TC      PHASCHNG
+                OCT     04024
+                TC      INTPRET
+                VXM     VSL1
+                        REFSMMAT
+                STORE   DELVSIN
+                ABVAL
+                STOVL   DELVSAB
+                        RN1
                 STOVL   RTIG
                         VN1
-		STODL	VTIG
-			PIPTIME1
-		STORE	TIG
-		SET	CLEAR
-			XDELVFLG
-			LETABORT
-		EXIT
+                STODL   VTIG
+                        PIPTIME1
+                STORE   TIG
+                SET     CLEAR
+                        XDELVFLG
+                        MUNFLAG
+                EXIT
 
-		CAF	SIX		# SET UP R60 FOR A 10 DEG/SEC MANUV. RATE.
-		TS	RATEINDX
+                TC      NEWMODEX
+                DEC     40
+                TC      POSTJUMP
+                CADR    P40LM
 
-		CAF	PRIO13		# REDUCE PRIORITY TO LEVEL EXPECTED BY
-		TC	PRIOCHNG	# P40 AND P42.
-		CAF	ORBMANAD	# INITIALIZE FOR ORBITAL MANEUVERS LIST.
-		TS	DNLSTCOD
-		TS	AGSWORD
+P71             TC      LEGAL?
+                TC      NEWMODEX
+                DEC     71
+                TCF     ABORTJOB
 
-		TC	CHECKMM
-		DEC	70		# FOR MODE=70,USE P40,OTHERWISE P42
-		TCF	42SET
-40SET		CAF	P40CADR
-		TS	CADRSAVE
-		CAF	DEC40
-COMMSET		TS	MMSAVE
-		TC	PHASCHNG
-		OCT	05024
-		OCT	13000
+P71RET          CAF     P71ADR
+                TS      WHICH
 
-		CA	MMSAVE
-		TC	NEWMODEA
+                TC      UPFLAG
+                ADRES   3AXISFLG
 
-		CA	CADRSAVE
-		TC	BANKJUMP
-42SET		CAF	P42CADR
-		TS	CADRSAVE
-		CAF	DEC42
-		TCF	COMMSET
+                TC      INTPRET
+                CALL
+                        P12INIT
+                EXIT
 
-P40CADR		CADR	P40LM
-P42CADR		CADR	P42LM
-CADRSAVE	=	MASS1
-MMSAVE		=	MASS1 +1
-DEC40		DEC	40
-DEC42		DEC	42
+                EXTEND
+                READ    CHAN30
+                COM
+                MASK    BIT4
+                CCS     A
+                TCF     ABRTSTAG
 
-P71RET		TC	DOWNFLAG
-		ADRES	LETABORT
+                INHINT
+                TC      IBNKCALL
+                CADR    ENGINOF2
+                RELINT
 
-		CAF	THRESH2		# SET DVMON THRESHOLD TO THE ASCENT VALUE.
-		TS	DVTHRUSH
+                CAF     BIT2
+                EXTEND
+                RAND    CHAN30
+                CCS     A
+                TCF     STAGED  
 
-		TC	INTPRET
-		BON	CALL
-			FLAP
-			OLDTIME
-			TGOCOMP		# IF FLAP=0, TGO=T-TIG
-		SSP	GOTO
-			QPRET
-		CADR	INJTARG
-			P12INIT		# WILL EXIT P12INIT TO INJTARG
-OLDTIME		DLOAD	SL1		# IF FLAP=1,TGO=2 TGO
-			TGO
-		STCALL	TGO1
-			P12INIT
-		EXIT
-		TC	PHASCHNG
-		OCT	04024
+                CAF     OCT206
+                TC      BANKCALL
+                CADR    GOPERF1
+                TCF     GOTOPOOH
+                TCF     STAGED
+                TCF     -5
 
-		EXTEND
-		DCA	TGO1
-		DXCH	TGO
-		TCF	UPTHROT1 -3
+STAGED          CAF     OCT207
+                TC      BANKCALL
+                CADR    GOPERF1
+                TCF     GOTOPOOH
+                TCF     +2
+                TCF     ABRTGUID
 
-TGO1		=	APO
-# ************************************************************************
+                INHINT
+                CAF     ONE
+                TC      WAITLIST
+                EBANK=  DVCNTR
+                2CADR   IGNITION
 
-		BANK	21
-		SETLOC	R11
-		BANK
+                TCF     UPTHROT1
 
-		COUNT*	$$/P70
+ABRTSTAG        TC      INTPRET
+                BOFF
+                        FLAP
+                        NEWTIME
+                DLOAD   SL1
+                        TGO
+                STORE   TGO
+                RTB
+                        UPTHROT1 -2
 
-LEGAL?		CS	MMNUMBER	# IS THE DESIRED PGM ALREADY IN PROGRESS?
-		AD	MODREG
-		EXTEND
-		BZF	ABORTALM
-
-		CS	FLAGWRD9	# ARE THE ABORTS ENABLED?
-		MASK	LETABBIT
-		CCS	A
-		TCF	ABORTALM
-
-		CA	FLAGWRD7	# IS SERVICER ON THE AIR?
-		MASK	AVEGFBIT
-		CCS	A
-		TC	Q		# YES. ALL IS WELL.
-ABORTALM	TC	FALTON
-		TC	RELDSP
-		TC	POSTJUMP
-		CADR	PINBRNCH
-
-		BANK	32
-		SETLOC	ABORTS
-		BANK
-
-		COUNT*	$$/P70
+NEWTIME         CALL
+                        TGOCOMP         # IF FLAP=0, TGO=T-TIG
+                GOTO
+                        INJTARG
 
 # ************************************************************************
 
-TGOCOMP		RTB	DSU
-			LOADTIME
-			TIG
-		SL
-			11D
-		STORE	TGO
-		RVQ
+LEGAL?          CS      FLAGWRD9        # ARE THE ABORTS ENABLED?
+                MASK    LETABBIT
+                CCS     A
+                TCF     ABORTALM
+
+                CS      FLAGWRD7        # IS SERVICER ON THE AIR?
+                MASK    AVEGFBIT
+                CCS     A
+                TCF     ABORTALM
+                TC      Q               # YES. ALL IS WELL.
+
+ABORTALM        TC      POSTJUMP
+                CADR    ENGINOF3
 
 # ************************************************************************
 
-THROTUP		CAF	BIT13
-		TS	THRUST
-		CAF	BIT4
-		EXTEND
-		WOR	CHAN14
-		TC	Q
+TGOCOMP         RTB     DSU
+                        LOADTIME
+                        TIG
+                SL
+                        11D
+                STORE   TGO
+                RVQ
 
 # ************************************************************************
 
-DEC299		DEC	299
+5.0SEC          DEC     500
 
-10SECS		2DEC	1000
+6.5SEC          DEC     650
 
-90SEC		2DEC	9000
+10SECS          2DEC    1000
 
-50SECS		2DEC	5000 B-17
+80SEC           2DEC    8000
 
-HINJECT		2DEC	18288 B-24	# 60,000 FEET EXPRESSED IN METERS.
+50SECS          2DEC    5000 B-17
 
-(TGO)A		2DEC	37000 B-17
+HINJECT         2DEC    18288 B-24      # 60,000 FEET EXPRESSED IN METERS.
 
-K(AT)		2DEC	.02		# SCALING CONSTANT
+ABTVINJ2        2DEC    +16.77924013 B-7
 
-WHICHADR	REMADR	P70TABLE
+MDOTDPS*        2DEC    0.1425 B1
+
+
+(1/DV)A         2DEC    16.20 B-7       # 2 SECONDS WORTH OF INITIAL ASCENT
+
+                                        # STAGE ACCELERATION -- INVERTED (M/CS)
+                                        # 1) PREDICATED ON A LIFTOFF MASS OF
+                                        #    4869.9 KG (SNA-8-D-027  7/11/68)
+                                        # 2) PREDICATED ON A CONTRIBUTION TO VEH-
+                                        #    ICLE ACCELERATION FROM RCS THRUSTERS
+                                        #    EQUIV. TO 1 JET ON CONTINUOUSLY.
+K(1/DV)         2DEC    432.67 B-9      # DPS ENGINE THRUST IN NEWTONS / 100 CS.
+
+(AT)A           2DEC    3.0806 E-4 B9   # INITIAL ASC. STG. ACCELERATION ** M/CS.
+                                        # ASSUMPTIONS SAME AS FOR (1/DV)A.
+
+K(AT)           2DEC    .02             # SCALING CONSTANT
+
+(TBUP)A         2DEC    98279 B-17      # ESTIMATED BURN-UP TIME OF THE ASCENT STG
+                                        # ASSUMPTIONS SAME AS FOR (1/DV)A WITH THE
+                                        # ADDITIONAL ASSUMPTION THAT NET MASS-FLOW
+                                        # RATE = 5.299 KG/SEC = 5.135 (APS) +
+                                        # .164 (1 RCS JET).
+
+# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST NOT BE CHANGED *******
+
+DPSVEX          2DEC    2943.96 E-2 B-7 # 9942 FT/SEC IN M/CS.
+
+APSVEX          2DEC    3003.78 E-2 B-7 # 9684 FT/SEC IN M/CS.
+
+DTDECAY*        2DEC    36.5 B-17
+
+ATDECAY*        2DEC    12.3 B-17
+
+(TGO)A          2DEC    45000 B-17
+
+P70ADR          REMADR  P70TABLE
+P71ADR          REMADR  P71TABLE
+
+OCT206          OCT     206
+OCT207          OCT     207
 
 # ************************************************************************
-		EBANK=	DVCNTR
-ATMAGAD		2CADR	ATMAG
+                EBANK=  DVCNTR
+ATMAGAD         2CADR   ATMAG
 
-ORBMANAD	ADRES	POWERED
-
+                EBANK=  DVCNTR
+SVEXITAD        2CADR   SERVEXIT

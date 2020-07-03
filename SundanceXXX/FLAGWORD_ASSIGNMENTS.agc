@@ -255,14 +255,13 @@ MOONFLAG        =               003D                    # MOON IS SPHERE OF   EA
 MOONBIT         =               BIT12                   # INFLUENCE           INFLUENCE
 
 # BIT 11 FLAG 0
-#               =               004D
-#               =               BIT11
+VINHFLG         =               004D
+VINHFBIT        =               BIT11
 #
 
 # BIT 10 FLAG 0
-#               =               005D
-
-#               =               BIT10
+ZMEASFLG        =               005D
+ZMEASBIT        =               BIT10
 #
 
 # BIT 9 FLAG 0  (S)
@@ -385,7 +384,8 @@ GUESSBIT        =               BIT2                    # FOR ITERATION       IT
 #
 
 # BIT 1 FLAG 1
-#               =               029D
+HINHFLG         =               029D
+HINHFBIT        =               BIT1
 #
 
 FLAGWRD2        =               STATE           +2      # (030-044)

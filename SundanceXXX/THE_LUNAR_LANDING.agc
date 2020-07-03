@@ -34,30 +34,21 @@ P63LM           TC      PHASCHNG
                 CAF     P63ADRES        # INITIALIZE WHICH FOR BURNBABY
                 TS      WHICH
 
-                CAF     DPSTHRSH        # INITIALIZE DVMON
-                TS      DVTHRUSH
-                CAF     FOUR
-                TS      DVCNTR
-
-                CS      ONE             # INITIALIZE WCHPHASE AND FLPASSO
+                CAF     IGNADRES        # INITIALIZE WCHPHASE AND FLPASSO
                 ZL                      #   FOR IGNITION ALGORITHM
                 DXCH    WCHPHASE
 
 
-                CS      BIT14
-                EXTEND
-                WAND    CHAN12          # REMOVE TRACK-ENABLE DISCRETE.
-
 FLAGORGY        TC      INTPRET         # DIONYSIAN FLAG WAVING
                 CLEAR   CLEAR
                         NOTHROTL
-                        REDFLAG
-                CLEAR   SET
-                        LRBYPASS
-                        MUNFLAG
+                        3AXISFLG
                 CLEAR   CLEAR
-                        P25FLAG         # TERMINATE P25 IF IT IS RUNNING.
-                        RNDVZFLG        # TERMINATE P20 IF IT IS RUNNING
+                        VINHFLG
+                        HINHFLG
+                SET     SET
+                        SWANDISP
+                        MUNFLAG
 
                                         # ****************************************
 
@@ -70,33 +61,30 @@ IGNALG1         SETPD   VLOAD           # FIRST SET UP INPUTS FOR RP-TO-R:-
                         RP-TO-R
                 VSL4    MXV
                         REFSMMAT
-                # STCALL  LAND
-                #         GUIDINIT        # GUIDINIT INITIALIZES WM AND /LAND/
-                DLOAD   DSU
+                STODL   LAND
                         TLAND
+                DSU
                         GUIDDURN
                 STCALL  TDEC1           # INTEGRATE STATE FORWARD TO THAT TIME
                         LEMPREC
-                SSP     VLOAD
-                        NIGNLOOP
-                        40D
-                        UNITX
-                STOVL   CG
-                        UNITY
-                STOVL   CG +6
-                        UNITZ
-                STODL   CG +14
-                        99999CON
-                STOVL   DELTAH          # INITIALIZE DELTAH FOR V16N68 DISPLAY
-                        ZEROVECS
-                STODL   UNFC/2          # INITIALIZE TRIM VELOCITY CORRECTION TERM
-                        HI6ZEROS
+                VLOAD   MXV
+                        MOONRATE
+                        REFSMMAT
+                STODL   WM
+                        MOONRATE
+                STORE   NIGNLOOP
                 STORE   TTF/8
 
 IGNALOOP        DLOAD
                         TAT
-                STOVL   PIPTIME1
+                STOVL   PIPTIME
+                        VATT1
+                STORE   VCV
+                MXV     VSR1
+                        REFSMMAT
+                STOVL   V
                         RATT1
+                STORE   RCV
                 VSL4    MXV
                         REFSMMAT
                 STCALL  R
@@ -116,37 +104,30 @@ IGNALOOP        DLOAD
 # THE QUOTIENT IS THUS A TIME IN UNITS OF 2(18) CENTISECONDS.  THE FINAL SHIFT RESCALES TO UNITS OF 2(28) CS.
 # THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/B8 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.
 
-DDUMCALC        TS      NIGNLOOP
-                TC      INTPRET
-                DLOAD   DMPR            # FORM DENOMINATOR FIRST
-                        VGU
-                        KIGNX/B4
-                SL4R    BDSU
-                        VGU +4
-                PDDL    DSU
+DDUMCALC        DLOAD   DSU             # FORM DENOMINATOR FIRST
                         RIGNZ
                         RGU +4
-                SR4R    PDDL
+                PDDL    DSQ
                         RGU +2
-                DSQ     DMPR
-                        KIGNY/B8
-                SL4R    PDDL
+                DMPR    PDDL
+                        KIGNY
                         RGU
-                DSU     DMPR
+                DSU     DDV
                         RIGNX
-                        KIGNX/B4
+                        1/KIGNX
                 PDVL    ABVAL
                         VGU
                 DSU     DMPR
                         VIGN
-                        KIGNV/B4
+                        KIGNV
                 DAD     DAD
-                DAD     DDV
-                SRR
-                        10D
+                DAD     SR4
+                DDV     SRR
+                        VGU +4
+                        12D
 
                 PUSH    DAD
-                        PIPTIME1
+                        PIPTIME
                 STODL   TDEC1           # STORE NEW GUESS FOR NEXT INTEGRATION
                 ABS     DSU
                         DDUMCRIT
@@ -156,51 +137,48 @@ DDUMCALC        TS      NIGNLOOP
                 SET     SET
                         INTYPFLG
                         MOONFLAG
-                DLOAD
-                        PIPTIME1
-                STOVL   TET             # HOPEFULLY ?GUIDSUB DID NOT
-                        RATT1           #       CLOBBER RATT1 AND VATT1
-                STOVL   RCV
-                        VATT1
-                STCALL  VCV
+                CLEAR   DLOAD
+                        MIDFLAG
+                        PIPTIME
+                STCALL  TET
                         INTEGRVS
                 GOTO
                         IGNALOOP
 
-DDUMGOOD        SLOAD   SR
-                        ZOOMTIME
-                        14D
-                BDSU
+DDUMGOOD        DLOAD   DSU
                         TDEC1
+                        ZOOMTDP
                 STOVL   TIG             # COMPUTE DISTANCE LANDING SITE WILL BE
-                        V               #       OUT OF LM'S ORBITAL PLANE AT IGNITION:
+                        R               #       OUT OF LM'S ORBITAL PLANE AT IGNITION:
                 VXV     UNIT            #       SIGN IS + IF LANDING SITE IS TO THE
-                        R               #       RIGHT, NORTH; - IF TO THE LEFT, SOUTH.
+                        V               #       RIGHT, NORTH; - IF TO THE LEFT, SOUTH.
                 DOT     SL1
                         LAND
 R60INIT         STOVL   OUTOFPLN        # INITIALIZATION FOR CALCMANU
                         UNFC/2
-                #STORE   R60VSAVE        # STORE UNFC/2 TEMPORARILY IN R60SAVE
+                STOVL   POINTVSM
+                        UNITX
+                STORE   SCAXIS
                 EXIT
                                         # ****************************************
 
 IGNALGRT        TC      PHASCHNG        # PREVENT REPEATING IGNALG
                 OCT     04024
 
-ASTNRET         TC      INTPRET
-                SSP     RTB             # GO PICK UP DISPLAY AT END OF R51:
-                        QMAJ            #       "PROCEED" WILL DO A FINE ALIGNMENT
-                FCADR   P63SPOT2        #       "ENTER" WILL RETURN TO P63SPOT2
-                        R51P63
-P63SPOT2        VLOAD   UNIT            # INITIALIZE KALCMANU FOR BURN ATTITUDE
-                        #R60VSAVE
-                STOVL   POINTVSM
-                        UNITX
-                STORE   SCAXIS
-                EXIT
+                TC      BANKCALL
+                CADR    ASTNCLOK
 
-                CAF     EBANK7
-                TS      EBANK
+                CAF     OCT14
+                TC      BANKCALL
+                CADR    GOPERF1
+                TCF     GOTOPOOH
+                TCF     +2
+                TCF     -5
+
+P63SPOT2        TC      INTPRET
+                CALL
+                        R51
+                EXIT
 
                 INHINT
                 TC      IBNKCALL
@@ -237,14 +215,19 @@ P63SPOT4        TC      BANKCALL        # ENTER         INITIALIZE LANDING RADAR
 
 P63ADRES        GENADR  P63TABLE
 
+IGNADRES        GENADR  IGNALG
+
 CODE500         OCT     00500
 
-99999CON        2DEC    30479.7 B-24
+GUIDDURN        2DEC    +60800
+DDUMCRIT        2DEC    +20 B-28        # CRITERION FOR IGNALG CONVERGENCE
 
-GUIDDURN        2DEC    +65164
-DDUMCRIT        2DEC    +8 B-28         # CRITERION FOR IGNALG CONVERGENCE
-
-ROSEN           EQUALS
+VIGN            2DEC*   +1.69664345 E+1 B-10*
+RIGNX           2DEC*   -3.41873750 E+4 B-24*
+RIGNZ           2DEC*   -4.35548938 E+5 B-24*
+1/KIGNX         2DEC*   -1.99999999 E-1 B+0*
+KIGNY           2DEC*   -0.02430170 E-6 B+8*
+KIGNV           2DEC    -384 E2 B-20
 
 #       ----------------------------------------
 
