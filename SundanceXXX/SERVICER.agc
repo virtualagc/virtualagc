@@ -347,7 +347,7 @@ NORMLIZE        TC              INTPRET
                                 MASS
                 STOVL           MASS1
                                 UNITX
-                STORE           UNFC/2A
+                STORE           UASTEER
                 BON             VLOAD
                                 MUNFLAG
                                 NORMLIZ1
@@ -636,7 +636,7 @@ COPYCYC1        TC              PHASCHNG
                 VSL1
                 STORE           VN1                     # TEMP. REF. VELOCITY VECTOR*2(7)M/CS.
                 ABVAL
-                STOVL           ABVEL
+                STOVL           ABVN1
                                 R1S
                 VXM             VSR4
                                 REFSMMAT
@@ -896,8 +896,8 @@ RPCRTIME        DEC             -6              E2 B-17
 0.175           2DEC            0.175
 0.155           2DEC            0.155
 LRWH            2DEC            0.45454545
-VSCAL3          2DEC            -9.44882011     B-8
-6.25            2DEC            .01905          B-6     # 7.5 FT/SEC AT 2(6) M/CS
+VSCAL3          2DEC            -4.72241006     B-7     # 15.5 FT/SEC AT 2(7) M/CS
+6.25            2DEC            .01905          B-6     # 6.25 FT/SEC AT 2(6) M/CS
 LRHMAX          2DEC            170688              
 2SEC(18)        2DEC            200             B-18
 2SEC(28)        2OCT            00000   00310           # 2SEC AT 2(28)

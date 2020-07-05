@@ -12,13 +12,16 @@ BASENAME=SundanceXXX
 
 EXTRA_YAYUL_ARGS+=--parity
 NO_BINSOURCE=yes
-EXTRA_TARGETS=SundanceDumps.bin diffSundanceXXX
+EXTRA_TARGETS=SundanceDumps.bin diffSundanceXXX.txt checkSundanceXXX
 
 include ../Makefile.inc
 
-.PHONY: diffSundanceXXX
-diffSundanceXXX: ../Tools/bdiffhead SundanceDumps.bin $(BASENAME).bin
-	../Tools/bdiffhead SundanceDumps.bin $(BASENAME).bin | tail -n+2 | wc -l
+diffSundanceXXX.txt: ../Tools/bdiffhead SundanceDumps.bin $(BASENAME).bin
+	../Tools/bdiffhead SundanceDumps.bin $(BASENAME).bin | tail -n+3 > $@
+
+.PHONY: checkSundanceXXX
+checkSundanceXXX: diffSundanceXXX.txt
+	cat $< changes.txt | sed 's/;.*//' | sort | uniq -u | wc -l
 
 SundanceDumps.bin:
 	cat Sundance292-B1.bin Sundance302-B2.bin Sundance302-B3.bin \

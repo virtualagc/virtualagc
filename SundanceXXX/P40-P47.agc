@@ -906,7 +906,7 @@ VGAIN*          STORE           VG                      # VELOCITY TO BE GAINED 
                 MXV             VSL1
                                 REFSMMAT
                 UNIT
-                STORE           UNFC/2
+                STORE           UDSTEER
                 BON             VLOAD
                                 FIRSTFLG
                                 BDTOK
@@ -959,21 +959,21 @@ XPSTEER         SETPD           STQ
                 RTB
                                 TMPTOSPT
                 VLOAD           CALL
-                                UNFC/2
+                                UDSTEER
                                 TRG*SMNB
-                STORE           UNFC/2
+                STORE           UDSTEER
                 VLOAD
                                 DELV
                 UNIT            CALL
                                 *SMNB*
                 VSU             VSR3
-                                UNFC/2A
+                                UASTEER
                 VAD             UNIT
-                                UNFC/2A
-                STORE           UNFC/2A
+                                UASTEER
+                STORE           UASTEER
                 VLOAD           VXV
-                                UNFC/2A
-                                UNFC/2
+                                UASTEER
+                                UDSTEER
                 STORE           10D
                 ABVAL           PUSH
                 DSU             BMN

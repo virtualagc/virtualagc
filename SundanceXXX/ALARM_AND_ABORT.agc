@@ -33,8 +33,8 @@
 ALARM           INHINT
 
                 CA      Q
-ALARM2          TS      ALMCADR
-                INDEX   Q
+                TS      ALMCADR
+ALARM2          INDEX   Q
                 CA      0
 BORTENT         TS      L
 

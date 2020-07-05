@@ -234,7 +234,7 @@ P10ITER         DLOAD   DSU
                 STOVL   DELDEP
                         DELVEET1
                 ABVAL
-                STOVL   DELTPI
+                STOVL   DELVTPI
                         DELVEET2
                 ABVAL   SETPD
                         0

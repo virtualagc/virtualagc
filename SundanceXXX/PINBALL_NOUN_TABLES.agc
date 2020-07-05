@@ -188,7 +188,7 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                 OCT             40000                   # 01 SPECIFY MACHINE ADDRESS (FRACTIONAL)
                 OCT             40000                   # 02 SPECIFY MACHINE ADDRESS (WHOLE)
                 OCT             40000                   # 03 SPECIFY MACHINE ADDRESS (DEGREES)
-                ECADR           DSPTEM1                 # 04 ANGULAR ERROR/DIFFERENCE
+                OCT             0                       # 04 SPARE
                 ECADR           DSPTEM1                 # 05 ANGULAR ERROR/DIFFERENCE
                 ECADR           OPTION1                 # 06 OPTION CODE
                 ECADR           XREG                    # 07 ECADR OF WORD TO BE MODIFIED
@@ -197,17 +197,16 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                 ECADR           ALMCADR                 # 08 ALARM DATA
                 ECADR           FAILREG                 # 09 ALARM CODES
                 OCT             77776                   # 10 CHANNEL TO BE SPECIFIED
-                ECADR           TCSI                    # 11 TIG OF CSI (HRS,MIN,SEC)
-                ECADR           OPTIONX                 # 12 OPTION CODE
-                                                        #       (USED BY EXTENDED VERBS ONLY)
-                ECADR           TCDH                    # 13 TIG OF CDH (HRS,MIN,SEC)
+                OCT             00000                   # 11 SPARE
+                OCT             00000                   # 12 SPARE
+                OCT             00000                   # 13 SPARE
                 ECADR           DSPTEMX                 # 14 CHECKLIST
                                                         #       (USED BY EXTENDED VERBS ONLY)
                 OCT             77777                   # 15 INCREMENT MACHINE ADDRESS
                 ECADR           DSPTEMX                 # 16 TIME OF EVENT (HRS,MIN,SEC)
-                OCT             00000                   # 17 SPARE
+                ECADR           AZ                      # 17 ASTRONAUT TOTAL ATTITUDE
                 ECADR           FDAIX                   # 18 AUTO MANEUVER BALL ANGLES
-                OCT             00000                   # 19 SPARE
+                ECADR           FDAIX                   # 19 BYPASS ATTITUDE TRIM MANEUVER
                 ECADR           CDUX                    # 20 ICDU ANGLES
                 ECADR           PIPAX                   # 21 PIPAS
                 ECADR           THETAD                  # 22 NEW ICDU ANGLES
@@ -217,18 +216,17 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                                                         #       (USED WITH PLEASE PERFORM ONLY)
                 ECADR           DSPTEM1                 # 26 PRIO/DELAY, ADRES, BBCON
                 ECADR           SMODE                   # 27 SELF TEST ON/OFF SWITCH
-
                 OCT             00000                   # 28 SPARE
-                OCT             00000                   # 29 SPARE
-                OCT             0                       # 30 SPARE
-                OCT             0                       # 31 SPARE
+                ECADR           LRFLAGS                 # 29 LANDING RADAR FLAG STATUS
+                ECADR           TCSI                    # 30 TIG OF CSI (HRS,MIN,SEC)
+                ECADR           TCDH                    # 31 TIG OF CDH (HRS,MIN,SEC)
                 ECADR           -TPER                   # 32 TIME TO PERIGEE (HRS,MIN,SEC)
                 ECADR           TIG                     # 33 TIME OF IGNITION (HRS,MIN(SEC)
                 ECADR           DSPTEM1                 # 34 TIME OF EVENT (HRS,MIN,SEC)
                 ECADR           TTOGO                   # 35 TIME TO GO TO EVENT (HRS,MIN,SEC)
                 ECADR           TIME2                   # 36 TIME OF AGC CLOCK (HRS,MIN,SEC)
                 ECADR           TTPI                    # 37 TIG OF TPI (HRS,MIN,SEC)
-                ECADR           TET                     # 38 TIME OF STATE BEING INTEGRATED
+                OCT             00000                   # 38 SPARE
                 OCT             00000                   # 39 SPARE
 # END OF NNADTAB FOR NORMAL NOUNS
 
@@ -258,11 +256,15 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                                                         #    GIMBAL ROLL TRIM
                 OCT             22033                   # 49 DELTA R
                                                         #    DELTA V
-                OCT             0                       # 50 SPARE
+                OCT             64036                   # 50 DELTA ALTITUDE CDH
+                                                        #    DELTA TIME CDH-CSI
+                                                        #    DELTA TIME TPI-CDH
                 OCT             22041                   # 51 S-BAND ANTENNA PITCH
                                                         #                   YAW
                 OCT             00044                   # 52 CENTRAL ANGLE OF ACTIVE VEHICLE
-                OCT             00000                   # 53 SPARE
+                OCT             24047                   # 53 DELTA V (CSI OR TPI)
+                                                        #    DELTA V (CDH OR TPF)
+                                                        #    CROSS RANGE
                 OCT             24052                   # 54 RANGE
                                                         #    RANGE RATE
                                                         #    THETA
@@ -270,8 +272,9 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                                                         #    ELEVATION ANGLE
 
                                                         #    CENTRAL ANGLE
-                OCT             02060                   # 56 RR LOS  AZIMUTH
-                                                        #            ELEVATION
+                OCT             24060                   # 56 NO. OF APSIDAL CROSSINGS
+                                                        #    ELEVATION ANGLE
+                                                        #    DELTA H CDH
                 OCT             20063                   # 57 DELTA R
                 OCT             24066                   # 58 PERIGEE ALT
                                                         #    DELTA V TPI
@@ -302,7 +305,9 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                 OCT             64124                   # 68 SLANT RANGE TO LANDING SIGHT
                                                         #    TIME TO GO IN BRAKING PHASE
                                                         #    LR ALTITUDE - COMPUTED ALTITUDE
-                OCT             00000                   # 69 SPARE
+                OCT             24127                   # 69 DELTA V LAST
+                                                        #    DELTA V DVMON
+                                                        #    DELTA V TOTAL
                 OCT             04132                   # 70 AOT DETENT CODE/STAR CODE
                 OCT             04135                   # 71 AOT DETENT CODE/STAR CODE
                 OCT             02140                   # 72 RR  360 - TRUNNION ANGLE
@@ -342,12 +347,17 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                 OCT             24226                   # 90 Y
                                                         #    Y DOT
                                                         #    PSI
-                OCT             00000                   # 91 SPARE
-                OCT             00000                   # 92 SPARE
+                OCT             64231                   # 91 TPI ALTITUDE
+                                                        #    TIME FROM LAUNCH TO TPI
+                                                        #    ANGLE FROM LAUNCH TO TPI
+                OCT             64234                   # 92 TIME FROM LAUNCH TO TPF
+                                                        #    ANGLE FROM LAUNCH TO TPF
                 OCT             04237                   # 93 DELTA GYRO ANGLES
-                OCT             00000                   # 94 SPARE
-                OCT             0                       # 95 SPARE
-                OCT             0                       # 96 SPARE
+                OCT             64242                   # 94 CSI ALTITUDE
+                                                        #    TIME FROM LAUNCH TO CSI
+                                                        #    ANGLE FROM LAUNCH TO CSI
+                OCT             04245                   # 95 PERF ATT ICDU ANGLES
+                OCT             04250                   # 96 +X AXIS ATT ICDU ANGLES
                 OCT             04253                   # 97 SYSTEM TEST INPUTS
                 OCT             04256                   # 98 SYSTEM TEST RESULTS
                 OCT             22261                   # 99 RMS IN POSITION
@@ -360,23 +370,23 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             04040                   # 01 3COMP  FRACTIONAL
                 OCT             04140                   # 02 3COMP  WHOLE
                 OCT             04102                   # 03 3COMP  CDU DEGREES
-                OCT             00504                   # 04 1COMP  DPDEG(360)
+                OCT             00000                   # 04        SPARE
                 OCT             00504                   # 05 1COMP  DPDEG(360)
-                OCT             04000                   # 06 3COMP  OCTAL ONLY
+                OCT             02000                   # 06 3COMP  OCTAL ONLY
                 OCT             04000                   # 07 3COMP  OCTAL ONLY
                 OCT             04000                   # 08 3COMP  OCTAL ONLY
                 OCT             04000                   # 09 3COMP  OCTAL ONLY
                 OCT             00000                   # 10 1COMP  OCTAL ONLY
-                OCT             24400                   # 11 3COMP  HMS (DEC ONLY)
-                OCT             02000                   # 12 2COMP  OCTAL ONLY
-                OCT             24400                   # 13 3COMP  HMS (DEC ONLY)
+                OCT             00000                   # 11        SPARE
+                OCT             00000                   # 12        SPARE
+                OCT             00000                   # 13        SPARE
 
                 OCT             04140                   # 14 3COMP  WHOLE
                 OCT             00000                   # 15 1COMP  OCTAL ONLY
                 OCT             24400                   # 16 3COMP  HMS (DEC ONLY)
-                OCT             0                       # 17       SPARE
+                OCT             04102                   # 17 3COMP  CDU DEG
                 OCT             04102                   # 18 3COMP  CDU DEG
-                OCT             00000                   # 19        SPARE
+                OCT             04102                   # 19 3COMP  CDU DEG
                 OCT             04102                   # 20 3COMP  CDU DEGREES
                 OCT             04140                   # 21 3COMP  WHOLE
                 OCT             04102                   # 22 3COMP  CDU DEGREES
@@ -387,15 +397,15 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             00140                   # 27 1COMP  WHOLE
                 OCT             00000                   # 28        SPARE
                 OCT             00000                   # 29        SPARE
-                OCT             0                       # 30 SPARE
-                OCT             0                       # 31 SPARE
+                OCT             24400                   # 30 3COMP  HMS (DEC ONLY)
+                OCT             24400                   # 31 3COMP  HMS (DEC ONLY)
                 OCT             24400                   # 32 3COMP  HMS (DEC ONLY)
                 OCT             24400                   # 33 3COMP  HMS (DEC ONLY)
                 OCT             24400                   # 34 3COMP  HMS (DEC ONLY)
                 OCT             24400                   # 35 3COMP  HMS (DEC ONLY)
                 OCT             24400                   # 36 3COMP  HMS (DEC ONLY)
                 OCT             24400                   # 37 3COMP  HMS (DEC ONLY)
-                OCT             24400                   # 38 3COMP  HMS (DEC ONLY)
+                OCT             00000                   # 38        SPARE
                 OCT             00000                   # 39        SPARE
 # END OF NNTYPTAB FOR NORMAL NOUNS
 
@@ -419,17 +429,19 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                                                         #           (DEC ONLY)
                 OCT             00510                   # 49 2COMP  POS4, VEL3
                                                         #           (DEC ONLY)
-                OCT             0                       # 50        SPARE
+                OCT             00010                   # 50 3COMP  POS4, MIN/SEC, MIN/SEC
+                                                        #           (NO LOAD, DEC ONLY)
                 OCT             00204                   # 51 2COMP  DPDEG(360), DPDEG(360)
-
                                                         #           (DEC ONLY)
                 OCT             00004                   # 52 1COMP  DPDEG(360)
-                OCT             00000                   # 53        SPARE
+                OCT             20512                   # 53 3COMP  VEL3, VEL3, POS4
+                                                        #           (DEC ONLY)
                 OCT             10507                   # 54 3COMP  POS5, VEL3, DPDEG(360)
                                                         #           (DEC ONLY)
                 OCT             10200                   # 55 3COMP  WHOLE, DPDEG(360), DPDEG(360)
                                                         #           (DEC ONLY)
-                OCT             00204                   # 56 2COMP  DPDEG(360), DPDEG(360)
+                OCT             20200                   # 56 3COMP  WHOLE, DPDEG(360), POS4
+                                                        #           (DEC ONLY)
                 OCT             00010                   # 57 1COMP  POS4
                                                         #           (DEC ONLY)
                 OCT             24510                   # 58 3COMP  POS4, VEL3, VEL3
@@ -452,14 +464,15 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             53223                   # 67 3COMP LANDING RADAR VELX, Y, Z
                 OCT             60026                   # 68 3COMP  POS7, MIN/SEC, COMP ALT
                                                         #           (NO LOAD, DEC ONLY)
-                OCT             00000                   # 69        SPARE
+                OCT             24000                   # 69 3COMP  WHOLE, WHOLE, VEL3
+                                                        #           (DEC ONLY)
                 OCT             0                       # 70 3COMP  OCTAL ONLY FOR EACH
                 OCT             0                       # 71 3COMP  OCTAL ONLY FOR EACH
                 OCT             00102                   # 72 2COMP  360-CDU DEG, CDU DEG
                 OCT             00102                   # 73 2COMP  360-CDU DEG, CDU DEG
                 OCT             10200                   # 74 3COMP  MIN/SEC, DPDEG(360), DPDEG(360)
                                                         #           (NO LOAD, DEC ONLY)
-                OCT             00010                   # 75 3COMP  POS4, MIN/SEC, MIN/SEC
+                OCT             60500                   # 75 3COMP  2INT, VEL3, COMP ALT
                                                         #           (NO LOAD, DEC ONLY)
                 OCT             00410                   # 76 3COMP  POS4, POS4
                                                         #           (DEC ONLY)
@@ -489,12 +502,12 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                                                         #           (DEC ONLY)
                 OCT             10507                   # 90 3COMP  POS5, VEL3, DPDEG(360)
                                                         #           (DEC ONLY)
-                OCT             00000                   # 91        SPARE
-                OCT             00000                   # 92        SPARE
+                OCT             62010                   # 91 3COMP  ALT RATE, WHOLE, DPDEG(XXXX.X)
+                OCT             62000                   # 92 3COMP  WHOLE, WHOLE, DPDEG(XXXX.X)
                 OCT             06143                   # 93 3COMP  DPDEG(90) FOR EACH
-                OCT             00000                   # 94        SPARE
-                OCT             0                       # 95        SPARE
-                OCT             0                       # 96        SPARE
+                OCT             62010                   # 94 3COMP  ALT RATE, WHOLE, DPDEG(XXXX.X)
+                OCT             04012                   # 95 3COMP  VEL3, WHOLE, CDU DEG
+                OCT             04012                   # 96 3COMP  VEL3, WHOLE, CDU DEG
                 OCT             00000                   # 97 3COMP  WHOLE FOR EACH
                 OCT             00000                   # 98 3COMP  WHOLE, FRAC, WHOLE
                 OCT             01572                   # 99 3COMP  POS9, VEL4
@@ -531,7 +544,8 @@ SFINTAB         OCT             00006                   # WHOLE, DP TIME (SEC)
                 OCT             21135
                 OCT             77766                   # RENDEZVOUS RADAR RANGE RATE
                 OCT             50711
-                2DEC*           .9267840599     E5 B-28*# LANDING RADAR ALTITUDE
+                OCT             00005                   # LANDING RADAR ALTITUDE
+                OCT             24733
                 OCT             00002                   # INITIAL/FINAL ALTITUDE
                 OCT             23224
                 OCT             00014                   # ALTITUDE RATE
@@ -586,7 +600,8 @@ SFOUTAB         OCT             05174                   # WHOLE, DP TIME (SEC)
                 OCT             14552
                 OCT             74552                   # RENDEZVOUS RADAR RANGE RATE
                 OCT             70307
-                2DEC            1.079           E-5 B14 # LANDING RADAR ALTITUDE
+                OCT             05521                   # LANDING RADAR ALTITUDE
+                OCT             30260
                 OCT             14226                   # INITIAL/FINAL ALTITUDE
                 OCT             31757
                 OCT             02476                   # ALTITUDE RATE
@@ -644,28 +659,27 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           R22DISP                 # 49 POS4                             DP3
                 ECADR           R22DISP         +2      # 49 VEL3                             DP3
                 OCT             00000                   # 49 SPARE COMPONENT
-                OCT             0                       # 50 SPARE
-                OCT             0                       # 50 SPARE
-                OCT             0                       # 50 SPARE
+                ECADR           DIFFALT                 # 50 POS4                             DP3
+                ECADR           T1TOT2                  # 50 MIN/SEC                          M/S
+                ECADR           T2TOT3                  # 50 MIN/SEC                          M/S
                 ECADR           ALPHASB                 # 51 DPDEG(360)                       DP4
                 ECADR           BETASB                  # 51 DPDEG(360)                       DP4
                 OCT             0                       # 51 SPARE COMPONENT
                 ECADR           ACTCENT                 # 52 DPDEG(360)                       DP4
                 OCT             00000                   # 52 SPARE COMPONENT
                 OCT             00000                   # 52 SPARE COMPONENT
-                OCT             00000                   # 53 SPARE
-                OCT             00000                   # 53
-                OCT             00000                   # 53
+                ECADR           DELVTPI                 # 53 
+                ECADR           DELVTPF                 # 53
+                ECADR           P1XMAX                  # 53
                 ECADR           RANGE                   # 54 POS5                             DP1
                 ECADR           RRATE                   # 54 VEL3                             DP3
                 ECADR           RTHETA                  # 54 DPDEG(360)                       DP4
                 ECADR           NN                      # 55 WHOLE                            ARTH
                 ECADR           ELEV                    # 55 DPDEG(360)                       DP4
                 ECADR           CENTANG                 # 55 DPDEG(360)                       DP4
-                ECADR           RR-AZ                   # 56 DPDEG(360)                       DP4
-                ECADR           RR-ELEV                 # 56 DPDEG(360)                       DP4
-                OCT             0                       # 56 SPARE COMPONENT
-
+                ECADR           NN                      # 56 
+                ECADR           ELEV                    # 56
+                ECADR           CDHDELH                 # 56 
                 ECADR           DELTAR                  # 57 POS4                             DP3
                 OCT             0                       # 57 SPARE COMPONENT
                 OCT             0                       # 57 SPARE COMPONENT
@@ -702,9 +716,9 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           RANGEDSP                # 68 POS7                             DP4
                 ECADR           TTFDISP                 # 68 MIN/SEC                          M/S
                 ECADR           DELTAH                  # 68 COMP ALT                         DP1
-                OCT             00000                   # 69 SPARE
-                OCT             00000                   # 69
-                OCT             00000                   # 69
+                ECADR           TTFDISP                 # 69
+                ECADR           DELTAH                  # 69
+                ECADR           ABDELV                  # 69
                 ECADR           AOTCODE                 # 70 OCTAL ONLY                       OCT
                 ECADR           AOTCODE         +1      # 70 OCTAL ONLY                       OCT
                 ECADR           AOTCODE         +2      # 70 OCTAL ONLY                       OCT
@@ -721,9 +735,9 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           TTOGO                   # 74 MIN/SEC                          M/S
                 ECADR           YAW                     # 74 DPDEG(360)                       DP4
                 ECADR           PITCH                   # 74 DPDEG(360)                       DP4
-                ECADR           DIFFALT                 # 75 POS4                             DP3
-                ECADR           T1TOT2                  # 75 MIN/SEC
-                ECADR           T2TOT3                  # 75 MIN/SEC                          M/S
+                ECADR           TTOGO                   # 75
+                ECADR           DVTOTAL                 # 75
+                ECADR           HCALC                   # 75
                 ECADR           XRANGE                  # 76 POS4                             DP3
                 ECADR           APO                     # 76 POS4                             DP3
                 OCT             0                       # 76 SPARE COMPONENT
@@ -733,9 +747,9 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           RSTACK                  # 78 RR RANGE                         DP1
                 ECADR           RSTACK          +2      # 78 RR RANGE RATE                    DP1
                 OCT             00000                   # 78 SPARE COMPONENT
-                ECADR           ATY                     # 79 CDU DEG                          CDU
-                ECADR           ATY                     # 79 CDU DEG                          CDU
-                ECADR           ATY                     # 79 WHOLE                            ARTH
+                ECADR           ATY                     # 79
+                ECADR           ATY                     # 79
+                ECADR           ATY                     # 79
                 ECADR           DATAGOOD                # 80 WHOLE                            ARTH
                 ECADR           OMEGAD                  # 80 DPDEG(360)                       DP4
                 OCT             0                       # 80 SPARE COMPONENT
@@ -763,31 +777,30 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           STARAD                  # 88 FRAC                             FRAC
                 ECADR           STARAD          +2      # 88 FRAC                             FRAC
                 ECADR           STARAD          +4      # 88 FRAC                             FRAC
-                ECADR           LANDLAT                 # 89 DPDEG(90)                        DP3
-                ECADR           LANDLONG                # 89 DPDEG(90)                        DP3
-                ECADR           LANDALT                 # 89 POS5                             DP1
+                ECADR           ATY                     # 89
+                ECADR           ATY                     # 89
+                ECADR           ATY                     # 89
                 ECADR           RANGE                   # 90 POS5                             DP1
-
                 ECADR           RRATE                   # 90 VEL3                             DP3
                 ECADR           RTHETA                  # 90 DPDEG(360)                       DP4
-                OCT             00000                   # 91 SPARE
-                OCT             00000                   # 91
-                OCT             00000                   # 91
-                OCT             00000                   # 92 SPARE
-                OCT             00000                   # 92
-                OCT             00000                   # 92
+                ECADR           INJALT                  # 91
+                ECADR           TPITIME                 # 91
+                ECADR           TPIANGLE                # 91
+                ECADR           SPARE                   # 92 SPARE
+                ECADR           INJTIME                 # 92
+                ECADR           INJANGLE                # 92
                 ECADR           OGC                     # 93 DPDEG(90)                        DP3
                 ECADR           OGC             +2      # 93 DPDEG(90)                        DP3
                 ECADR           OGC             +4      # 93 DPDEG(90)                        DP3
-                OCT             00000                   # 94 SPARE
-                OCT             00000                   # 94
-                OCT             00000                   # 94
-                OCT             0                       # 95 SPARE
-                OCT             0                       # 95 SPARE
-                OCT             0                       # 95 SPARE
-                OCT             0                       # 96 SPARE
-                OCT             0                       # 96 SPARE
-                OCT             0                       # 96 SPARE
+                ECADR           INJALT                  # 94
+                ECADR           INJTIME                 # 94
+                ECADR           INJANGLE                # 94
+                ECADR           CPHI                    # 95
+                ECADR           CTHETA                  # 95
+                ECADR           CPSI                    # 95
+                ECADR           SPARE                   # 96 SPARE
+                ECADR           SPARE           +1      # 96 SPARE
+                ECADR           SPARE           +2      # 96 SPARE
                 ECADR           DSPTEM1                 # 97 WHOLE                            ARTH
                 ECADR           DSPTEM1         +1      # 97 WHOLE                            ARTH
                 ECADR           DSPTEM1         +2      # 97 WHOLE                            ARTH
@@ -811,14 +824,13 @@ RUTMXTAB        OCT             16351                   # 40 M/S, DP3, DP3
                 OCT             00553                   # 47 ARITH1, ARITH1
                 OCT             00143                   # 48 ARTH, ARTH
                 OCT             00347                   # 49 DP3, DP3
-                OCT             0                       # 50 SPARE
+                OCT             22447                   # 50
                 OCT             00512                   # 51 DP4, DP4
                 OCT             00012                   # 52 DP4
-                OCT             00000                   # 53 SPARE
+                OCT             16347                   # 53
                 OCT             24344                   # 54 DP1, DP3, DP4
                 OCT             24503                   # 55 ARTH, DP4, DP4
-
-                OCT             00512                   # 56 DP4, DP4
+                OCT             16503                   # 56
                 OCT             00007                   # 57 DP3
                 OCT             16347                   # 58 DP3, DP3, DP3
                 OCT             16347                   # 59 DP3, DP3, DP3
@@ -831,13 +843,13 @@ RUTMXTAB        OCT             16351                   # 40 M/S, DP3, DP3
                 OCT             00304                   # 66 DP1, LRPOS
                 OCT             10204                   # 67 DP1, DP1, DP1
                 OCT             10452                   # 68 DP4, M/S, DP1
-                OCT             00000                   # 69 SPARE
+                OCT             16143                   # 69
                 OCT             0                       # 70 OCT, OCT, OCT
                 OCT             0                       # 71 OCT, OCT, OCT
                 OCT             00115                   # 72 360-CDU, CDU
                 OCT             00115                   # 73 360-CDU, CDU
                 OCT             24511                   # 74M/S, DP4, DP4
-                OCT             22447                   # 75 DP3, M/S, M/S
+                OCT             10351                   # 75
                 OCT             00347                   # 76 DP3, DP3
                 OCT             00351                   # 77 M/S, DP3
                 OCT             00204                   # 78 DP1, DP1
@@ -853,12 +865,12 @@ RUTMXTAB        OCT             16351                   # 40 M/S, DP3, DP3
                 OCT             02041                   # 88 FRAC FOR EACH
                 OCT             10347                   # 89 DP3, DP3, DP1
                 OCT             24344                   # 90 DP1, DP3, DP4
-                OCT             00000                   # 91 SPARE
-                OCT             00000                   # 92 SPARE
+                OCT             16447                   # 91
+                OCT             16447                   # 92
                 OCT             16347                   # 93 DP3, DP3, DP3
-                OCT             00000                   # 94 SPARE
-                OCT             0                       # 95 SPARE
-                OCT             0                       # 96 SPARE
+                OCT             16447                   # 94
+                OCT             04102                   # 95
+                OCT             04102                   # 96
                 OCT             06143                   # 97 ARTH, ARTH, ARTH
                 OCT             06043                   # 98 ARTH, FRAC, ARTH
                 OCT             00252                   # 99 DP4, DP2
