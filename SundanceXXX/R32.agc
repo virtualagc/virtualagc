@@ -48,13 +48,13 @@ JOBR32          TC      UNK7766
                 CAF     V06N84          # FLASH LAST DELTA V,
                 TC      BANKCALL        # AND WAIT FOR KEYBOARD ACTION.
                 CADR    GOMARKF
-                TCF     ENDR32
+                TC      ENDR32
                 TC      +2              # PROCEED
                 TC      -5              # STORE DATA AND REPEAT FLASHING
                 CAF     V06N84 +1       # FLASH VERB 06 NOUN 33, DISPLAY LAST TIG,
                 TC      BANKCALL        # AND WAIT FOR KEYBOARD ACTION.
                 CADR    GOMARKF
-                TCF     ENDR32
+                TC      ENDR32
                 TC      +2
                 TC      -5
                 TC      INTPRET         # RETURN TO INTERPRETIVE CODE
@@ -129,7 +129,7 @@ ENDR32          TC      INTPRET
                         R32FLAG
                 CAF     ZERO
                 TS      MARKCTR         # CLEAR RR TRACKING MARK COUNTER
-                TCF     GOTOPOOH
+                TCF     ENDEXT
 
 V06N84          NV      0684
                 NV      0633

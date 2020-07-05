@@ -610,9 +610,9 @@ JOEY            EXTEND                  # FORM THE RATE ERROR.
                 SU      OMEGAP
                 TS      EDOTP
                 CCS     EDOTP
-                TC      +3
-                TC      +2
-                TC      +1
+                TCF     +3
+                TCF     +2
+                TCF     +1
                 TS      ABSEDOTP
                 AD      TARGETDB
                 EXTEND
@@ -621,7 +621,7 @@ JOEY            EXTEND                  # FORM THE RATE ERROR.
 
 PEGI            CA      CDUX            # DIRECT RATE CONTROL.
                 TS      CDUXD
-                AD      EDOTP
+                CA      EDOTP
                 EXTEND
                 MP      1/2JTSP         # 1/2JTSP SCALED AT 2EXP(7)/PI
                 DAS     A

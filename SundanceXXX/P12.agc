@@ -61,7 +61,7 @@ P12INIT         DLOAD                   # INITIALIZE ENGINE DATA.  USED FOR P12 
                 STODL   AT
                         (TBUP)A
                 STODL   TBUP
-                        ATDECAY
+                        ATDECAY*
                 STODL   TTO
                         APSVEX
                 STORE   VE

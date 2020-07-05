@@ -741,7 +741,7 @@ DT/2MAX         2DEC    4000 E2 B-20
 
 INTSTALL        EXIT
                 TC      UPFLAG
-                ADRES   KILLROSE
+                ADRES   INTFLG2
                 CAF     ZERO
 ALLSTALL        TS      L
                 CA      RASFLAG
@@ -776,7 +776,7 @@ INTWAKE         CS      RASFLAG         # IS THIS INTSTALLED ROUTINE TO BE
                 BZF     GOBAC           # DONT INTWAKE IF WE CAME HERE VIA RESTART
 
 INTWAKE1        TC      DOWNFLAG
-                ADRES   KILLROSE
+                ADRES   INTFLG2
                 CAF     ZERO
 WAKE            TS      STALTEM         # INDEX OF ANY STALL USER
 WAKE1           INDEX   STALTEM

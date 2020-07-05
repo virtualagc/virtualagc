@@ -75,7 +75,7 @@ READACCS        CS              FLAGWRD6
                 CCS             A
                 TCF             PIPSDONE        -1
 
-                TC              FLAGWRD7
+                CS              FLAGWRD7
                 MASK            SWANDBIT
                 CCS             A
                 TCF             SWANDOFF
@@ -561,9 +561,9 @@ LRHTASK         CA              READLBIT
 
 HIGATASK        INHINT
                 CS              PRIO3                   # SET HIGATE AND LR INHIBIT FLAGS
-                MASK            FLGWRD11
+                MASK            LRSTAT   
                 AD              PRIO3
-                TS              FLGWRD11
+                TS              LRSTAT   
                 CAF             PRIO32
                 TC              FINDVAC                 # SET LR POSITIONING JOB (POS2)
                 EBANK=          HMEAS
@@ -591,7 +591,7 @@ MUNRETRN        EXIT
                 BZF             25KCHK                  # ALT WAS > 35000 FT LAST CYCLE   CHK NOW
 
 HITEST          CAF             PSTHIBIT                # CHECK FOR HIGATE
-                MASK            FLGWRD11
+                MASK            LRSTAT   
                 EXTEND
                 BZF             HIGATCHK                # NOT AT HIGATE LAST CYCLE-CHK THIS CYCLE
 
@@ -726,9 +726,9 @@ XORCHK          CAF             SIX                     # ARE WE BELOW 30000 FT?
                 CADR            ALTCHK
                 TCF             CONTSERV                # CONTINUE LR UPDATE
                 TC              UPFLAG                  # YES: INHIBIT X-AXIS OVERRIDE
-                ADRES           XOVINFLG
+                CADR            XOVINFLG
                 TC              UPFLAG
-                ADRES           XORFLG
+                CADR            XORFLG
                 TCF             CONTSERV                # CONTINUE LR UPDATE
 
 
@@ -830,7 +830,7 @@ KPIP            2DEC            .1024                   # SCALES DELV TO UNITS O
 -MUDT           2DEC*           -7.9720645      E+12 B-44*
 -MUDT1          2DEC*           -9.8055560      E+10 B-44*
 
-UNUSEDF3        2DEC            0.390625        B-14
+UNUSEDF3        2DEC            12800
 
 DP1/20          2DEC            0.05
 RESQ            2DEC*           40.6809913      E12 B-58*
@@ -839,8 +839,8 @@ RESQ            2DEC*           40.6809913      E12 B-58*
 ALTCONV         2DEC            1.399078846     B-4     # CONVERTS M*2(-24) TO BIT UNITS *2(-28).
 ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO BIT UNITS<
 1SEC(7)         2DEC            100             B-7
-DPSVEX1         2DEC            -3004.7575      E-2 B-5
-APSVEX1         2DEC            -3030.0259      E-2 B-5
+DPSVEX1         2DEC            -3004.75757     E-2 B-6
+APSVEX1         2DEC            -3030.0259      E-2 B-6
 200B17          =               2SEC(17)
 
 #****************************************************************************************************************
@@ -895,8 +895,8 @@ KPIP2           2DEC            .0064                   # SCALES DELV TO UNITS O
 RPCRTIME        DEC             -6              E2 B-17
 0.175           2DEC            0.175
 0.155           2DEC            0.155
-LRWH            2DEC            0.45454545
-VSCAL3          2DEC            -4.72241006     B-7     # 15.5 FT/SEC AT 2(7) M/CS
+LRWH            2DEC            0.45454545      B1
+VSCAL3          2DEC            -4.72441006     B-7     # 15.5 FT/SEC AT 2(7) M/CS
 6.25            2DEC            .01905          B-6     # 6.25 FT/SEC AT 2(6) M/CS
 LRHMAX          2DEC            170688              
 2SEC(18)        2DEC            200             B-18
@@ -916,11 +916,11 @@ LRWVX           2DEC            0.4
 BITS4-7         OCT             110
 
 UPDATCHK        CAF             NOLRRBIT                # SEE IF LR UPDATE INHIBITED.
-                MASK            FLGWRD11
+                MASK            LRSTAT   
                 CCS             A
                 TCF             CONTSERV                # IT IS-NO LR UPDATE
                 CAF             RNGEDBIT                # NO INHIBIT - SEE ALT MEAS. THIS CYCLE.
-                MASK            FLGWRD11
+                MASK            LRSTAT   
                 EXTEND
                 BZF             VMEASCHK                # NO ALT MEAS THIS CYCLE-CHECK FOR VEL
 
@@ -953,7 +953,7 @@ POSUPDAT        TC              INTPRET
                 CCS             OVFIND
                 TCF             HFAIL                   # DELTA H TOO LARGE
 
-                CS              FLAGWRD1
+                CA              FLAGWRD1
                 MASK            HINHFBIT
                 CCS             A
                 TCF             VMEASCHK                # UPDATE INHIBITED - TEST VELOCITY ANYWAY
@@ -1106,7 +1106,7 @@ NOLITE          CA              LRMCTR                  # SET S = M
                 TS              VSELECT
                 TCF             VALTCHK
 
-VUPDAT          CS              FLAGWRD0
+VUPDAT          CA              FLAGWRD0
                 MASK            VINHFBIT
                 CCS             A
                 TCF             VALTCHK                 # UPDATE INHIBITED
@@ -1204,7 +1204,7 @@ LRVJOB          INHINT
                 MASK            VELDABIT                # MEASUREMENT MADE.
                 ADS             LRSTAT
 
-                TCF             ENDOFJOB
+                TC              ENDOFJOB
 
 # LRHJOB IS SET BY LRHTASK WHEN LEM IS BELOW 25000 FT.  THIS JOB
 # INITIALIZES THE LR READ ROUTINE FOR AN ALT MEASUREMENT AND GOES TO
@@ -1263,7 +1263,7 @@ HIGATJOB        TC              BANKCALL                # START LRPOS2 JOB
                 CADR            LRPOS2
                 TC              BANKCALL                # PUT HIGATJOB TO SLEEP UNTIL JOB IS DONE
                 CADR            RADSTALL
-                TCF             ENDOFJOB                # BAD END
+                TC              ENDOFJOB                # BAD END
 
                 TC              SETPOS2                 # LR IN POS2 - SET UP TRANSFORMATIONS
 

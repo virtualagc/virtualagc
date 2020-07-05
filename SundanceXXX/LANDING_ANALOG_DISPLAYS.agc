@@ -52,10 +52,10 @@ ARCOMP          CA      RUNIT           # COMPUTE ALTRATE = RUNIT.VVECT M/CS *2(
                 CA      ARCONV          # CONVERT ALTRATE TO BIT UNITS (.5FPS/BIT)
                 EXTEND
                 MP      RUPTREG1
-                DDOUBL
-                DDOUBL
+                DOUBLE
+                DOUBLE
                 XCH     RUPTREG1        # ALTITUDE RATE IN BIT UNITS*2(-14).
-                CA      DALTRATE        # ALTITUDE RATE COMPENSATION FACTOR.
+                CS      DALTRATE        # ALTITUDE RATE COMPENSATION FACTOR.
                 EXTEND
                 MP      DT
                 AD      RUPTREG1
@@ -76,7 +76,7 @@ LANDELAY        CCS     PIPCTR
                 TCF     TASKOVER
                 TS      PIPCTR
                 TC      FIXDELAY
-                DEC     30
+                DEC     24
                 TCF     LANDISP
 
 ALTOUT          TC      DISINDAT        # CHECK MODE SELECT SWITCH AND DIDFLG.
@@ -280,7 +280,7 @@ LATFWDV         CA      ITEMP4          # COMPUTE LATERAL AND FORWARD VELOCITIES
                 CA      VELCONV         # CONVERT LATERAL VELOCITY TO BIT UNITS.
                 EXTEND
                 MP      RUPTREG1
-                DDOUBL
+                DOUBLE
                 XCH     LATVEL          # LATERAL VELOCITY IN BIT UNITS *2(-14).
                 CA      ITEMP4          # COMPUTE FORWARD VELOCITY.
                 EXTEND
@@ -294,7 +294,7 @@ LATFWDV         CA      ITEMP4          # COMPUTE LATERAL AND FORWARD VELOCITIES
                 CA      VELCONV         # CONVERT FORWARD VELOCITY TO BIT UNITS.
                 EXTEND
                 MP      RUPTREG1
-                DDOUBL
+                DOUBLE
                 XCH     FORVEL          # FORWARD VELOCITY IN BIT UNITS *2(-14).
 
                 CS      MAXVBITS        # ACC.=-199.9989 FT./SEC.
@@ -333,7 +333,7 @@ POSVMAXY        CS      LATVMETR
                 AD      MAXVBITS
                 XCH     RUPTREG3
                 CAF     ONE
-                TCF     ZEROLSTY +3
+                TCF     ZEROLSTY +2
 LASTNEGY        CA      LATVEL
                 EXTEND
                 BZMF    NEGVMAXY
@@ -344,7 +344,7 @@ NEGVMAXY        CA      LATVMETR
                 COM
                 XCH     RUPTREG3
                 CS      ONE
-                TCF     ZEROLSTY +3
+                TCF     ZEROLSTY +2
 LVLIMITS        CCS     TRAKLATV
                 TCF     LATVPOS
                 TCF     +2
@@ -429,9 +429,9 @@ LASTPOSZ        CA      FORVEL
                 TCF     ZEROLSTZ
 POSVMAXZ        CS      FORVMETR
                 AD      MAXVBITS
-                XCH     RUPTREG3
+                XCH     RUPTREG4
                 CAF     ONE
-                TCF     ZEROLSTZ +3
+                TCF     ZEROLSTZ +2
 LASTNEGZ        CA      FORVEL
                 EXTEND
                 BZMF    NEGVMAXZ
@@ -440,9 +440,9 @@ LASTNEGZ        CA      FORVEL
 NEGVMAXZ        CA      FORVMETR
                 AD      MAXVBITS
                 COM
-                XCH     RUPTREG3
+                XCH     RUPTREG4
                 CS      ONE
-                TCF     ZEROLSTZ +3
+                TCF     ZEROLSTZ +2
 FVLIMITS        CCS     TRAKFWDV
                 TCF     FORVPOS
                 TCF     +2
@@ -487,13 +487,13 @@ NEGLMFV         CA      FORVEL
                 TCF     ZEROLSTZ
 FVMINLM         CS      FORVMETR
                 AD      FORVEL
-ZEROLSTZ        XCH     RUPTREG3
+ZEROLSTZ        XCH     RUPTREG4
                 CAF     ZERO
                 TS      TRAKFWDV
-                CA      RUPTREG3
+                CA      RUPTREG4
                 AD      NEG0            # AVOIDS +0 DINC HARDWARE MALFUNCTION
-                TS      CDUTCMD
-                CA      RUPTREG3
+                TS      CDUSCMD
+                CA      RUPTREG4
                 ADS     FORVMETR
                 TC      LADQSAVE        # GO TO ALTROUT +1 OR TO ALTOUT +1
 ZERODATA        CAF     ZERO            # ZERO ALTSAVE AND ALTSAVE +1 - - -

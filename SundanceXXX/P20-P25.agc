@@ -326,7 +326,7 @@ UPPSV3          CLEAR           RTB
 PROG22          TC              2PHSCHNG
                 OCT             4
                 OCT             05022
-                OCT             26000
+                OCT             06000
 
                 INHINT
                 CS              FLAGWRD8
@@ -1842,7 +1842,7 @@ NODESNB         CAF             ONE
                 TC              RMODINV                 # REINVERT MODE BIT.
                 TC              ALARM                   # BAD INPUT ANGLES.
                 OCT             502
-                TC              DESRTRN +1              # AVOID 503 ALARM.
+                TCF             DESRTRN +1              # AVOID 503 ALARM.
 
 RRLIMNB         INDEX           Q                       # THIS ROUTINE IS IDENTICAL TO RRLIMCHK
                 CAF             0                       # EXCEPT THAT THE MODE 1 SHAFT LOWER
@@ -1955,7 +1955,7 @@ STDESIG         CAF             BIT11
                 EXTEND
                 BZF             STDESIG1
                 CCS             LOSCOUNT
-                TC              STDESIG -1
+                TC              STDESIG1        -1
 
                 CAF             PRIO26
                 TC              FINDVAC
@@ -2201,7 +2201,7 @@ NOTP20          EXIT
                 CCS             A
                 TC              RROUT
 
-                TC              ENDOFJOB
+                TCF             ENDOFJOB
 
 
 RDESGAIN        DEC             .53624                  # TRIES TO NULL .5 ERROR IN .5 SEC.
@@ -3931,7 +3931,7 @@ V06N99DS        CAF             V06N99
                 TC              BANKCALL
                 CADR            GOXDSPFR
                 TCF             ENDEXT
-                TCF             V06N9933
+                TC              V06N9933
                 TC              +4
                 CAF             BIT3
                 TC              BLANKET

@@ -193,7 +193,7 @@ S30.1           STQ     DLOAD
                         LEMPREC         # ENCKE ROUTINE FOR LEM
                         
                 VLOAD
-                        RATT
+                        RATT1
                 STORE   RVEC
                 STORE   RTIG            # RADIUS VECTOR AT IGNITION TIME
                 UNIT    VCOMP

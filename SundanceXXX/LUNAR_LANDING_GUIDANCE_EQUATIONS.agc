@@ -158,7 +158,7 @@ P65START        TC              NEWMODEX
                 CS              TWO
                 TS              WCHVERT
                 TC              DOWNFLAG                # PERMIT X-AXIS OVERRIDE
-                ADRES           XOVINFLG
+                CADR            XOVINFLG
 
                 TCF             TTFINCR
 
@@ -596,7 +596,7 @@ EXGSUB          CCS             NGUIDSUB
                 CS              BIT5
                 AD              NIGNLOOP
                 EXTEND
-                BZF             +3
+                BZMF            +3
                 TC              ALARM
                 OCT             01412
 
@@ -684,7 +684,7 @@ DISPEXIT        EXTEND                                  # KILL GROUP 3:  DISPLAY
                 BZF             ENDLLJOB                # TO PICK UP THE TAG
 
                 INDEX           WCHPHASE
-                TCF             -1
+                TCF             0 -1
 
 P63DISPS        CAF             V06N63
 DISPCOMN        TC              BANKCALL
@@ -1174,7 +1174,7 @@ TSCALINV        =               BIT4
 SCTTFDSP        DEC             .08                     # RESCALES FROM 2(-17) CS TO WHOLE SECONDS
 
 
-360DEGS         DEC             +1360
+360DEGS         DEC             +360
 
 
 TAUVERT         2DEC            600             B-14
@@ -1215,13 +1215,13 @@ MOONG           2DEC            -1.6226         E-4 B2
 DEPRCRIT        2DEC            -.02            B-2     # DEPRESSION ANGLE CRITERION
 
 
-PROJMAX         DEC             .42262          B-3     # SIN(25')/8 TO COMPARE WITH PROJ
+PROJMAX         2DEC            .42262          B-3     # SIN(25')/8 TO COMPARE WITH PROJ
 
 
-PROJMIN         DEC             .25882          B-3     # SIN(15')/8 TO COMPARE WITH PROJ
+PROJMIN         2DEC            .25882          B-3     # SIN(15')/8 TO COMPARE WITH PROJ
 
 
-PROJDIV         DEC             .198            B-3
+PROJDIV         2DEC            .1638           B-3
 
 
 V06N63          VN              0663                    # P63

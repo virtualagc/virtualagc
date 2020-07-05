@@ -212,7 +212,7 @@ OANB            SETPD           STQ
                 STADR                                   # UP 0-1
                 STOVL           SCAXIS          +4      # OAZ=1/2COS(ELV)COS(AZ)
                                 18D                     # LOAD UYP VEC
-                VXV             UNIT
+                VXV             VSL1
                                 SCAXIS                  # UXP VEC=UYP X OA
                 STORE           24D                     # STORE UXP
                 GOTO
@@ -257,8 +257,8 @@ CNTCHK          CCS             MARKCNTR                # NO PAIR SHOWING-SEE IF
 AVESTAR         CA              MARKCNTR
                 EXTEND
                 MP              SIX                     # GET C(L) = - 6 MARKCNTR
-                CS              XYMARK
-                AD              L                       # ADD - MARK VAC ADR SET IN MARKCHEX
+                XCH             L       
+                AD              XYMARK                  # ADD - MARK VAC ADR SET IN MARKCHEX
                 INDEX           FIXLOC
                 TS              X1                      # JAM - CDU ADR OF X-MARK IN X1
 

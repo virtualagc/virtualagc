@@ -275,7 +275,7 @@ UPOUT4          EQUALS  UPOUT +1        # COMES HERE ON V34 TO TERMINATE UPDATE
 #          CHECK FOR VERB 32 SEQUENCE
 
 CK4V32          CS      MPAC            # ON DATA RETURN FROM 'GOXDSPF'
-                MASK    BIT6            # ON DATA RETURN FROM "GOXDSP"& THE CON-
+                AD      BIT6            # ON DATA RETURN FROM "GOXDSP"& THE CON-
                 EXTEND                  # TENTS OF MPAC = VERB.  SO TEST FOR V32.
                 BZF     +2
                 TC      Q               # IT'S NOT A V32, IT'S DATA.  PROCEED.

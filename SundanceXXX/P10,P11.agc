@@ -367,7 +367,7 @@ P1XERDIS        CAF     V05N09AP
 
 P11SMA          DMP     DMP
                         2D
-                        1/MU
+                        1/MU*
                 DMP     PUSH
                 SLOAD   DSU
                         SMATWO
@@ -416,12 +416,12 @@ P10FRAC         2DEC    0.2
 30MIN           2DEC    1800 E2
 P1XPI           2DEC    3.141592659 B-6
 P10RM           2DEC    1738090 B-27
-EPSFOUR*        2DEC    0.416666666
+EPSFOUR*        2DEC    0.0416666666
 SMATWO          DEC     2 B5
 P10MU           2DEC    4.902778 E8 B-30
 1/MU*           2DEC    2.03966 E-9 B28
 DEGTOREV        2DEC    0.0055555555 B-1
-ROOT1/MU        2DEC    4.516259492 E-9 B-14
+ROOT1/MU        2DEC    4.516259492 E-5 B14
 
 P1XDISP         EXTEND
                 DCA     TIG(AS)

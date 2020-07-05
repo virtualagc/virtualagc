@@ -85,7 +85,7 @@ ABORTJOB        EXTEND                  # LOAD TEVENT FOR THE DOWNLINK.
 
                 TC      2PHSCHNG
                 OCT     00003
-                OCT     00004
+                OCT     00006
 
                 TC      PHASCHNG
                 OCT     07024
@@ -119,7 +119,7 @@ GOABORT         TC      PHASCHNG
                 TC      UPFLAG
                 ADRES   FLP70
                 TC      DOWNFLAG
-                ADRES   XOVINFLG
+                CADR    XOVINFLG
                 
                 TC      CHECKMM
                 DEC     70
@@ -144,7 +144,7 @@ P70INIT         CAF     P70ADR
                 BDDV
                         K(AT)
                 STODL   AT
-                        DTDECAY
+                        DTDECAY*
                 STODL   TTO
                         DPSVEX
                 STORE   VE              # INITIALIZE DPS EXHAUST VELOCITY
@@ -319,7 +319,7 @@ P71RET          CAF     P71ADR
                 TS      WHICH
 
                 TC      UPFLAG
-                ADRES   3AXISFLG
+                ADRES   KILLROSE
 
                 TC      INTPRET
                 CALL
@@ -436,7 +436,7 @@ MDOTDPS*        2DEC    0.1425 B1
                                         #    EQUIV. TO 1 JET ON CONTINUOUSLY.
 K(1/DV)         2DEC    432.67 B-9      # DPS ENGINE THRUST IN NEWTONS / 100 CS.
 
-(AT)A           2DEC    3.0806 E-4 B9   # INITIAL ASC. STG. ACCELERATION ** M/CS.
+(AT)A           2DEC    3.086 E-4 B9    # INITIAL ASC. STG. ACCELERATION ** M/CS.
                                         # ASSUMPTIONS SAME AS FOR (1/DV)A.
 
 K(AT)           2DEC    .02             # SCALING CONSTANT

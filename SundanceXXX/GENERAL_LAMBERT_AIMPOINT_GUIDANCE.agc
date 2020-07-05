@@ -126,7 +126,7 @@ VNPOOH2         EXTEND
                 CADR    GOFLASHR
                 TC      GOTOPOOH
                 TC      RTRN
-                TC      -5
+                TCF     -5
                 TC      PHASCHNG
                 OCT     00014
                 TC      ENDOFJOB

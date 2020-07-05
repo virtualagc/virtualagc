@@ -1180,7 +1180,7 @@ GOANIDLE        CAF     BIT4
                 TC      PRIOCHNG
 
                 INDEX   PLAYTEM3
-                CA      NVWORD
+                CA      CADRFLSH
                 TCF     BANKJUMP
 
 ISITN00         INDEX   COPINDEX        # IS THIS A PASTE

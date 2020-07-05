@@ -474,11 +474,11 @@ CUTOFF1         INHINT
                 TCF             -5
 
 SETXFLAG        TC              UPFLAG
-                ADRES           XOVINFLG
+                CADR            XOVINFLG
                 TCF             DANZIG
 
 CLRXFLAG        TC              DOWNFLAG
-                ADRES           XOVINFLG
+                CADR            XOVINFLG
                 TCF             DANZIG
 
 YCOMP           VLOAD           DOT
@@ -546,7 +546,7 @@ V06N76          VN              0676
 V06N33A         VN              0633
 
 KT1             2DEC            0.5000
-PRLIMIT         2DEC            -.0639                  # (B/TBUP)MIN=-.1FT.SEC(-3)
+PRLIMIT         2DEC            .25                     # (B/TBUP)MIN=-.1FT.SEC(-3)
 SIN5DEG         2DEC            .08716          B-2
-MINABDV         2DEC            .0356           B-5     # 10 PERCENT BIGGER THAN GRAVITY
+MINABDV         2DEC            .0625           B-5     # 10 PERCENT BIGGER THAN GRAVITY
 

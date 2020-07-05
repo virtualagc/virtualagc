@@ -252,7 +252,7 @@ LANDJUNK        TC      UPFLAG
                 CADR    ENGINOF3
 
                 TC      UPFLAG
-                ADRES   LRBYPASS
+                CADR    LRBYPASS
 
                 TC      INTPRET         # TO INTERPRETIVE AS TIME IS NOT CRITICAL
                 RTB     TLOAD
@@ -305,7 +305,7 @@ OCT71           OCT     71
 #       LANDING TEST PROGRAM
 #       ****************************************
 
-LANDTEST        CA      VERTCADR
+LANDTEST        CA      VERTADR
                 TS      WCHPHASE
                 TS      FLPASS0
                 TS      TARGTDEX

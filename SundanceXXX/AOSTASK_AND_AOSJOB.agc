@@ -470,8 +470,8 @@ TORQCONS        2DEC    0.51443 B-14    # CORRESPONDS TO 500 LB-FT
                 MP      MPAC            # SCALED AT 4 PI RAD-CM/SEC
                 EXTEND
                 MP      ABDELV          # SCALED AT 2(13) CM/SEC(2)
-                EXTEND
-                DV      MPAC    +1      # GET QUOTIENT
+                TC      DVOVSUB
+                ADRES   MPAC    +1      # GET QUOTIENT
 
                 TS      ACCDOTR
                 TCF     SPSCONT         # CONTINUE K, KSQ CALCULATIONS

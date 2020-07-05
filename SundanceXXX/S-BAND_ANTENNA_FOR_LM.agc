@@ -159,6 +159,6 @@ SBANDEX         EXIT
                 TC      SBANDANT +2     # YES, CONTINUE DISPLAYING ANGLES
 V06N51          VN      0651
 
-UR              EQUALS  0D
-URP             EQUALS  6D
+UR              EQUALS  8D
+URP             EQUALS  14D
                 SBANK=  LOWSUPER

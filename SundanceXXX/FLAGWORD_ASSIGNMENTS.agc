@@ -331,8 +331,8 @@ ERADFBIT        =               BIT13                   # FISCHER ELLIPSOID    P
 #
 
 # BIT 12 FLAG 1
-#               =               018D
-#               =               BIT12
+APSFLAG         =               018D
+APSFLBIT        =               BIT12
 
 
 # BIT 11 FLAG 1
@@ -1076,8 +1076,6 @@ AVEMDBIT        =               BIT1                    # DONT WRITE OVER RN, PI
 
 #
 
-FLGWRD10        =               STATE           +10D    # (150-164)
-
                                                         # (SET)               (RESET)
 
 # BIT 15 FLAG 10
@@ -1090,8 +1088,8 @@ INTFLBIT        =               BIT14                   # PROGRESS             P
 #
 
 # BIT 13 FLAG 10 (S,L)
-APSFLAG         =               152D                    # ASCENT STAGE         DESCENT STAGE
-APSFLBIT        =               BIT13                   # *** PROTECTED FROM FRESH START ***
+#               =               152D
+#               =               BIT13
 #
 
 # BIT 12 FLAG 10
@@ -1146,12 +1144,9 @@ REINTBIT        =               BIT7                    # TO BE RESTARTED     NO
 
 #
 
-FLGWRD11        =               STATE           +11D    # (165-179)
-
-                                                        # (SET)               (RESET)
 
 # BIT 15 FLAG 11 (L)(R12)
-LRBYPASS        =               165D                    # BYPASS ALL LANDING  DO NOT BYPASS LR
+LRBYPASS        =               13561D                  # BYPASS ALL LANDING  DO NOT BYPASS LR
 LRBYBIT         =               BIT15                   # RADAR UPDATES       UPDATES
 #
 
@@ -1183,7 +1178,7 @@ NOLRRBIT        =               BIT10                   # BYPASS UPDATE
 #
 
 # BIT 9 FLAG 11 (L)(R12)
-XORFLG          =               171D                    # BELOW LIMIT         ABOVE LIMIT DO
+XORFLG          =               13567D                  # BELOW LIMIT         ABOVE LIMIT DO
                                                         # INHIBIT X AXIS      NOT INHIBIT
 XORFLBIT        =               BIT9                    # OVERRIDE
 #
@@ -1231,8 +1226,6 @@ HFLSHFLG        =               179D                    # LR ALTITUDE FAIL    LR
 HFLSHBIT        =               BIT1                    # LAMP SHOULD BE      LAMP SHOULD NOT BE
                                                         # FLASHING            FLASHING
 #
-
-FLGWRD12        =               STATE           +12D    # (180-194)       WAS RADMODES
 
                                                         # (SET)               (RESET)
 
@@ -1321,8 +1314,6 @@ TURNONBT        =               BIT1                    # IN PROGRESS. (ZERO  SE
                                                         # MODE)
 #
 
-FLGWRD13        =               STATE           +13D    # (195-209)       WAS DAPBOOLS
-
                                                         # (SET)               (RESET)
 
 # BIT 15 FLAG 13
@@ -1357,7 +1348,7 @@ AORBTRAN        =               BIT10                   # TRANSLATION         TR
 #
 
 # BIT 9 FLAG 13
-XOVINFLG        =               201D                    # X-AXIS OVERRIDE     X-AXIS OVERRIDE OKAY
+XOVINFLG        =               11872D                  # X-AXIS OVERRIDE     X-AXIS OVERRIDE OKAY
 XOVINHIB        =               BIT9                    # LOCKED OUT
 #
 

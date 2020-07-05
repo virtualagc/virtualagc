@@ -467,7 +467,7 @@ STARTSB2        CAF             OCT30001                # DURING SOFTWARE RESTAR
                 AD              LTHVACA
                 TS              VAC5USE
 
-                CAF             ONE
+                CS              ONE
                 TS              DIDFLG
 
                 CAF             TEN

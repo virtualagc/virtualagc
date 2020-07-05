@@ -95,8 +95,8 @@ POSTHRST        CA              HALF
                 NDX             AXISCTR
                 TS              TJU
                 CCS             AXISCTR
-                TCF             AFTERTJ -2
-                TCF             AFTERTJ -2
+                TCF             +3
+                TCF             +2
                 TC              Q
 
                 CA              FLAGWRD5

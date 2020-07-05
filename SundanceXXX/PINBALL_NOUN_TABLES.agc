@@ -506,8 +506,8 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             62000                   # 92 3COMP  WHOLE, WHOLE, DPDEG(XXXX.X)
                 OCT             06143                   # 93 3COMP  DPDEG(90) FOR EACH
                 OCT             62010                   # 94 3COMP  ALT RATE, WHOLE, DPDEG(XXXX.X)
-                OCT             04012                   # 95 3COMP  VEL3, WHOLE, CDU DEG
-                OCT             04012                   # 96 3COMP  VEL3, WHOLE, CDU DEG
+                OCT             04102                   # 95 3COMP  VEL3, WHOLE, CDU DEG
+                OCT             04102                   # 96 3COMP  VEL3, WHOLE, CDU DEG
                 OCT             00000                   # 97 3COMP  WHOLE FOR EACH
                 OCT             00000                   # 98 3COMP  WHOLE, FRAC, WHOLE
                 OCT             01572                   # 99 3COMP  POS9, VEL4
@@ -716,9 +716,9 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           RANGEDSP                # 68 POS7                             DP4
                 ECADR           TTFDISP                 # 68 MIN/SEC                          M/S
                 ECADR           DELTAH                  # 68 COMP ALT                         DP1
-                ECADR           TTFDISP                 # 69
-                ECADR           DELTAH                  # 69
                 ECADR           ABDELV                  # 69
+                ECADR           DVTHRUSH                # 69
+                ECADR           DVTOTAL                 # 69
                 ECADR           AOTCODE                 # 70 OCTAL ONLY                       OCT
                 ECADR           AOTCODE         +1      # 70 OCTAL ONLY                       OCT
                 ECADR           AOTCODE         +2      # 70 OCTAL ONLY                       OCT

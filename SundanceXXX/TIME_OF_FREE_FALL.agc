@@ -155,7 +155,7 @@ TFFCONMU        VLOAD   ABVAL           # COME HERE WITH TFFRTMU LOADED.
                         X1              # -NR
                 STOVL   NRMAG           # RMAG  M  E:(-29+NR) M:(-27+NR)
                         RONE
-                VSR*    VXV
+                VSL*    VXV
                         0 -1,1
                         VONE            # SAVED VN.  M/CS  E:(-7) M:(-5)
                 V/SC    VSQ
@@ -404,7 +404,7 @@ CALCTFF         CLEAR                   # ENTER WITH RTERM IN MPAC
                 DOT
                         RONE            # SAVED RN.  E:(-29) M:(-27)
                 SL4     DDV
-                        TFFVSQ
+                        TFF/RTMU
                 STORE   TFFQ1           # Q1, SAVE FOR GONEPAST TEST.
                                         # E:(-16) M:(-15)
                 BMN     BDSU
@@ -512,11 +512,10 @@ TFFXTEST        DAD     PDDL            # (ABS(DEN) TO PDL+2))  E:(-3) OR (-16)
                 SL*     DAD
                         0,2
                                         # TFF SQRT(MU) FROM PDL+0       E:(-45) M:(-42)
-ENDTFF          DMP     BOV             # TFF SQRT(MU) IN MPAC          E:(-45) M:(-42)
+ENDTFF          SR1     DDV             # TFF SQRT(MU) IN MPAC          E:(-45) M:(-42)
                         TFF/RTMU        # E:(17) M:(14)
+                BOV     RVQ             # RETURN TFF (-28) CS IN MPAC.
                         MAXTFF          # SET POSMAX IF OVFL.
-
-DUMPTFF2        RVQ                     # RETURN TFF (-28) CS IN MPAC.
 
 NEGTFF          DLOAD
                                         # TFF SQRT(MU) FROM PDL+0, NEGATIVE.

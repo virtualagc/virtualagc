@@ -42,10 +42,10 @@ DEC66           DEC             66
                 CAF             ZERO
                 TS              RODCOUNT
 VRTSTART        TS              WCHVERT
-                CAF             VERTCADR                # WCHPHASE = VERTICAL: P65,P66,P67
+                CAF             VERTADR                 # WCHPHASE = VERTICAL: P65,P66,P67
                 TS              WCHPHASE
                 TC              DOWNFLAG                # PERMIT X-AXIS OVERRIDE
-                ADRES           XOVINFLG
+                CADR            XOVINFLG
                 TCF             GUILDRET
 
 STARTP67        TC              NEWMODEX                # NO HARM IN "STARTING" P67 OVER AND OVER
@@ -64,4 +64,4 @@ P66NOW?         TC              CHECKMM                 # NO:  ARE WE IN P66 NOW
                 TCF             STARTP66                # NO
                 TCF             GUILDRET                # YES
 
-VERTCADR        CADR            VERTICAL
+VERTADR         ADRES           VERTICAL

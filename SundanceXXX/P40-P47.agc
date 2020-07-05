@@ -318,8 +318,8 @@ P42LM           CAF             P42ADRES                # INITIALIZATION FOR BUR
                 TC              BANKCALL
                 CADR            R02BOTH
                 CAF             THRESH2                 # INITIALIZE DVMON
-                CAF             ONE
                 TS              TIME2SAV +1
+                CAF             ONE
                 TS              DVTHRUSH
                 CAF             FOUR
                 TS              DVCNTR
@@ -947,13 +947,13 @@ TGDCALC         SETPD           STQ
 
                 DSU             BPL
                                 FOURSECS                # 400 CS
-                                XPSTEER
+                                FINDCDUD
                 SET             CLRGO
                                 IMPULSW
                                 STEERSW
                                 S40EXIT
 
-XPSTEER         SETPD           STQ
+FINDCDUD        SETPD           STQ
                                 0
                                 S40EXIT
                 RTB
@@ -1027,14 +1027,14 @@ S40.8XIT        CAE             TEMPR60
                 GOTO
                                 S40EXIT
 
-1/PI            2DEC            0.3183099       B-27
+1/PI            2DEC            0.3183099       B1
 UNUSEDC1        2OCT            00002 00545
 
 -FOURDT         2DEC            -800            B-18    # -4 (200 CS.)  B(-18)
 2VEXHUST        2DEC            3000            E-2 B-6
 FOURSECS        2DEC            400                     # 400 CS SCALED AT 2(+28)CS
-SIN45DEG        2DEC            0.7071001       B-30
-SIN20DEG        2DEC            0.34229         B-30
+SIN45DEG        2DEC            0.7071          B-2
+SIN20DEG        2DEC            0.34229         B-2
 
 CALCCMD         DLOAD           DMP
                                 12D
@@ -1097,7 +1097,7 @@ S40.13          TC              INTPRET
                                 VGTIG                   # VELOCITY TO BE GAINED AT +7
                 PDDL            DMP                     # 00D = MAG OF VGTIG AT +7
                                 7SEC                    # 700 CS AT + 18
-                                FRCS2B2
+                                FRCS2B3
                 DDV             SL2                     # SCALE
                                 WEIGHT/G
                 BDSU            PUSH
@@ -1199,7 +1199,7 @@ K3VAL           2DEC            1.556802        B-10    # FAPS ( 3500 LBS THRUST
 5SECS           2DEC            500.0           B-14    # 500.0 CS AT +14
 6SEC            2DEC            600.0           B-14    # 600.0 CS AT +14
 7SEC            2DEC            700.0                   # 700.0 CS
-FRCS2B2         2DEC            0.08896         B2      # 200 LBS FORCE IN NEWTONS
+FRCS2B3         2DEC            0.08896         B3      # 200 LBS FORCE IN NEWTONS
 S40.136         2DEC            .4671           B-9     # .4671 M NEWTONS (DPS)
 S40.136_        2DEC            .4671           B+1     # S40.136 SHIFTED LEFT 10.
 89SECS          2DEC            8900.0          B-14

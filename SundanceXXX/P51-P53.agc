@@ -163,9 +163,9 @@ P52V            CA              OPTION2
 LSDISP          CAF             V06N89*                 # DISPLAY LAT,LONG/2, ALT
                 TC              BANKCALL
                 CADR            GOFLASH
-                TCF             GOTOPOOH                # VB34 TERMINATE
-                TCF             +2                      # VB33 PROCEED
-                TCF             LSDISP                  # VB32 RECYCLE
+                TC              GOTOPOOH                # VB34 TERMINATE
+                TC              +2                      # VB33 PROCEED
+                TC              LSDISP                  # VB32 RECYCLE
 
                 TC              INTPRET                 # OPTION 4 - GET LS ORIENTATION
                 SET             SET
@@ -220,7 +220,7 @@ P52J            CAF             PFRATBIT
                 TC              BANKCALL
                 CADR            GOFLASH
                 TC              GOTOPOOH
-                TCF             -4
+                TC              -4
                 TC              P52B
 
 P52H            TC              INTPRET                 # PREFERRED OPTION, GO COMPUTE GIMBALS
@@ -1398,8 +1398,8 @@ GRAVEL          VLOAD*          CALL
                 TC              BANKCALL
                 CADR            GOFLASH
                 TC              GOTOPOOH
-                TCF             PROGRAV                 # VB33-PROCEED
-                TCF             -5                      # VB32-RECYCLE
+                TC              PROGRAV                 # VB33-PROCEED
+                TC              -5                      # VB32-RECYCLE
 
 PROGRAV         TC              PHASCHNG
                 OCT             05024
@@ -1544,14 +1544,14 @@ JUSTTRIM        TC              BANKCALL
 GYRCDR          ECADR           OGC
 
 V16N20          VN              1620
-V04N05          VN              0405
-V04N23          VN              0423
-V04N20          VN              0420
+V06N05*         VN              0605
+V06N23          VN              0623
+V06N20          VN              0620
 
 # PERFORM STAR AQUISITION AND STAR SIGHTINGS
 
 2STARS          CAF             BIT1                    # INITALIZE STARIND
-                TCF             +2                      # ONE FOR 1ST STAR, ZERO FOR 2ND STAR
+                TC              +2                      # ONE FOR 1ST STAR, ZERO FOR 2ND STAR
 1STAR           CAF             ZERO
                 TS              STARIND
 
@@ -1769,7 +1769,7 @@ P57A            STORE           DSPTEM1
                 EXIT
 P57AA           CAF             V06N34                  # DISPLAY TALIGN, TALIGN : DSPTEM1
                 TC              BANKCALL
-                CADR            GOFLASHR
+                CADR            GOFLASH
                 TC              P57AA                   # V34-TERMINATE
                 TC              +2                      # V33-PROCEED
                 TC              P57AA                   # VB32-RECYCLE

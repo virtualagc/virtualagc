@@ -174,7 +174,7 @@ MASSMULT        EXTEND
 
 FMAXMAX         DEC     +3882
 FMAXODD         DEC     +3866           # THROTTLE SATURATION THRESHOLD
-FMAXPOS         DEC     +3592           # FMAX    43245 NEWTONS
+FMAXPOS         DEC     +3648           # FMAX    43245 NEWTONS
 HIGHCRIT        DEC     2446
 LOWCRIT         DEC     2135
 FEXTRA          =       BIT13

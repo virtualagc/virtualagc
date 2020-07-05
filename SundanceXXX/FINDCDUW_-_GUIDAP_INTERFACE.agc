@@ -214,7 +214,7 @@ DCMCL           VLOAD           CALL
                 TC              LIMITSUB                # YIELDS LIMITED MGA. 1 BIT ERROR POSSIBLE
                 XCH             MPAC            +2      #      BECAUSE USING 2'S COMP. WHO CARES?
                 EXTEND
-                MSU             MPAC            +2      # THIS BETTER YIELD ZERO
+                SU              MPAC            +2      # THIS BETTER YIELD ZERO
                 CCS             A
                 TCF             ALARMMGA
                 TCF             +2

@@ -204,7 +204,7 @@ SIZETAB         TC              1.2SPOT         -12006
 
                 DEC             200
                 EBANK=          DVCNTR
-                2CADR           REREADAC
+                -2CADR          REREADAC
 # ANY MORE GROUP 5.EVEN RESTART VALUES SHOULD GO HERE
 
 5.3SPOT         DEC             200

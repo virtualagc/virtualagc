@@ -47,7 +47,7 @@ LST2FAN         TC              VBZERO                  # VB40 ZERO (USED WITH N
                 TC              ALM/END                 # VB58 SPARE
                 TC              ALM/END                 # VB59 SPARE
                 TC              DAPATTER                # VB60 DISPLAY DAP ATTITUDE ERROR
-                TC              LRPOS2                  # VB61 COMMAND LR TO POSITION 2.
+                TC              LRPOS2K                 # VB61 COMMAND LR TO POSITION 2.
                 TC              R04                     # VB62 SAMPLE RADAR ONCE PER SECOND
                 TC              TOTATTER                # VB63 DISPLAY TOTAL ATTITUDE ERROR
                 TC              ALM/END                 # VB64 SPARE
@@ -1181,9 +1181,8 @@ DAPDISP         TC              TESTXACT
 DAPDATA1        TC              UNK7766
                 CAF             BOOLSMSK                # SET DISPLAY ACCORDING TO DAPBOOLS BITS.
                 MASK            DAPBOOLS                # LM
-                TS              DAPDATR1                # LM
-
-RELOAD          CAF             V01N46                  # LM
+RELOAD          TS              DAPDATR1                # LM
+                CAF             V01N46                  # LM
                 TC              BANKCALL
                 CADR            GOXDSPFR
                 TCF             ENDEXT                  # V34E  TERMINATE
@@ -1294,7 +1293,7 @@ DAPDATA3        CAF             BIT2
                 EXTEND
                 RAND            CHAN30
                 CCS             A                       # END ROUTINE IF LEM HAS STAGED,
-                TCF             ENDEXT
+                TC              ENDEXT
                 CAF             V06N48                  # DISPLAY TRIM ANGLES AND REQUEST RESPONSE
                 TC              BANKCALL
                 CADR            GOXDSPFR

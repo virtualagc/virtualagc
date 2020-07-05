@@ -72,7 +72,7 @@ SENSEGET        CA      BIT7            # INPUT BITS OVERRIDE THE INTERNAL BITS
                 EXTEND
                 BZF     TSENSE +1
 
-                CS      DRIFTBIT        # BURNING OR DRIFTING?
+                CAF     DRIFTBIT        # BURNING OR DRIFTING?
                 MASK    DAPBOOLS
                 CCS     A
                 TCF     TSENSE +1
@@ -203,7 +203,7 @@ OCT63           OCT     63
 -XTRANS         AD      FIVE
                 TS      ANYTRANS
                 AD      NEG4
-                TS      SENSETYP        # FAVOR APPROPRIATE JETS DURING TRANS.
+                TCF     TSENSE
 
 TRANS4          CA      FOUR
                 TCF     TSNUMBRT
@@ -222,7 +222,7 @@ CHEKSTIK        TS      INGTS           # NOT IN GTS WHEN IN ATT HOLD
                 CA      OURRCBIT        # ***********
                 MASK    DAPBOOLS        # *IN DETENT*   CHECK FOR MANUAL CONTROL
                 EXTEND                  # ***********   LAST TIME.
-                BZF     ATTSTEER
+                BZMF    ATTSTEER
 
 DBCHECK-        CA      OMEGAP          # STAY IN RATE DAMPING UNTIL P-AXIS
                 TC      CHKRTDB         # AUTOPILOT HAS TAKEN CARE OF P-RATE

@@ -18,9 +18,9 @@
                 BANK
                 COUNT*  $$/FLAG
 
-UPENT2          INDEX   Q
+ -2             INDEX   Q
                 CA      0
-                TS      L               # WHICH FLAGWORD IS IT
+UPENT2          TS      L               # WHICH FLAGWORD IS IT
                 MASK    OCT7
                 XCH     L               # SAVE IN L FOR INDEXING
                 
@@ -38,9 +38,9 @@ UPENT2          INDEX   Q
                 INCR    Q               # OBTAIN THE CORRECT RETURN ADDRESS
                 TC      Q               # RETURN
 
-DOWNENT2        INDEX   Q
+ -2             INDEX   Q
                 CA      0
-                TS      L               # WHICH FLAGWORD IS IT
+DOWNENT2        TS      L               # WHICH FLAGWORD IS IT
                 MASK    OCT7
                 XCH     L               # SAVE IN L FOR INDEXING
 

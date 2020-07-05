@@ -665,8 +665,9 @@ MASS            EQUALS          GDT/2           +6      # B(2)
 WEIGHT/G        =               MASS
 ABDELV          EQUALS          MASS            +2      # ALCMANU STORAGE)
 /AF/            EQUALS          ABDELV          +2      # (6)
-DVTHRUSH        EQUALS          /AF/            +2      # (1)
-AVEGEXIT        EQUALS          DVTHRUSH        +1      #  (2)
+DVTHRSH1        EQUALS          /AF/            +2      # (1)
+DVTHRUSH        =               TIME2SAV
+AVEGEXIT        EQUALS          DVTHRSH1        +1      #  (2)
 AVGEXIT         =               AVEGEXIT
 TEMX            EQUALS          AVEGEXIT        +2      #  (1)
 TEMY            EQUALS          TEMX            +1      #  (1)
@@ -1949,8 +1950,7 @@ ECDUWUSR        EQUALS          ECDUW                   # B(1)TMP
 QCDUWUSR        EQUALS          ECDUWUSR        +1      # I(1)TMP
 NDXCDUW         EQUALS          QCDUWUSR        +1      # B(1)TMP
 FLAGOODW        EQUALS          NDXCDUW         +1      # B(1)TMP
-FLPAUTNO        EQUALS          FLAGOODW        +1      # B(1)TMP
-UNFC/2          EQUALS          FLPAUTNO        +1      # I(6)IN
+UNFC/2          EQUALS          FLAGOODW        +1      # I(6)IN
 UNWC/2          EQUALS          UNFC/2          +6      # I(6)IN
 UNFV/2          EQUALS          UNWC/2          +6      # I(6) S-S
 UNFVX/2         =               UNFV/2
@@ -2296,10 +2296,10 @@ TSIGHT          EQUALS          PLANVEC         +6      # (2) TIME OF MARK OR ES
 
 #          LRS22.3 STORAGE. (CAN SHARE WITH P30'S AND OVERLAY LRS24.1   (30D).
 
-LGRET           EQUALS          INCORPEX                # I(1) TMP
+LGRET           EQUALS          INCORPEX        +1      # I(1) TMP
 RDRET           EQUALS          LGRET                   # B(1)  TEMP RETURN.
-IGRET           EQUALS          LGRET                   # B(1)  TEMP RETURN.
-MX              EQUALS          RDRET           +2      # I(6)
+IGRET           EQUALS          RDRET                   # B(1)  TEMP RETURN.
+MX              EQUALS          RDRET           +1      # I(6)
 MY              EQUALS          MX              +6      # I(6)
 MZ              EQUALS          MY              +6      # I(6)
 E0              EQUALS          MX                      # I(2)
