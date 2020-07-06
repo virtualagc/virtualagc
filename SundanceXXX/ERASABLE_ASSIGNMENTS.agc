@@ -1328,21 +1328,6 @@ ENDW            EQUALS          W               +162D
 
 # *******  OVERLAY NUMBER 1 IN EBANK 5  *******
 
-
-#          LUNAR LANDING TARGET PARAMETERS   - PADLOADED -              (64D)
-
-#  PLEASE RETAIN THE ORDER OF TLAND THRU JAPFG
-
-DELQFIX         EQUALS          W               +1      # I(2) LR ALTITUDE DATA REASONABLE PARM.
-
-#
-
-#          P70-P71    PADLOADED  *  ASCENT  *                           (5D)
-
-TBRKPNT         EQUALS          DELQFIX         +2      # I(1) TFI BRANCH TIME:ABORT TARGET PCR133
-ABTVINJ1        EQUALS          TBRKPNT         +1      # I(2) ABORT VELOCITY;TFI LESSTHAN TBRKPNT
-#
-
 #          SOME VARIABLES FOR SECOND DPS GUIDANCE                       (34D)
 
 CG              =               W                       # I(18D) GUIDANCE

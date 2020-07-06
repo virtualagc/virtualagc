@@ -395,7 +395,7 @@ LEGAL?          CS      FLAGWRD9        # ARE THE ABORTS ENABLED?
                 TC      Q               # YES. ALL IS WELL.
 
 ABORTALM        TC      POSTJUMP
-                CADR    ENGINOF3
+                CADR    P40ALM
 
 # ************************************************************************
 

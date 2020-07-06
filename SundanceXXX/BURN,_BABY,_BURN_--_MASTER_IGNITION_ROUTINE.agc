@@ -881,7 +881,7 @@ P41ADRES        ADRES           P41TABLE        -5
 P42ADRES        ADRES           P42TABLE
 
                 EBANK=          WCHPHASE
-DSP2CADR        2CADR           P63DISPS        -2
+DSP2CADR        2CADR           DISPEXIT
 
 
                 EBANK=          WCHPHASE

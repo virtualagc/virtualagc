@@ -380,9 +380,9 @@ PROG25          TC              2PHSCHNG
                 ADRES           TRACKFLG                # SET TRACK FLAG
                 TC              UPFLAG
                 ADRES           P25FLAG                 # SET P25FLAG
-P25LEM1         TC              BANKCALL
+                TC              BANKCALL
                 CADR            R61LEM
-                CAF             P25FLBIT
+P25LEM1         CAF             P25FLBIT
                 MASK            STATE                   # IS P25FLAG SET
                 EXTEND
                 BZF             ENDOFJOB
@@ -401,13 +401,13 @@ P25LEM1         TC              BANKCALL
                                 RRTARGET
                                 *SMNB*
                 DLOAD           ACOS
-                                MPAC +5
+                                MPAC            +5
                 DSU             BMN
                                 30DEGS
                                 P25OK
                 EXIT
 
-                TC              P25LEM1                 # THEN GO CHECK FLAGS
+                TC              P25LEM1         -2      # THEN GO CHECK FLAGS
 P25LEMWT        TC              PHASCHNG
                 OCT             00112
 P25LMWT1        CAF             60SCNDS

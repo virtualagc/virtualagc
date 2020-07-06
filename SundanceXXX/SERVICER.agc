@@ -260,7 +260,7 @@ LOTHRUST        CCS             DVCNTR
                 OCT             10035
 
                 TC              POSTJUMP
-                CADR            COMFAIL2
+                CADR            COMFAIL
 
 DECCNTR         TS              DVCNTR
 
