@@ -1087,3 +1087,28 @@ GRP2PC          STQ     EXIT
                 TC      INTPRET
                 GOTO
                         GRP2SVQ
+
+
+## FIXME: Move this to the correct spot!
+                BANK            32
+                SETLOC          P40S2
+                BANK
+
+                COUNT*          $$/P40
+
+ -1             STORE           TDEC1
+TIGINT          STQ
+                                IRETURN1
+                CALL
+                                INTSTALL
+                CLEAR           CLEAR
+                                VINTFLAG
+                                INTYPFLG
+                CLEAR           CLEAR
+                                DIM0FLAG
+                                D6OR9FLG
+                SET             CALL
+                                STATEFLG
+                                INTEGRV
+                GOTO
+                                IRETURN1

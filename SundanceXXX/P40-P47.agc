@@ -353,7 +353,7 @@ P47LM           TC              BANKCALL
                 TC              INTPRET
                 DLOAD           CALL
                                 TIG
-                                TIGINT
+                                TIGINT          -1
                 EXIT
 
                 TCF             ENDOFJOB

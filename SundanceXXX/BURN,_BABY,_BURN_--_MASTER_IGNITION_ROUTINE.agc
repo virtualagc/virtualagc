@@ -851,16 +851,6 @@ GOBACK          CAF             ZERO
                 TC              BANKJUMP                # GOODBYE.  COME AGAIN SOON.
 
 
-                BANK            32
-                SETLOC          P40S2
-                BANK
-
-                COUNT*          $$/P40
-
-## FIXME: DEFINE
-TIGINT          EQUALS          DANZIG
-
-
                 BANK            36
                 SETLOC          P40S
 
