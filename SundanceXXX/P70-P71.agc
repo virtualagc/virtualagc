@@ -160,7 +160,7 @@ INJTARG         DLOAD   DSU
 
                 INHINT
                 TC      IBNKCALL
-                CADR    ENGINOF2
+                CADR    ENGINOF1
                 RELINT
 
                 TC      ZONEZERO
@@ -195,7 +195,7 @@ ABORTIGN        VLOAD
                 CADR    R60LEM
 
                 TC      BANKCALL
-                CADR    GOASTCLK
+                CADR    P40AUTO
                 
                 CAF     ZERO
                 TS      DVTOTAL
@@ -335,7 +335,7 @@ P71RET          CAF     P71ADR
 
                 INHINT
                 TC      IBNKCALL
-                CADR    ENGINOF2
+                CADR    ENGINOF1
                 RELINT
 
                 CAF     BIT2

@@ -696,7 +696,7 @@ R77END          CAF             EBANK4                  # TO TERMINATE SAMPLING
 
                 TC              DOWNFLAG
                 ADRES           R77FLAG
-                TCF             GOPIN
+                TCF             ENDEXT
 
 V16N72          VN              1672
 V16N78          VN              1678
@@ -1388,7 +1388,7 @@ VERB96          TC              UPFLAG                  # QUITFLAG WILL CAUSE IN
 V45             TC              TESTXACT
                 CAF             PRIO5
                 TC              FINDVAC
-                EBANK=          WWPOS
+                EBANK=          QPLACE
                 2CADR           V45CALL
 
                 TC              ENDOFJOB

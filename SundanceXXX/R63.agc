@@ -108,7 +108,7 @@ V89RECL         TC      INTPRET         #                   = 2 FOR X AXIS
                         VONE
                 STORE   POINTVSM        # STORE LOS FOR VECPOINT CALL
                 EXIT
-                CS      OPTIONX +1      # 1 FOR Z AXIS.  2 FOR X AXIS.
+                CS      OPTION2         # 1 FOR Z AXIS.  2 FOR X AXIS.
                 AD      ONE
                 EXTEND
                 BZF     ALINEZ

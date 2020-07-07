@@ -328,7 +328,7 @@ DEXDEX          EQUALS          TEM2                    # B(1)TMP
 DEX1            EQUALS          TEM3                    # B(1)TMP
 DEX2            EQUALS          TEM4                    # B(1)TMP
 RTNSAVER        EQUALS          TEM5                    # B(1)TMP
-TERM1TMP        EQUALS          MPAC            +3      # B(2)TMP
+TERM1TMP        EQUALS          BUF2                    # B(2)TMP
 
 DEXI            =               DEX1
 
@@ -526,11 +526,6 @@ NORMTEM1        EQUALS          DSPTEM1                 # B(3)DSP NORMAL DISPLAY
 
 R22DISP         EQUALS          DSPTEM1                 # I(4) N49 DISPLAY OF DELTA R AND DELTA V
 #
-
-
-#          DISPLAY FOR EXTENDED VERBS (V82, R04(V62), V41(N72) )        (2D)
-
-OPTIONX         EQUALS          DSPTEMX                 # (2) EXTENDED VERB OPTION CODE
 
 #          TBASES AND PHSPRDT S.                                        (12D)
 
@@ -777,10 +772,9 @@ DNLRVELY        EQUALS          DNLRVELX        +1      # B(1)TMP
 DNLRVELZ        EQUALS          DNLRVELY        +1      # B(1)TMP
 DNLRALT         EQUALS          DNLRVELZ        +1      # B(1) TMP
 
-#          INCORPORATION UNSWITCHED.                                    (2D)
+#          INCORPORATION UNSWITCHED.                                    (1D)
 
-W.IND           EQUALS          PIPAGE                  # B(1)
-W.INDI          EQUALS          W.IND           +1      # I(1)
+W.IND           EQUALS          PIPCTR                  # B(1)
 
 
 #          SUBROUTINE BALLANGS OF R60.                                  (1D)
@@ -2361,9 +2355,9 @@ V               EQUALS          R               +6
 DELVREF         EQUALS          V                       # I(6)
 HCALC           EQUALS          DELVREF         +6      # B(2)     LR
 
-ABVEL           EQUALS          HCALC           +2      # B(2) DISPLAY
-ABVN1           EQUALS          ABVEL           +2      # B(2)
-HDOTDISP        EQUALS          ABVN1           +2      # B(2) DISPLAY
+ABVELINT        EQUALS          HCALC           +2      # B(2)
+ABVEL           EQUALS          ABVELINT        +2      # B(2) DISPLAY
+HDOTDISP        EQUALS          ABVEL           +2      # B(2) DISPLAY
 TTFDISP         EQUALS          HDOTDISP        +2      # B(2) DISPLAY
 #
 

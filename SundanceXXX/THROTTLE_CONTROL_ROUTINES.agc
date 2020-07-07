@@ -177,7 +177,7 @@ FMAXODD         DEC     +3866           # THROTTLE SATURATION THRESHOLD
 FMAXPOS         DEC     +3648           # FMAX    43245 NEWTONS
 HIGHCRIT        DEC     2446
 LOWCRIT         DEC     2135
-FEXTRA          =       BIT13
+FEXTRA          =       BIT7
 DEC438          DEC     438
 THROTLAG        DEC     20              # EMPIRICALLY DETERMINED THROTTLE LAG TIME
 2.PG.FRT        DEC     12800

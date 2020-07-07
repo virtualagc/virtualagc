@@ -437,7 +437,7 @@ ENGOFF          RTB             DSU
                                 T2TEST
 
 ENGOFF1         TC              IBNKCALL                # SHUT OFF THE ENGINE.
-                CADR            ENGINOF2
+                CADR            ENGINOF1
 
                 CAF             PRIO21                  # SET UP A JOB FOR THE ASCENT GUIDANCE
                 TC              FINDVAC                 # POSTBURN LOGIC.

@@ -866,7 +866,7 @@ RUTMXTAB        OCT             16351                   # 40 M/S, DP3, DP3
                 OCT             10347                   # 89 DP3, DP3, DP1
                 OCT             24344                   # 90 DP1, DP3, DP4
                 OCT             16447                   # 91
-                OCT             16447                   # 92
+                OCT             16441                   # 92
                 OCT             16347                   # 93 DP3, DP3, DP3
                 OCT             16447                   # 94
                 OCT             04102                   # 95

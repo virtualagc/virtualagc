@@ -755,7 +755,7 @@ STOPCLOK        TC              NULLCLOK                # STOP CLOKTASK & TURN O
 ASTNRETN        CAF             PRIO13
                 INHINT
                 TC              FINDVAC
-                EBANK=          STARIND
+                EBANK=          TTOGO
                 2CADR           GOBACK
                 TCF             ENDOFJOB
 

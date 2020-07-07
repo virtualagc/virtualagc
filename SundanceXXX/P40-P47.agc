@@ -318,9 +318,9 @@ P42LM           CAF             P42ADRES                # INITIALIZATION FOR BUR
                 TC              BANKCALL
                 CADR            R02BOTH
                 CAF             THRESH2                 # INITIALIZE DVMON
-                TS              TIME2SAV +1
-                CAF             ONE
                 TS              DVTHRUSH
+                CAF             ONE
+                TS              TIME2SAV +1
                 CAF             FOUR
                 TS              DVCNTR
 
@@ -1191,7 +1191,7 @@ STORETGO        DLOAD                                   # LOAD TGO AT 2(14)
 APSTGO          DDV             GOTO
                                 FAPSB9
                                 STORETGO        +1
-K1VAL           2DEC            124.57          B-23    # 2800 LB-SEC
+K1VAL           2DEC            124.54          B-23    # 2800 LB-SEC
 K2VAL           2DEC            31.138          B-24    # 700  LB-SEC
 K3VAL           2DEC            1.556802        B-10    # FAPS ( 3500 LBS THRUST)
 1SEC2D          2DEC            100.0           B-14    # 100.0 CS AT +14
@@ -1203,7 +1203,7 @@ FRCS2B3         2DEC            0.08896         B3      # 200 LBS FORCE IN NEWTO
 S40.136         2DEC            .4671           B-9     # .4671 M NEWTONS (DPS)
 S40.136_        2DEC            .4671           B+1     # S40.136 SHIFTED LEFT 10.
 89SECS          2DEC            8900.0          B-14
-FAPSB9          2DEC            1.556802        B-9     # 3500 LBS FORCE IN NEWTONS
+FAPSB9          2DEC            1.5568          B-9     # 3500 LBS FORCE IN NEWTONS
 # FUNCTION    (1) GENERATES REQUIRED VELOCITY AND VELOCITY-TO-BE-GAINED
 #             VECTORS FOR USE DURING AIMPOINT MANEUVERS EVERY TWO
 #             COMPUTATION CYCLES (4 SECONDS).

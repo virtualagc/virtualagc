@@ -899,7 +899,7 @@ N45PROC         CS      FLAGWRD2
                 OCT     04024
                 TC      UPFLAG          # SET
                 ADRES   FINALFLG        # FINALFLG
-CLUPDATE        CA      Z
+CLUPDATE        CA      TWOPI
                 TS      DISPDEX
                 TC      PHASCHNG
                 OCT     04024

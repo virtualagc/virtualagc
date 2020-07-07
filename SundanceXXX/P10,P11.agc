@@ -86,7 +86,7 @@ P1XSETUP        TC      INTPRET
                 STORE   RCSMINT
                 VXV     UNIT
                         VATT1
-                STODL   UNVEC
+                STODL   UNVEC2
                         30MIN
                 PUSH    DAD
                         TIG(AS)
@@ -107,8 +107,8 @@ P1XLOOP         SETPD
                         RP-TO-R
                 STORE   RLSBRCS
                 PUSH    VPROJ
-                        UNVEC
-                VSL1    VCOMP
+                        UNVEC2
+                VSL2    VCOMP
                 VAD
                 UNIT    LXA,1
                         P1XITCNT
@@ -156,7 +156,7 @@ P1XLOOP         SETPD
                         RATT1
                         RP1XROT
                 DOT     PDDL
-                        UNVEC
+                        UNVEC2
                         2D
                 SQRT    DMP
                         2D
@@ -283,7 +283,7 @@ P1XCONV         ABVAL
 
 P1XFINAL        VLOAD   DOT
                         RLSBRCS
-                        UNVEC
+                        UNVEC2
                 PDVL    UNIT
                         RLSBRCS
                 DOT     SL1
@@ -390,7 +390,7 @@ P1XROT          DLOAD   DMP
                         ULVEC
                 PDDL    SIN
                 PDVL    VXV
-                        UNVEC
+                        UNVEC2
                         ULVEC
                 UNIT    VXSC
                 VAD
@@ -402,7 +402,7 @@ P1XROT          DLOAD   DMP
                 PDVL    UNIT
                         RP1XROT
                 VXV     VXSC
-                        UNVEC
+                        UNVEC2
                         P1XVHOR
                 VSL1    VSU
                 VCOMP   VSL3
@@ -461,7 +461,7 @@ P1XCNTD         CAF     ONE
 
                 RELINT
 
-                CAF     V16N35
+                CAF     V16N35AP
                 TC      BANKCALL
                 CADR    GOFLASH
                 TC      GOTOPOOH

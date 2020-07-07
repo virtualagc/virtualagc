@@ -69,7 +69,7 @@ BRAKLING        TCF             LINSET                  # +0
 APPRQUAD        TCF             STARTP64                # +0
                 TCF             TTF/8CL                 # +1
                 TCF             EXNORM                  # +2
-                DEC             -10 E2 B-E7             # +3
+                DEC             -10 E2 B-17             # +3
                 TCF             REDESIG                 # +4
                 OCT             30                      # +5
                 DEC             -158 E2 B-17            # +6
@@ -674,9 +674,9 @@ GDUMP1          TC              THROTTLE
 # GUIDANCE LOOP DISPLAYS
 # ****************************************************************************************************************
 
-DISPEXIT        EXTEND                                  # KILL GROUP 3:  DISPLAYS WILL BE
+DISPEXIT        EXTEND                                  # KILL GROUP 2:  DISPLAYS WILL BE
                 DCA             NEG0                    #   RESTORED BY NEXT GUIDANCE CYCLE
-                DXCH            -PHASE3
+                DXCH            -PHASE2
 
                 CS              FLAGWRD8                # IF FLUNDISP SET, NO DISPLAY THIS PASS
                 MASK            FLUNDBIT

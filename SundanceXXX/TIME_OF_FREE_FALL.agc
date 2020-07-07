@@ -403,7 +403,7 @@ CALCTFF         CLEAR                   # ENTER WITH RTERM IN MPAC
                         VONE            # VN/SQRT(MU)  E:(10) M:(9)
                 DOT
                         RONE            # SAVED RN.  E:(-29) M:(-27)
-                SL4     DDV
+                SL2     DDV
                         TFF/RTMU
                 STORE   TFFQ1           # Q1, SAVE FOR GONEPAST TEST.
                                         # E:(-16) M:(-15)
@@ -660,7 +660,7 @@ TCDANZIG        =       ENDT(X)
 #MUM            =       4.902778 E8             M CUBE/CS SQ
 #RTMUM          2DEC*   2.21422176 E4 B-18*
 
-UNUSEDF2        2DEC    3.04825219 B-2
+UNUSEDF2        2DEC    3.04825218 B-2
 
 PI/16           2DEC    3.141592653 B-4
 

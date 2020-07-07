@@ -553,7 +553,7 @@ R22LEM96        EXIT
                 TC              N49TERM                 # TERMINATE - EXIT R22 AND P20
                 TC              N49PROC                 # PROCEED - N49FLAG = -1
                 TC              N49RECYC                # RECYCLE - N49FLAG = + VALUE
-                CAF             PRIO34
+                CAF             PRIO24
                 TC              PRIOCHNG
                 TC              INTPRET
                 STORE           MPAC
@@ -722,7 +722,7 @@ R21LEM4         CAF             ALRM527                 # ALARM 527-LOS NOT IN M
                 CADR            PRIOLARM
 
                 TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
-                TC              R21LEM
+                TC              R21LEM1
                 TC              -5                      # ENTER
                 TC              ENDOFJOB
 
@@ -866,7 +866,7 @@ R24LEM3         TC              PHASCHNG
                 OCT             04022
                 INHINT
                 TC              KILLTASK
-                CADR            CALLDGCH                # KILL WAITLIST FOR NEXT POINT IN PATTERN
+                CADR            STDESIG                 # KILL WAITLIST FOR NEXT POINT IN PATTERN
                 RELINT                                  # HALF SECOND DESIGNATE LOOP
                 TC              CLRADMOD
                 CS              BIT2
@@ -2547,7 +2547,7 @@ LRPOS2          INHINT
                 
                 CAF             6SECS                   # START SCANNING FOR INBIT AFTER 7 SECS.
                 TC              WAITLIST
-                EBANK=          RRRET
+                EBANK=          LOSCOUNT
                 2CADR           LRPOSCAN
                 
                 TC              ROADBACK

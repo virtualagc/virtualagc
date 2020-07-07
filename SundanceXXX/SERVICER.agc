@@ -348,7 +348,7 @@ NORMLIZE        TC              INTPRET
                 STOVL           MASS1
                                 UNITX
                 STORE           UASTEER
-                BON             VLOAD
+                BOFF            VLOAD
                                 MUNFLAG
                                 NORMLIZ1
                                 VN1
@@ -636,7 +636,7 @@ COPYCYC1        TC              PHASCHNG
                 VSL1
                 STORE           VN1                     # TEMP. REF. VELOCITY VECTOR*2(7)M/CS.
                 ABVAL
-                STOVL           ABVN1
+                STOVL           ABVEL
                                 R1S
                 VXM             VSR4
                                 REFSMMAT
@@ -836,7 +836,7 @@ DP1/20          2DEC            0.05
 RESQ            2DEC*           40.6809913      E12 B-58*
 20J             2DEC            3.24692010      E-2
 2J              2DEC            3.24692010      E-3
-ALTCONV         2DEC            1.399078846     B-4     # CONVERTS M*2(-24) TO BIT UNITS *2(-28).
+ALTCONV         2DEC            1.40206802      B-4     # CONVERTS M*2(-24) TO BIT UNITS *2(-28).
 ARCONV1         2DEC            656.167979      B-10    # CONV. ALTRATE COMP. TO BIT UNITS<
 1SEC(7)         2DEC            100             B-7
 DPSVEX1         2DEC            -3004.75757     E-2 B-6
@@ -868,7 +868,7 @@ MUNRVG          VLOAD           VXSC
                                 V
                 STORE           V1S                     # STORE V SCALED AT 2(+7)M/CS.
                 ABVAL
-                STOVL           ABVEL                   # STORE SPEED FOR LR AND DISPLAYS.
+                STOVL           ABVELINT                # STORE SPEED FOR LR AND DISPLAYS.
                                 UNIT/R/
                 DOT             SL1
                                 V1S
@@ -884,8 +884,8 @@ MUNGRAV         UNIT                                    # AT 36D HAVE ABVAL(R), 
                 NORM            BDDV
                                 X2
                                 -MUDT1
-                SR*             VXSC
-                                11D,2
+                SLR*            VXSC
+                                0 -11D,2
                                 UNIT/R/
                 STORE           GDT1/2                  # 1/2GDT SCALED AT 2(7) M/CS.
                 RVQ
@@ -895,7 +895,7 @@ KPIP2           2DEC            .0064                   # SCALES DELV TO UNITS O
 RPCRTIME        DEC             -6              E2 B-17
 0.175           2DEC            0.175
 0.155           2DEC            0.155
-LRWH            2DEC            0.45454545      B1
+LRWH            2DEC            0.4545454545    B1
 VSCAL3          2DEC            -4.72441006     B-7     # 15.5 FT/SEC AT 2(7) M/CS
 6.25            2DEC            .01905          B-6     # 6.25 FT/SEC AT 2(6) M/CS
 LRHMAX          2DEC            170688              
@@ -1113,7 +1113,7 @@ VUPDAT          CA              FLAGWRD0
 
 VUPDAT1         TC              INTPRET
                 DLOAD           DDV
-                                ABVEL
+                                ABVELINT
                                 VSCAL3
                 BOVB            DAD
                                 VALTCHK

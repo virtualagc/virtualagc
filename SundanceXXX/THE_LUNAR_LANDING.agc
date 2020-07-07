@@ -121,7 +121,7 @@ DDUMCALC        DLOAD   DSU             # FORM DENOMINATOR FIRST
                         VIGN
                         KIGNV
                 DAD     DAD
-                DAD     SR4
+                DAD     SR4R
                 DDV     SRR
                         VGU +4
                         12D
@@ -166,14 +166,14 @@ IGNALGRT        TC      PHASCHNG        # PREVENT REPEATING IGNALG
                 OCT     04024
 
                 TC      BANKCALL
-                CADR    ASTNCLOK
+                CADR    GOASTCLK
 
                 CAF     OCT14
                 TC      BANKCALL
                 CADR    GOPERF1
                 TCF     GOTOPOOH
-                TCF     +2
-                TCF     -5
+                TCF     P63SPOT2
+                TCF     +5
 
 P63SPOT2        TC      INTPRET
                 CALL
@@ -308,7 +308,7 @@ OCT71           OCT     71
 LANDTEST        CA      VERTADR
                 TS      WCHPHASE
                 TS      FLPASS0
-                TS      TARGTDEX
+                TS      WCHVERT
 
                 TC      INTPRET
                 VLOAD   MXV
@@ -381,5 +381,5 @@ TESTIGN         CS      PRIO30
                 ADRES   ENGONFLG
                 TCF     TASKOVER
 
-LANDSCAL        2DEC    0.20719647
+LANDSCAL        2DEC    0.207196475
 TESTDB          DEC     0.02222
