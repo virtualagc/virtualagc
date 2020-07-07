@@ -96,9 +96,9 @@ ALTOUT          TC      DISINDAT        # CHECK MODE SELECT SWITCH AND DIDFLG.
 
 ZDATA2          DXCH    ALTSAVE
                 TCF     NEWDATA
-OLDDATA         CA      ARTOA           # RATE APPLIES FOR .5 SEC. (4X/SEC. CYCLE)
+OLDDATA         CA      ALTRATE         # RATE APPLIES FOR .5 SEC. (4X/SEC. CYCLE)
                 EXTEND
-                MP      ALTRATE         # EXTRAPOLATE WITH ALTITUDE RATE.
+                MP      ARTOA           # EXTRAPOLATE WITH ALTITUDE RATE.
                 AD      ALTSAVE +1
                 TS      ALTSAVE +1
                 CAF     ZERO
@@ -412,7 +412,7 @@ ZEROLSTY        XCH     RUPTREG3
                 AD      MAXVBITS
                 EXTEND
                 BZMF    +2
-                TCF     LVLIMITS
+                TCF     FVLIMITS
 CHKLASTZ        CCS     TRAKFWDV
                 TCF     LASTPOSZ
                 TCF     +2
@@ -525,7 +525,7 @@ ARCONV          OCT     24402           # 656.1679798B-10 CONV ALTRATE TO BIT UN
 ARTOA           DEC     .2051 B-1
 DATABITS        OCT     06004
 VELCONV         OCT     22316           # 588.914 B-10 CONV VEL. TO BIT UNITS.
-KPIP1(5)        DEC     .0512           # SCALES DELV TO M/CS*2(-5).
+KPIP1(5)        DEC     .05115          # SCALES DELV TO M/CS*2(-5).
 OCT33427        OCT     33427
 MAXVBITS        OCT     00547           # MAX. DISPLAYED VELOCITY 199.9989 FT/SEC.
 

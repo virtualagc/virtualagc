@@ -260,7 +260,7 @@ AVESTAR         CA              MARKCNTR
                 XCH             L       
                 AD              XYMARK                  # ADD - MARK VAC ADR SET IN MARKCHEX
                 INDEX           FIXLOC
-                TS              X1                      # JAM - CDU ADR OF X-MARK IN X1
+                TS              S1                      # JAM - CDU ADR OF X-MARK IN S1
 
                 CAF             BIT12                   # INITIALIZE MKDEX FOR STAR LOS COUNTER
                 ADS             MKDEX                   # MKDEX WAS INITIALIZED ZERO IN MARKCHEX

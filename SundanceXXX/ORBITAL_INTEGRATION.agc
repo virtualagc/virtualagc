@@ -683,7 +683,7 @@ ENDSTATE        VLOAD
                 TC      PHASCHNG
                 OCT     04022           # PHASE 1
                 CS      RASFLAG         # PHASE CHANGE HAS OCCURRED BETWEEN
-                MASK    REINTFLG        # INTSTALL AND INTWAKE
+                MASK    REINTBIT        # INTSTALL AND INTWAKE
                 ADS     RASFLAG
                 TC      INTPRET
                 SSP
