@@ -1100,15 +1100,13 @@ GRP2PC          STQ     EXIT
 TIGINT          STQ
                                 IRETURN1
                 CALL
-                                INTSTALL
-                CLEAR           CLEAR
-                                VINTFLAG
-                                INTYPFLG
-                CLEAR           CLEAR
-                                DIM0FLAG
-                                D6OR9FLG
-                SET             CALL
-                                STATEFLG
-                                INTEGRV
+                                LEMPREC
+                VLOAD
+                                RATT
+                STOVL           RN1
+                                VATT
+                STODL           VN1
+                                TAT
+                STORE           PIPTIME1
                 GOTO
                                 IRETURN1
