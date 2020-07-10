@@ -68,10 +68,10 @@ IGNALG1         SETPD   VLOAD           # FIRST SET UP INPUTS FOR RP-TO-R:-
                 STCALL  TDEC1           # INTEGRATE STATE FORWARD TO THAT TIME
                         LEMPREC
                 VLOAD   MXV
-                        MOONRATE
+                        WMREF
                         REFSMMAT
                 STODL   WM
-                        MOONRATE
+                        WMREF
                 STORE   NIGNLOOP
                 STORE   TTF/8
 
@@ -312,7 +312,7 @@ LANDTEST        CA      VERTADR
 
                 TC      INTPRET
                 VLOAD   MXV
-                        MOONRATE
+                        WMREF
                         REFSMMAT
                 STODL   WM
                         LUNLANAD

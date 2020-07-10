@@ -266,7 +266,6 @@ SIGNRET         =               VBUF            +3      # RETURN FOR +,- ON
 # ALSO MIXTEMP+1 = VBUF+4, MIXTEMP+2 = VBUF+5.
 
 BUF             ERASE           +2                      # TEMPORARY SCALAR STORAGE.
-
 BUF2            ERASE           +1
 INDEXLOC        EQUALS          BUF                     # CONTAINS ADDRESS OF SPECIFIED INDEX.
 SWWORD          EQUALS          BUF                     # ADDRESS OF SWITCH WORD.
@@ -318,7 +317,6 @@ IDAD1TEM        ERASE                                   # TEMP FOR INDIR ADRESS 
                                                         # MUST = IDAD2TEM-1, = IDAD3TEM-2.
 IDAD2TEM        ERASE                                   # TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)
 
-                                                        # MUST = IDAD1TEM+1, = IDAD3TEM-1.
 IDAD3TEM        ERASE                                   # TEMP FOR INDIR ADRESS TABLE ENTRY (MIXNN)
                                                         # MUST = IDAD1TEM+2, = IDAD2TEM+1.
 RUTMXTEM        ERASE                                   # TEMP FOR SF ROUT TABLE ENTRY (MIXNN ONLY)
@@ -558,12 +556,17 @@ R1SAVE          ERASE
 
 #          SINGLE PRECISION SUBROUTINE TEMPORARIES.                     (2D)
 
-TEMK            ERASE                                   # (1)
-SQ              ERASE                                   # (1)
-#
+#                                                              SPSIN, SPCOS, SPROOT VARIABLES.
+#                                                              DO NOT SHARE. THESE ARE USED BY DAPS IN INTERRUPT
+#                                                              AND CURRENTLY ARE NOT PROTECTED. IF OTHER USERS
+#                                                              MATERIALIZE, THEN THIS CAN BE CHANGED.
 
-## FIXME: Is this erasable unreferenced?
-UNUSED1         ERASE
+HALFY           ERASE
+ROOTRET         ERASE
+SQRARG          ERASE
+TEMK            EQUALS          HALFY
+SQ              EQUALS          ROOTRET
+#
 
 #          UNSWITCHED RADAR ERASABLE                                    (13D)
 
@@ -599,7 +602,6 @@ ZV              EQUALS          YV              +6      # I(6)
 
 #          MISCELLANEOUS UNSWITCHED.                                    (20D)
 
-## FIXME: Is this erasable unreferenced?
 UNUSED2         ERASE           +5
 
 P40/RET         ERASE                                   # (WILL BE PUT IN E6 WHEN THERE IS ROOM)
@@ -610,8 +612,7 @@ OPTION3         ERASE                                   # B(1)  NOUN 06 USES THI
 LONGCADR        ERASE           +1                      # B(2)  LONGCALL REGISTER
 LONGBASE        ERASE           +1
 LONGTIME        ERASE           +1                      # B(2)    LONGCALL REGISTER
-## FIXME: Is this erasable unreferenced?
-UNUSED3         ERASE
+NVWORD1         ERASE
 CDUTEMPX        ERASE                                   # B(1)TMP
 CDUTEMPY        ERASE                                   # B(1)TMP
 CDUTEMPZ        ERASE                                   # B(1)TMP
@@ -668,8 +669,8 @@ TEMX            EQUALS          AVEGEXIT        +2      #  (1)
 TEMY            EQUALS          TEMX            +1      #  (1)
 TEMZ            EQUALS          TEMY            +1      #  (1)
 PIPCTR          EQUALS          TEMZ            +1      # B(1)
-SETDVCNT        EQUALS          PIPCTR          +1      # B(1)
-PIPAGE          EQUALS          SETDVCNT        +1      # B(1)
+STOPDVC         EQUALS          PIPCTR          +1      # B(1)
+PIPAGE          EQUALS          STOPDVC         +1      # B(1)
 OUTROUTE        EQUALS          PIPAGE          +1      # B(1)
 LRSTAT          EQUALS          OUTROUTE        +1      # B(1)
 
@@ -726,7 +727,7 @@ MARKSTAT        ERASE
 
 DSRUPTSW        ERASE
 DIDFLG          ERASE                                   # (1)
-UNUSED6         ERASE           +1                      # (1)
+FINALT          ERASE           +1                      # (MAY NOT BE REQUIRED FOR FLIGHTS).
 LGYRO           ERASE                                   # (1)
 
 #          P25 RADAR STORAGE.                                           (2D)
@@ -789,7 +790,6 @@ EL              EQUALS          AZ              +1D     # B(1)
 
 
 #          NOUN 29                                                      (1D)
-## FIXME: is this unused?
 UNUSED7         ERASE
 LRFLAGS         ERASE
 
@@ -871,6 +871,7 @@ PBIASZ          ERASE
 PIPASCFZ        ERASE
 
 NBDX            ERASE                                   # GYRO BIAS DRIFTS
+GBIASX          =               NBDX
 NBDY            ERASE
 NBDZ            ERASE
 
@@ -949,11 +950,10 @@ XKEPLEM         ERASE           +1                      # B(2)PRM
 X789            ERASE           +5
 TEPHEM          ERASE           +2
 AZO             ERASE           +1
--AYO            ERASE           +1
-AXO             ERASE           +1
+UNITW           ERASE           +5
+-AYO            EQUALS          UNITW                   #  (2)
+AXO             EQUALS          UNITW           +2      #  (2)
 #
-
-UNUSED4         ERASE           +1
 
 
 #          STATE VECTORS FOR DOWNLINK.                                  (12D)
@@ -2021,9 +2021,7 @@ LRALPHA         ERASE           +4                      # B(1)    POS1 X ROTATIO
 LRBETA1         EQUALS          LRALPHA         +1      # B(1)    POS1 Y ROTATION    *  BE  *
 LRALPHA2        EQUALS          LRBETA1         +1      # B(1)    POS2 X ROTATION    *  IN  *
 LRBETA2         EQUALS          LRALPHA2        +1      # B(1)    POS2 Y ROTATION    * ORDER *
-HBEAMANT        EQUALS          LRBETA2         +1      # B(1)
-#E FIXME: DELETE THESE
-#
+HANGLE          EQUALS          LRBETA2         +1      # B(1)
 
 #          THROTTLE STORAGE.      -PAD LOADED-                          (1D)
 

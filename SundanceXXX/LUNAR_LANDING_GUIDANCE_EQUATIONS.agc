@@ -1195,7 +1195,7 @@ GSCALE          2DEC            100             B-11
 3/4DP           2DEC            .750000000
 
 
-MOONRATE        2DEC            0.0
+WMREF           2DEC            0.0
                 2DEC*           .26616994890062991 E-7 B+18* # RAD/CS.
                 2DEC            0.0
 

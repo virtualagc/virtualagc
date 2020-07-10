@@ -45,7 +45,7 @@ BIBIBIAS        TC              PIPASR          +3      # CLEAR + READ PIPS LAST
                 CAF             FOUR                    # INITIALIZE DV MONITOR
                 TS              DVCNTR
                 TS              PIPAGE
-                TS              SETDVCNT
+                TS              STOPDVC 
 
                 CAF             LRBYBIT
                 TS              LRSTAT
@@ -229,7 +229,7 @@ DVMON           INHINT
                 MASK            STEERBIT
                 ADS             FLAGWRD2
 
-DVCNTSET        CA              SETDVCNT                # UPDATE MAXIMUM NOW THAT
+DVCNTSET        CA              STOPDVC                 # UPDATE MAXIMUM NOW THAT
                 TS              DVCNTR                  # THRUXT HAS BEEN DETECTED.
 
                 CA              FLAGWRD1
@@ -764,7 +764,7 @@ CALCGRAV        UNIT            PDVL                    # SAVE UNIT/R/ IN PUSHLI
                                 CALCGRV1
                                 0
                 DOT             PUSH
-                                -AYO
+                                UNITW
                 DSQ             BDSU
                                 DP1/20
                 PDDL            DDV
@@ -779,7 +779,7 @@ CALCGRAV        UNIT            PDVL                    # SAVE UNIT/R/ IN PUSHLI
                                 2J
                                 32D
                 VXSC            VAD
-                                -AYO
+                                UNITW
                 STADR
                 STORE           UNITGOBL
                 VAD             PUSH                    # MPAC = UNIT GRAVITY VECTOR.         (18)
@@ -1311,7 +1311,7 @@ SETPOS          EXTEND
                 VXV             VSL1
                                 VYBEAMNB
                 STODL           VZBEAMNB                # Z = X * Y
-                                HBEAMANT
+                                HANGLE
                 RTB             PUSH
                                 CDULOGIC
                 SIN             PDDL
