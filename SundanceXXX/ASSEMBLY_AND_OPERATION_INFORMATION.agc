@@ -13,16 +13,16 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-# THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
-# THE DETAILS OF IMPLEMENTATION ARE SPECIFIED IN REPORT R-567, AS AMENDED.
+# THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED EARTH ORBITAL MISSION OR ANY SUBSET THEREOF.
+# THE DETAILS OF IMPLEMENTATION ARE SPECIFIED IN REPORT R-557, AS AMENDED.
 
 
 #                            GUIDANCE SYSTEM OPERATIONS PLAN
-#                    FOR MANNED LM EARTH ORBITAL AND LUNAR MISSIONS
-#                                 USING PROGRAM LUMINARY
+#                         FOR MANNED LM EARTH ORBITAL MISSIONS
+#                                 USING PROGRAM SUNDANCE
 
 
-# THIS PROGRAM AND R-567 HAVE BEEN PREPARED BY THE INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF 
+# THIS PROGRAM AND R-557 HAVE BEEN PREPARED BY THE INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF 
 # TECHNOLOGY  75 CAMBRIDGE PARKWAY, CAMBRIDGE, MASSACHUSETTS UNDER PROJECT55-238-70, SPONSORED BY THE MANNED
 # SPACECRAFT CENTER OF THE NATIONAL AERONAUTICS AND SPACE ADMINISTRATION, CONTRACT NAS 9-4065
 
@@ -30,10 +30,7 @@
 
 # ASSEMBLY AND OPERATION INFORMATION
 # TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
-# PADLOADS
-# CONTROLLED CONSTANTS
 # INPUT/OUTPUT CHANNEL BIT DESCRIPTIONS
-# FLAGWORD ASSIGNMENTS
 # SUBROUTINE CALLS
 
 
@@ -44,6 +41,7 @@
 #                 INTERRUPT LEAD INS
 #                 T4RUPT PROGRAM
 #                 RCS FAILURE MONITOR
+#                 STAGE MONITOR
 #                 DOWNLINK LISTS
 #                 AGS INITIALIZATION
 #                 FRESH START AND RESTART
@@ -63,6 +61,8 @@
 #                 PINBALL GAMES BUTTONS AND LIGHTS
 #                 R60,R62
 #                 S-BAND ANTENNA FOR LM
+#          LEMP10S
+#                 P10,P11
 #          LEMP20S
 #                 RADAR LEADIN ROUTINES
 #                 P20-P25
@@ -74,13 +74,14 @@
 #                 GROUND TRACKING DETERMINATION PROGRAM - P21
 #                 P34-P35, P74-P75
 #                 R31
-#                 P76
+#                 R32
 #                 R30
 #                 STABLE ORBIT - P38-P39
 #          FLY
 #                 BURN, BABY, BURN -- MASTER IGNITION ROUTINE
 #                 P40-P47
 #                 THE LUNAR LANDING
+#                 R13
 #                 THROTTLE CONTROL ROUTINES
 #                 LUNAR LANDING GUIDANCE EQUATIONS
 #                 P70-P71
@@ -110,6 +111,7 @@
 #                 INFLIGHT ALIGNMENT ROUTINES
 #                 POWERED FLIGHT SUBROUTINES
 #                 TIME OF FREE FALL
+#                 STAR TABLES
 #                 AGC BLOCK TWO SELF-CHECK
 #                 PHASE TABLE MAINTENANCE
 #                 RESTARTS ROUTINE
@@ -144,7 +146,7 @@
 #          OCCUPIED LOCATIONS TABLE
 #          SUBROS CALLED & PROGRAM STATUS
 
-#          VERB LIST FOR LUMINARY
+#          VERB LIST FOR SUNDANCE
 
 # REGULAR VERBS
 
@@ -196,7 +198,7 @@
 # 42 FINE ALIGN IMU
 # 43 LOAD IMU ATT ERROR METERS
 # 44 TERMINATE RR CONTINUOUS DESIGNATE (V41N72 OPTION 2)
-# 45
+# 45 DISPLAY W MATRIX
 # 46
 # 47 INITIALIZE AGS (R47)
 # 48 REQUEST DAP DATA LOAD ROUTINE (R03)
@@ -208,18 +210,18 @@
 # 54 MARK X OR Y-RETICLE
 # 55 INCREMENT AGC TIME (DECIMAL)
 # 56 TERMINATE TRACKING (P20 + P25)
-# 57 PERMIT LANDING RADAR UPDATES
-# 58 INHIBIT LANDING RADAR UPDATES
+# 57
+# 58
 # 59
-# 60 COMMAND LR TO POSITION 2.
-# 61 DISPLAY DAP FOLLOWING ATTITUDE ERRORS.
-# 62 DISPLAY TOTAL ATTITUDE ERRORS WITH RESPECT TO NOUN 22.
-# 63 SAMPLE RADAR ONCE PER SECOND (R04).
-# 64 REQUEST S-BAND ANTENNA ROUTINE (R05)
+# 60 DISPLAY DAP FOLLOWING ATTITUDE ERRORS.
+# 61 COMMAND LR TO POSITION 2.
+# 62 SAMPLE RADAR ONCE PER SECOND (R04).
+# 63 DISPLAY TOTAL ATTITUDE ERRORS WITH RESPECT TO NOUN 22.
+# 64
 # 65 DISABLE U AND V JET FIRINGS DURING DPS BURNS.
 # 66 VEHICLES ARE ATTACHED.  MOVE THIS VEHICLE STATE TO OTHER VEHICLE.
-# 67 DISPLAY W MATRIX
-# 68 CAUSES IMMEDIATE SWITCHING FROM P63 TO P64.
+# 67
+# 68
 # 69 CAUSE RESTART
 # 70 UPDATE LIFTOFF TIME
 # 71 UNIVERSAL UPDATE-BLOCK  ADR
@@ -235,8 +237,8 @@
 # 81 UPDATE CSM STATE VECTOR
 # 82 REQUEST ORBIT PARAM DISPLAY (R30)
 # 83 REQUEST REND  PARAM DISPLAY (R31)
-# 84
-# 85 DISPLAY RR LOS AZ AND ELEV
+# 84 START TARGET DELTA V (R32)
+# 85
 # 86
 # 87
 # 88
@@ -248,7 +250,7 @@
 # 94
 # 95 NO UPDATE OF EITHER STATE VECTOR (P20 OR P22)
 # 96 INTERRUPT INTEGRATION AND GO TO POO
-# 97 PERFORM ENGINE FAIL PROCEDURE
+# 97
 # 98
 # 99 PLEASE ENABLE ENGINE
 
@@ -267,9 +269,9 @@
 # 01  SPECIFY MACHINE ADDRESS (FRACTIONAL)   3COMP   .XXXXX FOR EACH
 # 02  SPECIFY MACHINE ADDRESS (WHOLE)        3COMP   XXXXX. FOR EACH
 # 03  SPECIFY MACHINE ADDRESS (DEGREES)      3COMP   XXX.XX DEG FOR EACH
-# 04  ANGULAR ERROR/DIFFERENCE               1COMP   XXX.XX DEG
+# 04  SPARE
 # 05  ANGULAR ERROR/DIFFERENCE               1COMP   XXX.XX DEG
-# 06  OPTION CODE                            3COMP   OCTAL ONLY FOR EACH
+# 06  OPTION CODE                            2COMP   OCTAL ONLY FOR EACH
 # LOADING NOUN 07 WILL SET OR RESET SELECTED BITS IN ANY ERASABLE REGISTER
 # 07  ECADR OF WORD TO BE MODIFIED           3COMP   OCTAL ONLY FOR EACH
 #     ONES FOR BITS TO BE MODIFIED
@@ -277,14 +279,9 @@
 # 08  ALARM DATA                             3COMP   OCTAL ONLY FOR EACH
 # 09  ALARM CODES                            3COMP   OCTAL ONLY FOR EACH
 # 10  CHANNEL TO BE SPECIFIED                1COMP   OCTAL ONLY
-# 11  TIG OF CSI                             3COMP   00XXX. HRS                          DEC ONLY
-#                                                    000XX. MIN                          MUST LOAD 3 COMPS
-#                                                    0XX.XX SEC
-# 12  OPTION CODE                            2COMP   OCTAL ONLY FOR EACH
-#      (USED BY EXTENDED VERBS ONLY)
-# 13  TIG OF CDH                             3COMP   00XXX. HRS                          DEC ONLY
-#                                                    000XX. MIN                          MUST LOAD 3 COMPS
-#                                                    0XX.XX SEC
+# 11  SPARE
+# 12  SPARE
+# 13  SPARE
 # 14  CHECKLIST                              3COMP   XXXXX. FOR EACH
 #      (USED BY EXTENDED VERBS ONLY)
 #      (NOUN 25 IS PASTED AFTER DISPLAY)
@@ -292,9 +289,9 @@
 # 16  TIME OF EVENT                          3COMP   00XXX. HRS                          DEC ONLY
 #      (USED BY EXTENDED VERBS ONLY)                 000XX. MIN                          MUST LOAD 3 COMPS
 #                                                    0XX.XX SEC
-# 17  SPARE
+# 17  ASTRONAUT TOTAL ATTITUDE               3COMP   XXX.XX DEG FOR EACH
 # 18  AUTO MANEUVER BALL ANGLES              3COMP   XXX.XX DEG FOR EACH
-# 19  SPARE
+# 19  BYPASS ATTITUDE TRIM MANEUVER          3COMP   XXX.XX DEG FOR EACH
 # 20  ICDU ANGLES                            3COMP   XXX.XX DEG FOR EACH
 # 21  PIPAS                                  3COMP   XXXXX. PULSES FOR EACH
 # 22  NEW ICDU ANGLES                        3COMP   XXX.XX DEG FOR EACH
@@ -307,9 +304,13 @@
 # 26  PRIORITY/DELAY, ADRES, BBCON           3COMP   OCTAL ONLY FOR EACH
 # 27  SELF TEST ON/OFF SWITCH                1COMP   XXXXX.
 # 28  SPARE
-# 29  SPARE
-# 30  SPARE
-# 31  SPARE
+# 29  LANDING RADAR FLAG STATUS              1COMP   OCTAL ONLY
+# 30  TIG OF CSI                             3COMP   00XXX. HRS                          DEC ONLY
+#                                                    000XX. MIN                          MUST LOAD 3 COMPS
+#                                                    0XX.XX SEC
+# 31  TIG OF CDH                             3COMP   00XXX. HRS                          DEC ONLY
+#                                                    000XX. MIN                          MUST LOAD 3 COMPS
+#                                                    0XX.XX SEC
 # 32  TIME FROM PERIGEE                      3COMP   00XXX. HRS                          DEC ONLY
 #                                                    000XX. MIN                          MUST LOAD 3 COMPS
 #                                                    0XX.XX SEC
@@ -328,9 +329,7 @@
 # 37  TIG OF TPI                             3COMP   00XXX. HRS                          DEC ONLY
 #                                                    000XX. MIN                          MUST LOAD 3 COMPS
 #                                                    0XX.XX SEC
-# 38  TIME OF STATE BEING INTEGRATED         3COMP   00XXX. HRS                          DEC ONLY
-#                                                    000XX. MIN                          MUST LOAD 3 COMPS
-#                                                    0XX.XX SEC
+# 38  SPARE
 # 39  SPARE
 
 # MIXED NOUNS                            COMPONENTS  SCALE AND DECIMAL POINT             RESTRICTIONS
@@ -359,11 +358,15 @@
 #     GIMBAL ROLL TRIM                               XXX.XX DEG
 # 49  DELTA R,                               2COMP   XXXX.X NAUT MI                      DEC ONLY
 #     DELTA V,                                       XXXX.X FT/SEC
-# 50  SPARE
+# 50  DELTA ALTITUDE CDH                     3COMP   XXXX.X NAUT MI                      NO LOAD, DEC ONLY
+#     DELTA TIME CDH-CSI                             XXBXX  MIN/SEC
+#     DELTA TIME TPI-CDH                             XXBXX  MIN/SEC
 # 51  S-BAND ANTENNA ANGLES PITCH            2COMP   XXX.XX DEG                          DEC ONLY
 #                           YAW                      XXX.XX DEG
 # 52  CENTRAL ANGLE OF ACTIVE VEHICLE        1COMP   XXX.XX DEG
-# 53  SPARE
+# 53  DELTA V (CSI OR TPI)                   3COMP   XXXX.X FT/SEC                       DEC ONLY
+#     DELTA V (CDH OR TPF)                           XXXX.X FT/SEC 
+#     CROSS RANGE DISTANCE                           XXXX.X NAUT MI
 # 54  RANGE,                                 3COMP   XXX.XX NAUT MI                      DEC ONLY
 #     RANGE RATE,                                    XXXX.X FT/SEC
 #     THETA                                          XXX.XX DEG
@@ -846,7 +849,7 @@
 #                      (MAX 328.0)              METERS/CENTI-SEC
 # THAT-S ALL ON THE NOUNS.
 
-# ALARM CODES FOR LUMINARY
+# ALARM CODES FOR SUNDANCE
 
 # *9       *18                                       *60   COLUMN
 
@@ -957,7 +960,7 @@
 
 #          ALL OTHERS ARE NON-ABORTIVE
 
-#          CHECKLIST CODES FOR LUMINARY
+#          CHECKLIST CODES FOR SUNDANCE
 
 # *9      *17      *26                                                    *9   COLUMN
 
@@ -977,7 +980,7 @@
 #                    PERFORM DENOTES START OR END OF A TASK
 #                    KEY IN DENOTES KEY IN OF DATA THRU THE DSKY
 
-#         OPTION CODES FOR LUMINARY
+#         OPTION CODES FOR SUNDANCE
 
 # THE SPECIFIED OPTION CODES WILL BE FLASHED IN COMPONENT R1 IN
 # CONJUNCTION WITH V04N06 OR V04N12 (FOR EXTENDED VERBS) TO REQUEST THE

@@ -372,7 +372,7 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             04102                   # 03 3COMP  CDU DEGREES
                 OCT             00000                   # 04        SPARE
                 OCT             00504                   # 05 1COMP  DPDEG(360)
-                OCT             02000                   # 06 3COMP  OCTAL ONLY
+                OCT             02000                   # 06 2COMP  OCTAL ONLY
                 OCT             04000                   # 07 3COMP  OCTAL ONLY
                 OCT             04000                   # 08 3COMP  OCTAL ONLY
                 OCT             04000                   # 09 3COMP  OCTAL ONLY
@@ -396,7 +396,7 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             04000                   # 26 3COMP  OCTAL ONLY
                 OCT             00140                   # 27 1COMP  WHOLE
                 OCT             00000                   # 28        SPARE
-                OCT             00000                   # 29        SPARE
+                OCT             00000                   # 29 1COMP  OCTAL ONLY
                 OCT             24400                   # 30 3COMP  HMS (DEC ONLY)
                 OCT             24400                   # 31 3COMP  HMS (DEC ONLY)
                 OCT             24400                   # 32 3COMP  HMS (DEC ONLY)
