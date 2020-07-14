@@ -373,8 +373,9 @@
 # 55  NO. OF APSIDAL CROSSINGS               3COMP   XXXXX.                              DEC ONLY
 #     ELEVATION ANGLE                                XXX.XX DEG
 #     CENTRAL ANGLE OF PASSIVE VEHICLE               XXX.XX DEG
-# 56  RR LOS AZIMUTH                         2COMP   XXX.XX DEG
-#            ELEVATION                               XXX.XX DEG
+# 56  NO. OF APSIDAL CROSSINGS               3COMP   XXXXX.                              DEC ONLY
+#     ELEVATION ANGLE                                XXX.XX DEG
+#     DESIRED DELTA H AT CDH                         XXXX.X NAUT MI
 # 57  DELTA R                                1COMP   XXXX.X NAUT MI                      DEC ONLY
 # 58  PERIGEE ALT (POST TPI)                 3COMP   XXXX.X NAUT MI                      DEC ONLY
 #     DELTA V TPI                                    XXXX.X FT/SEC
@@ -406,7 +407,9 @@
 # 68  SLANT RANGE TO LANDING SITE            3COMP   XXXX.X NAUT MI                      NO LOAD, DEC ONLY
 #     TIME TO GO IN BRAKING PHASE                    XXBXX  MIN/SEC
 #     LR ALTITUDE - COMPUTED ALTITUDE                XXXXX. FEET
-# 69  SPARE
+# 69  DELTA V LAST                           3COMP   XXXXX. CM/SEC                       DEC ONLY
+#     DELTA V DVMON                                  XXXXX. CM/SEC 
+#     DELTA V TOTAL                                  XXXX.X FT/SEC
 # 70  AOT DETENT CODE/STAR CODE              3COMP   OCTAL ONLY FOR EACH
 # 71  AOT DETENT CODE/STAR CODE              3COMP   OCTAL ONLY FOR EACH
 # 72  RR  360 - TRUNNION ANGLE               2COMP   XXX.XX DEG
@@ -416,9 +419,9 @@
 # 74  TIME FROM IGNITION                     3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     YAW AFTER VEHICLE RISE                         XXX.XX DEG
 #     PITCH AFTER VEHICLE RISE                       XXX.XX DEG
-# 75  DELTA ALTITUDE CDH                     3COMP   XXXX.X NAUT MI                      NO LOAD, DEC ONLY
-#     DELTA TIME (CDH-CSI OR TPI-CDH)                XXBXX  MIN/SEC
-#     DELTA TIME (TPI-CDH OR TPI-NOMTPI)             XXBXX  MIN/SEC
+# 75  TIME FROM IGNITION                     3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
+#     DELTA V (ACCUMULATED)                          XXXX.X FT/SEC
+#     COMPUTED ALTITUDE                              XXXXX. FEET
 # 76  CROSS-RANGE DISTANCE                   2COMP   XXXX.X NAUT MI                      DEC ONLY
 #     APOCYNTHION ALTITUDE                           XXXX.X NAUT MI
 # 77  TIME TO ENGINE CUTOFF                  2COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
@@ -445,12 +448,17 @@
 # 90  Y                                      3COMP   XXX.XX NM                           DEC ONLY
 #     Y DOT                                          XXXX.X FPS
 #     PSI                                            XXX.XX DEG
-# 91  SPARE
-# 92  SPARE
+# 91  TPI ALTITUDE                           3COMP   XXXX.X NAUT MI                      NO LOAD, DEC ONLY
+#     TIME FROM LAUNCH TO TPI                        XXBXX  MIN/SEC
+#     ANGLE FROM LAUNCH TO TPI                       XXXX.X DEG
+# 92  TIME FROM LAUNCH TO TPF                        XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
+#     ANGLE FROM LAUNCH TO TPF                       XXXX.X DEG
 # 93  DELTA GYRO ANGLES                      3COMP   XX.XXX DEG FOR EACH
-# 94  SPARE
-# 95  SPARE
-# 96  SPARE
+# 94  CSI ALTITUDE                           3COMP   XXXX.X NAUT MI                      NO LOAD, DEC ONLY
+#     TIME FROM LAUNCH TO CSI                        XXBXX  MIN/SEC
+#     ANGLE FROM LAUNCH TO CSI                       XXXX.X DEG
+# 95  PREFERRED ATTITUDE ICDU ANGLES         3COMP   XXX.XX DEG FOR EACH
+# 96  +X-AXIS ATTITUDE ICDU ANGLES           3COMP   XXX.XX DEG FOR EACH
 # 97  SYSTEM TEST INPUTS                     3COMP   XXXXX. FOR EACH
 # 98  SYSTEM TEST RESULTS AND INPUTS         3COMP   XXXXX.
 #                                                    .XXXXX
@@ -466,20 +474,20 @@
 # 01       SPECIFY ADDRESS       B
 # 02       SPECIFY ADDRESS       C
 # 03       SPECIFY ADDRESS       D
-# 04              DSPTEM1        H
+# 04       SPARE
 # 05              DSPTEM1        H
 # 06              OPTION1        A
 # 07              XREG           A
 # 08              ALMCADR        A
 # 09              FAILREG        A
 # 10       SPECIFY CHANNEL       A
-# 11              TCSI           K
-# 12              OPTIONX        A
-# 13              TCDH           K
+# 11       SPARE
+# 12       SPARE
+# 13       SPARE
 # 14              DSPTEMX        C
 # 15       INCREMENT ADDRESS     A
 # 16              DSPTEMX        C
-# 17       SPARE
+# 17              AZ             D
 # 18              FDAIX          D
 # 19       SPARE
 # 20              CDUX           D

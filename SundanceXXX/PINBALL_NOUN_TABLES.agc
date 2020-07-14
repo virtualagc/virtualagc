@@ -270,7 +270,6 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                                                         #    THETA
                 OCT             24055                   # 55 NO. OF APSIDAL CROSSINGS
                                                         #    ELEVATION ANGLE
-
                                                         #    CENTRAL ANGLE
                 OCT             24060                   # 56 NO. OF APSIDAL CROSSINGS
                                                         #    ELEVATION ANGLE
@@ -317,9 +316,9 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                 OCT             64146                   # 74 TIME TO IGNITION
                                                         #    YAWAFTER VEHICLE RISE
                                                         #    PITCH AFTER VEHICLE RISE
-                OCT             64151                   # 75 DELTA ALTITUDE CDH
-                                                        #    DELTA TIME (CDH-CSI OR TPI-CDH)
-                                                        #    DELTA TIME (TPI-CDH OR TPI-NOMTPI)
+                OCT             64151                   # 75 TIME TO IGNITION
+                                                        #    DELTA V (ACCUMULATED)
+                                                        #    COMPUTED ALTITUDE
                 OCT             22154                   # 76 CROSS-RANGE DISTANCE
                                                         #    APOCYNTHION ALTITUDE
                 OCT             62157                   # 77 TIME TO ENGINE CUTOFF
@@ -356,8 +355,8 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                 OCT             64242                   # 94 CSI ALTITUDE
                                                         #    TIME FROM LAUNCH TO CSI
                                                         #    ANGLE FROM LAUNCH TO CSI
-                OCT             04245                   # 95 PERF ATT ICDU ANGLES
-                OCT             04250                   # 96 +X AXIS ATT ICDU ANGLES
+                OCT             04245                   # 95 PREFERRED ATTITUDE ICDU ANGLES
+                OCT             04250                   # 96 +X-AXIS ATTITUDE ICDU ANGLES
                 OCT             04253                   # 97 SYSTEM TEST INPUTS
                 OCT             04256                   # 98 SYSTEM TEST RESULTS
                 OCT             22261                   # 99 RMS IN POSITION
@@ -472,7 +471,7 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             00102                   # 73 2COMP  360-CDU DEG, CDU DEG
                 OCT             10200                   # 74 3COMP  MIN/SEC, DPDEG(360), DPDEG(360)
                                                         #           (NO LOAD, DEC ONLY)
-                OCT             60500                   # 75 3COMP  2INT, VEL3, COMP ALT
+                OCT             60500                   # 75 3COMP  MIN/SEC, VEL3, COMP ALT
                                                         #           (NO LOAD, DEC ONLY)
                 OCT             00410                   # 76 3COMP  POS4, POS4
                                                         #           (DEC ONLY)
@@ -502,12 +501,15 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                                                         #           (DEC ONLY)
                 OCT             10507                   # 90 3COMP  POS5, VEL3, DPDEG(360)
                                                         #           (DEC ONLY)
-                OCT             62010                   # 91 3COMP  ALT RATE, WHOLE, DPDEG(XXXX.X)
-                OCT             62000                   # 92 3COMP  WHOLE, WHOLE, DPDEG(XXXX.X)
+                OCT             62010                   # 91 3COMP  POS4, MIN/SEC, DPDEG(XXXX.X)
+                                                        #           (NO LOAD, DEC ONLY)
+                OCT             62000                   # 92 2COMP  MIN/SEC, DPDEG(XXXX.X)
+                                                        #           (NO LOAD, DEC ONLY)
                 OCT             06143                   # 93 3COMP  DPDEG(90) FOR EACH
-                OCT             62010                   # 94 3COMP  ALT RATE, WHOLE, DPDEG(XXXX.X)
-                OCT             04102                   # 95 3COMP  VEL3, WHOLE, CDU DEG
-                OCT             04102                   # 96 3COMP  VEL3, WHOLE, CDU DEG
+                OCT             62010                   # 94 3COMP  POS4, MIN/SEC, DPDEG(XXXX.X)
+                                                        #           (NO LOAD, DEC ONLY)
+                OCT             04102                   # 95 3COMP  CDU DEG FOR EACH
+                OCT             04102                   # 96 3COMP  CDU DEG FOR EACH
                 OCT             00000                   # 97 3COMP  WHOLE FOR EACH
                 OCT             00000                   # 98 3COMP  WHOLE, FRAC, WHOLE
                 OCT             01572                   # 99 3COMP  POS9, VEL4
@@ -668,18 +670,18 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           ACTCENT                 # 52 DPDEG(360)                       DP4
                 OCT             00000                   # 52 SPARE COMPONENT
                 OCT             00000                   # 52 SPARE COMPONENT
-                ECADR           DELVTPI                 # 53 
-                ECADR           DELVTPF                 # 53
-                ECADR           P1XMAX                  # 53
+                ECADR           DELVTPI                 # 53 VEL3                             DP3
+                ECADR           DELVTPF                 # 53 VEL3                             DP3
+                ECADR           P1XMAX                  # 53 POS4                             DP3
                 ECADR           RANGE                   # 54 POS5                             DP1
                 ECADR           RRATE                   # 54 VEL3                             DP3
                 ECADR           RTHETA                  # 54 DPDEG(360)                       DP4
                 ECADR           NN                      # 55 WHOLE                            ARTH
                 ECADR           ELEV                    # 55 DPDEG(360)                       DP4
                 ECADR           CENTANG                 # 55 DPDEG(360)                       DP4
-                ECADR           NN                      # 56 
-                ECADR           ELEV                    # 56
-                ECADR           CDHDELH                 # 56 
+                ECADR           NN                      # 56 WHOLE                            ARTH
+                ECADR           ELEV                    # 56 DPDEG(360)                       DP4
+                ECADR           CDHDELH                 # 56 POS4                             DP3
                 ECADR           DELTAR                  # 57 POS4                             DP3
                 OCT             0                       # 57 SPARE COMPONENT
                 OCT             0                       # 57 SPARE COMPONENT
@@ -716,9 +718,9 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           RANGEDSP                # 68 POS7                             DP4
                 ECADR           TTFDISP                 # 68 MIN/SEC                          M/S
                 ECADR           DELTAH                  # 68 COMP ALT                         DP1
-                ECADR           ABDELV                  # 69
-                ECADR           DVTHRUSH                # 69
-                ECADR           DVTOTAL                 # 69
+                ECADR           ABDELV                  # 69 WHOLE                            ARTH
+                ECADR           DVTHRUSH                # 69 WHOLE                            ARTH
+                ECADR           DVTOTAL                 # 69 VEL3                             DP3
                 ECADR           AOTCODE                 # 70 OCTAL ONLY                       OCT
                 ECADR           AOTCODE         +1      # 70 OCTAL ONLY                       OCT
                 ECADR           AOTCODE         +2      # 70 OCTAL ONLY                       OCT
@@ -730,14 +732,13 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 OCT             0                       # 72 SPARE COMPONENT
                 ECADR           TANG                    # 73 360-CDU DEG                   360-CDU
                 ECADR           TANG            +1      # 73 CDU DEG                          CDU
-
                 OCT             0                       # 73 SPARE COMPONENT
                 ECADR           TTOGO                   # 74 MIN/SEC                          M/S
                 ECADR           YAW                     # 74 DPDEG(360)                       DP4
                 ECADR           PITCH                   # 74 DPDEG(360)                       DP4
-                ECADR           TTOGO                   # 75
-                ECADR           DVTOTAL                 # 75
-                ECADR           HCALC                   # 75
+                ECADR           TTOGO                   # 75 MIN/SEC                          M/S
+                ECADR           DVTOTAL                 # 75 VEL3                             DP3
+                ECADR           HCALC                   # 75 COMP ALT                         DP1
                 ECADR           XRANGE                  # 76 POS4                             DP3
                 ECADR           APO                     # 76 POS4                             DP3
                 OCT             0                       # 76 SPARE COMPONENT
@@ -747,9 +748,9 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           RSTACK                  # 78 RR RANGE                         DP1
                 ECADR           RSTACK          +2      # 78 RR RANGE RATE                    DP1
                 OCT             00000                   # 78 SPARE COMPONENT
-                ECADR           ATY                     # 79
-                ECADR           ATY                     # 79
-                ECADR           ATY                     # 79
+                ECADR           CURSOR                  # 79 CDU DEG                          CDU
+                ECADR           SPIRAL                  # 79 CDU DEG                          CDU
+                ECADR           POSCODE                 # 79 WHOLE                            ARTH
                 ECADR           DATAGOOD                # 80 WHOLE                            ARTH
                 ECADR           OMEGAD                  # 80 DPDEG(360)                       DP4
                 OCT             0                       # 80 SPARE COMPONENT
@@ -777,30 +778,30 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           STARAD                  # 88 FRAC                             FRAC
                 ECADR           STARAD          +2      # 88 FRAC                             FRAC
                 ECADR           STARAD          +4      # 88 FRAC                             FRAC
-                ECADR           ATY                     # 89
-                ECADR           ATY                     # 89
-                ECADR           ATY                     # 89
+                ECADR           LANDLAT                 # 89 DPDEG(90)                        DP3
+                ECADR           LANDLONG                # 89 DPDEG(90)                        DP3
+                ECADR           LANDALT                 # 89 POS5                             DP1
                 ECADR           RANGE                   # 90 POS5                             DP1
                 ECADR           RRATE                   # 90 VEL3                             DP3
                 ECADR           RTHETA                  # 90 DPDEG(360)                       DP4
-                ECADR           INJALT                  # 91
-                ECADR           TPITIME                 # 91
-                ECADR           TPIANGLE                # 91
-                ECADR           SPARE                   # 92 SPARE
-                ECADR           INJTIME                 # 92
-                ECADR           INJANGLE                # 92
+                ECADR           INJALT                  # 91 POS4                             DP3
+                ECADR           TPITIME                 # 91 MIN/SEC                          M/S
+                ECADR           TPIANGLE                # 91 DPDEG(XXXX.X)                    DP3
+                ECADR           SPARE                   # 92 SPARE COMPONENT
+                ECADR           INJTIME                 # 92 MIN/SEC                          M/S
+                ECADR           INJANGLE                # 92 DPDEG(XXXX.X)                    DP3
                 ECADR           OGC                     # 93 DPDEG(90)                        DP3
                 ECADR           OGC             +2      # 93 DPDEG(90)                        DP3
                 ECADR           OGC             +4      # 93 DPDEG(90)                        DP3
-                ECADR           INJALT                  # 94
-                ECADR           INJTIME                 # 94
-                ECADR           INJANGLE                # 94
-                ECADR           CPHI                    # 95
-                ECADR           CTHETA                  # 95
-                ECADR           CPSI                    # 95
-                ECADR           SPARE                   # 96 SPARE
-                ECADR           SPARE           +1      # 96 SPARE
-                ECADR           SPARE           +2      # 96 SPARE
+                ECADR           INJALT                  # 94 POS4                             DP3
+                ECADR           INJTIME                 # 94 MIN/SEC                          M/S
+                ECADR           INJANGLE                # 94 DPDEG(XXXX.X)                    DP3
+                ECADR           CPHI                    # 95 CDU DEG                          CDU
+                ECADR           CTHETA                  # 95 CDU DEG                          CDU
+                ECADR           CPSI                    # 95 CDU DEG                          CDU
+                ECADR           CPHIX                   # 96 CDU DEG                          CDU
+                ECADR           CPHIX           +1      # 96 CDU DEG                          CDU
+                ECADR           CPHIX           +2      # 96 CDU DEG                          CDU
                 ECADR           DSPTEM1                 # 97 WHOLE                            ARTH
                 ECADR           DSPTEM1         +1      # 97 WHOLE                            ARTH
                 ECADR           DSPTEM1         +2      # 97 WHOLE                            ARTH
@@ -824,13 +825,13 @@ RUTMXTAB        OCT             16351                   # 40 M/S, DP3, DP3
                 OCT             00553                   # 47 ARITH1, ARITH1
                 OCT             00143                   # 48 ARTH, ARTH
                 OCT             00347                   # 49 DP3, DP3
-                OCT             22447                   # 50
+                OCT             22447                   # 50 DP3, M/S, M/S
                 OCT             00512                   # 51 DP4, DP4
                 OCT             00012                   # 52 DP4
-                OCT             16347                   # 53
+                OCT             16347                   # 53 DP3, DP3, DP3
                 OCT             24344                   # 54 DP1, DP3, DP4
                 OCT             24503                   # 55 ARTH, DP4, DP4
-                OCT             16503                   # 56
+                OCT             16503                   # 56 ARTH, DP4, DP3
                 OCT             00007                   # 57 DP3
                 OCT             16347                   # 58 DP3, DP3, DP3
                 OCT             16347                   # 59 DP3, DP3, DP3
@@ -843,13 +844,13 @@ RUTMXTAB        OCT             16351                   # 40 M/S, DP3, DP3
                 OCT             00304                   # 66 DP1, LRPOS
                 OCT             10204                   # 67 DP1, DP1, DP1
                 OCT             10452                   # 68 DP4, M/S, DP1
-                OCT             16143                   # 69
+                OCT             16143                   # 69 ARTH, ARTH, DP3
                 OCT             0                       # 70 OCT, OCT, OCT
                 OCT             0                       # 71 OCT, OCT, OCT
                 OCT             00115                   # 72 360-CDU, CDU
                 OCT             00115                   # 73 360-CDU, CDU
                 OCT             24511                   # 74M/S, DP4, DP4
-                OCT             10351                   # 75
+                OCT             10351                   # 75 M/S, DP3, DP1
                 OCT             00347                   # 76 DP3, DP3
                 OCT             00351                   # 77 M/S, DP3
                 OCT             00204                   # 78 DP1, DP1
@@ -865,12 +866,12 @@ RUTMXTAB        OCT             16351                   # 40 M/S, DP3, DP3
                 OCT             02041                   # 88 FRAC FOR EACH
                 OCT             10347                   # 89 DP3, DP3, DP1
                 OCT             24344                   # 90 DP1, DP3, DP4
-                OCT             16447                   # 91
-                OCT             16441                   # 92
+                OCT             16447                   # 91 DP3, M/S, DP3
+                OCT             16441                   # 92 M/S, DP3
                 OCT             16347                   # 93 DP3, DP3, DP3
-                OCT             16447                   # 94
-                OCT             04102                   # 95
-                OCT             04102                   # 96
+                OCT             16447                   # 94 DP3, M/S, DP3
+                OCT             04102                   # 95 CDU, CDU, CDU
+                OCT             04102                   # 96 CDU, CDU, CDU
                 OCT             06143                   # 97 ARTH, ARTH, ARTH
                 OCT             06043                   # 98 ARTH, FRAC, ARTH
                 OCT             00252                   # 99 DP4, DP2

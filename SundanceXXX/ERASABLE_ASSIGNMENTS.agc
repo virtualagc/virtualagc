@@ -1348,13 +1348,6 @@ ZNB             =               ZDC
 -COSB           EQUALS          XSM             +2      # (2)TMP
 SINB            EQUALS          -COSB           +2      # (2)TMP
 
-
-#          MORE OVERLAYS TO ALIGNMENT /SYSTEST  (THESE ARE P52)         (6D)
-
-LANDLAT         EQUALS          STARAD                  # (2) LATITUDE, LONGITUDE
-LANDLONG        EQUALS          LANDLAT         +2      # (2)     AND ALTITUDE
-LANDALT         EQUALS          LANDLONG        +2      # (2)     OF LANDING SITE
-
 #          ALIGNMENT/SYSTEST COMMON STORAGE.                    (31D)
 
 STARAD          EQUALS          ZDC             +6      # I(18D)TMP
@@ -2598,10 +2591,20 @@ FDAIZ           =               FDAIY           +1      # I(1)
 
 # THE FOLLOWING CARDS KEEP THE ASSEMBLER HAPPY UNTIL THE SYMBOLS ARE DELETED FROM THE PINBALL NOUN TABLES.
 
+CPHIX           EQUALS          SPARE
+
+CURSOR          EQUALS          END-E7.0
+SPIRAL          EQUALS          END-E7.0
+POSCODE         EQUALS          END-E7.0
+
+LANDLAT         EQUALS          END-E7.0
+LANDLONG        EQUALS          END-E7.0
+LANDALT         EQUALS          END-E7.0
+
 END-E7.0        EQUALS          IRETURN1        +1      # FIRST UNUSED LOCATION IN E7 OVERLAY 0
 END-E7.1        EQUALS          N49FLAG         +1      # FIRST UNUSED LOCATION IN E7 OVERLAY 1
-END-E7.2        EQUALS          POINTVSM        +6      # FIRST UNUSED LOCATION IN E7 OVERLAY 2
-END-E7.3        EQUALS          END-ALIG                # FIRST UNUSED LOCATION IN E7 OVERLAY 3
-END-E7.4        EQUALS          LASTLADW        +1      # FIRST UNUSED LOCATION IN E7 OVERLAY 4
+END-E7.2        EQUALS          P21TIME         +2      # FIRST UNUSED LOCATION IN E7 OVERLAY 2
+END-E7.3        EQUALS          P11VTPF         +2      # FIRST UNUSED LOCATION IN E7 OVERLAY 3
+END-E7.4        EQUALS          FDAIZ           +1      # FIRST UNUSED LOCATION IN E7 OVERLAY 4
 END-E7.5        EQUALS          TXO             +2      # FIRST UNUSED LOCATION IN E7 OVERLAY 5
 END-E7          EQUALS          3777                    # **LAST LOCATION USED IN E7 **
