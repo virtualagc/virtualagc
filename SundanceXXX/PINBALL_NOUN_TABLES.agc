@@ -204,7 +204,7 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                                                         #       (USED BY EXTENDED VERBS ONLY)
                 OCT             77777                   # 15 INCREMENT MACHINE ADDRESS
                 ECADR           DSPTEMX                 # 16 TIME OF EVENT (HRS,MIN,SEC)
-                ECADR           AZ                      # 17 ASTRONAUT TOTAL ATTITUDE
+                ECADR           CPHIX                   # 17 ASTRONAUT TOTAL ATTITUDE
                 ECADR           FDAIX                   # 18 AUTO MANEUVER BALL ANGLES
                 ECADR           FDAIX                   # 19 BYPASS ATTITUDE TRIM MANEUVER
                 ECADR           CDUX                    # 20 ICDU ANGLES
@@ -503,7 +503,7 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                                                         #           (DEC ONLY)
                 OCT             62010                   # 91 3COMP  POS4, MIN/SEC, DPDEG(XXXX.X)
                                                         #           (NO LOAD, DEC ONLY)
-                OCT             62000                   # 92 2COMP  MIN/SEC, DPDEG(XXXX.X)
+                OCT             62000                   # 92 3COMP  SPARE, MIN/SEC, DPDEG(XXXX.X)
                                                         #           (NO LOAD, DEC ONLY)
                 OCT             06143                   # 93 3COMP  DPDEG(90) FOR EACH
                 OCT             62010                   # 94 3COMP  POS4, MIN/SEC, DPDEG(XXXX.X)
@@ -799,9 +799,9 @@ IDADDTAB        ECADR           TTOGO                   # 40 MIN/SEC            
                 ECADR           CPHI                    # 95 CDU DEG                          CDU
                 ECADR           CTHETA                  # 95 CDU DEG                          CDU
                 ECADR           CPSI                    # 95 CDU DEG                          CDU
-                ECADR           CPHIX                   # 96 CDU DEG                          CDU
-                ECADR           CPHIX           +1      # 96 CDU DEG                          CDU
-                ECADR           CPHIX           +2      # 96 CDU DEG                          CDU
+                ECADR           CPHIXATT                # 96 CDU DEG                          CDU
+                ECADR           CPHIXATT        +1      # 96 CDU DEG                          CDU
+                ECADR           CPHIXATT        +2      # 96 CDU DEG                          CDU
                 ECADR           DSPTEM1                 # 97 WHOLE                            ARTH
                 ECADR           DSPTEM1         +1      # 97 WHOLE                            ARTH
                 ECADR           DSPTEM1         +2      # 97 WHOLE                            ARTH

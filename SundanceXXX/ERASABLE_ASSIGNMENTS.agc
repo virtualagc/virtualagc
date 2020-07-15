@@ -782,15 +782,19 @@ W.IND           EQUALS          PIPCTR                  # B(1)
 
 BALLEXIT        ERASE                                   # B(1)SAVE LOCATION FOR BALLINGS SUBR EXIT
 
+#          CRS61.1 STORAGE. -USED IN R63 (VERB 89)-                       (5D)
+
+CPHIX           ERASE           +2                      # B(3)DSP NOUN 96 CALCULATED BY CRS61.1
+#
+
 #          NOUN 87                                                      (2D)
 
-AZ              ERASE           +1D                     # B(1)  AZ AND EL MUST BE CONTIGUOUS
+AZ              EQUALS          CPHIX                   # B(1)  AZ AND EL MUST BE CONTIGUOUS
 EL              EQUALS          AZ              +1D     # B(1)
 #
 
 
 #          NOUN 29                                                      (1D)
-UNUSED7         ERASE
 LRFLAGS         ERASE
 
 
@@ -2591,7 +2595,7 @@ FDAIZ           =               FDAIY           +1      # I(1)
 
 # THE FOLLOWING CARDS KEEP THE ASSEMBLER HAPPY UNTIL THE SYMBOLS ARE DELETED FROM THE PINBALL NOUN TABLES.
 
-CPHIX           EQUALS          SPARE
+CPHIXATT        EQUALS          SPARE
 
 CURSOR          EQUALS          END-E7.0
 SPIRAL          EQUALS          END-E7.0

@@ -451,7 +451,8 @@
 # 91  TPI ALTITUDE                           3COMP   XXXX.X NAUT MI                      NO LOAD, DEC ONLY
 #     TIME FROM LAUNCH TO TPI                        XXBXX  MIN/SEC
 #     ANGLE FROM LAUNCH TO TPI                       XXXX.X DEG
-# 92  TIME FROM LAUNCH TO TPF                        XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
+# 92  SPARE COMPONENT                        3COMP   BLANK                               NO LOAD, DEC ONLY
+#     TIME FROM LAUNCH TO TPF                        XXBXX  MIN/SEC
 #     ANGLE FROM LAUNCH TO TPF                       XXXX.X DEG
 # 93  DELTA GYRO ANGLES                      3COMP   XX.XXX DEG FOR EACH
 # 94  CSI ALTITUDE                           3COMP   XXXX.X NAUT MI                      NO LOAD, DEC ONLY
@@ -487,9 +488,9 @@
 # 14              DSPTEMX        C
 # 15       INCREMENT ADDRESS     A
 # 16              DSPTEMX        C
-# 17              AZ             D
+# 17              CPHIX          D
 # 18              FDAIX          D
-# 19       SPARE
+# 19              FDAIX          D
 # 20              CDUX           D
 # 21              PIPAX          C
 # 22              THETAD         D
@@ -499,16 +500,16 @@
 # 26              DSPTEM1        A
 # 27              SMODE          C
 # 28       SPARE
-# 29       SPARE
-# 30       SPARE
-# 31       SPARE
+# 29              LRFLAGS        A
+# 30              TCSI           K
+# 31              TCDH           K
 # 32              -TPER          K
 # 33              TIG            K
 # 34              DSPTEM1        K
 # 35              TTOGO          K
 # 36              TIME2          K
 # 37              TTPI           K
-# 38              TET            K
+# 38       SPARE
 # 39       SPARE
 
 # REGISTERS AND SCALING FOR MIXED NOUNS
@@ -539,19 +540,24 @@
 #          2      ROLLTIME         NN
 # 49       1      R22DISP          Q
 #          2      R22DISP +2       S
-# 50       SPARE
+# 50       1      DIFFALT          Q
+#          2      T1TOT2           L
+#          3      T2TOT3           L
 # 51       1      ALPHASB          H
 #          2      BETASB           H
 # 52       1      ACTCENT          H
-# 53       SPARE
+# 53       1      DELVTPI          S
+#          2      DELVTPF          S
+#          3      P1XMAX           Q
 # 54       1      RANGE            JJ
 #          2      RRATE            S
 #          3      RTHETA           H
 # 55       1      NN               C
 #          2      ELEV             H
 #          3      CENTANG          H
-# 56       1      RR-AZ            H
-#          2      RR-ELEV          H
+# 56       1      NN               C
+#          2      ELEV             H
+#          3      CDHDELH          Q
 # 57       1      DELTAR           Q
 # 58       1      POSTTPI          Q
 #          2      DELVTPI          S
@@ -585,7 +591,9 @@
 # 68       1      RANGEDSP         QQ
 #          2      TTFDISP          L
 #          3      DELTAH           RR
-# 69       SPARE
+# 69       1      ABDELV           C
+#          2      DVTHRUSH         C
+#          3      DVTOTAL          S
 # 70       1      AOTCODE          A
 #          2      AOTCODE +1       A
 #          3      AOTCODE +2       A
@@ -599,9 +607,9 @@
 # 74       1      TTOGO            L
 #          2      YAW              H
 #          3      PITCH            H
-# 75       1      DIFFALT          Q
-#          2      T1TOT2           L
-#          3      T2TOT3           L
+# 75       1      TTOGO            L
+#          2      DVTOTAL          S
+#          3      HCALC            RR
 # 76       1      XRANGE           Q
 #          2      APO              Q
 # 77       1      TTOGO            L
@@ -642,14 +650,23 @@
 # 90       1      RANGE            JJ
 #          2      RRATE            S
 #          3      RTHETA           H
-# 91       SPARE
-# 92       SPARE
+# 91       1      INJALT           Q
+#          2      TPITIME          L
+#          3      TPIANGLE         SS
+# 92       2      INJTIME          L
+#          3      INJANGLE         SS
 # 93       1      OGC              G
 #          2      OGC +2           G
 #          3      OGC +4           G
-# 94       SPARE
-# 95       SPARE
-# 96       SPARE
+# 94       1      INJALT           Q
+#          2      INJTIME          L
+#          3      INJANGLE         SS
+# 95       1      CPHI             D
+#          2      CTHETA           D
+#          3      CPSI             D
+# 96       1      CPHIXATT         D
+#          2      CPHIXATT +1      D
+#          3      CPHIXATT +2      D
 # 97       1      DSPTEM1          C
 #          2      DSPTEM1 +1       C
 #          3      DSPTEM1 +2       C
