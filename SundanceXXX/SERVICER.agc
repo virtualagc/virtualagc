@@ -903,8 +903,8 @@ LRHMAX          2DEC            170688
 2SEC(28)        2OCT            00000   00310           # 2SEC AT 2(28)
 
 HSCAL           2DEC            -.3288792               # SCALES 1.079 FT/BIT TO 2(22)M.
-# ***** THE SEQUENCE OF THE FOLLOWING CONSTANTS MUST BE PRESERVED ********
 
+# ***** THE SEQUENCE OF THE FOLLOWING CONSTANTS MUST BE PRESERVED ********
 VZSCAL          2DEC            +.5410829105            # SCALES .8668 FT/SEC/BIT TO 2(18) M/CS.
 VYSCAL          2DEC            +.7565672446            # SCALES 1.212 FT/SEC/BIT TO 2(18) M/CS.
 VXSCAL          2DEC            -.4020043770            # SCALES -.644 FT/SEC/BIT TO 2(18) M/CS.
@@ -914,6 +914,21 @@ LRWVY           2DEC            0.7
 LRWVX           2DEC            0.4
 
 BITS4-7         OCT             110
+
+# LRSTAT BIT DEFINITIONS
+LRBYBIT         =               BIT15                   # LR UPDATE BYPASS FLAG
+PSTHIBIT        =               BIT11                   # PAST HIGATE FLAG
+NOLRRBIT        =               BIT10                   # LANDING RADAR REPOSITIONING FLAG
+XORFLBIT        =               BIT9                    # X-AXIS OVERRIDE LIMIT FLAG
+VELDABIT        =               BIT7                    # LR VELOCITY MEASUREMENT MADE FLAG
+READLBIT        =               BIT6                    # OK TO READ LR RANGE DATA FLAG
+READVBIT        =               BIT5                    # OK TO READ LR VELOCITY DATA FLAG
+RNGEDBIT        =               BIT4                    # LR ALTITUDE MEASUREMENT MADE FLAG
+
+# THE FOLLOWING DEFINITIONS ALLOW LRSTAT AND 
+XOVINFLG        =               11872D                  # X-AXIS OVERRIDE FLAG
+LRBYPASS        =               13561D                  # LANDING RADAR BYPASS FLAG
+XORFLG          =               13567D                  # X-AXIS OVERRIDE LIMIT FLAG
 
 UPDATCHK        CAF             NOLRRBIT                # SEE IF LR UPDATE INHIBITED.
                 MASK            LRSTAT   
@@ -1095,7 +1110,7 @@ NOLITE          CA              LRMCTR                  # SET S = M
                 TS              LRSCTR
 
                 CS              FLAGWRD0
-                MASK            ZMEASBIT
+                MASK            VORIDBIT
                 EXTEND
                 BZF             VUPDAT1
 

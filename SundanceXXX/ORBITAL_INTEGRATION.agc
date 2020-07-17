@@ -872,6 +872,9 @@ RDM             2DEC    16093.44 E3 B-27
 
 RDE             2DEC    80467.20 E3 B-29
 
+INTFLBIT        =       BIT14
+REINTBIT        =       BIT7
+
 RATT            EQUALS  00
 VATT            EQUALS  6D
 TAT             EQUALS  12D

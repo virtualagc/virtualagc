@@ -4021,3 +4021,12 @@ V45XXX          LXA,1           SXA,1
 
 V06N99          VN              0699
 1/SQRT3         2DEC            0.5773502
+
+# RADMODES BIT DEFINITIONS
+REMODBIT        =               BIT14                   # ANTENNA MODE CHANGE REQUESTED FLAG
+ANTENBIT        =               BIT12                   # RR ANTENNA MODE FLAG
+REPOSBIT        =               BIT11                   # RR REPOSITION TAKING PLACE FLAG
+LRVELBIT        =               BIT8                    # LR VELOCITY DATA FAIL FLAG
+RCDUFBIT        =               BIT7                    # RR CDU FAIL OCCURRED FLAG
+LRALTBIT        =               BIT5                    # LR ALTITUDE DATA FAIL FLAG
+AUTOMBIT        =               BIT2                    # RR AUTO MODE DISCRETE FLAG
