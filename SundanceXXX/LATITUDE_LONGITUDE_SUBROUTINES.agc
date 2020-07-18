@@ -7,7 +7,6 @@
 ##              No original listings of this program are available;
 ##              instead, this file was created via disassembly of dumps
 ##              of various revisions of Sundance core rope modules.
-## Reference:   pp. 1128-1134
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
