@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 302
+
 # PROGRAM NAMES:        (1) T6JOBCHK    MOD. NO. 5      OCTOBER 2, 1967
 #                       (2) DOT6RUPT
 # MODIFICATION BY:      LOWELL G HULL (A.C.ELECTRONICS)
@@ -103,6 +105,8 @@ ENABLET6        CA      BIT15
 GOCH56          INDEX   L
                 TCF     WRITEP -1
 
+## Sundance 292
+
                 BLOCK   02
                 SETLOC  FFTAG9
                 BANK
@@ -135,6 +139,8 @@ WRITEV          TS      L
                 CA      00314OCT
                 TCF     -9D
 00314OCT        OCT     00314
+
+## Sundance 302
 
                 BANK    16
                 SETLOC  DAPS1

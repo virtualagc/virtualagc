@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 292
+
 # SECTION 1  DISPATCHER
 
 #          ENTRY TO THE INTERPRETER. INTPRET SETS LOC TO THE FIRST  INSTRUCTION, BANKSET TO THE BBANK OF THE

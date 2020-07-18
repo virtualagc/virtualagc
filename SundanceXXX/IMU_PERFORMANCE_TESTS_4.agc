@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 306
+
 # PROGRAM-IMU PERFORMANCE TESTS 4
 # DATE-NOV 15, 1966
 # BY-GEORGE SCHMIDT IL7-146 EXT 1126

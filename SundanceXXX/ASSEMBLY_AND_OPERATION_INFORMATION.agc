@@ -13,6 +13,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## This section, being entirely comments, is entirely guesswork. The noun tables reflect what is
+## actually present in Sundance 306, while the remainder is based off of section 4 of the GSOP.
+
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED EARTH ORBITAL MISSION OR ANY SUBSET THEREOF.
 # THE DETAILS OF IMPLEMENTATION ARE SPECIFIED IN REPORT R-557, AS AMENDED.
 

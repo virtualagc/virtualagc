@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 302
+
 # 1.0 INTRODUCTION
 # ----------------
 #
@@ -1011,6 +1013,8 @@ NOTIME          CLEAR   EXIT            # TOO LATE
 3CSECS          2DEC    3
 
 TIMEDELT        2DEC    1000
+
+## Sundance 292
 
                 BANK    27
                 SETLOC  UPDATE2

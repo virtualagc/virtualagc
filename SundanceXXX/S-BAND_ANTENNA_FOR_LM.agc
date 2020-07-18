@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 306
+
 # SUBROUTINE NAME: R05 - S-BAND ANTENNA FOR LM
 #
 # MOD0 BY T. JAMES

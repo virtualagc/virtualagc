@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 302
+
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
 # MOD NO- 0                                                                              LOG SECTION- P51-P53
 # MODIFICATION BY- LONSKE                                                                ASSEMBLY- SUNDANCE REV 46

@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 292
+
 # SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
 
                 COUNT*  $$/PHASE
@@ -46,6 +48,8 @@ CHECKMM         INDEX   Q
 
 TCQ             =       Q+2 +1
 
+## Sundance 302
+
                 BANK    14
                 SETLOC  PHASETAB
                 BANK
@@ -63,6 +67,8 @@ SETUPDSP        INHINT
                 DXCH    Z               # RETURN
 
 DSPMMJOB        EQUALS  DSPMMJB
+
+## Sundance 292
 
                 BLOCK   02
                 SETLOC  FFTAG1
@@ -278,6 +284,8 @@ TEMPP2          EQUALS  RUPTREG3
 TEMPBBCN        EQUALS  RUPTREG4
 BB              EQUALS  BBANK
 
+## Sundance 302
+
                 BANK    14
                 SETLOC  PHASETAB
                 BANK
@@ -367,6 +375,8 @@ CON2            LXCH    TEMPBBCN
                 DXCH    PHSNAME1 -2
 
                 TCF     BELOW1
+
+## Sundance 292
 
                 BLOCK   02
                 SETLOC  FFTAG1

@@ -13,14 +13,17 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-                SUBRO           LUMERASE        102
-                SUBRO           LEMONAID        070
-                SUBRO           LEMP20S         114
-                SUBRO           LEMP30S         102
-                SUBRO           KISSING         040
-                SUBRO           FLY             109
-                SUBRO           LEMP50S         103
-                SUBRO           SKIPPER         070
-                SUBRO           LMDAP           012
+## This section is speculation; we don't know exactly what all of the subroutines
+## in Sundance were called.
+
+                SUBRO           DANCERAS
+                SUBRO           LEMONAID
+                SUBRO           LEMP20S
+                SUBRO           LEMP30S
+                SUBRO           KISSING
+                SUBRO           FLY
+                SUBRO           LEMP50S
+                SUBRO           SKIPPER
+                SUBRO           LMDAP
 
 

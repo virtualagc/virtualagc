@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 292
+
 # PROGRAM DESCRIPTION                                                           DATE - 10 OCTOBER 1966
 # MOD NO - 2                                                                    LOG SECTION - WAITLIST
 # MOD BY - MILLER       (DTMAX INCREASED TO 162.5 SEC)                          ASSEMBLY SUNBURST REV 5

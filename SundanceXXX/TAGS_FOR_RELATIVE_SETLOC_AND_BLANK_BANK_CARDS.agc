@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## This section allocates tags to match our particular set of Sundance modules.
+
                 COUNT           BANKSUM
 
 # MODULE 1 CONTAINS BANKS 0 THROUGH 5
@@ -27,9 +29,6 @@ FFTAG7          EQUALS
 FFTAG8          EQUALS
 FFTAG9          EQUALS
 FFTAG10         EQUALS
-FFTAG11         EQUALS
-FFTAG12         EQUALS
-FFTAG13         EQUALS
                 BNKSUM          02
 
 
@@ -157,7 +156,6 @@ R10             EQUALS
 KALCMON1        EQUALS
 KALCMON2        EQUALS
 R30LOC          EQUALS
-RENDEZ          EQUALS
                 BNKSUM          22
 
 
@@ -186,7 +184,6 @@ P20S2           EQUALS
 LRS22           EQUALS
 RADARUPT        EQUALS
 RRLEADIN        EQUALS
-R29S1           EQUALS
                 BNKSUM          25
 
 
@@ -226,7 +223,6 @@ F2DPS*31        EQUALS
 P10S            EQUALS
 F2DPS*32        EQUALS
 ABORTS          EQUALS
-ASENT1          EQUALS
 P40S2           EQUALS
 R11             EQUALS
                 BNKSUM          32
@@ -234,7 +230,6 @@ R11             EQUALS
 
                 BANK            33
 SERVICES        EQUALS
-R29/SERV        EQUALS
                 BNKSUM          33
 
 

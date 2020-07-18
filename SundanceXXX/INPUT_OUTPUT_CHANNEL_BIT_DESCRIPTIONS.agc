@@ -208,7 +208,7 @@
 #
 #       BIT 1       ABORT WITH DESCENT STAGE
 #
-#       BIT 2          UNUSED
+#       BIT 2       STAGE VERIFY SIGNAL
 #
 #       BIT 3       ENGINE ARMED SIGNAL
 #

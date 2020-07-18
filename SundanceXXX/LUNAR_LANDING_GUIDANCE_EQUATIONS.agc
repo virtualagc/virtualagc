@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 292
+
                 EBANK=          E2DPS
 
                 COUNT*          $$/F2DPS
@@ -827,6 +829,7 @@ PITFALL         XCH             BANKRUPT
                 ADRES           REDESMON
                 TCF             RESUME
 
+## Sundance 302
 
 # REDESIGNATION MONITOR (INITIATED BY PITFALL)
 
@@ -914,6 +917,8 @@ DESCBITS        MASK            BIT7                    # COME HERE FROM MARKRUP
                 ADS             RODCOUNT
 
                 TCF             RESUME                  # TRAP IS RESET WHEN SWITCH IS RELEASED
+
+## Sundance 292
 
 
                 BANK            31

@@ -13,18 +13,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## <br><br>
-## At the get-together of the AGC developers celebrating the 40th anniversary
-## of the first moonwalk, Don Eyles (one of the authors of this routine along
-## with Peter Adler) related a little interesting history behind the
-## naming of the routine to one of us.<br>
-## <br>
-## It traces back to 1965 and the Los Angeles riots, and was inspired
-## by disc jockey extraordinaire and radio station owner Magnificent Montague.
-## Magnificent Montague used the phrase "Burn, baby! BURN!" when spinning the
-## hottest new records. Magnificent Montague was the charismatic voice of
-## soul music in Chicago, New York, and Los Angeles from the mid-1950s to
-## the mid-1960s.
+## Sundance 306
 
                 BANK            36
                 SETLOC          P40S
@@ -811,7 +800,6 @@ NULLCLOK        INHINT
                 TS              DISPDEX
                 TC              P40/RET
 
-## FIXME: Better name?
 GOASTCLK        TC              MAKECADR
                 TS              TEMPR60
                 CAF             ZERO
@@ -896,6 +884,8 @@ VB99CON         OCT             24020                   # BITS 5, 12, AND 14
 
 OCT1505         OCT             1505
 
+## Sundance 292
+
 #          KILLTASK
 # MOD NO: NEW PROGRAM
 # MOD BY: COVELLI
@@ -936,6 +926,8 @@ KILLTASK        CA              KILLBB
 
                 EBANK=          LST2
 KILLBB          BBCON           KILLTSK2
+
+## Sundance 302
 
 
                 BANK            27

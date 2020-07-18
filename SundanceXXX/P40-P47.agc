@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 306
+
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
 # MOD 03 BY PETER ADLER           MARCH 3, 1967
 # CALLED VIA JOB FROM V37E
@@ -617,6 +619,9 @@ ACADN85         =               P41TABLE        +2
 
                 EBANK=          DELVIMU
 ACADN83         2CADR           CALCN83
+
+## Sundance 302
+
 # *************************************************
 
 # PROGRAM DESCRIPTION S40.1       DATE15NOV66

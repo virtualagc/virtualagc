@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 302
+
                 BANK            12
                 SETLOC          T4RUP
                 BANK
@@ -33,6 +35,8 @@ T4RUPT          TS              BANKRUPT
 NORMT4          CAF             SEVEN
                 TS              RUPTREG1
                 TS              DSRUPTSW
+
+## Sundance 292
 
                 BLOCK           02
                 SETLOC          FFTAG10
@@ -55,6 +59,8 @@ RELTAB          OCT             04025
                 OCT             50037
                 OCT             54000
 RELTAB11        OCT             60000
+
+## Sundance 302
 
 #          SWITCHED-BANK PORTION.
 

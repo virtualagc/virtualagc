@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 302
+
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION                       DATE - 1 SEPTEMBER 1967
 # MOD NO. - 0                                                                     LOG SECTION - CONIC SUBROUTINES
 # MOD BY KRAUSE                                                                   ASSEMBLY - COLOSSUS REVISION 88
@@ -1187,6 +1189,8 @@ LAMENTER        NORM
                         VVEC
                 VSL8    RVQ
 
+## Sundance 292
+
                 SETLOC  CONICS1
                 BANK
 
@@ -1224,6 +1228,7 @@ COGUPLIM        2DEC    .999511597
 
 COGLOLIM        2DEC    -.999511597
 
+## Sundance 302
 
                 SETLOC  CONICS
                 BANK
@@ -1298,6 +1303,8 @@ PARAM           STQ     CLEAR           # MPAC=V1VEC, 0D=R1VEC         PL AT 6
                 GOTO
                         RTNPRM
 
+## Sundance 292
+
                 BANK    4
                 SETLOC  CONICS1
                 BANK
@@ -1350,6 +1357,8 @@ MUTABLE         2DEC*   3.986032   E10 B-36*       # MUE
 
                 2DEC*   2.21422176 E4 B-15*        # SQRT(MUM)
                 2DEC*   .45162595  E-4 B+14*       # 1/SQRT(MUM)
+
+## Sundance 302
 
                 BANK    12
                 SETLOC  CONICS

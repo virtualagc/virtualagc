@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 302
+
 # MOD NO: 0                             DATE: 1 MAY 1968
 # MOD BY: DIGITAL DEVEL GROUP           LOG SECTION R60,R62
 #

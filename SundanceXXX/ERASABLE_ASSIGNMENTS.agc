@@ -13,6 +13,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## This log section assembles such that the addresses of all erasables match
+## their locations for Sundance 306, to the best of our knowledge. The order
+## of definitions, and especially the comments, may not reflect the original
+## listing.
+
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
 
 #          EQUALS IS USED IN TWO WAYS.  IT IS OFTEN USED TO CHAIN A GROUP

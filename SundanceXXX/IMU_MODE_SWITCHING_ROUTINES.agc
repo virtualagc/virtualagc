@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 292
+
                 BLOCK   02
                 SETLOC  FFTAG3
                 BANK
@@ -29,6 +31,8 @@ ZEROICDU        CAF     ZERO            # ZERO ICDU COUNTERS.
                 TC      Q
 
 SPSCODE         =       BIT9
+
+## Sundance 302
 
 # IMU ZEROING ROUTINE.
 
@@ -828,6 +832,8 @@ GOMANUR         CA      ATTCADR         # IS KALCMANU FREE
                 CADR    KALCMAN3
 KALEBCON        ECADR   BCDU
 
+## Sundance 292
+
 # PROGRAM DESCRIPTION
 # IMU STATUS CHECK ROUTINE R02 (SUBROUTINE UTILITY)
 # MOD NO - 1
@@ -883,6 +889,8 @@ R02ZERO         TC      UPFLAG
                 ADRES   IMUSE
                 TCF     SWRETURN
 OCT220          OCT     220
+
+## Sundance 306
 
 # PROGRAM DESCRIPTION   P06   10 FEB 67
 #

@@ -13,6 +13,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
+## Sundance 302
+
 # PROGRAM DESCRIPTION
 # DESIGNED BY:	R. D. GOSS AND P. S. WEISSMAN
 # CODED BY:  P. S. WEISSMAN 28 FEBRUARY 1968
