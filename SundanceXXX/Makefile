@@ -1,10 +1,9 @@
 # Copyright:	Public domain.
 # Filename:	Makefile
-# Purpose:	Makefile for Luminary 69 revision 2.
-#		The flown version of software for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 10. It has been
-#		reconstructed from a listing of Luminary 069 (revision 0),
-#		Luminary 099 (revision 1), and Luminary memos 75 and 78.
+# Purpose:	Makefile for a reconstructed, mixed version of Sundance,
+#		the software for the Lunar Module's (LM) Apollo Guidance
+#		Computer (AGC) for Apollo 9. It has been reconstructed
+#		from binary dumps of original core rope program modules.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # History:	2019-07-27 	MAS	Created.
 
@@ -21,7 +20,7 @@ diffSundanceXXX.txt: ../Tools/bdiffhead SundanceDumps.bin $(BASENAME).bin
 
 .PHONY: checkSundanceXXX
 checkSundanceXXX: diffSundanceXXX.txt
-	cat $< changes.txt | sed 's/;.*//' | sort | uniq -u | wc -l
+	cat $< SundanceXXXDifferences.txt | sed 's/;.*//' | sort | uniq -u | wc -l
 
 SundanceDumps.bin:
 	cat Sundance292-B1.bin Sundance302-B2.bin Sundance302-B3.bin \

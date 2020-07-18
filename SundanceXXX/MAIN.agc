@@ -1,12 +1,12 @@
 ### FILE="Main.annotation"
 # Copyright:    Public domain.
 # Filename:     MAIN.agc
-# Purpose:      The main source file for Luminary revision 069.
-#               It is part of the source code for the original release 
-#               of the flight software for the Lunar Module's (LM) Apollo 
-#               Guidance Computer (AGC) for Apollo 10. The actual flown 
-#               version was Luminary 69 revision 2, which included a 
-#               newer lunar gravity model and only affected module 2.
+# Purpose:      The main source file for a reconstructed, mixed version
+#               of Sundance.  It is part of the reconstructed source code
+#               for the Lunar Module's (LM) Apollo Guidance Computer (AGC)
+#               for Apollo 9.  No original listings of this program are
+#               available; instead, this file was created via disassembly
+#               of dumps of various revisions of Sundance core rope modules.
 # Assembler:    yaYUL
 # Contact:      Ron Burkey <info@sandroid.org>.
 # Website:      www.ibiblio.org/apollo/index.html
