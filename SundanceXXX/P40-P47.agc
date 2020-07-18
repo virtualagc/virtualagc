@@ -114,8 +114,7 @@ P40LM           CAF             P40ADRES                # INITIALIZATION FOR BUR
                 AD              THRESH3
                 TS              DVTHRUSH
                 CAF             ONE
-## FIXME: This is probably not TIME2SAV +1
-                TS              TIME2SAV +1
+                TS              AUXFLAG
                 CAF             FOUR
                 TS              DVCNTR
 
@@ -322,7 +321,7 @@ P42LM           CAF             P42ADRES                # INITIALIZATION FOR BUR
                 CAF             THRESH2                 # INITIALIZE DVMON
                 TS              DVTHRUSH
                 CAF             ONE
-                TS              TIME2SAV +1
+                TS              AUXFLAG
                 CAF             FOUR
                 TS              DVCNTR
 
@@ -585,7 +584,6 @@ P40ALM          TC              ALARM                   # ASTRONAUT DOESN'T AGRE
 # ************************************************************************
 
 FDPS            2DEC            4.319223        B-7     # 9710.0 LBS FORCE IN NEWTONS
-## FIXME: SCALING?
 MDOTDPS         2DEC            0.00891025      B-3     # 32.62 LBS/SEC IN KGS/CS.
 DTDECAY         2DEC            -38
 

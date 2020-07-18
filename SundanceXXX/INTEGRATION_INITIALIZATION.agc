@@ -1093,7 +1093,17 @@ GRP2PC          STQ     EXIT
                         GRP2SVQ
 
 
-## FIXME: Move this to the correct spot!
+## This function, which we have called TIGINT, performs integration to TIG-30 for BURNBABY, and
+## integration to TIG for P47. Both were rewritten to use MIDTOAVE in Luminary. Unfortunately,
+## it was located in bank 36 in Sundance 292, and in bank 32 in Sundance 306. We only have
+## revision 292 of bank 32, and revision 306 of bank 36 -- which means that we are completely
+## missing this function. The below implementation was created by Mike Stewart and Niklas Beug
+## to perform all of the needed functions. It has been tested and confirmed working in NASSP,
+## although it is shorter than the original implementation, which means something (hopefully
+## unimportant) is possibly still missing.
+## Furthermore, it was very likely located in BURN, BABY, BURN -- MASTER IGNITION ROUTINE in
+## Sundance, but it is placed here in this reconstruction to minimize the assembled differences
+## from the dumped binaries.
                 BANK            32
                 SETLOC          P40S2
                 BANK

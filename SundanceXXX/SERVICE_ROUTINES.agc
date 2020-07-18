@@ -228,5 +228,8 @@ B5OFF           CS      BIT5
                 TS      EXTVBACT
                 TC      ENDOFJOB
 
-## FIXME: Figure out what this is and what it does.
+## The following function, which assembles to address 7766, was added in Sundance 302. Unfortunately,
+## we only have revision 292 of this bank. We have not yet figured out what it does, but it is only
+## called from extended verbs and so likely either does something with EXTVBACT or marks. Until we
+## determine its purpose, it is equated to TCQ to allow it to perform no function.
 UNK7766         EQUALS  TCQ

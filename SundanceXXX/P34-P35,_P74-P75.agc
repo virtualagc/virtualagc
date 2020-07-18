@@ -978,7 +978,6 @@ DP-.01          OCT     77777           # CONSTANTS
 
 
 ## Sundance 302
-## FIXME: comments
 
 # ..... INITVEL .....
 
@@ -1026,8 +1025,8 @@ DP-.01          OCT     77777           # CONSTANTS
 #       (5)     INTIME          TIME OF RINIT
 #       (6)     0D              NUMBER OF ITERATIONS OF LAMBERT/INTEGRVS
 #       (7)     2D              ANGLE TO 180 DEGREES WHEN ROTATION STARTS
-#       (8)     RTX1            -2 FOR EARTH, -10D FOR LUNAR
-#       (9)     RTX2            COORDINATE SYSTEM ORIGIN - 0 FOR EARTH, 2 FOR LUNAR
+#       (8)     X1              -2 FOR EARTH, -10D FOR LUNAR
+#       (9)     B29FLAG         CLEAR IF EARTH IS CENTRAL BODY
 #       PUSHLOC SET AT 4D
 #
 # OUTPUT

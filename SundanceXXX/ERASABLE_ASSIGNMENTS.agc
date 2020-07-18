@@ -1662,6 +1662,7 @@ ABDELV          EQUALS          MASS            +2      # ALCMANU STORAGE)
 /AF/            EQUALS          ABDELV          +2      # (6)
 DVTHRSH1        EQUALS          /AF/            +2      # (1)
 DVTHRUSH        =               TIME2SAV
+AUXFLAG         =               DVTHRUSH        +1
 AVEGEXIT        EQUALS          DVTHRSH1        +1      #  (2)
 AVGEXIT         =               AVEGEXIT
 TEMX            EQUALS          AVEGEXIT        +2      #  (1)
