@@ -186,6 +186,7 @@
 #				couple of years ago, for some reason I didn't set them
 #				to be built automatically.  Now they are.  Also, added
 #				the yaLVDC (LVDC/PTC) target, and have it build automatically.
+#		2020-07-22 RSB	Added SundanceXXX.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -204,7 +205,7 @@
 # certain changes that *may* allow building with clang rather than gcc.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2019-09-22\\\"
+NVER:=\\\"2020-07-22\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -433,6 +434,7 @@ MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
 MISSIONS += Retread50 SundialE LUM69R2 Luminary097 Luminary098
 MISSIONS += Comanche051 Artemis071 Luminary178 Luminary163 Luminary173
+MISSIONS += SundanceXXX
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif

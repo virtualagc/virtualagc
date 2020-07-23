@@ -6,20 +6,30 @@
 </td>
 <td style="vertical-align: middle;">
 These source code files are a reconstruction of Sundance, the Apollo 9 LM (Lunar Module) AGC
-(Apollo Guidance Computer) flight sofwatere, created from binary dumps of original core rope
+(Apollo Guidance Computer) flight software, created from binary dumps of original core rope
 program modules, as follows:
-B1 - Revision 292
-B2 - Revision 302
-B3 - Revision 302
-B4 - Revision 302
-B5 - Revision 292
-B6 - Revision 306
+<ul>
+<li>B1 &mdash; Revision 292</li>
+<li>B2 &mdash; Revision 302</li>
+<li>B3 &mdash; Revision 302</li>
+<li>B4 &mdash; Revision 302</li>
+<li>B5 &mdash; Revision 292</li>
+<li>B6 &mdash; Revision 306</li>
+</ul>
 
-This code matches, as closely as possible, these binary dumps. This means that this build
-does not represent a real historical revision of Sundance, but rather a mixture of the
+This means that source code
+does not represent a specific historical revision of Sundance, but rather a mixture of the
 three released versions. Nonetheless, it is capable of flying the whole Apollo 9 mission.
-
-Since only binary dumps of Sundance are available, all comments and labels are approximate.
+<br><br>
+This code matches the binary dumps, as closely as <i>possible</i>. Due mostly to 
+changes in memory addresses at which code and variables were allocated in different
+revisions of Sundance, there are 827 binary differences between the core-rope module
+dumps and the assembled source code.  Source-code
+comments of the form "## Sundance <i>REV</i>" have been added to identify the 
+differences.
+<br><br>
+Since only binary dumps (rather than listings) of Sundance are available as source material, 
+all comments and labels are approximate.
 They have been taken from other AGC programs where possible, or, in some places, written
 from scratch to match what we believe would have been in the original listing.
 
