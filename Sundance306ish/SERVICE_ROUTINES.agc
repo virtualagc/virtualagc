@@ -229,5 +229,19 @@ B5OFF           CS      BIT5
 ## The following function, which assembles to address 7766, was added in Sundance 302. Unfortunately,
 ## we only have revision 292 of this bank. We have not yet figured out what it does, but it is only
 ## called from extended verbs and so likely either does something with EXTVBACT or marks. Until we
-## determine its purpose, it is equated to TCQ to allow it to perform no function.
-UNK7766         EQUALS  TCQ
+## determine its purpose, it is implemented as NOOPs.
+
+                BLOCK   03
+                SETLOC  FFTAG5
+                BANK
+
+                EBANK=  ITEMP1
+
+                COUNT*  $$/UNK
+
+UNK7766         NOOP
+                NOOP
+                NOOP
+                NOOP
+                NOOP
+                TC      Q

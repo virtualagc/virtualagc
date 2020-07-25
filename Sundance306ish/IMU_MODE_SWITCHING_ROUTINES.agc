@@ -13,8 +13,9 @@
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
 
-                BLOCK   02
-                SETLOC  FFTAG3
+## The following routine is located in bank 2 in Sundance 292.
+                BLOCK   03
+                SETLOC  FFTAG5
                 BANK
 
                 EBANK=  COMMAND

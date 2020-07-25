@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-
 # PROGRAM DESCRIPTION                                                           DATE - 10 OCTOBER 1966
 # MOD NO - 2                                                                    LOG SECTION - WAITLIST
 # MOD BY - MILLER       (DTMAX INCREASED TO 162.5 SEC)                          ASSEMBLY SUNBURST REV 5
@@ -162,12 +161,24 @@ SVCT3           CCS     FLAGWRD2        # DRIFT FLAG
                 TCF     TASKOVER
                 TCF     +1
 
+## This block of five instructions, as well as the three at SVCT3X, were very
+## likely added in Sundance 302.
+CKIMUSE         CCS     IMUCADR         # DON'T DO NBDONLY IF SOMEONE ELSE IS IN
+                TCF     SVCT3X          # IMUSTALL.
+                TCF     +3
+                TCF     SVCT3X
+                TCF     SVCT3X
+
  +3             CAF     PRIO35          # COMPENSATE FOR NBD COEFFICIENTS ONLY.
                 TC      NOVAC           #       ENABLE EVERY 81.93 SECONDS
                 EBANK=  NBDX
                 2CADR   NBDONLY
 
                 TCF     TASKOVER
+
+SVCT3X		TC	FIXDELAY	# DELAY MAX OF 2 TIMES FOR IMUZERO.
+		DEC	500
+		TC	SVCT3		# CHECK DRIFT FLAG AGAIN.
 
 # BEGIN TASK INSERTION.
 
