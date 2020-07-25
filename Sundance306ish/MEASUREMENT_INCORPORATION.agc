@@ -139,6 +139,8 @@ INCOR1C         TLOAD   ROUND
                 XSU,1   SR1
                         S1
                 DDV     PUSH            # PD 0-1 = DELTAQ/A
+                GOTO
+                        NEWZCOMP
  -3             SSP
                         S2
                         54D
@@ -412,4 +414,56 @@ ZEROO           =       ZEROVECS
 6DD             DEC     -6
 12DD            DEC     12
 
+
+NEWZCOMP	VLOAD	ABVAL
+			ZI
+		STOVL	NORMZI
+			ZI +6
+		ABVAL	PUSH
+		DSU	BMN
+			NORMZI
+			+3
+		DLOAD	STADR
+		STORE	NORMZI
+		VLOAD	ABVAL
+			ZI +12D
+		PUSH	DSU
+			NORMZI
+		BMN	DLOAD
+			+3
+		STADR
+		STORE	NORMZI		# LARGEST ABVAL
+		DLOAD	SXA,1
+			NORMZI
+			NORMZI		# SAVE X1
+		NORM	INCR,1
+			X1
+		DEC	2
+		VLOAD	VSL*
+			ZI
+			0,1
+		STOVL	ZI
+			ZI +6
+		VSL*
+			0,1
+		STOVL	ZI +6
+			ZI +12D
+		VSL*	SXA,1
+			0,1
+			NORMZI +1	# SAVE SHIFT
+		STORE	ZI +12D
+		LXA,1	XSU,1
+			NORMGAM
+			NORMZI +1
+		XSU,1
+			NORMZI +1
+		SXA,1	LXC,1
+			NORMGAM
+			NORMZI +1
+		XAD,1	SETPD
+			NORMZI
+			2D
+		GOTO
+			INCOR2 -3
+NORMZI		=	36D
 

@@ -93,6 +93,9 @@ DOFSTART        CAF             FOUR
                 TS              EBANK
                 EBANK=          HIASCENT
 
+## The following two instructions were very likely added in Sundance 302.
+                CA              RATESTRT
+                TS              -RATEDB
                 CAF             FULLAPS                 # INITIALIZE MAXIMUM ASCENT MASS FOR USE
                 TS              HIASCENT                #   BY 1/ACCS UNTIL THE PAD LOAD IS DONE.
                 CA              77001OCT                #     LOAD DAP FILTER GAINS PAD LOAD
@@ -106,6 +109,9 @@ DOFSTART        CAF             FOUR
                 CA              TEN
                 TS              DKOMEGAN                # 1 SEC GAIN FOR OMEGA
                 CAF             IM33INIT
+## The following two instructions were very likely added in Sundance 302.
+                CAF             BIT8                    # SET DOCKED DB TO 1.4 DEG.  MAY OVERWRITE
+                TS              DKDB                    #   WITH PAD LOAD.
                 AD              BIT6                    # KEEP BOTH DAP AND ERROR-NEEDLES DISPLAY
                 TS              IMODES33                #   OFF UNTIL ICDU ZERO IS FINISHED.
 
@@ -338,6 +344,8 @@ OCT10000        =               BIT13
 OCT30000        =               PRIO30
 OCT32001        OCT             32001
 OCT7777         OCT             7777
+## The following constant was very likely added in Sundance 302.
+RATESTRT        DEC             -218
 RACTCADR        CADR            RESTARTS
 BOOLSTRT        OCT             21312
 77001OCT        OCT             77001                   # .14 DEG SCALED AT 4.5 DEG

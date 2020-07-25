@@ -216,6 +216,43 @@ ONTIME          DLOAD           DSU
                 INDEX           WHICH
                 TCF             5
 
+## This function, which we have called TIGINT, performs integration to TIG-30 for BURNBABY, and
+## integration to TIG for P47. Both were rewritten to use MIDTOAVE in Luminary. Unfortunately,
+## it was located in bank 36 in Sundance 292, and in bank 32 in Sundance 306. We only have
+## revision 292 of bank 32, and revision 306 of bank 36 -- which means that we are completely
+## missing this function. The below implementation was created by Mike Stewart and Niklas Beug
+## to perform all of the needed functions. It has been tested and confirmed working in NASSP,
+## although it is shorter than the original implementation, which means something (hopefully
+## unimportant) is possibly still missing.
+                BANK            32
+                SETLOC          P40S2
+                BANK
+
+                COUNT*          $$/P40
+
+ -1             STORE           TDEC1
+TIGINT          STQ
+                                IRETURN1
+                CALL
+                                LEMPREC
+                VLOAD
+                                RATT
+                STORE           RN1
+                VLOAD
+                                VATT
+                STORE           VN1
+                DLOAD
+                                TAT
+                STORE           PIPTIME1
+                GOTO
+                                IRETURN1
+
+                BANK            36
+                SETLOC          P40S
+                BANK
+                EBANK=          WHICH
+                COUNT*          $$/P40
+
 P12SPOT         =               P40SPOT                 # (5)
 P42SPOT         =               P40SPOT                 # (5)
 P63SPOT         =               P41SPOT                 # (5)      IN P63 CLOKTASK ALREADY GOING

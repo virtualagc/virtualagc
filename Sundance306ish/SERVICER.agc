@@ -216,6 +216,13 @@ COPYCYCL        TC              COPYCYC
                 CCS             A
                 TCF             USEJETS                 # IDLEFLAG = 1, HENCE SET AUXFLAG TO 0.
 
+## The following three instructions have been added to approximate the AUXFLAG logic in Luminary,
+## using only three instructions as observed from module B6 of Sundance 306. They are, however,
+## a modern recreation, and may or may not match what actually went into 306.
+                XCH             AUXFLAG
+                CCS             A
+                TCF             USEJETS
+
 DVMON           INHINT
                 CS              DVTHRUSH
                 AD              ABDELV

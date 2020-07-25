@@ -188,6 +188,10 @@ P34             TC      AVFLAGA
 P74             TC      AVFLAGP
 P34/P74A        CAF     V06N37          # TTPI
                 TC      VNPOOH
+## The following three instructions may have been added in Sundance 302.
+                EXTEND
+                DCA     130DEG
+                DXCH    CENTANG
                 TC      DISPLAYE        # ELEV AND CENTANG
                 TC      INTPRET
                 CLEAR   DLOAD
@@ -407,15 +411,14 @@ P75             TC      AVFLAGP
                 DCA     PTIGINC
 P35/P75A        DXCH    KT
                 TC      INTPRET
-                RTB
+                CALL
+                        SELECTMU
+P35/P75B        RTB
                         LOADTIME
                 STORE   TSTRT
                 DAD
                         KT
-                STCALL  TIG
-                        SELECTMU
-P35/P75B        DLOAD
-                        TIG
+                STORE   TIG
                 STORE   INTIME          # FOR INITVEL
                 STCALL  TDEC1
                         PRECSET         # ADVANCE BOTH VEHICLES
@@ -427,12 +430,7 @@ P35/P75B        DLOAD
                         S34/35.5
                 CALL
                         VN1645
-                RTB
-                        LOADTIME
-                STORE   TSTRT
-                DAD
-                        KT
-                STCALL  TIG
+                GOTO
                         P35/P75B
 # ..... S33/34.1 .....
 
@@ -974,6 +972,8 @@ DECTWO          OCT     2
 DP-.01          OCT     77777           # CONSTANTS
                 OCT     61337           # ADJACENT      -.01 FOR MGA DSP
 
+## The following constant may have been added in Sundance 302.
+130DEG          2DEC    .3611111111
 
 
 # ..... INITVEL .....
@@ -1628,17 +1628,24 @@ R36INT          STCALL  TDEC1
                         UNP36           # .   -   -
                 STOVL   RRATE           # Y = U . V
                         06D             # -        A  -
+## The following UNIT *may* have been added in Sundance 302 -- although
+## this is just a guess based on the other UNITs.
+                UNIT
                 UNIT    PUSH            # U  = UNIT ( R  )              18D
                 VXV     VXV             #  RA          A
                         00D             #  -    -     -     -
                         18D             # (U  X V ) X U   = U
                 VSL2    UNIT            #   RA   A     RA    A
+## The following UNIT was added in Sundance 302.
+                UNIT
                 STOVL   00D             # UNIT HORIZONTAL IN FORWARD DIR. 00D
                         18D
                 DOT     VXSC            # -
                         12D             # U
                 VSL2                    #  L
                 BVSU    UNIT
+## The following UNIT was added in Sundance 302.
+                UNIT
                 PUSH    DOT             # LOS PROJECTED INTO HORIZONTAL  12D
                         00D             # PLANE
                 SL1     ARCCOS          #              -   -

@@ -457,7 +457,8 @@ P25OK           EXIT
                 EBANK=          LRS22.1X
                 COUNT*          $$/R22
 R22LEM          TC              PHASCHNG
-                OCT             00152
+## This may have been changed from 00152 in Sundance 306.
+                OCT             04022
                 CAF             RNDVZBIT                # IS RENDESVOUS FLAG SET?
                 MASK            STATE
                 EXTEND
@@ -482,6 +483,9 @@ R22LEM12        CAF             BIT14                   # IS RR AUTO TRACK ENABL
                 MASK            BIT13                   # (BIT 13 RADMODES EQUAL ONE)
                 EXTEND
                 BZF             R22WAIT                 # CDUS BEING ZEROED
+## The following PHASCHNG may have been added in Sundance 306.
+                TC              PHASCHNG                # IF A RESTART OCCURS,AN EXTRA RADAR
+                OCT             00152                   # READING IS TAKEN,SO BAD DATA ISN'T USED
                 TC              BANKCALL                # YES READ DATA + CALCULATE LOS
                 CADR            LRS22.1                 # DATA READ SUBROUTINE
                 INDEX           MPAC
