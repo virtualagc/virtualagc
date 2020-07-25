@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 302
 
 # NAME - LSPOS  - LOCATE SUN AND MOON			DATE - 25 OCT 67
 # MOD NO.1

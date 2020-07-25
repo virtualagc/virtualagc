@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 302
 
 # PROGRAM NAME:         1/ACCS
 # PROGRAM WRITTEN BY:   BOB COVELLI AND MIKE HOUSTON

@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 306
 
                 BANK            36
                 SETLOC          P40S
@@ -883,7 +882,6 @@ VB99CON         OCT             24020                   # BITS 5, 12, AND 14
 
 OCT1505         OCT             1505
 
-## Sundance 292
 
 #          KILLTASK
 # MOD NO: NEW PROGRAM
@@ -926,7 +924,6 @@ KILLTASK        CA              KILLBB
                 EBANK=          LST2
 KILLBB          BBCON           KILLTSK2
 
-## Sundance 302
 
 
                 BANK            27

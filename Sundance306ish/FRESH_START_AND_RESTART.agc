@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 292
 
                 BANK            10
                 SETLOC          FRANDRES
@@ -1085,7 +1084,6 @@ AGSUPDAT        =               1
 RENDEZVU        =               2
 POWERED         =               3
 
-## Sundance 302
 
                 BANK            13
                 SETLOC          INTINIT

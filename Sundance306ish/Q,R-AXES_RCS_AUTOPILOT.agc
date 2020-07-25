@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 302
 
                 BANK    17
                 SETLOC  DAPS2
@@ -742,7 +741,6 @@ ENDJASK         DXCH    DAPARUPT
                 DXCH    ZRUPT
                 TCF     NOQRSM
 
-## Sundance 292
 
                 BLOCK   3
                 SETLOC  FFTAG6

@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 292
 
 #          THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
@@ -80,7 +79,6 @@ MULTFAIL        CA      L
 
                 TCF     MULTEXIT
 
-## Sundance 302
 
 # PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND
 # AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,
@@ -110,7 +108,6 @@ PRIOLARM        INHINT                  # * * * KEEP IN DISPLAY ROUTINES BANK
                 CAF     V05N09
                 TCF     PRIODSPR
 
-## Sundance 292
 
                 BLOCK   02
                 SETLOC  FFTAG7

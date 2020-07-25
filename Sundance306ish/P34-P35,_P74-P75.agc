@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 292
 
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
 
@@ -976,7 +975,6 @@ DP-.01          OCT     77777           # CONSTANTS
                 OCT     61337           # ADJACENT      -.01 FOR MGA DSP
 
 
-## Sundance 302
 
 # ..... INITVEL .....
 
@@ -1530,7 +1528,6 @@ SHIFTR1         LXA,2   SL*
                         0,2
                 RVQ
 
-## Sundance 292
 
 # PROGRAM DESCRIPTION
 # SUBROUTINE NAME       R36     OUT-OF-PLANE RENDEZVOUS ROUTINE

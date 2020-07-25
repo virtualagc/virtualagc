@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 306
 
 # PROGRAM NAME:   P27
 # WRITTEN BY:     KILROY/ DE WOLF
@@ -181,7 +180,6 @@ UP71            EQUALS  ONE
 UP72            EQUALS  TWO
 UP73            EQUALS  THREE
 
-## Sundance 292
 
                 BANK    04
                 SETLOC  UPDATE2

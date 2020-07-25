@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 302
 
 # SUBROUTINE NAME:  V82CALL
 # MOD NO: 0                                                             DATE: 16 FEB 67

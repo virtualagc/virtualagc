@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 292
 
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
 
@@ -568,7 +567,6 @@ BLANKET         TS      MPAC    +6
 ENDMARK         TC      POSTJUMP
                 CADR    MARKEND
 
-## Sundance 302
 
 # ***ALL EXTENDED VERB ROUTINES THAT HAVE AT LEAST ONE FLASHING DISPLAY MUST TCF ENDMARK OR TCF ENDEXT WHEN
 # FINISHED.

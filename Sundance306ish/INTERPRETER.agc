@@ -12,8 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 292
-
 # SECTION 1  DISPATCHER
 
 #          ENTRY TO THE INTERPRETER. INTPRET SETS LOC TO THE FIRST  INSTRUCTION, BANKSET TO THE BBANK OF THE
@@ -2726,6 +2724,11 @@ ACOSOVF         EXTEND                  # IF MAJOR PART WAS ONLY 1 MORE THAN .5,
 
 ACOSABRT        TC      ABORT
                 OCT     1301
+
+## The following two instructions were very likely added in Sundance 306 (based on
+## offsets observed from module B6).
+                CAF     ZERO
+                TCF     ACOS=0
 
 ACOSZERO        CAF     QUARTER         # ACOS(0) = PI/2.
                 TCF     ACOS=0  +1      # SET MPAC AND EXIT VIA ESCAPE.

@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 306
 
 # NAME- IMU PERFORMANCE TESTS 2
 #
@@ -378,7 +377,6 @@ XNBADR          GENADR  XNB
 XSMADR          GENADR  XSM
 OMEG/MS         2DEC    .24339048
 
-## Sundance 292
 
                 BLOCK   2
                 COUNT*  $$/P07

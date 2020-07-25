@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 302
 
 # RENDEZVOUS NAVIGATION PROGRAM 20
 # PROGRAM DESCRIPTION
@@ -959,7 +958,6 @@ R61C+L1         CAF             BIT7+9PV                # IS RENDEZVOUS OR P25FL
                 TC              R61C+L4                 # YES EXIT ROUTINE
 BIT7+9PV        OCT             00500
 
-## Sundance 292
 
                 BLOCK           02
                 SETLOC          RADARFF
@@ -1155,7 +1153,6 @@ LRVELCHK        CS              RADMODES
 13,7,2          OCT             10102
 ENDRMODF        EQUALS
 
-## Sundance 302
 
 # PROGRAM NAME_  RRTURNON
 
@@ -3907,7 +3904,6 @@ JOBOVER         EQUALS          LRS24.1                 # ****  TEMPORARY DEFINI
 #  ****************************************
 ZERO/SP         EQUALS          HI6ZEROS
 
-## Sundance 292
                 BLOCK           02
                 SETLOC          FFTAG5
                 BANK
@@ -3918,7 +3914,6 @@ GOTOV56         EXTEND                                  # P20 TERMINATES BY GOTO
                 EBANK=          WHOCARES
 VB56CADR        2CADR           TRMTRACK
 
-## Sundance 306
 
 # W-MATRIX MONITOR
 

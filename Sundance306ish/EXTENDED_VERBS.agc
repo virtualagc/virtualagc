@@ -12,7 +12,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 
-## Sundance 306
 
                 BANK    7
                 SETLOC          EXTVERBS
@@ -1172,7 +1171,6 @@ DAPDISP         TC              TESTXACT
                 TC              POSTJUMP
                 CADR            DAPDATA1
 
-## Sundance 302
                 BANK            34
                 SETLOC          LOADDAP
                 BANK
@@ -1326,7 +1324,6 @@ V06N48          VN              0648
 
 V50N48          VN              5048
 
-## Sundance 306
 
 # VERB 66.  VEHICLES ARE ATTACHED.  MOVE THIS VEHICLE STATE VECTOR TO
 #           OTHER VEHICLE STATE VECTOR.
