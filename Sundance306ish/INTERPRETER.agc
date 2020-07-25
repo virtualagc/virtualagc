@@ -2722,7 +2722,8 @@ ACOSSHR         INDEX   A               # THE SHIFT RIGHT IS LESS THAN 14 SINCE
 ACOSOVF         EXTEND                  # IF MAJOR PART WAS ONLY 1 MORE THAN .5,
                 BZF     ACOS=0          # CALL ANSWER ZERO.
 
-ACOSABRT        TC      ABORT
+## This was an ABORT before Sundance 306.
+ACOSABRT        TC      ALARM
                 OCT     1301
 
 ## The following two instructions were very likely added in Sundance 306 (based on
