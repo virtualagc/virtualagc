@@ -105,7 +105,7 @@ R34ANG          VLOAD   UNIT
                 EXTEND
                 BZF     ENDEXT          # YES, DIE
 
-                TC      UNK7766
+                TC      SETXDSP
                 TC      BANKCALL
                 CADR    MARKBRAN
 

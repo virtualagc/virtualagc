@@ -1582,7 +1582,11 @@ SHIFTR1         LXA,2   SL*
 
                 COUNT*  $$/R36
 
-R36             ZL
+## The following call to SETXDSP may have been added in Sundance 302. Whether it was,
+## and where exactly it was, is currently unclear. Our current thinking is that it
+## occurred here, right at the beginning, since this is similar to what R32 does.
+R36             TC      SETXDSP
+                ZL
                 CAF     ZERO            # SET TIME OF EVENT TO ZERO FOR FIRST
                 DXCH    DSPTEMX         # DISPLAY
                 CAF     V06N16N
@@ -1628,9 +1632,6 @@ R36INT          STCALL  TDEC1
                         UNP36           # .   -   -
                 STOVL   RRATE           # Y = U . V
                         06D             # -        A  -
-## The following UNIT *may* have been added in Sundance 302 -- although
-## this is just a guess based on the other UNITs.
-                UNIT
                 UNIT    PUSH            # U  = UNIT ( R  )              18D
                 VXV     VXV             #  RA          A
                         00D             #  -    -     -     -

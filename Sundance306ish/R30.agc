@@ -121,7 +121,7 @@ V82STALL        CAF     THREE           # STALL IN THIS LOOP AND WITHOLD V 16 N 
                 CADR    DELAYJOB
                 TC      V82STALL
 
-FLAGGON         TC      UNK7766
+FLAGGON         TC      SETXDSP
                 CAF     V16N44          # MONITOR HAPO,HPER,TFF.
                 TC      BANKCALL
                 CADR    GOXDSPF
@@ -258,7 +258,7 @@ V82GON          EXIT                    # AVERAGE G ON.  USE CURRENT STATE VECTO
                 CAF     1SEC            # WITHOLD V16 N44 UNTIL FIRST ORBIT CALC
                 TC      BANKCALL        # IS DONE.  NOTE:  V82GON1 (PRIO7, FINDVAC
                 CADR    DELAYJOB        # JOB) IS COMPLETED BEFORE V82GON (PRIO7,
-                TC      UNK7766         # NOVAC JOB).
+                TC      SETXDSP         # NOVAC JOB).
 V82REDSP        CAF     V16N44          # MONITOR HAPO, HPER, TFF
                 TC      BANKCALL
                 CADR    GOXDSPF

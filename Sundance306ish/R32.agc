@@ -40,7 +40,7 @@
 
                 EBANK=  TIG
 
-JOBR32          TC      UNK7766
+JOBR32          TC      SETXDSP
                 TC      INTPRET
                 SET     EXIT
                         R32FLAG

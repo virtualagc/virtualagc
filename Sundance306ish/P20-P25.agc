@@ -3928,7 +3928,7 @@ VB56CADR        2CADR           TRMTRACK
 
                 EBANK=          WWPOS
 
-V45CALL         TC              UNK7766
+V45CALL         TC              SETXDSP
                 TC              INTPRET
                 CALL
                                 V45WW

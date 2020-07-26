@@ -1179,7 +1179,7 @@ DAPDISP         TC              TESTXACT
 
                 SBANK=          LOWSUPER                # FOR SUBSEQUENT LOW 2CADR'S.
 
-DAPDATA1        TC              UNK7766
+DAPDATA1        TC              SETXDSP
                 CAF             BOOLSMSK                # SET DISPLAY ACCORDING TO DAPBOOLS BITS.
                 MASK            DAPBOOLS                # LM
 RELOAD          TS              DAPDATR1                # LM

@@ -227,9 +227,19 @@ B5OFF           CS      BIT5
                 TC      ENDOFJOB
 
 ## The following function, which assembles to address 7766, was added in Sundance 302. Unfortunately,
-## we only have revision 292 of this bank. We have not yet figured out what it does, but it is only
-## called from extended verbs and so likely either does something with EXTVBACT or marks. Until we
-## determine its purpose, it is implemented as NOOPs.
+## we only have revision 292 of this bank. We currently believe that this routine corresponds with
+## the following change which went into Colossus and Luminary in May 1968, right about when Sundance
+## 302 was being finalized:
+##
+##  "A change was put into the Display Routines to set the XDSPFLAG for every MARK display set up. The
+##   only way to reset this bit is by means of ENDEXT. This change will lock out any normal displays
+##   throughout an extended verb as soon as the first display in the extended verb is initiated."
+##
+## This change do the display interface routines is *not* present in Sundance 302 -- however, it is
+## possible that they decided to not globablly make this change in a rope that had already been
+## released, but to instead add this function which allowed them to manually set the bit whenever
+## they explicitly wanted it. In this form, this subroutine essentially performs the function "past
+## this point, normal displays can no longer appear".
 
                 BLOCK   03
                 SETLOC  FFTAG5
@@ -237,11 +247,11 @@ B5OFF           CS      BIT5
 
                 EBANK=  ITEMP1
 
-                COUNT*  $$/UNK
+                COUNT*  $$/EXTVB
 
-UNK7766         NOOP
-                NOOP
-                NOOP
-                NOOP
-                NOOP
+SETXDSP         INHINT
+                CS      FLAGWRD4
+                MASK    XDSPBIT
+                ADS     FLAGWRD4
+                RELINT
                 TC      Q
