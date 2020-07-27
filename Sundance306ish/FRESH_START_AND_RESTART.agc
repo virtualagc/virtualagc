@@ -93,7 +93,7 @@ DOFSTART        CAF             FOUR
                 TS              EBANK
                 EBANK=          HIASCENT
 
-## The following two instructions were very likely added in Sundance 302.
+## The following two instructions were likely added in Sundance 302.
                 CA              RATESTRT
                 TS              -RATEDB
                 CAF             FULLAPS                 # INITIALIZE MAXIMUM ASCENT MASS FOR USE
@@ -344,8 +344,8 @@ OCT10000        =               BIT13
 OCT30000        =               PRIO30
 OCT32001        OCT             32001
 OCT7777         OCT             7777
-## The following constant was very likely added in Sundance 302.
-RATESTRT        DEC             -218
+## The following constant was likely added in Sundance 302. -509 corresponds to 1.4 deg/sec.
+RATESTRT        DEC             -509
 RACTCADR        CADR            RESTARTS
 BOOLSTRT        OCT             21312
 77001OCT        OCT             77001                   # .14 DEG SCALED AT 4.5 DEG
