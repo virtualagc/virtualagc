@@ -11,6 +11,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2020-07-27 MAS  Corrected VVARMIN to be double-precision
+##                              instead of triple-precision.
 
 ## This log section assembles such that the addresses of all erasables match
 ## their locations for Sundance 306, to the best of our knowledge. The order
@@ -2286,7 +2288,7 @@ VIPRIME         ERASE           +5                      # I(6) NEW VEL REQUIRED 
 RANGEVAR        ERASE           +1                      # I(2) RR RANGE ERROR VARIANCE
 RATEVAR         ERASE           +1                      # I(2) RR RANGE-RATE ERROR VARIANCE
 RVARMIN         ERASE           +2                      # I(3) MINIMUM RANGE ERROR VARIANCE
-VVARMIN         ERASE           +2                      # I(3) MINIMUM RANGE-RATE ERROR VARIANCE
+VVARMIN         ERASE           +1                      # I(2) MINIMUM RANGE-RATE ERROR VARIANCE
 #
 
 #
