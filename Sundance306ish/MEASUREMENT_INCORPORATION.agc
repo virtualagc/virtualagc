@@ -1,16 +1,20 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    MEASUREMENT_INCORPORATION.agc
-## Purpose:     A section of a reconstructed, mixed version of Sundance
-##              It is part of the reconstructed source code for the Lunar
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.
-##              No original listings of this program are available;
-##              instead, this file was created via disassembly of dumps
-##              of various revisions of Sundance core rope modules.
+## Purpose:     A section of an attempt to reconstruct Sundance revision 306
+##              as closely as possible with available information. Sundance
+##              306 is the source code for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 9. This program was created
+##              using the mixed-revision SundanceXXX as a starting point, and
+##              pulling back features from Luminary 69 believed to have been
+##              added based on memos, checklists, observed address changes,
+##              or the Sundance GSOPs.
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2020-07-29 MAS  Added NEWZCOMP.
+
 
 
 #  INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI
@@ -415,55 +419,55 @@ ZEROO           =       ZEROVECS
 12DD            DEC     12
 
 
-NEWZCOMP	VLOAD	ABVAL
-			ZI
-		STOVL	NORMZI
-			ZI +6
-		ABVAL	PUSH
-		DSU	BMN
-			NORMZI
-			+3
-		DLOAD	STADR
-		STORE	NORMZI
-		VLOAD	ABVAL
-			ZI +12D
-		PUSH	DSU
-			NORMZI
-		BMN	DLOAD
-			+3
-		STADR
-		STORE	NORMZI		# LARGEST ABVAL
-		DLOAD	SXA,1
-			NORMZI
-			NORMZI		# SAVE X1
-		NORM	INCR,1
-			X1
-		DEC	2
-		VLOAD	VSL*
-			ZI
-			0,1
-		STOVL	ZI
-			ZI +6
-		VSL*
-			0,1
-		STOVL	ZI +6
-			ZI +12D
-		VSL*	SXA,1
-			0,1
-			NORMZI +1	# SAVE SHIFT
-		STORE	ZI +12D
-		LXA,1	XSU,1
-			NORMGAM
-			NORMZI +1
-		XSU,1
-			NORMZI +1
-		SXA,1	LXC,1
-			NORMGAM
-			NORMZI +1
-		XAD,1	SETPD
-			NORMZI
-			2D
-		GOTO
-			INCOR2 -3
-NORMZI		=	36D
+NEWZCOMP        VLOAD   ABVAL
+                        ZI
+                STOVL   NORMZI
+                        ZI +6
+                ABVAL   PUSH
+                DSU     BMN
+                        NORMZI
+                        +3
+                DLOAD   STADR
+                STORE   NORMZI
+                VLOAD   ABVAL
+                        ZI +12D
+                PUSH    DSU
+                        NORMZI
+                BMN     DLOAD
+                        +3
+                STADR
+                STORE   NORMZI          # LARGEST ABVAL
+                DLOAD   SXA,1
+                        NORMZI
+                        NORMZI          # SAVE X1
+                NORM    INCR,1
+                        X1
+                DEC     2
+                VLOAD   VSL*
+                        ZI
+                        0,1
+                STOVL   ZI
+                        ZI +6
+                VSL*
+                        0,1
+                STOVL   ZI +6
+                        ZI +12D
+                VSL*    SXA,1
+                        0,1
+                        NORMZI +1       # SAVE SHIFT
+                STORE   ZI +12D
+                LXA,1   XSU,1
+                        NORMGAM
+                        NORMZI +1
+                XSU,1
+                        NORMZI +1
+                SXA,1   LXC,1
+                        NORMGAM
+                        NORMZI +1
+                XAD,1   SETPD
+                        NORMZI
+                        2D
+                GOTO
+                        INCOR2 -3
+NORMZI          =       36D
 

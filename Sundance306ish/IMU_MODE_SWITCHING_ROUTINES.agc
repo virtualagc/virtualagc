@@ -1,16 +1,19 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    IMU_MODE_SWITCHING_ROUTINES.agc
-## Purpose:     A section of a reconstructed, mixed version of Sundance
-##              It is part of the reconstructed source code for the Lunar
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.
-##              No original listings of this program are available;
-##              instead, this file was created via disassembly of dumps
-##              of various revisions of Sundance core rope modules.
+## Purpose:     A section of an attempt to reconstruct Sundance revision 306
+##              as closely as possible with available information. Sundance
+##              306 is the source code for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 9. This program was created
+##              using the mixed-revision SundanceXXX as a starting point, and
+##              pulling back features from Luminary 69 believed to have been
+##              added based on memos, checklists, observed address changes,
+##              or the Sundance GSOPs.
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2020-07-29 MAS  Moved ZEROICDU to bank 3.
 
 
 ## The following routine is located in bank 2 in Sundance 292.

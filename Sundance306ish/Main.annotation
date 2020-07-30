@@ -5,9 +5,9 @@
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source code files are a reconstruction of Sundance, the Apollo 9 LM (Lunar Module) AGC
-(Apollo Guidance Computer) flight software, created from binary dumps of original core rope
-program modules, as follows:
+These source code files are an attempted reconstruction of Sundance revision 306, the Apollo 9
+LM (Lunar Module) AGC (Apollo Guidance Computer) flight software, created from binary dumps of
+original core rope program modules, as follows:
 <ul>
 <li>B1 &mdash; Revision 292</li>
 <li>B2 &mdash; Revision 302</li>
@@ -17,15 +17,11 @@ program modules, as follows:
 <li>B6 &mdash; Revision 306</li>
 </ul>
 
-This means that source code
-does not represent a specific historical revision of Sundance, but rather a mixture of the
-three released versions. Nonetheless, it is capable of flying the whole Apollo 9 mission.
-This source code matches the binary dumps, as closely as feasible, but 100% match is not possible, 
-due <i>mostly</i> to changes in memory addresses at which code and variables were allocated in 
-different revisions of Sundance.  Refer to 
-<a href="https://github.com/virtualagc/virtualagc/blob/master/SundanceXXX/SundanceXXXDifferences.txt">
-<u>this list of explanations for each binary mismatch</u></a>.
-<br><br>
+These dumps were then modified using memos, checklists, observed address changes, and the
+Sundance GSOPs to get the entire program to match Sundance revision 306 as closely as possible.
+Without more information, it is not possible to say how close it actually is; however, this
+code should be quite close. It is capable of flying the whole Apollo 9 mission using the original
+checklists and padload.
 Since only binary dumps (rather than listings) of Sundance are available as source material, 
 all comments and labels are approximate.
 They have been taken from other AGC programs where possible, or, in some places, written

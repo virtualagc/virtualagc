@@ -1,16 +1,23 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    P34-P35,_P74-P75.agc
-## Purpose:     A section of a reconstructed, mixed version of Sundance
-##              It is part of the reconstructed source code for the Lunar
-##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.
-##              No original listings of this program are available;
-##              instead, this file was created via disassembly of dumps
-##              of various revisions of Sundance core rope modules.
+## Purpose:     A section of an attempt to reconstruct Sundance revision 306
+##              as closely as possible with available information. Sundance
+##              306 is the source code for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 9. This program was created
+##              using the mixed-revision SundanceXXX as a starting point, and
+##              pulling back features from Luminary 69 believed to have been
+##              added based on memos, checklists, observed address changes,
+##              or the Sundance GSOPs.
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2020-07-29 MAS  Doubled some units in R36, and added a call
+##                              to SETXDSP to it. Also changed the P35/P75
+##                              leadin to match Luminary 69, and added CENTANG
+##                              initialization to P34/P74.
+
 
 
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
