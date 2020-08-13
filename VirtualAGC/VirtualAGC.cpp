@@ -119,6 +119,9 @@
  *          	2019-08-16 RSB	Added Artemis 71.
  *          	2019-09-22 RSB  Added Luminary 163 and 173.
  *          	2020-07-23 RSB  Added Sundance XXX.
+ *          	2020-08-13 RSB  Updated Apollo 9 LM support to use Sundance306ish (phase 2
+ *          	                reconstruction of Sundance 306) in place of SundanceXXX
+ *          	                (phase 1 reconstrunction).
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -186,9 +189,9 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "Apollo 9 Command Module", "Colossus249/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 9 mission, running software COLOSSUS 249.",
                 ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus249", "CM.ini" },
-            { "Apollo 9 Lunar Module", "SundanceXXX/MAIN.agc.html",
-                "Click this to select the Sundance XXX (reconstructed) software for the Apollo 9 LM.",
-                ENABLED, LM, BLOCK2, PERIPHERALS, "SundanceXXX", "CM.ini" /* Yes, the CM is intentional */},
+            { "Apollo 9 Lunar Module", "Sundance306ish/MAIN.agc.html",
+                "Click this to select the Sundance306ish (phase 2 reconstruction of Sundance 306) software for the Apollo 9 LM.",
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Sundance306ish", "CM.ini" /* Yes, the CM is intentional */},
             { "Apollo 10 Command Module", "",
                 "Click this to select the CM for the Apollo 10 mission.",
                 DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
