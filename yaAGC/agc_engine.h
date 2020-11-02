@@ -117,6 +117,8 @@
 				which is the logical OR of channel 11 bit 4 and
 				channel 30 bit 15. The AGC did this internally
 				so the light would still work in standby.
+		02/11/20 TVB	Disabled a compiler warning under MSC for some stdio
+				functions that are safe for us to use.
 
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -132,6 +134,10 @@ extern "C" {
 
 #ifndef AGC_ENGINE_H
 #define AGC_ENGINE_H
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#define _CRT_SECURE_NO_DEPRECATE
+#endif
 
 #ifndef NULL
 #define NULL ((void *) 0)
