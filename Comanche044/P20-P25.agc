@@ -13,7 +13,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+## Mod history: 2020-12-03 MAS  Created from Comanche 51. Restored V67 to
+##                              mostly match Colossus 249, minus V67FLAG.
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -3374,9 +3375,15 @@ V06N9933	TC	INTPRET
 			V6N99INP
 		EXIT
 		TCF	ENDEXT
-V6N99INP	LXA,1	LXA,2
+V6N99INP	DLOAD	DMP
 			WWPOS
+			1/SQRT3
+		LXA,1	DLOAD
+			MPAC
 			WWVEL
+		DMP	LXA,2
+			1/SQRT3
+			MPAC
 		SLOAD	DSU
 			WWOPT
 			V67DEC2
@@ -3439,15 +3446,8 @@ NXPOSVEL	VLOAD*	VSQ
 			DPPOSMAX
 		STORE	WWPOS
 		STORE	WWVEL
-V67XXX		DLOAD	DSU
-			WWPOS
-			FT99999
-		BMN	DLOAD
-			+3
-			FT99999
+V67XXX		LXA,1	SXA,1
 ## Page 634
-		STORE	WWPOS
-		LXA,1	SXA,1
 			S2
 			QPRET
 		EXIT
@@ -3457,6 +3457,6 @@ WWPOS		=	RANGE
 WWVEL		=	RRATE
 WWOPT		=	RTHETA
 V06N99A		VN	0699
-FT99999		2DEC	30479 B-19
+1/SQRT3		2DEC	0.5773502
 V67DEC2		2DEC	2 B-14
 		SBANK=	LOWSUPER
