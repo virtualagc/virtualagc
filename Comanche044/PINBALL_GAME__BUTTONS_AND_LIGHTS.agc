@@ -13,7 +13,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+## Mod history: 2020-12-03 MAS  Created from Comanche 51. Removed the call to
+##                              CHKPOOH from VBTSTLTS.
 
 ## Page 307
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -3589,10 +3590,7 @@ PINTEST		EQUALS	LST2FAN
 		
 		COUNT	41/PIN
 		
-VBTSTLTS	TC	BANKCALL
-		CADR	CHKPOOH
-		
-		INHINT
+VBTSTLTS	INHINT
 		CS	BIT1		# SET BIT 1 OF IMODES33 SO IMUMON WONT
 		MASK	IMODES33	# TURN OUT ANY LAMPS.
 		AD	BIT1
