@@ -13,7 +13,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+## Mod history: 2020-12-03 MAS  Created from Comanche 51. Removed clearing of
+##                              STATEFLG, REINTFLG, and NODOFLAG from POODOO.
 
 ## Page 1493
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -163,17 +164,7 @@ OCT77770	OCT	77770		# DONT MOVE
 		CCS	A
 		TC	WHIMPER -1	# YES.  DONT DO POODOO.  DO BAILOUT.
 
-		TC	DOWNFLAG
-		ADRES	STATEFLG
-		
-		TC	DOWNFLAG
-		
 ## Page 1496
-		ADRES	REINTFLG
-		
-		TC	DOWNFLAG
-		ADRES	NODOFLAG
-		
 		TC	BANKCALL
 		CADR	MR.KLEAN
 		TC	WHIMPER
