@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2020-12-04 MAS  Added back an INHINT that was removed.
 
 ## Page 635
 		BANK	32
@@ -51,7 +52,7 @@ COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
 		ADRES	TIMRFLAG	# BIT 11 FLAG 7
 		CAF	ZERO
 		TS	NVWORD1
-		
+		INHINT
 		CAF	ONE
 		TC	WAITLIST
 		EBANK=	TIG
