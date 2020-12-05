@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2020-12-04 MAS  Removed setting of NN from P38/P78.
 
 ## Page 525
 # STABLE ORBIT RENDEZVOUS PROGRAMS (P38 AND P78)
@@ -128,9 +129,6 @@ P78		TC	AVFLAGP         # OTHER VEHICLE ACTIVE
 		TCR	BLANKET
 		TCF	ENDOFJOB
 		TC	INTPRET
-		SSP
-		        NN
-		        2
 		SLOAD   SR1
 			OPTION2
 		BHIZ	DLOAD
