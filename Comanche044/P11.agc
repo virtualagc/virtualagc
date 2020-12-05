@@ -14,6 +14,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2020-12-03 MAS  Moved a chunk of code back to REP11A from
+##                              MATRXJOB.
 
 ## Page 533
 
@@ -224,7 +226,19 @@ REP11A		INHINT
 		EBANK=	QPLACES
 		CA	P11XIT		# SET EXIT FROM PROUT IN EARTHR
 		TS	QPLACES
-		TC      INTPRET
+		ZL			# STORE DP GIMBAL
+		CA	CDUX		# ANGLES FOR ATTITUDE
+		DXCH	OGC		# ERROR DISPLAY
+		ZL			# AFTER L.O.
+		CA	CDUY
+		DXCH	IGC
+		ZL
+		CA	CDUZ
+		DXCH	MGC
+		TC	INTPRET		#	-
+		VLOAD	VSR1		# SCALE OGC B-1
+			OGC
+		STORE	OGC
 		VLOAD	MXV
 			THETAN
 			XSM
@@ -236,19 +250,7 @@ REP11A		INHINT
 			S2
 		CADR	PROUT		# RETURN FROM EARTHR
 			EARTHR	+3
-MATRXJOB	ZL	                # STORE DP GIMBAL ANGLES FOR ATTITUDE
-		CA      CDUX            #       ERROR DISPLAY AFTER LIFTOFF
-		DXCH    OGC
-		ZL      
-		CA      CDUY
-		DXCH    IGC     
-		ZL
-		CA      CDUZ
-		DXCH    MGC
-		TC      INTPRET         #       -
-		VLOAD   VSR1            # SCALE OGC B-1
-			OGC
-		STORE   OGC
+MATRXJOB	TC	INTPRET
 		SSP			# ZERO RTX2
 			RTX2		# FOR
 			0		# EARTH
