@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2020-12-04 MAS  Removed the SL* 0,2 for P21VEL in P21VSAVE.
 
 ## Page 456
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -142,8 +143,7 @@ P21VSAVE	DLOAD			# SAVE CURRENT BASE VECTOR
 		STOVL	P21BASER	# ..POS B-29 OR B-27
 			VATT1
 		STORE	P21BASEV	# ..VEL B-7  OR B-5
-		ABVAL	SL*
-			0,2
+		ABVAL
 		STOVL	P21VEL		# /VEL/ FOR N73 DSP
 			RATT
 		UNIT	DOT
