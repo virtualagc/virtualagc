@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2020-12-04 MAS  Changed the last ARATE entry back to 4 deg/s.
 
 ## Page 412
 		BANK	15		
@@ -59,7 +60,7 @@ ARATE		2DEC	.0022222222	# = .05 DEG/SEC
 		
 		2DEC	.0222222222	# = .5 DEG/SEC
 		
-		2DEC	.0888888889	# = 2 DEG/SEC                $22.5 DEG/SEC
+		2DEC	.1777777777	# = 4 DEG/SEC		$ 22.5 DEG/SEC
 		
 ANGLTIME	2DEC	.000190735	# = 100B - 19
 
