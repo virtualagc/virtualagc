@@ -14,6 +14,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2020-12-04 MAS  Removed the tags S3435LOC, MODCHG1, and
+##                              MODCHG2 (the former is from 45-51, and the
+##                              latter are from 51-55).
 
 ## Page 27
 FIXED		MEMORY	120000 - 167777
@@ -118,7 +121,6 @@ INTINIT1	EQUALS
 CONICS		EQUALS
 CSIPROG2	EQUALS
 CSI/CDH2	EQUALS
-MODCHG2		EQUALS
 		BNKSUM	12
 		
 		BANK	13
@@ -129,7 +131,6 @@ SR52/1		EQUALS
 ORBITAL2	EQUALS
 CDHTAGS		EQUALS
 E/PROG1		EQUALS
-MODCHG3		EQUALS
 		BNKSUM	13
 
 # SPACER
@@ -315,7 +316,6 @@ MEASINC		EQUALS
 MEASINC1	EQUALS
 P17S		EQUALS
 RTE1		EQUALS
-S3435LOC	EQUALS
 		BNKSUM	36
 		
 		BANK	37
