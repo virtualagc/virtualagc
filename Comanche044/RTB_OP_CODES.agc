@@ -302,7 +302,3 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## Page 1516
-## Between Comanche 51 and 55, two new functions, QUALITY1 and QUALITY2, were inserted
-## here. They are part of the R-2 lunar potential model. They belong in ORBITAL INTEGRATION,
-## but were placed here to simplify making the changes such that only a single module (B2)
-## had to be remanufactured.

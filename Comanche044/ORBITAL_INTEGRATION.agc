@@ -865,8 +865,6 @@ ASCALE		DEC	-7
 		2DEC*	4.9027780 E8 B-30*	# M
 MUEARTH		2DEC*	3.986032 E10 B-36*
 		2DEC	0
-## Between Comanche 51 and 55, the second number in J4REQ/J3 was changed from
-## 0 to -176236.02 B-25.
 J4REQ/J3	2DEC*	.4991607391 E7 B-26*
 		2DEC	0
 2J3RE/J2	2DEC*	-.1355426363 E5 B-27*
