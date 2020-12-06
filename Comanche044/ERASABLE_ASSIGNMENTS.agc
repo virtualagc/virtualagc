@@ -14,6 +14,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2020-12-05 MAS  Removed definitions of EK2VAL, EK3VAL, and
+##                              STARSAV3.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2230,12 +2232,7 @@ RMAG		ERASE	+1
 
 # P40 PAD LOADS				(6D)
 EK1VAL		ERASE	+1		# I(2)PL 1-SEC SPS IMPULSE NEWTSEC/100/B23
-EK2VAL		ERASE	+1		# I(2)PL  B+23 NEWTON-SEC/E+2
-EK3VAL		ERASE			# I(1)PL  B+09 NEWTONS/E+4
 FANG		ERASE			# I(1)PL SPS THRUST USED BY IMPULSIVE BURN
-
-## Between Comanche 51 and 55, two new padloaded erasables (E3J22R2M and E32C31RM)
-## were added here, and END-E3 changed to point to the latter.
 
 # **** CONICSEX (PLANETARY INERT. ORIEN.) ****
 TIMSUBO		EQUALS	TEPHEM		# CSEC B-42 (TRIPLE PREC)
@@ -3626,9 +3623,6 @@ RM		EQUALS	S22RTNEX	# DOWNLINK OF VHF RANGE
 
 # S22.1					(1D)
 S22RTNEX	EQUALS	MARKDOWN +7	# B(1)
-
-# P22 STORAGE				(6D)
-STARSAV3	EQUALS	S22RTNEX +1	# I(6)TMP
 
 # CRS61.1 STORAGE.  -A SUBSET OF P20-	(14D)
 Q611		EQUALS	RM	+1	# I(1)TMP QSAVE

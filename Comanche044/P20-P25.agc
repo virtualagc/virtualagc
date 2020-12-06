@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51. Restored V67 to
 ##                              mostly match Colossus 249, minus V67FLAG.
+##              2020-12-05 MAS  Replaced STARSAV3 with STAR in LDPLANET,
+##                              and changed the pairing of its opcodes.
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -3334,10 +3336,10 @@ LDPLANET	EXIT			# KEEP THIS OPEN SUBROUTINE IN EBANK=5
 		TC	+2
 		TC	-5
 		TC	INTPRET
-		VLOAD
-			STARSAV3
-		VXSC	UNIT
+		VLOAD   VXSC
+			STAR
 			1/SQR3
+		UNIT
 		STORE	STARSAV2
 		GOTO
 			P23.31
