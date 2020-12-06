@@ -188,7 +188,11 @@
 #				the yaLVDC (LVDC/PTC) target, and have it build automatically.
 #		2020-07-22 RSB	Added SundanceXXX.
 #		2020-08-05 RSB	Added Sundance306ish.
-#		2020-12-05 RSB	Added Comanche044
+#		2020-12-05 RSB	Added Comanche044. Also, added some comments mostly
+#				intended to help me recall how my own personal build
+#				environment works :-), but also provides an example of
+#				the FORCE_cc and FORCE_CC build switches.  Also, updated
+#				the NVER version code.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -198,16 +202,28 @@
 #	Use "make" for Linux.
 # On some platforms, we simply can't deduce what C or C++ compiler is being used
 # from the settings indicated above.  An example is Mac OS X, in which older versions
-# of Xcode used gcc, but newer ones use clang (which we don't support).  Or so I'm 
-# told.  At any rate, you can force using specific C and C++ compilers by giving their
-# full pathnames. For example:
+# of Xcode used gcc, but newer ones use clang (which we don't support, but see below).  
+# Or so I'm told.  At any rate, you can force using specific C and C++ compilers by 
+# giving their full pathnames. For example:
 #	make MACOSX=yes FORCE_cc=/path/to/gcc FORCE_CC=/path/to/g++
-# I have no systems myself on which this is an issue, so that's a feature I've never
-# tested in any meaningful way.  Another available switch is FORCE_clang=yes, which makes
-# certain changes that *may* allow building with clang rather than gcc.
+# Most people shouldn't need this feature, but the more complex your build environment,
+# the more likely.  For example, on my own computer, with so many competing versions of 
+# gcc and libraries, I'll get a runtime version-mismatch between the VirtualAGC GUI and 
+# libstdc++ if I just run 'make' by itself.  So I have to run "make FORCE_CC=/usr/bin/g++" 
+# to override the C++ compiler normally found in my PATH.  (This is clunky, I admit, but
+# it's better than having to perform AGC builds in a clean virtual machine, which is my 
+# only other practical option.  It's the curse of having been a software developer for 
+# so long!)
+
+# Another available switch is FORCE_clang=yes, which makes certain changes that *may* 
+# allow building with clang rather than gcc.  Since I don't have any Macs new 
+# enough to be use clang, I can't testify of my own personal knowledge that this
+# works as hoped for on a Mac.  But I have installed clang 3.9 on my Linux box, and
+# a build of Virtual AGC with clang does complete without errors there, and does 
+# seem to work after it is built.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2020-07-22\\\"
+NVER:=\\\"2020-12-06\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************

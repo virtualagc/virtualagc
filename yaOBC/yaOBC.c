@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2011,2020 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -36,6 +36,8 @@
  *           			the same simulator.  And it looks
  *           			like I never really implemented any
  *           			of it anyway.
+ *           	2020-12-06 RSB  Fixed a clang warning (PRF_TBD vs
+ *           	                PRO_TBD).
  */
 
 #include <unistd.h>
@@ -332,7 +334,7 @@ ProCategory_t ProCategories[64] =
         { PRO_OUTPUT, PRF_MDIU }, // YX = 52
         { PRO_ILLEGAL, PRF_ILLEGAL }, // YX = 53
         { PRO_ILLEGAL, PRF_ILLEGAL }, // YX = 54
-        { PRO_TBD, PRO_TBD }, // YX = 55
+        { PRO_TBD, PRF_TBD }, // YX = 55
         { PRO_INPUT, PRF_IMU }, // YX = 56
         { PRO_ILLEGAL, PRF_ILLEGAL }, // YX = 57
         { PRO_OUTPUT, PRF_MDIU }, // YX = 60

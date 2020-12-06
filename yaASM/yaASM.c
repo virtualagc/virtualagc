@@ -1,5 +1,5 @@
 /*
- * Copyright 2011,2012,2019 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2011,2012,2019,2020 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -58,6 +58,9 @@
  *                              error detection.
  *              2019-09-08 RSB  Backed out anything related to LVDC
  *                              support.  Use yaASM.py instead for LVDC.
+ *              2020-12-06 RSB  Changed character stuffed at end of input
+ *                              line buffer to avoid a clang warning for
+ *                              signed vs unsigned characters.
  */
 
 #include <stdlib.h>
@@ -782,7 +785,7 @@ Pass(enum PassType_t PassType)
       char FirstChar;
       char OperandBuffer[MAX_SYMSIZE + 1], *OperandField;
 
-      InputLine[LINESIZE - 1] = 255;
+      InputLine[LINESIZE - 1] = 127; // 20201206 RSB, was 255.
       if (NULL == fgets(InputLine, sizeof(Line_t), fin)) // Done with this file?
 
         {
