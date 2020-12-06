@@ -188,6 +188,7 @@
 #				the yaLVDC (LVDC/PTC) target, and have it build automatically.
 #		2020-07-22 RSB	Added SundanceXXX.
 #		2020-08-05 RSB	Added Sundance306ish.
+#		2020-12-05 RSB	Added Comanche044
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -435,7 +436,7 @@ MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
 MISSIONS += Retread50 SundialE LUM69R2 Luminary097 Luminary098
 MISSIONS += Comanche051 Artemis071 Luminary178 Luminary163 Luminary173
-MISSIONS += SundanceXXX Sundance306ish
+MISSIONS += SundanceXXX Sundance306ish Comanche044
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif
