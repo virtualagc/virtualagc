@@ -1,5 +1,5 @@
 /*
- * Copyright 2009,2010,2016-20020 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2009,2010,2016-2020 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -122,10 +122,12 @@
  *          	2020-08-13 RSB  Updated Apollo 9 LM support to use Sundance306ish (phase 2
  *          	                reconstruction of Sundance 306) in place of SundanceXXX
  *          	                (phase 1 reconstrunction).
+ *          	2020-12-05 RSB  Added Comanche 44 and 45, though 45 isn't available yet, so
+ *          	                it isn't enabled.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
- * in wxGlade..
+ * in wxGlade.
  */
 
 #include <stdio.h>
@@ -192,6 +194,12 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "Apollo 9 Lunar Module", "Sundance306ish/MAIN.agc.html",
                 "Click this to select the Sundance306ish (phase 2 reconstruction of Sundance 306) software for the Apollo 9 LM.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Sundance306ish", "CM.ini" /* Yes, the CM is intentional */},
+            { "COMANCHE 44 (CM)", "Comanche044/MAIN.agc.html",
+                "Click this to select software originally targeted (but not subsequently flown) in the CM for the Apollo 10 mission.",
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche044", "CM.ini" },
+            { "COMANCHE 45 (CM)", "Comanche045/MAIN.agc.html",
+                "Click this to select software originally targeted (but not subsequently flown) in the CM for the Apollo 10 mission.",
+                DISABLED, CM, BLOCK2, PERIPHERALS, "Comanche045", "CM.ini" },
             { "Apollo 10 Command Module", "",
                 "Click this to select the CM for the Apollo 10 mission.",
                 DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
@@ -707,6 +715,8 @@ EVT_RADIOBUTTON(ID_APOLLO7CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO8CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO9CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO9LMBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_COMANCHE44BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_COMANCHE45BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO10CMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUM69BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_APOLLO10LMBUTTON, VirtualAGC::ConsistencyEvent)
