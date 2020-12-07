@@ -13,7 +13,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-12-06 MAS  Created from Comanche 44.
+## Mod history: 2020-12-06 MAS  Created from Comanche 44. Added a stub for the
+##                              COM-4 anomaly fix.
 
 ## Page 1508
 		BANK	22
@@ -302,3 +303,6 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## Page 1516
+                SETLOC  MODCHG1
+                BANK
+COM4FIX         OCT     0

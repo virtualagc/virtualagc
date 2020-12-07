@@ -13,7 +13,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-12-06 MAS  Created from Comanche 44.
+## Mod history: 2020-12-06 MAS  Created from Comanche 44 and added the
+##                              MODCHG1 tag to bank 17.
 
 ## Page 27
 FIXED		MEMORY	120000 - 167777
@@ -164,6 +165,7 @@ DAPS4		EQUALS
 DAPS5		EQUALS
 DAPS7		EQUALS
 P50S3		EQUALS
+MODCHG1         EQUALS
 		BNKSUM	17
 		
 		BANK	20
