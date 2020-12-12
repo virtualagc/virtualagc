@@ -66,27 +66,58 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files are part of a reconstructed copy of Comanche 044, the
-original release, though not the final mission release, of the Apollo 10 
-Command Module (CM) Apollo Guidance Computer (AGC) software. 
+These source-code files are part of a reconstructed copy of Comanche 44, the
+initial release (though not the final mission release) of the Apollo 10 
+Command Module (CM) Apollo Guidance Computer (AGC) software.  Subsequent releases
+were Comanche 45 and Comanche 45/2 (the flown release on Apollo 10). The reconstruction
+is believed to be exactly accurate, but in the absence of an actual Apollo-era
+listing of Comanche 44, some explanation of the reconstruction process is needed
+to insure confidence in that accuracy. 
 <br><br>
-The reconstruction began with source code of Comanche 051 previously reconstructed
-from a digitized copy of Comanche 055.  The code was then updated by undoing
-changes made between revisions 044 and 051. The reconstruction was verified by
-matching memory-bank checksums to those listed in drawing 2021153D. While there
-is thus a high degree of confidence in the reconstructed code, there are nevertheless
-a few changes that remain open to question, particularly in log section P20-P25,
-though even if these eventually prove incorrect they should not adversely affect
-code execution. Note also that page
-numbers in the reconstructed code match those on the Comanche 055 printout,
-although the added code would likely have changed page numbers for a real
-Comanche 044 listing.
+The starting point was the source code of Comanche 51 
+(separately previously reconstructed from an Apollo-era listing of Comanche 55, 
+flown on Apollo 11).  Comanche 51 source code was then modified 
+by undoing changes known to have been made between revisions 44 and 51. The now-reconstructed 
+Comanche 44 source code was verified by assembling it and checking that the assembled code had
+the expected known-correct memory-bank checksums. 
+Note that page numbers in the reconstructed code match those on the Comanche 55 printout,
+although the source code would likely have different page numbers in a contemporary
+Comanche 44 listing.
 <br><br>
-Comments from the original source code are prefixed with a single '#' symbol, 
+Annotations that were not present in the contemporary source code have been added to the reconstructed
+code to justify each change relative to Comanche 51. Here's a guide to the Apollo documentation referenced
+in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n89/mode/1up">
+    MIT/IL engineering drawing 2021153D, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Comanche 44.</li>
+<li><a href="https://archive.org/details/Comanche55J2k60">
+       Comanche 55 (Apollo 11 CM) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/Colossus249MartinPp15651719">
+       Colossus 249 (Apollo 9 CM) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=12">
+       <i>Guidance System Operations Plan for Colossus 3</i>, Section 5, p. <i>xiii</i></a>.  
+       Table listing some Program Request Changes (PCRs) incorporated between 
+       Comanche 45/2 and Comanche 55.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208472.pdf#page=8">
+       <i>Guidance System Operations Plan for Colossus 2E</i>, Section 3, pp. <i>ix-x</i></a>.
+       Tables listing some Program Change Requests (PCRs) incorporated between 
+       Comanche 44 and Comanche 55.</li>
+<li><a href="http://www.ibiblio.org/apollo/links.html#PGE_COLOSSUS2">
+       <i>Programmed Guidance Equations for Colossus 2, Based on Comanche 55</i></a>. 
+       A pseudocode representation of Comanche 55, showing change bars
+       for differences from Comanche 45/2.</li>
+</ul>
+In most cases, only the titles (rather than the full texts) of PCRs are known.  In addition to the 
+explanatory annotations, there is also 
+<a href="https://github.com/virtualagc/virtualagc/issues/1134">
+a step-by-step commentary about the reconstruction process</a>.
+<br><br>
+Comments expected to have been present in the original source code are prefixed with a single '#' symbol, 
 whereas comments added later are prefixed by "##" or "###".  Report any errors 
 noted by creating an 
 issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
-project's GitHub repository</a>.
+Project's GitHub repository</a>.
 </td></tr></tbody></table>
 
 <p class="nobreak">
@@ -109,102 +140,102 @@ project's GitHub repository</a>.
 000016,000016:                                                                                                  <span class="co">#  Mod history:  2020-12-03 MAS  Created from Comanche 51.</span>
 000017,000017: 
 000018,000018: <a href="CONTRACT_AND_APPROVALS.agc.html">$CONTRACT_AND_APPROVALS.agc</a>
-000087,000019: <a href="ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">$ASSEMBLY_AND_OPERATION_INFORMATION.agc</a>
-001112,000020: <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html">$TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc</a>
-001535,000021: 
-001536,000022: 
-001537,000023:                                                                                                  <span class="co">#  COMERASE</span>
-001538,000024: <a href="ERASABLE_ASSIGNMENTS.agc.html">$ERASABLE_ASSIGNMENTS.agc</a>
-005298,000025: 
-005299,000026:                                                                                                  <span class="co">#  COMAID</span>
-005300,000027: <a href="INTERRUPT_LEAD_INS.agc.html">$INTERRUPT_LEAD_INS.agc</a>
-005416,000028: <a href="T4RUPT_PROGRAM.agc.html">$T4RUPT_PROGRAM.agc</a>
-006871,000029: <a href="DOWNLINK_LISTS.agc.html">$DOWNLINK_LISTS.agc</a>
-007273,000030: <a href="FRESH_START_AND_RESTART.agc.html">$FRESH_START_AND_RESTART.agc</a>
-008732,000031: <a href="RESTART_TABLES.agc.html">$RESTART_TABLES.agc</a>
-009275,000032: <a href="SXTMARK.agc.html">$SXTMARK.agc</a>
-009935,000033: <a href="EXTENDED_VERBS.agc.html">$EXTENDED_VERBS.agc</a>
-011248,000034: <a href="PINBALL_NOUN_TABLES.agc.html">$PINBALL_NOUN_TABLES.agc</a>
-012101,000035: <a href="CSM_GEOMETRY.agc.html">$CSM_GEOMETRY.agc</a>
-012508,000036: <a href="IMU_COMPENSATION_PACKAGE.agc.html">$IMU_COMPENSATION_PACKAGE.agc</a>
-012866,000037: <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html">$PINBALL_GAME__BUTTONS_AND_LIGHTS.agc</a>
-016631,000038: <a href="R60,R62.agc.html">$R60,R62.agc</a>
-017007,000039: <a href="ANGLFIND.agc.html">$ANGLFIND.agc</a>
-017627,000040: <a href="GIMBAL_LOCK_AVOIDANCE.agc.html">$GIMBAL_LOCK_AVOIDANCE.agc</a>
-017715,000041: <a href="KALCMANU_STEERING.agc.html">$KALCMANU_STEERING.agc</a>
-017969,000042: <a href="SYSTEM_TEST_STANDARD_LEAD_INS.agc.html">$SYSTEM_TEST_STANDARD_LEAD_INS.agc</a>
-018107,000043: <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html">$IMU_CALIBRATION_AND_ALIGNMENT.agc</a>
-019492,000044: 
-019493,000045:                                                                                                  <span class="co">#  COMEKISS</span>
-019494,000046: <a href="GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc.html">$GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc</a>
-019690,000047: <a href="P34-P35,_P74-P75.agc.html">$P34-P35,_P74-P75.agc</a>
-021410,000048: <a href="R31.agc.html">$R31.agc</a>
-021686,000049: <a href="P76.agc.html">$P76.agc</a>
-021836,000050: <a href="R30.agc.html">$R30.agc</a>
-022314,000051: <a href="STABLE_ORBIT_-_P38-P39.agc.html">$STABLE_ORBIT_-_P38-P39.agc</a>
-022728,000052: 
-022729,000053:                                                                                                  <span class="co">#  TROUBLE</span>
-022730,000054: <a href="P11.agc.html">$P11.agc</a>
-023642,000055: <a href="TPI_SEARCH.agc.html">$TPI_SEARCH.agc</a>
-024185,000056: <a href="P20-P25.agc.html">$P20-P25.agc</a>
-027650,000057: <a href="P30,P37.agc.html">$P30,P37.agc</a>
-028244,000058: <a href="P32-P33,_P72-P73.agc.html">$P32-P33,_P72-P73.agc</a>
-029633,000059: <a href="P40-P47.agc.html">$P40-P47.agc</a>
-032040,000060: <a href="P51-P53.agc.html">$P51-P53.agc</a>
-034237,000061: <a href="LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc.html">$LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc</a>
-034434,000062: <a href="P61-P67.agc.html">$P61-P67.agc</a>
-035646,000063: <a href="SERVICER207.agc.html">$SERVICER207.agc</a>
-036434,000064: <a href="ENTRY_LEXICON.agc.html">$ENTRY_LEXICON.agc</a>
-036798,000065: <a href="REENTRY_CONTROL.agc.html">$REENTRY_CONTROL.agc</a>
-038396,000066: <a href="CM_BODY_ATTITUDE.agc.html">$CM_BODY_ATTITUDE.agc</a>
-038687,000067: <a href="P37,P70.agc.html">$P37,P70.agc</a>
-040622,000068: <a href="S-BAND_ANTENNA_FOR_CM.agc.html">$S-BAND_ANTENNA_FOR_CM.agc</a>
-040737,000069: <a href="LUNAR_LANDMARK_SELECTION_FOR_CM.agc.html">$LUNAR_LANDMARK_SELECTION_FOR_CM.agc</a>
-040757,000070: 
-040758,000071:                                                                                                  <span class="co">#  TVCDAPS</span>
-040759,000072: <a href="TVCINITIALIZE.agc.html">$TVCINITIALIZE.agc</a>
-041148,000073: <a href="TVCEXECUTIVE.agc.html">$TVCEXECUTIVE.agc</a>
-041406,000074: <a href="TVCMASSPROP.agc.html">$TVCMASSPROP.agc</a>
-041634,000075: <a href="TVCRESTARTS.agc.html">$TVCRESTARTS.agc</a>
-041887,000076: <a href="TVCDAPS.agc.html">$TVCDAPS.agc</a>
-042652,000077: <a href="TVCSTROKETEST.agc.html">$TVCSTROKETEST.agc</a>
-042902,000078: <a href="TVCROLLDAP.agc.html">$TVCROLLDAP.agc</a>
-043507,000079: <a href="MYSUBS.agc.html">$MYSUBS.agc</a>
-043589,000080: <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html">$RCS-CSM_DIGITAL_AUTOPILOT.agc</a>
-044557,000081: <a href="AUTOMATIC_MANEUVERS.agc.html">$AUTOMATIC_MANEUVERS.agc</a>
-045046,000082: <a href="RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc.html">$RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc</a>
-045119,000083: <a href="JET_SELECTION_LOGIC.agc.html">$JET_SELECTION_LOGIC.agc</a>
-046035,000084: <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html">$CM_ENTRY_DIGITAL_AUTOPILOT.agc</a>
-047295,000085: 
-047296,000086:                                                                                                  <span class="co">#  CHIEFTAN</span>
-047297,000087: <a href="DOWN-TELEMETRY_PROGRAM.agc.html">$DOWN-TELEMETRY_PROGRAM.agc</a>
-047736,000088: <a href="INTER-BANK_COMMUNICATION.agc.html">$INTER-BANK_COMMUNICATION.agc</a>
-047903,000089: <a href="INTERPRETER.agc.html">$INTERPRETER.agc</a>
-050947,000090: <a href="FIXED-FIXED_CONSTANT_POOL.agc.html">$FIXED-FIXED_CONSTANT_POOL.agc</a>
-051198,000091: <a href="INTERPRETIVE_CONSTANTS.agc.html">$INTERPRETIVE_CONSTANTS.agc</a>
-051273,000092: <a href="SINGLE_PRECISION_SUBROUTINES.agc.html">$SINGLE_PRECISION_SUBROUTINES.agc</a>
-051336,000093: <a href="EXECUTIVE.agc.html">$EXECUTIVE.agc</a>
-051821,000094: <a href="WAITLIST.agc.html">$WAITLIST.agc</a>
-052377,000095: <a href="LATITUDE_LONGITUDE_SUBROUTINES.agc.html">$LATITUDE_LONGITUDE_SUBROUTINES.agc</a>
-052684,000096: <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html">$PLANETARY_INERTIAL_ORIENTATION.agc</a>
-053062,000097: <a href="MEASUREMENT_INCORPORATION.agc.html">$MEASUREMENT_INCORPORATION.agc</a>
-053550,000098: <a href="CONIC_SUBROUTINES.agc.html">$CONIC_SUBROUTINES.agc</a>
-055459,000099: <a href="INTEGRATION_INITIALIZATION.agc.html">$INTEGRATION_INITIALIZATION.agc</a>
-056629,000100: <a href="ORBITAL_INTEGRATION.agc.html">$ORBITAL_INTEGRATION.agc</a>
-057524,000101: <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html">$INFLIGHT_ALIGNMENT_ROUTINES.agc</a>
-057819,000102: <a href="POWERED_FLIGHT_SUBROUTINES.agc.html">$POWERED_FLIGHT_SUBROUTINES.agc</a>
-058170,000103: <a href="TIME_OF_FREE_FALL.agc.html">$TIME_OF_FREE_FALL.agc</a>
-058866,000104: <a href="STAR_TABLES.agc.html">$STAR_TABLES.agc</a>
-059049,000105: <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html">$AGC_BLOCK_TWO_SELF-CHECK.agc</a>
-059555,000106: <a href="PHASE_TABLE_MAINTENANCE.agc.html">$PHASE_TABLE_MAINTENANCE.agc</a>
-059949,000107: <a href="RESTARTS_ROUTINE.agc.html">$RESTARTS_ROUTINE.agc</a>
-060269,000108: <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html">$IMU_MODE_SWITCHING_ROUTINES.agc</a>
-061325,000109: <a href="KEYRUPT,_UPRUPT.agc.html">$KEYRUPT,_UPRUPT.agc</a>
-061447,000110: <a href="DISPLAY_INTERFACE_ROUTINES.agc.html">$DISPLAY_INTERFACE_ROUTINES.agc</a>
-062922,000111: <a href="SERVICE_ROUTINES.agc.html">$SERVICE_ROUTINES.agc</a>
-063178,000112: <a href="ALARM_AND_ABORT.agc.html">$ALARM_AND_ABORT.agc</a>
-063386,000113: <a href="UPDATE_PROGRAM.agc.html">$UPDATE_PROGRAM.agc</a>
-063922,000114: <a href="RTB_OP_CODES.agc.html">$RTB_OP_CODES.agc</a>
+000137,000019: <a href="ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">$ASSEMBLY_AND_OPERATION_INFORMATION.agc</a>
+001189,000020: <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html">$TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc</a>
+001618,000021: 
+001619,000022: 
+001620,000023:                                                                                                  <span class="co">#  COMERASE</span>
+001621,000024: <a href="ERASABLE_ASSIGNMENTS.agc.html">$ERASABLE_ASSIGNMENTS.agc</a>
+005400,000025: 
+005401,000026:                                                                                                  <span class="co">#  COMAID</span>
+005402,000027: <a href="INTERRUPT_LEAD_INS.agc.html">$INTERRUPT_LEAD_INS.agc</a>
+005518,000028: <a href="T4RUPT_PROGRAM.agc.html">$T4RUPT_PROGRAM.agc</a>
+006973,000029: <a href="DOWNLINK_LISTS.agc.html">$DOWNLINK_LISTS.agc</a>
+007375,000030: <a href="FRESH_START_AND_RESTART.agc.html">$FRESH_START_AND_RESTART.agc</a>
+008834,000031: <a href="RESTART_TABLES.agc.html">$RESTART_TABLES.agc</a>
+009377,000032: <a href="SXTMARK.agc.html">$SXTMARK.agc</a>
+010037,000033: <a href="EXTENDED_VERBS.agc.html">$EXTENDED_VERBS.agc</a>
+011350,000034: <a href="PINBALL_NOUN_TABLES.agc.html">$PINBALL_NOUN_TABLES.agc</a>
+012271,000035: <a href="CSM_GEOMETRY.agc.html">$CSM_GEOMETRY.agc</a>
+012678,000036: <a href="IMU_COMPENSATION_PACKAGE.agc.html">$IMU_COMPENSATION_PACKAGE.agc</a>
+013036,000037: <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html">$PINBALL_GAME__BUTTONS_AND_LIGHTS.agc</a>
+016817,000038: <a href="R60,R62.agc.html">$R60,R62.agc</a>
+017193,000039: <a href="ANGLFIND.agc.html">$ANGLFIND.agc</a>
+017813,000040: <a href="GIMBAL_LOCK_AVOIDANCE.agc.html">$GIMBAL_LOCK_AVOIDANCE.agc</a>
+017908,000041: <a href="KALCMANU_STEERING.agc.html">$KALCMANU_STEERING.agc</a>
+018162,000042: <a href="SYSTEM_TEST_STANDARD_LEAD_INS.agc.html">$SYSTEM_TEST_STANDARD_LEAD_INS.agc</a>
+018300,000043: <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html">$IMU_CALIBRATION_AND_ALIGNMENT.agc</a>
+019685,000044: 
+019686,000045:                                                                                                  <span class="co">#  COMEKISS</span>
+019687,000046: <a href="GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc.html">$GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc</a>
+019896,000047: <a href="P34-P35,_P74-P75.agc.html">$P34-P35,_P74-P75.agc</a>
+021699,000048: <a href="R31.agc.html">$R31.agc</a>
+021975,000049: <a href="P76.agc.html">$P76.agc</a>
+022125,000050: <a href="R30.agc.html">$R30.agc</a>
+022603,000051: <a href="STABLE_ORBIT_-_P38-P39.agc.html">$STABLE_ORBIT_-_P38-P39.agc</a>
+023031,000052: 
+023032,000053:                                                                                                  <span class="co">#  TROUBLE</span>
+023033,000054: <a href="P11.agc.html">$P11.agc</a>
+023960,000055: <a href="TPI_SEARCH.agc.html">$TPI_SEARCH.agc</a>
+024503,000056: <a href="P20-P25.agc.html">$P20-P25.agc</a>
+028039,000057: <a href="P30,P37.agc.html">$P30,P37.agc</a>
+028640,000058: <a href="P32-P33,_P72-P73.agc.html">$P32-P33,_P72-P73.agc</a>
+030029,000059: <a href="P40-P47.agc.html">$P40-P47.agc</a>
+032483,000060: <a href="P51-P53.agc.html">$P51-P53.agc</a>
+034752,000061: <a href="LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc.html">$LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc</a>
+034949,000062: <a href="P61-P67.agc.html">$P61-P67.agc</a>
+036174,000063: <a href="SERVICER207.agc.html">$SERVICER207.agc</a>
+036962,000064: <a href="ENTRY_LEXICON.agc.html">$ENTRY_LEXICON.agc</a>
+037326,000065: <a href="REENTRY_CONTROL.agc.html">$REENTRY_CONTROL.agc</a>
+038924,000066: <a href="CM_BODY_ATTITUDE.agc.html">$CM_BODY_ATTITUDE.agc</a>
+039215,000067: <a href="P37,P70.agc.html">$P37,P70.agc</a>
+041150,000068: <a href="S-BAND_ANTENNA_FOR_CM.agc.html">$S-BAND_ANTENNA_FOR_CM.agc</a>
+041265,000069: <a href="LUNAR_LANDMARK_SELECTION_FOR_CM.agc.html">$LUNAR_LANDMARK_SELECTION_FOR_CM.agc</a>
+041285,000070: 
+041286,000071:                                                                                                  <span class="co">#  TVCDAPS</span>
+041287,000072: <a href="TVCINITIALIZE.agc.html">$TVCINITIALIZE.agc</a>
+041732,000073: <a href="TVCEXECUTIVE.agc.html">$TVCEXECUTIVE.agc</a>
+041990,000074: <a href="TVCMASSPROP.agc.html">$TVCMASSPROP.agc</a>
+042218,000075: <a href="TVCRESTARTS.agc.html">$TVCRESTARTS.agc</a>
+042471,000076: <a href="TVCDAPS.agc.html">$TVCDAPS.agc</a>
+043236,000077: <a href="TVCSTROKETEST.agc.html">$TVCSTROKETEST.agc</a>
+043486,000078: <a href="TVCROLLDAP.agc.html">$TVCROLLDAP.agc</a>
+044091,000079: <a href="MYSUBS.agc.html">$MYSUBS.agc</a>
+044173,000080: <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html">$RCS-CSM_DIGITAL_AUTOPILOT.agc</a>
+045165,000081: <a href="AUTOMATIC_MANEUVERS.agc.html">$AUTOMATIC_MANEUVERS.agc</a>
+045654,000082: <a href="RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc.html">$RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc</a>
+045727,000083: <a href="JET_SELECTION_LOGIC.agc.html">$JET_SELECTION_LOGIC.agc</a>
+046643,000084: <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html">$CM_ENTRY_DIGITAL_AUTOPILOT.agc</a>
+047903,000085: 
+047904,000086:                                                                                                  <span class="co">#  CHIEFTAN</span>
+047905,000087: <a href="DOWN-TELEMETRY_PROGRAM.agc.html">$DOWN-TELEMETRY_PROGRAM.agc</a>
+048344,000088: <a href="INTER-BANK_COMMUNICATION.agc.html">$INTER-BANK_COMMUNICATION.agc</a>
+048511,000089: <a href="INTERPRETER.agc.html">$INTERPRETER.agc</a>
+051555,000090: <a href="FIXED-FIXED_CONSTANT_POOL.agc.html">$FIXED-FIXED_CONSTANT_POOL.agc</a>
+051806,000091: <a href="INTERPRETIVE_CONSTANTS.agc.html">$INTERPRETIVE_CONSTANTS.agc</a>
+051881,000092: <a href="SINGLE_PRECISION_SUBROUTINES.agc.html">$SINGLE_PRECISION_SUBROUTINES.agc</a>
+051944,000093: <a href="EXECUTIVE.agc.html">$EXECUTIVE.agc</a>
+052429,000094: <a href="WAITLIST.agc.html">$WAITLIST.agc</a>
+052985,000095: <a href="LATITUDE_LONGITUDE_SUBROUTINES.agc.html">$LATITUDE_LONGITUDE_SUBROUTINES.agc</a>
+053292,000096: <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html">$PLANETARY_INERTIAL_ORIENTATION.agc</a>
+053680,000097: <a href="MEASUREMENT_INCORPORATION.agc.html">$MEASUREMENT_INCORPORATION.agc</a>
+054168,000098: <a href="CONIC_SUBROUTINES.agc.html">$CONIC_SUBROUTINES.agc</a>
+056077,000099: <a href="INTEGRATION_INITIALIZATION.agc.html">$INTEGRATION_INITIALIZATION.agc</a>
+057247,000100: <a href="ORBITAL_INTEGRATION.agc.html">$ORBITAL_INTEGRATION.agc</a>
+058142,000101: <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html">$INFLIGHT_ALIGNMENT_ROUTINES.agc</a>
+058437,000102: <a href="POWERED_FLIGHT_SUBROUTINES.agc.html">$POWERED_FLIGHT_SUBROUTINES.agc</a>
+058788,000103: <a href="TIME_OF_FREE_FALL.agc.html">$TIME_OF_FREE_FALL.agc</a>
+059484,000104: <a href="STAR_TABLES.agc.html">$STAR_TABLES.agc</a>
+059674,000105: <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html">$AGC_BLOCK_TWO_SELF-CHECK.agc</a>
+060180,000106: <a href="PHASE_TABLE_MAINTENANCE.agc.html">$PHASE_TABLE_MAINTENANCE.agc</a>
+060574,000107: <a href="RESTARTS_ROUTINE.agc.html">$RESTARTS_ROUTINE.agc</a>
+060894,000108: <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html">$IMU_MODE_SWITCHING_ROUTINES.agc</a>
+061950,000109: <a href="KEYRUPT,_UPRUPT.agc.html">$KEYRUPT,_UPRUPT.agc</a>
+062072,000110: <a href="DISPLAY_INTERFACE_ROUTINES.agc.html">$DISPLAY_INTERFACE_ROUTINES.agc</a>
+063547,000111: <a href="SERVICE_ROUTINES.agc.html">$SERVICE_ROUTINES.agc</a>
+063803,000112: <a href="ALARM_AND_ABORT.agc.html">$ALARM_AND_ABORT.agc</a>
+064039,000113: <a href="UPDATE_PROGRAM.agc.html">$UPDATE_PROGRAM.agc</a>
+064575,000114: <a href="RTB_OP_CODES.agc.html">$RTB_OP_CODES.agc</a>
 <h1>Usage Table for Fixed-Memory Banks</h1>
 Bank 00:  1770/2000 words used.
 Bank 01:  1770/2000 words used.

@@ -66,27 +66,58 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files are part of a reconstructed copy of Comanche 044, the
-original release, though not the final mission release, of the Apollo 10 
-Command Module (CM) Apollo Guidance Computer (AGC) software. 
+These source-code files are part of a reconstructed copy of Comanche 44, the
+initial release (though not the final mission release) of the Apollo 10 
+Command Module (CM) Apollo Guidance Computer (AGC) software.  Subsequent releases
+were Comanche 45 and Comanche 45/2 (the flown release on Apollo 10). The reconstruction
+is believed to be exactly accurate, but in the absence of an actual Apollo-era
+listing of Comanche 44, some explanation of the reconstruction process is needed
+to insure confidence in that accuracy. 
 <br><br>
-The reconstruction began with source code of Comanche 051 previously reconstructed
-from a digitized copy of Comanche 055.  The code was then updated by undoing
-changes made between revisions 044 and 051. The reconstruction was verified by
-matching memory-bank checksums to those listed in drawing 2021153D. While there
-is thus a high degree of confidence in the reconstructed code, there are nevertheless
-a few changes that remain open to question, particularly in log section P20-P25,
-though even if these eventually prove incorrect they should not adversely affect
-code execution. Note also that page
-numbers in the reconstructed code match those on the Comanche 055 printout,
-although the added code would likely have changed page numbers for a real
-Comanche 044 listing.
+The starting point was the source code of Comanche 51 
+(separately previously reconstructed from an Apollo-era listing of Comanche 55, 
+flown on Apollo 11).  Comanche 51 source code was then modified 
+by undoing changes known to have been made between revisions 44 and 51. The now-reconstructed 
+Comanche 44 source code was verified by assembling it and checking that the assembled code had
+the expected known-correct memory-bank checksums. 
+Note that page numbers in the reconstructed code match those on the Comanche 55 printout,
+although the source code would likely have different page numbers in a contemporary
+Comanche 44 listing.
 <br><br>
-Comments from the original source code are prefixed with a single '#' symbol, 
+Annotations that were not present in the contemporary source code have been added to the reconstructed
+code to justify each change relative to Comanche 51. Here's a guide to the Apollo documentation referenced
+in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n89/mode/1up">
+    MIT/IL engineering drawing 2021153D, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Comanche 44.</li>
+<li><a href="https://archive.org/details/Comanche55J2k60">
+       Comanche 55 (Apollo 11 CM) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/Colossus249MartinPp15651719">
+       Colossus 249 (Apollo 9 CM) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=12">
+       <i>Guidance System Operations Plan for Colossus 3</i>, Section 5, p. <i>xiii</i></a>.  
+       Table listing some Program Request Changes (PCRs) incorporated between 
+       Comanche 45/2 and Comanche 55.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208472.pdf#page=8">
+       <i>Guidance System Operations Plan for Colossus 2E</i>, Section 3, pp. <i>ix-x</i></a>.
+       Tables listing some Program Change Requests (PCRs) incorporated between 
+       Comanche 44 and Comanche 55.</li>
+<li><a href="http://www.ibiblio.org/apollo/links.html#PGE_COLOSSUS2">
+       <i>Programmed Guidance Equations for Colossus 2, Based on Comanche 55</i></a>. 
+       A pseudocode representation of Comanche 55, showing change bars
+       for differences from Comanche 45/2.</li>
+</ul>
+In most cases, only the titles (rather than the full texts) of PCRs are known.  In addition to the 
+explanatory annotations, there is also 
+<a href="https://github.com/virtualagc/virtualagc/issues/1134">
+a step-by-step commentary about the reconstruction process</a>.
+<br><br>
+Comments expected to have been present in the original source code are prefixed with a single '#' symbol, 
 whereas comments added later are prefixed by "##" or "###".  Report any errors 
 noted by creating an 
 issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
-project's GitHub repository</a>.
+Project's GitHub repository</a>.
 </td></tr></tbody></table>
 
 <p class="nobreak">
@@ -109,7 +140,9 @@ project's GitHub repository</a>.
 000034,000016:                                                                                                  <span class="co">## Mod history: 2020-12-03 MAS  Created from Comanche 51.</span>
 000035,000017:                                                                                                  <span class="co">##              2020-12-05 MAS  Changed name to COLOSSUS 2 and dates to</span>
 000036,000018:                                                                                                  <span class="co">##                              approximate Comanche 44 release date.</span>
-000037,000019: 
+000037,000019:                                                                                                  <span class="co">##              2020-12-11 RSB  Added justifying annotations related to</span>
+000038,000020:                                                                                                  <span class="co">##                              Mike's reconstruction.</span>
+000039,000021: 
 </pre>
 </span>
 </p>
@@ -125,54 +158,144 @@ Page 1
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000039,000021: 
-000040,000022:                                                                                                  <span class="co">#  ************************************************************************</span>
-000041,000023:                                                                                                  <span class="co">#  *                                                                      *</span>
-000042,000024:                                                                                                  <span class="co">#  *             THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS:           *</span>
-000043,000025:                                                                                                  <span class="co">#  *                                                                      *</span>
-000044,000026:                                                                                                  <span class="co">#  *                                                                      *</span>
-000045,000027:                                                                                                  <span class="co">#  *                             COLOSSUS 2                               *</span>
-000046,000028:                                                                                                  <span class="co">#  *                                                                      *</span>
-000047,000029:                                                                                                  <span class="co">#  *                                                                      *</span>
-000048,000030:                                                                                                  <span class="co">#  *      THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED         *</span>
-000049,000031:                                                                                                  <span class="co">#  *      IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER DSR           *</span>
-000050,000032:                                                                                                  <span class="co">#  *      PROJECT 55-23870, SPONSORED BY THE MANNED SPACECRAFT            *</span>
-000051,000033:                                                                                                  <span class="co">#  *      CENTER OF THE NATIONAL AERONAUTICS AND SPACE                    *</span>
-000052,000034:                                                                                                  <span class="co">#  *      ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE             *</span>
-000053,000035:                                                                                                  <span class="co">#  *      INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF          *</span>
-000054,000036:                                                                                                  <span class="co">#  *      TECHNOLOGY, CAMBRIDGE, MASS.                                    *</span>
-000055,000037:                                                                                                  <span class="co">#  *                                                                      *</span>
-000056,000038:                                                                                                  <span class="co">#  ************************************************************************</span>
-000057,000039: 
-000058,000040: 
-000059,000041:                                                                                                  <span class="co">#        SUBMITTED:      MARGARET H. HAMILTON            DATE:   8 FEB 69</span>
-000060,000042:                                                                                                  <span class="co">#                M.H.HAMILTON, COLOSSUS PROGRAMMING LEADER</span>
-000061,000043:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION</span>
-000062,000044: 
-000063,000045:                                                                                                  <span class="co">#        APPROVED:       DANIEL J. LICKLY                DATE:   8 FEB 69</span>
-000064,000046:                                                                                                  <span class="co">#                D.J.LICKLY, DIRECTOR, MISSION PROGRAM DEVELOPMENT</span>
-000065,000047:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000066,000048: 
-000067,000049:                                                                                                  <span class="co">#        APPROVED:       FRED H. MARTIN                  DATE:   8 FEB 69</span>
-000068,000050:                                                                                                  <span class="co">#                FRED H. MARTIN, COLOSSUS PROJECT MANGER</span>
-000069,000051:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000070,000052: 
-000071,000053:                                                                                                  <span class="co">#        APPROVED:       NORMAN E. SEARS                 DATE:   8 FEB 69</span>
-000072,000054:                                                                                                  <span class="co">#                N.E. SEARS, DIRECTOR, MISSION DEVELOPMENT</span>
-000073,000055:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000074,000056: 
-000075,000057:                                                                                                  <span class="co">#        APPROVED:       RICHARD H. BATTIN               DATE:   8 FEB 69</span>
-000076,000058:                                                                                                  <span class="co">#                R.H. BATTIN, DIRECTOR, MISSION DEVELOPMENT</span>
-000077,000059:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000078,000060: 
-000079,000061:                                                                                                  <span class="co">#        APPROVED:       DAVID G. HOAG                   DATE:   8 FEB 69</span>
-000080,000062:                                                                                                  <span class="co">#                D.G. HOAG, DIRECTOR</span>
-000081,000063:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
-000082,000064: 
-000083,000065:                                                                                                  <span class="co">#        APPROVED:       RALPH R. RAGAN                  DATE:   8 FEB 69</span>
-000084,000066:                                                                                                  <span class="co">#                R.R. RAGAN, DEPUTY DIRECTOR</span>
-000085,000067:                                                                                                  <span class="co">#                INSTRUMENTATION LABORATORY</span>
-000086,000068: 
+000041,000023: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+<b>Reconstruction:</b> We don't know of any surviving specific contemporary
+documentation supporting the material in this log section, absent an
+Apollo-era assembly listing of it.  The section contains
+only comments and no executable code.  We have simply modeled the Comanche 44 version of it on the 
+corresponding log section of Comanche 55, but have changed a handful of
+items in ways that seem sensible to us.  The annotations below thus 
+provide our common-sense reasoning on the matter, rather than justification from documentation.
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+000049,000031: 
+000050,000032:                                                                                                  <span class="co">#  ************************************************************************</span>
+000051,000033:                                                                                                  <span class="co">#  *                                                                      *</span>
+000052,000034:                                                                                                  <span class="co">#  *             THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS:           *</span>
+000053,000035:                                                                                                  <span class="co">#  *                                                                      *</span>
+000054,000036:                                                                                                  <span class="co">#  *                                                                      *</span>
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+<b>Reconstruction:</b> The line in Comanche 55 corresponding to the following 
+one reads "COLOSSUS 2A".
+We have changed it to "COLOSSUS 2" for Comanche 44, since generically COLOSSUS 2
+refers to the Apollo 10 CM software; COLOSSUS 2A, 2C, 2D, and 2E generically
+refer to Apollo 11, 12, 13, and 14.
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+000060,000042:                                                                                                  <span class="co">#  *                             COLOSSUS 2                               *</span>
+000061,000043:                                                                                                  <span class="co">#  *                                                                      *</span>
+000062,000044:                                                                                                  <span class="co">#  *                                                                      *</span>
+000063,000045:                                                                                                  <span class="co">#  *      THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED         *</span>
+000064,000046:                                                                                                  <span class="co">#  *      IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER DSR           *</span>
+000065,000047:                                                                                                  <span class="co">#  *      PROJECT 55-23870, SPONSORED BY THE MANNED SPACECRAFT            *</span>
+000066,000048:                                                                                                  <span class="co">#  *      CENTER OF THE NATIONAL AERONAUTICS AND SPACE                    *</span>
+000067,000049:                                                                                                  <span class="co">#  *      ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE             *</span>
+000068,000050:                                                                                                  <span class="co">#  *      INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF          *</span>
+000069,000051:                                                                                                  <span class="co">#  *      TECHNOLOGY, CAMBRIDGE, MASS.                                    *</span>
+000070,000052:                                                                                                  <span class="co">#  *                                                                      *</span>
+000071,000053:                                                                                                  <span class="co">#  ************************************************************************</span>
+000072,000054: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+<b>Reconstruction:</b> The signature names and titles below are not
+actually known for certain.  Because Comanche 44 through 55 were separated by
+only 1-3 months in time (see below), we assume that personnel turnover 
+in that limited period of time would be unlikely. Hence we have retained the 
+same names and titles for Comanche 44 as for Comanche 55. 
+<br><br>
+On the other hand, the DATE fields below are more speculative, 
+and are very likely to be wrong but unlikely to be <i>too</i> wrong.  Consider the document
+<a href="http://www.ibiblio.org/apollo/Documents/a042186.pdf#page=52">
+<i>Software Systems Development: A CSDL Project History</i>, Table 4-6</a>.
+From the data in that table, and from the Comanche 55 source code, here is
+a timeline of events for your consideration:<br>
+<ul>
+<li>March 28, 1969:  Signoff date in Comanche 55's CONTRACT AND APPROVALS
+log section.</li>
+<li>April 18, 1969:  Colossus 2A released.  We presume that this refers to
+the release of Comanche 55.</li>
+</ul>
+From this timeline, we conclude that for Comanche 55, CONTRACT AND APPROVALS signoffs
+occurred 3 weeks prior to the official release date of the software.
+<br><br>
+To use that information, however, requires knowing the release date for 
+Comanche 44, which does not appear in the reference just mentioned.  The best
+information we're aware of comes from
+<a href="http://www.ibiblio.org/apollo/Documents/R-700.pdf#page=170">
+<i>MIT's Role in Project Apollo, Final Report</i>, Table 4-II</a>.  There,
+we see release dates of<br>
+<ul>
+<li>February, 1969:  Comanche 44 released.</li>
+<li>April, 1969: Comanche 55 released.</li>
+</ul> 
+which is consistent, but which unfortunately lacks some specificity.  At any 
+rate, noting that Comanche 44 was released sometime between February 1 and 
+February 28, and then subtracting 21 days, we guess that the software signoffs
+occurred somewhere between January 11 and February 7.  The midpoint of that
+range is January 24, which in 1969 was a Friday.
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+000109,000091:                                                                                                  <span class="co">#        SUBMITTED:      MARGARET H. HAMILTON            DATE:   24 JAN 69</span>
+000110,000092:                                                                                                  <span class="co">#                M.H.HAMILTON, COLOSSUS PROGRAMMING LEADER</span>
+000111,000093:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION</span>
+000112,000094: 
+000113,000095:                                                                                                  <span class="co">#        APPROVED:       DANIEL J. LICKLY                DATE:   24 JAN 69</span>
+000114,000096:                                                                                                  <span class="co">#                D.J.LICKLY, DIRECTOR, MISSION PROGRAM DEVELOPMENT</span>
+000115,000097:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000116,000098: 
+000117,000099:                                                                                                  <span class="co">#        APPROVED:       FRED H. MARTIN                  DATE:   24 JAN 69</span>
+000118,000100:                                                                                                  <span class="co">#                FRED H. MARTIN, COLOSSUS PROJECT MANGER</span>
+000119,000101:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000120,000102: 
+000121,000103:                                                                                                  <span class="co">#        APPROVED:       NORMAN E. SEARS                 DATE:   24 JAN 69</span>
+000122,000104:                                                                                                  <span class="co">#                N.E. SEARS, DIRECTOR, MISSION DEVELOPMENT</span>
+000123,000105:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000124,000106: 
+000125,000107:                                                                                                  <span class="co">#        APPROVED:       RICHARD H. BATTIN               DATE:   24 JAN 69</span>
+000126,000108:                                                                                                  <span class="co">#                R.H. BATTIN, DIRECTOR, MISSION DEVELOPMENT</span>
+000127,000109:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000128,000110: 
+000129,000111:                                                                                                  <span class="co">#        APPROVED:       DAVID G. HOAG                   DATE:   24 JAN 69</span>
+000130,000112:                                                                                                  <span class="co">#                D.G. HOAG, DIRECTOR</span>
+000131,000113:                                                                                                  <span class="co">#                APOLLO GUIDANCE AND NAVIGATION PROGRAM</span>
+000132,000114: 
+000133,000115:                                                                                                  <span class="co">#        APPROVED:       RALPH R. RAGAN                  DATE:   24 JAN 69</span>
+000134,000116:                                                                                                  <span class="co">#                R.R. RAGAN, DEPUTY DIRECTOR</span>
+000135,000117:                                                                                                  <span class="co">#                INSTRUMENTATION LABORATORY</span>
+000136,000118: 
 
 End of include-file CONTRACT_AND_APPROVALS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
