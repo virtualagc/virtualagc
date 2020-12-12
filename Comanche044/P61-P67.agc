@@ -14,6 +14,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##		2020-12-12 RSB	Added justifying annotations for Mike's 
+##				reconstruction steps.
 
 ## Page 789
 # PROGRAM:	P61
@@ -325,6 +327,12 @@ POSECADR	2CADR	CM/POSE
 # MOD NO.-	1	SEPT. 19, 1967
 # MOD BY-	R. HIRSCHKOP
 # MOD NO: 2	MOD BY: RR BAIRNSFATHER		DATE: 8 MAY 68		REVISED COMMENTS FOR COLOSSUS
+## <b>Reconstruction:</b> At this point, a comment from Comanche 51 has been removed
+## from Comanche 44, concerning work on NOUN 74.  For various reasons, such as
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=72">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-28</i></a>, we know that
+## NOUN 74 had not yet been introduced in Comanche 44. The comment must therefore pertain to later
+## software revisions.
 # FUNCTION-	1.  TO START ENTRY GUIDANCE AT .05G SELECTING ROLL ATTITUDE, CONSTANT DRAG LEVEL, AND
 #		    DRAG THRESHOLD, KA, WHICH ARE KEYED TO THE .05G POINT.
 #		2.  SELECT FINAL PHASE P67 IF V < 27000 FPS WHEN .2G OCCURS.
@@ -346,11 +354,16 @@ POSECADR	2CADR	CM/POSE
 		
 P64		TC	NEWMODEX		# ENTER VIA RTB WHEN .05G IS EXCEEDED.
 		MM	64
+## <b>Reconstruction:</b> As explained in the preceding annotation, NOUN 74 (which
+## is referenced in the following instruction in Comanche 51) was not used in Comanche 44.
+## The following instruction is rolled back to Colossus 249 (Apollo 9), which used
+## NOUN 68 rather than 74.
 		CA	V06N68			# ROLLC		VI		HDOT
 						# XXX.XX DEG	XXXXX. FPS	XXXXX. FPS
 		TS	ENTRYVN			# DISPLAY VIA OVERNOUT.
 		
 		TC	DANZIG			# ... AND CONTINUE IN INITROLL ...
+## <b>Reconstruction:</b> Same as the preceding annotation.
 V06N68		VN	0668
 
 ## Page 798		

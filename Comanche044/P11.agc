@@ -16,6 +16,8 @@
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-03 MAS  Moved a chunk of code back to REP11A from
 ##                              MATRXJOB.
+##		2020-12-11 RSB	Added justifying annotations for the steps
+##				of Mike's reconstruction.
 
 ## Page 533
 
@@ -226,6 +228,17 @@ REP11A		INHINT
 		EBANK=	QPLACES
 		CA	P11XIT		# SET EXIT FROM PROUT IN EARTHR
 		TS	QPLACES
+## <b>Reconstruction:</b> In Comanche 51, the following block of code (down to the
+## terminating annotation) and the TC INTPRET at the label MATRXJOB are swapped.
+## For justification, refer to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=15">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. BOOS-1.</a> 
+## The relevant change bar in that document is associated with the pseudocode "(OGC, IGC, MGC) = CDU".
+## It's difficult, though not impossible, to recognize that this pseudocode
+## refers to the block of code below, although it is certainly <i>not</i> clear
+## from the pseudocode that the block of code persists across versions but is
+## merely moved to a different location.  Consulting Colossus 249 (Apollo 9)
+## to Comanche 55 (Apollo 11), the positioning swap is evident.
 		ZL			# STORE DP GIMBAL
 		CA	CDUX		# ANGLES FOR ATTITUDE
 		DXCH	OGC		# ERROR DISPLAY
@@ -239,6 +252,7 @@ REP11A		INHINT
 		VLOAD	VSR1		# SCALE OGC B-1
 			OGC
 		STORE	OGC
+## <b>Reconstruction:</b> Termination of swapped block of code (see above).
 		VLOAD	MXV
 			THETAN
 			XSM
@@ -250,6 +264,7 @@ REP11A		INHINT
 			S2
 		CADR	PROUT		# RETURN FROM EARTHR
 			EARTHR	+3
+## <b>Reconstruction:</b> Instruction with which code block is swapped (see above).
 MATRXJOB	TC	INTPRET
 		SSP			# ZERO RTX2
 			RTX2		# FOR

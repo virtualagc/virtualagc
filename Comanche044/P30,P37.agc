@@ -15,6 +15,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-04 MAS  Added back an INHINT that was removed.
+##		2020-12-11 RSB	Added an annotation justifying the change mentioned above.
 
 ## Page 635
 		BANK	32
@@ -52,6 +53,12 @@ COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
 		ADRES	TIMRFLAG	# BIT 11 FLAG 7
 		CAF	ZERO
 		TS	NVWORD1
+## <b>Reconstruction:</b> The following INHINT instruction is not present
+## in Comanche 55 (Apollo 11), but none of the available contemporary documentation
+## suggests that it should be removed from Comanche 44 (Apollo 10).  However, it is
+## present in Colossus 249 (Apollo 9), and if not present here would result in a 
+## one-word offset in succeeding memory locations that is difficult to resolve.
+## Perhaps it was removed between Comanche 44 and Comanche 45/2.	
 		INHINT
 		CAF	ONE
 		TC	WAITLIST

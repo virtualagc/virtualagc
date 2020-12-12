@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-04 MAS  Removed setting of NN from P38/P78.
+##		2020-12-12 RSB	Added justifying annotations for the
+##				steps of Mike's reconstruction.
 
 ## Page 525
 # STABLE ORBIT RENDEZVOUS PROGRAMS (P38 AND P78)
@@ -129,6 +131,18 @@ P78		TC	AVFLAGP         # OTHER VEHICLE ACTIVE
 		TCR	BLANKET
 		TCF	ENDOFJOB
 		TC	INTPRET
+## <b>Reconstruction:</b> Comanche 51 code<br>
+## <pre>
+##    SSP
+##            NN
+##            2
+## </pre>
+## was delete at this point in Comanche 44. Refer to
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=22">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. BURN-20</a>, pseudocode<br>
+## <pre>
+##    NN1<sub>sp</sub> = 2
+## </pre>		
 		SLOAD   SR1
 			OPTION2
 		BHIZ	DLOAD

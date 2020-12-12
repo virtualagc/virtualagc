@@ -14,6 +14,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
+##              2020-12-12 RSB	Added justifying annotations for Mike
+##				and Nik's reconstruction steps.
 
 ## Page 684
 # PROGRAM DESCRIPTION ** P40CSM **
@@ -1190,6 +1192,25 @@ S40.1		SET	VLOAD
 			QTEMP
 			XDELVFLG
 			S40.1B		# LAMBERT
+## <b>Reconstruction:</b> A block of interpretive instructions appearing at this
+## point in Comanche 51 has been removed in Comanche 44,<br>
+## <pre>
+##     VLOAD   ABVAL
+##             DELVSIN
+##     STORE   DELVSAB
+##     SETPD   VLOAD
+## </pre>
+## According to
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=94">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. STER-1</a>,
+## these instructions relate to the pseudocode<br>
+## <pre>
+##     TS = K<sub>thetcon</sub>|<u>V</u><sub>tig</sub> * <u>R</u><sub>tig</sub>|
+##     BURNANG = TS  DELVSAB  MASS<sub>dp</sub> / (CAPF |<u>R</u><sub>tig</sub>|<sup>2</sup>)
+## </pre>
+## Rather than trying to relate this pseudocode to the deleted interpretive instructions,
+## we'll just note that in Comanche 44 the code for routine S40.1 has simply been reverted to 
+## Colossus 249 (Apollo 9).
 		SETPD	VLOAD		# EXTERNAL DELTA V
 			0
 			VTIG
@@ -1201,6 +1222,9 @@ S40.1		SET	VLOAD
 		STORE	RINIT
 		VSQ	PDDL
 			36D
+## <b>Reconstruction:</b> At this point in Comanche 51, the DMPR interpretive instruction
+## is used in place of DMP.  As justification, we offer the comments in the preceding annotation,
+## above.
 		DMP	DDV
 			THETACON
 		DMP	DMP
@@ -1999,6 +2023,29 @@ NOTADDUL	TC	INTPRET
 		COUNT	17/40.13
 		
 K1VAL		=	EK1VAL		# DP PAD LOAD B+23 NEWTON-SEC/E+2
+## <b>Reconstruction:</b> The constants K2VAL and K3VAL listed below changed in value between
+## Comanche 45/2 and Comanche 55, according to
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=99">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. STER-9</a>.
+## Unfortunately, they <i>also</i> differ in value between Comanche 44 and 
+## Colossus 249 (Apollo 9), and hence cannot simply be copied from any other
+## available source code.  But the appropriate values can be derived from
+## <a href="https://www.ibiblio.org/apollo/Documents/R-577-Colossus2-Martin-5.6789.pdf#page=120">
+## <i>Guidance System Operations Plan for Manned CM Earth Orbital and Lunar Missions
+## Using Program Colossus 2 (Comanche Rev. 44, 45)</i>, p. 5.9-2</a>.
+## The correct values are listed there as<br>
+## <ul>
+## <li>K<sub>2</sub> = 5000 pound-sec</li>
+## <li>K<sub>3</sub> = 25500 pounds</li>
+## </ul>
+## These cannot be used as-is, since they use <i>pounds</i> of as physical units of force,
+## whereas Comanche requires <i>newtons</i> instead.  The values must therefore be converted
+## to newtons, as well as being scaled by 10<sup>-2</sup> and 10<sup>-4</sup> respectively.  
+## One force pound = 4.4482216152605 newtons. Thus,<br>
+## <pre>
+##     5000 &times; 4.4482216152605 &times; 10<sup>-2</sup> = 222.411080763
+##     25500 &times; 4.4482216152605 &times; 10<sup>-4</sup> = 11.342965119
+## </pre>
 K2VAL		2DEC	222.411081 B-23	#  5000 LB-SEC, SC.AT B+23 NEWTON-SEC/E+2
 K3VAL		2DEC	11.3429651 B-9	# 25500 LBS, SC.AT B+9 NEWTONS/E+4
 1SEC2D		2DEC	100.0 B-14	# 100.0 CS AT +14

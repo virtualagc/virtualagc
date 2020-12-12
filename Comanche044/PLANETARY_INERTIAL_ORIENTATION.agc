@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51. Changed constants
 ##                              to match the 1968-1969 values in Colossus 294.
+##		2020-12-12 RSB	Added justifying annotations for the steps of
+##				Mike's reconstruction.
 
 ## Page 1243
 # ..... RP-TO-R SUBROUTINE .....
@@ -342,6 +344,10 @@ EARTHL		DLOAD	DCOMP
 # CONSTANTS AND ERASABLE ASSIGNMENTS
 
 1B1		=	DP1/2		# 1 SCALED B-1
+## <b>Reconstruction:</b> The variables COSI and SINI have reverted to
+## their Colossus 249 (Apollo 9) values.  Refer to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=24">
+## <i>Programmed Guidance Equations for Colossus 2</i>, pp. COOR-16 and -17</a>.
 COSI		2DEC	.99964115 B-1	# COS(1 DEG 32.1 MIN) B-1
 
 SINI		2DEC	.02678760 B-1	# SIN(1 DEG 32.1 MIN) B-1
@@ -361,6 +367,10 @@ MMATRIX		=	20D		# 18		M MATRIX
 COB		=	32D		# 2		COS(B) B-1
 SOB		=	34D		# 2		SIN(B) B-1
 504F		=	6D		# 2		F(MOON)
+## <b>Reconstruction:</b> The variables NODDOT, FDOT, BDOT, NODIO, FSUB0, BSUB0, and WEARTH have reverted to their
+## Colossus 249 (Apollo 9) values.  Refer to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=24">
+## <i>Programmed Guidance Equations for Colossus 2</i>, pp. COOR-16 and -17</a>.
 NODDOT		2DEC	-.457335143 E-2	# REVS/CSEC B+28=-1.07047016 E-6  RAD/SEC
 
 FDOT		2DEC	.570862491	# REVS/CSEC B+27= 2.67240019 E-6  RAD/SEC

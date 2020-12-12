@@ -16,6 +16,8 @@
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-05 MAS  Removed definitions of EK2VAL, EK3VAL, and
 ##                              STARSAV3.
+##		2020-12-11 RSB	Added justifying annotations for Mike's
+##				reconstruction.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2232,6 +2234,15 @@ RMAG		ERASE	+1
 
 # P40 PAD LOADS				(6D)
 EK1VAL		ERASE	+1		# I(2)PL 1-SEC SPS IMPULSE NEWTSEC/100/B23
+## <b>Reconstruction:</b> Relative to Comanche 51, the variables EK2VAL and EK3VAL
+## have been removed at this point.  This is justified by 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=9">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. 91</a>, which indicates 
+## that those variables first appeared between Comanche 45/2 and Comanche 55.  That reference
+## <i>also</i> indicates a change in the variable FANG; this appears to me to be an error, and
+## that FANG usage is precisely the same in Comanche 44 through 55.  (A change of 
+## E3J22R2M and E32C31RM is also indicated, but those variables had not yet been introduced
+## in Comanche 51, and therefore did not need to be removed in the reconstruction of Comanche 44.)
 FANG		ERASE			# I(1)PL SPS THRUST USED BY IMPULSIVE BURN
 
 # **** CONICSEX (PLANETARY INERT. ORIEN.) ****
@@ -3623,6 +3634,14 @@ RM		EQUALS	S22RTNEX	# DOWNLINK OF VHF RANGE
 
 # S22.1					(1D)
 S22RTNEX	EQUALS	MARKDOWN +7	# B(1)
+
+## <b>Reconstruction:</b> An alias of STARSAV3 (to S22RTNEX+1) has been
+## removed at this point, along with an associated explanatory comment.
+## The variable STARSAV3 was added between Comanche 45/2 and Comanche 55,
+## and hence there is no need to preserve the alias defining the symbolic
+## name.  <i>All</i> references to STARSAV3 within the
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf">
+## <i>Programmed Guidance Equations for Colossus 2</i></a> are accompanied by change bars.
 
 # CRS61.1 STORAGE.  -A SUBSET OF P20-	(14D)
 Q611		EQUALS	RM	+1	# I(1)TMP QSAVE

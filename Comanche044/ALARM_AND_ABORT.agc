@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51. Removed clearing of
 ##                              STATEFLG, REINTFLG, and NODOFLAG from POODOO.
+##		2020-12-08 RSB	Added justifying annotation related to the change 
+##				mentioned above.
 
 ## Page 1493
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -163,6 +165,32 @@ OCT77770	OCT	77770		# DONT MOVE
 		MASK	FLAGWRD7
 		CCS	A
 		TC	WHIMPER -1	# YES.  DONT DO POODOO.  DO BAILOUT.
+
+## <b>Reconstruction:</b>  At this point in COMANCHE 51, there's a sequence of interpretive
+## instructions which have been removed in COMANCHE 44, namely:<br>
+## <pre>
+##    TC DOWNFLAG
+##    ADRES STATEFLG
+##    TC DOWNFLAG
+##    ADRES REINTFLG
+##    TC DOWNFLAG
+##    ADRES NODOFLAG
+## </pre>
+## This removal is justified by the document 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=43">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. GENP-23</i></a>, which indicates &mdash;
+## via the change bars in the pseudocode<br>
+## <pre>
+##    Set bit 5(STATEFLG) of FLAGWRD3 = 0
+##    Set bit 7(INTGRAB) of RASFLAG = 0  (i.e., FLGWRD10)
+##    Set bit 1(NODOV37) of FLAGWRD2 = 0
+## </pre>
+## in POODOO &mdash; that these instructions were added some time between COMANCHE 45/2 and COMANCHE 55.
+## As far as the differences in naming between the assembly language and the pseudocode are concerned
+## &mdash; i.e., REINTFLG vs INTGRAB and NODOFLAG vs NODOV37 &mdash;
+## the ERASABLE ASSIGNMENTS log section of COMANCHE 55 defines REINTFLG as bit 7 of flagword 10
+## and NODOFLAG as bit 1 of flagword 2, so the differing names clearly refer to the identical
+## flags.
 
 ## Page 1496
 		TC	BANKCALL

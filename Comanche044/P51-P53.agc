@@ -15,8 +15,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-05 MAS  Moved a chunk from P51B to P51A, changed
-##                              R56A display logic to match Colosssu 249,
+##                              R56A display logic to match Colosssus 249,
 ##                              and changed STARSAV3 to STAR.
+##		2020-12-12 RSB	Added justifying annotations for Mike's 
+##				reconstruction steps.
 
 ## Page 737
 # PROGRAM NAME - PROG52			DATE - NOV 30, 1966
@@ -1466,6 +1468,11 @@ P51AA		CAF	PRFMSTAQ
 		TC	BANKCALL	# IF CAGING, BUT T4 WILL ZERO C/A ENABLE.
 		CADR	IMUSTALL	# IF PUT TO SLEEP, IMUFINED WILL WAKE US
 		TC	CURTAINS	# UP.
+## <b>Reconstruction:</b> The following block of instructions, down to the terminating
+## annotation below, was removed from Comanche 51, but has been restored from Colossus 249
+## (Apollo 9) source code.  The position of the removal is given by
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=47">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. INFA-1</a>.
 		TC	INTPRET
 		RTB	VLOAD
 			SET1/PDT
@@ -1473,6 +1480,7 @@ P51AA		CAF	PRFMSTAQ
 		STORE	GCOMP
 		SET	EXIT
 			DRIFTFLG
+## <b>Reconstruction:</b> Termination of instruction block. See the annotation above.
 		TC	PHASCHNG
 		OCT	05024
 		OCT	13000
@@ -1487,6 +1495,22 @@ P51B		TC	PHASCHNG
 			STARIND		# INDEX - STAR 1 OR 2
 			0
 			0
+## <b>Reconstruction:</b> In Comanche 51, the two instructions immediately following
+## this annotation are replaced by this block of instructions:<br>
+## <pre>
+##    RTB     VLOAD
+##            SET1/PDT
+##            ZEROVEC
+##    STORE   GCOMP
+##    SET     CLEAR
+##            DRIFTFLG
+##            TARG2FLG
+##    EXIT
+## </pre>
+## This change is indicated by
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=48">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. INFA-2</a>.
+## In Comanche 44, we've simply reverted to Colossus 249 (Apollo 9) source code here.
 		CLEAR	EXIT
 			TARG2FLG	# SHOW STAR MARK-NOT LAND MARK
 		CAF	BIT1
@@ -2083,11 +2107,22 @@ R56A		TC	BANKCALL
 		TC	BANKCALL
 		CADR	CLEANDSP
 		
+## <b>Reconstruction:</b>  At this point in Comanche 51, a program label
+## R56A1 has been added to the following line, and the jump at the next
+## annotation below is TCF R56A1 rather than TCF R56A +2.  I.e., the jump
+## is to the 6th instruction of R56A in Comanche 51, but only to the 
+## 2nd instruction of R56A in Comanche 44.  The latter is the same behavior
+## as in Colossus 249 (Apollo 9).
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=81">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. OPTC-19</a>
+## marks the pseudocode positions corresponding to these two annotations
+## with change bars, although without giving any details as to what the changes may be. 
 		CAF	VB53		# DISPLAY V53 REQUESTING ALTERNATE MARK
 		TC	BANKCALL
 ## Page 782
 		CADR	GOMARK2
 		TCF	GOTOPOOH	# V34-TERMINATE
+## <b>Reconstruction:</b>  See the preceding annotation.
 		TCF	R56A +2		# V33-DONT PROCEED - JUST ENTER TO MARK
 		TC	INTPRET
 		DLOAD
@@ -2123,6 +2158,30 @@ R56A		TC	BANKCALL
 		CADR	GOPERF1
 		TC	GOTOPOOH	# TERM.
 		TCF	R56B		# PROCEED-MARK COMPLETED
+## <b>Reconstruction:</b> There is no code difference between Comanche 44 and
+## Comanche 51 at this point, but I'd like to make a comment on something that
+## confused <i>me</i> (RSB) when I was writing these annotations, and thus may
+## confuse you as well.  If in the annotations immediately preceding this one
+## you had continued to read a little farther in the <i>Programmed Guidance
+## Equations</i>, at this point in the code you'd have come to pseudocode
+## reading<br>
+## <pre>
+##     Proceed to "GOPERF1": if terminate, proceed to "GOTOPOOH"
+##                           if proceed, proceed
+##                           otherwise, proceed to 5th line of "R56"
+## </pre>
+## The final line above <i>appears</i> to be a veiled reference to the Comanche 51
+## program label R56A1 mentioned above, and yet it must be incorrect (since R56A1
+## would be the 14th line of R56 or the 6th line of R56A).  Further confusing 
+## the matter, the actual 
+## assembly code in Comanche 55 is the same as the Comanche 44 line below, which
+## is <i>not</i> R56A1.  Nor is the pseudocode accompanied by a change bar.  What
+## in the world could be going on?
+## <br><br>
+## The answer is that when the pseudocode says something like "5th line of R56",
+## it isn't referring to lines of assembly code, but rather to lines of pseudocode.
+## Program label R56A1 would indeed appear at the "5th line of R56" using that 
+## method of reckoning.
 		TCF	R56A 	+2	# RECYCLE-DO ANOTHER MARK - LIKE REJECT
 R56B		TC	BANKCALL
 		CADR	R53C1
@@ -2161,6 +2220,19 @@ NOSAM		EXIT
 		TC	-5
 		TC	INTPRET
 		VLOAD	VXSC
+## <b>Reconstruction:</b> In Comanche 51, the variable STARSAV3 is used rather
+## than the STAR of Comanche 44.  This relates to the Comanche 51 pseudocode<br>
+## <pre>
+##    T<u>S</u> = unit( unit(K<sub>ldsqr3</sub> STARSAV<u>3</u>) + VELd<u>C</u>)
+## </pre>
+## from
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=50">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. INFA-8</a>.
+## The pseudocode is admittedly difficult to relate to this specific code change;
+## but it should be noted that Comanche 51's STARSAV3 is changed to STAR
+## <i>throughout</i> the entire Comanche 44 source code &mdash; for example,
+## <a href="ASSEMBLY_AND_OPERATION_INFORMATION.agc.html#NOUN88">here</a> &mdash; 
+## so that makes the specific change at this point in the code seem more natural.
 			STAR
 			1/SQR3
 		UNIT	GOTO

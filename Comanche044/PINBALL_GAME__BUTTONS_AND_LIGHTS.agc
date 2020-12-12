@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51. Removed the call to
 ##                              CHKPOOH from VBTSTLTS.
+##		2020-12-12 RSB	Added justifying annotations for Mike's 
+##				reconstruction steps.
 
 ## Page 307
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -3589,7 +3591,21 @@ PINTEST		EQUALS	LST2FAN
 		SETLOC	ENDNVSB1 +1
 		
 		COUNT	41/PIN
-		
+
+## <b>Reconstruction:</b> In Comanche 51, the single line following this
+## annotation is replaced by<br>
+## <pre>
+##    VBTSTLTS        TC      BANKCALL
+##                    CADR    CHKPOOH
+##                    INHINT
+## </pre>
+## Thus, in Comanche 44, a call to CHKPOOH has been removed. This removal
+## relates to
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=106">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. VBDF-2</a>, though
+## as usual in these situations, we simply fall back on Colossus 249 (Apollo 9)
+## code rather than attempt to relate the pseudocode of the <i>Programmed
+## Guidance Equations</i> to the actual assembly code.
 VBTSTLTS	INHINT
 		CS	BIT1		# SET BIT 1 OF IMODES33 SO IMUMON WONT
 		MASK	IMODES33	# TURN OUT ANY LAMPS.

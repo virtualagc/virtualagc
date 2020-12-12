@@ -16,6 +16,8 @@
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51. Removed noun 74,
 ##                              changed POSITION9 back to NAUT MI, and
 ##                              changed N88 to use STAR instead of STARSAV3.
+##		2020-12-12 RSB	Added justifying annotations for Mike's 
+##				reconstruction steps.
 
 ## Page 268
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -79,6 +81,12 @@
 #	01111			POSITION6 (XXXX.X NAUT MI)	USE ARITHDP3
 #	10000			DRAG ACCELERATION (XXX.XX G)	USE ARITHDP2
 #	10001			POSITION8 (XXXX.X NAUT MI)	USE ARITHDP3
+## <b>Reconstruction:</b> According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=74">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-30</i></a>, 
+## the change from displaying feet to nautical miles in NOUN 99's register 1 was
+## introduced some time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request
+## (PCR) 739.  The line below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 #	10010			POSITION9 (XXX.XX NAUT MI)	USE ARITHDP4
 #	10011			VELOCITY4 (XXXX.X FT/SEC)	USE ARITHDP2
 #
@@ -313,6 +321,12 @@ NNADTAB		OCT	00000			# 00 	NOT IN USE
 		OCT	04143			# 73	ALTITUDE
 						#	VELOCITY
 						#	FLIGHT PATH ANGLE
+## <a name="NOUN74"></a><b>Reconstruction:</b> NOUN 74 was not used in COMANCHE 44. According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=72">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-28</i></a>, 
+## it was introduced some
+## time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request (PCR) 272. The line 
+## below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 		OCT	0			# 74	SPARE
 		OCT	64151			# 75	DELTA ALTITUDE CDH
 						# 	DELTA TIME (CDH-CSI OR TPI-CDH)
@@ -466,6 +480,12 @@ NNTYPTAB	OCT	00000			# 00	NOT IN USE
 		OCT	00404			# 72	3COMP	DPDEG(360), POS4, WHOLE
 						#		(DEC ONLY)
 		OCT	10450			# 73	3COMP	POS4, VEL2, DPDEG(360)
+## <a name="NOUN74"></a><b>Reconstruction:</b> NOUN 74 was not used in COMANCHE 44. According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=72">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-28</i></a>, 
+## it was introduced some
+## time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request (PCR) 272. The line 
+## below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 		OCT	0			# 74	SPARE
 		OCT	00010			# 75	3COMP	POS4, MIN/SEC, MIN/SEC
 						# 		(NO LOAD, DEC ONLY)
@@ -544,6 +564,12 @@ SFINTAB		OCT	00006			# WHOLE, DP TIME (SEC)
 		OCT	00000
 		OCT	27176			# POSITION 8
 		OCT	14235
+## <b>Reconstruction:</b> According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=74">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-30</i></a>, 
+## the change from displaying feet to nautical miles in NOUN 99's register 1 was
+## introduced some time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request
+## (PCR) 739.  The line below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 		2DEC	1852 E3 B-22		# POSITION 9
 		
 		2DEC	30.48 B-7		# VELOCITY4
@@ -587,6 +613,12 @@ SFOUTAB		OCT	05174			# WHOLE, DP TIME (SEC)
 		OCT	23146
 		OCT	00260			# POSITION 8
 		OCT	06213
+## <b>Reconstruction:</b> According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=74">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-30</i></a>, 
+## the change from displaying feet to nautical miles in NOUN 99's register 1 was
+## introduced some time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request
+## (PCR) 739.  The line below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 		2DEC	.283092873		# POSITION 9
 		
 		2DEC	.032808399		# VELOCITY4
@@ -699,6 +731,12 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	P21ALT			# 73	POS4			DP3
 		ECADR	P21VEL			# 73	VEL2			DP4
 		ECADR	P21GAM			# 73	DPDEG(360)		DP4
+## <a name="NOUN74"></a><b>Reconstruction:</b> NOUN 74 was not used in COMANCHE 44. According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=72">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-28</i></a>, 
+## it was introduced some
+## time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request (PCR) 272. The 3 lines 
+## below have therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 		OCT	0			# 74	SPARE
 		OCT	0			# 74	SPARE
 		OCT	0			# 74	SPARE
@@ -742,6 +780,18 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	MRKBUF1 +3		# 87	CDU DEG			CDU
 		ECADR	MRKBUF1 +5		# 87	Y OPTICS DEG		YOPT
 		OCT	0			# 87	SPARE COMPONENT
+## <a name="NOUN88"></a><b>Reconstruction:</b> According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=73">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-29</i></a>, 
+## "STAR" was changed to "STARSAV3" in NOUN 88 some
+## time between COMANCHE 45/2 and COMANCHE 55. The 3 lines 
+## below are similar to the corresponding lines from the Apollo 9 (COLOSSUS 249) source code
+## <i>except</i> that the comment maintains that the variable is DPFRAC in Comanche 2 
+## instead of merely FRAC as in Colossus 249. There is no simple way to justify this claim,
+## as it is a <i>conclusion</i> drawn from examining the specific interpretive code that
+## processes STAR variable, which differs between Colossus 249 and Comanche 44.  At any
+## rate, whether or not the comment in the 3 lines below will agree with a contemporary
+## Comanche 44 program listing does not affect the accuracy of the executable code.
 		ECADR	STAR			# 88	DPFRAC			DPFRAC
 		ECADR	STAR +2			# 88	DPFRAC			DPFRAC
 		ECADR	STAR +4			# 88	DPFRAC			DPFRAC
@@ -776,6 +826,12 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 		ECADR	DSPTEM2			# 98	WHOLE			ARTH
 		ECADR	DSPTEM2 +1		# 98	FRAC			FRAC
 		ECADR	DSPTEM2 +2		# 98	WHOLE			ARTH
+## <b>Reconstruction:</b> According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=74">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-30</i></a>, 
+## the change from displaying feet to nautical miles in NOUN 99's register 1 was
+## introduced some time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request
+## (PCR) 739.  The line below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 		ECADR	WWPOS			# 99 	POS9			DP4
 		ECADR	WWVEL			# 99	VEL4			DP2
 		ECADR	WWOPT			# 99 	WHOLE			ARTH
@@ -819,6 +875,12 @@ RUTMXTAB	OCT	16351			# 40	M/S, DP3, DP3
 		OCT	0			# 71	OCT, OCT,OCT
 		OCT	06352			# 72	DP4, DP3, ARTH
 		OCT	24507			# 73	DP3, DP4, DP4
+## <a name="NOUN74"></a><b>Reconstruction:</b> NOUN 74 was not used in COMANCHE 44. According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=72">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-28</i></a>, 
+## it was introduced some
+## time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request (PCR) 272. The line 
+## below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 		OCT	0			# 74	SPARE
 		OCT	22447			# 75	DP3, M/S, M/S
 		OCT	0			# 76	SPARE
@@ -844,6 +906,12 @@ RUTMXTAB	OCT	16351			# 40	M/S, DP3, DP3
 		OCT	04102			# 96	CDU, CDU, CDU
 		OCT	06143			# 97	ARTH, ARTH, ARTH
 		OCT	06043			# 98	ARTH, FRAC, ARTH
+## <b>Reconstruction:</b> According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=74">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-30</i></a>, 
+## the change from displaying feet to nautical miles in NOUN 99's register 1 was
+## introduced some time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request
+## (PCR) 739.  The line below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 		OCT	06252			# 99	DP4, DP2, ARTH
 				
 # END OF RUTMXTAB

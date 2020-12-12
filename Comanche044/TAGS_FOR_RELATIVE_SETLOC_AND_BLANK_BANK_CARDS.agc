@@ -17,6 +17,8 @@
 ##              2020-12-04 MAS  Removed the tags S3435LOC, MODCHG1, and
 ##                              MODCHG2 (the former is from 45-51, and the
 ##                              latter are from 51-55).
+##		2020-12-12 RSB	Added justifying annotations for Mike's
+##				reconstruction steps.
 
 ## Page 27
 FIXED		MEMORY	120000 - 167777
@@ -316,6 +318,10 @@ MEASINC		EQUALS
 MEASINC1	EQUALS
 P17S		EQUALS
 RTE1		EQUALS
+## <b>Reconstruction:</b> At this point, a line reading "S3435LOC EQUALS" from
+## Comanche 51 has been removed from Comanche 44. Refer to
+## <a href="P34-P35,_P74-P75.agc.html#S3435LOC">the justification in the 
+## P34-P35, P74-P75 log section</a>.
 		BNKSUM	36
 		
 		BANK	37

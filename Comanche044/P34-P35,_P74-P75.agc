@@ -17,6 +17,8 @@
 ##              2020-12-04 MAS  Removed all code related to NN, restored
 ##                              DISPLAYE to its C249 behavior, and moved
 ##                              S34/35.1 back to bank 35.
+##		2020-12-12 RSB	Added justifying annotations for Mike's
+##				reconstruction steps.
 
 ## Page 460
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -174,6 +176,16 @@ P74		TC	AVFLAGP
 P34/P74A	TC	P20FLGON	# SET UPDATFLG, TRACKFLG
 		CAF	V06N37		# TTPI
 		TC	VNPOOH
+## <b>Reconstruction:</b>  In Comanche 51, we would find the code (deleted in Comanche 44)<br>
+## <pre>
+##    TC      INTPRET
+##    SSP     EXIT
+##            NN
+##            0
+## </pre>	
+## This is removal relates to Comanche 51's addition (in pseudocode) of NN1<sub>sp</sub>=0, described in
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=17">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. BURN-13</a>	
 		TC	DISPLAYE	# ELEV AND CENTANG
 		TC	INTPRET
 		CLEAR	DLOAD
@@ -621,6 +633,20 @@ TIMEX		DLOAD	GOTO
 
 # COMPUTE UNIT NORMAL AND LINE OF SIGHT VECTORS GIVEN THE ACTIVE AND
 # PASSIVE POS AND VEL AT TIME T3
+## <a name="S3435LOC"></a>
+## <b>Reconstruction:</b> This change is not described by any contemporary 
+## documentation (such as the Programmed Guidance Equations), but is 
+## necessitated by the other changes between Comanche 44 and 51.  Specifically,
+## the increased code size in Comanche 51 would cause the current memory bank to overflow
+## if some of its code were not removed to a different memory bank to free up some
+## space.  The solution used in Comanche 51 was to relocate the S34/35.1 block
+## of code using the instructions<br>
+## <pre>
+##    SETLOC  S3435LOC
+##    BANK
+## </pre>
+## This code relocation isn't needed in Comanche 44, and thus the bank-change instructions
+## above have been removed.
 
 S34/35.1	VLOAD	VSU
 			RPASS3
@@ -637,6 +663,13 @@ S34/35.1	VLOAD	VSU
 # ..... S34/35.2 .....
 
 # ADVANCE PASSIVE VEH TO RENDEZVOUS TIME AND GET REQ VEL FROM LAMBERT
+## <b>Reconstruction:</b> See the preceding annotation above.  The Comanche 51 instructions<br>
+## <pre>
+##    SETLOC  CSI/CDH
+##    BANK
+## </pre>
+## which would undo the memory-bank change described in the preceding annotation,
+## are unneeded in Comanche 44, and have been removed.
 
 S34/35.2 	STQ	VLOAD
 			SUBEXIT
@@ -646,6 +679,27 @@ S34/35.2 	STQ	VLOAD
 			INTIME
 		PDDL	PDDL
 			TPASS4
+## <b>Reconstruction:</b> In Comanche 51, the two lines of Comanche 44 source following 
+## this annotation are replaced by a block of code reading<br>
+## <pre>
+##                            TWOPI
+##                    PDDL    BHIZ
+##                            NN
+##                            S3435.23
+##                    DLOAD   PDDL
+##                            ZEROVECS
+##    S3435.23        CALL
+## </pre>
+## This change relates to the pseudocode change<br>
+## <pre>
+##    If NN1<sub>sp</sub> = 0:
+##         Set bit 4(CONICINT) of FLAGWRD3 = 1
+## </pre>
+## found in the
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=89">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. REND-14</a>.  Rather than to 
+## attempt rationalizing that the interpretive instructions implement the pseudocode,
+## we'll simply point out that in Comanche 44 we've reverted to the code from Colossus 249 (Apollo 9).
 			ZEROVECS
 		PUSH	CALL
 			INTINT		# GET TARGET VECTOR
@@ -673,6 +727,19 @@ NOPIE		STODL	ACTCENT
 			INTIME
 		STORE	DELLT4
 		SLOAD	SETPD
+## <b>Reconstruction:</b> In Comanche 51, according to
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=92">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. REND-35</a>, the
+## value on the line below is the "the number of precision offsets that the
+## 'INITVEL' package should employ" and is coded as the variable NN.  In Comanche 44, 
+## it is simply hard-coded
+## to the constant value 2 (DECTWO).  See also 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=90">
+## p. REND-15</a>, which gives the associated pseudocode as<br>
+## <pre>
+##     TS<sub>1</sub> = NN1<sub>sp</sub>
+## </pre>
+## However, we simply revert to the Colossus 249 (Apollo 9) code.
 			DECTWO
 			0D
 		PDDL	PDVL
@@ -915,10 +982,26 @@ DISPLAYE	EXTEND
 		QXCH	NORMEX
 		CAF	V06N55
 		TCR	BANKCALL
+## <b>Reconstruction:</b> The DISPLAYE routine has simply 
+## reverted from Comanche 51 (Apollo 11) to Colossus 249 (Apollo 9) code.
+## This is related to the fact that Comanche 51/55 wants to use the GOFLASH
+## routine rather than the GOFLASHR routine, presumably because GOFLASH
+## has the simpler interface and thus saves some words of memory with a shorter
+## calling sequence.  The contemporary documentation does not call
+## out any specific changes to the DISPLAYE routine; it does, however,
+## describe the changes separately in discussions of outer code that calls
+## DISPLAYE:
+## <ul>
+## <li><a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=17">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. BURN-13</a></li>
+## <li><a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=19">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. BURN-15</a></li>
+## </ul>
 		CADR	GOFLASHR
 		TCF	GOTOPOOH
 		TC	NORMEX
 		TCF	-5
+## <b>Reconstruction:</b> See the preceding annotation, above.
 		CAF	BIT1		# BLANK R1
 		TCR	BLANKET
 		TCF	ENDOFJOB

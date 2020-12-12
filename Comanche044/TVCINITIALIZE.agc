@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-05 MAS  Removed the "LM attached" check from ATTINIT.
+##		2020-12-12 RSB	Added justifying annotations for the steps of
+##				Mike's reconstruction.
 
 ## Page 937
 # NAME		TVCDAPON (TVC DAP INITIALIZATION AND STARTUP CALL)
@@ -154,6 +156,58 @@ TVCINIT3	CAE	PACTOFF		# TRIM VALUES TO TRIM-TRACKERS, OUTPUT
 		TS	YCMD
 		TS	DELYBAR
 
+## <b>Reconstruction:</b> At this point in Comanche 51, the following block of code
+## has been used in place of the 2 lines of code following this annotation in 
+## Comanche 44:<br>
+## <pre>
+##    ATTINIT         CAE     DAPDATR1        # ATTITUDE-ERROR INITIALIZATION LOGIC
+##                    MASK    BIT13           #       TEST FOR CSM OR CSM/LM
+##                    EXTEND
+##                    BZF     NEEDLEIN        #       BYPASS INITIALIZATION FOR CSM/LM
+##                    CAF     BIT1            #       SET UP TEMPORARY COUNTER
+##     +5             TS      TTMP1
+## </pre>
+## This relates to the pseudocode changes listed on
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=34">
+## <i>Programmed Guidance Equations for Colossus 2</i>, pp. DPTV-2 and -3</a>.  
+## Unfortunately, it is not possible from the pseudocode to determine the Comanche 44
+## code that this deleted chunk should be replaced with, nor it is not possible in this
+## case to resort to the usual trick of simply reverting to the Colossus 249 (Apollo 9) 
+## version of the code. Some additional inquiry, and admittedly some speculation, is
+## necessary to arrive at a solution.
+## <br><br>
+## Several additional pieces of information are available.<br>
+## <ul>
+## <li><a href="http://www.ibiblio.org/apollo/ScansForConversion/Comanche055/0939.jpg">
+## Digitized p. 939 of Comanche 55 assembly listing</a></li>
+## <li><a href="http://www.ibiblio.org/apollo/ScansForConversion/Comanche055/0940.jpg">
+## Digitized p. 940 of Comanche 55 assembly listing</a></li>
+## <li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208472.pdf#page=9">
+## <i>Guidance System Operations Plan for Manned CM Orbital and Lunar Missions Using Program 
+## Colossus 2E</i>, Section 3, p. ix</a></li>
+## </ul>
+## The significance of the digitized pages from Comanche 55 is that &mdash; <i>unlike</i>
+## the normally more-handy source-code transcriptions &mdash; there are markings which
+## indicate which specific lines have changed (though not <i>how</i> they've changed) since
+## the preceding release (though not <i>which</i> release it considers the preceding one).
+## The marks in question are the asterisks which sometimes appear near the left-hand margin,
+## following the line-sequence numbers. They appear at line-sequence numbers 1103 through
+## 110402 and at line-sequence number 110417.
+## <br><br>
+## This significance of the page from the GSOP document is that it mentions an applicable 
+## Program Change Request, PCR 747, titled "Remove TVC DAP Initial Attitude Errors".  While
+## we don't have the full text of the PCR, the title at least tells us the motivation for
+## the changes.
+## <br><br>
+## Examining the deleted Comanche 55 code, we notice that it tests whether the spacecraft
+## configuration is CSM only or whether it is CSM+LM, and then bypasses the initialization
+## for the CSM+LM configuration. This may cause one to speculate that the error which the 
+## PCR wanted to fix may have been that initialization was occurring in both cases &mdash;
+## i.e., even in the CSM+LM configuration.  
+## <br><br>
+## What the following two lines of code implement, therefore, is precisely what the Comanche 55
+## code implemented, but <i>without</i> the test for CSM vs CSM+LM.  I.e., it simply always 
+## sets up an initialization instead of bypassing it when the spacecraft configuration is wrong.
 ATTINIT		CAF     BIT1
  +1		TS	TTMP1
 
@@ -172,6 +226,8 @@ ATTINIT		CAF     BIT1
  +2		INDEX	TTMP1
 		TS	ERRBTMP
  +8		CCS 	TTMP1		#	TEST TEMPORARY COUNTER
+## <b>Reconstruction:</b> This change is a part of the change described in the preceding
+## annotation above.
 		TCF	ATTINIT +1	#	BACK TO REPEAT FOR PITCH ERROR
 
 		CA	ERRBTMP		# ERRORS ESTABLISHED AND LIMITED

@@ -16,6 +16,8 @@
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51. Copied contents
 ##                              from Colossus 249, since Comanche 44 still
 ##                              had the 1968-1969 star tables.
+##		2020-12-12 RSB	Added justifying annotations for Mike's
+##				reconstruction steps.
 
 ## Page 1389
 		BANK	32
@@ -23,6 +25,11 @@
 		BANK
 
 		COUNT	14/STARS
+
+## <b>Reconstruction:</b> All star-table data has been reverted to Colossus 249
+## (Apollo 9).  Refer to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=55">
+## <i>Programmed Guidance Equations for Colossus 2</i>, pp. INFA-19</a>.
 
 		2DEC	+.8341953207 B-1	# STAR 37	X
 		2DEC	-.2394362567 B-1	# STAR 37	Y

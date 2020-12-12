@@ -17,6 +17,8 @@
 ##                              mostly match Colossus 249, minus V67FLAG.
 ##              2020-12-05 MAS  Replaced STARSAV3 with STAR in LDPLANET,
 ##                              and changed the pairing of its opcodes.
+##		2020-12-11 RSB	Added justifying annotations for the steps
+##				of Mike's reconstruction.
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -3336,6 +3338,29 @@ LDPLANET	EXIT			# KEEP THIS OPEN SUBROUTINE IN EBANK=5
 		TC	+2
 		TC	-5
 		TC	INTPRET
+## <b>Reconstruction:</b> The next 4 lines of interpretive code replace
+## the following Comanche 51 code:<br>
+## <pre>
+##    VLOAD
+##            STARSAV3
+##    VXSC    UNIT
+##            1/SQR3
+## </pre>
+## Though not obvious without a little thought, these two segments of code
+## behave identically, except that one uses STARSAV3 and the other uses STAR.
+## The justification for changing to STARSAV3 is found in the
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=62">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. MEAS-20</a>.
+## The rearrangements of the interpretive instructions have no <i>functional</i> 
+## effect, but do result in a different memory-bank checksum.  The arrangement 
+## below is the one that produces the correct memory-bank checksum for Comanche 44.  
+## Note that the Artemis 72 CM code (Apollo 15-17) uses the code arrangement shown 
+## here for Comanche 44 (Apollo 10), rather than the Apollo 11 arrangement.<br><br>
+## <i>Why</i> the code was rearranged for Comanche 55, and then later returned
+## to the original arrangement is unknown.  Also, given that the rearrangement
+## is not documented (in places like the Programmed Guidance Equations), there
+## is less certainty in its correctness than the other changes made during the 
+## reconstruction.
 		VLOAD   VXSC
 			STAR
 			1/SQR3
@@ -3377,6 +3402,22 @@ V06N9933	TC	INTPRET
 			V6N99INP
 		EXIT
 		TCF	ENDEXT
+## <a name="V6N99INP"></a>
+## <b>Reconstruction:</b> The block of code below &mdash; up through the 
+## terminating annotation &mdash; replaces the Comanche 51 code<br>
+## <pre>
+##    V6N99INP        LXA,1   LXA,2
+##                            WWPOS
+##                            WWVEL
+## </pre>
+## It is justified by the
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=58">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. MEAS-4</a>.
+## Since the move from Comanche 45/2 to Comanche 55 deleted so many interpretive
+## instructions, the pseudocode from the Programmed Guidance Equations is
+## not very helpful in reconstructing the missing code.  What has been done
+## here is simply to revert to the code from Colossus 249 (Apollo 9).
+## Also, <a href="#V67XXX">see V67XXX below</a>.
 V6N99INP	DLOAD	DMP
 			WWPOS
 			1/SQRT3
@@ -3386,6 +3427,7 @@ V6N99INP	DLOAD	DMP
 		DMP	LXA,2
 			1/SQRT3
 			MPAC
+## <b>Reconstruction:</b> Termination of code block (see above).
 		SLOAD	DSU
 			WWOPT
 			V67DEC2
@@ -3448,6 +3490,27 @@ NXPOSVEL	VLOAD*	VSQ
 			DPPOSMAX
 		STORE	WWPOS
 		STORE	WWVEL
+## <a name="V67XXX"></a>
+## <b>Reconstruction:</b> The following block of interpretive code in Comanche 51
+## has been deleted in Comanche 44:<br>
+## <pre>
+##    V67XXX          DLOAD   DSU
+##                            WWPOS
+##                            FT99999
+##                    BMN     DLOAD
+##                            +3
+##                            FT99999
+##                    STORE   WWPOS
+## </pre>
+## This is justified by the
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=58">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. MEAS-4</a>.
+## To understand these changes, it is perhaps worth noting that they
+## relate to changing the scaling of the display of register 1 of NOUN 99
+## from nautical miles (Comanche 44) to feet (Comanche 55).  This means that
+## the value must be scaled differently (thus the factor of 1/SQRT3) and
+## limited differently (thus the ceiling of FT99999).
+## Also, <a href="#V6N99INP">see V6N99INP above</a>.
 V67XXX		LXA,1	SXA,1
 ## Page 634
 			S2
@@ -3459,6 +3522,14 @@ WWPOS		=	RANGE
 WWVEL		=	RRATE
 WWOPT		=	RTHETA
 V06N99A		VN	0699
+## <b>Reconstruction:</b> The following variable (1/SQRT3) replaces the
+## variable FT99999 from Comanche 51.  This is a result of the
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=58">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. MEAS-4</a>, since
+## the variable FT99999 is not used by any surviving Comanche 44 code, and
+## the variable 1/SQRT3 is not used by any surviving Comanche 51 code.
+## Also, see the related changes at <a href="#V6N99INP">V6N99INP</a> and
+## <a href="#V67XXX">V67XXX</a> above.
 1/SQRT3		2DEC	0.5773502
 V67DEC2		2DEC	2 B-14
 		SBANK=	LOWSUPER

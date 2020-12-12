@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-05 MAS  Updated to match changes in the noun tables.
+##		2020-12-11 RSB	Added justifying annotations related to Mike's
+##				code reconstruction.
 
 ## Page 2
 
@@ -422,6 +424,12 @@
 # 73	ALTITUDE				3COMP	XXXXXB. NAUT MI
 #	VELOCITY					XXXXX.  FT/SEC
 #	FLIGHT PATH ANGLE				XXX.XX  DEG
+## <a name="NOUN74"></a><b>Reconstruction:</b> NOUN 74 was not used in COMANCHE 44. According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=72">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-28</i></a>, 
+## it was introduced some
+## time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request (PCR) 272. The line 
+## below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 # 74	SPARE
 # 75	DELTA ALTITUDE CDH			3COMP	XXXX.X NAUT MI		NO LOAD, DEC ONLY
 #	DELTA TIME (CDH-CSI OR TPI-CDH)			XXBXX  MIN/SEC
@@ -464,6 +472,12 @@
 # 98	SYSTEM TEST RESULTS AND INPUTS		3COMP	XXXXX.
 #							.XXXXX
 #							XXXXX.
+## <a name="NOUN99"><b>Reconstruction:</b> According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=74">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-30</i></a>, 
+## the change from displaying feet to nautical miles in NOUN 99's register 1 was
+## introduced some time between COMANCHE 45/2 and COMANCHE 55, due to Program Change Request
+## (PCR) 739.  The line below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 # 99	RMS IN POSITION				3COMP	XXX.XX NAUT MI			DEC ONLY
 #	RMS IN VELOCITY					XXXX.X FT/SEC
 #	RMS OPTION					XXXXX.
@@ -614,6 +628,8 @@
 # 73	1	P21ALT		Q (MEMORY/100 TO DISPLAY TENS N.M.)
 #	2	P21VEL		P
 #	3	P21GAM		H
+## <b>Reconstruction:</b> See the <a href="#NOUN74">earlier NOUN 74 annotation</a> 
+## regarding the change to the following line.
 # 74	SPARE
 # 75	1	DIFFALT		Q
 #	2	T1TOT2		L
@@ -648,6 +664,12 @@
 #	3	DELVLVC +4	P
 # 87	1	MRKBUF1 +3	D
 #	2	MRKBUF1 +5	J
+## <a name="NOUN88"></a><b>Reconstruction:</b> According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=73">
+## <i>Programmed Guidance Equations for COLOSSUS 2, p. NNDF-29</i></a>, 
+## "STAR" was changed to "STARSAV3" in NOUN 88 some
+## time between COMANCHE 45/2 and COMANCHE 55. The line 
+## below has therefore been taken from the Apollo 9 (COLOSSUS 249) source code.
 # 88	1	STAR		ZZ
 #	2	STAR +2		ZZ
 #	3	STAR +4		ZZ
@@ -855,6 +877,11 @@
 #							NAUT MI
 #
 # -XX-
+## <b>Reconstruction:</b> While the following 3 lines are not referenced specifically
+## in the available contemporary documentation of changes, POSITION 9 refers to the
+## quantity displayed in register 1 discussed earlier in the <a href="NOUN99">annotation 
+## for NOUN 99</a>.  Consequently, the comment regarding POSITION 9 below has been
+## rolled back to the corresponding comment from the Colossus 249 (Apollo 9) source code.
 # POSITION 9		XXX.XX NAUT MI		DP	BIT 1 OF LOW REGISTER =
 #			(MAX 283.09)			 -9
 #							2   METERS

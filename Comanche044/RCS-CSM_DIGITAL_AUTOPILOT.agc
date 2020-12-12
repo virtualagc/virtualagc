@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-04 MAS  Changed max rate from 2 deg/s to 4 deg/s.
+##		2020-12-12 RSB	Added justifying annotations for Mike's 
+##				reconstruction steps.
 
 ## Page 1002
 # T5 INTERRUPT PROGRAM FOR THE RCS-CSM AUTOPILOT
@@ -755,6 +757,10 @@ SETWBODY	TS	SPNDX
 		AD	RATEINDX	# RATEINDX = 0  0.05 DEG/SEC
 		TS	Q		#          = 2  0.2  DEG/SEC
 		INDEX	Q		#          = 4  0.5  DEG/SEC
+## <b>Reconstruction:</b> Rates 6 and 7 have reverted to their Colossus 249 (Apollo 9)
+## values of 4 deg/sec, as opposed to their Comanche 51 values of 2 deg/sec.  See
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=32">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. DPRC-28</a>.
 		CA	MANTABLE -1	#          = 6  4.0  DEG/SEC
 		EXTEND
 		MP	BIT9		# MULTIPLY MANTABLE BY 2 TO THE -6
@@ -813,6 +819,10 @@ MANTABLE	DEC	.0071111
 		DEC	-0.028444
 		DEC	.071111
 		DEC	-.071111
+## <b>Reconstruction:</b> Rates 6 and 7 have reverted to their Colossus 249 (Apollo 9)
+## values of 4 deg/sec, as opposed to their Comanche 51 values of 2 deg/sec.  See
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=32">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. DPRC-28</a>.
 		DEC	.568889
 		DEC	-.568889
 =+14MS		DEC	23
@@ -842,6 +852,13 @@ T6PROGM		CAF	ZERO		# FOR MANUAL ROTATIONS
 ## Page 1021
 		DEC	.2112		# FILTER GAIN FOR TRANSLATION, LEM ON
 		DEC	.8400		# FILTER GAIN FOR TRANSLATION 2(ZETA)WN DT
+## <b>Reconstruction:</b> Rates 6 and 7 have reverted to their Colossus 249 (Apollo 9)
+## values of 4 deg/sec, as opposed to their Comanche 51 values of 2 deg/sec, and the 
+## associated filter gains needed to revert as well.  See the 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=31">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. DPRC-27</a>.  Note that these
+## gain values are depicted without change bars, so perhaps they were changed between
+## Comanche 44 and 45/2 even though the rates were changed between 45/2 and 55.
 		DEC	.2112		# FILTER GAIN FOR 4 DEGREE/SEC MANEUVERS
 GAIN1		DEC	.0640		# KALMAN FILTER GAINS FOR INITIALIZATION
 		DEC	.3180		# OF ATTITUDE RATES
@@ -857,6 +874,13 @@ GAIN1		DEC	.0640		# KALMAN FILTER GAINS FOR INITIALIZATION
 		
 		DEC	.0174		# FILTER GAIN FOR TRANSLATION, LEM ON
 		DEC	.3600		# FILTER GAIN FOR TRANSLATION (WN)(WN)DT
+## <b>Reconstruction:</b> Rates 6 and 7 have reverted to their Colossus 249 (Apollo 9)
+## values of 4 deg/sec, as opposed to their Comanche 51 values of 2 deg/sec, and the 
+## associated filter gains needed to revert as well.  See the 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=31">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. DPRC-27</a>.  Note that these
+## gain values are depicted without change bars, so perhaps they were changed between
+## Comanche 44 and 45/2 even though the rates were changed between 45/2 and 55.
 		DEC	.0174		# FILTER GAIN FOR 4 DEGREE/SEC MANEUVERS
 GAIN2		DEC	.0016		# SCALED 10
 		DEC	.0454

@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-04 MAS  Changed the last ARATE entry back to 4 deg/s.
+##		2020-12-11 RSB	Added justifying annotations for Mike's 
+##				reconstruction steps.
 
 ## Page 412
 		BANK	15		
@@ -60,6 +62,11 @@ ARATE		2DEC	.0022222222	# = .05 DEG/SEC
 		
 		2DEC	.0222222222	# = .5 DEG/SEC
 		
+## <b>Reconstruction:</b> The following value has been changed from its
+## Comanche 51 value (2 degrees per seconds) to its Colossus 249 (Apollo 9)
+## value.  This is justified by 
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=14">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. ATTM-14</a>
 		2DEC	.1777777777	# = 4 DEG/SEC		$ 22.5 DEG/SEC
 		
 ANGLTIME	2DEC	.000190735	# = 100B - 19
