@@ -1205,26 +1205,23 @@ S40.1		SET	VLOAD
 ## <i>Programmed Guidance Equations for Colossus 2</i>, p. STER-1</a>,
 ## which relates to this section of the code.  There is a pseudocode change 
 ## indicated at that reference, but it does not relate to this specific change
-## in the code.  Rather, the code change relates to the pseudocode<br>
+## in the code.  Rather, the code change here relates to the pseudocode<br>
 ## <pre>
 ##     DELVSAB = |DELVSI<u>N</u>|
 ## </pre>
-## which has <i>no</i> change bar. How then is this change justified?  To
-## understand it, we have to adopt the point of view of someone reconstructing
-## the code.  One thing we might do is to get a list of differences between 
-## Colossus 249 (Apollo 9) and Comanche 55 (Apollo 11).  We might then compare
-## those differences to the pseudocode in the <i>Programmed Guidance Equations</i>, and
-## note that they do functionally correspond to the pseudocode listed above.  We might
-## then ask ourself <i>when</i> the change occurred.  Page STER-1 of the 
-## <i>Programmed Guidance Equations</i> is marked as "Rev. 2", which means that the only
-## changes marked with change bars are the ones that occurred between Comanche 45/2
-## and 55.  Moreover, the <a href="http://www.ibiblio.org/apollo/ScansForConversion/Comanche055/0710.jpg">
-## corresponding page (710) of the original Comanche 55 assembly listing</a>
-## has no change marks &mdash; asterisks following the line-sequence numbers &mdash;
-## hence we conclude that the change was made prior to Comanche 45/2.
-## Finally, the appropriate response would then be to simply revert this small portion
+## which has <i>no</i> change bar. 
+## The change is instead justified by MIT/IL Software Anomaly
+## report COM 4 (<a href="COM-4-1.jpg">p. 1</a>, <a href="COM-4-2.jpg">p. 2</a>).
+## The report describes a problem with the velocity-gained magnitude, which was being
+## computed in P30, but which it instead wished to compute in P40 and P41.  Poking around
+## in the source code, you find that DELVSAB is this quantity, since comments in the 
+## P32-P33, P72-P73 log section describes it as "MAGNITUDE OF DELTA VELOCITY".
+## Report COM 4 further describes the problem as having been encountered in Comanche 44,
+## and asks for it to be corrected in later revisions, and for the associated memory module
+## to be remanufactured.  Thus the change occurred between Comanche 44 and 45, thus
+## explaining the absence of a change bar in the <i>Programmed Guidance Equations</i>.
+## Finally, the appropriate response is simply revert this small portion
 ## of the code to Colossus 249 (Apollo 9) by deleting the changed instructions.  
-## And that's exactly what has been done.
 		SETPD	VLOAD		# EXTERNAL DELTA V
 			0
 			VTIG
@@ -1238,8 +1235,8 @@ S40.1		SET	VLOAD
 			36D
 ## <b>Reconstruction:</b> At this point in Comanche 51, the DMPR interpretive instruction
 ## is used in place of DMP. This is due to
-## <a href="COM-10.jpg">MIT/IL Software Anomaly Report COM 10</a>, incorporated in
-## Comanche 49.
+## <a href="COM-10.jpg">MIT/IL Software Anomaly Report COM 10</a>.  The problem was 
+## reported in Comanche 49, so the change must have occurred between Comanche 45/2 and 51.
 		DMP	DDV
 			THETACON
 		DMP	DMP
