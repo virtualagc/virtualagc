@@ -16,6 +16,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-30 MAS  Created from Comanche 55, and removed R-2
 ##                              lunar potential model code.
+##		2020-12-12 RSB	Restored a page number (1342) that appeared
+##				to have been removed accidentally.  Also,
+##				added or modified existing annotations 
+##				justifying the reconstruction steps, making
+##				them consistent with similar annotations in
+##				Comanche 44.
 
 ## Page 1334
 # DELETE
@@ -359,6 +365,7 @@ COMTERM		STORE	UZ
 		PDDL	DMPR
 			2
 			5/128
+## Page 1342
 		BDSU
 		DMP*
 			J4REQ/J3,2
@@ -392,6 +399,18 @@ COMTERM		STORE	UZ
 			S1		#         4
 		PUSH	BDDV*		# NORMED R  TO 0D
 			J2REQSQ,2
+## <b>Reconstruction:</b> A large block of code at this position &mdash; down
+## through a termination annotation we've added below &mdash; differs completely
+## from Comanche 55 code.  The code is known to differ because of TBD.
+## <br><br>
+## Unfortunately, Colossus 249 code is also completely different, and thus we cannot
+## revert to it, thus eliminating the possibility of substituting a block of code 
+## from some other version of Colossus.  But what about Luminary?  It turns out that
+## the corresponding block of code in Luminary 69 (the initial release, but not the
+## final, flown release, for Apollo 10) is a precise match, and that is what has
+## been substituted here.
+## <br><br>
+## It is known that Luminary 69 is suitable because TBD.
 		VXSC
 			TVEC
 		STORE	TVEC
@@ -409,6 +428,11 @@ COMTERM		STORE	UZ
 		DAD	PDDL		# Y +X  B-2 TO 2D
 			2D
 		SL1	DSU
+
+## <b>Reconstruction:</b>  Notice that the following line number is out of sequence
+## with the others in this file, since it is preceded by 1342 and followed by 1344.
+## That's because it is a line number from Luminary 69, as described in the
+## preceding annotation above.
 
 ## Page 1232
 			2D
@@ -450,6 +474,8 @@ NBRANCH1	BOV
 		STORE	FV
 		BOV
 			GOBAQUE
+## <b>Reconstruction:</b> Termination of block of code begun by the preceding
+## annotation above.
 ## Page 1344
 NBRANCH		SLOAD	LXA,1
 			DIFEQCNT
@@ -867,9 +893,18 @@ ASCALE		DEC	-7
 		2DEC*	4.9027780 E8 B-30*	# M
 MUEARTH		2DEC*	3.986032 E10 B-36*
 		2DEC	0
-## Between Comanche 51 and 55, the second number in J4REQ/J3 was changed from
-## 0 to -176236.02 B-25.
 J4REQ/J3	2DEC*	.4991607391 E7 B-26*
+## <b>Reconstruction:</b>  In Comanche 55, the value of the constant on 
+## the line immediately following this annotation reads -176236.02 B-25.
+## It was targeted for change in the reconstruction because on 
+## <a href="https://archive.org/details/Comanche55J2k60/page/n1353/mode/1up">
+## p. 1354 of the original Comanche 55 assembly listing</a> the line
+## has a change marker &mdash; an asterisk following the line-sequence number
+## (810). While this provides no clue as such to what the correct value <i>should</i>
+## be, the usual practice in these cases is to revert to the value from the 
+## closest previous known release, Colossus 
+## 249 (Apollo 9), and see if that helps to produce the correct memory-bank
+## checksums.  In this case, it does do so.
 		2DEC	0
 2J3RE/J2	2DEC*	-.1355426363 E5 B-27*
 		2DEC*	.3067493316 E18 B-60*

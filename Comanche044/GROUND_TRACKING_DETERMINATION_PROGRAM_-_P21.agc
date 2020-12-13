@@ -17,6 +17,7 @@
 ##              2020-12-04 MAS  Removed the SL* 0,2 for P21VEL in P21VSAVE.
 ##		2020-12-11 RSB	Added justification annotations for Mike's
 ##				reconstruction steps.
+##		2020-12-13 RSB	Added feedback about the annotations.
 
 ## Page 456
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -154,8 +155,9 @@ P21VSAVE	DLOAD			# SAVE CURRENT BASE VECTOR
 ## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=83">
 ## <i>Programmed Guidance Equations for Colossus 2</i>, p. ORVN-3</a>.  (The indicated change,
 ## from Comanche 45/2 to Comanche 55, is that an absolute value is taken, shifted right by
-## two bits, and then stored.  This is an error, in that the only actual change is the 
-## shift; the absolute value and storage remain unchanged.)		
+## two bits, and then stored, so the only actual change in the code is the shift, with the
+## the absolute value and storage remain unchanged.  The change bars refer to changes in the
+## <i>document</i> rather than changes in the code.)		
 		ABVAL
 		STOVL	P21VEL		# /VEL/ FOR N73 DSP
 			RATT

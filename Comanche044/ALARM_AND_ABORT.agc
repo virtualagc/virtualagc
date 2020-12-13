@@ -17,6 +17,7 @@
 ##                              STATEFLG, REINTFLG, and NODOFLAG from POODOO.
 ##		2020-12-08 RSB	Added justifying annotation related to the change 
 ##				mentioned above.
+##		2020-12-13 RSB	Incorporated feedback about the annotations.
 
 ## Page 1493
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -166,7 +167,7 @@ OCT77770	OCT	77770		# DONT MOVE
 		CCS	A
 		TC	WHIMPER -1	# YES.  DONT DO POODOO.  DO BAILOUT.
 
-## <b>Reconstruction:</b>  At this point in COMANCHE 51, there's a sequence of interpretive
+## <b>Reconstruction:</b>  At this point in COMANCHE 51, there's a sequence of
 ## instructions which have been removed in COMANCHE 44, namely:<br>
 ## <pre>
 ##    TC DOWNFLAG
@@ -185,7 +186,7 @@ OCT77770	OCT	77770		# DONT MOVE
 ##    Set bit 7(INTGRAB) of RASFLAG = 0  (i.e., FLGWRD10)
 ##    Set bit 1(NODOV37) of FLAGWRD2 = 0
 ## </pre>
-## in POODOO &mdash; that these instructions were added some time between COMANCHE 45/2 and COMANCHE 55.
+## in POODOO &mdash; that these instructions were added some time between COMANCHE 45/2 and COMANCHE 51.
 ## As far as the differences in naming between the assembly language and the pseudocode are concerned
 ## &mdash; i.e., REINTFLG vs INTGRAB and NODOFLAG vs NODOV37 &mdash;
 ## the ERASABLE ASSIGNMENTS log section of COMANCHE 55 defines REINTFLG as bit 7 of flagword 10

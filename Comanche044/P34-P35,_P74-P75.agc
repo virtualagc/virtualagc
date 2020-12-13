@@ -19,6 +19,7 @@
 ##                              S34/35.1 back to bank 35.
 ##		2020-12-12 RSB	Added justifying annotations for Mike's
 ##				reconstruction steps.
+##		2020-12-13 RSB	Incorporated feedback about the annotations.
 
 ## Page 460
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -985,9 +986,7 @@ DISPLAYE	EXTEND
 ## <b>Reconstruction:</b> The DISPLAYE routine has simply 
 ## reverted from Comanche 51 (Apollo 11) to Colossus 249 (Apollo 9) code.
 ## This is related to the fact that Comanche 51/55 wants to use the GOFLASH
-## routine rather than the GOFLASHR routine, presumably because GOFLASH
-## has the simpler interface and thus saves some words of memory with a shorter
-## calling sequence.  The contemporary documentation does not call
+## routine rather than the GOFLASHR routine.  The contemporary documentation does not call
 ## out any specific changes to the DISPLAYE routine; it does, however,
 ## describe the changes separately in discussions of outer code that calls
 ## DISPLAYE:

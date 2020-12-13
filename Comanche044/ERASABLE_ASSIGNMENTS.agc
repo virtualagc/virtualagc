@@ -18,6 +18,7 @@
 ##                              STARSAV3.
 ##		2020-12-11 RSB	Added justifying annotations for Mike's
 ##				reconstruction.
+##		2020-12-13 RSB	Incorporated feedback about the annotations.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2239,8 +2240,9 @@ EK1VAL		ERASE	+1		# I(2)PL 1-SEC SPS IMPULSE NEWTSEC/100/B23
 ## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=9">
 ## <i>Programmed Guidance Equations for Colossus 2</i>, p. 91</a>, which indicates 
 ## that those variables first appeared between Comanche 45/2 and Comanche 55.  That reference
-## <i>also</i> indicates a change in the variable FANG; this appears to me to be an error, and
-## that FANG usage is precisely the same in Comanche 44 through 55.  (A change of 
+## <i>also</i> indicates a change in the variable FANG; this is due not to a change in the
+## line of code, but rather because removing EK2VAL and EK3VAL had changed the address
+## at which the instruction appears in memory.  (A change of 
 ## E3J22R2M and E32C31RM is also indicated, but those variables had not yet been introduced
 ## in Comanche 51, and therefore did not need to be removed in the reconstruction of Comanche 44.)
 FANG		ERASE			# I(1)PL SPS THRUST USED BY IMPULSIVE BURN

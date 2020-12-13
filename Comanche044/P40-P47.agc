@@ -16,6 +16,7 @@
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-12 RSB	Added justifying annotations for Mike
 ##				and Nik's reconstruction steps.
+##		2020-12-13 RSB	Incorporated feedback about the annotations.
 
 ## Page 684
 # PROGRAM DESCRIPTION ** P40CSM **
@@ -1198,19 +1199,32 @@ S40.1		SET	VLOAD
 ##     VLOAD   ABVAL
 ##             DELVSIN
 ##     STORE   DELVSAB
-##     SETPD   VLOAD
 ## </pre>
-## According to
+## Refer to
 ## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=94">
 ## <i>Programmed Guidance Equations for Colossus 2</i>, p. STER-1</a>,
-## these instructions relate to the pseudocode<br>
+## which relates to this section of the code.  There is a pseudocode change 
+## indicated at that reference, but it does not relate to this specific change
+## in the code.  Rather, the code change relates to the pseudocode<br>
 ## <pre>
-##     TS = K<sub>thetcon</sub>|<u>V</u><sub>tig</sub> * <u>R</u><sub>tig</sub>|
-##     BURNANG = TS  DELVSAB  MASS<sub>dp</sub> / (CAPF |<u>R</u><sub>tig</sub>|<sup>2</sup>)
+##     DELVSAB = |DELVSI<u>N</u>|
 ## </pre>
-## Rather than trying to relate this pseudocode to the deleted interpretive instructions,
-## we'll just note that in Comanche 44 the code for routine S40.1 has simply been reverted to 
-## Colossus 249 (Apollo 9).
+## which has <i>no</i> change bar. How then is this change justified?  To
+## understand it, we have to adopt the point of view of someone reconstructing
+## the code.  One thing we might do is to get a list of differences between 
+## Colossus 249 (Apollo 9) and Comanche 55 (Apollo 11).  We might then compare
+## those differences to the pseudocode in the <i>Programmed Guidance Equations</i>, and
+## note that they do functionally correspond to the pseudocode listed above.  We might
+## then ask ourself <i>when</i> the change occurred.  Page STER-1 of the 
+## <i>Programmed Guidance Equations</i> is marked as "Rev. 2", which means that the only
+## changes marked with change bars are the ones that occurred between Comanche 45/2
+## and 55.  Moreover, the <a href="http://www.ibiblio.org/apollo/ScansForConversion/Comanche055/0710.jpg">
+## corresponding page (710) of the original Comanche 55 assembly listing</a>
+## has no change marks &mdash; asterisks following the line-sequence numbers &mdash;
+## hence we conclude that the change was made prior to Comanche 45/2.
+## Finally, the appropriate response would then be to simply revert this small portion
+## of the code to Colossus 249 (Apollo 9) by deleting the changed instructions.  
+## And that's exactly what has been done.
 		SETPD	VLOAD		# EXTERNAL DELTA V
 			0
 			VTIG
@@ -1223,8 +1237,9 @@ S40.1		SET	VLOAD
 		VSQ	PDDL
 			36D
 ## <b>Reconstruction:</b> At this point in Comanche 51, the DMPR interpretive instruction
-## is used in place of DMP.  As justification, we offer the comments in the preceding annotation,
-## above.
+## is used in place of DMP. This is due to
+## <a href="COM-10.jpg">MIT/IL Software Anomaly Report COM 10</a>, incorporated in
+## Comanche 49.
 		DMP	DDV
 			THETACON
 		DMP	DMP

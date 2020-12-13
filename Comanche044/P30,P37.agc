@@ -16,6 +16,7 @@
 ## Mod history: 2020-12-03 MAS  Created from Comanche 51.
 ##              2020-12-04 MAS  Added back an INHINT that was removed.
 ##		2020-12-11 RSB	Added an annotation justifying the change mentioned above.
+##		2020-12-13 RSB	Incorporated feedback about the annotations.
 
 ## Page 635
 		BANK	32
@@ -58,7 +59,6 @@ COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
 ## suggests that it should be removed from Comanche 44 (Apollo 10).  However, it is
 ## present in Colossus 249 (Apollo 9), and if not present here would result in a 
 ## one-word offset in succeeding memory locations that is difficult to resolve.
-## Perhaps it was removed between Comanche 44 and Comanche 45/2.	
 		INHINT
 		CAF	ONE
 		TC	WAITLIST

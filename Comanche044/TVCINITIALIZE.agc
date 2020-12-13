@@ -17,6 +17,7 @@
 ##              2020-12-05 MAS  Removed the "LM attached" check from ATTINIT.
 ##		2020-12-12 RSB	Added justifying annotations for the steps of
 ##				Mike's reconstruction.
+##		2020-12-13 RSB	Incorporated feedback about the annotations.
 
 ## Page 937
 # NAME		TVCDAPON (TVC DAP INITIALIZATION AND STARTUP CALL)
@@ -182,9 +183,9 @@ TVCINIT3	CAE	PACTOFF		# TRIM VALUES TO TRIM-TRACKERS, OUTPUT
 ## Digitized p. 939 of Comanche 55 assembly listing</a></li>
 ## <li><a href="http://www.ibiblio.org/apollo/ScansForConversion/Comanche055/0940.jpg">
 ## Digitized p. 940 of Comanche 55 assembly listing</a></li>
-## <li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208472.pdf#page=9">
+## <li><a href="http://www.ibiblio.org/apollo/Documents/HSI-208472.pdf#page=10">
 ## <i>Guidance System Operations Plan for Manned CM Orbital and Lunar Missions Using Program 
-## Colossus 2E</i>, Section 3, p. ix</a></li>
+## Colossus 2E</i>, Section 3, p. x</a></li>
 ## </ul>
 ## The significance of the digitized pages from Comanche 55 is that &mdash; <i>unlike</i>
 ## the normally more-handy source-code transcriptions &mdash; there are markings which
@@ -195,7 +196,7 @@ TVCINIT3	CAE	PACTOFF		# TRIM VALUES TO TRIM-TRACKERS, OUTPUT
 ## 110402 and at line-sequence number 110417.
 ## <br><br>
 ## This significance of the page from the GSOP document is that it mentions an applicable 
-## Program Change Request, PCR 747, titled "Remove TVC DAP Initial Attitude Errors".  While
+## Program Change Request, PCR 749, titled "TVC DAP initial errors, CSM alone".  While
 ## we don't have the full text of the PCR, the title at least tells us the motivation for
 ## the changes.
 ## <br><br>

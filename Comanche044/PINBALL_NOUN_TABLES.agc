@@ -787,11 +787,9 @@ IDADDTAB	ECADR	TTOGO			# 40	MIN/SEC			M/S
 ## time between COMANCHE 45/2 and COMANCHE 55. The 3 lines 
 ## below are similar to the corresponding lines from the Apollo 9 (COLOSSUS 249) source code
 ## <i>except</i> that the comment maintains that the variable is DPFRAC in Comanche 2 
-## instead of merely FRAC as in Colossus 249. There is no simple way to justify this claim,
-## as it is a <i>conclusion</i> drawn from examining the specific interpretive code that
-## processes STAR variable, which differs between Colossus 249 and Comanche 44.  At any
-## rate, whether or not the comment in the 3 lines below will agree with a contemporary
-## Comanche 44 program listing does not affect the accuracy of the executable code.
+## instead of merely FRAC as in Colossus 249. For justification that the components of 
+## NOUN 88 are truly DPFRAC, rather than reverting to FRAC, refer to 
+## <a href="#DPFRAC88">the annotation concerning NOUN 88's entry in the RUTMXTAB table below</a>.
 		ECADR	STAR			# 88	DPFRAC			DPFRAC
 		ECADR	STAR +2			# 88	DPFRAC			DPFRAC
 		ECADR	STAR +4			# 88	DPFRAC			DPFRAC
@@ -895,6 +893,16 @@ RUTMXTAB	OCT	16351			# 40	M/S, DP3, DP3
 		OCT	16347			# 85	DP3, DP3, DP3
 		OCT	24512			# 86	DP4, DP4, DP4
 		OCT	00302			# 87	CDU, YOPT
+## <a name="DPFRAC88"></a>
+## <b>Reconstruction:</b> The following line doesn't differ between Comanche 44 and
+## Comanche 51, but it provides the evidence that NOUN 88 is DPFRAC in Comanche 44
+## as required by <a href="#NOUN88">an earlier annotation about NOUN 88</a>.  The
+## evidence is not in the comment "DPFRAC FOR EACH", but rather in the constant
+## value 32655, since the RUTMXTAB table's purpose is to define the formats for
+## each display component of each mixed noun.  The value is a packed set of 
+## three 5-bit indexes, one for each component, with the index indicating the
+## component's format.  32655 unpacks as the (binary) indices 01101, 01101, 01101.
+## 01101 is the formatting code for "DP STRAIGHT FRACTIONAL".
 		OCT	32655			# 88	DPFRAC FOR EACH
 		OCT	10347			# 89	DP3, DP3, DP1
 		OCT	24344			# 90	DP1, DP3, DP4

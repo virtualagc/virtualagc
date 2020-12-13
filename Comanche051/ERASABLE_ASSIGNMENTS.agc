@@ -16,6 +16,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-30 MAS  Created from Comanche 55. Removed new pad-
 ##                              loaded erasables for the R-2 potential model.
+##		2020-12-12 RSB	Expanded the justifying annotations for the steps
+##				of Mike's reconstruction and made them consistent
+##				in style to similar annotations in Comanche 44.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2236,11 +2239,19 @@ EK2VAL		ERASE	+1		# I(2)PL  B+23 NEWTON-SEC/E+2
 EK3VAL		ERASE			# I(1)PL  B+09 NEWTONS/E+4
 FANG		ERASE			# I(1)PL SPS THRUST USED BY IMPULSIVE BURN
 
-## Between Comanche 51 and 55, two new padloaded erasables (E3J22R2M and E32C31RM)
-## were added here, and END-E3 changed to point to the latter.
+## <b>Reconstruction:</b> Between Comanche 51 and 55, two new padloaded erasables
+## (E3J22R2M and E32C31RM) were added here.
+## Those have now been removed.  For justification, refer to
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=9">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. 91</a>.  Note that
+## some of the variables above (EK2VAL and EK3VAL) shown as changed in the 
+## <i>Programmed Guidance Equations</i> were added between Comanche 45/2
+## to 51, and therefore don't represent changes from Comanche 51 to 55.
 
 # **** CONICSEX (PLANETARY INERT. ORIEN.) ****
 TIMSUBO		EQUALS	TEPHEM		# CSEC B-42 (TRIPLE PREC)
+## <b>Reconstruction:</b> The following line is part of the change described in the 
+## preceding annotation above, for obvious reasons: In Comanche 55 it reads "END-E3 EQUALS E32C31RM".
 END-E3		EQUALS	FANG		# LAST USED E3 ADDRESS
 
 ## Page 88
