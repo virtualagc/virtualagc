@@ -16,6 +16,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-30 MAS  Created from Comanche 55, and removed R-2
 ##                              lunar potential model code.
+##		2020-12-13 RSB	Added justifying annotations for Mike's
+##				reconstruction steps.
 
 ## Page 1508
 		BANK	22
@@ -304,7 +306,15 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## Page 1516
-## Between Comanche 51 and 55, two new functions, QUALITY1 and QUALITY2, were inserted
-## here. They are part of the R-2 lunar potential model. They belong in ORBITAL INTEGRATION,
-## but were placed here to simplify making the changes such that only a single module (B2)
-## had to be remanufactured.
+## <a name="R2MODEL2"></a>
+## <b>Reconstruction:</b> As described in some detail in 
+## <a href="ORBITAL_INTEGRATION.agc.html#R2MODEL">an annotation in the ORBITAL INTEGRATION
+## log section</a>, the principal difference between Comanche 51 and Comanche 55 is that
+## the latter contains "R-2 Lunar Potential Model" code identical to that from the
+## ORBITAL INTEGRATION log section of Luminary 69/2 (Apollo 10 LM final software release).
+## However, two of the functions of that code, QUALITY1 and QUALITY2, were instead placed
+## at the end of Comanche 55's RTB OP CODES log section.  Presumably this was done for 
+## practical reasons, in that it allowed remanufacturing a single core-rope module (B2)
+## in upgrading Comanche 51 to 55.  Regardless of the intention, Comanche 51 has no 
+## R-2 model, so that code has been removed.
+

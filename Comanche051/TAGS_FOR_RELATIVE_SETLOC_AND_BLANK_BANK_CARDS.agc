@@ -17,6 +17,8 @@
 ## Mod history: 2019-07-30 MAS  Created from Comanche 55.
 ##              2020-12-08 MAS  Removed MODCHG2 and MODCHG3 tags (which
 ##                              were added between Comanche 51 and 55).
+##		2020-12-13 RSB	Added justifying annotations for Mike's
+##				reconstruction steps.
 
 ## Page 27
 FIXED		MEMORY	120000 - 167777
@@ -121,6 +123,11 @@ INTINIT1	EQUALS
 CONICS		EQUALS
 CSIPROG2	EQUALS
 CSI/CDH2	EQUALS
+## <b>Reconstruction:</b> A line in Comanche 55 reading "MODCHG2 EQUALS"
+## has been removed at this point.  MODCHG2 was used in Comanche 55 only
+## in a <a href="RTB_OP_CODES.agc.html#R2MODEL2">block of code removed
+## from Comanche 51 at the end of the RTB OP CODES log section</a>, and
+## is thus not used at all in Comanche 51.
 		BNKSUM	12
 		
 		BANK	13
@@ -131,6 +138,11 @@ SR52/1		EQUALS
 ORBITAL2	EQUALS
 CDHTAGS		EQUALS
 E/PROG1		EQUALS
+## <b>Reconstruction:</b> A line in Comanche 55 reading "MODCHG3 EQUALS"
+## has been removed at this point.  MODCHG3 was used in Comanche 55 only
+## in a <a href="RTB_OP_CODES.agc.html#R2MODEL2">block of code removed
+## from Comanche 51 at the end of the RTB OP CODES log section</a>, and
+## is thus not used at all in Comanche 51.
 		BNKSUM	13
 
 # SPACER
