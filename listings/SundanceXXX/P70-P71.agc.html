@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -97,479 +96,479 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-032768,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-032769,000003:                                                                                                  <span class="co">## Filename:    P70-P71.agc</span>
-032770,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
-032771,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
-032772,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
-032773,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
-032774,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
-032775,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
-032776,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-032777,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-032778,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-032779,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
-032780,000014: 
-032781,000015:                                                                                                  <span class="co">## Sundance 292</span>
-032782,000016: 
-032783,000017: 21,2102                                           <span class="ps">BANK    </span> 21                                    
-032784,000018: 32,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523131">R11</a>                                   
-032785,000019: 32,2000                                           <span class="ps">BANK    </span>                                       
-032786,000020: 
-032787,000021: 32,3137  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-032788,000022: 32,3137                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523131">R11</a>                                
-032789,000023: 
-<a name="524F53454E"></a>032790,000024: 32,3137           05271        <span class="sm">ROSEN   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
-032791,000025: 32,3140           00062                           <span class="ps">DEC     </span> 50         B-14                       
-032792,000026: 
-032793,000027: 32,3141           40102                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              
-032794,000028: 32,3142           75022                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B494C4C52424954">KILLRBIT</a>                              
-032795,000029: 32,3143           00006                           <span class="op">EXTEND  </span>                                       
-032796,000030: 32,3144           15321                           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-032797,000031: 
-<a name="5037314E4F573F"></a>032798,000032: 32,3145           41012        <span class="sm">P71NOW? </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                <span class="co">#  YES.  ARE WE IN P71 NOW?</span>
-032799,000033: 32,3146           63160                           <span class="op">AD      </span> <a href="#4D4F44453731">MODE71</a>                                
-032800,000034: 32,3147           00006                           <span class="op">EXTEND  </span>                                       
-032801,000035: 32,3150           15321                           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  YES.  EXIT.</span>
-032802,000036: 
-032803,000037: 32,3151           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NO.  IS AN ABORT STAGE COMMANDED?</span>
-032804,000038: 32,3152           00030                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
-032805,000039: 32,3153           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-032806,000040: 32,3154           75023                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  
-032807,000041: 32,3155           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-032808,000042: 32,3156           13166                           <span class="op">TCF     </span> <a href="#5037304E4F573F">P70NOW?</a>                               <span class="co">#  NO.</span>
-032809,000043: 
-032810,000044: 32,3157           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
-<a name="4D4F44453731"></a>032811,000045: 32,3160           00107        <span class="sm">MODE71  </span>           <span class="ps">DEC     </span> 71         B-14                       
-032812,000046: 
-<a name="5354525441425254"></a>032813,000047: 32,3161           37665        <span class="sm">STRTABRT</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3235">PRIO25</a>                                
-032814,000048: 32,3162           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-032815,000049: 32,3163  E7,1430                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5748494348">WHICH</a>                                 
-032816,000050: 32,3163           03204 64067                     <span class="ps">2CADR   </span> <a href="#41424F52544A4F42">ABORTJOB</a>                              
-032817,000051: 
-032818,000052: 32,3165           13137                           <span class="op">TCF     </span> <a href="#524F53454E">ROSEN</a>                                 
-032819,000053: 
-<a name="5037304E4F573F"></a>032820,000054: 32,3166           41012        <span class="sm">P70NOW? </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                <span class="co">#  NO. ARE WE IN P70 NOW?</span>
-032821,000055: 32,3167           63177                           <span class="op">AD      </span> <a href="#4D4F44453730">MODE70</a>                                
-032822,000056: 32,3170           00006                           <span class="op">EXTEND  </span>                                       
-032823,000057: 32,3171           13137                           <span class="op">BZF     </span> <a href="#524F53454E">ROSEN</a>                                 <span class="co">#  YES.  CHECK AGAIN IN 50MS.</span>
-032824,000058: 
-032825,000059: 32,3172           40001                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  NO.  IS AN ABORT COMMANDED?</span>
-032826,000060: 32,3173           75026                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-032827,000061: 32,3174           00006                           <span class="op">EXTEND  </span>                                       
-032828,000062: 32,3175           13137                           <span class="op">BZF     </span> <a href="#524F53454E">ROSEN</a>                                 <span class="co">#  NO.</span>
-032829,000063: 
-032830,000064: 32,3176           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  YES.</span>
-<a name="4D4F44453730"></a>032831,000065: 32,3177           00106        <span class="sm">MODE70  </span>           <span class="ps">DEC     </span> 70         B-14                       
-032832,000066: 32,3200           13161                           <span class="op">TCF     </span> <a href="#5354525441425254">STRTABRT</a>                              
-032833,000067: 
-032834,000068: 32,3201                                           <span class="ps">BANK    </span> 32                                    
-032835,000069: 32,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#41424F525453">ABORTS</a>                                
-032836,000070: 32,2000                                           <span class="ps">BANK    </span>                                       
-032837,000071: 
-032838,000072: 32,3201                                           <span class="ps">COUNT*  </span> $$/<a href="#503730">P70</a>                                
-032839,000073: 
-032840,000074: 
-<a name="503730"></a>032841,000075: 32,3201           03576        <span class="sm">P70     </span>           <span class="op">TC      </span> <a href="#4C4547414C3F">LEGAL?</a>                                
-032842,000076: 32,3202           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
-032843,000077: 32,3203           00106                           <span class="ps">DEC     </span> 70         B-14                       
-032844,000078: 
-<a name="41424F52544A4F42"></a>032845,000079: 32,3204           00006        <span class="sm">ABORTJOB</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  LOAD TEVENT FOR THE DOWNLINK.</span>
-032846,000080: 32,3205           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-032847,000081: 32,3206           53355                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544556454E54">TEVENT</a>                                
-032848,000082: 
-032849,000083: 32,3207           05373                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
-032850,000084: 32,3210           00001                           <span class="ps">OCT     </span> 00001                                 
-032851,000085: 32,3211           00002                           <span class="ps">OCT     </span> 00002                                 
-032852,000086: 
-032853,000087: 32,3212           05373                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
-032854,000088: 32,3213           00003                           <span class="ps">OCT     </span> 00003                                 
-032855,000089: 32,3214           00006                           <span class="ps">OCT     </span> 00006                                 
-032856,000090: 
-032857,000091: 32,3215           05413                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-032858,000092: 32,3216           07024                           <span class="ps">OCT     </span> 07024                                 
-032859,000093: 32,3217           25000                           <span class="ps">OCT     </span> 25000                                 
-032860,000094: 32,3220  E7,1430                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5748494348">WHICH</a>                                 
-032861,000095: 32,3220           03225 64067                     <span class="ps">2CADR   </span> <a href="#474F41424F5254">GOABORT</a>                               
-032862,000096: 
-032863,000097: 32,3222           00004                           <span class="op">INHINT  </span>                                       
-032864,000098: 32,3223           04674                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-032865,000099: 32,3224           12570                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F4732">GOPROG2</a>                               
-032866,000100: 
-<a name="474F41424F5254"></a>032867,000101: 32,3225           05413        <span class="sm">GOABORT </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-032868,000102: 32,3226           04024                           <span class="ps">OCT     </span> 04024                                 
-032869,000103: 
-032870,000104: 32,3227           36216                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  SET UP R60 FOR A 10 DEG/SEC MANUV. RATE.</span>
-032871,000105: 32,3230           55331                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
-032872,000106: 
-032873,000107: 32,3231           35010                           <span class="op">CAF     </span> <a href="SERVICER.agc.html#4C524259424954">LRBYBIT</a>                               
-032874,000108: 32,3232           55263                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5253544154">LRSTAT</a>                                
-032875,000109: 
-032876,000110: 32,3233           00006                           <span class="op">EXTEND  </span>                                       
-032877,000111: 32,3234           33671                           <span class="op">DCA     </span> <a href="#5356455849544144">SVEXITAD</a>                              
-032878,000112: 32,3235           53253                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4156454745584954">AVEGEXIT</a>                              
-032879,000113: 
-032880,000114: 32,3236           36221                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  INITIALIZE FOR POWERED DOWNLIST.</span>
-032881,000115: 32,3237           54332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
-032882,000116: 32,3240           55330                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414753574F5244">AGSWORD</a>                               
-032883,000117: 
-032884,000118: 32,3241           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
-032885,000119: 32,3242           00155                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5357414E44495350">SWANDISP</a>                              
-032886,000120: 32,3243           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
-032887,000121: 32,3244           00211                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C503730">FLP70</a>                                 
-032888,000122: 32,3245           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
-032889,000123: 32,3246           17140                           <span class="ps">CADR    </span> <a href="SERVICER.agc.html#584F56494E464C47">XOVINFLG</a>                              
-032890,000124: 
-032891,000125: 32,3247           05365                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
-032892,000126: 32,3250           00106                           <span class="ps">DEC     </span> 70         B-14                       
-032893,000127: 32,3251           13510                           <span class="op">TCF     </span> <a href="#503731524554">P71RET</a>                                
-032894,000128: 
-<a name="503730494E4954"></a>032895,000129: 32,3252           33662        <span class="sm">P70INIT </span>           <span class="op">CAF     </span> <a href="#503730414452">P70ADR</a>                                
-032896,000130: 32,3253           55430                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5748494348">WHICH</a>                                 
-032897,000131: 
-032898,000132: 32,3254           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032899,000133: 32,3255           77624                           <span class="in">CALL    </span>                                       
-032900,000134: 32,3256           65611                                    <a href="#54474F434F4D50">TGOCOMP</a>                               
-032901,000135: 32,3257           77745                           <span class="in">DLOAD   </span>                                       
-032902,000136: 32,3260           01244                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
-032903,000137: 32,3261           56206                           <span class="in">PUSH    </span> <span class="in">DDV       </span>                            
-032904,000138: 32,3262           25635                                    <a href="#4D444F544450532A">MDOTDPS*</a>                              
-032905,000139: 32,3263           17642                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  
-032906,000140: 32,3264           70471                           <span class="in">DDV     </span> <span class="in">SR1       </span>                            
-032907,000141: 32,3265           25641                                    <a href="#4B28312F445629">K(1/DV)</a>                               
-032908,000142: 32,3266           03644                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445631">1/DV1</a>                                 
-032909,000143: 32,3267           03646                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445632">1/DV2</a>                                 
-032910,000144: 32,3270           03650                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445633">1/DV3</a>                                 
-032911,000145: 32,3271           77665                           <span class="in">BDDV    </span>                                       
-032912,000146: 32,3272           25645                                    <a href="#4B28415429">K(AT)</a>                                 
-032913,000147: 32,3273           17634                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    
-032914,000148: 32,3274           25655                                    <a href="#445444454341592A">DTDECAY*</a>                              
-032915,000149: 32,3275           17640                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F">TTO</a>                                   
-032916,000150: 32,3276           25651                                    <a href="#445053564558">DPSVEX</a>                                
-032917,000151: 32,3277           03636                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    <span class="co">#  INITIALIZE DPS EXHAUST VELOCITY</span>
-032918,000152: 32,3300           45014                           <span class="in">SET     </span> <span class="in">CALL      </span>                            
-032919,000153: 32,3301           04467                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4150">FLAP</a>                                  
-032920,000154: 32,3302           60046                                    <a href="P12.agc.html#434F4D4D494E4954">COMMINIT</a>                              
-032921,000155: 
-<a name="494E4A54415247"></a>032922,000156: 32,3303           45345        <span class="sm">INJTARG </span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            
-032923,000157: 32,3304           03474                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-032924,000158: 32,3305           25627                                    <a href="#353053454353">50SECS</a>                                
-032925,000159: 32,3306           77444                           <span class="in">BPL     </span> <span class="in">EXIT      </span>                            
-032926,000160: 32,3307           65376                                    <a href="#55505448524F54">UPTHROT</a>                               
-032927,000161: 
-032928,000162: 32,3310           00004                           <span class="op">INHINT  </span>                                       
-032929,000163: 32,3311           04737                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-032930,000164: 32,3312           75546                           <span class="ps">CADR    </span> <a href="P40-P47.agc.html#454E47494E4F4631">ENGINOF1</a>                              
-032931,000165: 32,3313           00003                           <span class="op">RELINT  </span>                                       
-032932,000166: 
-032933,000167: 32,3314           03413                           <span class="op">TC      </span> <a href="#5A4F4E455A45524F">ZONEZERO</a>                              
-032934,000168: 
-<a name="4142525447554944"></a>032935,000169: 32,3315           06014        <span class="sm">ABRTGUID</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032936,000170: 32,3316           45014                           <span class="in">SET     </span> <span class="in">CALL      </span>                            
-032937,000171: 32,3317           04470                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4943">FLIC</a>                                  
-032938,000172: 32,3320           60266                                    <a href="ASCENT_GUIDANCE.agc.html#415343454E54">ASCENT</a>                                
-032939,000173: 
-<a name="41424F525449474E"></a>032940,000174: 32,3321           77775        <span class="sm">ABORTIGN</span>           <span class="in">VLOAD   </span>                                       
-032941,000175: 32,3322           03250                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E46432F32">UNFC/2</a>                                
-032942,000176: 32,3323           25256                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F494E5456534D">POINTVSM</a>                              
-032943,000177: 32,3324           06231                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495458">UNITX</a>                                 
-032944,000178: 32,3325           01250                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534341584953">SCAXIS</a>                                
-032945,000179: 32,3326           77414                           <span class="in">CLEAR   </span> <span class="in">EXIT      </span>                            
-032946,000180: 32,3327           02663                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F5448524F544C">NOTHROTL</a>                              
-032947,000181: 
-032948,000182: 32,3330           05413                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-032949,000183: 32,3331           04024                           <span class="ps">OCT     </span> 04024                                 
-032950,000184: 
-032951,000185: 32,3332           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
-032952,000186: 32,3333           00124                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#3341584953464C47">3AXISFLG</a>                              
-032953,000187: 
-032954,000188: 32,3334           00004                           <span class="op">INHINT  </span>                                       
-032955,000189: 32,3335           04737                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-032956,000190: 32,3336           40221                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#5345544D494E4442">SETMINDB</a>                              
-032957,000191: 
-032958,000192: 32,3337           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
-032959,000193: 32,3340           00217                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4943">FLIC</a>                                  
-032960,000194: 
-032961,000195: 32,3341           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-032962,000196: 32,3342           54103                           <span class="ps">CADR    </span> <a href="R60,R62.agc.html#5236304C454D">R60LEM</a>                                
-032963,000197: 
-032964,000198: 32,3343           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-032965,000199: 32,3344           75064                           <span class="ps">CADR    </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5034304155544F">P40AUTO</a>                               
-032966,000200: 
-032967,000201: 32,3345           35030                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-032968,000202: 32,3346           55466                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456544F54414C">DVTOTAL</a>                               
-032969,000203: 32,3347           55467                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456544F54414C">DVTOTAL</a>    +1                         
-032970,000204: 
-032971,000205: 32,3350           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-032972,000206: 32,3351           77624                           <span class="in">CALL    </span>                                       
-032973,000207: 32,3352           61213                                    <a href="FINDCDUW_-_GUIDAP_INTERFACE.agc.html#494E495443445557">INITCDUW</a>                              
-032974,000208: 32,3353           77776                           <span class="in">EXIT    </span>                                       
-032975,000209: 
-032976,000210: 32,3354           33621                           <span class="op">CAF     </span> <a href="#362E35534543">6.5SEC</a>                                
-032977,000211: 32,3355           00004                           <span class="op">INHINT  </span>                                       
-032978,000212: 32,3356           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-032979,000213: 32,3357  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-032980,000214: 32,3357           02376 74067                     <span class="ps">2CADR   </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#554C4C475441534B">ULLGTASK</a>                              
-032981,000215: 
-032982,000216: 32,3361           33620                           <span class="op">CAF     </span> <a href="#352E30534543">5.0SEC</a>                                
-032983,000217: 32,3362           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-032984,000218: 32,3363  E7,1426                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F474F">TTOGO</a>                                 
-032985,000219: 32,3363           02402 74067                     <span class="ps">2CADR   </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5449472D35">TIG-5</a>                                 
-032986,000220: 
-032987,000221: 32,3365           00006                           <span class="op">EXTEND  </span>                                       
-032988,000222: 32,3366           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-032989,000223: 32,3367           53425                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-032990,000224: 32,3370           00006                           <span class="op">EXTEND  </span>                                       
-032991,000225: 32,3371           33623                           <span class="op">DCA     </span> <a href="#313053454353">10SECS</a>                                
-032992,000226: 32,3372           21425                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-032993,000227: 32,3373           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-032994,000228: 32,3374           74655                           <span class="ps">CADR    </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5354434C4F4B33">STCLOK3</a>                               
-032995,000229: 
-032996,000230: 32,3375           13407                           <span class="op">TCF     </span> <a href="#55505448524F5431">UPTHROT1</a>                              
-032997,000231: 
-<a name="55505448524F54"></a>032998,000232: 32,3376           77414        <span class="sm">UPTHROT </span>           <span class="in">SET     </span> <span class="in">EXIT      </span>                            
-032999,000233: 32,3377           04461                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C5652">FLVR</a>                                  
-033000,000234: 
-033001,000235: 32,3400           00004                           <span class="op">INHINT  </span>                                       
-033002,000236: 32,3401           35026                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-033003,000237: 32,3402           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-033004,000238: 32,3403  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-033005,000239: 32,3403           02566 74067                     <span class="ps">2CADR   </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5A4F4F4D">ZOOM</a>                                  
-033006,000240: 
-033007,000241: 32,3405           04655                 -2        <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  VERIFY THAT THE PANEL SWITCHES </span>
-033008,000242: 32,3406           75064                           <span class="ps">CADR    </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5034304155544F">P40AUTO</a>                               <span class="co">#  ARE PROPERLY SET.</span>
-033009,000243: 
-<a name="55505448524F5431"></a>033010,000244: 32,3407           00006        <span class="sm">UPTHROT1</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  SET SERVICER TO CALL ASCENT GUIDANCE.</span>
-033011,000245: 32,3410           33667                           <span class="op">DCA     </span> <a href="#41544D41474144">ATMAGAD</a>                               
-033012,000246: 32,3411           53253                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               
-033013,000247: 
-033014,000248: 32,3412           15225                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-033015,000249: 
-033016,000250: 
-<a name="5A4F4E455A45524F"></a>033017,000251: 32,3413           06014        <span class="sm">ZONEZERO</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-033018,000252: 32,3414           77731                           <span class="in">SSP     </span>                                       
-033019,000253: 32,3415           01263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5554524F555445">OUTROUTE</a>                              
-033020,000254: 32,3416           65424                           <span class="ps">CADR    </span> <a href="#5A4F4E4530524554">ZONE0RET</a>                              
-033021,000255: 32,3417           77414                           <span class="in">CLEAR   </span> <span class="in">EXIT      </span>                            
-033022,000256: 32,3420           03672                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41564547464C4147">AVEGFLAG</a>                              
-033023,000257: 
-033024,000258: 32,3421           05413                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-033025,000259: 32,3422           00004                           <span class="ps">OCT     </span> 00004                                 
-033026,000260: 
-033027,000261: 32,3423           15225                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-033028,000262: 
-<a name="5A4F4E4530524554"></a>033029,000263: 32,3424           05413        <span class="sm">ZONE0RET</span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-033030,000264: 32,3425           05024                           <span class="ps">OCT     </span> 05024                                 
-033031,000265: 32,3426           20000                           <span class="ps">OCT     </span> 20000                                 
-033032,000266: 
-033033,000267: 32,3427           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-033034,000268: 32,3430           43234                           <span class="in">RTB     </span> <span class="in">DAD       </span>                            
-033035,000269: 32,3431           21454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
-033036,000270: 32,3432           25625                                    <a href="#3830534543">80SEC</a>                                 
-033037,000271: 32,3433           03546                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D4531">PIPTIME1</a>                              <span class="co">#  STORE TEMPORARILY IN PIPTIME1.</span>
-033038,000272: 32,3434           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 
-033039,000273: 32,3435           27030                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D50524543">LEMPREC</a>                               
-033040,000274: 32,3436           77775                           <span class="in">VLOAD   </span>                                       
-033041,000275: 32,3437           00007                                    <a href="ORBITAL_INTEGRATION.agc.html#56415454">VATT</a>                                  
-033042,000276: 32,3440           03540                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E31">VN1</a>                                   <span class="co">#  STORE VTIG TEMPORARILY IN VN1.</span>
-033043,000277: 32,3441           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
-033044,000278: 32,3442           01736                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-033045,000279: 32,3443           27504                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56">V</a>                                     
-033046,000280: 32,3444           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
-033047,000281: 32,3445           03532                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E31">RN1</a>                                   <span class="co">#  STORE RTIG TEMPORARILY IN RN1.</span>
-033048,000282: 32,3446           52521                           <span class="in">MXV     </span> <span class="in">VSL6      </span>                            
-033049,000283: 32,3447           01736                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-033050,000284: 32,3450           37476                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52">R</a>                                     
-033051,000285: 32,3451           67200                                    <a href="SERVICER.agc.html#4D554E47524156">MUNGRAV</a>                               
-033052,000286: 32,3452           45014                           <span class="in">SET     </span> <span class="in">CALL      </span>                            
-033053,000287: 32,3453           04471                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C5A4F4E4530">FLZONE0</a>                               
-033054,000288: 32,3454           60266                                    <a href="ASCENT_GUIDANCE.agc.html#415343454E54">ASCENT</a>                                
-<a name="5052454252455431"></a>033055,000289: 32,3455           77776        <span class="sm">PREBRET1</span>           <span class="in">EXIT    </span>                                       
-033056,000290: 32,3456           05413                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-033057,000291: 32,3457           04024                           <span class="ps">OCT     </span> 04024                                 
-033058,000292: 32,3460           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-033059,000293: 32,3461           76505                           <span class="in">VXM     </span> <span class="in">VSL1      </span>                            
-033060,000294: 32,3462           01736                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-033061,000295: 32,3463           03643                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               
-033062,000296: 32,3464           77646                           <span class="in">ABVAL   </span>                                       
-033063,000297: 32,3465           27651                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534142">DELVSAB</a>                               
-033064,000298: 32,3466           03532                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E31">RN1</a>                                   
-033065,000299: 32,3467           27627                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544947">RTIG</a>                                  
-033066,000300: 32,3470           03540                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E31">VN1</a>                                   
-033067,000301: 32,3471           17635                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56544947">VTIG</a>                                  
-033068,000302: 32,3472           03546                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D4531">PIPTIME1</a>                              
-033069,000303: 32,3473           03425                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-033070,000304: 32,3474           43014                           <span class="in">SET     </span> <span class="in">CLEAR     </span>                            
-033071,000305: 32,3475           01067                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5844454C56464C47">XDELVFLG</a>                              
-033072,000306: 32,3476           03267                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D554E464C4147">MUNFLAG</a>                               
-033073,000307: 32,3477           77776                           <span class="in">EXIT    </span>                                       
-033074,000308: 
-033075,000309: 32,3500           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
-033076,000310: 32,3501           00050                           <span class="ps">DEC     </span> 40         B-14                       
-033077,000311: 32,3502           04674                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-033078,000312: 32,3503           75133                           <span class="ps">CADR    </span> <a href="P40-P47.agc.html#5034304C4D">P40LM</a>                                 
-033079,000313: 
-<a name="503731"></a>033080,000314: 32,3504           03576        <span class="sm">P71     </span>           <span class="op">TC      </span> <a href="#4C4547414C3F">LEGAL?</a>                                
-033081,000315: 32,3505           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
-033082,000316: 32,3506           00107                           <span class="ps">DEC     </span> 71         B-14                       
-033083,000317: 32,3507           13204                           <span class="op">TCF     </span> <a href="#41424F52544A4F42">ABORTJOB</a>                              
-033084,000318: 
-<a name="503731524554"></a>033085,000319: 32,3510           33663        <span class="sm">P71RET  </span>           <span class="op">CAF     </span> <a href="#503731414452">P71ADR</a>                                
-033086,000320: 32,3511           55430                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5748494348">WHICH</a>                                 
-033087,000321: 
-033088,000322: 32,3512           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
-033089,000323: 32,3513           00144                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B494C4C524F5345">KILLROSE</a>                              
-033090,000324: 
-033091,000325: 32,3514           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-033092,000326: 32,3515           77624                           <span class="in">CALL    </span>                                       
-033093,000327: 32,3516           60031                                    <a href="P12.agc.html#503132494E4954">P12INIT</a>                               
-033094,000328: 32,3517           77776                           <span class="in">EXIT    </span>                                       
-033095,000329: 
-033096,000330: 32,3520           00006                           <span class="op">EXTEND  </span>                                       
-033097,000331: 32,3521           00030                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
-033098,000332: 32,3522           40000                           <span class="op">COM     </span>                                       
-033099,000333: 32,3523           75023                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  
-033100,000334: 32,3524           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-033101,000335: 32,3525           13561                           <span class="op">TCF     </span> <a href="#4142525453544147">ABRTSTAG</a>                              
-033102,000336: 
-033103,000337: 32,3526           00004                           <span class="op">INHINT  </span>                                       
-033104,000338: 32,3527           04737                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
-033105,000339: 32,3530           75546                           <span class="ps">CADR    </span> <a href="P40-P47.agc.html#454E47494E4F4631">ENGINOF1</a>                              
-033106,000340: 32,3531           00003                           <span class="op">RELINT  </span>                                       
-033107,000341: 
-033108,000342: 32,3532           35025                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-033109,000343: 32,3533           00006                           <span class="op">EXTEND  </span>                                       
-033110,000344: 32,3534           02030                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
-033111,000345: 32,3535           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-033112,000346: 32,3536           13545                           <span class="op">TCF     </span> <a href="#535441474544">STAGED</a>                                
-033113,000347: 
-033114,000348: 32,3537           33664                           <span class="op">CAF     </span> <a href="#4F4354323036">OCT206</a>                                
-033115,000349: 32,3540           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-033116,000350: 32,3541           20532                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5045524631">GOPERF1</a>                               
-033117,000351: 32,3542           14106                           <span class="op">TCF     </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              
-033118,000352: 32,3543           13545                           <span class="op">TCF     </span> <a href="#535441474544">STAGED</a>                                
-033119,000353: 32,3544           13537                           <span class="op">TCF     </span> -5                                    
-033120,000354: 
-<a name="535441474544"></a>033121,000355: 32,3545           33665        <span class="sm">STAGED  </span>           <span class="op">CAF     </span> <a href="#4F4354323037">OCT207</a>                                
-033122,000356: 32,3546           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-033123,000357: 32,3547           20532                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5045524631">GOPERF1</a>                               
-033124,000358: 32,3550           14106                           <span class="op">TCF     </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              
-033125,000359: 32,3551           13553                           <span class="op">TCF     </span> +2                                    
-033126,000360: 32,3552           13315                           <span class="op">TCF     </span> <a href="#4142525447554944">ABRTGUID</a>                              
-033127,000361: 
-033128,000362: 32,3553           00004                           <span class="op">INHINT  </span>                                       
-033129,000363: 32,3554           35026                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-033130,000364: 32,3555           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-033131,000365: 32,3556  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-033132,000366: 32,3556           02446 74067                     <span class="ps">2CADR   </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#49474E4954494F4E">IGNITION</a>                              
-033133,000367: 
-033134,000368: 32,3560           13407                           <span class="op">TCF     </span> <a href="#55505448524F5431">UPTHROT1</a>                              
-033135,000369: 
-<a name="4142525453544147"></a>033136,000370: 32,3561           06014        <span class="sm">ABRTSTAG</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-033137,000371: 32,3562           77614                           <span class="in">BOFF    </span>                                       
-033138,000372: 32,3563           04747                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4150">FLAP</a>                                  
-033139,000373: 32,3564           65572                                    <a href="#4E455754494D45">NEWTIME</a>                               
-033140,000374: 32,3565           72545                           <span class="in">DLOAD   </span> <span class="in">SL1       </span>                            
-033141,000375: 32,3566           03474                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-033142,000376: 32,3567           03474                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-033143,000377: 32,3570           77634                           <span class="in">RTB     </span>                                       
-033144,000378: 32,3571           65405                                    <a href="#55505448524F5431">UPTHROT1</a>   -2                         
-033145,000379: 
-<a name="4E455754494D45"></a>033146,000380: 32,3572           77624        <span class="sm">NEWTIME </span>           <span class="in">CALL    </span>                                       
-033147,000381: 32,3573           65611                                    <a href="#54474F434F4D50">TGOCOMP</a>                               <span class="co">#  IF FLAP=0, TGO=T-TIG</span>
-033148,000382: 32,3574           77650                           <span class="in">GOTO    </span>                                       
-033149,000383: 32,3575           65303                                    <a href="#494E4A54415247">INJTARG</a>                               
-033150,000384: 
-033151,000385:                                                                                                  <span class="co">#  ************************************************************************</span>
-033152,000386: 
-<a name="4C4547414C3F"></a>033153,000387: 32,3576           40105        <span class="sm">LEGAL?  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524439">FLAGWRD9</a>                              <span class="co">#  ARE THE ABORTS ENABLED?</span>
-033154,000388: 32,3577           75016                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C45544142424954">LETABBIT</a>                              
-033155,000389: 32,3600           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-033156,000390: 32,3601           13607                           <span class="op">TCF     </span> <a href="#41424F5254414C4D">ABORTALM</a>                              
-033157,000391: 
-033158,000392: 32,3602           40103                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  IS SERVICER ON THE AIR?</span>
-033159,000393: 32,3603           75022                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4156454746424954">AVEGFBIT</a>                              
-033160,000394: 32,3604           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-033161,000395: 32,3605           13607                           <span class="op">TCF     </span> <a href="#41424F5254414C4D">ABORTALM</a>                              
-033162,000396: 32,3606           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  YES. ALL IS WELL.</span>
-033163,000397: 
-<a name="41424F5254414C4D"></a>033164,000398: 32,3607           04674        <span class="sm">ABORTALM</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
-033165,000399: 32,3610           75714                           <span class="ps">CADR    </span> <a href="P40-P47.agc.html#503430414C4D">P40ALM</a>                                
-033166,000400: 
-033167,000401:                                                                                                  <span class="co">#  ************************************************************************</span>
-033168,000402: 
-<a name="54474F434F4D50"></a>033169,000403: 32,3611           45234        <span class="sm">TGOCOMP </span>           <span class="in">RTB     </span> <span class="in">DSU       </span>                            
-033170,000404: 32,3612           21454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
-033171,000405: 32,3613           03425                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-033172,000406: 32,3614           77661                           <span class="in">SL      </span>                                       
-033173,000407: 32,3615           20214                                    11D                                   
-033174,000408: 32,3616           03474                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-033175,000409: 32,3617           77616                           <span class="in">RVQ     </span>                                       
-033176,000410: 
-033177,000411:                                                                                                  <span class="co">#  ************************************************************************</span>
-033178,000412: 
-<a name="352E30534543"></a>033179,000413: 32,3620           00764        <span class="sm">5.0SEC  </span>           <span class="ps">DEC     </span> 500        B-14                       
-033180,000414: 
-<a name="362E35534543"></a>033181,000415: 32,3621           01212        <span class="sm">6.5SEC  </span>           <span class="ps">DEC     </span> 650        B-14                       
-033182,000416: 
-<a name="313053454353"></a>033183,000417: 32,3622           00000 01750  <span class="sm">10SECS  </span>           <span class="ps">2DEC    </span> 1000       B-28                       
-033184,000418: 
-<a name="3830534543"></a>033185,000419: 32,3624           00000 17500  <span class="sm">80SEC   </span>           <span class="ps">2DEC    </span> 8000       B-28                       
-033186,000420: 
-<a name="353053454353"></a>033187,000421: 32,3626           01161 00000  <span class="sm">50SECS  </span>           <span class="ps">2DEC    </span> 5000       B-17                       
-033188,000422: 
-<a name="48494E4A454354"></a>033189,000423: 32,3630           00021 33400  <span class="sm">HINJECT </span>           <span class="ps">2DEC    </span> 18288      B-24                       <span class="co">#  60,000 FEET EXPRESSED IN METERS.</span>
-033190,000424: 
-<a name="41425456494E4A32"></a>033191,000425: 32,3632           04143 27611  <span class="sm">ABTVINJ2</span>           <span class="ps">2DEC    </span> +16.77924013 B-7                        
-033192,000426: 
-<a name="4D444F544450532A"></a>033193,000427: 32,3634           11075 16051  <span class="sm">MDOTDPS*</span>           <span class="ps">2DEC    </span> 0.1425     B1                         
-033194,000428: 
-033195,000429: 
-<a name="28312F44562941"></a>033196,000430: 32,3636           04031 23146  <span class="sm">(1/DV)A </span>           <span class="ps">2DEC    </span> 16.20      B-7                        <span class="co">#  2 SECONDS WORTH OF INITIAL ASCENT</span>
-033197,000431: 
-033198,000432:                                                                                                  <span class="co">#  STAGE ACCELERATION -- INVERTED (M/CS)</span>
-033199,000433:                                                                                                  <span class="co">#  1) PREDICATED ON A LIFTOFF MASS OF</span>
-033200,000434:                                                                                                  <span class="co">#     4869.9 KG (SNA-8-D-027  7/11/68)</span>
-033201,000435:                                                                                                  <span class="co">#  2) PREDICATED ON A CONTRIBUTION TO VEH-</span>
-033202,000436:                                                                                                  <span class="co">#     ICLE ACCELERATION FROM RCS THRUSTERS</span>
-033203,000437:                                                                                                  <span class="co">#     EQUIV. TO 1 JET ON CONTINUOUSLY.</span>
-<a name="4B28312F445629"></a>033204,000438: 32,3640           33025 16051  <span class="sm">K(1/DV) </span>           <span class="ps">2DEC    </span> 432.67     B-9                        <span class="co">#  DPS ENGINE THRUST IN NEWTONS / 100 CS.</span>
-033205,000439: 
-<a name="2841542941"></a>033206,000440: 32,3642           05034 27135  <span class="sm">(AT)A   </span>           <span class="ps">2DEC    </span> 3.086      E-4        B9              <span class="co">#  INITIAL ASC. STG. ACCELERATION ** M/CS.</span>
-033207,000441:                                                                                                  <span class="co">#  ASSUMPTIONS SAME AS FOR (1/DV)A.</span>
-033208,000442: 
-<a name="4B28415429"></a>033209,000443: 32,3644           00507 25605  <span class="sm">K(AT)   </span>           <span class="ps">2DEC    </span> .02                                   <span class="co">#  SCALING CONSTANT</span>
-033210,000444: 
-<a name="28544255502941"></a>033211,000445: 32,3646           27774 34000  <span class="sm">(TBUP)A </span>           <span class="ps">2DEC    </span> 98279      B-17                       <span class="co">#  ESTIMATED BURN-UP TIME OF THE ASCENT STG</span>
-033212,000446:                                                                                                  <span class="co">#  ASSUMPTIONS SAME AS FOR (1/DV)A WITH THE</span>
-033213,000447:                                                                                                  <span class="co">#  ADDITIONAL ASSUMPTION THAT NET MASS-FLOW</span>
-033214,000448:                                                                                                  <span class="co">#  RATE = 5.299 KG/SEC = 5.135 (APS) +</span>
-033215,000449:                                                                                                  <span class="co">#  .164 (1 RCS JET).</span>
-033216,000450: 
-033217,000451:                                                                                                  <span class="co">#  *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST NOT BE CHANGED *******</span>
-033218,000452: 
-<a name="445053564558"></a>033219,000453: 32,3650           07270 10464  <span class="sm">DPSVEX  </span>           <span class="ps">2DEC    </span> 2943.96    E-2        B-7             <span class="co">#  9942 FT/SEC IN M/CS.</span>
-033220,000454: 
-<a name="415053564558"></a>033221,000455: 32,3652           07404 32650  <span class="sm">APSVEX  </span>           <span class="ps">2DEC    </span> 3003.78    E-2        B-7             <span class="co">#  9684 FT/SEC IN M/CS.</span>
-033222,000456: 
-<a name="445444454341592A"></a>033223,000457: 32,3654           00004 22000  <span class="sm">DTDECAY*</span>           <span class="ps">2DEC    </span> 36.5       B-17                       
-033224,000458: 
-<a name="415444454341592A"></a>033225,000459: 32,3656           00001 21146  <span class="sm">ATDECAY*</span>           <span class="ps">2DEC    </span> 12.3       B-17                       
-033226,000460: 
-<a name="2854474F2941"></a>033227,000461: 32,3660           12771 00000  <span class="sm">(TGO)A  </span>           <span class="ps">2DEC    </span> 45000      B-17                       
-033228,000462: 
-<a name="503730414452"></a>033229,000463: 32,3662           02077        <span class="sm">P70ADR  </span>           <span class="ps">REMADR  </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5037305441424C45">P70TABLE</a>                              
-<a name="503731414452"></a>033230,000464: 32,3663           02115        <span class="sm">P71ADR  </span>           <span class="ps">REMADR  </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5037315441424C45">P71TABLE</a>                              
-033231,000465: 
-<a name="4F4354323036"></a>033232,000466: 32,3664           00206        <span class="sm">OCT206  </span>           <span class="ps">OCT     </span> 206                                   
-<a name="4F4354323037"></a>033233,000467: 32,3665           00207        <span class="sm">OCT207  </span>           <span class="ps">OCT     </span> 207                                   
-033234,000468: 
-033235,000469:                                                                                                  <span class="co">#  ************************************************************************</span>
-033236,000470: 32,3666  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-<a name="41544D41474144"></a>033237,000471: 32,3666           02213 60067  <span class="sm">ATMAGAD </span>           <span class="ps">2CADR   </span> <a href="ASCENT_GUIDANCE.agc.html#41544D4147">ATMAG</a>                                 
-033238,000472: 
-033239,000473: 32,3670  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-<a name="5356455849544144"></a>033240,000474: 32,3670           02351 66067  <span class="sm">SVEXITAD</span>           <span class="ps">2CADR   </span> <a href="SERVICER.agc.html#5345525645584954">SERVEXIT</a>                              
+032770,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+032771,000003:                                                                                                  <span class="co">## Filename:    P70-P71.agc</span>
+032772,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
+032773,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
+032774,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
+032775,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
+032776,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
+032777,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
+032778,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+032779,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+032780,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+032781,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
+032782,000014: 
+032783,000015:                                                                                                  <span class="co">## Sundance 292</span>
+032784,000016: 
+032785,000017: 21,2102                                           <span class="ps">BANK    </span> 21                                    
+032786,000018: 32,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523131">R11</a>                                   
+032787,000019: 32,2000                                           <span class="ps">BANK    </span>                                       
+032788,000020: 
+032789,000021: 32,3137  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+032790,000022: 32,3137                                           <span class="ps">COUNT*  </span> $$/<a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#523131">R11</a>                                
+032791,000023: 
+<a name="524F53454E"></a>032792,000024: 32,3137           05271        <span class="sm">ROSEN   </span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#46495844454C4159">FIXDELAY</a>                              
+032793,000025: 32,3140           00062                           <span class="ps">DEC     </span> 50         B-14                       
+032794,000026: 
+032795,000027: 32,3141           40102                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              
+032796,000028: 32,3142           75022                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B494C4C52424954">KILLRBIT</a>                              
+032797,000029: 32,3143           00006                           <span class="op">EXTEND  </span>                                       
+032798,000030: 32,3144           15321                           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+032799,000031: 
+<a name="5037314E4F573F"></a>032800,000032: 32,3145           41012        <span class="sm">P71NOW? </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                <span class="co">#  YES.  ARE WE IN P71 NOW?</span>
+032801,000033: 32,3146           63160                           <span class="op">AD      </span> <a href="#4D4F44453731">MODE71</a>                                
+032802,000034: 32,3147           00006                           <span class="op">EXTEND  </span>                                       
+032803,000035: 32,3150           15321                           <span class="op">BZF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  YES.  EXIT.</span>
+032804,000036: 
+032805,000037: 32,3151           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  NO.  IS AN ABORT STAGE COMMANDED?</span>
+032806,000038: 32,3152           00030                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
+032807,000039: 32,3153           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+032808,000040: 32,3154           75023                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  
+032809,000041: 32,3155           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+032810,000042: 32,3156           13166                           <span class="op">TCF     </span> <a href="#5037304E4F573F">P70NOW?</a>                               <span class="co">#  NO.</span>
+032811,000043: 
+032812,000044: 32,3157           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
+<a name="4D4F44453731"></a>032813,000045: 32,3160           00107        <span class="sm">MODE71  </span>           <span class="ps">DEC     </span> 71         B-14                       
+032814,000046: 
+<a name="5354525441425254"></a>032815,000047: 32,3161           37665        <span class="sm">STRTABRT</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3235">PRIO25</a>                                
+032816,000048: 32,3162           05155                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+032817,000049: 32,3163  E7,1430                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5748494348">WHICH</a>                                 
+032818,000050: 32,3163           03204 64067                     <span class="ps">2CADR   </span> <a href="#41424F52544A4F42">ABORTJOB</a>                              
+032819,000051: 
+032820,000052: 32,3165           13137                           <span class="op">TCF     </span> <a href="#524F53454E">ROSEN</a>                                 
+032821,000053: 
+<a name="5037304E4F573F"></a>032822,000054: 32,3166           41012        <span class="sm">P70NOW? </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                <span class="co">#  NO. ARE WE IN P70 NOW?</span>
+032823,000055: 32,3167           63177                           <span class="op">AD      </span> <a href="#4D4F44453730">MODE70</a>                                
+032824,000056: 32,3170           00006                           <span class="op">EXTEND  </span>                                       
+032825,000057: 32,3171           13137                           <span class="op">BZF     </span> <a href="#524F53454E">ROSEN</a>                                 <span class="co">#  YES.  CHECK AGAIN IN 50MS.</span>
+032826,000058: 
+032827,000059: 32,3172           40001                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  NO.  IS AN ABORT COMMANDED?</span>
+032828,000060: 32,3173           75026                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+032829,000061: 32,3174           00006                           <span class="op">EXTEND  </span>                                       
+032830,000062: 32,3175           13137                           <span class="op">BZF     </span> <a href="#524F53454E">ROSEN</a>                                 <span class="co">#  NO.</span>
+032831,000063: 
+032832,000064: 32,3176           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  YES.</span>
+<a name="4D4F44453730"></a>032833,000065: 32,3177           00106        <span class="sm">MODE70  </span>           <span class="ps">DEC     </span> 70         B-14                       
+032834,000066: 32,3200           13161                           <span class="op">TCF     </span> <a href="#5354525441425254">STRTABRT</a>                              
+032835,000067: 
+032836,000068: 32,3201                                           <span class="ps">BANK    </span> 32                                    
+032837,000069: 32,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#41424F525453">ABORTS</a>                                
+032838,000070: 32,2000                                           <span class="ps">BANK    </span>                                       
+032839,000071: 
+032840,000072: 32,3201                                           <span class="ps">COUNT*  </span> $$/<a href="#503730">P70</a>                                
+032841,000073: 
+032842,000074: 
+<a name="503730"></a>032843,000075: 32,3201           03576        <span class="sm">P70     </span>           <span class="op">TC      </span> <a href="#4C4547414C3F">LEGAL?</a>                                
+032844,000076: 32,3202           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
+032845,000077: 32,3203           00106                           <span class="ps">DEC     </span> 70         B-14                       
+032846,000078: 
+<a name="41424F52544A4F42"></a>032847,000079: 32,3204           00006        <span class="sm">ABORTJOB</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  LOAD TEVENT FOR THE DOWNLINK.</span>
+032848,000080: 32,3205           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+032849,000081: 32,3206           53355                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544556454E54">TEVENT</a>                                
+032850,000082: 
+032851,000083: 32,3207           05373                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
+032852,000084: 32,3210           00001                           <span class="ps">OCT     </span> 00001                                 
+032853,000085: 32,3211           00002                           <span class="ps">OCT     </span> 00002                                 
+032854,000086: 
+032855,000087: 32,3212           05373                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
+032856,000088: 32,3213           00003                           <span class="ps">OCT     </span> 00003                                 
+032857,000089: 32,3214           00006                           <span class="ps">OCT     </span> 00006                                 
+032858,000090: 
+032859,000091: 32,3215           05413                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+032860,000092: 32,3216           07024                           <span class="ps">OCT     </span> 07024                                 
+032861,000093: 32,3217           25000                           <span class="ps">OCT     </span> 25000                                 
+032862,000094: 32,3220  E7,1430                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5748494348">WHICH</a>                                 
+032863,000095: 32,3220           03225 64067                     <span class="ps">2CADR   </span> <a href="#474F41424F5254">GOABORT</a>                               
+032864,000096: 
+032865,000097: 32,3222           00004                           <span class="op">INHINT  </span>                                       
+032866,000098: 32,3223           04674                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+032867,000099: 32,3224           12570                           <span class="ps">CADR    </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F4732">GOPROG2</a>                               
+032868,000100: 
+<a name="474F41424F5254"></a>032869,000101: 32,3225           05413        <span class="sm">GOABORT </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+032870,000102: 32,3226           04024                           <span class="ps">OCT     </span> 04024                                 
+032871,000103: 
+032872,000104: 32,3227           36216                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  SET UP R60 FOR A 10 DEG/SEC MANUV. RATE.</span>
+032873,000105: 32,3230           55331                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
+032874,000106: 
+032875,000107: 32,3231           35010                           <span class="op">CAF     </span> <a href="SERVICER.agc.html#4C524259424954">LRBYBIT</a>                               
+032876,000108: 32,3232           55263                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5253544154">LRSTAT</a>                                
+032877,000109: 
+032878,000110: 32,3233           00006                           <span class="op">EXTEND  </span>                                       
+032879,000111: 32,3234           33671                           <span class="op">DCA     </span> <a href="#5356455849544144">SVEXITAD</a>                              
+032880,000112: 32,3235           53253                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4156454745584954">AVEGEXIT</a>                              
+032881,000113: 
+032882,000114: 32,3236           36221                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  INITIALIZE FOR POWERED DOWNLIST.</span>
+032883,000115: 32,3237           54332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354434F44">DNLSTCOD</a>                              
+032884,000116: 32,3240           55330                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414753574F5244">AGSWORD</a>                               
+032885,000117: 
+032886,000118: 32,3241           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
+032887,000119: 32,3242           00155                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5357414E44495350">SWANDISP</a>                              
+032888,000120: 32,3243           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
+032889,000121: 32,3244           00211                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C503730">FLP70</a>                                 
+032890,000122: 32,3245           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
+032891,000123: 32,3246           17140                           <span class="ps">CADR    </span> <a href="SERVICER.agc.html#584F56494E464C47">XOVINFLG</a>                              
+032892,000124: 
+032893,000125: 32,3247           05365                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#434845434B4D4D">CHECKMM</a>                               
+032894,000126: 32,3250           00106                           <span class="ps">DEC     </span> 70         B-14                       
+032895,000127: 32,3251           13510                           <span class="op">TCF     </span> <a href="#503731524554">P71RET</a>                                
+032896,000128: 
+<a name="503730494E4954"></a>032897,000129: 32,3252           33662        <span class="sm">P70INIT </span>           <span class="op">CAF     </span> <a href="#503730414452">P70ADR</a>                                
+032898,000130: 32,3253           55430                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5748494348">WHICH</a>                                 
+032899,000131: 
+032900,000132: 32,3254           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032901,000133: 32,3255           77624                           <span class="in">CALL    </span>                                       
+032902,000134: 32,3256           65611                                    <a href="#54474F434F4D50">TGOCOMP</a>                               
+032903,000135: 32,3257           77745                           <span class="in">DLOAD   </span>                                       
+032904,000136: 32,3260           01244                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353">MASS</a>                                  
+032905,000137: 32,3261           56206                           <span class="in">PUSH    </span> <span class="in">DDV       </span>                            
+032906,000138: 32,3262           25635                                    <a href="#4D444F544450532A">MDOTDPS*</a>                              
+032907,000139: 32,3263           17642                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  
+032908,000140: 32,3264           70471                           <span class="in">DDV     </span> <span class="in">SR1       </span>                            
+032909,000141: 32,3265           25641                                    <a href="#4B28312F445629">K(1/DV)</a>                               
+032910,000142: 32,3266           03644                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445631">1/DV1</a>                                 
+032911,000143: 32,3267           03646                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445632">1/DV2</a>                                 
+032912,000144: 32,3270           03650                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445633">1/DV3</a>                                 
+032913,000145: 32,3271           77665                           <span class="in">BDDV    </span>                                       
+032914,000146: 32,3272           25645                                    <a href="#4B28415429">K(AT)</a>                                 
+032915,000147: 32,3273           17634                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    
+032916,000148: 32,3274           25655                                    <a href="#445444454341592A">DTDECAY*</a>                              
+032917,000149: 32,3275           17640                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F">TTO</a>                                   
+032918,000150: 32,3276           25651                                    <a href="#445053564558">DPSVEX</a>                                
+032919,000151: 32,3277           03636                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    <span class="co">#  INITIALIZE DPS EXHAUST VELOCITY</span>
+032920,000152: 32,3300           45014                           <span class="in">SET     </span> <span class="in">CALL      </span>                            
+032921,000153: 32,3301           04467                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4150">FLAP</a>                                  
+032922,000154: 32,3302           60046                                    <a href="P12.agc.html#434F4D4D494E4954">COMMINIT</a>                              
+032923,000155: 
+<a name="494E4A54415247"></a>032924,000156: 32,3303           45345        <span class="sm">INJTARG </span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            
+032925,000157: 32,3304           03474                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+032926,000158: 32,3305           25627                                    <a href="#353053454353">50SECS</a>                                
+032927,000159: 32,3306           77444                           <span class="in">BPL     </span> <span class="in">EXIT      </span>                            
+032928,000160: 32,3307           65376                                    <a href="#55505448524F54">UPTHROT</a>                               
+032929,000161: 
+032930,000162: 32,3310           00004                           <span class="op">INHINT  </span>                                       
+032931,000163: 32,3311           04737                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+032932,000164: 32,3312           75546                           <span class="ps">CADR    </span> <a href="P40-P47.agc.html#454E47494E4F4631">ENGINOF1</a>                              
+032933,000165: 32,3313           00003                           <span class="op">RELINT  </span>                                       
+032934,000166: 
+032935,000167: 32,3314           03413                           <span class="op">TC      </span> <a href="#5A4F4E455A45524F">ZONEZERO</a>                              
+032936,000168: 
+<a name="4142525447554944"></a>032937,000169: 32,3315           06014        <span class="sm">ABRTGUID</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032938,000170: 32,3316           45014                           <span class="in">SET     </span> <span class="in">CALL      </span>                            
+032939,000171: 32,3317           04470                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4943">FLIC</a>                                  
+032940,000172: 32,3320           60266                                    <a href="ASCENT_GUIDANCE.agc.html#415343454E54">ASCENT</a>                                
+032941,000173: 
+<a name="41424F525449474E"></a>032942,000174: 32,3321           77775        <span class="sm">ABORTIGN</span>           <span class="in">VLOAD   </span>                                       
+032943,000175: 32,3322           03250                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E46432F32">UNFC/2</a>                                
+032944,000176: 32,3323           25256                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F494E5456534D">POINTVSM</a>                              
+032945,000177: 32,3324           06231                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495458">UNITX</a>                                 
+032946,000178: 32,3325           01250                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534341584953">SCAXIS</a>                                
+032947,000179: 32,3326           77414                           <span class="in">CLEAR   </span> <span class="in">EXIT      </span>                            
+032948,000180: 32,3327           02663                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F5448524F544C">NOTHROTL</a>                              
+032949,000181: 
+032950,000182: 32,3330           05413                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+032951,000183: 32,3331           04024                           <span class="ps">OCT     </span> 04024                                 
+032952,000184: 
+032953,000185: 32,3332           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
+032954,000186: 32,3333           00124                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#3341584953464C47">3AXISFLG</a>                              
+032955,000187: 
+032956,000188: 32,3334           00004                           <span class="op">INHINT  </span>                                       
+032957,000189: 32,3335           04737                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+032958,000190: 32,3336           40221                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#5345544D494E4442">SETMINDB</a>                              
+032959,000191: 
+032960,000192: 32,3337           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              
+032961,000193: 32,3340           00217                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4943">FLIC</a>                                  
+032962,000194: 
+032963,000195: 32,3341           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+032964,000196: 32,3342           54103                           <span class="ps">CADR    </span> <a href="R60,R62.agc.html#5236304C454D">R60LEM</a>                                
+032965,000197: 
+032966,000198: 32,3343           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+032967,000199: 32,3344           75064                           <span class="ps">CADR    </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5034304155544F">P40AUTO</a>                               
+032968,000200: 
+032969,000201: 32,3345           35030                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+032970,000202: 32,3346           55466                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456544F54414C">DVTOTAL</a>                               
+032971,000203: 32,3347           55467                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456544F54414C">DVTOTAL</a>    +1                         
+032972,000204: 
+032973,000205: 32,3350           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+032974,000206: 32,3351           77624                           <span class="in">CALL    </span>                                       
+032975,000207: 32,3352           61213                                    <a href="FINDCDUW_-_GUIDAP_INTERFACE.agc.html#494E495443445557">INITCDUW</a>                              
+032976,000208: 32,3353           77776                           <span class="in">EXIT    </span>                                       
+032977,000209: 
+032978,000210: 32,3354           33621                           <span class="op">CAF     </span> <a href="#362E35534543">6.5SEC</a>                                
+032979,000211: 32,3355           00004                           <span class="op">INHINT  </span>                                       
+032980,000212: 32,3356           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+032981,000213: 32,3357  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+032982,000214: 32,3357           02376 74067                     <span class="ps">2CADR   </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#554C4C475441534B">ULLGTASK</a>                              
+032983,000215: 
+032984,000216: 32,3361           33620                           <span class="op">CAF     </span> <a href="#352E30534543">5.0SEC</a>                                
+032985,000217: 32,3362           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+032986,000218: 32,3363  E7,1426                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F474F">TTOGO</a>                                 
+032987,000219: 32,3363           02402 74067                     <span class="ps">2CADR   </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5449472D35">TIG-5</a>                                 
+032988,000220: 
+032989,000221: 32,3365           00006                           <span class="op">EXTEND  </span>                                       
+032990,000222: 32,3366           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+032991,000223: 32,3367           53425                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+032992,000224: 32,3370           00006                           <span class="op">EXTEND  </span>                                       
+032993,000225: 32,3371           33623                           <span class="op">DCA     </span> <a href="#313053454353">10SECS</a>                                
+032994,000226: 32,3372           21425                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+032995,000227: 32,3373           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+032996,000228: 32,3374           74655                           <span class="ps">CADR    </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5354434C4F4B33">STCLOK3</a>                               
+032997,000229: 
+032998,000230: 32,3375           13407                           <span class="op">TCF     </span> <a href="#55505448524F5431">UPTHROT1</a>                              
+032999,000231: 
+<a name="55505448524F54"></a>033000,000232: 32,3376           77414        <span class="sm">UPTHROT </span>           <span class="in">SET     </span> <span class="in">EXIT      </span>                            
+033001,000233: 32,3377           04461                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C5652">FLVR</a>                                  
+033002,000234: 
+033003,000235: 32,3400           00004                           <span class="op">INHINT  </span>                                       
+033004,000236: 32,3401           35026                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+033005,000237: 32,3402           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+033006,000238: 32,3403  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+033007,000239: 32,3403           02566 74067                     <span class="ps">2CADR   </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5A4F4F4D">ZOOM</a>                                  
+033008,000240: 
+033009,000241: 32,3405           04655                 -2        <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  VERIFY THAT THE PANEL SWITCHES </span>
+033010,000242: 32,3406           75064                           <span class="ps">CADR    </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5034304155544F">P40AUTO</a>                               <span class="co">#  ARE PROPERLY SET.</span>
+033011,000243: 
+<a name="55505448524F5431"></a>033012,000244: 32,3407           00006        <span class="sm">UPTHROT1</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  SET SERVICER TO CALL ASCENT GUIDANCE.</span>
+033013,000245: 32,3410           33667                           <span class="op">DCA     </span> <a href="#41544D41474144">ATMAGAD</a>                               
+033014,000246: 32,3411           53253                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41564745584954">AVGEXIT</a>                               
+033015,000247: 
+033016,000248: 32,3412           15225                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+033017,000249: 
+033018,000250: 
+<a name="5A4F4E455A45524F"></a>033019,000251: 32,3413           06014        <span class="sm">ZONEZERO</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+033020,000252: 32,3414           77731                           <span class="in">SSP     </span>                                       
+033021,000253: 32,3415           01263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5554524F555445">OUTROUTE</a>                              
+033022,000254: 32,3416           65424                           <span class="ps">CADR    </span> <a href="#5A4F4E4530524554">ZONE0RET</a>                              
+033023,000255: 32,3417           77414                           <span class="in">CLEAR   </span> <span class="in">EXIT      </span>                            
+033024,000256: 32,3420           03672                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41564547464C4147">AVEGFLAG</a>                              
+033025,000257: 
+033026,000258: 32,3421           05413                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+033027,000259: 32,3422           00004                           <span class="ps">OCT     </span> 00004                                 
+033028,000260: 
+033029,000261: 32,3423           15225                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+033030,000262: 
+<a name="5A4F4E4530524554"></a>033031,000263: 32,3424           05413        <span class="sm">ZONE0RET</span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+033032,000264: 32,3425           05024                           <span class="ps">OCT     </span> 05024                                 
+033033,000265: 32,3426           20000                           <span class="ps">OCT     </span> 20000                                 
+033034,000266: 
+033035,000267: 32,3427           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+033036,000268: 32,3430           43234                           <span class="in">RTB     </span> <span class="in">DAD       </span>                            
+033037,000269: 32,3431           21454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
+033038,000270: 32,3432           25625                                    <a href="#3830534543">80SEC</a>                                 
+033039,000271: 32,3433           03546                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D4531">PIPTIME1</a>                              <span class="co">#  STORE TEMPORARILY IN PIPTIME1.</span>
+033040,000272: 32,3434           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 
+033041,000273: 32,3435           27030                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D50524543">LEMPREC</a>                               
+033042,000274: 32,3436           77775                           <span class="in">VLOAD   </span>                                       
+033043,000275: 32,3437           00007                                    <a href="ORBITAL_INTEGRATION.agc.html#56415454">VATT</a>                                  
+033044,000276: 32,3440           03540                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E31">VN1</a>                                   <span class="co">#  STORE VTIG TEMPORARILY IN VN1.</span>
+033045,000277: 32,3441           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
+033046,000278: 32,3442           01736                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+033047,000279: 32,3443           27504                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56">V</a>                                     
+033048,000280: 32,3444           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
+033049,000281: 32,3445           03532                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E31">RN1</a>                                   <span class="co">#  STORE RTIG TEMPORARILY IN RN1.</span>
+033050,000282: 32,3446           52521                           <span class="in">MXV     </span> <span class="in">VSL6      </span>                            
+033051,000283: 32,3447           01736                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+033052,000284: 32,3450           37476                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52">R</a>                                     
+033053,000285: 32,3451           67200                                    <a href="SERVICER.agc.html#4D554E47524156">MUNGRAV</a>                               
+033054,000286: 32,3452           45014                           <span class="in">SET     </span> <span class="in">CALL      </span>                            
+033055,000287: 32,3453           04471                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C5A4F4E4530">FLZONE0</a>                               
+033056,000288: 32,3454           60266                                    <a href="ASCENT_GUIDANCE.agc.html#415343454E54">ASCENT</a>                                
+<a name="5052454252455431"></a>033057,000289: 32,3455           77776        <span class="sm">PREBRET1</span>           <span class="in">EXIT    </span>                                       
+033058,000290: 32,3456           05413                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+033059,000291: 32,3457           04024                           <span class="ps">OCT     </span> 04024                                 
+033060,000292: 32,3460           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+033061,000293: 32,3461           76505                           <span class="in">VXM     </span> <span class="in">VSL1      </span>                            
+033062,000294: 32,3462           01736                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+033063,000295: 32,3463           03643                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5653494E">DELVSIN</a>                               
+033064,000296: 32,3464           77646                           <span class="in">ABVAL   </span>                                       
+033065,000297: 32,3465           27651                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534142">DELVSAB</a>                               
+033066,000298: 32,3466           03532                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E31">RN1</a>                                   
+033067,000299: 32,3467           27627                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52544947">RTIG</a>                                  
+033068,000300: 32,3470           03540                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E31">VN1</a>                                   
+033069,000301: 32,3471           17635                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56544947">VTIG</a>                                  
+033070,000302: 32,3472           03546                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D4531">PIPTIME1</a>                              
+033071,000303: 32,3473           03425                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+033072,000304: 32,3474           43014                           <span class="in">SET     </span> <span class="in">CLEAR     </span>                            
+033073,000305: 32,3475           01067                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5844454C56464C47">XDELVFLG</a>                              
+033074,000306: 32,3476           03267                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D554E464C4147">MUNFLAG</a>                               
+033075,000307: 32,3477           77776                           <span class="in">EXIT    </span>                                       
+033076,000308: 
+033077,000309: 32,3500           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
+033078,000310: 32,3501           00050                           <span class="ps">DEC     </span> 40         B-14                       
+033079,000311: 32,3502           04674                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+033080,000312: 32,3503           75133                           <span class="ps">CADR    </span> <a href="P40-P47.agc.html#5034304C4D">P40LM</a>                                 
+033081,000313: 
+<a name="503731"></a>033082,000314: 32,3504           03576        <span class="sm">P71     </span>           <span class="op">TC      </span> <a href="#4C4547414C3F">LEGAL?</a>                                
+033083,000315: 32,3505           05351                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              
+033084,000316: 32,3506           00107                           <span class="ps">DEC     </span> 71         B-14                       
+033085,000317: 32,3507           13204                           <span class="op">TCF     </span> <a href="#41424F52544A4F42">ABORTJOB</a>                              
+033086,000318: 
+<a name="503731524554"></a>033087,000319: 32,3510           33663        <span class="sm">P71RET  </span>           <span class="op">CAF     </span> <a href="#503731414452">P71ADR</a>                                
+033088,000320: 32,3511           55430                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5748494348">WHICH</a>                                 
+033089,000321: 
+033090,000322: 32,3512           05563                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#5550464C4147">UPFLAG</a>                                
+033091,000323: 32,3513           00144                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B494C4C524F5345">KILLROSE</a>                              
+033092,000324: 
+033093,000325: 32,3514           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+033094,000326: 32,3515           77624                           <span class="in">CALL    </span>                                       
+033095,000327: 32,3516           60031                                    <a href="P12.agc.html#503132494E4954">P12INIT</a>                               
+033096,000328: 32,3517           77776                           <span class="in">EXIT    </span>                                       
+033097,000329: 
+033098,000330: 32,3520           00006                           <span class="op">EXTEND  </span>                                       
+033099,000331: 32,3521           00030                           <span class="op">READ    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
+033100,000332: 32,3522           40000                           <span class="op">COM     </span>                                       
+033101,000333: 32,3523           75023                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  
+033102,000334: 32,3524           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+033103,000335: 32,3525           13561                           <span class="op">TCF     </span> <a href="#4142525453544147">ABRTSTAG</a>                              
+033104,000336: 
+033105,000337: 32,3526           00004                           <span class="op">INHINT  </span>                                       
+033106,000338: 32,3527           04737                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              
+033107,000339: 32,3530           75546                           <span class="ps">CADR    </span> <a href="P40-P47.agc.html#454E47494E4F4631">ENGINOF1</a>                              
+033108,000340: 32,3531           00003                           <span class="op">RELINT  </span>                                       
+033109,000341: 
+033110,000342: 32,3532           35025                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+033111,000343: 32,3533           00006                           <span class="op">EXTEND  </span>                                       
+033112,000344: 32,3534           02030                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3330">CHAN30</a>                                
+033113,000345: 32,3535           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+033114,000346: 32,3536           13545                           <span class="op">TCF     </span> <a href="#535441474544">STAGED</a>                                
+033115,000347: 
+033116,000348: 32,3537           33664                           <span class="op">CAF     </span> <a href="#4F4354323036">OCT206</a>                                
+033117,000349: 32,3540           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+033118,000350: 32,3541           20532                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5045524631">GOPERF1</a>                               
+033119,000351: 32,3542           14106                           <span class="op">TCF     </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              
+033120,000352: 32,3543           13545                           <span class="op">TCF     </span> <a href="#535441474544">STAGED</a>                                
+033121,000353: 32,3544           13537                           <span class="op">TCF     </span> -5                                    
+033122,000354: 
+<a name="535441474544"></a>033123,000355: 32,3545           33665        <span class="sm">STAGED  </span>           <span class="op">CAF     </span> <a href="#4F4354323037">OCT207</a>                                
+033124,000356: 32,3546           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+033125,000357: 32,3547           20532                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F5045524631">GOPERF1</a>                               
+033126,000358: 32,3550           14106                           <span class="op">TCF     </span> <a href="FRESH_START_AND_RESTART.agc.html#474F544F504F4F48">GOTOPOOH</a>                              
+033127,000359: 32,3551           13553                           <span class="op">TCF     </span> +2                                    
+033128,000360: 32,3552           13315                           <span class="op">TCF     </span> <a href="#4142525447554944">ABRTGUID</a>                              
+033129,000361: 
+033130,000362: 32,3553           00004                           <span class="op">INHINT  </span>                                       
+033131,000363: 32,3554           35026                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+033132,000364: 32,3555           05252                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+033133,000365: 32,3556  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+033134,000366: 32,3556           02446 74067                     <span class="ps">2CADR   </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#49474E4954494F4E">IGNITION</a>                              
+033135,000367: 
+033136,000368: 32,3560           13407                           <span class="op">TCF     </span> <a href="#55505448524F5431">UPTHROT1</a>                              
+033137,000369: 
+<a name="4142525453544147"></a>033138,000370: 32,3561           06014        <span class="sm">ABRTSTAG</span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+033139,000371: 32,3562           77614                           <span class="in">BOFF    </span>                                       
+033140,000372: 32,3563           04747                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#464C4150">FLAP</a>                                  
+033141,000373: 32,3564           65572                                    <a href="#4E455754494D45">NEWTIME</a>                               
+033142,000374: 32,3565           72545                           <span class="in">DLOAD   </span> <span class="in">SL1       </span>                            
+033143,000375: 32,3566           03474                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+033144,000376: 32,3567           03474                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+033145,000377: 32,3570           77634                           <span class="in">RTB     </span>                                       
+033146,000378: 32,3571           65405                                    <a href="#55505448524F5431">UPTHROT1</a>   -2                         
+033147,000379: 
+<a name="4E455754494D45"></a>033148,000380: 32,3572           77624        <span class="sm">NEWTIME </span>           <span class="in">CALL    </span>                                       
+033149,000381: 32,3573           65611                                    <a href="#54474F434F4D50">TGOCOMP</a>                               <span class="co">#  IF FLAP=0, TGO=T-TIG</span>
+033150,000382: 32,3574           77650                           <span class="in">GOTO    </span>                                       
+033151,000383: 32,3575           65303                                    <a href="#494E4A54415247">INJTARG</a>                               
+033152,000384: 
+033153,000385:                                                                                                  <span class="co">#  ************************************************************************</span>
+033154,000386: 
+<a name="4C4547414C3F"></a>033155,000387: 32,3576           40105        <span class="sm">LEGAL?  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524439">FLAGWRD9</a>                              <span class="co">#  ARE THE ABORTS ENABLED?</span>
+033156,000388: 32,3577           75016                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C45544142424954">LETABBIT</a>                              
+033157,000389: 32,3600           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+033158,000390: 32,3601           13607                           <span class="op">TCF     </span> <a href="#41424F5254414C4D">ABORTALM</a>                              
+033159,000391: 
+033160,000392: 32,3602           40103                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524437">FLAGWRD7</a>                              <span class="co">#  IS SERVICER ON THE AIR?</span>
+033161,000393: 32,3603           75022                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4156454746424954">AVEGFBIT</a>                              
+033162,000394: 32,3604           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+033163,000395: 32,3605           13607                           <span class="op">TCF     </span> <a href="#41424F5254414C4D">ABORTALM</a>                              
+033164,000396: 32,3606           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  YES. ALL IS WELL.</span>
+033165,000397: 
+<a name="41424F5254414C4D"></a>033166,000398: 32,3607           04674        <span class="sm">ABORTALM</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              
+033167,000399: 32,3610           75714                           <span class="ps">CADR    </span> <a href="P40-P47.agc.html#503430414C4D">P40ALM</a>                                
+033168,000400: 
+033169,000401:                                                                                                  <span class="co">#  ************************************************************************</span>
+033170,000402: 
+<a name="54474F434F4D50"></a>033171,000403: 32,3611           45234        <span class="sm">TGOCOMP </span>           <span class="in">RTB     </span> <span class="in">DSU       </span>                            
+033172,000404: 32,3612           21454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              
+033173,000405: 32,3613           03425                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+033174,000406: 32,3614           77661                           <span class="in">SL      </span>                                       
+033175,000407: 32,3615           20214                                    11D                                   
+033176,000408: 32,3616           03474                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+033177,000409: 32,3617           77616                           <span class="in">RVQ     </span>                                       
+033178,000410: 
+033179,000411:                                                                                                  <span class="co">#  ************************************************************************</span>
+033180,000412: 
+<a name="352E30534543"></a>033181,000413: 32,3620           00764        <span class="sm">5.0SEC  </span>           <span class="ps">DEC     </span> 500        B-14                       
+033182,000414: 
+<a name="362E35534543"></a>033183,000415: 32,3621           01212        <span class="sm">6.5SEC  </span>           <span class="ps">DEC     </span> 650        B-14                       
+033184,000416: 
+<a name="313053454353"></a>033185,000417: 32,3622           00000 01750  <span class="sm">10SECS  </span>           <span class="ps">2DEC    </span> 1000       B-28                       
+033186,000418: 
+<a name="3830534543"></a>033187,000419: 32,3624           00000 17500  <span class="sm">80SEC   </span>           <span class="ps">2DEC    </span> 8000       B-28                       
+033188,000420: 
+<a name="353053454353"></a>033189,000421: 32,3626           01161 00000  <span class="sm">50SECS  </span>           <span class="ps">2DEC    </span> 5000       B-17                       
+033190,000422: 
+<a name="48494E4A454354"></a>033191,000423: 32,3630           00021 33400  <span class="sm">HINJECT </span>           <span class="ps">2DEC    </span> 18288      B-24                       <span class="co">#  60,000 FEET EXPRESSED IN METERS.</span>
+033192,000424: 
+<a name="41425456494E4A32"></a>033193,000425: 32,3632           04143 27611  <span class="sm">ABTVINJ2</span>           <span class="ps">2DEC    </span> +16.77924013 B-7                        
+033194,000426: 
+<a name="4D444F544450532A"></a>033195,000427: 32,3634           11075 16051  <span class="sm">MDOTDPS*</span>           <span class="ps">2DEC    </span> 0.1425     B1                         
+033196,000428: 
+033197,000429: 
+<a name="28312F44562941"></a>033198,000430: 32,3636           04031 23146  <span class="sm">(1/DV)A </span>           <span class="ps">2DEC    </span> 16.20      B-7                        <span class="co">#  2 SECONDS WORTH OF INITIAL ASCENT</span>
+033199,000431: 
+033200,000432:                                                                                                  <span class="co">#  STAGE ACCELERATION -- INVERTED (M/CS)</span>
+033201,000433:                                                                                                  <span class="co">#  1) PREDICATED ON A LIFTOFF MASS OF</span>
+033202,000434:                                                                                                  <span class="co">#     4869.9 KG (SNA-8-D-027  7/11/68)</span>
+033203,000435:                                                                                                  <span class="co">#  2) PREDICATED ON A CONTRIBUTION TO VEH-</span>
+033204,000436:                                                                                                  <span class="co">#     ICLE ACCELERATION FROM RCS THRUSTERS</span>
+033205,000437:                                                                                                  <span class="co">#     EQUIV. TO 1 JET ON CONTINUOUSLY.</span>
+<a name="4B28312F445629"></a>033206,000438: 32,3640           33025 16051  <span class="sm">K(1/DV) </span>           <span class="ps">2DEC    </span> 432.67     B-9                        <span class="co">#  DPS ENGINE THRUST IN NEWTONS / 100 CS.</span>
+033207,000439: 
+<a name="2841542941"></a>033208,000440: 32,3642           05034 27135  <span class="sm">(AT)A   </span>           <span class="ps">2DEC    </span> 3.086      E-4        B9              <span class="co">#  INITIAL ASC. STG. ACCELERATION ** M/CS.</span>
+033209,000441:                                                                                                  <span class="co">#  ASSUMPTIONS SAME AS FOR (1/DV)A.</span>
+033210,000442: 
+<a name="4B28415429"></a>033211,000443: 32,3644           00507 25605  <span class="sm">K(AT)   </span>           <span class="ps">2DEC    </span> .02                                   <span class="co">#  SCALING CONSTANT</span>
+033212,000444: 
+<a name="28544255502941"></a>033213,000445: 32,3646           27774 34000  <span class="sm">(TBUP)A </span>           <span class="ps">2DEC    </span> 98279      B-17                       <span class="co">#  ESTIMATED BURN-UP TIME OF THE ASCENT STG</span>
+033214,000446:                                                                                                  <span class="co">#  ASSUMPTIONS SAME AS FOR (1/DV)A WITH THE</span>
+033215,000447:                                                                                                  <span class="co">#  ADDITIONAL ASSUMPTION THAT NET MASS-FLOW</span>
+033216,000448:                                                                                                  <span class="co">#  RATE = 5.299 KG/SEC = 5.135 (APS) +</span>
+033217,000449:                                                                                                  <span class="co">#  .164 (1 RCS JET).</span>
+033218,000450: 
+033219,000451:                                                                                                  <span class="co">#  *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST NOT BE CHANGED *******</span>
+033220,000452: 
+<a name="445053564558"></a>033221,000453: 32,3650           07270 10464  <span class="sm">DPSVEX  </span>           <span class="ps">2DEC    </span> 2943.96    E-2        B-7             <span class="co">#  9942 FT/SEC IN M/CS.</span>
+033222,000454: 
+<a name="415053564558"></a>033223,000455: 32,3652           07404 32650  <span class="sm">APSVEX  </span>           <span class="ps">2DEC    </span> 3003.78    E-2        B-7             <span class="co">#  9684 FT/SEC IN M/CS.</span>
+033224,000456: 
+<a name="445444454341592A"></a>033225,000457: 32,3654           00004 22000  <span class="sm">DTDECAY*</span>           <span class="ps">2DEC    </span> 36.5       B-17                       
+033226,000458: 
+<a name="415444454341592A"></a>033227,000459: 32,3656           00001 21146  <span class="sm">ATDECAY*</span>           <span class="ps">2DEC    </span> 12.3       B-17                       
+033228,000460: 
+<a name="2854474F2941"></a>033229,000461: 32,3660           12771 00000  <span class="sm">(TGO)A  </span>           <span class="ps">2DEC    </span> 45000      B-17                       
+033230,000462: 
+<a name="503730414452"></a>033231,000463: 32,3662           02077        <span class="sm">P70ADR  </span>           <span class="ps">REMADR  </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5037305441424C45">P70TABLE</a>                              
+<a name="503731414452"></a>033232,000464: 32,3663           02115        <span class="sm">P71ADR  </span>           <span class="ps">REMADR  </span> <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html#5037315441424C45">P71TABLE</a>                              
+033233,000465: 
+<a name="4F4354323036"></a>033234,000466: 32,3664           00206        <span class="sm">OCT206  </span>           <span class="ps">OCT     </span> 206                                   
+<a name="4F4354323037"></a>033235,000467: 32,3665           00207        <span class="sm">OCT207  </span>           <span class="ps">OCT     </span> 207                                   
+033236,000468: 
+033237,000469:                                                                                                  <span class="co">#  ************************************************************************</span>
+033238,000470: 32,3666  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+<a name="41544D41474144"></a>033239,000471: 32,3666           02213 60067  <span class="sm">ATMAGAD </span>           <span class="ps">2CADR   </span> <a href="ASCENT_GUIDANCE.agc.html#41544D4147">ATMAG</a>                                 
+033240,000472: 
+033241,000473: 32,3670  E7,1472                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+<a name="5356455849544144"></a>033242,000474: 32,3670           02351 66067  <span class="sm">SVEXITAD</span>           <span class="ps">2CADR   </span> <a href="SERVICER.agc.html#5345525645584954">SERVEXIT</a>                              
 
 End of include-file P70-P71.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

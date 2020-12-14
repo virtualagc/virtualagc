@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -66,26 +65,45 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files are part of a reconstructed copy of LUM69 Revision 2, the
-flown Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
+These source-code files are part of a reconstructed copy of Luminary 69/2,
+the flown, final release of the Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
 <br><br>
-The reconstruction began with source code of Luminary 69 revision 0 previously
-transcribed from a digitized copy of that program.  The code was then updated 
-by back-porting the R-2 lunar potential model from previously-transcribed source
-code of Luminary 99. These required changes were described in the original
-Luminary memos 75 and 78. The reconstructed code was verified by 
-matching memory-bank checksums to those listed in drawing 2021152G. Note that
-page numbers in the reconstructed code match those on the Luminary 069 printout, 
-although the added code would likely have changed page numbers for a real LUM69 
-Revision 2 listing.
+The reconstruction is based on the source code of Luminary 69 &mdash; i.e., the
+initial, unflown version, "revision 0" &mdash; of which 
+a contemporary listing was available.  The code was then updated by incorporating the 
+differences between Luminary 69 and Luminary 69/2, known from other contemporary
+documentation.  The only such difference is the implementation in 
+Luminary 69/2 of the "R-2 Lunar Potential Model", the source code for which was taken 
+from program Luminary 99/1 (Apollo 11 LM), of which a contemporary listing was also available.
+Finally, the now-reconstructed Luminary 69/2 was then validated by assembling it to
+executable form and verifying that its memory banks had the correct checksums,
+known from still other contemporary documentation.
 <br><br>
+Note that page numbers in the reconstructed code match those in the original Luminary 69
+program listing, or in the ORBITAL INTEGRATION log section, in Luminary 99/1. Page numbers 
+would certainly differ somewhat in a contemporary Luminary 69/2 listing.
+Moreover, annotations that were not present in the contemporary source code have been added 
+to the reconstructed code to justify each change in Luminary 69/2 relative to 
+Luminary 69. Here's a guide to the Apollo documentation referenced in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n80/mode/1up">
+    MIT/IL engineering drawing 2021152N, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Luminary 69/2 (called "LUMINARY 69 REV. 2" in the document itself).</li>
+<li><a href="https://archive.org/details/Luminary99001J2k60/mode/1up">
+       Luminary 99/1 (Apollo 11 LM final release) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/luminary6900miti/mode/1up">
+       Luminary 69 (Apollo 10 LM initial release) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">
+       LUMINARY Memo #75, "R-2 Lunar Potential Model Added to LUM"</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM78_text.pdf">
+       LUMINARY Memo #78, "LUMINARY Revisions 93-96"</a>.</li>
+</ul>
 Comments from the original source code are prefixed with a single '#' symbol, 
 whereas comments added later are prefixed by "##" or "###".  Report any errors 
 noted by creating an 
 issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
 project's GitHub repository</a>.
 </td></tr></tbody></table>
-
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
@@ -108,96 +126,96 @@ project's GitHub repository</a>.
 000018,000018: 
 000019,000019: <a href="ASSEMBLY_AND_OPERATION_INFORMATION.agc.html">$ASSEMBLY_AND_OPERATION_INFORMATION.agc                 # pp. 1-26</a>
 001052,000020: <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html">$TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc      # pp. 27-36</a>
-001409,000021: <a href="PADLOADS.agc.html">$PADLOADS.agc                                           # pp. 37-52</a>
-002212,000022: <a href="CONTROLLED_CONSTANTS.agc.html">$CONTROLLED_CONSTANTS.agc                               # pp. 53-69</a>
-002786,000023: <a href="INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc.html">$INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc              # pp. 70-76</a>
-003136,000024: <a href="FLAGWORD_ASSIGNMENTS.agc.html">$FLAGWORD_ASSIGNMENTS.agc                               # pp. 77-104</a>
-004585,000025: <a href="SUBROUTINE_CALLS.agc.html">$SUBROUTINE_CALLS.agc                                   # p.  105</a>
-004617,000026: <a href="ERASABLE_ASSIGNMENTS.agc.html">$ERASABLE_ASSIGNMENTS.agc                               # pp. 106-167</a>
-007380,000027: <a href="INTERRUPT_LEAD_INS.agc.html">$INTERRUPT_LEAD_INS.agc                                 # pp. 168-169</a>
-007492,000028: <a href="T4RUPT_PROGRAM.agc.html">$T4RUPT_PROGRAM.agc                                     # pp. 170-204</a>
-008856,000029: <a href="RCS_FAILURE_MONITOR.agc.html">$RCS_FAILURE_MONITOR.agc                                # pp. 205-207</a>
-009021,000030: <a href="DOWNLINK_LISTS.agc.html">$DOWNLINK_LISTS.agc                                     # pp. 208-220</a>
-009475,000031: <a href="AGS_INITIALIZATION.agc.html">$AGS_INITIALIZATION.agc                                 # pp. 221-225</a>
-009700,000032: <a href="FRESH_START_AND_RESTART.agc.html">$FRESH_START_AND_RESTART.agc                            # pp. 226-252</a>
-010945,000033: <a href="RESTART_TABLES.agc.html">$RESTART_TABLES.agc                                     # pp. 253-258</a>
-011200,000034: <a href="AOTMARK.agc.html">$AOTMARK.agc                                            # pp. 259-276</a>
-011888,000035: <a href="EXTENDED_VERBS.agc.html">$EXTENDED_VERBS.agc                                     # pp. 277-315</a>
-013543,000036: <a href="PINBALL_NOUN_TABLES.agc.html">$PINBALL_NOUN_TABLES.agc                                # pp. 316-333</a>
-014435,000037: <a href="LEM_GEOMETRY.agc.html">$LEM_GEOMETRY.agc                                       # pp. 334-338</a>
-014614,000038: <a href="IMU_COMPENSATION_PACKAGE.agc.html">$IMU_COMPENSATION_PACKAGE.agc                           # pp. 339-350</a>
-015026,000039: <a href="R63.agc.html">$R63.agc                                                # pp. 351-354</a>
-015174,000040: <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html">$ATTITUDE_MANEUVER_ROUTINE.agc                          # pp. 355-376</a>
-016206,000041: <a href="GIMBAL_LOCK_AVOIDANCE.agc.html">$GIMBAL_LOCK_AVOIDANCE.agc                              # p.  377</a>
-016273,000042: <a href="KALCMANU_STEERING.agc.html">$KALCMANU_STEERING.agc                                  # pp. 378-382</a>
-016488,000043: <a href="SYSTEM_TEST_STANDARD_LEAD_INS.agc.html">$SYSTEM_TEST_STANDARD_LEAD_INS.agc                      # pp. 383-385</a>
-016608,000044: <a href="IMU_PERFORMANCE_TESTS_2.agc.html">$IMU_PERFORMANCE_TESTS_2.agc                            # pp. 386-394</a>
-017021,000045: <a href="IMU_PERFORMANCE_TESTS_4.agc.html">$IMU_PERFORMANCE_TESTS_4.agc                            # pp. 395-402</a>
-017375,000046: <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html">$PINBALL_GAME__BUTTONS_AND_LIGHTS.agc                   # pp. 403-484</a>
-021267,000047: <a href="R60,R62.agc.html">$R60,R62.agc                                            # pp. 485-497</a>
-021829,000048: <a href="S-BAND_ANTENNA_FOR_LM.agc.html">$S-BAND_ANTENNA_FOR_LM.agc                              # pp. 498-501</a>
-022018,000049: <a href="RADAR_LEADIN_ROUTINES.agc.html">$RADAR_LEADIN_ROUTINES.agc                              # pp. 502-503</a>
-022113,000050: <a href="P20-P25.agc.html">$P20-P25.agc                                            # pp. 504-623</a>
-027164,000051: <a href="P30,P37.agc.html">$P30,P37.agc                                            # pp. 624-627</a>
-027347,000052: <a href="P32-P35,_P72-P75.agc.html">$P32-P35,_P72-P75.agc                                   # pp. 628-660</a>
-028706,000053: <a href="GENERAL_LAMBERT_AIMPOINT_GUIDANCE.agc.html">$GENERAL_LAMBERT_AIMPOINT_GUIDANCE.agc                  # pp. 661-663</a>
-028861,000054: <a href="GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc.html">$GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc        # pp. 664-666</a>
-029018,000055: <a href="P34-P35,_P74-P75.agc.html">$P34-P35,_P74-P75.agc                                   # pp. 667-711</a>
-030758,000056: <a href="R31.agc.html">$R31.agc                                                # pp. 712-716</a>
-030986,000057: <a href="P76.agc.html">$P76.agc                                                # pp. 717-719</a>
-031142,000058: <a href="R30.agc.html">$R30.agc                                                # pp. 720-730</a>
-031598,000059: <a href="STABLE_ORBIT_-_P38-P39.agc.html">$STABLE_ORBIT_-_P38-P39.agc                             # pp. 731-738</a>
-032019,000060: <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html">$BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc        # pp. 739-758</a>
-033059,000061: <a href="P40-P47.agc.html">$P40-P47.agc                                            # pp. 759-788</a>
-034426,000062: <a href="THE_LUNAR_LANDING.agc.html">$THE_LUNAR_LANDING.agc                                  # pp. 789-796</a>
-034756,000063: <a href="THROTTLE_CONTROL_ROUTINES.agc.html">$THROTTLE_CONTROL_ROUTINES.agc                          # pp. 797-801</a>
-034971,000064: <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html">$LUNAR_LANDING_GUIDANCE_EQUATIONS.agc                   # pp. 802-828</a>
-036328,000065: <a href="P70-P71.agc.html">$P70-P71.agc                                            # pp. 829-838</a>
-036840,000066: <a href="P12.agc.html">$P12.agc                                                # pp. 839-843</a>
-037087,000067: <a href="ASCENT_GUIDANCE.agc.html">$ASCENT_GUIDANCE.agc                                    # pp. 844-857</a>
-037716,000068: <a href="SERVICER.agc.html">$SERVICER.agc                                           # pp. 858-896</a>
-039397,000069: <a href="LANDING_ANALOG_DISPLAYS.agc.html">$LANDING_ANALOG_DISPLAYS.agc                            # pp. 897-906</a>
-039924,000070: <a href="FINDCDUW_-_GUIDAP_INTERFACE.agc.html">$FINDCDUW_-_GUIDAP_INTERFACE.agc                        # pp. 907-924</a>
-040669,000071: <a href="P51-P53.agc.html">$P51-P53.agc                                            # pp. 925-978</a>
-042967,000072: <a href="LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc.html">$LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc            # pp. 979-982</a>
-043157,000073: <a href="DOWN-TELEMETRY_PROGRAM.agc.html">$DOWN-TELEMETRY_PROGRAM.agc                             # pp. 983-992</a>
-043579,000074: <a href="INTER-BANK_COMMUNICATION.agc.html">$INTER-BANK_COMMUNICATION.agc                           # pp. 993-996</a>
-043745,000075: <a href="INTERPRETER.agc.html">$INTERPRETER.agc                                        # pp. 997-1089</a>
-046846,000076: <a href="FIXED-FIXED_CONSTANT_POOL.agc.html">$FIXED-FIXED_CONSTANT_POOL.agc                          # pp. 1090-1094</a>
-047102,000077: <a href="INTERPRETIVE_CONSTANTS.agc.html">$INTERPRETIVE_CONSTANTS.agc                             # pp. 1095-1096</a>
-047175,000078: <a href="SINGLE_PRECISION_SUBROUTINES.agc.html">$SINGLE_PRECISION_SUBROUTINES.agc                       # p.  1097</a>
-047235,000079: <a href="EXECUTIVE.agc.html">$EXECUTIVE.agc                                          # pp. 1098-1111</a>
-047730,000080: <a href="WAITLIST.agc.html">$WAITLIST.agc                                           # pp. 1112-1127</a>
-048288,000081: <a href="LATITUDE_LONGITUDE_SUBROUTINES.agc.html">$LATITUDE_LONGITUDE_SUBROUTINES.agc                     # pp. 1128-1134</a>
-048589,000082: <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html">$PLANETARY_INERTIAL_ORIENTATION.agc                     # pp. 1135-1143</a>
-048958,000083: <a href="MEASUREMENT_INCORPORATION.agc.html">$MEASUREMENT_INCORPORATION.agc                          # pp. 1144-1153</a>
-049445,000084: <a href="CONIC_SUBROUTINES.agc.html">$CONIC_SUBROUTINES.agc                                  # pp. 1154-1199</a>
-051503,000085: <a href="INTEGRATION_INITIALIZATION.agc.html">$INTEGRATION_INITIALIZATION.agc                         # pp. 1200-1222</a>
-052620,000086: <a href="ORBITAL_INTEGRATION.agc.html">$ORBITAL_INTEGRATION.agc                                # pp. 1223-1243</a>
-053571,000087: <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html">$INFLIGHT_ALIGNMENT_ROUTINES.agc                        # pp. 1244-1253</a>
-053866,000088: <a href="POWERED_FLIGHT_SUBROUTINES.agc.html">$POWERED_FLIGHT_SUBROUTINES.agc                         # pp. 1254-1261</a>
-054203,000089: <a href="TIME_OF_FREE_FALL.agc.html">$TIME_OF_FREE_FALL.agc                                  # pp. 1262-1277</a>
-054914,000090: <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html">$AGC_BLOCK_TWO_SELF-CHECK.agc                           # pp. 1278-1287</a>
-055413,000091: <a href="PHASE_TABLE_MAINTENANCE.agc.html">$PHASE_TABLE_MAINTENANCE.agc                            # pp. 1288-1296</a>
-055808,000092: <a href="RESTARTS_ROUTINE.agc.html">$RESTARTS_ROUTINE.agc                                   # pp. 1297-1302</a>
-056127,000093: <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html">$IMU_MODE_SWITCHING_ROUTINES.agc                        # pp. 1303-1331</a>
-057184,000094: <a href="KEYRUPT,_UPRUPT.agc.html">$KEYRUPT,_UPRUPT.agc                                    # pp. 1332-1334</a>
-057308,000095: <a href="DISPLAY_INTERFACE_ROUTINES.agc.html">$DISPLAY_INTERFACE_ROUTINES.agc                         # pp. 1335-1367</a>
-058859,000096: <a href="SERVICE_ROUTINES.agc.html">$SERVICE_ROUTINES.agc                                   # pp. 1368-1374</a>
-059098,000097: <a href="ALARM_AND_ABORT.agc.html">$ALARM_AND_ABORT.agc                                    # pp. 1375-1378</a>
-059314,000098: <a href="UPDATE_PROGRAM.agc.html">$UPDATE_PROGRAM.agc                                     # pp. 1379-1389</a>
-059848,000099: <a href="RTB_OP_CODES.agc.html">$RTB_OP_CODES.agc                                       # pp. 1390-1397</a>
-060151,000100: <a href="T6-RUPT_PROGRAMS.agc.html">$T6-RUPT_PROGRAMS.agc                                   # pp. 1398-1400</a>
-060306,000101: <a href="DAP_INTERFACE_SUBROUTINES.agc.html">$DAP_INTERFACE_SUBROUTINES.agc                          # pp. 1401-1404</a>
-060474,000102: <a href="DAPIDLER_PROGRAM.agc.html">$DAPIDLER_PROGRAM.agc                                   # pp. 1405-1415</a>
-060943,000103: <a href="P-AXIS_RCS_AUTOPILOT.agc.html">$P-AXIS_RCS_AUTOPILOT.agc                               # pp. 1416-1435</a>
-061969,000104: <a href="Q,R-AXES_RCS_AUTOPILOT.agc.html">$Q,R-AXES_RCS_AUTOPILOT.agc                             # pp. 1436-1453</a>
-062799,000105: <a href="TJET_LAW.agc.html">$TJET_LAW.agc                                           # pp. 1454-1464</a>
-063309,000106: <a href="KALMAN_FILTER.agc.html">$KALMAN_FILTER.agc                                      # pp. 1465-1466</a>
-063402,000107: <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html">$TRIM_GIMBAL_CONTROL_SYSTEM.agc                         # pp. 1467-1478</a>
-063964,000108: <a href="AOSTASK_AND_AOSJOB.agc.html">$AOSTASK_AND_AOSJOB.agc                                 # pp. 1479-1499</a>
-064947,000109: <a href="SPS_BACK-UP_RCS_CONTROL.agc.html">$SPS_BACK-UP_RCS_CONTROL.agc                            # pp. 1500-1502</a>
-065096,000110:                                                                                                  <span class="co">#  pp. 1503-1735: GAP-generated tables.</span>
+001427,000021: <a href="PADLOADS.agc.html">$PADLOADS.agc                                           # pp. 37-52</a>
+002230,000022: <a href="CONTROLLED_CONSTANTS.agc.html">$CONTROLLED_CONSTANTS.agc                               # pp. 53-69</a>
+002819,000023: <a href="INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc.html">$INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc              # pp. 70-76</a>
+003169,000024: <a href="FLAGWORD_ASSIGNMENTS.agc.html">$FLAGWORD_ASSIGNMENTS.agc                               # pp. 77-104</a>
+004618,000025: <a href="SUBROUTINE_CALLS.agc.html">$SUBROUTINE_CALLS.agc                                   # p.  105</a>
+004650,000026: <a href="ERASABLE_ASSIGNMENTS.agc.html">$ERASABLE_ASSIGNMENTS.agc                               # pp. 106-167</a>
+007433,000027: <a href="INTERRUPT_LEAD_INS.agc.html">$INTERRUPT_LEAD_INS.agc                                 # pp. 168-169</a>
+007545,000028: <a href="T4RUPT_PROGRAM.agc.html">$T4RUPT_PROGRAM.agc                                     # pp. 170-204</a>
+008909,000029: <a href="RCS_FAILURE_MONITOR.agc.html">$RCS_FAILURE_MONITOR.agc                                # pp. 205-207</a>
+009074,000030: <a href="DOWNLINK_LISTS.agc.html">$DOWNLINK_LISTS.agc                                     # pp. 208-220</a>
+009528,000031: <a href="AGS_INITIALIZATION.agc.html">$AGS_INITIALIZATION.agc                                 # pp. 221-225</a>
+009753,000032: <a href="FRESH_START_AND_RESTART.agc.html">$FRESH_START_AND_RESTART.agc                            # pp. 226-252</a>
+010998,000033: <a href="RESTART_TABLES.agc.html">$RESTART_TABLES.agc                                     # pp. 253-258</a>
+011253,000034: <a href="AOTMARK.agc.html">$AOTMARK.agc                                            # pp. 259-276</a>
+011941,000035: <a href="EXTENDED_VERBS.agc.html">$EXTENDED_VERBS.agc                                     # pp. 277-315</a>
+013596,000036: <a href="PINBALL_NOUN_TABLES.agc.html">$PINBALL_NOUN_TABLES.agc                                # pp. 316-333</a>
+014488,000037: <a href="LEM_GEOMETRY.agc.html">$LEM_GEOMETRY.agc                                       # pp. 334-338</a>
+014667,000038: <a href="IMU_COMPENSATION_PACKAGE.agc.html">$IMU_COMPENSATION_PACKAGE.agc                           # pp. 339-350</a>
+015079,000039: <a href="R63.agc.html">$R63.agc                                                # pp. 351-354</a>
+015227,000040: <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html">$ATTITUDE_MANEUVER_ROUTINE.agc                          # pp. 355-376</a>
+016259,000041: <a href="GIMBAL_LOCK_AVOIDANCE.agc.html">$GIMBAL_LOCK_AVOIDANCE.agc                              # p.  377</a>
+016326,000042: <a href="KALCMANU_STEERING.agc.html">$KALCMANU_STEERING.agc                                  # pp. 378-382</a>
+016541,000043: <a href="SYSTEM_TEST_STANDARD_LEAD_INS.agc.html">$SYSTEM_TEST_STANDARD_LEAD_INS.agc                      # pp. 383-385</a>
+016661,000044: <a href="IMU_PERFORMANCE_TESTS_2.agc.html">$IMU_PERFORMANCE_TESTS_2.agc                            # pp. 386-394</a>
+017074,000045: <a href="IMU_PERFORMANCE_TESTS_4.agc.html">$IMU_PERFORMANCE_TESTS_4.agc                            # pp. 395-402</a>
+017428,000046: <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html">$PINBALL_GAME__BUTTONS_AND_LIGHTS.agc                   # pp. 403-484</a>
+021320,000047: <a href="R60,R62.agc.html">$R60,R62.agc                                            # pp. 485-497</a>
+021882,000048: <a href="S-BAND_ANTENNA_FOR_LM.agc.html">$S-BAND_ANTENNA_FOR_LM.agc                              # pp. 498-501</a>
+022071,000049: <a href="RADAR_LEADIN_ROUTINES.agc.html">$RADAR_LEADIN_ROUTINES.agc                              # pp. 502-503</a>
+022166,000050: <a href="P20-P25.agc.html">$P20-P25.agc                                            # pp. 504-623</a>
+027217,000051: <a href="P30,P37.agc.html">$P30,P37.agc                                            # pp. 624-627</a>
+027400,000052: <a href="P32-P35,_P72-P75.agc.html">$P32-P35,_P72-P75.agc                                   # pp. 628-660</a>
+028759,000053: <a href="GENERAL_LAMBERT_AIMPOINT_GUIDANCE.agc.html">$GENERAL_LAMBERT_AIMPOINT_GUIDANCE.agc                  # pp. 661-663</a>
+028914,000054: <a href="GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc.html">$GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc        # pp. 664-666</a>
+029071,000055: <a href="P34-P35,_P74-P75.agc.html">$P34-P35,_P74-P75.agc                                   # pp. 667-711</a>
+030811,000056: <a href="R31.agc.html">$R31.agc                                                # pp. 712-716</a>
+031039,000057: <a href="P76.agc.html">$P76.agc                                                # pp. 717-719</a>
+031195,000058: <a href="R30.agc.html">$R30.agc                                                # pp. 720-730</a>
+031651,000059: <a href="STABLE_ORBIT_-_P38-P39.agc.html">$STABLE_ORBIT_-_P38-P39.agc                             # pp. 731-738</a>
+032072,000060: <a href="BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc.html">$BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc        # pp. 739-758</a>
+033112,000061: <a href="P40-P47.agc.html">$P40-P47.agc                                            # pp. 759-788</a>
+034479,000062: <a href="THE_LUNAR_LANDING.agc.html">$THE_LUNAR_LANDING.agc                                  # pp. 789-796</a>
+034809,000063: <a href="THROTTLE_CONTROL_ROUTINES.agc.html">$THROTTLE_CONTROL_ROUTINES.agc                          # pp. 797-801</a>
+035024,000064: <a href="LUNAR_LANDING_GUIDANCE_EQUATIONS.agc.html">$LUNAR_LANDING_GUIDANCE_EQUATIONS.agc                   # pp. 802-828</a>
+036381,000065: <a href="P70-P71.agc.html">$P70-P71.agc                                            # pp. 829-838</a>
+036893,000066: <a href="P12.agc.html">$P12.agc                                                # pp. 839-843</a>
+037140,000067: <a href="ASCENT_GUIDANCE.agc.html">$ASCENT_GUIDANCE.agc                                    # pp. 844-857</a>
+037769,000068: <a href="SERVICER.agc.html">$SERVICER.agc                                           # pp. 858-896</a>
+039450,000069: <a href="LANDING_ANALOG_DISPLAYS.agc.html">$LANDING_ANALOG_DISPLAYS.agc                            # pp. 897-906</a>
+039977,000070: <a href="FINDCDUW_-_GUIDAP_INTERFACE.agc.html">$FINDCDUW_-_GUIDAP_INTERFACE.agc                        # pp. 907-924</a>
+040722,000071: <a href="P51-P53.agc.html">$P51-P53.agc                                            # pp. 925-978</a>
+043020,000072: <a href="LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc.html">$LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc            # pp. 979-982</a>
+043210,000073: <a href="DOWN-TELEMETRY_PROGRAM.agc.html">$DOWN-TELEMETRY_PROGRAM.agc                             # pp. 983-992</a>
+043632,000074: <a href="INTER-BANK_COMMUNICATION.agc.html">$INTER-BANK_COMMUNICATION.agc                           # pp. 993-996</a>
+043798,000075: <a href="INTERPRETER.agc.html">$INTERPRETER.agc                                        # pp. 997-1089</a>
+046899,000076: <a href="FIXED-FIXED_CONSTANT_POOL.agc.html">$FIXED-FIXED_CONSTANT_POOL.agc                          # pp. 1090-1094</a>
+047155,000077: <a href="INTERPRETIVE_CONSTANTS.agc.html">$INTERPRETIVE_CONSTANTS.agc                             # pp. 1095-1096</a>
+047228,000078: <a href="SINGLE_PRECISION_SUBROUTINES.agc.html">$SINGLE_PRECISION_SUBROUTINES.agc                       # p.  1097</a>
+047288,000079: <a href="EXECUTIVE.agc.html">$EXECUTIVE.agc                                          # pp. 1098-1111</a>
+047783,000080: <a href="WAITLIST.agc.html">$WAITLIST.agc                                           # pp. 1112-1127</a>
+048341,000081: <a href="LATITUDE_LONGITUDE_SUBROUTINES.agc.html">$LATITUDE_LONGITUDE_SUBROUTINES.agc                     # pp. 1128-1134</a>
+048642,000082: <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html">$PLANETARY_INERTIAL_ORIENTATION.agc                     # pp. 1135-1143</a>
+049011,000083: <a href="MEASUREMENT_INCORPORATION.agc.html">$MEASUREMENT_INCORPORATION.agc                          # pp. 1144-1153</a>
+049498,000084: <a href="CONIC_SUBROUTINES.agc.html">$CONIC_SUBROUTINES.agc                                  # pp. 1154-1199</a>
+051556,000085: <a href="INTEGRATION_INITIALIZATION.agc.html">$INTEGRATION_INITIALIZATION.agc                         # pp. 1200-1222</a>
+052697,000086: <a href="ORBITAL_INTEGRATION.agc.html">$ORBITAL_INTEGRATION.agc                                # pp. 1223-1243</a>
+053746,000087: <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html">$INFLIGHT_ALIGNMENT_ROUTINES.agc                        # pp. 1244-1253</a>
+054041,000088: <a href="POWERED_FLIGHT_SUBROUTINES.agc.html">$POWERED_FLIGHT_SUBROUTINES.agc                         # pp. 1254-1261</a>
+054378,000089: <a href="TIME_OF_FREE_FALL.agc.html">$TIME_OF_FREE_FALL.agc                                  # pp. 1262-1277</a>
+055089,000090: <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html">$AGC_BLOCK_TWO_SELF-CHECK.agc                           # pp. 1278-1287</a>
+055588,000091: <a href="PHASE_TABLE_MAINTENANCE.agc.html">$PHASE_TABLE_MAINTENANCE.agc                            # pp. 1288-1296</a>
+055983,000092: <a href="RESTARTS_ROUTINE.agc.html">$RESTARTS_ROUTINE.agc                                   # pp. 1297-1302</a>
+056302,000093: <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html">$IMU_MODE_SWITCHING_ROUTINES.agc                        # pp. 1303-1331</a>
+057359,000094: <a href="KEYRUPT,_UPRUPT.agc.html">$KEYRUPT,_UPRUPT.agc                                    # pp. 1332-1334</a>
+057483,000095: <a href="DISPLAY_INTERFACE_ROUTINES.agc.html">$DISPLAY_INTERFACE_ROUTINES.agc                         # pp. 1335-1367</a>
+059034,000096: <a href="SERVICE_ROUTINES.agc.html">$SERVICE_ROUTINES.agc                                   # pp. 1368-1374</a>
+059273,000097: <a href="ALARM_AND_ABORT.agc.html">$ALARM_AND_ABORT.agc                                    # pp. 1375-1378</a>
+059489,000098: <a href="UPDATE_PROGRAM.agc.html">$UPDATE_PROGRAM.agc                                     # pp. 1379-1389</a>
+060023,000099: <a href="RTB_OP_CODES.agc.html">$RTB_OP_CODES.agc                                       # pp. 1390-1397</a>
+060326,000100: <a href="T6-RUPT_PROGRAMS.agc.html">$T6-RUPT_PROGRAMS.agc                                   # pp. 1398-1400</a>
+060481,000101: <a href="DAP_INTERFACE_SUBROUTINES.agc.html">$DAP_INTERFACE_SUBROUTINES.agc                          # pp. 1401-1404</a>
+060649,000102: <a href="DAPIDLER_PROGRAM.agc.html">$DAPIDLER_PROGRAM.agc                                   # pp. 1405-1415</a>
+061118,000103: <a href="P-AXIS_RCS_AUTOPILOT.agc.html">$P-AXIS_RCS_AUTOPILOT.agc                               # pp. 1416-1435</a>
+062144,000104: <a href="Q,R-AXES_RCS_AUTOPILOT.agc.html">$Q,R-AXES_RCS_AUTOPILOT.agc                             # pp. 1436-1453</a>
+062974,000105: <a href="TJET_LAW.agc.html">$TJET_LAW.agc                                           # pp. 1454-1464</a>
+063484,000106: <a href="KALMAN_FILTER.agc.html">$KALMAN_FILTER.agc                                      # pp. 1465-1466</a>
+063577,000107: <a href="TRIM_GIMBAL_CONTROL_SYSTEM.agc.html">$TRIM_GIMBAL_CONTROL_SYSTEM.agc                         # pp. 1467-1478</a>
+064139,000108: <a href="AOSTASK_AND_AOSJOB.agc.html">$AOSTASK_AND_AOSJOB.agc                                 # pp. 1479-1499</a>
+065122,000109: <a href="SPS_BACK-UP_RCS_CONTROL.agc.html">$SPS_BACK-UP_RCS_CONTROL.agc                            # pp. 1500-1502</a>
+065271,000110:                                                                                                  <span class="co">#  pp. 1503-1735: GAP-generated tables.</span>
 <h1>Usage Table for Fixed-Memory Banks</h1>
 Bank 00:  1774/2000 words used.
 Bank 01:  1773/2000 words used.

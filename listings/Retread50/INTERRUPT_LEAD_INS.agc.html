@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -74,23 +73,24 @@ and AURORA 12. <a href="http://www.ibiblio.org/apollo/Restoration.html">
 <u>Read about the process here.</u></a>  Assembling this source code with
 yaYUL produces core ropes identical to those of the physical modules. 
 Page-number references refer to corresponding sections of RETREAD 44 source
-code.  No printouts of RETREAD 50 program listings are available.  Names of
-variables and program constants of the form "UNK<i>nnnn</i>" appear in areas not yet correlated
-with other pre-existing source code, and which are therefore unknown.
+code.  No printouts of RETREAD 50 program listings are available.  New sections of the
+software (appearing in EXTENDED_VERBS_FOR_MODING.agc) have been disassembled; labels
+and comments have been either taken from similar code in later programs or, in cases
+where this was not possible, added by VirtualAGC for clarity.
 </td></tr></tbody></table>
 
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000540,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-000541,000003:                                                                                                  <span class="co">## Filename:    INTERRUPT_LEAD_INS.agc</span>
-000542,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for AGC program Retread 50. </span>
-000543,000005:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-000544,000006:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-000545,000007:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/Restoration.html</span>
-000546,000008:                                                                                                  <span class="co">## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's</span>
-000547,000009:                                                                                                  <span class="co">##                              physical core-rope modules.</span>
-000548,000010: 
+000557,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+000558,000003:                                                                                                  <span class="co">## Filename:    INTERRUPT_LEAD_INS.agc</span>
+000559,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for AGC program Retread 50. </span>
+000560,000005:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+000561,000006:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+000562,000007:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/Restoration.html</span>
+000563,000008:                                                                                                  <span class="co">## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's</span>
+000564,000009:                                                                                                  <span class="co">##                              physical core-rope modules.</span>
+000565,000010: 
 </pre>
 </span>
 </p>
@@ -106,57 +106,57 @@ Page 15
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000550,000012: 
-000551,000013:    4000                                           <span class="ps">SETLOC  </span> 4000                                  
-000552,000014: 
-000553,000015:    4000           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  GO</span>
-000554,000016:    4001           34054                           <span class="op">CAF     </span> <a href="#474F4242">GOBB</a>                                  
-000555,000017:    4002           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000556,000018:    4003           12721                           <span class="op">TCF     </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F47">GOPROG</a>                                
-000557,000019: 
-000558,000020:    4004           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T6RUPT</span>
-000559,000021:    4005           34055                           <span class="op">CAF     </span> <a href="#54365250544242">T6RPTBB</a>                               
-000560,000022:    4006           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000561,000023:    4007           14330                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>     +3                         <span class="co">#  ***FIX LATER***</span>
-000562,000024: 
-000563,000025:    4010           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T5RUPT</span>
-000564,000026:    4011           34056                           <span class="op">CAF     </span> <a href="#54355250544242">T5RPTBB</a>                               
-000565,000027:    4012           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000566,000028:    4013           14330                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>     +3                         <span class="co">#  ***FIX LATER***</span>
-000567,000029: 
-000568,000030:    4014           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T3RUPT</span>
-000569,000031:    4015           34057                           <span class="op">CAF     </span> <a href="#54335250544242">T3RPTBB</a>                               
-000570,000032:    4016           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000571,000033:    4017           14272                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#543352555054">T3RUPT</a>                                
-000572,000034: 
-000573,000035:    4020           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T4RUPT</span>
-000574,000036:    4021           34060                           <span class="op">CAF     </span> <a href="#54345250544242">T4RPTBB</a>                               
-000575,000037:    4022           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000576,000038:    4023           13052                           <span class="op">TCF     </span> <a href="T4RUPT_PROGRAM.agc.html#543452555054">T4RUPT</a>                                
-000577,000039: 
-000578,000040:    4024           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  KEYRUPT1</span>
-000579,000041:    4025           34061                           <span class="op">CAF     </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
-000580,000042:    4026           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000581,000043:    4027           13153                           <span class="op">TCF     </span> <a href="KEYRUPT,_UPRUPT.agc.html#4B45595255505431">KEYRUPT1</a>                              
-000582,000044: 
-000583,000045:    4030           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  KEYRUPT2</span>
-000584,000046:    4031           34061                           <span class="op">CAF     </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
-000585,000047:    4032           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000586,000048:    4033           13175                           <span class="op">TCF     </span> <a href="KEYRUPT,_UPRUPT.agc.html#4B45595255505432">KEYRUPT2</a>                              
-000587,000049: 
-000588,000050:    4034           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  UPRUPT</span>
-000589,000051:    4035           34061                           <span class="op">CAF     </span> <a href="#55505250544242">UPRPTBB</a>                               
-000590,000052:    4036           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000591,000053:    4037           13205                           <span class="op">TCF     </span> <a href="KEYRUPT,_UPRUPT.agc.html#555052555054">UPRUPT</a>                                
-000592,000054: 
-000593,000055:    4040           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  DOWNRUPT</span>
-000594,000056:    4041           34062                           <span class="op">CAF     </span> <a href="#44574E5250544242">DWNRPTBB</a>                              
-000595,000057:    4042           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-000596,000058:    4043           14330                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>     +3                         <span class="co">#  ***FIX LATER***</span>
-000597,000059: 
-000598,000060:    4044           50017                           <span class="op">RESUME  </span>                                       <span class="co">#  RADAR RUPT    ****FIX LATER******</span>
-000599,000061: 
-000600,000062:    4050                                           <span class="ps">SETLOC  </span> 4050                                  
+000567,000012: 
+000568,000013:    4000                                           <span class="ps">SETLOC  </span> 4000                                  
+000569,000014: 
+000570,000015:    4000           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  GO</span>
+000571,000016:    4001           34054                           <span class="op">CAF     </span> <a href="#474F4242">GOBB</a>                                  
+000572,000017:    4002           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000573,000018:    4003           12721                           <span class="op">TCF     </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F47">GOPROG</a>                                
+000574,000019: 
+000575,000020:    4004           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T6RUPT</span>
+000576,000021:    4005           34055                           <span class="op">CAF     </span> <a href="#54365250544242">T6RPTBB</a>                               
+000577,000022:    4006           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000578,000023:    4007           14330                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>     +3                         <span class="co">#  ***FIX LATER***</span>
+000579,000024: 
+000580,000025:    4010           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T5RUPT</span>
+000581,000026:    4011           34056                           <span class="op">CAF     </span> <a href="#54355250544242">T5RPTBB</a>                               
+000582,000027:    4012           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000583,000028:    4013           14330                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>     +3                         <span class="co">#  ***FIX LATER***</span>
+000584,000029: 
+000585,000030:    4014           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T3RUPT</span>
+000586,000031:    4015           34057                           <span class="op">CAF     </span> <a href="#54335250544242">T3RPTBB</a>                               
+000587,000032:    4016           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000588,000033:    4017           14272                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#543352555054">T3RUPT</a>                                
+000589,000034: 
+000590,000035:    4020           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  T4RUPT</span>
+000591,000036:    4021           34060                           <span class="op">CAF     </span> <a href="#54345250544242">T4RPTBB</a>                               
+000592,000037:    4022           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000593,000038:    4023           13052                           <span class="op">TCF     </span> <a href="T4RUPT_PROGRAM.agc.html#543452555054">T4RUPT</a>                                
+000594,000039: 
+000595,000040:    4024           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  KEYRUPT1</span>
+000596,000041:    4025           34061                           <span class="op">CAF     </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
+000597,000042:    4026           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000598,000043:    4027           13153                           <span class="op">TCF     </span> <a href="KEYRUPT,_UPRUPT.agc.html#4B45595255505431">KEYRUPT1</a>                              
+000599,000044: 
+000600,000045:    4030           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  KEYRUPT2</span>
+000601,000046:    4031           34061                           <span class="op">CAF     </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
+000602,000047:    4032           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000603,000048:    4033           13175                           <span class="op">TCF     </span> <a href="KEYRUPT,_UPRUPT.agc.html#4B45595255505432">KEYRUPT2</a>                              
+000604,000049: 
+000605,000050:    4034           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  UPRUPT</span>
+000606,000051:    4035           34061                           <span class="op">CAF     </span> <a href="#55505250544242">UPRPTBB</a>                               
+000607,000052:    4036           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000608,000053:    4037           13205                           <span class="op">TCF     </span> <a href="KEYRUPT,_UPRUPT.agc.html#555052555054">UPRUPT</a>                                
+000609,000054: 
+000610,000055:    4040           52011                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152555054">ARUPT</a>                                 <span class="co">#  DOWNRUPT</span>
+000611,000056:    4041           34062                           <span class="op">CAF     </span> <a href="#44574E5250544242">DWNRPTBB</a>                              
+000612,000057:    4042           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+000613,000058:    4043           14330                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>     +3                         <span class="co">#  ***FIX LATER***</span>
+000614,000059: 
+000615,000060:    4044           50017                           <span class="op">RESUME  </span>                                       <span class="co">#  RADAR RUPT    ****FIX LATER******</span>
+000616,000061: 
+000617,000062:    4050                                           <span class="ps">SETLOC  </span> 4050                                  
 </pre>
 </span>
 </p>
@@ -172,37 +172,37 @@ Page 16
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000602,000064:    4050           50017                           <span class="op">RESUME  </span>                                       <span class="co">#  HAND CONTROL RUPT   ***FIX LATER****</span>
-000603,000065: 
-000604,000066: 
-000605,000067: 
-000606,000068:    4054                                           <span class="ps">SETLOC  </span> 4054                                  
-000607,000069: 
-000608,000070: 
-000609,000071:    4054  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  <span class="co">#  RESTART USES E0, E3</span>
-<a name="474F4242"></a>000610,000072:    4054           02003        <span class="sm">GOBB    </span>           <span class="ps">BBCON   </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F47">GOPROG</a>                                
-000611,000073: 
-000612,000074:    4055     0025                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
-<a name="54365250544242"></a>000613,000075:    4055           04000        <span class="sm">T6RPTBB </span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  ***FIX LATER***</span>
-000614,000076: 
-000615,000077:    4056     0025                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
-<a name="54355250544242"></a>000616,000078:    4056           04000        <span class="sm">T5RPTBB </span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  ***FIX LATER***</span>
-000617,000079: 
-000618,000080:    4057  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="54335250544242"></a>000619,000081:    4057           04003        <span class="sm">T3RPTBB </span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#543352555054">T3RUPT</a>                                
-000620,000082: 
-000621,000083:    4060     1020                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453525550545357">DSRUPTSW</a>                              
-<a name="54345250544242"></a>000622,000084:    4060           02002        <span class="sm">T4RPTBB </span>           <span class="ps">BBCON   </span> <a href="T4RUPT_PROGRAM.agc.html#543452555054">T4RUPT</a>                                
-000623,000085: 
-000624,000086:    4061     0624                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              
-<a name="4B45595250544242"></a>000625,000087:    4061           02001        <span class="sm">KEYRPTBB</span>           <span class="ps">BBCON   </span> <a href="KEYRUPT,_UPRUPT.agc.html#4B45595255505431">KEYRUPT1</a>                              
-000626,000088: 
-<a name="55505250544242"></a>000627,000089:    4062     4061               <span class="sm">UPRPTBB </span>           <span class="ps">=       </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
-000628,000090: 
-000629,000091:    4062     0025                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
-<a name="44574E5250544242"></a>000630,000092:    4062           04000        <span class="sm">DWNRPTBB</span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  ***FIX LATER ***</span>
-000631,000093: 
-<a name="454E44494E544646"></a>000632,000094:    4063                        <span class="sm">ENDINTFF</span>           <span class="ps">EQUALS  </span>                                       
+000619,000064:    4050           50017                           <span class="op">RESUME  </span>                                       <span class="co">#  HAND CONTROL RUPT   ***FIX LATER****</span>
+000620,000065: 
+000621,000066: 
+000622,000067: 
+000623,000068:    4054                                           <span class="ps">SETLOC  </span> 4054                                  
+000624,000069: 
+000625,000070: 
+000626,000071:    4054  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  <span class="co">#  RESTART USES E0, E3</span>
+<a name="474F4242"></a>000627,000072:    4054           02003        <span class="sm">GOBB    </span>           <span class="ps">BBCON   </span> <a href="FRESH_START_AND_RESTART.agc.html#474F50524F47">GOPROG</a>                                
+000628,000073: 
+000629,000074:    4055     0025                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
+<a name="54365250544242"></a>000630,000075:    4055           04000        <span class="sm">T6RPTBB </span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  ***FIX LATER***</span>
+000631,000076: 
+000632,000077:    4056     0025                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
+<a name="54355250544242"></a>000633,000078:    4056           04000        <span class="sm">T5RPTBB </span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  ***FIX LATER***</span>
+000634,000079: 
+000635,000080:    4057  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="54335250544242"></a>000636,000081:    4057           04003        <span class="sm">T3RPTBB </span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#543352555054">T3RUPT</a>                                
+000637,000082: 
+000638,000083:    4060     1020                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453525550545357">DSRUPTSW</a>                              
+<a name="54345250544242"></a>000639,000084:    4060           02002        <span class="sm">T4RPTBB </span>           <span class="ps">BBCON   </span> <a href="T4RUPT_PROGRAM.agc.html#543452555054">T4RUPT</a>                                
+000640,000085: 
+000641,000086:    4061     0624                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B455954454D5031">KEYTEMP1</a>                              
+<a name="4B45595250544242"></a>000642,000087:    4061           02001        <span class="sm">KEYRPTBB</span>           <span class="ps">BBCON   </span> <a href="KEYRUPT,_UPRUPT.agc.html#4B45595255505431">KEYRUPT1</a>                              
+000643,000088: 
+<a name="55505250544242"></a>000644,000089:    4062     4061               <span class="sm">UPRPTBB </span>           <span class="ps">=       </span> <a href="#4B45595250544242">KEYRPTBB</a>                              
+000645,000090: 
+000646,000091:    4062     0025                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
+<a name="44574E5250544242"></a>000647,000092:    4062           04000        <span class="sm">DWNRPTBB</span>           <span class="ps">BBCON   </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                <span class="co">#  ***FIX LATER ***</span>
+000648,000093: 
+<a name="454E44494E544646"></a>000649,000094:    4063                        <span class="sm">ENDINTFF</span>           <span class="ps">EQUALS  </span>                                       
 
 End of include-file INTERRUPT_LEAD_INS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

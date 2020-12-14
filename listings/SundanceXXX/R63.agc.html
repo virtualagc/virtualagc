@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -97,148 +96,148 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-012220,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-012221,000003:                                                                                                  <span class="co">## Filename:    R63.agc</span>
-012222,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
-012223,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
-012224,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
-012225,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
-012226,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
-012227,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
-012228,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-012229,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-012230,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-012231,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
-012232,000014: 
-012233,000015:                                                                                                  <span class="co">## Sundance 302</span>
-012234,000016: 
-012235,000017:                                                                                                  <span class="co">#  SUBROUTINE NAME:      V89CALL</span>
-012236,000018:                                                                                                  <span class="co">#  MOD NO:       0                       DATE:           9 JAN 1968</span>
-012237,000019:                                                                                                  <span class="co">#  MOD BY:       DIGITAL DEVEL GROUP     LOG SECTION:    R63</span>
-012238,000020: 
-012239,000021:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
-012240,000022: 
-012241,000023:                                                                                                  <span class="co">#  CALLED BY VERB 89 ENTER DURING P00.  PRIO 10 USED.  CALCULATES AND</span>
-012242,000024:                                                                                                  <span class="co">#  DISPLAYS FINAL FDAI BALL ANGLES TO POINT LM +X OR +Z AXIS AT CSM.</span>
-012243,000025: 
-012244,000026:                                                                                                  <span class="co">#  1. KEY IN V 89 E ONLY IF IN PROG 00.  IF NOT IN P00, OPERATOR ERROR AND</span>
-012245,000027:                                                                                                  <span class="co">#  EXIT R63, OTHERWISE CONTINUE.</span>
-012246,000028: 
-012247,000029:                                                                                                  <span class="co">#  2. IF IN P00, DO IMU STATUS CHECK ROUTINE (R02BOTH).  IF IMU ON AND ITS</span>
-012248,000030:                                                                                                  <span class="co">#  ORIENTATION KNOWN TO LGC, CONTINUE.</span>
-012249,000031: 
-012250,000032:                                                                                                  <span class="co">#  3. FLASH DISPLAY V 04 N 06.  R2 INDICATES WHICH SPACECRAFT AXIS IS TO</span>
-012251,000033:                                                                                                  <span class="co">#  BE POINTED AT CSM.  INITIAL CHOICE IS PREFERRED (+Z) AXIS (R2=1).</span>
-012252,000034:                                                                                                  <span class="co">#  ASTRONAUT CAN CHANGE TO (+X) AXIS (R2 NOT =1) BY V 22 E 2 E.  CONTINUE</span>
-012253,000035:                                                                                                  <span class="co">#  AFTER KEYING IN PROCEED.</span>
-012254,000036: 
-012255,000037:                                                                                                  <span class="co">#  4. BOTH VEHICLE STATE VECTORS UPDATED BY CONIC EQS.</span>
-012256,000038: 
-012257,000039:                                                                                                  <span class="co">#  5. HALF MAGNITUDE UNIT LOS VECTOR (IN STABLE MEMBER COORDINATES) AND</span>
-012258,000040:                                                                                                  <span class="co">#  HALF MAGNITUDE UNIT SPACECRAFT AXIS VECTOR (IN BODY COORDINATES)</span>
-012259,000041:                                                                                                  <span class="co">#  PREPARED FOR VECPOINT.</span>
-012260,000042: 
-012261,000043:                                                                                                  <span class="co">#  6. GIMBAL ANGLES FROM VECPOINT TRANSFORMED INTO FDAI BALL ANGLES BY</span>
-012262,000044:                                                                                                  <span class="co">#  BALLANGS.  FLASH DISPLAY V 06 N 18 AND AWAIT RESPONSE.</span>
-012263,000045: 
-012264,000046:                                                                                                  <span class="co">#  7.    RECYCLE - RETURN TO STEP 4.</span>
-012265,000047:                                                                                                  <span class="co">#        TERMINATE - EXIT R63.</span>
-012266,000048:                                                                                                  <span class="co">#        PROCEED - RESET 3AXISFLG AND CALL R60LEM FOR ATTITUDE MANEUVER.</span>
-012267,000049: 
-012268,000050:                                                                                                  <span class="co">#  CALLING SEQUENCE:     V 89 E.</span>
-012269,000051: 
-012270,000052:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   CHKPOOH, R02BOTH, GOXDSPF, CSMCONIC, LEMCONIC,</span>
-012271,000053:                                                                                                  <span class="co">#                        VECPOINT, BALLANGS, R60LEM.</span>
-012272,000054: 
-012273,000055:                                                                                                  <span class="co">#  NORMAL EXIT MODES:    TC ENDEXT</span>
-012274,000056: 
-012275,000057:                                                                                                  <span class="co">#  ALARMS:       1. OPERATOR ERROR IF NOT IN P00.</span>
-012276,000058:                                                                                                  <span class="co">#                2. PROGRAM ALARM IF IMU IS OFF.</span>
-012277,000059:                                                                                                  <span class="co">#                3. PROGRAM ALARM IF IMU ORIENTATION IS UNKNOWN.</span>
-012278,000060: 
-012279,000061:                                                                                                  <span class="co">#  OUTPUT:       NONE</span>
-012280,000062: 
-012281,000063:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED:  NONE</span>
-012282,000064: 
-012283,000065:                                                                                                  <span class="co">#  DEBRIS:       OPTION1, +1, TDEC1, POINTVSM, SCAXIS, CPHI, CTHETA, CPSI,</span>
-012284,000066:                                                                                                  <span class="co">#                3AXISFLG.</span>
-012285,000067: 
-012286,000068: 06,3712  E4,1614                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  
-012287,000069: 32,2000                                           <span class="ps">BANK    </span> 32                                    
-012288,000070: 26,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4241574C414E4753">BAWLANGS</a>                              
-012289,000071: 26,2000                                           <span class="ps">BANK    </span>                                       
-012290,000072: 
-012291,000073: 26,2000                                           <span class="ps">COUNT*  </span> $$/R63                                
-<a name="56383943414C4C"></a>012292,000074: 26,2000           04655        <span class="sm">V89CALL </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  IMU STATUS CHECK.  RETURNS IF ORIENTATION</span>
-012293,000075: 26,2001           11064                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#523032424F5448">R02BOTH</a>                               <span class="co">#  KNOWN.  ALARMS IF NOT.</span>
-012294,000076: 26,2002           36221                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  ALLOW ASTRONAUT TO SELECT DESIRED</span>
-012295,000077: 26,2003           55155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E31">OPTION1</a>                               <span class="co">#  TRACKING ATTITUDE AXIS.</span>
-012296,000078: 26,2004           35026                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-012297,000079: 26,2005           55156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E31">OPTION1</a>    +1                         
-012298,000080: 26,2006           32101                           <span class="op">CAF     </span> <a href="#564230344E30362A">VB04N06*</a>                              <span class="co">#  V 04 N 06</span>
-012299,000081: 26,2007           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-012300,000082: 26,2010           20406                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F464C415348">GOFLASH</a>                               
-012301,000083: 26,2011           05561                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE</span>
-012302,000084: 26,2012           02014                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED</span>
-012303,000085: 26,2013           02006                           <span class="op">TC      </span> -5                                    <span class="co">#  DATA IN. OPTION1+1 = 1 FOR Z AXIS</span>
-<a name="5638395245434C"></a>012304,000086: 26,2014           06014        <span class="sm">V89RECL </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#                    = 2 FOR X AXIS</span>
-012305,000087: 26,2015           77634                           <span class="in">RTB     </span>                                       
-012306,000088: 26,2016           21454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              <span class="co">#  READ PRESENT TIME</span>
-012307,000089: 26,2017           02213                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  SAVE TIME FOR LEMCONIC CALL</span>
-012308,000090: 26,2020           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  STORE TIME FOR CSMCONIC CALL</span>
-012309,000091: 26,2021           27037                                    <a href="INTEGRATION_INITIALIZATION.agc.html#43534D434F4E4943">CSMCONIC</a>                              <span class="co">#  CSM STATE VECTOR UPDATE</span>
-012310,000092: 26,2022           77775                           <span class="in">VLOAD   </span>                                       <span class="co">#  CSMCONIC LEFT R VECTOR IN RATT</span>
-012311,000093: 26,2023           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
-012312,000094: 26,2024           16215                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  <span class="co">#  SAVE FOR LINE OF SIGHT (LOS) COMPUTATION</span>
-012313,000095: 26,2025           02213                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              
-012314,000096: 26,2026           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  STORE TIME FOR LEMCONIC CALL</span>
-012315,000097: 26,2027           27051                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D434F4E4943">LEMCONIC</a>                              <span class="co">#  LEM STATE VECTOR UPDATE</span>
-012316,000098: 26,2030           52375                           <span class="in">VLOAD   </span> <span class="in">VSU       </span>                            <span class="co">#  CSM POSITION - LEM POSITION = LOS</span>
-012317,000099: 26,2031           02215                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  <span class="co">#  LOS VECTOR LEFT IN MPAC</span>
-012318,000100: 26,2032           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
-012319,000101: 26,2033           40121                           <span class="in">MXV     </span> <span class="in">BOV       </span>                            <span class="co">#  (REFSMMAT X LOS).  TRANSFORMS LOS FROM</span>
-012320,000102: 26,2034           01736                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFERENCE COORD TO STAB MEMB COORD.</span>
-012321,000103: 26,2035           54036                                    +1                                    
-012322,000104: 26,2036           02223                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
-012323,000105: 26,2037           40012                           <span class="in">VSL8    </span> <span class="in">BOV       </span>                            
-012324,000106: 26,2040           54042                                    +2                                    
-012325,000107: 26,2041           02223                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
-012326,000108: 26,2042           53575                           <span class="in">VLOAD   </span> <span class="in">UNIT      </span>                            
-012327,000109: 26,2043           02223                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
-012328,000110: 26,2044           01256                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F494E5456534D">POINTVSM</a>                              <span class="co">#  STORE LOS FOR VECPOINT CALL</span>
-012329,000111: 26,2045           77776                           <span class="in">EXIT    </span>                                       
-012330,000112: 26,2046           41156                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E32">OPTION2</a>                               <span class="co">#  1 FOR Z AXIS.  2 FOR X AXIS.</span>
-012331,000113: 26,2047           65026                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-012332,000114: 26,2050           00006                           <span class="op">EXTEND  </span>                                       
-012333,000115: 26,2051           12075                           <span class="op">BZF     </span> <a href="#414C494E455A">ALINEZ</a>                                
-<a name="414C494E4558"></a>012334,000116: 26,2052           06014        <span class="sm">ALINEX  </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  X AXIS ALIGNMENT</span>
-012335,000117: 26,2053           77775                           <span class="in">VLOAD   </span>                                       
-012336,000118: 26,2054           06231                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495458">UNITX</a>                                 <span class="co">#  READ (.5, 0, 0)</span>
-<a name="56383943414C4C31"></a>012337,000119: 26,2055           35250        <span class="sm">V89CALL1</span>           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534341584953">SCAXIS</a>                                <span class="co">#  STORE SELECTED ALIGNMENT AXIS</span>
-012338,000120: 26,2056           56000                                    <a href="R60,R62.agc.html#564543504F494E54">VECPOINT</a>                              <span class="co">#  PUTS DESIRED GIM ANG (OG,IG,MG) IN TMPAC</span>
-012339,000121: 26,2057           01207                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  <span class="co">#  STORE GIMBAL ANGLES FOR BALLANGS CALL.</span>
-012340,000122: 26,2060           77776                           <span class="in">EXIT    </span>                                       
-012341,000123: 26,2061           02302                           <span class="op">TC      </span> <a href="R60,R62.agc.html#42414C4C414E4753">BALLANGS</a>                              <span class="co">#  PUTS DESIRED BALL ANGLES IN FDAIX,Y,Z</span>
-012342,000124: 26,2062           32102                           <span class="op">CAF     </span> <a href="#564230364E3138">VB06N18</a>                               <span class="co">#  V 06 N 18</span>
-012343,000125: 26,2063           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  NOUN 18 REFERS TO FDAIX,Y,Z</span>
-012344,000126: 26,2064           20406                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F464C415348">GOFLASH</a>                               
-012345,000127: 26,2065           05561                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE</span>
-012346,000128: 26,2066           02070                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED</span>
-012347,000129: 26,2067           02014                           <span class="op">TC      </span> <a href="#5638395245434C">V89RECL</a>                               <span class="co">#  RECYCLE</span>
-012348,000130: 26,2070           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  RESET 3 AXIS FLAG</span>
-012349,000131: 26,2071           00124                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#3341584953464C47">3AXISFLG</a>                              <span class="co">#  RESET BIT6 FLAG WORD 5</span>
-012350,000132: 26,2072           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  PERFORMS LEM MANEUVER TO ALIGN SELECTED</span>
-012351,000133: 26,2073           54103                           <span class="ps">CADR    </span> <a href="R60,R62.agc.html#5236304C454D">R60LEM</a>                                <span class="co">#  SPACECRAFT AXIS TO CSM.</span>
-012352,000134: 26,2074           15561                           <span class="op">TCF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE R63</span>
-012353,000135: 
-<a name="414C494E455A"></a>012354,000136: 26,2075           06014        <span class="sm">ALINEZ  </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  Z AXIS ALIGNMENT</span>
-012355,000137: 26,2076           52175                           <span class="in">VLOAD   </span> <span class="in">GOTO      </span>                            
-012356,000138: 26,2077           06225                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#554E49545A">UNITZ</a>                                 <span class="co">#  READ (0, 0, .5)</span>
-012357,000139: 26,2100           54055                                    <a href="#56383943414C4C31">V89CALL1</a>                              
-012358,000140: 
-<a name="564230344E30362A"></a>012359,000141: 26,2101           01006        <span class="sm">VB04N06*</span>           <span class="ps">VN      </span> 406                                   
-<a name="564230364E3138"></a>012360,000142: 26,2102           01422        <span class="sm">VB06N18 </span>           <span class="ps">VN      </span> 0618                                  
-012361,000143: 
+012222,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+012223,000003:                                                                                                  <span class="co">## Filename:    R63.agc</span>
+012224,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
+012225,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
+012226,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
+012227,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
+012228,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
+012229,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
+012230,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+012231,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+012232,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+012233,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
+012234,000014: 
+012235,000015:                                                                                                  <span class="co">## Sundance 302</span>
+012236,000016: 
+012237,000017:                                                                                                  <span class="co">#  SUBROUTINE NAME:      V89CALL</span>
+012238,000018:                                                                                                  <span class="co">#  MOD NO:       0                       DATE:           9 JAN 1968</span>
+012239,000019:                                                                                                  <span class="co">#  MOD BY:       DIGITAL DEVEL GROUP     LOG SECTION:    R63</span>
+012240,000020: 
+012241,000021:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
+012242,000022: 
+012243,000023:                                                                                                  <span class="co">#  CALLED BY VERB 89 ENTER DURING P00.  PRIO 10 USED.  CALCULATES AND</span>
+012244,000024:                                                                                                  <span class="co">#  DISPLAYS FINAL FDAI BALL ANGLES TO POINT LM +X OR +Z AXIS AT CSM.</span>
+012245,000025: 
+012246,000026:                                                                                                  <span class="co">#  1. KEY IN V 89 E ONLY IF IN PROG 00.  IF NOT IN P00, OPERATOR ERROR AND</span>
+012247,000027:                                                                                                  <span class="co">#  EXIT R63, OTHERWISE CONTINUE.</span>
+012248,000028: 
+012249,000029:                                                                                                  <span class="co">#  2. IF IN P00, DO IMU STATUS CHECK ROUTINE (R02BOTH).  IF IMU ON AND ITS</span>
+012250,000030:                                                                                                  <span class="co">#  ORIENTATION KNOWN TO LGC, CONTINUE.</span>
+012251,000031: 
+012252,000032:                                                                                                  <span class="co">#  3. FLASH DISPLAY V 04 N 06.  R2 INDICATES WHICH SPACECRAFT AXIS IS TO</span>
+012253,000033:                                                                                                  <span class="co">#  BE POINTED AT CSM.  INITIAL CHOICE IS PREFERRED (+Z) AXIS (R2=1).</span>
+012254,000034:                                                                                                  <span class="co">#  ASTRONAUT CAN CHANGE TO (+X) AXIS (R2 NOT =1) BY V 22 E 2 E.  CONTINUE</span>
+012255,000035:                                                                                                  <span class="co">#  AFTER KEYING IN PROCEED.</span>
+012256,000036: 
+012257,000037:                                                                                                  <span class="co">#  4. BOTH VEHICLE STATE VECTORS UPDATED BY CONIC EQS.</span>
+012258,000038: 
+012259,000039:                                                                                                  <span class="co">#  5. HALF MAGNITUDE UNIT LOS VECTOR (IN STABLE MEMBER COORDINATES) AND</span>
+012260,000040:                                                                                                  <span class="co">#  HALF MAGNITUDE UNIT SPACECRAFT AXIS VECTOR (IN BODY COORDINATES)</span>
+012261,000041:                                                                                                  <span class="co">#  PREPARED FOR VECPOINT.</span>
+012262,000042: 
+012263,000043:                                                                                                  <span class="co">#  6. GIMBAL ANGLES FROM VECPOINT TRANSFORMED INTO FDAI BALL ANGLES BY</span>
+012264,000044:                                                                                                  <span class="co">#  BALLANGS.  FLASH DISPLAY V 06 N 18 AND AWAIT RESPONSE.</span>
+012265,000045: 
+012266,000046:                                                                                                  <span class="co">#  7.    RECYCLE - RETURN TO STEP 4.</span>
+012267,000047:                                                                                                  <span class="co">#        TERMINATE - EXIT R63.</span>
+012268,000048:                                                                                                  <span class="co">#        PROCEED - RESET 3AXISFLG AND CALL R60LEM FOR ATTITUDE MANEUVER.</span>
+012269,000049: 
+012270,000050:                                                                                                  <span class="co">#  CALLING SEQUENCE:     V 89 E.</span>
+012271,000051: 
+012272,000052:                                                                                                  <span class="co">#  SUBROUTINES CALLED:   CHKPOOH, R02BOTH, GOXDSPF, CSMCONIC, LEMCONIC,</span>
+012273,000053:                                                                                                  <span class="co">#                        VECPOINT, BALLANGS, R60LEM.</span>
+012274,000054: 
+012275,000055:                                                                                                  <span class="co">#  NORMAL EXIT MODES:    TC ENDEXT</span>
+012276,000056: 
+012277,000057:                                                                                                  <span class="co">#  ALARMS:       1. OPERATOR ERROR IF NOT IN P00.</span>
+012278,000058:                                                                                                  <span class="co">#                2. PROGRAM ALARM IF IMU IS OFF.</span>
+012279,000059:                                                                                                  <span class="co">#                3. PROGRAM ALARM IF IMU ORIENTATION IS UNKNOWN.</span>
+012280,000060: 
+012281,000061:                                                                                                  <span class="co">#  OUTPUT:       NONE</span>
+012282,000062: 
+012283,000063:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED:  NONE</span>
+012284,000064: 
+012285,000065:                                                                                                  <span class="co">#  DEBRIS:       OPTION1, +1, TDEC1, POINTVSM, SCAXIS, CPHI, CTHETA, CPSI,</span>
+012286,000066:                                                                                                  <span class="co">#                3AXISFLG.</span>
+012287,000067: 
+012288,000068: 06,3712  E4,1614                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  
+012289,000069: 32,2000                                           <span class="ps">BANK    </span> 32                                    
+012290,000070: 26,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4241574C414E4753">BAWLANGS</a>                              
+012291,000071: 26,2000                                           <span class="ps">BANK    </span>                                       
+012292,000072: 
+012293,000073: 26,2000                                           <span class="ps">COUNT*  </span> $$/R63                                
+<a name="56383943414C4C"></a>012294,000074: 26,2000           04655        <span class="sm">V89CALL </span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  IMU STATUS CHECK.  RETURNS IF ORIENTATION</span>
+012295,000075: 26,2001           11064                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#523032424F5448">R02BOTH</a>                               <span class="co">#  KNOWN.  ALARMS IF NOT.</span>
+012296,000076: 26,2002           36221                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  ALLOW ASTRONAUT TO SELECT DESIRED</span>
+012297,000077: 26,2003           55155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E31">OPTION1</a>                               <span class="co">#  TRACKING ATTITUDE AXIS.</span>
+012298,000078: 26,2004           35026                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+012299,000079: 26,2005           55156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E31">OPTION1</a>    +1                         
+012300,000080: 26,2006           32101                           <span class="op">CAF     </span> <a href="#564230344E30362A">VB04N06*</a>                              <span class="co">#  V 04 N 06</span>
+012301,000081: 26,2007           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+012302,000082: 26,2010           20406                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F464C415348">GOFLASH</a>                               
+012303,000083: 26,2011           05561                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE</span>
+012304,000084: 26,2012           02014                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED</span>
+012305,000085: 26,2013           02006                           <span class="op">TC      </span> -5                                    <span class="co">#  DATA IN. OPTION1+1 = 1 FOR Z AXIS</span>
+<a name="5638395245434C"></a>012306,000086: 26,2014           06014        <span class="sm">V89RECL </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#                    = 2 FOR X AXIS</span>
+012307,000087: 26,2015           77634                           <span class="in">RTB     </span>                                       
+012308,000088: 26,2016           21454                                    <a href="RTB_OP_CODES.agc.html#4C4F414454494D45">LOADTIME</a>                              <span class="co">#  READ PRESENT TIME</span>
+012309,000089: 26,2017           02213                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              <span class="co">#  SAVE TIME FOR LEMCONIC CALL</span>
+012310,000090: 26,2020           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  STORE TIME FOR CSMCONIC CALL</span>
+012311,000091: 26,2021           27037                                    <a href="INTEGRATION_INITIALIZATION.agc.html#43534D434F4E4943">CSMCONIC</a>                              <span class="co">#  CSM STATE VECTOR UPDATE</span>
+012312,000092: 26,2022           77775                           <span class="in">VLOAD   </span>                                       <span class="co">#  CSMCONIC LEFT R VECTOR IN RATT</span>
+012313,000093: 26,2023           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
+012314,000094: 26,2024           16215                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  <span class="co">#  SAVE FOR LINE OF SIGHT (LOS) COMPUTATION</span>
+012315,000095: 26,2025           02213                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5453544152543832">TSTART82</a>                              
+012316,000096: 26,2026           34041                           <span class="in">STCALL  </span> <a href="ORBITAL_INTEGRATION.agc.html#5444454331">TDEC1</a>                                 <span class="co">#  STORE TIME FOR LEMCONIC CALL</span>
+012317,000097: 26,2027           27051                                    <a href="INTEGRATION_INITIALIZATION.agc.html#4C454D434F4E4943">LEMCONIC</a>                              <span class="co">#  LEM STATE VECTOR UPDATE</span>
+012318,000098: 26,2030           52375                           <span class="in">VLOAD   </span> <span class="in">VSU       </span>                            <span class="co">#  CSM POSITION - LEM POSITION = LOS</span>
+012319,000099: 26,2031           02215                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524F4E45">RONE</a>                                  <span class="co">#  LOS VECTOR LEFT IN MPAC</span>
+012320,000100: 26,2032           00001                                    <a href="ORBITAL_INTEGRATION.agc.html#52415454">RATT</a>                                  
+012321,000101: 26,2033           40121                           <span class="in">MXV     </span> <span class="in">BOV       </span>                            <span class="co">#  (REFSMMAT X LOS).  TRANSFORMS LOS FROM</span>
+012322,000102: 26,2034           01736                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFERENCE COORD TO STAB MEMB COORD.</span>
+012323,000103: 26,2035           54036                                    +1                                    
+012324,000104: 26,2036           02223                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
+012325,000105: 26,2037           40012                           <span class="in">VSL8    </span> <span class="in">BOV       </span>                            
+012326,000106: 26,2040           54042                                    +2                                    
+012327,000107: 26,2041           02223                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
+012328,000108: 26,2042           53575                           <span class="in">VLOAD   </span> <span class="in">UNIT      </span>                            
+012329,000109: 26,2043           02223                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564F4E45">VONE</a>                                  
+012330,000110: 26,2044           01256                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F494E5456534D">POINTVSM</a>                              <span class="co">#  STORE LOS FOR VECPOINT CALL</span>
+012331,000111: 26,2045           77776                           <span class="in">EXIT    </span>                                       
+012332,000112: 26,2046           41156                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494F4E32">OPTION2</a>                               <span class="co">#  1 FOR Z AXIS.  2 FOR X AXIS.</span>
+012333,000113: 26,2047           65026                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+012334,000114: 26,2050           00006                           <span class="op">EXTEND  </span>                                       
+012335,000115: 26,2051           12075                           <span class="op">BZF     </span> <a href="#414C494E455A">ALINEZ</a>                                
+<a name="414C494E4558"></a>012336,000116: 26,2052           06014        <span class="sm">ALINEX  </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  X AXIS ALIGNMENT</span>
+012337,000117: 26,2053           77775                           <span class="in">VLOAD   </span>                                       
+012338,000118: 26,2054           06231                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#554E495458">UNITX</a>                                 <span class="co">#  READ (.5, 0, 0)</span>
+<a name="56383943414C4C31"></a>012339,000119: 26,2055           35250        <span class="sm">V89CALL1</span>           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534341584953">SCAXIS</a>                                <span class="co">#  STORE SELECTED ALIGNMENT AXIS</span>
+012340,000120: 26,2056           56000                                    <a href="R60,R62.agc.html#564543504F494E54">VECPOINT</a>                              <span class="co">#  PUTS DESIRED GIM ANG (OG,IG,MG) IN TMPAC</span>
+012341,000121: 26,2057           01207                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  <span class="co">#  STORE GIMBAL ANGLES FOR BALLANGS CALL.</span>
+012342,000122: 26,2060           77776                           <span class="in">EXIT    </span>                                       
+012343,000123: 26,2061           02302                           <span class="op">TC      </span> <a href="R60,R62.agc.html#42414C4C414E4753">BALLANGS</a>                              <span class="co">#  PUTS DESIRED BALL ANGLES IN FDAIX,Y,Z</span>
+012344,000124: 26,2062           32102                           <span class="op">CAF     </span> <a href="#564230364E3138">VB06N18</a>                               <span class="co">#  V 06 N 18</span>
+012345,000125: 26,2063           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  NOUN 18 REFERS TO FDAIX,Y,Z</span>
+012346,000126: 26,2064           20406                           <span class="ps">CADR    </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#474F464C415348">GOFLASH</a>                               
+012347,000127: 26,2065           05561                           <span class="op">TC      </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE</span>
+012348,000128: 26,2066           02070                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED</span>
+012349,000129: 26,2067           02014                           <span class="op">TC      </span> <a href="#5638395245434C">V89RECL</a>                               <span class="co">#  RECYCLE</span>
+012350,000130: 26,2070           05575                           <span class="op">TC      </span> <a href="SERVICE_ROUTINES.agc.html#444F574E464C4147">DOWNFLAG</a>                              <span class="co">#  RESET 3 AXIS FLAG</span>
+012351,000131: 26,2071           00124                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#3341584953464C47">3AXISFLG</a>                              <span class="co">#  RESET BIT6 FLAG WORD 5</span>
+012352,000132: 26,2072           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  PERFORMS LEM MANEUVER TO ALIGN SELECTED</span>
+012353,000133: 26,2073           54103                           <span class="ps">CADR    </span> <a href="R60,R62.agc.html#5236304C454D">R60LEM</a>                                <span class="co">#  SPACECRAFT AXIS TO CSM.</span>
+012354,000134: 26,2074           15561                           <span class="op">TCF     </span> <a href="DISPLAY_INTERFACE_ROUTINES.agc.html#454E44455854">ENDEXT</a>                                <span class="co">#  TERMINATE R63</span>
+012355,000135: 
+<a name="414C494E455A"></a>012356,000136: 26,2075           06014        <span class="sm">ALINEZ  </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               <span class="co">#  Z AXIS ALIGNMENT</span>
+012357,000137: 26,2076           52175                           <span class="in">VLOAD   </span> <span class="in">GOTO      </span>                            
+012358,000138: 26,2077           06225                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#554E49545A">UNITZ</a>                                 <span class="co">#  READ (0, 0, .5)</span>
+012359,000139: 26,2100           54055                                    <a href="#56383943414C4C31">V89CALL1</a>                              
+012360,000140: 
+<a name="564230344E30362A"></a>012361,000141: 26,2101           01006        <span class="sm">VB04N06*</span>           <span class="ps">VN      </span> 406                                   
+<a name="564230364E3138"></a>012362,000142: 26,2102           01422        <span class="sm">VB06N18 </span>           <span class="ps">VN      </span> 0618                                  
+012363,000143: 
 
 End of include-file R63.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

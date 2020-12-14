@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -66,47 +65,66 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files are part of a reconstructed copy of LUM69 Revision 2, the
-flown Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
+These source-code files are part of a reconstructed copy of Luminary 69/2,
+the flown, final release of the Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
 <br><br>
-The reconstruction began with source code of Luminary 69 revision 0 previously
-transcribed from a digitized copy of that program.  The code was then updated 
-by back-porting the R-2 lunar potential model from previously-transcribed source
-code of Luminary 99. These required changes were described in the original
-Luminary memos 75 and 78. The reconstructed code was verified by 
-matching memory-bank checksums to those listed in drawing 2021152G. Note that
-page numbers in the reconstructed code match those on the Luminary 069 printout, 
-although the added code would likely have changed page numbers for a real LUM69 
-Revision 2 listing.
+The reconstruction is based on the source code of Luminary 69 &mdash; i.e., the
+initial, unflown version, "revision 0" &mdash; of which 
+a contemporary listing was available.  The code was then updated by incorporating the 
+differences between Luminary 69 and Luminary 69/2, known from other contemporary
+documentation.  The only such difference is the implementation in 
+Luminary 69/2 of the "R-2 Lunar Potential Model", the source code for which was taken 
+from program Luminary 99/1 (Apollo 11 LM), of which a contemporary listing was also available.
+Finally, the now-reconstructed Luminary 69/2 was then validated by assembling it to
+executable form and verifying that its memory banks had the correct checksums,
+known from still other contemporary documentation.
 <br><br>
+Note that page numbers in the reconstructed code match those in the original Luminary 69
+program listing, or in the ORBITAL INTEGRATION log section, in Luminary 99/1. Page numbers 
+would certainly differ somewhat in a contemporary Luminary 69/2 listing.
+Moreover, annotations that were not present in the contemporary source code have been added 
+to the reconstructed code to justify each change in Luminary 69/2 relative to 
+Luminary 69. Here's a guide to the Apollo documentation referenced in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n80/mode/1up">
+    MIT/IL engineering drawing 2021152N, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Luminary 69/2 (called "LUMINARY 69 REV. 2" in the document itself).</li>
+<li><a href="https://archive.org/details/Luminary99001J2k60/mode/1up">
+       Luminary 99/1 (Apollo 11 LM final release) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/luminary6900miti/mode/1up">
+       Luminary 69 (Apollo 10 LM initial release) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">
+       LUMINARY Memo #75, "R-2 Lunar Potential Model Added to LUM"</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM78_text.pdf">
+       LUMINARY Memo #78, "LUMINARY Revisions 93-96"</a>.</li>
+</ul>
 Comments from the original source code are prefixed with a single '#' symbol, 
 whereas comments added later are prefixed by "##" or "###".  Report any errors 
 noted by creating an 
 issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
 project's GitHub repository</a>.
 </td></tr></tbody></table>
-
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009023,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-009024,000003:                                                                                                  <span class="co">## Filename:    DOWNLINK_LISTS.agc</span>
-009025,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
-009026,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
-009027,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
-009028,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
-009029,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
-009030,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
-009031,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
-009032,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
-009033,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
-009034,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
-009035,000014:                                                                                                  <span class="co">## Reference:   pp. 208-220</span>
-009036,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-009037,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-009038,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-009039,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
-009040,000019: 
+009076,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+009077,000003:                                                                                                  <span class="co">## Filename:    DOWNLINK_LISTS.agc</span>
+009078,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
+009079,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
+009080,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
+009081,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
+009082,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
+009083,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
+009084,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
+009085,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
+009086,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
+009087,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
+009088,000014:                                                                                                  <span class="co">## Reference:   pp. 208-220</span>
+009089,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+009090,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+009091,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+009092,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
+009093,000019: 
 </pre>
 </span>
 </p>
@@ -122,49 +140,49 @@ Page 208
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009042,000021: 22,2004                                           <span class="ps">BANK    </span> 22                                    
-009043,000022: 05,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444F574E54454C4D">DOWNTELM</a>                              
-009044,000023: 05,2000                                           <span class="ps">BANK    </span>                                       
-009045,000024: 
-009046,000025: 05,2065     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-009047,000026: 
-009048,000027:                                                                                                  <span class="co">#  SPECIAL DOWNLINK OP CODES</span>
-009049,000028:                                                                                                  <span class="co">#        OP CODE  ADDRESS(EXAMPLE) SENDS..     BIT 15  BITS 14-12 BITS 11</span>
-009050,000029:                                                                                                  <span class="co">#                                                                      -0</span>
-009051,000030:                                                                                                  <span class="co">#        ------  ----------      ----------    ------  ---------- -------</span>
-009052,000031:                                                                                                  <span class="co">#                                                                      --</span>
-009053,000032:                                                                                                  <span class="co">#        1DNADR  TIME2           (2 AGC WDS)     0         0      ECADR</span>
-009054,000033:                                                                                                  <span class="co">#        2DNADR  TEPHEM          (4 AGC WDS)     0         1      ECADR</span>
-009055,000034:                                                                                                  <span class="co">#        3DNADR  VGBODY          (6 AGC WDS)     0         2      ECADR</span>
-009056,000035:                                                                                                  <span class="co">#        4DNADR  STATE           (8 AGC WDS)     0         3      ECADR</span>
-009057,000036:                                                                                                  <span class="co">#        5DNADR  UPBUFF          (10 AGC WDS)    0         4      ECADR</span>
-009058,000037:                                                                                                  <span class="co">#        6DNADR  DSPTAB          (12 AGC WDS)    0         5      ECADR</span>
-009059,000038:                                                                                                  <span class="co">#        DNCHAN  30              CHANNELS        0         7      CHANNEL</span>
-009060,000039:                                                                                                  <span class="co">#                                                                 ADDRESS</span>
-009061,000040:                                                                                                  <span class="co">#        DNPTR   NEXTLIST        POINTS TO NEXT  0         6      ADRES</span>
-009062,000041:                                                                                                  <span class="co">#                                 LIST.</span>
-009063,000042: 
-009064,000043:                                                                                                  <span class="co">#  DOWNLIST FORMAT DEFINITIONS AND RULES-</span>
-009065,000044:                                                                                                  <span class="co">#  1. END OF A LIST = -XDNADR (X = 1 TO 6), -DNPTR, OR -DNCHAN.</span>
-009066,000045:                                                                                                  <span class="co">#  2. SNAPSHOT SUBLIST = LIST WHICH STARTS WITH A -1DNADR.</span>
-009067,000046:                                                                                                  <span class="co">#  3. SNAPSHOT SUBLIST CAN ONLY CONTAIN 1DNADRS.</span>
-009068,000047:                                                                                                  <span class="co">#  4. TIME2 1DNADR MUST BE LOCATED IN THE CONTROL LIST OF A DOWNLIST.</span>
-009069,000048:                                                                                                  <span class="co">#  5. ERASABLE DOWN TELEMETRY WORDS SHOULD BE GROUPED IN SEQUENTIAL</span>
-009070,000049:                                                                                                  <span class="co">#     LOCATIONS AS MUCH AS POSSIBLE TO SAVE STORAGE USED BY DOWNLINK LISTS.</span>
-009071,000050: 
-009072,000051: 05,2065                                           <span class="ps">COUNT*  </span> $$/DLIST                              
-<a name="455241535A45524F"></a>009073,000052: 05,2065                        <span class="sm">ERASZERO</span>           <span class="ps">EQUALS  </span> 7                                     
-<a name="554E4B4E4F574E"></a>009074,000053: 05,2065  0000007               <span class="sm">UNKNOWN </span>           <span class="ps">EQUALS  </span> <a href="#455241535A45524F">ERASZERO</a>                              
-<a name="5350415245"></a>009075,000054: 05,2065  0000007               <span class="sm">SPARE   </span>           <span class="ps">EQUALS  </span> <a href="#455241535A45524F">ERASZERO</a>                              <span class="co">#  USE SPARE TO INDICATE AVAILABLE SPACE</span>
-<a name="4C4F574944434F44"></a>009076,000055: 05,2065           77340        <span class="sm">LOWIDCOD</span>           <span class="ps">OCT     </span> 77340                                 <span class="co">#  LOW ID CODE</span>
-009077,000056: 
-009078,000057: 
-<a name="4E4F4D444E4C5354"></a>009079,000058: 05,2066  05,2172               <span class="sm">NOMDNLST</span>           <span class="ps">EQUALS  </span> <a href="#4C4D43535441444C">LMCSTADL</a>                              <span class="co">#  FRESH START AND POST P27 DOWNLIST</span>
-009080,000059: 
-<a name="4147534C495354"></a>009081,000060: 05,2066  05,2407               <span class="sm">AGSLIST </span>           <span class="ps">EQUALS  </span> <a href="#4C4D41475349444C">LMAGSIDL</a>                              
-009082,000061: 
-<a name="5550444E4C495354"></a>009083,000062: 05,2066  05,2407               <span class="sm">UPDNLIST</span>           <span class="ps">EQUALS  </span> <a href="#4C4D41475349444C">LMAGSIDL</a>                              <span class="co">#  UPDATE PROGRAM (P27) DOWNLIST</span>
-009084,000063: 
+009095,000021: 22,2004                                           <span class="ps">BANK    </span> 22                                    
+009096,000022: 05,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444F574E54454C4D">DOWNTELM</a>                              
+009097,000023: 05,2000                                           <span class="ps">BANK    </span>                                       
+009098,000024: 
+009099,000025: 05,2065     0340                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+009100,000026: 
+009101,000027:                                                                                                  <span class="co">#  SPECIAL DOWNLINK OP CODES</span>
+009102,000028:                                                                                                  <span class="co">#        OP CODE  ADDRESS(EXAMPLE) SENDS..     BIT 15  BITS 14-12 BITS 11</span>
+009103,000029:                                                                                                  <span class="co">#                                                                      -0</span>
+009104,000030:                                                                                                  <span class="co">#        ------  ----------      ----------    ------  ---------- -------</span>
+009105,000031:                                                                                                  <span class="co">#                                                                      --</span>
+009106,000032:                                                                                                  <span class="co">#        1DNADR  TIME2           (2 AGC WDS)     0         0      ECADR</span>
+009107,000033:                                                                                                  <span class="co">#        2DNADR  TEPHEM          (4 AGC WDS)     0         1      ECADR</span>
+009108,000034:                                                                                                  <span class="co">#        3DNADR  VGBODY          (6 AGC WDS)     0         2      ECADR</span>
+009109,000035:                                                                                                  <span class="co">#        4DNADR  STATE           (8 AGC WDS)     0         3      ECADR</span>
+009110,000036:                                                                                                  <span class="co">#        5DNADR  UPBUFF          (10 AGC WDS)    0         4      ECADR</span>
+009111,000037:                                                                                                  <span class="co">#        6DNADR  DSPTAB          (12 AGC WDS)    0         5      ECADR</span>
+009112,000038:                                                                                                  <span class="co">#        DNCHAN  30              CHANNELS        0         7      CHANNEL</span>
+009113,000039:                                                                                                  <span class="co">#                                                                 ADDRESS</span>
+009114,000040:                                                                                                  <span class="co">#        DNPTR   NEXTLIST        POINTS TO NEXT  0         6      ADRES</span>
+009115,000041:                                                                                                  <span class="co">#                                 LIST.</span>
+009116,000042: 
+009117,000043:                                                                                                  <span class="co">#  DOWNLIST FORMAT DEFINITIONS AND RULES-</span>
+009118,000044:                                                                                                  <span class="co">#  1. END OF A LIST = -XDNADR (X = 1 TO 6), -DNPTR, OR -DNCHAN.</span>
+009119,000045:                                                                                                  <span class="co">#  2. SNAPSHOT SUBLIST = LIST WHICH STARTS WITH A -1DNADR.</span>
+009120,000046:                                                                                                  <span class="co">#  3. SNAPSHOT SUBLIST CAN ONLY CONTAIN 1DNADRS.</span>
+009121,000047:                                                                                                  <span class="co">#  4. TIME2 1DNADR MUST BE LOCATED IN THE CONTROL LIST OF A DOWNLIST.</span>
+009122,000048:                                                                                                  <span class="co">#  5. ERASABLE DOWN TELEMETRY WORDS SHOULD BE GROUPED IN SEQUENTIAL</span>
+009123,000049:                                                                                                  <span class="co">#     LOCATIONS AS MUCH AS POSSIBLE TO SAVE STORAGE USED BY DOWNLINK LISTS.</span>
+009124,000050: 
+009125,000051: 05,2065                                           <span class="ps">COUNT*  </span> $$/DLIST                              
+<a name="455241535A45524F"></a>009126,000052: 05,2065                        <span class="sm">ERASZERO</span>           <span class="ps">EQUALS  </span> 7                                     
+<a name="554E4B4E4F574E"></a>009127,000053: 05,2065  0000007               <span class="sm">UNKNOWN </span>           <span class="ps">EQUALS  </span> <a href="#455241535A45524F">ERASZERO</a>                              
+<a name="5350415245"></a>009128,000054: 05,2065  0000007               <span class="sm">SPARE   </span>           <span class="ps">EQUALS  </span> <a href="#455241535A45524F">ERASZERO</a>                              <span class="co">#  USE SPARE TO INDICATE AVAILABLE SPACE</span>
+<a name="4C4F574944434F44"></a>009129,000055: 05,2065           77340        <span class="sm">LOWIDCOD</span>           <span class="ps">OCT     </span> 77340                                 <span class="co">#  LOW ID CODE</span>
+009130,000056: 
+009131,000057: 
+<a name="4E4F4D444E4C5354"></a>009132,000058: 05,2066  05,2172               <span class="sm">NOMDNLST</span>           <span class="ps">EQUALS  </span> <a href="#4C4D43535441444C">LMCSTADL</a>                              <span class="co">#  FRESH START AND POST P27 DOWNLIST</span>
+009133,000059: 
+<a name="4147534C495354"></a>009134,000060: 05,2066  05,2407               <span class="sm">AGSLIST </span>           <span class="ps">EQUALS  </span> <a href="#4C4D41475349444C">LMAGSIDL</a>                              
+009135,000061: 
+<a name="5550444E4C495354"></a>009136,000062: 05,2066  05,2407               <span class="sm">UPDNLIST</span>           <span class="ps">EQUALS  </span> <a href="#4C4D41475349444C">LMAGSIDL</a>                              <span class="co">#  UPDATE PROGRAM (P27) DOWNLIST</span>
+009137,000063: 
 </pre>
 </span>
 </p>
@@ -180,57 +198,57 @@ Page 209
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009086,000065:                                                                                                  <span class="co">#  LM ORBITAL MANEUVERS LIST</span>
-009087,000066: 
-009088,000067:                                                                                                  <span class="co">#      -----------------  CONTROL LIST  --------------------------</span>
-009089,000068: 
-<a name="4C4D4F52424D444C"></a>009090,000069: 05,2066                        <span class="sm">LMORBMDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
-009091,000070: 05,2066           32127                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3031">LMORBM01</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009092,000071: 05,2067           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009093,000072: 05,2070           03447                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4C5434">DELLT4</a>                                <span class="co">#  DELLT4,+1</span>
-009094,000073: 05,2071           13441                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5254415247">RTARG</a>                                 <span class="co">#  RTARG,+1...+5</span>
-009095,000074: 05,2072           02262                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454C4556">ELEV</a>                                  <span class="co">#  ELEV,+1</span>
-009096,000075: 05,2073           01344                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544556454E54">TEVENT</a>                                <span class="co">#  TEVENT,+1</span>
-009097,000076: 05,2074           25733                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFSMMAT+0...+11D</span>
-009098,000077: 05,2075           03631                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54435349">TCSI</a>                                  <span class="co">#  TCSI,+1</span>
-009099,000078: 05,2076           12272                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455431">DELVEET1</a>                              <span class="co">#  DELVEET1+0...+5</span>
-009100,000079: 05,2077           13704                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5647544947">VGTIG</a>                                 <span class="co">#  VGTIG+0...+5</span>
-009101,000080: 05,2100           01340                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5256454C5A">DNLRVELZ</a>                              <span class="co">#  DNLRVELZ,DNLRALT</span>
-009102,000081: 05,2101           03626                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#545041535334">TPASS4</a>                                <span class="co">#  TPASS4,+1</span>
-009103,000082: 05,2102           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DATA</span>
-009104,000083: 05,2103           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
-009105,000084: 05,2104           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009106,000085: 05,2105           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009107,000086: 05,2106           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DATA</span>
-009108,000087: 05,2107           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
-009109,000088: 05,2110           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
-009110,000089: 05,2111           03373                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434448">TCDH</a>                                  <span class="co">#  TCDH,+1</span>
-009111,000090: 05,2112           12300                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455432">DELVEET2</a>                              <span class="co">#  DELVEET2+0...+5</span>
-009112,000091: 05,2113           03633                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54545049">TTPI</a>                                  <span class="co">#  TTPI,+1</span>
-009113,000092: 05,2114           13365                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455433">DELVEET3</a>                              <span class="co">#  DELVEET3+0...+5</span>
-009114,000093: 05,2115           01333                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E5252414E4745">DNRRANGE</a>                              <span class="co">#  DNRRANGE,DNRRDOT</span>
-009115,000094: 05,2116           05336                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5256454C58">DNLRVELX</a>                              <span class="co">#  DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT</span>
-009116,000095: 05,2117           03575                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494646414C54">DIFFALT</a>                               <span class="co">#  DIFFALT,+1</span>
-009117,000096: 05,2120           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
-009118,000097: 05,2121           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
-009119,000098: 05,2122           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
-009120,000099: 05,2123           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DATA</span>
-009121,000100: 05,2124           32170                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3036">LMORBM06</a>                              <span class="co">#  COMMON DATA</span>
-009122,000101: 05,2125           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 <span class="co">#  FORMERLY PIF</span>
-009123,000102: 05,2126           74263                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  TGO,+1</span>
-009124,000103: 
-009125,000104:                                                                                                  <span class="co">#      -----------------  SUB-LISTS  ----------------------------</span>
-009126,000105: 
-<a name="4C4D4F52424D3031"></a>009127,000106: 05,2127           76056        <span class="sm">LMORBM01</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#522D4F54484552">R-OTHER</a>    +2                         <span class="co">#  R-OTHER+2,+3             SNAPSHOT</span>
-009128,000107: 05,2130           01723                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#522D4F54484552">R-OTHER</a>    +4                         <span class="co">#  R-OTHER+4,+5</span>
-009129,000108: 05,2131           01725                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#562D4F54484552">V-OTHER</a>                               <span class="co">#  V-OTHER,+1</span>
-009130,000109: 05,2132           01727                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#562D4F54484552">V-OTHER</a>    +2                         <span class="co">#  V-OTHER+2,+3</span>
-009131,000110: 05,2133           01731                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#562D4F54484552">V-OTHER</a>    +4                         <span class="co">#  V-OTHER+4,+5</span>
-009132,000111: 05,2134           01570                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#542D4F54484552">T-OTHER</a>                               <span class="co">#  T-OTHER,+1</span>
-009133,000112: 05,2135           76060                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#522D4F54484552">R-OTHER</a>                               <span class="co">#  R-OTHER+0,+1</span>
-009134,000113: 
-<a name="4C4D4F52424D3032"></a>009135,000114: 05,2136           04320        <span class="sm">LMORBM02</span>           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245444F435452">REDOCTR</a>                               <span class="co">#  REDOCTR,THETAD,+1,+2     COMMON DATA</span>
-009136,000115: 
+009139,000065:                                                                                                  <span class="co">#  LM ORBITAL MANEUVERS LIST</span>
+009140,000066: 
+009141,000067:                                                                                                  <span class="co">#      -----------------  CONTROL LIST  --------------------------</span>
+009142,000068: 
+<a name="4C4D4F52424D444C"></a>009143,000069: 05,2066                        <span class="sm">LMORBMDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
+009144,000070: 05,2066           32127                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3031">LMORBM01</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009145,000071: 05,2067           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009146,000072: 05,2070           03447                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4C5434">DELLT4</a>                                <span class="co">#  DELLT4,+1</span>
+009147,000073: 05,2071           13441                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5254415247">RTARG</a>                                 <span class="co">#  RTARG,+1...+5</span>
+009148,000074: 05,2072           02262                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454C4556">ELEV</a>                                  <span class="co">#  ELEV,+1</span>
+009149,000075: 05,2073           01344                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544556454E54">TEVENT</a>                                <span class="co">#  TEVENT,+1</span>
+009150,000076: 05,2074           25733                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFSMMAT+0...+11D</span>
+009151,000077: 05,2075           03631                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54435349">TCSI</a>                                  <span class="co">#  TCSI,+1</span>
+009152,000078: 05,2076           12272                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455431">DELVEET1</a>                              <span class="co">#  DELVEET1+0...+5</span>
+009153,000079: 05,2077           13704                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5647544947">VGTIG</a>                                 <span class="co">#  VGTIG+0...+5</span>
+009154,000080: 05,2100           01340                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5256454C5A">DNLRVELZ</a>                              <span class="co">#  DNLRVELZ,DNLRALT</span>
+009155,000081: 05,2101           03626                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#545041535334">TPASS4</a>                                <span class="co">#  TPASS4,+1</span>
+009156,000082: 05,2102           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DATA</span>
+009157,000083: 05,2103           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
+009158,000084: 05,2104           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009159,000085: 05,2105           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009160,000086: 05,2106           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DATA</span>
+009161,000087: 05,2107           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
+009162,000088: 05,2110           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
+009163,000089: 05,2111           03373                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434448">TCDH</a>                                  <span class="co">#  TCDH,+1</span>
+009164,000090: 05,2112           12300                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455432">DELVEET2</a>                              <span class="co">#  DELVEET2+0...+5</span>
+009165,000091: 05,2113           03633                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54545049">TTPI</a>                                  <span class="co">#  TTPI,+1</span>
+009166,000092: 05,2114           13365                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455433">DELVEET3</a>                              <span class="co">#  DELVEET3+0...+5</span>
+009167,000093: 05,2115           01333                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E5252414E4745">DNRRANGE</a>                              <span class="co">#  DNRRANGE,DNRRDOT</span>
+009168,000094: 05,2116           05336                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5256454C58">DNLRVELX</a>                              <span class="co">#  DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT</span>
+009169,000095: 05,2117           03575                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494646414C54">DIFFALT</a>                               <span class="co">#  DIFFALT,+1</span>
+009170,000096: 05,2120           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
+009171,000097: 05,2121           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
+009172,000098: 05,2122           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
+009173,000099: 05,2123           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DATA</span>
+009174,000100: 05,2124           32170                           <span class="dn">DNPTR   </span> <a href="#4C4D4F52424D3036">LMORBM06</a>                              <span class="co">#  COMMON DATA</span>
+009175,000101: 05,2125           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 <span class="co">#  FORMERLY PIF</span>
+009176,000102: 05,2126           74263                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   <span class="co">#  TGO,+1</span>
+009177,000103: 
+009178,000104:                                                                                                  <span class="co">#      -----------------  SUB-LISTS  ----------------------------</span>
+009179,000105: 
+<a name="4C4D4F52424D3031"></a>009180,000106: 05,2127           76056        <span class="sm">LMORBM01</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#522D4F54484552">R-OTHER</a>    +2                         <span class="co">#  R-OTHER+2,+3             SNAPSHOT</span>
+009181,000107: 05,2130           01723                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#522D4F54484552">R-OTHER</a>    +4                         <span class="co">#  R-OTHER+4,+5</span>
+009182,000108: 05,2131           01725                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#562D4F54484552">V-OTHER</a>                               <span class="co">#  V-OTHER,+1</span>
+009183,000109: 05,2132           01727                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#562D4F54484552">V-OTHER</a>    +2                         <span class="co">#  V-OTHER+2,+3</span>
+009184,000110: 05,2133           01731                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#562D4F54484552">V-OTHER</a>    +4                         <span class="co">#  V-OTHER+4,+5</span>
+009185,000111: 05,2134           01570                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#542D4F54484552">T-OTHER</a>                               <span class="co">#  T-OTHER,+1</span>
+009186,000112: 05,2135           76060                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#522D4F54484552">R-OTHER</a>                               <span class="co">#  R-OTHER+0,+1</span>
+009187,000113: 
+<a name="4C4D4F52424D3032"></a>009188,000114: 05,2136           04320        <span class="sm">LMORBM02</span>           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245444F435452">REDOCTR</a>                               <span class="co">#  REDOCTR,THETAD,+1,+2     COMMON DATA</span>
+009189,000115: 
 </pre>
 </span>
 </p>
@@ -246,40 +264,40 @@ Page 210
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009138,000117: 05,2137           01432                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5253424251">RSBBQ</a>                                 <span class="co">#  RSBBQ,+1</span>
-009139,000118: 05,2140           07017                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                <span class="co">#  OMEGAP,OMEGAQ,OMEGAR,GARBAGE</span>
-009140,000119: 05,2141           07233                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  CDUXD,CDUYD,CDUZD,GARBAGE</span>
-009141,000120: 05,2142           04032                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  CDUX,CDUY,CDUZ,CDUT</span>
-009142,000121: 05,2143           24074                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 <span class="co">#  STATE+0...+11D (FLAGWORDS)</span>
-009143,000122: 05,2144           52754                           <span class="dn">-6DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                <span class="co">#  DSPTAB TABLES</span>
-009144,000123: 
-<a name="4C4D4F52424D3033"></a>009145,000124: 05,2145           76555        <span class="sm">LMORBM03</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>         +2                         <span class="co">#  RN +2,+3                 SNAPSHOT</span>
-009146,000125: 05,2146           01224                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>         +4                         <span class="co">#  RN +4,+5</span>
-009147,000126: 05,2147           01226                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  VN,+1</span>
-009148,000127: 05,2150           01230                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>         +2                         <span class="co">#  VN +2,+3</span>
-009149,000128: 05,2151           01232                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>         +4                         <span class="co">#  VN +4,+5</span>
-009150,000129: 05,2152           01234                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               <span class="co">#  PIPTIME,+1</span>
-009151,000130: 05,2153           76557                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    <span class="co">#  RN,+1</span>
-009152,000131: 
-<a name="4C4D4F52424D3034"></a>009153,000132: 05,2154           07241        <span class="sm">LMORBM04</span>           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415044">OMEGAPD</a>                               <span class="co">#  OMEGAPD,OMEGAQD,OMEGARD,GARBAGE</span>
-009154,000133: 05,2155           10372                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43414452464C5348">CADRFLSH</a>                              <span class="co">#  CADRFLSH,+1,+2,FAILREG,+1,+2</span>
-009155,000134: 05,2156           77667                           <span class="dn">-1DNADR </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5241444D4F444553">RADMODES</a>                              <span class="co">#  RADMODES,DAPBOOLS        COMMON DATA</span>
-009156,000135: 
-<a name="4C4D4F52424D3035"></a>009157,000136: 05,2157           07017        <span class="sm">LMORBM05</span>           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                <span class="co">#  OMEGAP,OMEGAQ,OMEGAR,GARBAGE</span>
-009158,000137: 05,2160           07233                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  CDUXD,CDUXD,CDUZD,GARBAGE</span>
-009159,000138: 05,2161           04032                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  CDUX,CDUY,CDUZ,CDUT</span>
-009160,000139: 05,2162           03022                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484151">ALPHAQ</a>                                <span class="co">#  ALPHAQ,ALPHAR            COMMON DATA</span>
-009161,000140: 05,2163           03113                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B50">POSTORKP</a>                              <span class="co">#  POSTORKP,NEGTORKP</span>
-009162,000141: 05,2164           34011                           <span class="dn">DNCHAN  </span> 11                                    <span class="co">#  CHANNELS11,12</span>
-009163,000142: 05,2165           34013                           <span class="dn">DNCHAN  </span> 13                                    <span class="co">#  CHANNELS13,14</span>
-009164,000143: 05,2166           34030                           <span class="dn">DNCHAN  </span> 30                                    <span class="co">#  CHANNELS30,31</span>
-009165,000144: 05,2167           43745                           <span class="dn">-DNCHAN </span> 32                                    <span class="co">#  CHANNELS32,33</span>
-009166,000145: 
-<a name="4C4D4F52424D3036"></a>009167,000146: 05,2170           03556        <span class="sm">LMORBM06</span>           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D4531">PIPTIME1</a>                              <span class="co">#  PIPTIME,+1               COMMON DATA</span>
-009168,000147: 05,2171           67453                           <span class="dn">-3DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56">DELV</a>                                  <span class="co">#  DELV+0...+5</span>
-009169,000148: 
-009170,000149:                                                                                                  <span class="co">#      ---------------------------------------------------------</span>
-009171,000150: 
+009191,000117: 05,2137           01432                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5253424251">RSBBQ</a>                                 <span class="co">#  RSBBQ,+1</span>
+009192,000118: 05,2140           07017                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                <span class="co">#  OMEGAP,OMEGAQ,OMEGAR,GARBAGE</span>
+009193,000119: 05,2141           07233                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  CDUXD,CDUYD,CDUZD,GARBAGE</span>
+009194,000120: 05,2142           04032                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  CDUX,CDUY,CDUZ,CDUT</span>
+009195,000121: 05,2143           24074                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 <span class="co">#  STATE+0...+11D (FLAGWORDS)</span>
+009196,000122: 05,2144           52754                           <span class="dn">-6DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                <span class="co">#  DSPTAB TABLES</span>
+009197,000123: 
+<a name="4C4D4F52424D3033"></a>009198,000124: 05,2145           76555        <span class="sm">LMORBM03</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>         +2                         <span class="co">#  RN +2,+3                 SNAPSHOT</span>
+009199,000125: 05,2146           01224                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>         +4                         <span class="co">#  RN +4,+5</span>
+009200,000126: 05,2147           01226                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    <span class="co">#  VN,+1</span>
+009201,000127: 05,2150           01230                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>         +2                         <span class="co">#  VN +2,+3</span>
+009202,000128: 05,2151           01232                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>         +4                         <span class="co">#  VN +4,+5</span>
+009203,000129: 05,2152           01234                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               <span class="co">#  PIPTIME,+1</span>
+009204,000130: 05,2153           76557                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    <span class="co">#  RN,+1</span>
+009205,000131: 
+<a name="4C4D4F52424D3034"></a>009206,000132: 05,2154           07241        <span class="sm">LMORBM04</span>           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D4547415044">OMEGAPD</a>                               <span class="co">#  OMEGAPD,OMEGAQD,OMEGARD,GARBAGE</span>
+009207,000133: 05,2155           10372                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43414452464C5348">CADRFLSH</a>                              <span class="co">#  CADRFLSH,+1,+2,FAILREG,+1,+2</span>
+009208,000134: 05,2156           77667                           <span class="dn">-1DNADR </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#5241444D4F444553">RADMODES</a>                              <span class="co">#  RADMODES,DAPBOOLS        COMMON DATA</span>
+009209,000135: 
+<a name="4C4D4F52424D3035"></a>009210,000136: 05,2157           07017        <span class="sm">LMORBM05</span>           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                <span class="co">#  OMEGAP,OMEGAQ,OMEGAR,GARBAGE</span>
+009211,000137: 05,2160           07233                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  CDUXD,CDUXD,CDUZD,GARBAGE</span>
+009212,000138: 05,2161           04032                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  CDUX,CDUY,CDUZ,CDUT</span>
+009213,000139: 05,2162           03022                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484151">ALPHAQ</a>                                <span class="co">#  ALPHAQ,ALPHAR            COMMON DATA</span>
+009214,000140: 05,2163           03113                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B50">POSTORKP</a>                              <span class="co">#  POSTORKP,NEGTORKP</span>
+009215,000141: 05,2164           34011                           <span class="dn">DNCHAN  </span> 11                                    <span class="co">#  CHANNELS11,12</span>
+009216,000142: 05,2165           34013                           <span class="dn">DNCHAN  </span> 13                                    <span class="co">#  CHANNELS13,14</span>
+009217,000143: 05,2166           34030                           <span class="dn">DNCHAN  </span> 30                                    <span class="co">#  CHANNELS30,31</span>
+009218,000144: 05,2167           43745                           <span class="dn">-DNCHAN </span> 32                                    <span class="co">#  CHANNELS32,33</span>
+009219,000145: 
+<a name="4C4D4F52424D3036"></a>009220,000146: 05,2170           03556        <span class="sm">LMORBM06</span>           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D4531">PIPTIME1</a>                              <span class="co">#  PIPTIME,+1               COMMON DATA</span>
+009221,000147: 05,2171           67453                           <span class="dn">-3DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56">DELV</a>                                  <span class="co">#  DELV+0...+5</span>
+009222,000148: 
+009223,000149:                                                                                                  <span class="co">#      ---------------------------------------------------------</span>
+009224,000150: 
 </pre>
 </span>
 </p>
@@ -295,57 +313,57 @@ Page 211
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009173,000152:                                                                                                  <span class="co">#  LM COAST AND ALIGNMENT DOWNLIST</span>
-009174,000153: 
-009175,000154:                                                                                                  <span class="co">#      -----------------  CONTROL LIST  --------------------------</span>
-009176,000155: 
-<a name="4C4D43535441444C"></a>009177,000156: 05,2172                        <span class="sm">LMCSTADL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
-009178,000157: 05,2172           32127                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413031">LMCSTA01</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009179,000158: 05,2173           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009180,000159: 05,2174           02020                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  <span class="co">#  AGSK,+1</span>
-009181,000160: 05,2175           02774                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54414C49474E">TALIGN</a>                                <span class="co">#  TALIGN,+1</span>
-009182,000161: 05,2176           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
-009183,000162: 05,2177           01333                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E5252414E4745">DNRRANGE</a>                              <span class="co">#  DNRRANGE,DNRRDOT</span>
-009184,000163: 05,2200           01344                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544556454E54">TEVENT</a>                                <span class="co">#  TEVENT,+1</span>
-009185,000164: 05,2201           25733                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFSMMAT+0...+11D</span>
-009186,000165: 05,2202           00735                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F54434F4445">AOTCODE</a>                               <span class="co">#  AOTCODE,GARBAGE</span>
-009187,000166: 05,2203           13704                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5647544947">VGTIG</a>                                 <span class="co">#  VGTIG+0...+5</span>
-009188,000167: 05,2204           05336                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5256454C58">DNLRVELX</a>                              <span class="co">#  DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT</span>
-009189,000168: 05,2205           32224                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413036">LMCSTA06</a>                              <span class="co">#  COMMON DATA</span>
-009190,000169: 05,2206           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413032">LMCSTA02</a>                              <span class="co">#  COMMON DATA</span>
-009191,000170: 05,2207           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
-009192,000171: 05,2210           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413033">LMCSTA03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009193,000172: 05,2211           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009194,000173: 05,2212           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413034">LMCSTA04</a>                              <span class="co">#  COMMON DATA</span>
-009195,000174: 05,2213           32226                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413037">LMCSTA07</a>                              <span class="co">#  COMMON DATA</span>
-009196,000175: 05,2214           05336                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5256454C58">DNLRVELX</a>                              <span class="co">#  DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT</span>
-009197,000176: 05,2215           04036                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553">CDUS</a>                                  <span class="co">#  CDUS,PIPAX,PIPAY,PIPAZ</span>
-009198,000177: 05,2216           00112                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
-009199,000178: 05,2217           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
-009200,000179: 05,2220           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
-009201,000180: 05,2221           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
-009202,000181: 05,2222           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413035">LMCSTA05</a>                              <span class="co">#  COMMON DATA</span>
-009203,000182: 05,2223           52754                           <span class="dn">-6DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                <span class="co">#  DSPTAB+0...+11D TABLE</span>
-009204,000183: 
-009205,000184:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
-009206,000185: 
-<a name="4C4D435354413031"></a>009207,000186: 05,2224  05,2127               <span class="sm">LMCSTA01</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3031">LMORBM01</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009208,000187: 
-<a name="4C4D435354413032"></a>009209,000188: 05,2224  05,2136               <span class="sm">LMCSTA02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009210,000189: 
-<a name="4C4D435354413033"></a>009211,000190: 05,2224  05,2145               <span class="sm">LMCSTA03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009212,000191: 
-<a name="4C4D435354413034"></a>009213,000192: 05,2224  05,2154               <span class="sm">LMCSTA04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009214,000193: 
-<a name="4C4D435354413035"></a>009215,000194: 05,2224  05,2157               <span class="sm">LMCSTA05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009216,000195: 
-<a name="4C4D435354413036"></a>009217,000196: 05,2224           05700        <span class="sm">LMCSTA06</span>           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58373839">X789</a>                                  <span class="co">#  X789+0...+3               COMMON DATA</span>
-009218,000197: 05,2225           77665                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
-<a name="4C4D435354413037"></a>009219,000198: 05,2226           12737        <span class="sm">LMCSTA07</span>           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   <span class="co">#  OGC,+1,IGC,+1,MGC,+1      COMMON DATA</span>
-009220,000199: 05,2227           02755                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4245535449">BESTI</a>                                 <span class="co">#  BESTI,BESTJ</span>
-009221,000200: 05,2230           12760                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415253415631">STARSAV1</a>                              <span class="co">#  STARSAV1+0...+5</span>
-009222,000201: 05,2231           65011                           <span class="dn">-3DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415253415632">STARSAV2</a>                              <span class="co">#  STARSAV2+0...+5</span>
-009223,000202: 
+009226,000152:                                                                                                  <span class="co">#  LM COAST AND ALIGNMENT DOWNLIST</span>
+009227,000153: 
+009228,000154:                                                                                                  <span class="co">#      -----------------  CONTROL LIST  --------------------------</span>
+009229,000155: 
+<a name="4C4D43535441444C"></a>009230,000156: 05,2172                        <span class="sm">LMCSTADL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
+009231,000157: 05,2172           32127                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413031">LMCSTA01</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009232,000158: 05,2173           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009233,000159: 05,2174           02020                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  <span class="co">#  AGSK,+1</span>
+009234,000160: 05,2175           02774                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54414C49474E">TALIGN</a>                                <span class="co">#  TALIGN,+1</span>
+009235,000161: 05,2176           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
+009236,000162: 05,2177           01333                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E5252414E4745">DNRRANGE</a>                              <span class="co">#  DNRRANGE,DNRRDOT</span>
+009237,000163: 05,2200           01344                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544556454E54">TEVENT</a>                                <span class="co">#  TEVENT,+1</span>
+009238,000164: 05,2201           25733                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFSMMAT+0...+11D</span>
+009239,000165: 05,2202           00735                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F54434F4445">AOTCODE</a>                               <span class="co">#  AOTCODE,GARBAGE</span>
+009240,000166: 05,2203           13704                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5647544947">VGTIG</a>                                 <span class="co">#  VGTIG+0...+5</span>
+009241,000167: 05,2204           05336                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5256454C58">DNLRVELX</a>                              <span class="co">#  DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT</span>
+009242,000168: 05,2205           32224                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413036">LMCSTA06</a>                              <span class="co">#  COMMON DATA</span>
+009243,000169: 05,2206           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413032">LMCSTA02</a>                              <span class="co">#  COMMON DATA</span>
+009244,000170: 05,2207           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
+009245,000171: 05,2210           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413033">LMCSTA03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009246,000172: 05,2211           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009247,000173: 05,2212           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413034">LMCSTA04</a>                              <span class="co">#  COMMON DATA</span>
+009248,000174: 05,2213           32226                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413037">LMCSTA07</a>                              <span class="co">#  COMMON DATA</span>
+009249,000175: 05,2214           05336                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5256454C58">DNLRVELX</a>                              <span class="co">#  DNLRVELX,DNLRVELY,DNLRVELZ,DNLRALT</span>
+009250,000176: 05,2215           04036                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553">CDUS</a>                                  <span class="co">#  CDUS,PIPAX,PIPAY,PIPAZ</span>
+009251,000177: 05,2216           00112                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
+009252,000178: 05,2217           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
+009253,000179: 05,2220           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
+009254,000180: 05,2221           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
+009255,000181: 05,2222           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D435354413035">LMCSTA05</a>                              <span class="co">#  COMMON DATA</span>
+009256,000182: 05,2223           52754                           <span class="dn">-6DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                <span class="co">#  DSPTAB+0...+11D TABLE</span>
+009257,000183: 
+009258,000184:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
+009259,000185: 
+<a name="4C4D435354413031"></a>009260,000186: 05,2224  05,2127               <span class="sm">LMCSTA01</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3031">LMORBM01</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009261,000187: 
+<a name="4C4D435354413032"></a>009262,000188: 05,2224  05,2136               <span class="sm">LMCSTA02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009263,000189: 
+<a name="4C4D435354413033"></a>009264,000190: 05,2224  05,2145               <span class="sm">LMCSTA03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009265,000191: 
+<a name="4C4D435354413034"></a>009266,000192: 05,2224  05,2154               <span class="sm">LMCSTA04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009267,000193: 
+<a name="4C4D435354413035"></a>009268,000194: 05,2224  05,2157               <span class="sm">LMCSTA05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009269,000195: 
+<a name="4C4D435354413036"></a>009270,000196: 05,2224           05700        <span class="sm">LMCSTA06</span>           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58373839">X789</a>                                  <span class="co">#  X789+0...+3               COMMON DATA</span>
+009271,000197: 05,2225           77665                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
+<a name="4C4D435354413037"></a>009272,000198: 05,2226           12737        <span class="sm">LMCSTA07</span>           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   <span class="co">#  OGC,+1,IGC,+1,MGC,+1      COMMON DATA</span>
+009273,000199: 05,2227           02755                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4245535449">BESTI</a>                                 <span class="co">#  BESTI,BESTJ</span>
+009274,000200: 05,2230           12760                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415253415631">STARSAV1</a>                              <span class="co">#  STARSAV1+0...+5</span>
+009275,000201: 05,2231           65011                           <span class="dn">-3DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415253415632">STARSAV2</a>                              <span class="co">#  STARSAV2+0...+5</span>
+009276,000202: 
 </pre>
 </span>
 </p>
@@ -361,8 +379,8 @@ Page 212
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009225,000204:                                                                                                  <span class="co">#      -----------------------------------------------------------</span>
-009226,000205: 
+009278,000204:                                                                                                  <span class="co">#      -----------------------------------------------------------</span>
+009279,000205: 
 </pre>
 </span>
 </p>
@@ -378,56 +396,56 @@ Page 213
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009228,000207:                                                                                                  <span class="co">#  LM RENDEZVOUS AND PRE-THRUST DOWNLIST</span>
-009229,000208: 
-009230,000209:                                                                                                  <span class="co">#      -----------------  CONTROL LIST   --------------------------</span>
-009231,000210: 
-<a name="4C4D52454E44444C"></a>009232,000211: 05,2232                        <span class="sm">LMRENDDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
-009233,000212: 05,2232           32127                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443031">LMREND01</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009234,000213: 05,2233           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009235,000214: 05,2234           32276                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443037">LMREND07</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009236,000215: 05,2235           14340                           <span class="dn">4DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009237,000216: 05,2236           03447                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4C5434">DELLT4</a>                                <span class="co">#  DELLT4,+1</span>
-009238,000217: 05,2237           13441                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5254415247">RTARG</a>                                 <span class="co">#  RTARG+0...+5</span>
-009239,000218: 05,2240           13431                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534C56">DELVSLV</a>                               <span class="co">#  DELVSLV+0...+5</span>
-009240,000219: 05,2241           03631                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54435349">TCSI</a>                                  <span class="co">#  TCSI,+1</span>
-009241,000220: 05,2242           12272                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455431">DELVEET1</a>                              <span class="co">#  DELVEET+0-..+5</span>
-009242,000221: 05,2243           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
-009243,000222: 05,2244           03626                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#545041535334">TPASS4</a>                                <span class="co">#  TPASS4,+1</span>
-009244,000223: 05,2245           32224                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443036">LMREND06</a>                              <span class="co">#  COMMON DATA</span>
-009245,000224: 05,2246           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443032">LMREND02</a>                              <span class="co">#  COMMON DATA</span>
-009246,000225: 05,2247           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
-009247,000226: 05,2250           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443033">LMREND03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009248,000227: 05,2251           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009249,000228: 05,2252           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443034">LMREND04</a>                              <span class="co">#  COMMON DATA</span>
-009250,000229: 05,2253           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
-009251,000230: 05,2254           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
-009252,000231: 05,2255           03373                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434448">TCDH</a>                                  <span class="co">#  TCDH,+1</span>
-009253,000232: 05,2256           12300                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455432">DELVEET2</a>                              <span class="co">#  DELVEET2+0...+5</span>
-009254,000233: 05,2257           03633                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54545049">TTPI</a>                                  <span class="co">#  TTPI,+1</span>
-009255,000234: 05,2260           13365                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455433">DELVEET3</a>                              <span class="co">#  DELVEET3+0...+5</span>
-009256,000235: 05,2261           02262                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454C4556">ELEV</a>                                  <span class="co">#  ELEV,+1</span>
-009257,000236: 05,2262           04036                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553">CDUS</a>                                  <span class="co">#  CDUS,PIPAX,PIPAY,PIPAZ</span>
-009258,000237: 05,2263           00112                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
-009259,000238: 05,2264           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
-009260,000239: 05,2265           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
-009261,000240: 05,2266           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
-009262,000241: 05,2267           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443035">LMREND05</a>                              <span class="co">#  COMMON DATA</span>
-009263,000242: 05,2270           02306                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544152">DELTAR</a>                                <span class="co">#  DELTAR,+1</span>
-009264,000243: 05,2271           03616                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43454E54414E47">CENTANG</a>                               <span class="co">#  CENTANG,+1</span>
-009265,000244: 05,2272           03464                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4E">NN</a>                                    <span class="co">#  NN,+1</span>
-009266,000245: 05,2273           03575                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494646414C54">DIFFALT</a>                               <span class="co">#  DIFFALT,+1</span>
-009267,000246: 05,2274           02353                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56545046">DELVTPF</a>                               <span class="co">#  DELVTPF,+1</span>
-009268,000247: 05,2275           77770                           <span class="dn">-1DNADR </span> <a href="#5350415245">SPARE</a>                                 
-009269,000248: 
-009270,000249:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
-009271,000250: 
-<a name="4C4D52454E443031"></a>009272,000251: 05,2276  05,2127               <span class="sm">LMREND01</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3031">LMORBM01</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009273,000252: 
-<a name="4C4D52454E443032"></a>009274,000253: 05,2276  05,2136               <span class="sm">LMREND02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009275,000254: 
-<a name="4C4D52454E443033"></a>009276,000255: 05,2276  05,2145               <span class="sm">LMREND03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009277,000256: 
+009281,000207:                                                                                                  <span class="co">#  LM RENDEZVOUS AND PRE-THRUST DOWNLIST</span>
+009282,000208: 
+009283,000209:                                                                                                  <span class="co">#      -----------------  CONTROL LIST   --------------------------</span>
+009284,000210: 
+<a name="4C4D52454E44444C"></a>009285,000211: 05,2232                        <span class="sm">LMRENDDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
+009286,000212: 05,2232           32127                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443031">LMREND01</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009287,000213: 05,2233           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009288,000214: 05,2234           32276                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443037">LMREND07</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009289,000215: 05,2235           14340                           <span class="dn">4DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009290,000216: 05,2236           03447                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4C5434">DELLT4</a>                                <span class="co">#  DELLT4,+1</span>
+009291,000217: 05,2237           13441                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5254415247">RTARG</a>                                 <span class="co">#  RTARG+0...+5</span>
+009292,000218: 05,2240           13431                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56534C56">DELVSLV</a>                               <span class="co">#  DELVSLV+0...+5</span>
+009293,000219: 05,2241           03631                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54435349">TCSI</a>                                  <span class="co">#  TCSI,+1</span>
+009294,000220: 05,2242           12272                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455431">DELVEET1</a>                              <span class="co">#  DELVEET+0-..+5</span>
+009295,000221: 05,2243           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
+009296,000222: 05,2244           03626                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#545041535334">TPASS4</a>                                <span class="co">#  TPASS4,+1</span>
+009297,000223: 05,2245           32224                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443036">LMREND06</a>                              <span class="co">#  COMMON DATA</span>
+009298,000224: 05,2246           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443032">LMREND02</a>                              <span class="co">#  COMMON DATA</span>
+009299,000225: 05,2247           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
+009300,000226: 05,2250           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443033">LMREND03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009301,000227: 05,2251           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009302,000228: 05,2252           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443034">LMREND04</a>                              <span class="co">#  COMMON DATA</span>
+009303,000229: 05,2253           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
+009304,000230: 05,2254           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
+009305,000231: 05,2255           03373                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434448">TCDH</a>                                  <span class="co">#  TCDH,+1</span>
+009306,000232: 05,2256           12300                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455432">DELVEET2</a>                              <span class="co">#  DELVEET2+0...+5</span>
+009307,000233: 05,2257           03633                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54545049">TTPI</a>                                  <span class="co">#  TTPI,+1</span>
+009308,000234: 05,2260           13365                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5645455433">DELVEET3</a>                              <span class="co">#  DELVEET3+0...+5</span>
+009309,000235: 05,2261           02262                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454C4556">ELEV</a>                                  <span class="co">#  ELEV,+1</span>
+009310,000236: 05,2262           04036                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445553">CDUS</a>                                  <span class="co">#  CDUS,PIPAX,PIPAY,PIPAZ</span>
+009311,000237: 05,2263           00112                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
+009312,000238: 05,2264           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
+009313,000239: 05,2265           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
+009314,000240: 05,2266           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
+009315,000241: 05,2267           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D52454E443035">LMREND05</a>                              <span class="co">#  COMMON DATA</span>
+009316,000242: 05,2270           02306                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544152">DELTAR</a>                                <span class="co">#  DELTAR,+1</span>
+009317,000243: 05,2271           03616                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43454E54414E47">CENTANG</a>                               <span class="co">#  CENTANG,+1</span>
+009318,000244: 05,2272           03464                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4E">NN</a>                                    <span class="co">#  NN,+1</span>
+009319,000245: 05,2273           03575                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44494646414C54">DIFFALT</a>                               <span class="co">#  DIFFALT,+1</span>
+009320,000246: 05,2274           02353                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56545046">DELVTPF</a>                               <span class="co">#  DELVTPF,+1</span>
+009321,000247: 05,2275           77770                           <span class="dn">-1DNADR </span> <a href="#5350415245">SPARE</a>                                 
+009322,000248: 
+009323,000249:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
+009324,000250: 
+<a name="4C4D52454E443031"></a>009325,000251: 05,2276  05,2127               <span class="sm">LMREND01</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3031">LMORBM01</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009326,000252: 
+<a name="4C4D52454E443032"></a>009327,000253: 05,2276  05,2136               <span class="sm">LMREND02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009328,000254: 
+<a name="4C4D52454E443033"></a>009329,000255: 05,2276  05,2145               <span class="sm">LMREND03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009330,000256: 
 </pre>
 </span>
 </p>
@@ -443,20 +461,20 @@ Page 214
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4C4D52454E443034"></a>009279,000258: 05,2276  05,2154               <span class="sm">LMREND04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009280,000259: 
-<a name="4C4D52454E443035"></a>009281,000260: 05,2276  05,2157               <span class="sm">LMREND05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009282,000261: 
-<a name="4C4D52454E443036"></a>009283,000262: 05,2276  05,2224               <span class="sm">LMREND06</span>           <span class="ps">EQUALS  </span> <a href="#4C4D435354413036">LMCSTA06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009284,000263: 
-<a name="4C4D52454E443037"></a>009285,000264: 05,2276           74322        <span class="sm">LMREND07</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414947">AIG</a>                                   <span class="co">#  AIG,AMG              SNAPSHOT</span>
-009286,000265: 05,2277           03457                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   <span class="co">#  AOG,TRKMKCNT</span>
-009287,000266: 05,2300           03750                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54414E474E42">TANGNB</a>                                <span class="co">#  TANGNB,+1</span>
-009288,000267: 05,2301           03752                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54494D45">MKTIME</a>                                <span class="co">#  MKTIME,+1</span>
-009289,000268: 05,2302           76444                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E5252414E4745">DNRRANGE</a>                              <span class="co">#  DNRRANGE,DNRRDOT</span>
-009290,000269: 
-009291,000270:                                                                                                  <span class="co">#      ------------------------------------------------------------</span>
-009292,000271: 
+<a name="4C4D52454E443034"></a>009332,000258: 05,2276  05,2154               <span class="sm">LMREND04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009333,000259: 
+<a name="4C4D52454E443035"></a>009334,000260: 05,2276  05,2157               <span class="sm">LMREND05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009335,000261: 
+<a name="4C4D52454E443036"></a>009336,000262: 05,2276  05,2224               <span class="sm">LMREND06</span>           <span class="ps">EQUALS  </span> <a href="#4C4D435354413036">LMCSTA06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009337,000263: 
+<a name="4C4D52454E443037"></a>009338,000264: 05,2276           74322        <span class="sm">LMREND07</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414947">AIG</a>                                   <span class="co">#  AIG,AMG              SNAPSHOT</span>
+009339,000265: 05,2277           03457                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   <span class="co">#  AOG,TRKMKCNT</span>
+009340,000266: 05,2300           03750                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54414E474E42">TANGNB</a>                                <span class="co">#  TANGNB,+1</span>
+009341,000267: 05,2301           03752                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54494D45">MKTIME</a>                                <span class="co">#  MKTIME,+1</span>
+009342,000268: 05,2302           76444                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E5252414E4745">DNRRANGE</a>                              <span class="co">#  DNRRANGE,DNRRDOT</span>
+009343,000269: 
+009344,000270:                                                                                                  <span class="co">#      ------------------------------------------------------------</span>
+009345,000271: 
 </pre>
 </span>
 </p>
@@ -472,57 +490,57 @@ Page 215
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009294,000273:                                                                                                  <span class="co">#  LM DESCENT AND ASCENT DOWNLIST</span>
-009295,000274: 
-009296,000275:                                                                                                  <span class="co">#      -----------------  CONTROL LIST   --------------------------</span>
-009297,000276: 
-<a name="4C4D44534153444C"></a>009298,000277: 05,2303                        <span class="sm">LMDSASDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
-009299,000278: 05,2303           32341                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533037">LMDSAS07</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009300,000279: 05,2304           32355                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533038">LMDSAS08</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009301,000280: 05,2305           01344                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544556454E54">TEVENT</a>                                <span class="co">#  TEVENT,+1</span>
-009302,000281: 05,2306           13251                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554E46432F32">UNFC/2</a>                                <span class="co">#  UNFC/2+0...+5</span>
-009303,000282: 05,2307           13645                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564756454354">VGVECT</a>                                <span class="co">#  VGVECT+0...+5</span>
-009304,000283: 05,2310           03640                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454462F38">TTF/8</a>                                 <span class="co">#  TTF/8,+1</span>
-009305,000284: 05,2311           03662                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544148">DELTAH</a>                                <span class="co">#  DELTAH,+1</span>
-009306,000285: 05,2312           12022                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   <span class="co">#  RLS+0...+5</span>
-009307,000286: 05,2313           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
-009308,000287: 05,2314           32224                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533039">LMDSAS09</a>                              <span class="co">#  COMMON DATA</span>
-009309,000288: 05,2315           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533032">LMDSAS02</a>                              <span class="co">#  COMMON DATA</span>
-009310,000289: 05,2316           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
-009311,000290: 05,2317           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533033">LMDSAS03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009312,000291: 05,2320           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009313,000292: 05,2321           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533034">LMDSAS04</a>                              <span class="co">#  COMMON DATA</span>
-009314,000293: 05,2322           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
-009315,000294: 05,2323           12543                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524755">RGU</a>                                   <span class="co">#  RGU+0...+5</span>
-009316,000295: 05,2324           13624                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564755">VGU</a>                                   <span class="co">#  VGU+0...+5</span>
-009317,000296: 05,2325           13632                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E44">LAND</a>                                  <span class="co">#  LAND+0...+5</span>
-009318,000297: 05,2326           02256                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  AT,+1</span>
-009319,000298: 05,2327           02400                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544C414E44">TLAND</a>                                 <span class="co">#  TLAND,+1</span>
-009320,000299: 05,2330           03613                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    <span class="co">#  FC,GARBAGE</span>
-009321,000300: 05,2331           00112                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
-009322,000301: 05,2332           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
-009323,000302: 05,2333           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
-009324,000303: 05,2334           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
-009325,000304: 05,2335           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533035">LMDSAS05</a>                              <span class="co">#  COMMON DATA</span>
-009326,000305: 05,2336           32170                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533036">LMDSAS06</a>                              <span class="co">#  COMMON DATA</span>
-009327,000306: 05,2337           03612                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50534555444F3535">PSEUDO55</a>                              <span class="co">#  PSEUDO55,GARBAGE</span>
-009328,000307: 05,2340           74326                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F474F">TTOGO</a>                                 <span class="co">#  TTOGO,+1</span>
-009329,000308:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
-009330,000309: 
-<a name="4C4D445341533032"></a>009331,000310: 05,2341  05,2136               <span class="sm">LMDSAS02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009332,000311: 
-<a name="4C4D445341533033"></a>009333,000312: 05,2341  05,2145               <span class="sm">LMDSAS03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009334,000313: 
-<a name="4C4D445341533034"></a>009335,000314: 05,2341  05,2154               <span class="sm">LMDSAS04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009336,000315: 
-<a name="4C4D445341533035"></a>009337,000316: 05,2341  05,2157               <span class="sm">LMDSAS05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009338,000317: 
-<a name="4C4D445341533036"></a>009339,000318: 05,2341  05,2170               <span class="sm">LMDSAS06</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3036">LMORBM06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009340,000319: 
-<a name="4C4D445341533037"></a>009341,000320: 05,2341           75435        <span class="sm">LMDSAS07</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C525A434455444C">LRZCDUDL</a>                              <span class="co">#  LRZCDUDL,GARBAGE               SNAPSHOT</span>
-009342,000321: 05,2342           03647                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5653454C454354">VSELECT</a>                               <span class="co">#  VSELECT,GARBAGE</span>
-009343,000322: 05,2343           02343                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C525654494D444C">LRVTIMDL</a>                              <span class="co">#  LRVTIMDL,+1</span>
-009344,000323: 
+009347,000273:                                                                                                  <span class="co">#  LM DESCENT AND ASCENT DOWNLIST</span>
+009348,000274: 
+009349,000275:                                                                                                  <span class="co">#      -----------------  CONTROL LIST   --------------------------</span>
+009350,000276: 
+<a name="4C4D44534153444C"></a>009351,000277: 05,2303                        <span class="sm">LMDSASDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
+009352,000278: 05,2303           32341                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533037">LMDSAS07</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009353,000279: 05,2304           32355                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533038">LMDSAS08</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009354,000280: 05,2305           01344                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544556454E54">TEVENT</a>                                <span class="co">#  TEVENT,+1</span>
+009355,000281: 05,2306           13251                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554E46432F32">UNFC/2</a>                                <span class="co">#  UNFC/2+0...+5</span>
+009356,000282: 05,2307           13645                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564756454354">VGVECT</a>                                <span class="co">#  VGVECT+0...+5</span>
+009357,000283: 05,2310           03640                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454462F38">TTF/8</a>                                 <span class="co">#  TTF/8,+1</span>
+009358,000284: 05,2311           03662                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C544148">DELTAH</a>                                <span class="co">#  DELTAH,+1</span>
+009359,000285: 05,2312           12022                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   <span class="co">#  RLS+0...+5</span>
+009360,000286: 05,2313           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
+009361,000287: 05,2314           32224                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533039">LMDSAS09</a>                              <span class="co">#  COMMON DATA</span>
+009362,000288: 05,2315           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533032">LMDSAS02</a>                              <span class="co">#  COMMON DATA</span>
+009363,000289: 05,2316           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
+009364,000290: 05,2317           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533033">LMDSAS03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009365,000291: 05,2320           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009366,000292: 05,2321           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533034">LMDSAS04</a>                              <span class="co">#  COMMON DATA</span>
+009367,000293: 05,2322           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
+009368,000294: 05,2323           12543                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524755">RGU</a>                                   <span class="co">#  RGU+0...+5</span>
+009369,000295: 05,2324           13624                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564755">VGU</a>                                   <span class="co">#  VGU+0...+5</span>
+009370,000296: 05,2325           13632                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E44">LAND</a>                                  <span class="co">#  LAND+0...+5</span>
+009371,000297: 05,2326           02256                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    <span class="co">#  AT,+1</span>
+009372,000298: 05,2327           02400                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544C414E44">TLAND</a>                                 <span class="co">#  TLAND,+1</span>
+009373,000299: 05,2330           03613                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4643">FC</a>                                    <span class="co">#  FC,GARBAGE</span>
+009374,000300: 05,2331           00112                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
+009375,000301: 05,2332           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
+009376,000302: 05,2333           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
+009377,000303: 05,2334           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
+009378,000304: 05,2335           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533035">LMDSAS05</a>                              <span class="co">#  COMMON DATA</span>
+009379,000305: 05,2336           32170                           <span class="dn">DNPTR   </span> <a href="#4C4D445341533036">LMDSAS06</a>                              <span class="co">#  COMMON DATA</span>
+009380,000306: 05,2337           03612                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50534555444F3535">PSEUDO55</a>                              <span class="co">#  PSEUDO55,GARBAGE</span>
+009381,000307: 05,2340           74326                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F474F">TTOGO</a>                                 <span class="co">#  TTOGO,+1</span>
+009382,000308:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
+009383,000309: 
+<a name="4C4D445341533032"></a>009384,000310: 05,2341  05,2136               <span class="sm">LMDSAS02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009385,000311: 
+<a name="4C4D445341533033"></a>009386,000312: 05,2341  05,2145               <span class="sm">LMDSAS03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009387,000313: 
+<a name="4C4D445341533034"></a>009388,000314: 05,2341  05,2154               <span class="sm">LMDSAS04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009389,000315: 
+<a name="4C4D445341533035"></a>009390,000316: 05,2341  05,2157               <span class="sm">LMDSAS05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009391,000317: 
+<a name="4C4D445341533036"></a>009392,000318: 05,2341  05,2170               <span class="sm">LMDSAS06</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3036">LMORBM06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009393,000319: 
+<a name="4C4D445341533037"></a>009394,000320: 05,2341           75435        <span class="sm">LMDSAS07</span>           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C525A434455444C">LRZCDUDL</a>                              <span class="co">#  LRZCDUDL,GARBAGE               SNAPSHOT</span>
+009395,000321: 05,2342           03647                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5653454C454354">VSELECT</a>                               <span class="co">#  VSELECT,GARBAGE</span>
+009396,000322: 05,2343           02343                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C525654494D444C">LRVTIMDL</a>                              <span class="co">#  LRVTIMDL,+1</span>
+009397,000323: 
 </pre>
 </span>
 </p>
@@ -538,23 +556,23 @@ Page 216
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009346,000325: 05,2344           03650                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564D454153">VMEAS</a>                                 <span class="co">#  VMEAS,+1</span>
-009347,000326: 05,2345           03752                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54494D45">MKTIME</a>                                <span class="co">#  MKTIME,+1</span>
-009348,000327: 05,2346           03652                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484D454153">HMEAS</a>                                 <span class="co">#  HMEAS,+1</span>
-009349,000328: 05,2347           03754                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524D">RM</a>                                    <span class="co">#  RM,+1</span>
-009350,000329: 05,2350           03455                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414947">AIG</a>                                   <span class="co">#  AIG,AMG</span>
-009351,000330: 05,2351           03457                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   <span class="co">#  AOG,TRKMKCNT</span>
-009352,000331: 05,2352           03750                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54414E474E42">TANGNB</a>                                <span class="co">#  TANGNB,+1</span>
-009353,000332: 05,2353           03752                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54494D45">MKTIME</a>                                <span class="co">#  MKTIME,+1</span>
-009354,000333: 05,2354           75437                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5258434455444C">LRXCDUDL</a>                              <span class="co">#  LRXCDUDL,LRYCDUDL</span>
-009355,000334: 
-<a name="4C4D445341533038"></a>009356,000335: 05,2355           24340        <span class="sm">LMDSAS08</span>           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009357,000336: 05,2356           57423                           <span class="dn">-5DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +12D                       
-009358,000337: 
-<a name="4C4D445341533039"></a>009359,000338: 05,2357  05,2224               <span class="sm">LMDSAS09</span>           <span class="ps">EQUALS  </span> <a href="#4C4D435354413036">LMCSTA06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009360,000339: 
-009361,000340:                                                                                                  <span class="co">#      ---------------------------------------------------------</span>
-009362,000341: 
+009399,000325: 05,2344           03650                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564D454153">VMEAS</a>                                 <span class="co">#  VMEAS,+1</span>
+009400,000326: 05,2345           03752                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54494D45">MKTIME</a>                                <span class="co">#  MKTIME,+1</span>
+009401,000327: 05,2346           03652                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484D454153">HMEAS</a>                                 <span class="co">#  HMEAS,+1</span>
+009402,000328: 05,2347           03754                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524D">RM</a>                                    <span class="co">#  RM,+1</span>
+009403,000329: 05,2350           03455                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414947">AIG</a>                                   <span class="co">#  AIG,AMG</span>
+009404,000330: 05,2351           03457                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   <span class="co">#  AOG,TRKMKCNT</span>
+009405,000331: 05,2352           03750                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54414E474E42">TANGNB</a>                                <span class="co">#  TANGNB,+1</span>
+009406,000332: 05,2353           03752                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4B54494D45">MKTIME</a>                                <span class="co">#  MKTIME,+1</span>
+009407,000333: 05,2354           75437                           <span class="dn">-1DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5258434455444C">LRXCDUDL</a>                              <span class="co">#  LRXCDUDL,LRYCDUDL</span>
+009408,000334: 
+<a name="4C4D445341533038"></a>009409,000335: 05,2355           24340        <span class="sm">LMDSAS08</span>           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009410,000336: 05,2356           57423                           <span class="dn">-5DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +12D                       
+009411,000337: 
+<a name="4C4D445341533039"></a>009412,000338: 05,2357  05,2224               <span class="sm">LMDSAS09</span>           <span class="ps">EQUALS  </span> <a href="#4C4D435354413036">LMCSTA06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009413,000339: 
+009414,000340:                                                                                                  <span class="co">#      ---------------------------------------------------------</span>
+009415,000341: 
 </pre>
 </span>
 </p>
@@ -570,56 +588,56 @@ Page 217
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009364,000343:                                                                                                  <span class="co">#  LM LUNAR SURFACE ALIGN DOWNLIST</span>
-009365,000344: 
-009366,000345:                                                                                                  <span class="co">#      -----------------  CONTROL LIST  --------------------------</span>
-009367,000346: 
-<a name="4C4D4C53414C444C"></a>009368,000347: 05,2357                        <span class="sm">LMLSALDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
-009369,000348: 05,2357           32127                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3031">LMLSAL01</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009370,000349: 05,2360           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009371,000350: 05,2361           32276                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3037">LMLSAL07</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009372,000351: 05,2362           14340                           <span class="dn">4DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SHAPSHOT</span>
-009373,000352: 05,2363           02774                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54414C49474E">TALIGN</a>                                <span class="co">#  TALIGN,+1</span>
-009374,000353: 05,2364           25733                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFSMMAT+0...+11D</span>
-009375,000354: 05,2365           26242                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#594E42534156">YNBSAV</a>                                <span class="co">#  YNBSAV+0...+5,ZNBSAV+0...+5</span>
-009376,000355: 05,2366           32224                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3038">LMLSAL08</a>                              <span class="co">#  COMMON DATA</span>
-009377,000356: 05,2367           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3032">LMLSAL02</a>                              <span class="co">#  COMMON DATA</span>
-009378,000357: 05,2370           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME/1</span>
-009379,000358: 05,2371           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3033">LMLSAL03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009380,000359: 05,2372           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SHAPSHOT</span>
-009381,000360: 05,2373           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3034">LMLSAL04</a>                              <span class="co">#  COMMON DATA</span>
-009382,000361: 05,2374           32226                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3039">LMLSAL09</a>                              <span class="co">#  COMMON DATA</span>
-009383,000362: 05,2375           12234                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47534156">GSAV</a>                                  <span class="co">#  GSAV+0...+5</span>
-009384,000363: 05,2376           02020                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  <span class="co">#  AGSK,+1</span>
-009385,000364: 05,2377           00112                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
-009386,000365: 05,2400           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
-009387,000366: 05,2401           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
-009388,000367: 05,2402           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
-009389,000368: 05,2403           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3035">LMLSAL05</a>                              <span class="co">#  COMMON DATA</span>
-009390,000369: 05,2404           32170                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3036">LMLSAL06</a>                              <span class="co">#  COMMON DATA</span>
-009391,000370: 05,2405           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
-009392,000371: 05,2406           77770                           <span class="dn">-1DNADR </span> <a href="#5350415245">SPARE</a>                                 
-009393,000372: 
-009394,000373:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
-009395,000374: 
-<a name="4C4D4C53414C3031"></a>009396,000375: 05,2407  05,2127               <span class="sm">LMLSAL01</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3031">LMORBM01</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009397,000376: 
-<a name="4C4D4C53414C3032"></a>009398,000377: 05,2407  05,2136               <span class="sm">LMLSAL02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009399,000378: 
-<a name="4C4D4C53414C3033"></a>009400,000379: 05,2407  05,2145               <span class="sm">LMLSAL03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009401,000380: 
-<a name="4C4D4C53414C3034"></a>009402,000381: 05,2407  05,2154               <span class="sm">LMLSAL04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009403,000382: 
-<a name="4C4D4C53414C3035"></a>009404,000383: 05,2407  05,2157               <span class="sm">LMLSAL05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009405,000384: 
-<a name="4C4D4C53414C3036"></a>009406,000385: 05,2407  05,2170               <span class="sm">LMLSAL06</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3036">LMORBM06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009407,000386: 
-<a name="4C4D4C53414C3037"></a>009408,000387: 05,2407  05,2276               <span class="sm">LMLSAL07</span>           <span class="ps">EQUALS  </span> <a href="#4C4D52454E443037">LMREND07</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009409,000388: 
-<a name="4C4D4C53414C3038"></a>009410,000389: 05,2407  05,2224               <span class="sm">LMLSAL08</span>           <span class="ps">EQUALS  </span> <a href="#4C4D435354413036">LMCSTA06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009411,000390: 
-<a name="4C4D4C53414C3039"></a>009412,000391: 05,2407  05,2226               <span class="sm">LMLSAL09</span>           <span class="ps">EQUALS  </span> <a href="#4C4D435354413037">LMCSTA07</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009413,000392: 
+009417,000343:                                                                                                  <span class="co">#  LM LUNAR SURFACE ALIGN DOWNLIST</span>
+009418,000344: 
+009419,000345:                                                                                                  <span class="co">#      -----------------  CONTROL LIST  --------------------------</span>
+009420,000346: 
+<a name="4C4D4C53414C444C"></a>009421,000347: 05,2357                        <span class="sm">LMLSALDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND ID BY SPECIAL CODING</span>
+009422,000348: 05,2357           32127                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3031">LMLSAL01</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009423,000349: 05,2360           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009424,000350: 05,2361           32276                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3037">LMLSAL07</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009425,000351: 05,2362           14340                           <span class="dn">4DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SHAPSHOT</span>
+009426,000352: 05,2363           02774                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54414C49474E">TALIGN</a>                                <span class="co">#  TALIGN,+1</span>
+009427,000353: 05,2364           25733                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              <span class="co">#  REFSMMAT+0...+11D</span>
+009428,000354: 05,2365           26242                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#594E42534156">YNBSAV</a>                                <span class="co">#  YNBSAV+0...+5,ZNBSAV+0...+5</span>
+009429,000355: 05,2366           32224                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3038">LMLSAL08</a>                              <span class="co">#  COMMON DATA</span>
+009430,000356: 05,2367           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3032">LMLSAL02</a>                              <span class="co">#  COMMON DATA</span>
+009431,000357: 05,2370           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME/1</span>
+009432,000358: 05,2371           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3033">LMLSAL03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009433,000359: 05,2372           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SHAPSHOT</span>
+009434,000360: 05,2373           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3034">LMLSAL04</a>                              <span class="co">#  COMMON DATA</span>
+009435,000361: 05,2374           32226                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3039">LMLSAL09</a>                              <span class="co">#  COMMON DATA</span>
+009436,000362: 05,2375           12234                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47534156">GSAV</a>                                  <span class="co">#  GSAV+0...+5</span>
+009437,000363: 05,2376           02020                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  <span class="co">#  AGSK,+1</span>
+009438,000364: 05,2377           00112                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C41535459434D44">LASTYCMD</a>                              <span class="co">#  LASTYCMD,LASTXCMD</span>
+009439,000365: 05,2400           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
+009440,000366: 05,2401           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
+009441,000367: 05,2402           03437                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   <span class="co">#  TIG,+1</span>
+009442,000368: 05,2403           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3035">LMLSAL05</a>                              <span class="co">#  COMMON DATA</span>
+009443,000369: 05,2404           32170                           <span class="dn">DNPTR   </span> <a href="#4C4D4C53414C3036">LMLSAL06</a>                              <span class="co">#  COMMON DATA</span>
+009444,000370: 05,2405           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
+009445,000371: 05,2406           77770                           <span class="dn">-1DNADR </span> <a href="#5350415245">SPARE</a>                                 
+009446,000372: 
+009447,000373:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
+009448,000374: 
+<a name="4C4D4C53414C3031"></a>009449,000375: 05,2407  05,2127               <span class="sm">LMLSAL01</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3031">LMORBM01</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009450,000376: 
+<a name="4C4D4C53414C3032"></a>009451,000377: 05,2407  05,2136               <span class="sm">LMLSAL02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009452,000378: 
+<a name="4C4D4C53414C3033"></a>009453,000379: 05,2407  05,2145               <span class="sm">LMLSAL03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009454,000380: 
+<a name="4C4D4C53414C3034"></a>009455,000381: 05,2407  05,2154               <span class="sm">LMLSAL04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009456,000382: 
+<a name="4C4D4C53414C3035"></a>009457,000383: 05,2407  05,2157               <span class="sm">LMLSAL05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009458,000384: 
+<a name="4C4D4C53414C3036"></a>009459,000385: 05,2407  05,2170               <span class="sm">LMLSAL06</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3036">LMORBM06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009460,000386: 
+<a name="4C4D4C53414C3037"></a>009461,000387: 05,2407  05,2276               <span class="sm">LMLSAL07</span>           <span class="ps">EQUALS  </span> <a href="#4C4D52454E443037">LMREND07</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009462,000388: 
+<a name="4C4D4C53414C3038"></a>009463,000389: 05,2407  05,2224               <span class="sm">LMLSAL08</span>           <span class="ps">EQUALS  </span> <a href="#4C4D435354413036">LMCSTA06</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009464,000390: 
+<a name="4C4D4C53414C3039"></a>009465,000391: 05,2407  05,2226               <span class="sm">LMLSAL09</span>           <span class="ps">EQUALS  </span> <a href="#4C4D435354413037">LMCSTA07</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009466,000392: 
 </pre>
 </span>
 </p>
@@ -635,8 +653,8 @@ Page 218
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009415,000394:                                                                                                  <span class="co">#      ---------------------------------------------------------</span>
-009416,000395: 
+009468,000394:                                                                                                  <span class="co">#      ---------------------------------------------------------</span>
+009469,000395: 
 </pre>
 </span>
 </p>
@@ -652,57 +670,57 @@ Page 219
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009418,000397:                                                                                                  <span class="co">#  LM AGS INITIALIZATION AND UPDATE DOWNLIST</span>
-009419,000398: 
-009420,000399:                                                                                                  <span class="co">#      -----------------  CONTROL LIST  --------------------------</span>
-009421,000400: 
-<a name="4C4D41475349444C"></a>009422,000401: 05,2407                        <span class="sm">LMAGSIDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND IO BY SPECIAL CODING</span>
-009423,000402: 05,2407           12204                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +0                         <span class="co">#  AGSBUFF+0...+5</span>
-009424,000403: 05,2410           02220                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +12D                       <span class="co">#  AGSBUFF+12D,GARBAGE</span>
-009425,000404: 05,2411           12205                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +1                         <span class="co">#  AGSBUFF+1...+6</span>
-009426,000405: 05,2412           02221                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +13D                       <span class="co">#  AGSBUFF+13D, GARBAGE</span>
-009427,000406: 05,2413           12212                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +6                         <span class="co">#  AGSBUFF+6...+11</span>
-009428,000407: 05,2414           02220                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +12D                       <span class="co">#  AGSBUFF+12,GARBAGE</span>
-009429,000408: 05,2415           12213                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +7                         <span class="co">#  AGSBUFF+7...+12D</span>
-009430,000409: 05,2416           02221                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +13D                       <span class="co">#  AGSBUFF+13D,GARBAGE</span>
-009431,000410: 05,2417           25170                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  COMPNUMB,UPOLDMOD,UPVERB,UPCOUNT,</span>
-009432,000411:                                                                                                  <span class="co">#  UPBUFF+0...+7</span>
-009433,000412: 05,2420           25204                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +8D                        <span class="co">#  UPBUFF +8D...+19D</span>
-009434,000413: 05,2421           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D414753493032">LMAGSI02</a>                              <span class="co">#  COMMON DATA</span>
-009435,000414: 05,2422           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
-009436,000415: 05,2423           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D414753493033">LMAGSI03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
-009437,000416: 05,2424           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
-009438,000417: 05,2425           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D414753493034">LMAGSI04</a>                              <span class="co">#  COMMON DATA</span>
-009439,000418: 05,2426           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
-009440,000419: 05,2427           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
-009441,000420: 05,2430           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
-009442,000421: 05,2431           02020                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  <span class="co">#  AGSK,+1</span>
-009443,000422: 05,2432           25174                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  UPBUFF+0...+11D</span>
-009444,000423: 05,2433           15210                           <span class="dn">4DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +12D                       <span class="co">#  UPBUFF+12D...+19D</span>
-009445,000424: 05,2434           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
-009446,000425: 05,2435           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
-009447,000426: 05,2436           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
-009448,000427: 05,2437           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D414753493035">LMAGSI05</a>                              <span class="co">#  COMMON DATA</span>
-009449,000428: 05,2440           52754                           <span class="dn">-6DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                <span class="co">#  DSPTAB+0...+11D</span>
-009450,000429: 
-009451,000430:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
-009452,000431: 
-<a name="4C4D414753493032"></a>009453,000432: 05,2441  05,2136               <span class="sm">LMAGSI02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009454,000433: 
-<a name="4C4D414753493033"></a>009455,000434: 05,2441  05,2145               <span class="sm">LMAGSI03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009456,000435: 
-<a name="4C4D414753493034"></a>009457,000436: 05,2441  05,2154               <span class="sm">LMAGSI04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009458,000437: 
-<a name="4C4D414753493035"></a>009459,000438: 05,2441  05,2157               <span class="sm">LMAGSI05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
-009460,000439: 
-009461,000440:                                                                                                  <span class="co">#      ---------------------------------------------------------</span>
-009462,000441: 
-<a name="444E5441424C45"></a>009463,000442: 05,2441           02172        <span class="sm">DNTABLE </span>           <span class="ps">GENADR  </span> <a href="#4C4D43535441444C">LMCSTADL</a>                              <span class="co">#  LM COAST AND ALIGN DOWNLIST</span>
-009464,000443: 05,2442           02407                           <span class="ps">GENADR  </span> <a href="#4C4D41475349444C">LMAGSIDL</a>                              <span class="co">#  LM AGS INITIALIZATION/UPDATE DOWNLIST</span>
-009465,000444: 05,2443           02232                           <span class="ps">GENADR  </span> <a href="#4C4D52454E44444C">LMRENDDL</a>                              <span class="co">#  LM RENDEZVOUS AND PRE-THRUST DOWNLIST</span>
-009466,000445: 05,2444           02066                           <span class="ps">GENADR  </span> <a href="#4C4D4F52424D444C">LMORBMDL</a>                              <span class="co">#  LM ORBITAL MANEUVERS DOWNLIST</span>
-009467,000446: 05,2445           02303                           <span class="ps">GENADR  </span> <a href="#4C4D44534153444C">LMDSASDL</a>                              <span class="co">#  LM DESCENT AND ASCENT DOWNLIST</span>
-009468,000447: 
+009471,000397:                                                                                                  <span class="co">#  LM AGS INITIALIZATION AND UPDATE DOWNLIST</span>
+009472,000398: 
+009473,000399:                                                                                                  <span class="co">#      -----------------  CONTROL LIST  --------------------------</span>
+009474,000400: 
+<a name="4C4D41475349444C"></a>009475,000401: 05,2407                        <span class="sm">LMAGSIDL</span>           <span class="ps">EQUALS  </span>                                       <span class="co">#  SEND IO BY SPECIAL CODING</span>
+009476,000402: 05,2407           12204                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +0                         <span class="co">#  AGSBUFF+0...+5</span>
+009477,000403: 05,2410           02220                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +12D                       <span class="co">#  AGSBUFF+12D,GARBAGE</span>
+009478,000404: 05,2411           12205                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +1                         <span class="co">#  AGSBUFF+1...+6</span>
+009479,000405: 05,2412           02221                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +13D                       <span class="co">#  AGSBUFF+13D, GARBAGE</span>
+009480,000406: 05,2413           12212                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +6                         <span class="co">#  AGSBUFF+6...+11</span>
+009481,000407: 05,2414           02220                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +12D                       <span class="co">#  AGSBUFF+12,GARBAGE</span>
+009482,000408: 05,2415           12213                           <span class="dn">3DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +7                         <span class="co">#  AGSBUFF+7...+12D</span>
+009483,000409: 05,2416           02221                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41475342554646">AGSBUFF</a>    +13D                       <span class="co">#  AGSBUFF+13D,GARBAGE</span>
+009484,000410: 05,2417           25170                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F4D504E554D42">COMPNUMB</a>                              <span class="co">#  COMPNUMB,UPOLDMOD,UPVERB,UPCOUNT,</span>
+009485,000411:                                                                                                  <span class="co">#  UPBUFF+0...+7</span>
+009486,000412: 05,2420           25204                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +8D                        <span class="co">#  UPBUFF +8D...+19D</span>
+009487,000413: 05,2421           32136                           <span class="dn">DNPTR   </span> <a href="#4C4D414753493032">LMAGSI02</a>                              <span class="co">#  COMMON DATA</span>
+009488,000414: 05,2422           00024                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  TIME2/1</span>
+009489,000415: 05,2423           32145                           <span class="dn">DNPTR   </span> <a href="#4C4D414753493033">LMAGSI03</a>                              <span class="co">#  COLLECT SNAPSHOT</span>
+009490,000416: 05,2424           24340                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              <span class="co">#  SEND SNAPSHOT</span>
+009491,000417: 05,2425           32154                           <span class="dn">DNPTR   </span> <a href="#4C4D414753493034">LMAGSI04</a>                              <span class="co">#  COMMON DATA</span>
+009492,000418: 05,2426           07115                           <span class="dn">2DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504F53544F524B55">POSTORKU</a>                              <span class="co">#  POSTORKU,NEGTORKU,POSTORKV,NEGTORKV</span>
+009493,000419: 05,2427           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
+009494,000420: 05,2430           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
+009495,000421: 05,2431           02020                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4147534B">AGSK</a>                                  <span class="co">#  AGSK,+1</span>
+009496,000422: 05,2432           25174                           <span class="dn">6DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>                                <span class="co">#  UPBUFF+0...+11D</span>
+009497,000423: 05,2433           15210                           <span class="dn">4DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#555042554646">UPBUFF</a>     +12D                       <span class="co">#  UPBUFF+12D...+19D</span>
+009498,000424: 05,2434           01331                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C454D4D415353">LEMMASS</a>                               <span class="co">#  LEMMASS,CSMMASS</span>
+009499,000425: 05,2435           01302                           <span class="dn">1DNADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  IMODES30,IMODES33</span>
+009500,000426: 05,2436           00007                           <span class="dn">1DNADR  </span> <a href="#5350415245">SPARE</a>                                 
+009501,000427: 05,2437           32157                           <span class="dn">DNPTR   </span> <a href="#4C4D414753493035">LMAGSI05</a>                              <span class="co">#  COMMON DATA</span>
+009502,000428: 05,2440           52754                           <span class="dn">-6DNADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                <span class="co">#  DSPTAB+0...+11D</span>
+009503,000429: 
+009504,000430:                                                                                                  <span class="co">#      -----------------  SUB-LISTS   ----------------------------</span>
+009505,000431: 
+<a name="4C4D414753493032"></a>009506,000432: 05,2441  05,2136               <span class="sm">LMAGSI02</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3032">LMORBM02</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009507,000433: 
+<a name="4C4D414753493033"></a>009508,000434: 05,2441  05,2145               <span class="sm">LMAGSI03</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3033">LMORBM03</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009509,000435: 
+<a name="4C4D414753493034"></a>009510,000436: 05,2441  05,2154               <span class="sm">LMAGSI04</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3034">LMORBM04</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009511,000437: 
+<a name="4C4D414753493035"></a>009512,000438: 05,2441  05,2157               <span class="sm">LMAGSI05</span>           <span class="ps">EQUALS  </span> <a href="#4C4D4F52424D3035">LMORBM05</a>                              <span class="co">#  COMMON DOWNLIST DATA</span>
+009513,000439: 
+009514,000440:                                                                                                  <span class="co">#      ---------------------------------------------------------</span>
+009515,000441: 
+<a name="444E5441424C45"></a>009516,000442: 05,2441           02172        <span class="sm">DNTABLE </span>           <span class="ps">GENADR  </span> <a href="#4C4D43535441444C">LMCSTADL</a>                              <span class="co">#  LM COAST AND ALIGN DOWNLIST</span>
+009517,000443: 05,2442           02407                           <span class="ps">GENADR  </span> <a href="#4C4D41475349444C">LMAGSIDL</a>                              <span class="co">#  LM AGS INITIALIZATION/UPDATE DOWNLIST</span>
+009518,000444: 05,2443           02232                           <span class="ps">GENADR  </span> <a href="#4C4D52454E44444C">LMRENDDL</a>                              <span class="co">#  LM RENDEZVOUS AND PRE-THRUST DOWNLIST</span>
+009519,000445: 05,2444           02066                           <span class="ps">GENADR  </span> <a href="#4C4D4F52424D444C">LMORBMDL</a>                              <span class="co">#  LM ORBITAL MANEUVERS DOWNLIST</span>
+009520,000446: 05,2445           02303                           <span class="ps">GENADR  </span> <a href="#4C4D44534153444C">LMDSASDL</a>                              <span class="co">#  LM DESCENT AND ASCENT DOWNLIST</span>
+009521,000447: 
 </pre>
 </span>
 </p>
@@ -718,11 +736,11 @@ Page 220
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009470,000449: 05,2446           02357                           <span class="ps">GENADR  </span> <a href="#4C4D4C53414C444C">LMLSALDL</a>                              <span class="co">#  LM LUNAR SURFACE ALIGN DOWNLIST</span>
-009471,000450: 
-009472,000451:                                                                                                  <span class="co">#      ---------------------------------------------------------------</span>
-009473,000452: 
-009474,000453: 
+009523,000449: 05,2446           02357                           <span class="ps">GENADR  </span> <a href="#4C4D4C53414C444C">LMLSALDL</a>                              <span class="co">#  LM LUNAR SURFACE ALIGN DOWNLIST</span>
+009524,000450: 
+009525,000451:                                                                                                  <span class="co">#      ---------------------------------------------------------------</span>
+009526,000452: 
+009527,000453: 
 
 End of include-file DOWNLINK_LISTS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

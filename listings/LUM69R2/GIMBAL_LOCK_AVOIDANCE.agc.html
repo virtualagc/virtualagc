@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -66,47 +65,66 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files are part of a reconstructed copy of LUM69 Revision 2, the
-flown Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
+These source-code files are part of a reconstructed copy of Luminary 69/2,
+the flown, final release of the Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
 <br><br>
-The reconstruction began with source code of Luminary 69 revision 0 previously
-transcribed from a digitized copy of that program.  The code was then updated 
-by back-porting the R-2 lunar potential model from previously-transcribed source
-code of Luminary 99. These required changes were described in the original
-Luminary memos 75 and 78. The reconstructed code was verified by 
-matching memory-bank checksums to those listed in drawing 2021152G. Note that
-page numbers in the reconstructed code match those on the Luminary 069 printout, 
-although the added code would likely have changed page numbers for a real LUM69 
-Revision 2 listing.
+The reconstruction is based on the source code of Luminary 69 &mdash; i.e., the
+initial, unflown version, "revision 0" &mdash; of which 
+a contemporary listing was available.  The code was then updated by incorporating the 
+differences between Luminary 69 and Luminary 69/2, known from other contemporary
+documentation.  The only such difference is the implementation in 
+Luminary 69/2 of the "R-2 Lunar Potential Model", the source code for which was taken 
+from program Luminary 99/1 (Apollo 11 LM), of which a contemporary listing was also available.
+Finally, the now-reconstructed Luminary 69/2 was then validated by assembling it to
+executable form and verifying that its memory banks had the correct checksums,
+known from still other contemporary documentation.
 <br><br>
+Note that page numbers in the reconstructed code match those in the original Luminary 69
+program listing, or in the ORBITAL INTEGRATION log section, in Luminary 99/1. Page numbers 
+would certainly differ somewhat in a contemporary Luminary 69/2 listing.
+Moreover, annotations that were not present in the contemporary source code have been added 
+to the reconstructed code to justify each change in Luminary 69/2 relative to 
+Luminary 69. Here's a guide to the Apollo documentation referenced in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n80/mode/1up">
+    MIT/IL engineering drawing 2021152N, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Luminary 69/2 (called "LUMINARY 69 REV. 2" in the document itself).</li>
+<li><a href="https://archive.org/details/Luminary99001J2k60/mode/1up">
+       Luminary 99/1 (Apollo 11 LM final release) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/luminary6900miti/mode/1up">
+       Luminary 69 (Apollo 10 LM initial release) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">
+       LUMINARY Memo #75, "R-2 Lunar Potential Model Added to LUM"</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM78_text.pdf">
+       LUMINARY Memo #78, "LUMINARY Revisions 93-96"</a>.</li>
+</ul>
 Comments from the original source code are prefixed with a single '#' symbol, 
 whereas comments added later are prefixed by "##" or "###".  Report any errors 
 noted by creating an 
 issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
 project's GitHub repository</a>.
 </td></tr></tbody></table>
-
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-016208,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-016209,000003:                                                                                                  <span class="co">## Filename:    GIMBAL_LOCK_AVOIDANCE.agc</span>
-016210,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
-016211,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
-016212,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
-016213,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
-016214,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
-016215,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
-016216,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
-016217,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
-016218,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
-016219,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
-016220,000014:                                                                                                  <span class="co">## Reference:   p.  377</span>
-016221,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-016222,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-016223,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-016224,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
-016225,000019: 
+016261,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+016262,000003:                                                                                                  <span class="co">## Filename:    GIMBAL_LOCK_AVOIDANCE.agc</span>
+016263,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
+016264,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
+016265,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
+016266,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
+016267,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
+016268,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
+016269,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
+016270,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
+016271,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
+016272,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
+016273,000014:                                                                                                  <span class="co">## Reference:   p.  377</span>
+016274,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+016275,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+016276,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+016277,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
+016278,000019: 
 </pre>
 </span>
 </p>
@@ -122,52 +140,52 @@ Page 377
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-016227,000021: 15,2050                                           <span class="ps">BANK    </span> 15                                    
-016228,000022: 
-016229,000023: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B414C434D4F4E31">KALCMON1</a>                              
-016230,000024: 22,2000                                           <span class="ps">BANK    </span>                                       
-016231,000025: 
-016232,000026:                                                                                                  <span class="co">#  DETECTING GIMBAL LOCK</span>
-<a name="4C4F43534B495254"></a>016233,000027: 22,2744  22,2744               <span class="sm">LOCSKIRT</span>           <span class="ps">EQUALS  </span> <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
-016234,000028: 
-<a name="4E4F47494D4C4F43"></a>016235,000029: 22,2744           77614        <span class="sm">NOGIMLOC</span>           <span class="in">SET     </span>                                       
-016236,000030: 22,2745           01074                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#43414C434D414E33">CALCMAN3</a>                              
-<a name="5743414C43"></a>016237,000031: 22,2746           70740        <span class="sm">WCALC   </span>           <span class="in">LXC,1   </span> <span class="in">DLOAD*    </span>                            
-016238,000032: 22,2747           01325                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  CHOOSE THE DESIRED MANEUVER RATE</span>
-016239,000033: 22,2750           04772                                    ARATE,1                               <span class="co">#  FROM A LIST OF FOUR</span>
-016240,000034: 22,2751           45002                           <span class="in">SR4     </span> <span class="in">CALL      </span>                            <span class="co">#  COMPUTE THE INCREMENTAL ROTATION MATRIX</span>
-016241,000035: 22,2752           44527                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#44454C434F4D50">DELCOMP</a>                               <span class="co">#  DEL CORRESPONDING TO A 1 SEC ROTATION</span>
-016242,000036:                                                                                                  <span class="co">#  ABOUT COF</span>
-016243,000037: 22,2753           74343                           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
-016244,000038: 22,2754           04772                                    ARATE,1                               
-016245,000039: 22,2755           03267                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
-016246,000040: 22,2756           17324                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 <span class="co">#  COMPONENT MANEUVER RATES 45 DEG/SEC</span>
-016247,000041: 22,2757           03334                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
-016248,000042: 22,2760           55605                           <span class="in">DMP     </span> <span class="in">DDV*      </span>                            
-016249,000043: 22,2761           05002                                    <a href="#414E474C54494D45">ANGLTIME</a>                              
-016250,000044: 22,2762           04772                                    ARATE,1                               
-016251,000045: 22,2763           77661                           <span class="in">SR      </span>                                       
-016252,000046: 22,2764           20606                                    5                                     
-016253,000047: 22,2765           03332                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  MANEUVER EXECUTION TIME SCALED AS T2</span>
-016254,000048: 22,2766           77614                           <span class="in">SETGO   </span>                                       
-016255,000049: 22,2767           01035                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#43414C434D414E32">CALCMAN2</a>                              <span class="co">#  0(OFF) = CONTINUE MANEUVER</span>
-016256,000050: 22,2770           45010                                    <a href="KALCMANU_STEERING.agc.html#4E4557414E474C">NEWANGL</a>    +1                         <span class="co">#  1(ON) = START MANEUVER</span>
-016257,000051: 
-016258,000052:                                                                                                  <span class="co">#  THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY</span>
-016259,000053:                                                                                                  <span class="co">#  LOADING RATEINDX WITH 0, 2, 4, 6, RESPECTIVELY</span>
-016260,000054: 
-<a name="4152415445"></a>016261,000055: 22,2771           00221 24255  <span class="sm">ARATE   </span>           <span class="ps">2DEC    </span> .0088888888                            <span class="co">#  = 0.2 DEG/SEC         $ 22.5 DEG/SEC</span>
-016262,000056: 
-016263,000057: 22,2773           00554 02660                     <span class="ps">2DEC    </span> .0222222222                            <span class="co">#  = 0.5 DEG/SEC         $ 22.5 DEG/SEC</span>
-016264,000058: 
-016265,000059: 22,2775           02660 13301                     <span class="ps">2DEC    </span> .0888888888                            <span class="co">#  = 2.0 DEG/SEC         $ 22.5 DEG/SEC</span>
-016266,000060: 
-016267,000061: 22,2777           16161 30707                     <span class="ps">2DEC    </span> .4444444444                            <span class="co">#  = 10.0 DEG/SEC        $ 22.5 DEG/SEC</span>
-016268,000062: 
-<a name="414E474C54494D45"></a>016269,000063: 22,3001           00003 04000  <span class="sm">ANGLTIME</span>           <span class="ps">2DEC    </span> .0001907349                            <span class="co">#  = 100B-19 FUDGE FACTOR TO CONVERT</span>
-016270,000064:                                                                                                  <span class="co">#  MANEUVER ANGLE TO MANEUVER TIME</span>
-016271,000065: 
-016272,000066: 
+016280,000021: 15,2050                                           <span class="ps">BANK    </span> 15                                    
+016281,000022: 
+016282,000023: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B414C434D4F4E31">KALCMON1</a>                              
+016283,000024: 22,2000                                           <span class="ps">BANK    </span>                                       
+016284,000025: 
+016285,000026:                                                                                                  <span class="co">#  DETECTING GIMBAL LOCK</span>
+<a name="4C4F43534B495254"></a>016286,000027: 22,2744  22,2744               <span class="sm">LOCSKIRT</span>           <span class="ps">EQUALS  </span> <a href="#4E4F47494D4C4F43">NOGIMLOC</a>                              
+016287,000028: 
+<a name="4E4F47494D4C4F43"></a>016288,000029: 22,2744           77614        <span class="sm">NOGIMLOC</span>           <span class="in">SET     </span>                                       
+016289,000030: 22,2745           01074                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#43414C434D414E33">CALCMAN3</a>                              
+<a name="5743414C43"></a>016290,000031: 22,2746           70740        <span class="sm">WCALC   </span>           <span class="in">LXC,1   </span> <span class="in">DLOAD*    </span>                            
+016291,000032: 22,2747           01325                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  CHOOSE THE DESIRED MANEUVER RATE</span>
+016292,000033: 22,2750           04772                                    ARATE,1                               <span class="co">#  FROM A LIST OF FOUR</span>
+016293,000034: 22,2751           45002                           <span class="in">SR4     </span> <span class="in">CALL      </span>                            <span class="co">#  COMPUTE THE INCREMENTAL ROTATION MATRIX</span>
+016294,000035: 22,2752           44527                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#44454C434F4D50">DELCOMP</a>                               <span class="co">#  DEL CORRESPONDING TO A 1 SEC ROTATION</span>
+016295,000036:                                                                                                  <span class="co">#  ABOUT COF</span>
+016296,000037: 22,2753           74343                           <span class="in">DLOAD*  </span> <span class="in">VXSC      </span>                            
+016297,000038: 22,2754           04772                                    ARATE,1                               
+016298,000039: 22,2755           03267                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F46">COF</a>                                   
+016299,000040: 22,2756           17324                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 <span class="co">#  COMPONENT MANEUVER RATES 45 DEG/SEC</span>
+016300,000041: 22,2757           03334                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414D">AM</a>                                    
+016301,000042: 22,2760           55605                           <span class="in">DMP     </span> <span class="in">DDV*      </span>                            
+016302,000043: 22,2761           05002                                    <a href="#414E474C54494D45">ANGLTIME</a>                              
+016303,000044: 22,2762           04772                                    ARATE,1                               
+016304,000045: 22,2763           77661                           <span class="in">SR      </span>                                       
+016305,000046: 22,2764           20606                                    5                                     
+016306,000047: 22,2765           03332                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  MANEUVER EXECUTION TIME SCALED AS T2</span>
+016307,000048: 22,2766           77614                           <span class="in">SETGO   </span>                                       
+016308,000049: 22,2767           01035                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#43414C434D414E32">CALCMAN2</a>                              <span class="co">#  0(OFF) = CONTINUE MANEUVER</span>
+016309,000050: 22,2770           45010                                    <a href="KALCMANU_STEERING.agc.html#4E4557414E474C">NEWANGL</a>    +1                         <span class="co">#  1(ON) = START MANEUVER</span>
+016310,000051: 
+016311,000052:                                                                                                  <span class="co">#  THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY</span>
+016312,000053:                                                                                                  <span class="co">#  LOADING RATEINDX WITH 0, 2, 4, 6, RESPECTIVELY</span>
+016313,000054: 
+<a name="4152415445"></a>016314,000055: 22,2771           00221 24255  <span class="sm">ARATE   </span>           <span class="ps">2DEC    </span> .0088888888                            <span class="co">#  = 0.2 DEG/SEC         $ 22.5 DEG/SEC</span>
+016315,000056: 
+016316,000057: 22,2773           00554 02660                     <span class="ps">2DEC    </span> .0222222222                            <span class="co">#  = 0.5 DEG/SEC         $ 22.5 DEG/SEC</span>
+016317,000058: 
+016318,000059: 22,2775           02660 13301                     <span class="ps">2DEC    </span> .0888888888                            <span class="co">#  = 2.0 DEG/SEC         $ 22.5 DEG/SEC</span>
+016319,000060: 
+016320,000061: 22,2777           16161 30707                     <span class="ps">2DEC    </span> .4444444444                            <span class="co">#  = 10.0 DEG/SEC        $ 22.5 DEG/SEC</span>
+016321,000062: 
+<a name="414E474C54494D45"></a>016322,000063: 22,3001           00003 04000  <span class="sm">ANGLTIME</span>           <span class="ps">2DEC    </span> .0001907349                            <span class="co">#  = 100B-19 FUDGE FACTOR TO CONVERT</span>
+016323,000064:                                                                                                  <span class="co">#  MANEUVER ANGLE TO MANEUVER TIME</span>
+016324,000065: 
+016325,000066: 
 
 End of include-file GIMBAL_LOCK_AVOIDANCE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

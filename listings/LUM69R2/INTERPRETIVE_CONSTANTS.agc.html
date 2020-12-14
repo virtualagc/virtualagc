@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -66,47 +65,66 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files are part of a reconstructed copy of LUM69 Revision 2, the
-flown Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
+These source-code files are part of a reconstructed copy of Luminary 69/2,
+the flown, final release of the Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
 <br><br>
-The reconstruction began with source code of Luminary 69 revision 0 previously
-transcribed from a digitized copy of that program.  The code was then updated 
-by back-porting the R-2 lunar potential model from previously-transcribed source
-code of Luminary 99. These required changes were described in the original
-Luminary memos 75 and 78. The reconstructed code was verified by 
-matching memory-bank checksums to those listed in drawing 2021152G. Note that
-page numbers in the reconstructed code match those on the Luminary 069 printout, 
-although the added code would likely have changed page numbers for a real LUM69 
-Revision 2 listing.
+The reconstruction is based on the source code of Luminary 69 &mdash; i.e., the
+initial, unflown version, "revision 0" &mdash; of which 
+a contemporary listing was available.  The code was then updated by incorporating the 
+differences between Luminary 69 and Luminary 69/2, known from other contemporary
+documentation.  The only such difference is the implementation in 
+Luminary 69/2 of the "R-2 Lunar Potential Model", the source code for which was taken 
+from program Luminary 99/1 (Apollo 11 LM), of which a contemporary listing was also available.
+Finally, the now-reconstructed Luminary 69/2 was then validated by assembling it to
+executable form and verifying that its memory banks had the correct checksums,
+known from still other contemporary documentation.
 <br><br>
+Note that page numbers in the reconstructed code match those in the original Luminary 69
+program listing, or in the ORBITAL INTEGRATION log section, in Luminary 99/1. Page numbers 
+would certainly differ somewhat in a contemporary Luminary 69/2 listing.
+Moreover, annotations that were not present in the contemporary source code have been added 
+to the reconstructed code to justify each change in Luminary 69/2 relative to 
+Luminary 69. Here's a guide to the Apollo documentation referenced in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n80/mode/1up">
+    MIT/IL engineering drawing 2021152N, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Luminary 69/2 (called "LUMINARY 69 REV. 2" in the document itself).</li>
+<li><a href="https://archive.org/details/Luminary99001J2k60/mode/1up">
+       Luminary 99/1 (Apollo 11 LM final release) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/luminary6900miti/mode/1up">
+       Luminary 69 (Apollo 10 LM initial release) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">
+       LUMINARY Memo #75, "R-2 Lunar Potential Model Added to LUM"</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM78_text.pdf">
+       LUMINARY Memo #78, "LUMINARY Revisions 93-96"</a>.</li>
+</ul>
 Comments from the original source code are prefixed with a single '#' symbol, 
 whereas comments added later are prefixed by "##" or "###".  Report any errors 
 noted by creating an 
 issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
 project's GitHub repository</a>.
 </td></tr></tbody></table>
-
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047104,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-047105,000003:                                                                                                  <span class="co">## Filename:    INTERPRETIVE_CONSTANTS.agc</span>
-047106,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
-047107,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
-047108,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
-047109,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
-047110,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
-047111,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
-047112,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
-047113,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
-047114,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
-047115,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
-047116,000014:                                                                                                  <span class="co">## Reference:   pp. 1095-1096</span>
-047117,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-047118,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-047119,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-047120,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
-047121,000019: 
+047157,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+047158,000003:                                                                                                  <span class="co">## Filename:    INTERPRETIVE_CONSTANTS.agc</span>
+047159,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
+047160,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
+047161,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
+047162,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
+047163,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
+047164,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
+047165,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
+047166,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
+047167,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
+047168,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
+047169,000014:                                                                                                  <span class="co">## Reference:   pp. 1095-1096</span>
+047170,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+047171,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+047172,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+047173,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
+047174,000019: 
 </pre>
 </span>
 </p>
@@ -122,28 +140,28 @@ Page 1095
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047123,000021: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#494E545052455431">INTPRET1</a>                              
-047124,000022: 23,2000                                           <span class="ps">BANK    </span>                                       
-047125,000023: 
-047126,000024: 23,2413                                           <span class="ps">COUNT*  </span> $$/ICONS                              
-<a name="4450312F345448"></a>047127,000025: 23,2413           10000 00000  <span class="sm">DP1/4TH </span>           <span class="ps">2DEC    </span> .25                                   
-047128,000026: 
-<a name="554E49545A"></a>047129,000027: 23,2415           00000 00000  <span class="sm">UNITZ   </span>           <span class="ps">2DEC    </span> 0          B-28                       
-047130,000028: 
-<a name="554E495459"></a>047131,000029: 23,2417           00000 00000  <span class="sm">UNITY   </span>           <span class="ps">2DEC    </span> 0          B-28                       
-047132,000030: 
-<a name="554E495458"></a>047133,000031: 23,2421           20000 00000  <span class="sm">UNITX   </span>           <span class="ps">2DEC    </span> .5                                    
-047134,000032: 
-<a name="5A45524F56454353"></a>047135,000033: 23,2423           00000 00000  <span class="sm">ZEROVECS</span>           <span class="ps">2DEC    </span> 0          B-28                       
-047136,000034: 
-047137,000035: 23,2425           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-047138,000036: 
-047139,000037: 23,2427           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-047140,000038: 
-<a name="445048414C46"></a>047141,000039: 23,2431  23,2421               <span class="sm">DPHALF  </span>           <span class="ps">=       </span> <a href="#554E495458">UNITX</a>                                 
-<a name="4450504F534D4158"></a>047142,000040: 23,2431           37777        <span class="sm">DPPOSMAX</span>           <span class="ps">OCT     </span> 37777                                 
-047143,000041: 23,2432           37777                           <span class="ps">OCT     </span> 37777                                 
-047144,000042: 
+047176,000021: 23,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#494E545052455431">INTPRET1</a>                              
+047177,000022: 23,2000                                           <span class="ps">BANK    </span>                                       
+047178,000023: 
+047179,000024: 23,2413                                           <span class="ps">COUNT*  </span> $$/ICONS                              
+<a name="4450312F345448"></a>047180,000025: 23,2413           10000 00000  <span class="sm">DP1/4TH </span>           <span class="ps">2DEC    </span> .25                                   
+047181,000026: 
+<a name="554E49545A"></a>047182,000027: 23,2415           00000 00000  <span class="sm">UNITZ   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+047183,000028: 
+<a name="554E495459"></a>047184,000029: 23,2417           00000 00000  <span class="sm">UNITY   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+047185,000030: 
+<a name="554E495458"></a>047186,000031: 23,2421           20000 00000  <span class="sm">UNITX   </span>           <span class="ps">2DEC    </span> .5                                    
+047187,000032: 
+<a name="5A45524F56454353"></a>047188,000033: 23,2423           00000 00000  <span class="sm">ZEROVECS</span>           <span class="ps">2DEC    </span> 0          B-28                       
+047189,000034: 
+047190,000035: 23,2425           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+047191,000036: 
+047192,000037: 23,2427           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+047193,000038: 
+<a name="445048414C46"></a>047194,000039: 23,2431  23,2421               <span class="sm">DPHALF  </span>           <span class="ps">=       </span> <a href="#554E495458">UNITX</a>                                 
+<a name="4450504F534D4158"></a>047195,000040: 23,2431           37777        <span class="sm">DPPOSMAX</span>           <span class="ps">OCT     </span> 37777                                 
+047196,000041: 23,2432           37777                           <span class="ps">OCT     </span> 37777                                 
+047197,000042: 
 </pre>
 </span>
 </p>
@@ -159,35 +177,35 @@ Page 1096
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047146,000044:                                                                                                  <span class="co">#  INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY</span>
-047147,000045: 
-047148,000046: 11,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#494E545052455432">INTPRET2</a>                              
-047149,000047: 11,2000                                           <span class="ps">BANK    </span>                                       
-047150,000048: 
-047151,000049: 11,2266                                           <span class="ps">COUNT*  </span> $$/ICONS                              
-<a name="5A554E4954"></a>047152,000050: 11,2266           00000 00000  <span class="sm">ZUNIT   </span>           <span class="ps">2DEC    </span> 0          B-28                       
-047153,000051: 
-<a name="59554E4954"></a>047154,000052: 11,2270           00000 00000  <span class="sm">YUNIT   </span>           <span class="ps">2DEC    </span> 0          B-28                       
-047155,000053: 
-<a name="58554E4954"></a>047156,000054: 11,2272           20000 00000  <span class="sm">XUNIT   </span>           <span class="ps">2DEC    </span> .5                                    
-047157,000055: 
-<a name="5A45524F564543"></a>047158,000056: 11,2274           00000 00000  <span class="sm">ZEROVEC </span>           <span class="ps">2DEC    </span> 0          B-28                       
-047159,000057: 
-047160,000058: 11,2276           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-047161,000059: 
-047162,000060: 11,2300           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-047163,000061: 
-047164,000062: 11,2302           77777                           <span class="ps">OCT     </span> 77777                                 <span class="co">#  -0, -6, -12 MUST REMAIN IN THIS ORDER</span>
-<a name="4446432D36"></a>047165,000063: 11,2303           77771        <span class="sm">DFC-6   </span>           <span class="ps">DEC     </span> -6         B-14                       
-<a name="4446432D3132"></a>047166,000064: 11,2304           77763        <span class="sm">DFC-12  </span>           <span class="ps">DEC     </span> -12        B-14                       
-<a name="4C4F44504D4158"></a>047167,000065: 11,2305           37777 37777  <span class="sm">LODPMAX </span>           <span class="ps">2OCT    </span> 3777737777                            <span class="co">#  THESE TWO CONSTANTS MUST REMAIN</span>
-047168,000066: 
-<a name="4C4F44504D415831"></a>047169,000067: 11,2307           37777 37777  <span class="sm">LODPMAX1</span>           <span class="ps">2OCT    </span> 3777737777                            <span class="co">#  ADJACENT AND THE SAME FOR INTEGRATION</span>
-047170,000068: 
-<a name="5A45524F4450"></a>047171,000069: 11,2311  11,2274               <span class="sm">ZERODP  </span>           <span class="ps">=       </span> <a href="#5A45524F564543">ZEROVEC</a>                               
-<a name="48414C464450"></a>047172,000070: 11,2311  11,2272               <span class="sm">HALFDP  </span>           <span class="ps">=       </span> <a href="#58554E4954">XUNIT</a>                                 
-047173,000071: 
-047174,000072: 
+047199,000044:                                                                                                  <span class="co">#  INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY</span>
+047200,000045: 
+047201,000046: 11,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#494E545052455432">INTPRET2</a>                              
+047202,000047: 11,2000                                           <span class="ps">BANK    </span>                                       
+047203,000048: 
+047204,000049: 11,2266                                           <span class="ps">COUNT*  </span> $$/ICONS                              
+<a name="5A554E4954"></a>047205,000050: 11,2266           00000 00000  <span class="sm">ZUNIT   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+047206,000051: 
+<a name="59554E4954"></a>047207,000052: 11,2270           00000 00000  <span class="sm">YUNIT   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+047208,000053: 
+<a name="58554E4954"></a>047209,000054: 11,2272           20000 00000  <span class="sm">XUNIT   </span>           <span class="ps">2DEC    </span> .5                                    
+047210,000055: 
+<a name="5A45524F564543"></a>047211,000056: 11,2274           00000 00000  <span class="sm">ZEROVEC </span>           <span class="ps">2DEC    </span> 0          B-28                       
+047212,000057: 
+047213,000058: 11,2276           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+047214,000059: 
+047215,000060: 11,2300           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+047216,000061: 
+047217,000062: 11,2302           77777                           <span class="ps">OCT     </span> 77777                                 <span class="co">#  -0, -6, -12 MUST REMAIN IN THIS ORDER</span>
+<a name="4446432D36"></a>047218,000063: 11,2303           77771        <span class="sm">DFC-6   </span>           <span class="ps">DEC     </span> -6         B-14                       
+<a name="4446432D3132"></a>047219,000064: 11,2304           77763        <span class="sm">DFC-12  </span>           <span class="ps">DEC     </span> -12        B-14                       
+<a name="4C4F44504D4158"></a>047220,000065: 11,2305           37777 37777  <span class="sm">LODPMAX </span>           <span class="ps">2OCT    </span> 3777737777                            <span class="co">#  THESE TWO CONSTANTS MUST REMAIN</span>
+047221,000066: 
+<a name="4C4F44504D415831"></a>047222,000067: 11,2307           37777 37777  <span class="sm">LODPMAX1</span>           <span class="ps">2OCT    </span> 3777737777                            <span class="co">#  ADJACENT AND THE SAME FOR INTEGRATION</span>
+047223,000068: 
+<a name="5A45524F4450"></a>047224,000069: 11,2311  11,2274               <span class="sm">ZERODP  </span>           <span class="ps">=       </span> <a href="#5A45524F564543">ZEROVEC</a>                               
+<a name="48414C464450"></a>047225,000070: 11,2311  11,2272               <span class="sm">HALFDP  </span>           <span class="ps">=       </span> <a href="#58554E4954">XUNIT</a>                                 
+047226,000071: 
+047227,000072: 
 
 End of include-file INTERPRETIVE_CONSTANTS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

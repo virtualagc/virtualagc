@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -66,47 +65,66 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files are part of a reconstructed copy of LUM69 Revision 2, the
-flown Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
+These source-code files are part of a reconstructed copy of Luminary 69/2,
+the flown, final release of the Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
 <br><br>
-The reconstruction began with source code of Luminary 69 revision 0 previously
-transcribed from a digitized copy of that program.  The code was then updated 
-by back-porting the R-2 lunar potential model from previously-transcribed source
-code of Luminary 99. These required changes were described in the original
-Luminary memos 75 and 78. The reconstructed code was verified by 
-matching memory-bank checksums to those listed in drawing 2021152G. Note that
-page numbers in the reconstructed code match those on the Luminary 069 printout, 
-although the added code would likely have changed page numbers for a real LUM69 
-Revision 2 listing.
+The reconstruction is based on the source code of Luminary 69 &mdash; i.e., the
+initial, unflown version, "revision 0" &mdash; of which 
+a contemporary listing was available.  The code was then updated by incorporating the 
+differences between Luminary 69 and Luminary 69/2, known from other contemporary
+documentation.  The only such difference is the implementation in 
+Luminary 69/2 of the "R-2 Lunar Potential Model", the source code for which was taken 
+from program Luminary 99/1 (Apollo 11 LM), of which a contemporary listing was also available.
+Finally, the now-reconstructed Luminary 69/2 was then validated by assembling it to
+executable form and verifying that its memory banks had the correct checksums,
+known from still other contemporary documentation.
 <br><br>
+Note that page numbers in the reconstructed code match those in the original Luminary 69
+program listing, or in the ORBITAL INTEGRATION log section, in Luminary 99/1. Page numbers 
+would certainly differ somewhat in a contemporary Luminary 69/2 listing.
+Moreover, annotations that were not present in the contemporary source code have been added 
+to the reconstructed code to justify each change in Luminary 69/2 relative to 
+Luminary 69. Here's a guide to the Apollo documentation referenced in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n80/mode/1up">
+    MIT/IL engineering drawing 2021152N, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Luminary 69/2 (called "LUMINARY 69 REV. 2" in the document itself).</li>
+<li><a href="https://archive.org/details/Luminary99001J2k60/mode/1up">
+       Luminary 99/1 (Apollo 11 LM final release) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/luminary6900miti/mode/1up">
+       Luminary 69 (Apollo 10 LM initial release) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">
+       LUMINARY Memo #75, "R-2 Lunar Potential Model Added to LUM"</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM78_text.pdf">
+       LUMINARY Memo #78, "LUMINARY Revisions 93-96"</a>.</li>
+</ul>
 Comments from the original source code are prefixed with a single '#' symbol, 
 whereas comments added later are prefixed by "##" or "###".  Report any errors 
 noted by creating an 
 issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
 project's GitHub repository</a>.
 </td></tr></tbody></table>
-
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-054916,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-054917,000003:                                                                                                  <span class="co">## Filename:    AGC_BLOCK_TWO_SELF-CHECK.agc</span>
-054918,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
-054919,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
-054920,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
-054921,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
-054922,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
-054923,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
-054924,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
-054925,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
-054926,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
-054927,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
-054928,000014:                                                                                                  <span class="co">## Reference:   pp. 1278-1287</span>
-054929,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-054930,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-054931,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-054932,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
-054933,000019: 
+055091,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+055092,000003:                                                                                                  <span class="co">## Filename:    AGC_BLOCK_TWO_SELF-CHECK.agc</span>
+055093,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
+055094,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
+055095,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
+055096,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
+055097,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
+055098,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
+055099,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
+055100,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
+055101,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
+055102,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
+055103,000014:                                                                                                  <span class="co">## Reference:   pp. 1278-1287</span>
+055104,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+055105,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+055106,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+055107,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
+055108,000019: 
 </pre>
 </span>
 </p>
@@ -122,47 +140,47 @@ Page 1278
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-054935,000021:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION                           DATE  20 DECEMBER 1967</span>
-054936,000022:                                                                                                  <span class="co">#  PROGRAM NAME - SELF-CHECK                     LOG SECTION AGC BLOCK TWO SELF-CHECK</span>
-054937,000023:                                                                                                  <span class="co">#  MOD NO - 1                                    ASSEMBLY SUBROUTINE UTILITYM REV 25</span>
-054938,000024:                                                                                                  <span class="co">#  MOD BY - GAUNTT</span>
-054939,000025: 
-054940,000026:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-054941,000027:                                                                                                  <span class="co">#        PROGRAM HAS TWO MAIN PARTS. THE FIRST IS SELF-CHECK WHICH RUNS AS A ZERO PRIORITY JOB WITH NO CORE SET, AS</span>
-054942,000028:                                                                                                  <span class="co">#  PART OF THE BACK-UP IDLE LOOP. THE SECOND IS SHOW-BANKSUM WHICH RUNS AS A REGULAR EXECUTIVE JOB WITH ITS OWN</span>
-054943,000029:                                                                                                  <span class="co">#  STARTING VERB.</span>
-054944,000030:                                                                                                  <span class="co">#        THE PURPOSE OF SELF-CHECK IS TO CHECK OUT VARIOUS PARTS OF THE COMPUTER AS OUTLINED BELOW IN THE OPTIONS.</span>
-054945,000031:                                                                                                  <span class="co">#        THE PURPOSE OF SHOW-BANKSUM IS TO DISPLAY THE SUM OF EACH BANK, ONE AT A TIME.</span>
-054946,000032:                                                                                                  <span class="co">#        IN ALL THERE ARE 7 POSSIBLE OPTIONS IN THIS BLOCK II VERSION OF SELF-CHECK. MORE DETAIL DESCRIPTION MAY BE</span>
-054947,000033:                                                                                                  <span class="co">#  FOUND IN E-2065 BLOCK II AGC SELF-CHECK AND SHOW BANKSUM BY EDWIN D. SMALLY DECEMBER 1966, AND ADDENDA 2 AND 3.</span>
-054948,000034: 
-054949,000035:                                                                                                  <span class="co">#        THE DIFFERENT OPTIONS ARE CONTROLLED BY PUTTING DIFFERENT NUMBERS IN THE SMODE REGISTER (NOUN 27). BELOW IS</span>
-054950,000036:                                                                                                  <span class="co">#   A DESCRIPTION OF WHAT PARTS OF THE COMPUTER THAT ARE CHECKED BY THE OPTIONS, AND THE CORRESPONDING NUMBER, IN</span>
-054951,000037:                                                                                                  <span class="co">#  OCTAL, TO LOAD INTO SMODE.</span>
-054952,000038:                                                                                                  <span class="co">#  +-4   ERASABLE MEMORY</span>
-054953,000039:                                                                                                  <span class="co">#  +-5   FIXED MEMORY</span>
-054954,000040:                                                                                                  <span class="co">#  +-1,2,3,6,7,10   EVERYTHING IN OPTIONS 4 AND 5.</span>
-054955,000041:                                                                                                  <span class="co">#  -0    SAME AS +-10 UNTIL AN ERROR IS DETECTED.</span>
-054956,000042:                                                                                                  <span class="co">#  +0    NO CHECK, PUTS COMPUTER INTO THE BACKUP IDLE LOOP.</span>
-054957,000043: 
-054958,000044:                                                                                                  <span class="co">#  WARNINGS</span>
-054959,000045:                                                                                                  <span class="co">#        USE OF E MEMORY RESERVED FOR SELF-CHECK (EVEN IN IDLE LOOP) AS TEMP STORAGE BY OTHER PROGRAMS IS DANGEROUS.</span>
-054960,000046:                                                                                                  <span class="co">#        SMODE SET GREATER THAN OCT 10 PUTS COMPUTER INTO BACKUP IDLE LOOP.</span>
-054961,000047: 
-054962,000048:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-054963,000049:                                                                                                  <span class="co">#        TO CALL SELF-CHECK KEY IN</span>
-054964,000050:                                                                                                  <span class="co">#                V 21 N 27 E     OPTION NUMBER E</span>
-054965,000051:                                                                                                  <span class="co">#        TO CALL SHOW-BANKSUM KEY IN</span>
-054966,000052:                                                                                                  <span class="co">#                V 91 E          DISPLAYS FIRST BANK</span>
-054967,000053:                                                                                                  <span class="co">#                V 33 E          PROCEED, DISPLAYS NEXT BANK</span>
-054968,000054: 
-054969,000055:                                                                                                  <span class="co">#  EXIT MODES, NORMAL AND ALARM</span>
-054970,000056:                                                                                                  <span class="co">#        SELF-CHECK NORMALLY CONTINUES INDEFINITELY UNLESS THERE IS AN ERROR DETECTED. IF SO + OPTION NUMBERS PUT</span>
-054971,000057:                                                                                                  <span class="co">#  COMPUTER INTO BACKUP IDLE LOOP, - OPTION NUMBERS RESTART THE OPTION.</span>
-054972,000058:                                                                                                  <span class="co">#        THE -0 OPTION PROCEEDS FROM THE LINE FOLLOWING THE LINE WHERE THE ERROR WAS DETECTED.</span>
-054973,000059:                                                                                                  <span class="co">#        SHOW-BANKSUM PROCEEDS UNTIL A TERMINATE IS KEYED IN (V 34 E).  THE COMPUTER IS PUT INTO THE BACKUP IDLE LOOP</span>
-054974,000060: 
-054975,000061:                                                                                                  <span class="co">#  OUTPUT</span>
+055110,000021:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION                           DATE  20 DECEMBER 1967</span>
+055111,000022:                                                                                                  <span class="co">#  PROGRAM NAME - SELF-CHECK                     LOG SECTION AGC BLOCK TWO SELF-CHECK</span>
+055112,000023:                                                                                                  <span class="co">#  MOD NO - 1                                    ASSEMBLY SUBROUTINE UTILITYM REV 25</span>
+055113,000024:                                                                                                  <span class="co">#  MOD BY - GAUNTT</span>
+055114,000025: 
+055115,000026:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+055116,000027:                                                                                                  <span class="co">#        PROGRAM HAS TWO MAIN PARTS. THE FIRST IS SELF-CHECK WHICH RUNS AS A ZERO PRIORITY JOB WITH NO CORE SET, AS</span>
+055117,000028:                                                                                                  <span class="co">#  PART OF THE BACK-UP IDLE LOOP. THE SECOND IS SHOW-BANKSUM WHICH RUNS AS A REGULAR EXECUTIVE JOB WITH ITS OWN</span>
+055118,000029:                                                                                                  <span class="co">#  STARTING VERB.</span>
+055119,000030:                                                                                                  <span class="co">#        THE PURPOSE OF SELF-CHECK IS TO CHECK OUT VARIOUS PARTS OF THE COMPUTER AS OUTLINED BELOW IN THE OPTIONS.</span>
+055120,000031:                                                                                                  <span class="co">#        THE PURPOSE OF SHOW-BANKSUM IS TO DISPLAY THE SUM OF EACH BANK, ONE AT A TIME.</span>
+055121,000032:                                                                                                  <span class="co">#        IN ALL THERE ARE 7 POSSIBLE OPTIONS IN THIS BLOCK II VERSION OF SELF-CHECK. MORE DETAIL DESCRIPTION MAY BE</span>
+055122,000033:                                                                                                  <span class="co">#  FOUND IN E-2065 BLOCK II AGC SELF-CHECK AND SHOW BANKSUM BY EDWIN D. SMALLY DECEMBER 1966, AND ADDENDA 2 AND 3.</span>
+055123,000034: 
+055124,000035:                                                                                                  <span class="co">#        THE DIFFERENT OPTIONS ARE CONTROLLED BY PUTTING DIFFERENT NUMBERS IN THE SMODE REGISTER (NOUN 27). BELOW IS</span>
+055125,000036:                                                                                                  <span class="co">#   A DESCRIPTION OF WHAT PARTS OF THE COMPUTER THAT ARE CHECKED BY THE OPTIONS, AND THE CORRESPONDING NUMBER, IN</span>
+055126,000037:                                                                                                  <span class="co">#  OCTAL, TO LOAD INTO SMODE.</span>
+055127,000038:                                                                                                  <span class="co">#  +-4   ERASABLE MEMORY</span>
+055128,000039:                                                                                                  <span class="co">#  +-5   FIXED MEMORY</span>
+055129,000040:                                                                                                  <span class="co">#  +-1,2,3,6,7,10   EVERYTHING IN OPTIONS 4 AND 5.</span>
+055130,000041:                                                                                                  <span class="co">#  -0    SAME AS +-10 UNTIL AN ERROR IS DETECTED.</span>
+055131,000042:                                                                                                  <span class="co">#  +0    NO CHECK, PUTS COMPUTER INTO THE BACKUP IDLE LOOP.</span>
+055132,000043: 
+055133,000044:                                                                                                  <span class="co">#  WARNINGS</span>
+055134,000045:                                                                                                  <span class="co">#        USE OF E MEMORY RESERVED FOR SELF-CHECK (EVEN IN IDLE LOOP) AS TEMP STORAGE BY OTHER PROGRAMS IS DANGEROUS.</span>
+055135,000046:                                                                                                  <span class="co">#        SMODE SET GREATER THAN OCT 10 PUTS COMPUTER INTO BACKUP IDLE LOOP.</span>
+055136,000047: 
+055137,000048:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+055138,000049:                                                                                                  <span class="co">#        TO CALL SELF-CHECK KEY IN</span>
+055139,000050:                                                                                                  <span class="co">#                V 21 N 27 E     OPTION NUMBER E</span>
+055140,000051:                                                                                                  <span class="co">#        TO CALL SHOW-BANKSUM KEY IN</span>
+055141,000052:                                                                                                  <span class="co">#                V 91 E          DISPLAYS FIRST BANK</span>
+055142,000053:                                                                                                  <span class="co">#                V 33 E          PROCEED, DISPLAYS NEXT BANK</span>
+055143,000054: 
+055144,000055:                                                                                                  <span class="co">#  EXIT MODES, NORMAL AND ALARM</span>
+055145,000056:                                                                                                  <span class="co">#        SELF-CHECK NORMALLY CONTINUES INDEFINITELY UNLESS THERE IS AN ERROR DETECTED. IF SO + OPTION NUMBERS PUT</span>
+055146,000057:                                                                                                  <span class="co">#  COMPUTER INTO BACKUP IDLE LOOP, - OPTION NUMBERS RESTART THE OPTION.</span>
+055147,000058:                                                                                                  <span class="co">#        THE -0 OPTION PROCEEDS FROM THE LINE FOLLOWING THE LINE WHERE THE ERROR WAS DETECTED.</span>
+055148,000059:                                                                                                  <span class="co">#        SHOW-BANKSUM PROCEEDS UNTIL A TERMINATE IS KEYED IN (V 34 E).  THE COMPUTER IS PUT INTO THE BACKUP IDLE LOOP</span>
+055149,000060: 
+055150,000061:                                                                                                  <span class="co">#  OUTPUT</span>
 </pre>
 </span>
 </p>
@@ -178,52 +196,52 @@ Page 1279
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-054977,000063:                                                                                                  <span class="co">#        SELF-CHECK UPON DETECTING AN ERROR LOADS THE SELF-CHECK ALARM CONSTANT (01102) INTO THE FAILREG SET AND</span>
-054978,000064:                                                                                                  <span class="co">#  TURNS ON THE ALARM LIGHT. THE OPERATOR MAY THEN DISPLAY THE THREE FAILREGS BY KEYING IN V 05 N 09 E. FOR FURTHER</span>
-054979,000065:                                                                                                  <span class="co">#  INFORMATION HE MAY KEY IN V 05 N 08 E, THE DSKY DISPLAY IN R1 WILL BE ADDRESS+1 OF WHERE THE ERROR WAS DETECTED,</span>
-054980,000066:                                                                                                  <span class="co">#  IN R2 THE BBCON OF SELF-CHECK, AND IN R3 THE TOTAL NUMBER OF ERRORS DETECTED BY SELF-CHECK SINCE THE LAST MAN</span>
-054981,000067:                                                                                                  <span class="co">#  INITIATED FRESH START (SLAP1).</span>
-054982,000068: 
-054983,000069:                                                                                                  <span class="co">#        SHOW-BANKSUM STARTING WITH BANK 0 DISPLAYS IN R1 THE BANK SUM (A +-NUMBER EQUAL TO THE BANK NUMBER), IN R2</span>
-054984,000070:                                                                                                  <span class="co">#  THE BANK NUMBER, AND IN R3 THE BUGGER WORD.</span>
-054985,000071: 
-054986,000072:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
-054987,000073:                                                                                                  <span class="co">#        ACCOMPLISHED BY FRESH START</span>
-054988,000074:                                                                                                  <span class="co">#                SMODE SET TO +0</span>
-054989,000075: 
-054990,000076:                                                                                                  <span class="co">#  DEBRIS</span>
-054991,000077:                                                                                                  <span class="co">#        ALL EXITS FROM THE CHECK OF ERASABLE (ERASCHK) RESTORE ORIGINAL CONTENTS TO REGISTERS UNDER CHECK.</span>
-054992,000078:                                                                                                  <span class="co">#  EXCEPTION IS A RESTART. RESTART THAT OCCURS DURING ERASCHK RESTORES ERASABLE, UNLESS THERE IS EVIDENCE TO DOUBT</span>
-054993,000079:                                                                                                  <span class="co">#  E MEMORY, IN WHICH CASE PROGRAM THEN DOES A FRESH START (DOFSTART).</span>
-054994,000080: 
-054995,000081: 25,3671                                           <span class="ps">BANK    </span> 25                                    
-054996,000082: 43,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#53454C4643484543">SELFCHEC</a>                              
-054997,000083: 43,2000                                           <span class="ps">BANK    </span>                                       
-054998,000084: 
-054999,000085: 43,3240                                           <span class="ps">COUNT*  </span> $$/SELF                               
-<a name="5342495431"></a>055000,000086: 43,3240     4753               <span class="sm">SBIT1   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-<a name="5342495432"></a>055001,000087: 43,3240     4752               <span class="sm">SBIT2   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-<a name="5342495433"></a>055002,000088: 43,3240     4751               <span class="sm">SBIT3   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
-<a name="5342495434"></a>055003,000089: 43,3240     4750               <span class="sm">SBIT4   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  
-<a name="5342495435"></a>055004,000090: 43,3240     4747               <span class="sm">SBIT5   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
-<a name="5342495436"></a>055005,000091: 43,3240     4746               <span class="sm">SBIT6   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  
-<a name="5342495437"></a>055006,000092: 43,3240     4745               <span class="sm">SBIT7   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
-<a name="5342495438"></a>055007,000093: 43,3240     4744               <span class="sm">SBIT8   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
-<a name="5342495439"></a>055008,000094: 43,3240     4743               <span class="sm">SBIT9   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495439">BIT9</a>                                  
-<a name="534249543130"></a>055009,000095: 43,3240     4742               <span class="sm">SBIT10  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 
-<a name="534249543131"></a>055010,000096: 43,3240     4741               <span class="sm">SBIT11  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
-<a name="534249543132"></a>055011,000097: 43,3240     4740               <span class="sm">SBIT12  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
-<a name="534249543133"></a>055012,000098: 43,3240     4737               <span class="sm">SBIT13  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 
-<a name="534249543134"></a>055013,000099: 43,3240     4736               <span class="sm">SBIT14  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
-<a name="534249543135"></a>055014,000100: 43,3240     4735               <span class="sm">SBIT15  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
-055015,000101: 
-<a name="532B5A45524F"></a>055016,000102: 43,3240     4755               <span class="sm">S+ZERO  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-<a name="532B31"></a>055017,000103: 43,3240     4753               <span class="sm">S+1     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
-<a name="532B32"></a>055018,000104: 43,3240     4752               <span class="sm">S+2     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
-<a name="532B33"></a>055019,000105: 43,3240     6244               <span class="sm">S+3     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 
-<a name="532B34"></a>055020,000106: 43,3240     4751               <span class="sm">S+4     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
-<a name="532B35"></a>055021,000107: 43,3240     4756               <span class="sm">S+5     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#46495645">FIVE</a>                                  
-<a name="532B36"></a>055022,000108: 43,3240     6241               <span class="sm">S+6     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
+055152,000063:                                                                                                  <span class="co">#        SELF-CHECK UPON DETECTING AN ERROR LOADS THE SELF-CHECK ALARM CONSTANT (01102) INTO THE FAILREG SET AND</span>
+055153,000064:                                                                                                  <span class="co">#  TURNS ON THE ALARM LIGHT. THE OPERATOR MAY THEN DISPLAY THE THREE FAILREGS BY KEYING IN V 05 N 09 E. FOR FURTHER</span>
+055154,000065:                                                                                                  <span class="co">#  INFORMATION HE MAY KEY IN V 05 N 08 E, THE DSKY DISPLAY IN R1 WILL BE ADDRESS+1 OF WHERE THE ERROR WAS DETECTED,</span>
+055155,000066:                                                                                                  <span class="co">#  IN R2 THE BBCON OF SELF-CHECK, AND IN R3 THE TOTAL NUMBER OF ERRORS DETECTED BY SELF-CHECK SINCE THE LAST MAN</span>
+055156,000067:                                                                                                  <span class="co">#  INITIATED FRESH START (SLAP1).</span>
+055157,000068: 
+055158,000069:                                                                                                  <span class="co">#        SHOW-BANKSUM STARTING WITH BANK 0 DISPLAYS IN R1 THE BANK SUM (A +-NUMBER EQUAL TO THE BANK NUMBER), IN R2</span>
+055159,000070:                                                                                                  <span class="co">#  THE BANK NUMBER, AND IN R3 THE BUGGER WORD.</span>
+055160,000071: 
+055161,000072:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED</span>
+055162,000073:                                                                                                  <span class="co">#        ACCOMPLISHED BY FRESH START</span>
+055163,000074:                                                                                                  <span class="co">#                SMODE SET TO +0</span>
+055164,000075: 
+055165,000076:                                                                                                  <span class="co">#  DEBRIS</span>
+055166,000077:                                                                                                  <span class="co">#        ALL EXITS FROM THE CHECK OF ERASABLE (ERASCHK) RESTORE ORIGINAL CONTENTS TO REGISTERS UNDER CHECK.</span>
+055167,000078:                                                                                                  <span class="co">#  EXCEPTION IS A RESTART. RESTART THAT OCCURS DURING ERASCHK RESTORES ERASABLE, UNLESS THERE IS EVIDENCE TO DOUBT</span>
+055168,000079:                                                                                                  <span class="co">#  E MEMORY, IN WHICH CASE PROGRAM THEN DOES A FRESH START (DOFSTART).</span>
+055169,000080: 
+055170,000081: 25,3671                                           <span class="ps">BANK    </span> 25                                    
+055171,000082: 43,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#53454C4643484543">SELFCHEC</a>                              
+055172,000083: 43,2000                                           <span class="ps">BANK    </span>                                       
+055173,000084: 
+055174,000085: 43,3240                                           <span class="ps">COUNT*  </span> $$/SELF                               
+<a name="5342495431"></a>055175,000086: 43,3240     4753               <span class="sm">SBIT1   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+<a name="5342495432"></a>055176,000087: 43,3240     4752               <span class="sm">SBIT2   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+<a name="5342495433"></a>055177,000088: 43,3240     4751               <span class="sm">SBIT3   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495433">BIT3</a>                                  
+<a name="5342495434"></a>055178,000089: 43,3240     4750               <span class="sm">SBIT4   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495434">BIT4</a>                                  
+<a name="5342495435"></a>055179,000090: 43,3240     4747               <span class="sm">SBIT5   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495435">BIT5</a>                                  
+<a name="5342495436"></a>055180,000091: 43,3240     4746               <span class="sm">SBIT6   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495436">BIT6</a>                                  
+<a name="5342495437"></a>055181,000092: 43,3240     4745               <span class="sm">SBIT7   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495437">BIT7</a>                                  
+<a name="5342495438"></a>055182,000093: 43,3240     4744               <span class="sm">SBIT8   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  
+<a name="5342495439"></a>055183,000094: 43,3240     4743               <span class="sm">SBIT9   </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495439">BIT9</a>                                  
+<a name="534249543130"></a>055184,000095: 43,3240     4742               <span class="sm">SBIT10  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 
+<a name="534249543131"></a>055185,000096: 43,3240     4741               <span class="sm">SBIT11  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
+<a name="534249543132"></a>055186,000097: 43,3240     4740               <span class="sm">SBIT12  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543132">BIT12</a>                                 
+<a name="534249543133"></a>055187,000098: 43,3240     4737               <span class="sm">SBIT13  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 
+<a name="534249543134"></a>055188,000099: 43,3240     4736               <span class="sm">SBIT14  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 
+<a name="534249543135"></a>055189,000100: 43,3240     4735               <span class="sm">SBIT15  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 
+055190,000101: 
+<a name="532B5A45524F"></a>055191,000102: 43,3240     4755               <span class="sm">S+ZERO  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+<a name="532B31"></a>055192,000103: 43,3240     4753               <span class="sm">S+1     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495431">BIT1</a>                                  
+<a name="532B32"></a>055193,000104: 43,3240     4752               <span class="sm">S+2     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  
+<a name="532B33"></a>055194,000105: 43,3240     6244               <span class="sm">S+3     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 
+<a name="532B34"></a>055195,000106: 43,3240     4751               <span class="sm">S+4     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  
+<a name="532B35"></a>055196,000107: 43,3240     4756               <span class="sm">S+5     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#46495645">FIVE</a>                                  
+<a name="532B36"></a>055197,000108: 43,3240     6241               <span class="sm">S+6     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
 </pre>
 </span>
 </p>
@@ -239,56 +257,56 @@ Page 1280
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="532B37"></a>055024,000110: 43,3240     4757               <span class="sm">S+7     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
-<a name="533842495453"></a>055025,000111: 43,3240     4357               <span class="sm">S8BITS  </span>           <span class="ps">EQUALS  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  00377</span>
-<a name="434E5452434F4E"></a>055026,000112: 43,3240     4771               <span class="sm">CNTRCON </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543530">OCT50</a>                                 <span class="co">#  USED IN CNTRCHK</span>
-<a name="45524153434F4E31"></a>055027,000113: 43,3240           00061        <span class="sm">ERASCON1</span>           <span class="ps">OCTAL   </span> 00061                                 <span class="co">#  USED IN ERASCHK</span>
-<a name="45524153434F4E32"></a>055028,000114: 43,3241           01373        <span class="sm">ERASCON2</span>           <span class="ps">OCTAL   </span> 01373                                 <span class="co">#  USED IN ERASCHK</span>
-<a name="45524153434F4E36"></a>055029,000115: 43,3242     5007               <span class="sm">ERASCON6</span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F435431343030">OCT1400</a>                               <span class="co">#  USED IN ERASCHK</span>
-<a name="45524153434F4E33"></a>055030,000116: 43,3242           01461        <span class="sm">ERASCON3</span>           <span class="ps">OCTAL   </span> 01461                                 <span class="co">#  USED IN ERASCHK</span>
-<a name="45524153434F4E34"></a>055031,000117: 43,3243           01773        <span class="sm">ERASCON4</span>           <span class="ps">OCTAL   </span> 01773                                 <span class="co">#  USED IN ERASCHK</span>
-<a name="53313042495453"></a>055032,000118: 43,3244     5012               <span class="sm">S10BITS </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  01777, USED IN ERASCHK</span>
-<a name="53424E4B3033"></a>055033,000119: 43,3244     5020               <span class="sm">SBNK03  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F36">PRIO6</a>                                 <span class="co">#  06000, USED IN ROPECHK</span>
-<a name="2D4D415841445253"></a>055034,000120: 43,3244     4350               <span class="sm">-MAXADRS</span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   <span class="co">#  FOR ROPECHK</span>
-<a name="5349585459"></a>055035,000121: 43,3244           00060        <span class="sm">SIXTY   </span>           <span class="ps">OCTAL   </span> 00060                                 
-<a name="53555052434F4E"></a>055036,000122: 43,3245           60017        <span class="sm">SUPRCON </span>           <span class="ps">OCTAL   </span> 60017                                 <span class="co">#  USED IN ROPECHK</span>
-<a name="53313342495453"></a>055037,000123: 43,3246           17777        <span class="sm">S13BITS </span>           <span class="ps">OCTAL   </span> 17777                                 
-<a name="434F4E432B5331"></a>055038,000124: 43,3247           25252        <span class="sm">CONC+S1 </span>           <span class="ps">OCTAL   </span> 25252                                 <span class="co">#  USED IN CYCLSHFT</span>
-<a name="434F4E432B5332"></a>055039,000125: 43,3250           52400        <span class="sm">CONC+S2 </span>           <span class="ps">OCTAL   </span> 52400                                 <span class="co">#  USED IN CYCLSHFT</span>
-<a name="45524153434F4E35"></a>055040,000126: 43,3251           76777        <span class="sm">ERASCON5</span>           <span class="ps">OCTAL   </span> 76777                                 
-<a name="532D37"></a>055041,000127: 43,3252     5660               <span class="sm">S-7     </span>           <span class="ps">=       </span> <a href="ALARM_AND_ABORT.agc.html#4F43543737373730">OCT77770</a>                              
-<a name="532D34"></a>055042,000128: 43,3252     6111               <span class="sm">S-4     </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETER.agc.html#4E454734">NEG4</a>                                  
-<a name="532D33"></a>055043,000129: 43,3252     7744               <span class="sm">S-3     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454733">NEG3</a>                                  
-<a name="532D32"></a>055044,000130: 43,3252     7745               <span class="sm">S-2     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
-<a name="532D31"></a>055045,000131: 43,3252     7746               <span class="sm">S-1     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
-<a name="532D5A45524F"></a>055046,000132: 43,3252     4754               <span class="sm">S-ZERO  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  
-055047,000133: 
-055048,000134: 43,3252  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="4144525331"></a>055049,000135: 43,3252           01371        <span class="sm">ADRS1   </span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-<a name="53454C4641445253"></a>055050,000136: 43,3253           03344        <span class="sm">SELFADRS</span>           <span class="ps">ADRES   </span> <a href="#53454C4643484B">SELFCHK</a>                               <span class="co">#  SELFCHK RETURN ADDRESS. SHOULD BE PUT</span>
-055051,000137:                                                                                                  <span class="co">#  IN SELFRET WHEN GOING FROM SELFCHK TO</span>
-055052,000138:                                                                                                  <span class="co">#  SHOWSUM AND PUT IN SKEEP1 WHEN GOING</span>
-055053,000139:                                                                                                  <span class="co">#  FROM SHOWSUM TO SELF-CHECK.</span>
-055054,000140: 
-<a name="50524552524F5253"></a>055055,000141: 43,3254           31360        <span class="sm">PRERRORS</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  IS IT NECESSARY TO RESTORE ERASABLE</span>
-055056,000142: 43,3255           00006                           <span class="op">EXTEND  </span>                                       
-055057,000143: 43,3256           13265                           <span class="op">BZF     </span> <a href="#4552524F5253">ERRORS</a>                                <span class="co">#  NO</span>
-055058,000144: 43,3257           00006                           <span class="op">EXTEND  </span>                                       
-055059,000145: 43,3260           31376                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                
-055060,000146: 43,3261           51377                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055061,000147: 43,3262           52001                           <span class="op">DXCH    </span> 0000                                  <span class="co">#  RESTORE THE TWO ERASABLE REGISTERS</span>
-055062,000148: 43,3263           34755                           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
-055063,000149: 43,3264           55360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              
-<a name="4552524F5253"></a>055064,000150: 43,3265           00004        <span class="sm">ERRORS  </span>           <span class="op">INHINT  </span>                                       
-055065,000151: 43,3266           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-055066,000152: 43,3267           55357                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 <span class="co">#  SAVE Q FOR FAILURE LOCATION</span>
-055067,000153: 43,3270           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               <span class="co">#  FOR DISPLAY WITH BBANK AND ERCOUNT</span>
-055068,000154: 43,3271           25365                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552434F554E54">ERCOUNT</a>                               <span class="co">#  KEEP TRACK OF NUMBER OF MALFUNCTIONS.</span>
-<a name="5443414C41524D32"></a>055069,000155: 43,3272           05571        <span class="sm">TCALARM2</span>           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D32">ALARM2</a>                                
-055070,000156: 43,3273           01102                           <span class="ps">OCT     </span> 01102                                 <span class="co">#  SELF-CHECK MALFUNCTION INDICATOR</span>
-055071,000157: 43,3274           11362                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534D4F4445">SMODE</a>                                 
-<a name="5349444C4F4F50"></a>055072,000158: 43,3275           34755        <span class="sm">SIDLOOP </span>           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
-055073,000159: 43,3276           55362                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534D4F4445">SMODE</a>                                 
+<a name="532B37"></a>055199,000110: 43,3240     4757               <span class="sm">S+7     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
+<a name="533842495453"></a>055200,000111: 43,3240     4357               <span class="sm">S8BITS  </span>           <span class="ps">EQUALS  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  <span class="co">#  00377</span>
+<a name="434E5452434F4E"></a>055201,000112: 43,3240     4771               <span class="sm">CNTRCON </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543530">OCT50</a>                                 <span class="co">#  USED IN CNTRCHK</span>
+<a name="45524153434F4E31"></a>055202,000113: 43,3240           00061        <span class="sm">ERASCON1</span>           <span class="ps">OCTAL   </span> 00061                                 <span class="co">#  USED IN ERASCHK</span>
+<a name="45524153434F4E32"></a>055203,000114: 43,3241           01373        <span class="sm">ERASCON2</span>           <span class="ps">OCTAL   </span> 01373                                 <span class="co">#  USED IN ERASCHK</span>
+<a name="45524153434F4E36"></a>055204,000115: 43,3242     5007               <span class="sm">ERASCON6</span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F435431343030">OCT1400</a>                               <span class="co">#  USED IN ERASCHK</span>
+<a name="45524153434F4E33"></a>055205,000116: 43,3242           01461        <span class="sm">ERASCON3</span>           <span class="ps">OCTAL   </span> 01461                                 <span class="co">#  USED IN ERASCHK</span>
+<a name="45524153434F4E34"></a>055206,000117: 43,3243           01773        <span class="sm">ERASCON4</span>           <span class="ps">OCTAL   </span> 01773                                 <span class="co">#  USED IN ERASCHK</span>
+<a name="53313042495453"></a>055207,000118: 43,3244     5012               <span class="sm">S10BITS </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  01777, USED IN ERASCHK</span>
+<a name="53424E4B3033"></a>055208,000119: 43,3244     5020               <span class="sm">SBNK03  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F36">PRIO6</a>                                 <span class="co">#  06000, USED IN ROPECHK</span>
+<a name="2D4D415841445253"></a>055209,000120: 43,3244     4350               <span class="sm">-MAXADRS</span>           <span class="ps">=       </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   <span class="co">#  FOR ROPECHK</span>
+<a name="5349585459"></a>055210,000121: 43,3244           00060        <span class="sm">SIXTY   </span>           <span class="ps">OCTAL   </span> 00060                                 
+<a name="53555052434F4E"></a>055211,000122: 43,3245           60017        <span class="sm">SUPRCON </span>           <span class="ps">OCTAL   </span> 60017                                 <span class="co">#  USED IN ROPECHK</span>
+<a name="53313342495453"></a>055212,000123: 43,3246           17777        <span class="sm">S13BITS </span>           <span class="ps">OCTAL   </span> 17777                                 
+<a name="434F4E432B5331"></a>055213,000124: 43,3247           25252        <span class="sm">CONC+S1 </span>           <span class="ps">OCTAL   </span> 25252                                 <span class="co">#  USED IN CYCLSHFT</span>
+<a name="434F4E432B5332"></a>055214,000125: 43,3250           52400        <span class="sm">CONC+S2 </span>           <span class="ps">OCTAL   </span> 52400                                 <span class="co">#  USED IN CYCLSHFT</span>
+<a name="45524153434F4E35"></a>055215,000126: 43,3251           76777        <span class="sm">ERASCON5</span>           <span class="ps">OCTAL   </span> 76777                                 
+<a name="532D37"></a>055216,000127: 43,3252     5660               <span class="sm">S-7     </span>           <span class="ps">=       </span> <a href="ALARM_AND_ABORT.agc.html#4F43543737373730">OCT77770</a>                              
+<a name="532D34"></a>055217,000128: 43,3252     6111               <span class="sm">S-4     </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETER.agc.html#4E454734">NEG4</a>                                  
+<a name="532D33"></a>055218,000129: 43,3252     7744               <span class="sm">S-3     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454733">NEG3</a>                                  
+<a name="532D32"></a>055219,000130: 43,3252     7745               <span class="sm">S-2     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
+<a name="532D31"></a>055220,000131: 43,3252     7746               <span class="sm">S-1     </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                
+<a name="532D5A45524F"></a>055221,000132: 43,3252     4754               <span class="sm">S-ZERO  </span>           <span class="ps">EQUALS  </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454730">NEG0</a>                                  
+055222,000133: 
+055223,000134: 43,3252  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="4144525331"></a>055224,000135: 43,3252           01371        <span class="sm">ADRS1   </span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+<a name="53454C4641445253"></a>055225,000136: 43,3253           03344        <span class="sm">SELFADRS</span>           <span class="ps">ADRES   </span> <a href="#53454C4643484B">SELFCHK</a>                               <span class="co">#  SELFCHK RETURN ADDRESS. SHOULD BE PUT</span>
+055226,000137:                                                                                                  <span class="co">#  IN SELFRET WHEN GOING FROM SELFCHK TO</span>
+055227,000138:                                                                                                  <span class="co">#  SHOWSUM AND PUT IN SKEEP1 WHEN GOING</span>
+055228,000139:                                                                                                  <span class="co">#  FROM SHOWSUM TO SELF-CHECK.</span>
+055229,000140: 
+<a name="50524552524F5253"></a>055230,000141: 43,3254           31360        <span class="sm">PRERRORS</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  IS IT NECESSARY TO RESTORE ERASABLE</span>
+055231,000142: 43,3255           00006                           <span class="op">EXTEND  </span>                                       
+055232,000143: 43,3256           13265                           <span class="op">BZF     </span> <a href="#4552524F5253">ERRORS</a>                                <span class="co">#  NO</span>
+055233,000144: 43,3257           00006                           <span class="op">EXTEND  </span>                                       
+055234,000145: 43,3260           31376                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                
+055235,000146: 43,3261           51377                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055236,000147: 43,3262           52001                           <span class="op">DXCH    </span> 0000                                  <span class="co">#  RESTORE THE TWO ERASABLE REGISTERS</span>
+055237,000148: 43,3263           34755                           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
+055238,000149: 43,3264           55360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              
+<a name="4552524F5253"></a>055239,000150: 43,3265           00004        <span class="sm">ERRORS  </span>           <span class="op">INHINT  </span>                                       
+055240,000151: 43,3266           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+055241,000152: 43,3267           55357                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 <span class="co">#  SAVE Q FOR FAILURE LOCATION</span>
+055242,000153: 43,3270           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C4D43414452">ALMCADR</a>                               <span class="co">#  FOR DISPLAY WITH BBANK AND ERCOUNT</span>
+055243,000154: 43,3271           25365                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4552434F554E54">ERCOUNT</a>                               <span class="co">#  KEEP TRACK OF NUMBER OF MALFUNCTIONS.</span>
+<a name="5443414C41524D32"></a>055244,000155: 43,3272           05571        <span class="sm">TCALARM2</span>           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D32">ALARM2</a>                                
+055245,000156: 43,3273           01102                           <span class="ps">OCT     </span> 01102                                 <span class="co">#  SELF-CHECK MALFUNCTION INDICATOR</span>
+055246,000157: 43,3274           11362                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534D4F4445">SMODE</a>                                 
+<a name="5349444C4F4F50"></a>055247,000158: 43,3275           34755        <span class="sm">SIDLOOP </span>           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
+055248,000159: 43,3276           55362                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534D4F4445">SMODE</a>                                 
 </pre>
 </span>
 </p>
@@ -304,56 +322,56 @@ Page 1281
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-055075,000161: 43,3277           03344                           <span class="op">TC      </span> <a href="#53454C4643484B">SELFCHK</a>                               <span class="co">#  GO TO IDLE LOOP</span>
-055076,000162: 43,3300           01357                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 <span class="co">#  CONTINUE WITH SELF-CHECK</span>
-055077,000163: 
-<a name="2D3143484B"></a>055078,000164: 43,3301           10000        <span class="sm">-1CHK   </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-055079,000165: 43,3302           13254                           <span class="op">TCF     </span> <a href="#50524552524F5253">PRERRORS</a>                              
-055080,000166: 43,3303           13254                           <span class="op">TCF     </span> <a href="#50524552524F5253">PRERRORS</a>                              
-055081,000167: 43,3304           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-055082,000168: 43,3305           13254                           <span class="op">TCF     </span> <a href="#50524552524F5253">PRERRORS</a>                              
-055083,000169: 43,3306           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-055084,000170: 
-<a name="534D4F444543484B"></a>055085,000171: 43,3307           00006        <span class="sm">SMODECHK</span>           <span class="op">EXTEND  </span>                                       
-055086,000172: 43,3310           23371                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-055087,000173: 43,3311           03340                           <span class="op">TC      </span> <a href="#434845434B4E4A">CHECKNJ</a>                               <span class="co">#  CHECK FOR NEW JOB</span>
-055088,000174: 43,3312           11362                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534D4F4445">SMODE</a>                                 
-055089,000175: 43,3313           03320                           <span class="op">TC      </span> <a href="#534F5054494F4E53">SOPTIONS</a>                              
-055090,000176: 43,3314           03311                           <span class="op">TC      </span> <a href="#534D4F444543484B">SMODECHK</a>   +2                         <span class="co">#  TO BACKUP IDLE LOOP</span>
-055091,000177: 43,3315           03320                           <span class="op">TC      </span> <a href="#534F5054494F4E53">SOPTIONS</a>                              
-055092,000178: 43,3316           25366                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53434F554E54">SCOUNT</a>                                
-055093,000179: 43,3317           01371                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  CONTINUE WITH SELF-CHECK</span>
-055094,000180: 
-<a name="534F5054494F4E53"></a>055095,000181: 43,3320           65660        <span class="sm">SOPTIONS</span>           <span class="op">AD      </span> <a href="#532D37">S-7</a>                                   
-055096,000182: 43,3321           00006                           <span class="op">EXTEND  </span>                                       
-055097,000183: 43,3322           63324                           <span class="op">BZMF    </span> +2                                    <span class="co">#  FOR OPTIONS BELOW NINE.</span>
-<a name="424E4B4F50544E"></a>055098,000184: 43,3323           03275        <span class="sm">BNKOPTN </span>           <span class="op">TC      </span> <a href="#5349444C4F4F50">SIDLOOP</a>                               <span class="co">#  ILLEGAL OPTION.  GO TO IDLE LOOP.</span>
-055099,000185: 43,3324           25366                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53434F554E54">SCOUNT</a>                                <span class="co">#  FOR OPTIONS BELOW NINE.</span>
-055100,000186: 43,3325           64757                           <span class="op">AD      </span> <a href="#532B37">S+7</a>                                   
-055101,000187: 
-055102,000188: 43,3326           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-055103,000189: 43,3327           03330                           <span class="op">TC      </span> <a href="#534F5054494F4E31">SOPTION1</a>                              
-<a name="534F5054494F4E31"></a>055104,000190: 43,3330           01371        <span class="sm">SOPTION1</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  WAS TC+TCF</span>
-<a name="534F5054494F4E32"></a>055105,000191: 43,3331           01371        <span class="sm">SOPTION2</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  WAS IN:OUT1</span>
-<a name="534F5054494F4E33"></a>055106,000192: 43,3332           01371        <span class="sm">SOPTION3</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  WAS COUNTCHK</span>
-<a name="534F5054494F4E34"></a>055107,000193: 43,3333           03345        <span class="sm">SOPTION4</span>           <span class="op">TC      </span> <a href="#4552415343484B">ERASCHK</a>                               
-<a name="534F5054494F4E35"></a>055108,000194: 43,3334           03526        <span class="sm">SOPTION5</span>           <span class="op">TC      </span> <a href="#524F504543484B">ROPECHK</a>                               
-<a name="534F5054494F4E36"></a>055109,000195: 43,3335           01371        <span class="sm">SOPTION6</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-<a name="534F5054494F4E37"></a>055110,000196: 43,3336           01371        <span class="sm">SOPTION7</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-<a name="534F50544F4E3130"></a>055111,000197: 43,3337           01371        <span class="sm">SOPTON10</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  CONTINUE WITH SELF-CHECK</span>
-055112,000198: 
-<a name="434845434B4E4A"></a>055113,000199: 43,3340           00006        <span class="sm">CHECKNJ </span>           <span class="op">EXTEND  </span>                                       
-055114,000200: 43,3341           23361                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               <span class="co">#  SAVE RETURN ADDRESS WHILE TESTING NEWJOB</span>
-055115,000201: 43,3342           04635                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  TO SEE IF ANY JOBS HAVE BECOME ACTIVE.</span>
-055116,000202: 43,3343           03211                           <span class="ps">CADR    </span> <a href="EXECUTIVE.agc.html#414456414E">ADVAN</a>                                 
-055117,000203: 
-<a name="53454C4643484B"></a>055118,000204: 43,3344           03307        <span class="sm">SELFCHK </span>           <span class="op">TC      </span> <a href="#534D4F444543484B">SMODECHK</a>                              <span class="co">#  ** CHARLEY, COME IN HERE</span>
-055119,000205: 
-055120,000206:                                                                                                  <span class="co">#  SKEEP7 HOLDS LOWEST OF TWO ADDRESSES BEING CHECKED.</span>
-055121,000207:                                                                                                  <span class="co">#  SKEEP6 HOLDS B(X+1).</span>
-055122,000208:                                                                                                  <span class="co">#  SKEEP5 HOLDS B(X).</span>
-055123,000209:                                                                                                  <span class="co">#  SKEEP4 HOLDS C(EBANK) DURING ERASLOOP AND CHECKNJ.</span>
-055124,000210:                                                                                                  <span class="co">#  SKEEP3 HOLDS LAST ADDRESS BEING CHECKED (HIGHEST ADDRESS).</span>
+055250,000161: 43,3277           03344                           <span class="op">TC      </span> <a href="#53454C4643484B">SELFCHK</a>                               <span class="co">#  GO TO IDLE LOOP</span>
+055251,000162: 43,3300           01357                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 <span class="co">#  CONTINUE WITH SELF-CHECK</span>
+055252,000163: 
+<a name="2D3143484B"></a>055253,000164: 43,3301           10000        <span class="sm">-1CHK   </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+055254,000165: 43,3302           13254                           <span class="op">TCF     </span> <a href="#50524552524F5253">PRERRORS</a>                              
+055255,000166: 43,3303           13254                           <span class="op">TCF     </span> <a href="#50524552524F5253">PRERRORS</a>                              
+055256,000167: 43,3304           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+055257,000168: 43,3305           13254                           <span class="op">TCF     </span> <a href="#50524552524F5253">PRERRORS</a>                              
+055258,000169: 43,3306           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+055259,000170: 
+<a name="534D4F444543484B"></a>055260,000171: 43,3307           00006        <span class="sm">SMODECHK</span>           <span class="op">EXTEND  </span>                                       
+055261,000172: 43,3310           23371                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+055262,000173: 43,3311           03340                           <span class="op">TC      </span> <a href="#434845434B4E4A">CHECKNJ</a>                               <span class="co">#  CHECK FOR NEW JOB</span>
+055263,000174: 43,3312           11362                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534D4F4445">SMODE</a>                                 
+055264,000175: 43,3313           03320                           <span class="op">TC      </span> <a href="#534F5054494F4E53">SOPTIONS</a>                              
+055265,000176: 43,3314           03311                           <span class="op">TC      </span> <a href="#534D4F444543484B">SMODECHK</a>   +2                         <span class="co">#  TO BACKUP IDLE LOOP</span>
+055266,000177: 43,3315           03320                           <span class="op">TC      </span> <a href="#534F5054494F4E53">SOPTIONS</a>                              
+055267,000178: 43,3316           25366                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53434F554E54">SCOUNT</a>                                
+055268,000179: 43,3317           01371                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  CONTINUE WITH SELF-CHECK</span>
+055269,000180: 
+<a name="534F5054494F4E53"></a>055270,000181: 43,3320           65660        <span class="sm">SOPTIONS</span>           <span class="op">AD      </span> <a href="#532D37">S-7</a>                                   
+055271,000182: 43,3321           00006                           <span class="op">EXTEND  </span>                                       
+055272,000183: 43,3322           63324                           <span class="op">BZMF    </span> +2                                    <span class="co">#  FOR OPTIONS BELOW NINE.</span>
+<a name="424E4B4F50544E"></a>055273,000184: 43,3323           03275        <span class="sm">BNKOPTN </span>           <span class="op">TC      </span> <a href="#5349444C4F4F50">SIDLOOP</a>                               <span class="co">#  ILLEGAL OPTION.  GO TO IDLE LOOP.</span>
+055274,000185: 43,3324           25366                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53434F554E54">SCOUNT</a>                                <span class="co">#  FOR OPTIONS BELOW NINE.</span>
+055275,000186: 43,3325           64757                           <span class="op">AD      </span> <a href="#532B37">S+7</a>                                   
+055276,000187: 
+055277,000188: 43,3326           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+055278,000189: 43,3327           03330                           <span class="op">TC      </span> <a href="#534F5054494F4E31">SOPTION1</a>                              
+<a name="534F5054494F4E31"></a>055279,000190: 43,3330           01371        <span class="sm">SOPTION1</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  WAS TC+TCF</span>
+<a name="534F5054494F4E32"></a>055280,000191: 43,3331           01371        <span class="sm">SOPTION2</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  WAS IN:OUT1</span>
+<a name="534F5054494F4E33"></a>055281,000192: 43,3332           01371        <span class="sm">SOPTION3</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  WAS COUNTCHK</span>
+<a name="534F5054494F4E34"></a>055282,000193: 43,3333           03345        <span class="sm">SOPTION4</span>           <span class="op">TC      </span> <a href="#4552415343484B">ERASCHK</a>                               
+<a name="534F5054494F4E35"></a>055283,000194: 43,3334           03526        <span class="sm">SOPTION5</span>           <span class="op">TC      </span> <a href="#524F504543484B">ROPECHK</a>                               
+<a name="534F5054494F4E36"></a>055284,000195: 43,3335           01371        <span class="sm">SOPTION6</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+<a name="534F5054494F4E37"></a>055285,000196: 43,3336           01371        <span class="sm">SOPTION7</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+<a name="534F50544F4E3130"></a>055286,000197: 43,3337           01371        <span class="sm">SOPTON10</span>           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  CONTINUE WITH SELF-CHECK</span>
+055287,000198: 
+<a name="434845434B4E4A"></a>055288,000199: 43,3340           00006        <span class="sm">CHECKNJ </span>           <span class="op">EXTEND  </span>                                       
+055289,000200: 43,3341           23361                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               <span class="co">#  SAVE RETURN ADDRESS WHILE TESTING NEWJOB</span>
+055290,000201: 43,3342           04635                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  TO SEE IF ANY JOBS HAVE BECOME ACTIVE.</span>
+055291,000202: 43,3343           03211                           <span class="ps">CADR    </span> <a href="EXECUTIVE.agc.html#414456414E">ADVAN</a>                                 
+055292,000203: 
+<a name="53454C4643484B"></a>055293,000204: 43,3344           03307        <span class="sm">SELFCHK </span>           <span class="op">TC      </span> <a href="#534D4F444543484B">SMODECHK</a>                              <span class="co">#  ** CHARLEY, COME IN HERE</span>
+055294,000205: 
+055295,000206:                                                                                                  <span class="co">#  SKEEP7 HOLDS LOWEST OF TWO ADDRESSES BEING CHECKED.</span>
+055296,000207:                                                                                                  <span class="co">#  SKEEP6 HOLDS B(X+1).</span>
+055297,000208:                                                                                                  <span class="co">#  SKEEP5 HOLDS B(X).</span>
+055298,000209:                                                                                                  <span class="co">#  SKEEP4 HOLDS C(EBANK) DURING ERASLOOP AND CHECKNJ.</span>
+055299,000210:                                                                                                  <span class="co">#  SKEEP3 HOLDS LAST ADDRESS BEING CHECKED (HIGHEST ADDRESS).</span>
 </pre>
 </span>
 </p>
@@ -369,57 +387,57 @@ Page 1282
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-055126,000212:                                                                                                  <span class="co">#  SKEEP2 CONTROLS CHECKING OF NON-SWITCHABLE ERASABLE MEMORY WITH BANK NUMBERS IN EB.</span>
-055127,000213:                                                                                                  <span class="co">#  ERASCHK TAKES APPROXMATELY 7 SECONDS</span>
-055128,000214: 
-<a name="4552415343484B"></a>055129,000215: 43,3345           34753        <span class="sm">ERASCHK </span>           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
-055130,000216: 43,3346           55372                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
-<a name="304542414E4B"></a>055131,000217: 43,3347           34755        <span class="sm">0EBANK  </span>           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
-055132,000218: 43,3350           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055133,000219: 43,3351           33242                           <span class="op">CA      </span> <a href="#45524153434F4E33">ERASCON3</a>                              <span class="co">#  01461</span>
-055134,000220: 43,3352           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  STARTING ADDRESS</span>
-055135,000221: 43,3353           35012                           <span class="op">CA      </span> <a href="#53313042495453">S10BITS</a>                               <span class="co">#  01777</span>
-055136,000222: 43,3354           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                <span class="co">#  LAST ADDRESS CHECKED</span>
-055137,000223: 43,3355           03375                           <span class="op">TC      </span> <a href="#455241534C4F4F50">ERASLOOP</a>                              
-055138,000224: 
-<a name="4531333435363742"></a>055139,000225: 43,3356           35007        <span class="sm">E134567B</span>           <span class="op">CA      </span> <a href="#45524153434F4E36">ERASCON6</a>                              <span class="co">#  01400</span>
-055140,000226: 43,3357           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  STARTING ADDRESS</span>
-055141,000227: 43,3360           35012                           <span class="op">CA      </span> <a href="#53313042495453">S10BITS</a>                               <span class="co">#  01777</span>
-055142,000228: 43,3361           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                <span class="co">#  LAST ADDRESS CHECKED</span>
-055143,000229: 43,3362           03375                           <span class="op">TC      </span> <a href="#455241534C4F4F50">ERASLOOP</a>                              
-055144,000230: 
-<a name="324542414E4B"></a>055145,000231: 43,3363           35007        <span class="sm">2EBANK  </span>           <span class="op">CA      </span> <a href="#45524153434F4E36">ERASCON6</a>                              <span class="co">#  01400</span>
-055146,000232: 43,3364           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  STARTING ADDRESS</span>
-055147,000233: 43,3365           33243                           <span class="op">CA      </span> <a href="#45524153434F4E34">ERASCON4</a>                              <span class="co">#  01773</span>
-055148,000234: 43,3366           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                <span class="co">#  LAST ADDRESS CHECKED</span>
-055149,000235: 43,3367           03375                           <span class="op">TC      </span> <a href="#455241534C4F4F50">ERASLOOP</a>                              
-055150,000236: 
-<a name="4E4F4542414E4B"></a>055151,000237: 43,3370           55372        <span class="sm">NOEBANK </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                <span class="co">#  +0</span>
-055152,000238: 43,3371           33240                           <span class="op">CA      </span> <a href="#45524153434F4E31">ERASCON1</a>                              <span class="co">#  00061</span>
-055153,000239: 43,3372           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  STARTING ADDRESS</span>
-055154,000240: 43,3373           33241                           <span class="op">CA      </span> <a href="#45524153434F4E32">ERASCON2</a>                              <span class="co">#  01373</span>
-055155,000241: 43,3374           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                <span class="co">#  LAST ADDRESS CHECKED</span>
-055156,000242: 
-<a name="455241534C4F4F50"></a>055157,000243: 43,3375           00004        <span class="sm">ERASLOOP</span>           <span class="op">INHINT  </span>                                       
-055158,000244: 43,3376           30003                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  STORES C(EBANK)</span>
-055159,000245: 43,3377           55374                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
-055160,000246: 43,3400           00006                           <span class="op">EXTEND  </span>                                       
-055161,000247: 43,3401           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055162,000248: 43,3402           30001                           <span class="op">DCA     </span> 0000                                  
-055163,000249: 43,3403           53376                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  STORES C(X) AND C(X+1) IN SKEEP6 AND 5.</span>
-055164,000250: 43,3404           31377                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055165,000251: 43,3405           55360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  IF RESTART, RESTORE C(X) AND C(X+1)</span>
-055166,000252: 43,3406           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-055167,000253: 43,3407           24001                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-055168,000254: 43,3410           50000                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-055169,000255: 43,3411           52001                           <span class="op">DXCH    </span> 0000                                  <span class="co">#  PUTS OWN ADDRESS IN X AND X +1</span>
-055170,000256: 43,3412           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055171,000257: 43,3413           40001                           <span class="op">CS      </span> 0001                                  <span class="co">#  CS  X+1</span>
-055172,000258: 43,3414           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055173,000259: 43,3415           60000                           <span class="op">AD      </span> 0000                                  <span class="co">#  AD X</span>
-055174,000260: 43,3416           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 
-055175,000261: 43,3417           31360                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  HAS ERASABLE BEEN RESTORED</span>
-055176,000262: 43,3420           00006                           <span class="op">EXTEND  </span>                                       
+055301,000212:                                                                                                  <span class="co">#  SKEEP2 CONTROLS CHECKING OF NON-SWITCHABLE ERASABLE MEMORY WITH BANK NUMBERS IN EB.</span>
+055302,000213:                                                                                                  <span class="co">#  ERASCHK TAKES APPROXMATELY 7 SECONDS</span>
+055303,000214: 
+<a name="4552415343484B"></a>055304,000215: 43,3345           34753        <span class="sm">ERASCHK </span>           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
+055305,000216: 43,3346           55372                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
+<a name="304542414E4B"></a>055306,000217: 43,3347           34755        <span class="sm">0EBANK  </span>           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
+055307,000218: 43,3350           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055308,000219: 43,3351           33242                           <span class="op">CA      </span> <a href="#45524153434F4E33">ERASCON3</a>                              <span class="co">#  01461</span>
+055309,000220: 43,3352           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  STARTING ADDRESS</span>
+055310,000221: 43,3353           35012                           <span class="op">CA      </span> <a href="#53313042495453">S10BITS</a>                               <span class="co">#  01777</span>
+055311,000222: 43,3354           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                <span class="co">#  LAST ADDRESS CHECKED</span>
+055312,000223: 43,3355           03375                           <span class="op">TC      </span> <a href="#455241534C4F4F50">ERASLOOP</a>                              
+055313,000224: 
+<a name="4531333435363742"></a>055314,000225: 43,3356           35007        <span class="sm">E134567B</span>           <span class="op">CA      </span> <a href="#45524153434F4E36">ERASCON6</a>                              <span class="co">#  01400</span>
+055315,000226: 43,3357           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  STARTING ADDRESS</span>
+055316,000227: 43,3360           35012                           <span class="op">CA      </span> <a href="#53313042495453">S10BITS</a>                               <span class="co">#  01777</span>
+055317,000228: 43,3361           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                <span class="co">#  LAST ADDRESS CHECKED</span>
+055318,000229: 43,3362           03375                           <span class="op">TC      </span> <a href="#455241534C4F4F50">ERASLOOP</a>                              
+055319,000230: 
+<a name="324542414E4B"></a>055320,000231: 43,3363           35007        <span class="sm">2EBANK  </span>           <span class="op">CA      </span> <a href="#45524153434F4E36">ERASCON6</a>                              <span class="co">#  01400</span>
+055321,000232: 43,3364           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  STARTING ADDRESS</span>
+055322,000233: 43,3365           33243                           <span class="op">CA      </span> <a href="#45524153434F4E34">ERASCON4</a>                              <span class="co">#  01773</span>
+055323,000234: 43,3366           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                <span class="co">#  LAST ADDRESS CHECKED</span>
+055324,000235: 43,3367           03375                           <span class="op">TC      </span> <a href="#455241534C4F4F50">ERASLOOP</a>                              
+055325,000236: 
+<a name="4E4F4542414E4B"></a>055326,000237: 43,3370           55372        <span class="sm">NOEBANK </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                <span class="co">#  +0</span>
+055327,000238: 43,3371           33240                           <span class="op">CA      </span> <a href="#45524153434F4E31">ERASCON1</a>                              <span class="co">#  00061</span>
+055328,000239: 43,3372           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  STARTING ADDRESS</span>
+055329,000240: 43,3373           33241                           <span class="op">CA      </span> <a href="#45524153434F4E32">ERASCON2</a>                              <span class="co">#  01373</span>
+055330,000241: 43,3374           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                <span class="co">#  LAST ADDRESS CHECKED</span>
+055331,000242: 
+<a name="455241534C4F4F50"></a>055332,000243: 43,3375           00004        <span class="sm">ERASLOOP</span>           <span class="op">INHINT  </span>                                       
+055333,000244: 43,3376           30003                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  STORES C(EBANK)</span>
+055334,000245: 43,3377           55374                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
+055335,000246: 43,3400           00006                           <span class="op">EXTEND  </span>                                       
+055336,000247: 43,3401           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055337,000248: 43,3402           30001                           <span class="op">DCA     </span> 0000                                  
+055338,000249: 43,3403           53376                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  STORES C(X) AND C(X+1) IN SKEEP6 AND 5.</span>
+055339,000250: 43,3404           31377                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055340,000251: 43,3405           55360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  IF RESTART, RESTORE C(X) AND C(X+1)</span>
+055341,000252: 43,3406           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+055342,000253: 43,3407           24001                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+055343,000254: 43,3410           50000                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+055344,000255: 43,3411           52001                           <span class="op">DXCH    </span> 0000                                  <span class="co">#  PUTS OWN ADDRESS IN X AND X +1</span>
+055345,000256: 43,3412           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055346,000257: 43,3413           40001                           <span class="op">CS      </span> 0001                                  <span class="co">#  CS  X+1</span>
+055347,000258: 43,3414           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055348,000259: 43,3415           60000                           <span class="op">AD      </span> 0000                                  <span class="co">#  AD X</span>
+055349,000260: 43,3416           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 
+055350,000261: 43,3417           31360                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  HAS ERASABLE BEEN RESTORED</span>
+055351,000262: 43,3420           00006                           <span class="op">EXTEND  </span>                                       
 </pre>
 </span>
 </p>
@@ -435,58 +453,58 @@ Page 1283
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-055178,000264: 43,3421           13445                           <span class="op">BZF     </span> <a href="#454C4F4F5046494E">ELOOPFIN</a>                              <span class="co">#  YES, EXIT ERASLOOP.</span>
-055179,000265: 43,3422           00006                           <span class="op">EXTEND  </span>                                       
-055180,000266: 43,3423           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055181,000267: 43,3424           40001                           <span class="op">DCS     </span> 0000                                  <span class="co">#  COMPLEMENT OF ADDRESS OF X AND X+1</span>
-055182,000268: 43,3425           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055183,000269: 43,3426           52001                           <span class="op">DXCH    </span> 0000                                  <span class="co">#  PUT COMPLEMENT OF ADDRESS OF X AND X+1</span>
-055184,000270: 43,3427           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055185,000271: 43,3430           40000                           <span class="op">CS      </span> 0000                                  <span class="co">#  CS X</span>
-055186,000272: 43,3431           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055187,000273: 43,3432           60001                           <span class="op">AD      </span> 0001                                  <span class="co">#  AD X+1</span>
-055188,000274: 43,3433           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 
-055189,000275: 43,3434           31360                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  HAS ERASABLE BEEN RESTORED</span>
-055190,000276: 43,3435           00006                           <span class="op">EXTEND  </span>                                       
-055191,000277: 43,3436           13445                           <span class="op">BZF     </span> <a href="#454C4F4F5046494E">ELOOPFIN</a>                              <span class="co">#  YES, EXIT ERASLOOP.</span>
-055192,000278: 43,3437           00006                           <span class="op">EXTEND  </span>                                       
-055193,000279: 43,3440           31376                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                
-055194,000280: 43,3441           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055195,000281: 43,3442           52001                           <span class="op">DXCH    </span> 0000                                  <span class="co">#  PUT B(X) AND B(X+1) BACK INTO X AND X+1</span>
-055196,000282: 43,3443           34755                           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
-055197,000283: 43,3444           55360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  IF RESTART, DO NOT RESTORE C(X), C(X+1)</span>
-<a name="454C4F4F5046494E"></a>055198,000284: 43,3445           00003        <span class="sm">ELOOPFIN</span>           <span class="op">RELINT  </span>                                       
-055199,000285: 43,3446           03340                           <span class="op">TC      </span> <a href="#434845434B4E4A">CHECKNJ</a>                               <span class="co">#  CHECK FOR NEW JOB</span>
-055200,000286: 43,3447           31374                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  REPLACES B(EBANK)</span>
-055201,000287: 43,3450           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055202,000288: 43,3451           25377                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055203,000289: 43,3452           41377                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055204,000290: 43,3453           61373                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
-055205,000291: 43,3454           00006                           <span class="op">EXTEND  </span>                                       
-055206,000292: 43,3455           13457                           <span class="op">BZF     </span> +2                                    
-055207,000293: 43,3456           03375                           <span class="op">TC      </span> <a href="#455241534C4F4F50">ERASLOOP</a>                              <span class="co">#  GO TO NEXT ADDRESS IN SAME BANK</span>
-055208,000294: 43,3457           11372                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
-055209,000295: 43,3460           03370                           <span class="op">TC      </span> <a href="#4E4F4542414E4B">NOEBANK</a>                               
-055210,000296: 43,3461           25372                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                <span class="co">#  PUT +1 IN SKEEP2.</span>
-055211,000297: 43,3462           30003                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055212,000298: 43,3463           64743                           <span class="op">AD      </span> <a href="#5342495439">SBIT9</a>                                 
-055213,000299: 43,3464           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055214,000300: 43,3465           63251                           <span class="op">AD      </span> <a href="#45524153434F4E35">ERASCON5</a>                              <span class="co">#  76777, CHECK FOR BANK E2</span>
-055215,000301: 43,3466           00006                           <span class="op">EXTEND  </span>                                       
-055216,000302: 43,3467           13363                           <span class="op">BZF     </span> <a href="#324542414E4B">2EBANK</a>                                
-055217,000303: 43,3470           10003                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055218,000304: 43,3471           03356                           <span class="op">TC      </span> <a href="#4531333435363742">E134567B</a>                              <span class="co">#  GO TO EBANKS 1,3,4,5,6, AND 7</span>
-055219,000305: 43,3472           35007                           <span class="op">CA      </span> <a href="#45524153434F4E36">ERASCON6</a>                              <span class="co">#  END OF ERASCHK</span>
-055220,000306: 43,3473           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-055221,000307: 
-055222,000308:                                                                                                  <span class="co">#  CNTRCHK PERFORMS A CS OF ALL REGISTERS FROM OCT. 60 THROUGH OCT. 10.</span>
-055223,000309:                                                                                                  <span class="co">#  INCLUDED ARE ALL COUNTERS, T6-1, CYCLE AND SHIFT, AND ALL RUPT REGISTERS</span>
-055224,000310: 
-<a name="434E545243484B"></a>055225,000311: 43,3474           34771        <span class="sm">CNTRCHK </span>           <span class="op">CA      </span> <a href="#434E5452434F4E">CNTRCON</a>                               <span class="co">#  00050</span>
-<a name="434E54524C4F4F50"></a>055226,000312: 43,3475           55372        <span class="sm">CNTRLOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
-055227,000313: 43,3476           64750                           <span class="op">AD      </span> <a href="#5342495434">SBIT4</a>                                 <span class="co">#  +10 OCTAL</span>
-055228,000314: 43,3477           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-055229,000315: 43,3500           40000                           <span class="op">CS      </span> 0000                                  
+055353,000264: 43,3421           13445                           <span class="op">BZF     </span> <a href="#454C4F4F5046494E">ELOOPFIN</a>                              <span class="co">#  YES, EXIT ERASLOOP.</span>
+055354,000265: 43,3422           00006                           <span class="op">EXTEND  </span>                                       
+055355,000266: 43,3423           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055356,000267: 43,3424           40001                           <span class="op">DCS     </span> 0000                                  <span class="co">#  COMPLEMENT OF ADDRESS OF X AND X+1</span>
+055357,000268: 43,3425           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055358,000269: 43,3426           52001                           <span class="op">DXCH    </span> 0000                                  <span class="co">#  PUT COMPLEMENT OF ADDRESS OF X AND X+1</span>
+055359,000270: 43,3427           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055360,000271: 43,3430           40000                           <span class="op">CS      </span> 0000                                  <span class="co">#  CS X</span>
+055361,000272: 43,3431           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055362,000273: 43,3432           60001                           <span class="op">AD      </span> 0001                                  <span class="co">#  AD X+1</span>
+055363,000274: 43,3433           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 
+055364,000275: 43,3434           31360                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  HAS ERASABLE BEEN RESTORED</span>
+055365,000276: 43,3435           00006                           <span class="op">EXTEND  </span>                                       
+055366,000277: 43,3436           13445                           <span class="op">BZF     </span> <a href="#454C4F4F5046494E">ELOOPFIN</a>                              <span class="co">#  YES, EXIT ERASLOOP.</span>
+055367,000278: 43,3437           00006                           <span class="op">EXTEND  </span>                                       
+055368,000279: 43,3440           31376                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                
+055369,000280: 43,3441           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055370,000281: 43,3442           52001                           <span class="op">DXCH    </span> 0000                                  <span class="co">#  PUT B(X) AND B(X+1) BACK INTO X AND X+1</span>
+055371,000282: 43,3443           34755                           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
+055372,000283: 43,3444           55360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              <span class="co">#  IF RESTART, DO NOT RESTORE C(X), C(X+1)</span>
+<a name="454C4F4F5046494E"></a>055373,000284: 43,3445           00003        <span class="sm">ELOOPFIN</span>           <span class="op">RELINT  </span>                                       
+055374,000285: 43,3446           03340                           <span class="op">TC      </span> <a href="#434845434B4E4A">CHECKNJ</a>                               <span class="co">#  CHECK FOR NEW JOB</span>
+055375,000286: 43,3447           31374                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  REPLACES B(EBANK)</span>
+055376,000287: 43,3450           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055377,000288: 43,3451           25377                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055378,000289: 43,3452           41377                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055379,000290: 43,3453           61373                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
+055380,000291: 43,3454           00006                           <span class="op">EXTEND  </span>                                       
+055381,000292: 43,3455           13457                           <span class="op">BZF     </span> +2                                    
+055382,000293: 43,3456           03375                           <span class="op">TC      </span> <a href="#455241534C4F4F50">ERASLOOP</a>                              <span class="co">#  GO TO NEXT ADDRESS IN SAME BANK</span>
+055383,000294: 43,3457           11372                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
+055384,000295: 43,3460           03370                           <span class="op">TC      </span> <a href="#4E4F4542414E4B">NOEBANK</a>                               
+055385,000296: 43,3461           25372                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                <span class="co">#  PUT +1 IN SKEEP2.</span>
+055386,000297: 43,3462           30003                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055387,000298: 43,3463           64743                           <span class="op">AD      </span> <a href="#5342495439">SBIT9</a>                                 
+055388,000299: 43,3464           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055389,000300: 43,3465           63251                           <span class="op">AD      </span> <a href="#45524153434F4E35">ERASCON5</a>                              <span class="co">#  76777, CHECK FOR BANK E2</span>
+055390,000301: 43,3466           00006                           <span class="op">EXTEND  </span>                                       
+055391,000302: 43,3467           13363                           <span class="op">BZF     </span> <a href="#324542414E4B">2EBANK</a>                                
+055392,000303: 43,3470           10003                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055393,000304: 43,3471           03356                           <span class="op">TC      </span> <a href="#4531333435363742">E134567B</a>                              <span class="co">#  GO TO EBANKS 1,3,4,5,6, AND 7</span>
+055394,000305: 43,3472           35007                           <span class="op">CA      </span> <a href="#45524153434F4E36">ERASCON6</a>                              <span class="co">#  END OF ERASCHK</span>
+055395,000306: 43,3473           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+055396,000307: 
+055397,000308:                                                                                                  <span class="co">#  CNTRCHK PERFORMS A CS OF ALL REGISTERS FROM OCT. 60 THROUGH OCT. 10.</span>
+055398,000309:                                                                                                  <span class="co">#  INCLUDED ARE ALL COUNTERS, T6-1, CYCLE AND SHIFT, AND ALL RUPT REGISTERS</span>
+055399,000310: 
+<a name="434E545243484B"></a>055400,000311: 43,3474           34771        <span class="sm">CNTRCHK </span>           <span class="op">CA      </span> <a href="#434E5452434F4E">CNTRCON</a>                               <span class="co">#  00050</span>
+<a name="434E54524C4F4F50"></a>055401,000312: 43,3475           55372        <span class="sm">CNTRLOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
+055402,000313: 43,3476           64750                           <span class="op">AD      </span> <a href="#5342495434">SBIT4</a>                                 <span class="co">#  +10 OCTAL</span>
+055403,000314: 43,3477           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+055404,000315: 43,3500           40000                           <span class="op">CS      </span> 0000                                  
 </pre>
 </span>
 </p>
@@ -502,58 +520,58 @@ Page 1284
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-055231,000317: 43,3501           11372                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
-055232,000318: 43,3502           03475                           <span class="op">TC      </span> <a href="#434E54524C4F4F50">CNTRLOOP</a>                              
-055233,000319: 
-055234,000320:                                                                                                  <span class="co">#  CYCLSHFT CHECKS THE CYCLE AND SHIFT REGISTERS</span>
-055235,000321: 
-<a name="4359434C53484654"></a>055236,000322: 43,3503           33247        <span class="sm">CYCLSHFT</span>           <span class="op">CA      </span> <a href="#434F4E432B5331">CONC+S1</a>                               <span class="co">#  25252</span>
-055237,000323: 43,3504           54020                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   <span class="co">#  C(CYR) = 12525</span>
-055238,000324: 43,3505           54022                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C">CYL</a>                                   <span class="co">#  C(CYL) = 52524</span>
-055239,000325: 43,3506           54021                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  C(SR) = 12525</span>
-055240,000326: 43,3507           54023                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F50">EDOP</a>                                  <span class="co">#  C(EDOP) = 00125</span>
-055241,000327: 43,3510           60020                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   <span class="co">#  37777         C(CYR) = 45252</span>
-055242,000328: 43,3511           60022                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C">CYL</a>                                   <span class="co">#  00-12524      C(CYL) = 25251</span>
-055243,000329: 43,3512           60021                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  00-25251      C(SR) = 05252</span>
-055244,000330: 43,3513           60023                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F50">EDOP</a>                                  <span class="co">#  00-25376      C(EDOP) = +0</span>
-055245,000331: 43,3514           63250                           <span class="op">AD      </span> <a href="#434F4E432B5332">CONC+S2</a>                               <span class="co">#  C(CONC+S2) = 52400</span>
-055246,000332: 43,3515           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 
-055247,000333: 43,3516           60020                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   <span class="co">#  45252</span>
-055248,000334: 43,3517           60022                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C">CYL</a>                                   <span class="co">#  72523</span>
-055249,000335: 43,3520           60021                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  77775</span>
-055250,000336: 43,3521           60023                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F50">EDOP</a>                                  <span class="co">#  77775</span>
-055251,000337: 43,3522           64753                           <span class="op">AD      </span> <a href="#532B31">S+1</a>                                   <span class="co">#  77776</span>
-055252,000338: 43,3523           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 
-055253,000339: 
-055254,000340: 43,3524           25367                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53434F554E54">SCOUNT</a>     +1                         
-055255,000341: 43,3525           03307                           <span class="op">TC      </span> <a href="#534D4F444543484B">SMODECHK</a>                              
-055256,000342: 
-055257,000343:                                                                                                  <span class="co">#  SKEEP1 HOLDS SUM</span>
-055258,000344:                                                                                                  <span class="co">#  SKEEP2 HOLDS PRESENT CONTENTS OF ADDRESS IN ROPECHK AND SHOWSUM ROUTINES</span>
-055259,000345:                                                                                                  <span class="co">#  SKEEP2 HOLDS BANK NUMBER IN LOW ORDER BITS DURING SHOWSUM DISPLAY</span>
-055260,000346:                                                                                                  <span class="co">#  SKEEP3 HOLDS PRESENT ADDRESS (00000 TO 01777 IN COMMON FIXED BANKS)</span>
-055261,000347:                                                                                                  <span class="co">#                               (04000 TO 07777 IN FXFX BANKS)</span>
-055262,000348:                                                                                                  <span class="co">#  SKEEP3 HOLDS BUGGER WORD DURING SHOWSUM DISPLAY</span>
-055263,000349:                                                                                                  <span class="co">#  SKEEP4 HOLDS BANK NUMBER AND SUPER BANK NUMBER</span>
-055264,000350:                                                                                                  <span class="co">#  SKEEP5 COUNTS 2 SUCCESSIVE TC SELF WORDS</span>
-055265,000351:                                                                                                  <span class="co">#  SKEEP6 CONTROLS ROPECHK OR SHOWSUM OPTION</span>
-055266,000352:                                                                                                  <span class="co">#  SKEEP7 CONTROLS WHEN ROUNTINE IS IN COMMON FIXED OR FIXED FIXED BANKS</span>
-055267,000353: 
-<a name="524F504543484B"></a>055268,000354: 43,3526           34754        <span class="sm">ROPECHK </span>           <span class="op">CA      </span> <a href="#532D5A45524F">S-ZERO</a>                                <span class="co">#  *</span>
-055269,000355: 43,3527           55376                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455036">SKEEP6</a>                                <span class="co">#  * -0 FOR ROPECHK.</span>
-<a name="535453484F53554D"></a>055270,000356: 43,3530           34755        <span class="sm">STSHOSUM</span>           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                <span class="co">#  * SHOULD BE ROPECHK</span>
-055271,000357: 
-055272,000358: 43,3531           55374                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  BANK NUMBER</span>
-055273,000359: 43,3532           34753                           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
-<a name="434F4D4D4658"></a>055274,000360: 43,3533           55377        <span class="sm">COMMFX  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055275,000361: 43,3534           34755                           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
-055276,000362: 43,3535           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-055277,000363: 43,3536           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
-055278,000364: 43,3537           34753                           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
-055279,000365: 43,3540           55375                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  COUNTS DOWN 2 TC SELF WORDS</span>
-<a name="434F4D41445253"></a>055280,000366: 43,3541           31374        <span class="sm">COMADRS </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
-055281,000367: 43,3542           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  TO SET SUPER BANK</span>
-055282,000368: 43,3543           74350                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   
+055406,000317: 43,3501           11372                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
+055407,000318: 43,3502           03475                           <span class="op">TC      </span> <a href="#434E54524C4F4F50">CNTRLOOP</a>                              
+055408,000319: 
+055409,000320:                                                                                                  <span class="co">#  CYCLSHFT CHECKS THE CYCLE AND SHIFT REGISTERS</span>
+055410,000321: 
+<a name="4359434C53484654"></a>055411,000322: 43,3503           33247        <span class="sm">CYCLSHFT</span>           <span class="op">CA      </span> <a href="#434F4E432B5331">CONC+S1</a>                               <span class="co">#  25252</span>
+055412,000323: 43,3504           54020                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   <span class="co">#  C(CYR) = 12525</span>
+055413,000324: 43,3505           54022                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C">CYL</a>                                   <span class="co">#  C(CYL) = 52524</span>
+055414,000325: 43,3506           54021                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  C(SR) = 12525</span>
+055415,000326: 43,3507           54023                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F50">EDOP</a>                                  <span class="co">#  C(EDOP) = 00125</span>
+055416,000327: 43,3510           60020                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   <span class="co">#  37777         C(CYR) = 45252</span>
+055417,000328: 43,3511           60022                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C">CYL</a>                                   <span class="co">#  00-12524      C(CYL) = 25251</span>
+055418,000329: 43,3512           60021                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  00-25251      C(SR) = 05252</span>
+055419,000330: 43,3513           60023                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F50">EDOP</a>                                  <span class="co">#  00-25376      C(EDOP) = +0</span>
+055420,000331: 43,3514           63250                           <span class="op">AD      </span> <a href="#434F4E432B5332">CONC+S2</a>                               <span class="co">#  C(CONC+S2) = 52400</span>
+055421,000332: 43,3515           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 
+055422,000333: 43,3516           60020                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435952">CYR</a>                                   <span class="co">#  45252</span>
+055423,000334: 43,3517           60022                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C">CYL</a>                                   <span class="co">#  72523</span>
+055424,000335: 43,3520           60021                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  77775</span>
+055425,000336: 43,3521           60023                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F50">EDOP</a>                                  <span class="co">#  77775</span>
+055426,000337: 43,3522           64753                           <span class="op">AD      </span> <a href="#532B31">S+1</a>                                   <span class="co">#  77776</span>
+055427,000338: 43,3523           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 
+055428,000339: 
+055429,000340: 43,3524           25367                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53434F554E54">SCOUNT</a>     +1                         
+055430,000341: 43,3525           03307                           <span class="op">TC      </span> <a href="#534D4F444543484B">SMODECHK</a>                              
+055431,000342: 
+055432,000343:                                                                                                  <span class="co">#  SKEEP1 HOLDS SUM</span>
+055433,000344:                                                                                                  <span class="co">#  SKEEP2 HOLDS PRESENT CONTENTS OF ADDRESS IN ROPECHK AND SHOWSUM ROUTINES</span>
+055434,000345:                                                                                                  <span class="co">#  SKEEP2 HOLDS BANK NUMBER IN LOW ORDER BITS DURING SHOWSUM DISPLAY</span>
+055435,000346:                                                                                                  <span class="co">#  SKEEP3 HOLDS PRESENT ADDRESS (00000 TO 01777 IN COMMON FIXED BANKS)</span>
+055436,000347:                                                                                                  <span class="co">#                               (04000 TO 07777 IN FXFX BANKS)</span>
+055437,000348:                                                                                                  <span class="co">#  SKEEP3 HOLDS BUGGER WORD DURING SHOWSUM DISPLAY</span>
+055438,000349:                                                                                                  <span class="co">#  SKEEP4 HOLDS BANK NUMBER AND SUPER BANK NUMBER</span>
+055439,000350:                                                                                                  <span class="co">#  SKEEP5 COUNTS 2 SUCCESSIVE TC SELF WORDS</span>
+055440,000351:                                                                                                  <span class="co">#  SKEEP6 CONTROLS ROPECHK OR SHOWSUM OPTION</span>
+055441,000352:                                                                                                  <span class="co">#  SKEEP7 CONTROLS WHEN ROUNTINE IS IN COMMON FIXED OR FIXED FIXED BANKS</span>
+055442,000353: 
+<a name="524F504543484B"></a>055443,000354: 43,3526           34754        <span class="sm">ROPECHK </span>           <span class="op">CA      </span> <a href="#532D5A45524F">S-ZERO</a>                                <span class="co">#  *</span>
+055444,000355: 43,3527           55376                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455036">SKEEP6</a>                                <span class="co">#  * -0 FOR ROPECHK.</span>
+<a name="535453484F53554D"></a>055445,000356: 43,3530           34755        <span class="sm">STSHOSUM</span>           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                <span class="co">#  * SHOULD BE ROPECHK</span>
+055446,000357: 
+055447,000358: 43,3531           55374                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  BANK NUMBER</span>
+055448,000359: 43,3532           34753                           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
+<a name="434F4D4D4658"></a>055449,000360: 43,3533           55377        <span class="sm">COMMFX  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055450,000361: 43,3534           34755                           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
+055451,000362: 43,3535           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+055452,000363: 43,3536           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
+055453,000364: 43,3537           34753                           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
+055454,000365: 43,3540           55375                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  COUNTS DOWN 2 TC SELF WORDS</span>
+<a name="434F4D41445253"></a>055455,000366: 43,3541           31374        <span class="sm">COMADRS </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
+055456,000367: 43,3542           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  TO SET SUPER BANK</span>
+055457,000368: 43,3543           74350                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   
 </pre>
 </span>
 </p>
@@ -569,56 +587,56 @@ Page 1285
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-055284,000370: 43,3544           61373                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
-055285,000371: 43,3545           04651                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535550444143414C">SUPDACAL</a>                              <span class="co">#  SUPER DATA CALL</span>
-055286,000372: 43,3546           03571                           <span class="op">TC      </span> <a href="#414453554D">ADSUM</a>                                 
-055287,000373: 43,3547           64741                           <span class="op">AD      </span> <a href="#534249543131">SBIT11</a>                                <span class="co">#  02000</span>
-055288,000374: 43,3550           03602                           <span class="op">TC      </span> <a href="#4144525343484B">ADRSCHK</a>                               
-055289,000375: 
-<a name="46584658"></a>055290,000376: 43,3551           40000        <span class="sm">FXFX    </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-055291,000377: 43,3552           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055292,000378: 43,3553           00006                           <span class="op">EXTEND  </span>                                       
-055293,000379: 43,3554           13557                           <span class="op">BZF     </span> +3                                    
-055294,000380: 43,3555           34740                           <span class="op">CA      </span> <a href="#534249543132">SBIT12</a>                                <span class="co">#  04000, STARTING ADDRESS OF BANK 02</span>
-055295,000381: 43,3556           03560                           <span class="op">TC      </span> +2                                    
-055296,000382: 43,3557           35020                           <span class="op">CA      </span> <a href="#53424E4B3033">SBNK03</a>                                <span class="co">#  06000, STARTING ADDRESS OF BANK 03</span>
-055297,000383: 43,3560           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
-055298,000384: 43,3561           34755                           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
-055299,000385: 43,3562           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-055300,000386: 43,3563           34753                           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
-055301,000387: 43,3564           55375                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  COUNTS DOWN 2 TC SELF WORDS</span>
-<a name="465841445253"></a>055302,000388: 43,3565           51373        <span class="sm">FXADRS  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
-055303,000389: 43,3566           30000                           <span class="op">CA      </span> 0000                                  
-055304,000390: 43,3567           03571                           <span class="op">TC      </span> <a href="#414453554D">ADSUM</a>                                 
-055305,000391: 43,3570           03602                           <span class="op">TC      </span> <a href="#4144525343484B">ADRSCHK</a>                               
-055306,000392: 
-<a name="414453554D"></a>055307,000393: 43,3571           55372        <span class="sm">ADSUM   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
-055308,000394: 43,3572           61371                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-055309,000395: 43,3573           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-055310,000396: 43,3574           34755                           <span class="op">CAF     </span> <a href="#532B5A45524F">S+ZERO</a>                                
-055311,000397: 43,3575           61371                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-055312,000398: 43,3576           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-055313,000399: 43,3577           41372                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
-055314,000400: 43,3600           61373                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
-055315,000401: 43,3601           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-055316,000402: 
-<a name="4144525343484B"></a>055317,000403: 43,3602           22000        <span class="sm">ADRSCHK </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-055318,000404: 43,3603           31373                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
-055319,000405: 43,3604           75012                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  RELATIVE ADDRESS</span>
-055320,000406: 43,3605           64350                           <span class="op">AD      </span> <a href="#2D4D415841445253">-MAXADRS</a>                              <span class="co">#  SUBTRACT MAX RELATIVE ADDRESS = 1777.</span>
-055321,000407: 43,3606           00006                           <span class="op">EXTEND  </span>                                       
-055322,000408: 43,3607           13676                           <span class="op">BZF     </span> <a href="#534F5054494F4E">SOPTION</a>                               <span class="co">#  CHECKSUM FINISHED IF LAST ADDRESS.</span>
-055323,000409: 43,3610           11375                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  IS CHECKSUM FINISHED</span>
-055324,000410: 43,3611           03614                           <span class="op">TC      </span> +3                                    <span class="co">#  NO</span>
-055325,000411: 43,3612           03614                           <span class="op">TC      </span> +2                                    <span class="co">#  NO</span>
-055326,000412: 43,3613           03676                           <span class="op">TC      </span> <a href="#534F5054494F4E">SOPTION</a>                               <span class="co">#  GO TO ROPECHK SHOWSUM OPTION</span>
-055327,000413: 43,3614           10001                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  -0 MEANS A TC SELF WORD.</span>
-055328,000414: 43,3615           03624                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>                               
-055329,000415: 43,3616           03624                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>                               
-055330,000416: 43,3617           03624                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>                               
-055331,000417: 43,3620           11375                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                
-055332,000418: 43,3621           03625                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>    +1                         
-055333,000419: 43,3622           37746                           <span class="op">CA      </span> <a href="#532D31">S-1</a>                                   
+055459,000370: 43,3544           61373                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
+055460,000371: 43,3545           04651                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535550444143414C">SUPDACAL</a>                              <span class="co">#  SUPER DATA CALL</span>
+055461,000372: 43,3546           03571                           <span class="op">TC      </span> <a href="#414453554D">ADSUM</a>                                 
+055462,000373: 43,3547           64741                           <span class="op">AD      </span> <a href="#534249543131">SBIT11</a>                                <span class="co">#  02000</span>
+055463,000374: 43,3550           03602                           <span class="op">TC      </span> <a href="#4144525343484B">ADRSCHK</a>                               
+055464,000375: 
+<a name="46584658"></a>055465,000376: 43,3551           40000        <span class="sm">FXFX    </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+055466,000377: 43,3552           55377                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055467,000378: 43,3553           00006                           <span class="op">EXTEND  </span>                                       
+055468,000379: 43,3554           13557                           <span class="op">BZF     </span> +3                                    
+055469,000380: 43,3555           34740                           <span class="op">CA      </span> <a href="#534249543132">SBIT12</a>                                <span class="co">#  04000, STARTING ADDRESS OF BANK 02</span>
+055470,000381: 43,3556           03560                           <span class="op">TC      </span> +2                                    
+055471,000382: 43,3557           35020                           <span class="op">CA      </span> <a href="#53424E4B3033">SBNK03</a>                                <span class="co">#  06000, STARTING ADDRESS OF BANK 03</span>
+055472,000383: 43,3560           55373                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
+055473,000384: 43,3561           34755                           <span class="op">CA      </span> <a href="#532B5A45524F">S+ZERO</a>                                
+055474,000385: 43,3562           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+055475,000386: 43,3563           34753                           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
+055476,000387: 43,3564           55375                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  COUNTS DOWN 2 TC SELF WORDS</span>
+<a name="465841445253"></a>055477,000388: 43,3565           51373        <span class="sm">FXADRS  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
+055478,000389: 43,3566           30000                           <span class="op">CA      </span> 0000                                  
+055479,000390: 43,3567           03571                           <span class="op">TC      </span> <a href="#414453554D">ADSUM</a>                                 
+055480,000391: 43,3570           03602                           <span class="op">TC      </span> <a href="#4144525343484B">ADRSCHK</a>                               
+055481,000392: 
+<a name="414453554D"></a>055482,000393: 43,3571           55372        <span class="sm">ADSUM   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
+055483,000394: 43,3572           61371                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+055484,000395: 43,3573           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+055485,000396: 43,3574           34755                           <span class="op">CAF     </span> <a href="#532B5A45524F">S+ZERO</a>                                
+055486,000397: 43,3575           61371                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+055487,000398: 43,3576           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+055488,000399: 43,3577           41372                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455032">SKEEP2</a>                                
+055489,000400: 43,3600           61373                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
+055490,000401: 43,3601           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+055491,000402: 
+<a name="4144525343484B"></a>055492,000403: 43,3602           22000        <span class="sm">ADRSCHK </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+055493,000404: 43,3603           31373                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
+055494,000405: 43,3604           75012                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  RELATIVE ADDRESS</span>
+055495,000406: 43,3605           64350                           <span class="op">AD      </span> <a href="#2D4D415841445253">-MAXADRS</a>                              <span class="co">#  SUBTRACT MAX RELATIVE ADDRESS = 1777.</span>
+055496,000407: 43,3606           00006                           <span class="op">EXTEND  </span>                                       
+055497,000408: 43,3607           13676                           <span class="op">BZF     </span> <a href="#534F5054494F4E">SOPTION</a>                               <span class="co">#  CHECKSUM FINISHED IF LAST ADDRESS.</span>
+055498,000409: 43,3610           11375                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  IS CHECKSUM FINISHED</span>
+055499,000410: 43,3611           03614                           <span class="op">TC      </span> +3                                    <span class="co">#  NO</span>
+055500,000411: 43,3612           03614                           <span class="op">TC      </span> +2                                    <span class="co">#  NO</span>
+055501,000412: 43,3613           03676                           <span class="op">TC      </span> <a href="#534F5054494F4E">SOPTION</a>                               <span class="co">#  GO TO ROPECHK SHOWSUM OPTION</span>
+055502,000413: 43,3614           10001                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  -0 MEANS A TC SELF WORD.</span>
+055503,000414: 43,3615           03624                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>                               
+055504,000415: 43,3616           03624                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>                               
+055505,000416: 43,3617           03624                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>                               
+055506,000417: 43,3620           11375                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                
+055507,000418: 43,3621           03625                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>    +1                         
+055508,000419: 43,3622           37746                           <span class="op">CA      </span> <a href="#532D31">S-1</a>                                   
 </pre>
 </span>
 </p>
@@ -634,56 +652,56 @@ Page 1286
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-055335,000421: 43,3623           03625                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>    +1                         <span class="co">#  AD IN THE BUGGER WORD</span>
-<a name="434F4E54494E55"></a>055336,000422: 43,3624           34753        <span class="sm">CONTINU </span>           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   <span class="co">#  MAKE SURE TWO CONSECUTIVE TC SELF WORDS</span>
-055337,000423: 43,3625           55375                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                
-055338,000424: 43,3626           11376                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455036">SKEEP6</a>                                <span class="co">#  *</span>
-055339,000425: 43,3627           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  * +1, SHOWSUM</span>
-055340,000426: 43,3630           05122                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4348414E4731">CHANG1</a>                                <span class="co">#  *</span>
-055341,000427: 43,3631           03633                           <span class="op">TC      </span> +2                                    <span class="co">#  *</span>
-055342,000428: 43,3632           03340                           <span class="op">TC      </span> <a href="#434845434B4E4A">CHECKNJ</a>                               <span class="co">#  -0 IN SKEEP6 FOR ROPECHK</span>
-055343,000429: 
-<a name="414452532B31"></a>055344,000430: 43,3633           25373        <span class="sm">ADRS+1  </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
-055345,000431: 43,3634           11377                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055346,000432: 43,3635           03541                           <span class="op">TC      </span> <a href="#434F4D41445253">COMADRS</a>                               
-055347,000433: 43,3636           03541                           <span class="op">TC      </span> <a href="#434F4D41445253">COMADRS</a>                               
-055348,000434: 43,3637           03565                           <span class="op">TC      </span> <a href="#465841445253">FXADRS</a>                                
-055349,000435: 43,3640           03565                           <span class="op">TC      </span> <a href="#465841445253">FXADRS</a>                                
-055350,000436: 
-<a name="4E5854424E4B"></a>055351,000437: 43,3641           41374        <span class="sm">NXTBNK  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
-055352,000438: 43,3642           63731                           <span class="op">AD      </span> <a href="#4C5354424E4B4348">LSTBNKCH</a>                              <span class="co">#  LAST BANK TO BE CHECKED</span>
-055353,000439: 43,3643           00006                           <span class="op">EXTEND  </span>                                       
-055354,000440: 43,3644           13137                           <span class="op">BZF     </span> <a href="EXTENDED_VERBS.agc.html#454E4453554D53">ENDSUMS</a>                               <span class="co">#  END OF SUMMING OF BANKS.</span>
-055355,000441: 43,3645           31374                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
-055356,000442: 43,3646           64741                           <span class="op">AD      </span> <a href="#534249543131">SBIT11</a>                                
-055357,000443: 43,3647           55374                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  37 TO 40 INCRMTS SKEEP4 BY END RND CARRY</span>
-055358,000444: 43,3650           03654                           <span class="op">TC      </span> <a href="#43484B53555052">CHKSUPR</a>                               
-<a name="3137544F3230"></a>055359,000445: 43,3651           34735        <span class="sm">17TO20  </span>           <span class="op">CA      </span> <a href="#534249543135">SBIT15</a>                                
-055360,000446: 43,3652           27374                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  SET FOR BANK 20</span>
-055361,000447: 43,3653           03670                           <span class="op">TC      </span> <a href="#474F4E5854424E4B">GONXTBNK</a>                              
-<a name="43484B53555052"></a>055362,000448: 43,3654           74350        <span class="sm">CHKSUPR </span>           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   
-055363,000449: 43,3655           00006                           <span class="op">EXTEND  </span>                                       
-055364,000450: 43,3656           13666                           <span class="op">BZF     </span> <a href="#4E585453555052">NXTSUPR</a>                               <span class="co">#  INCREMENT SUPER BANK</span>
-<a name="3237544F3330"></a>055365,000451: 43,3657           63246        <span class="sm">27TO30  </span>           <span class="op">AD      </span> <a href="#53313342495453">S13BITS</a>                               
-055366,000452: 43,3660           00006                           <span class="op">EXTEND  </span>                                       
-055367,000453: 43,3661           13663                           <span class="op">BZF     </span> +2                                    <span class="co">#  BANK SET FOR 30</span>
-055368,000454: 43,3662           03670                           <span class="op">TC      </span> <a href="#474F4E5854424E4B">GONXTBNK</a>                              
-055369,000455: 43,3663           33244                           <span class="op">CA      </span> <a href="#5349585459">SIXTY</a>                                 <span class="co">#  FIRST SUPER BANK</span>
-055370,000456: 43,3664           27374                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
-055371,000457: 43,3665           03670                           <span class="op">TC      </span> <a href="#474F4E5854424E4B">GONXTBNK</a>                              
-<a name="4E585453555052"></a>055372,000458: 43,3666           63245        <span class="sm">NXTSUPR </span>           <span class="op">AD      </span> <a href="#53555052434F4E">SUPRCON</a>                               <span class="co">#  SET BNK 30 + INCR SUPR BNK AND CANCEL</span>
-055373,000459: 43,3667           27374                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  ERC BIT OF THE 37 TO 40 ADVANCE.</span>
-<a name="474F4E5854424E4B"></a>055374,000460: 43,3670           11377        <span class="sm">GONXTBNK</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
-055375,000461: 43,3671           03533                           <span class="op">TC      </span> <a href="#434F4D4D4658">COMMFX</a>                                
-055376,000462: 43,3672           34753                           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
-055377,000463: 43,3673           03551                           <span class="op">TC      </span> <a href="#46584658">FXFX</a>                                  
-055378,000464: 43,3674           34745                           <span class="op">CA      </span> <a href="#5342495437">SBIT7</a>                                 <span class="co">#  HAS TO BE LARGER THAN NO OF FXSW BANKS.</span>
-055379,000465: 43,3675           03533                           <span class="op">TC      </span> <a href="#434F4D4D4658">COMMFX</a>                                
-055380,000466: 
-<a name="534F5054494F4E"></a>055381,000467: 43,3676           31374        <span class="sm">SOPTION </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
-055382,000468: 43,3677           74350                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   <span class="co">#  = BANK BITS</span>
-055383,000469: 43,3700           04331                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C45465435">LEFT5</a>                                 
-055384,000470: 43,3701           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  BANK NUMBER BEFORE SUPER BANK</span>
+055510,000421: 43,3623           03625                           <span class="op">TC      </span> <a href="#434F4E54494E55">CONTINU</a>    +1                         <span class="co">#  AD IN THE BUGGER WORD</span>
+<a name="434F4E54494E55"></a>055511,000422: 43,3624           34753        <span class="sm">CONTINU </span>           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   <span class="co">#  MAKE SURE TWO CONSECUTIVE TC SELF WORDS</span>
+055512,000423: 43,3625           55375                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                
+055513,000424: 43,3626           11376                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455036">SKEEP6</a>                                <span class="co">#  *</span>
+055514,000425: 43,3627           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  * +1, SHOWSUM</span>
+055515,000426: 43,3630           05122                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4348414E4731">CHANG1</a>                                <span class="co">#  *</span>
+055516,000427: 43,3631           03633                           <span class="op">TC      </span> +2                                    <span class="co">#  *</span>
+055517,000428: 43,3632           03340                           <span class="op">TC      </span> <a href="#434845434B4E4A">CHECKNJ</a>                               <span class="co">#  -0 IN SKEEP6 FOR ROPECHK</span>
+055518,000429: 
+<a name="414452532B31"></a>055519,000430: 43,3633           25373        <span class="sm">ADRS+1  </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455033">SKEEP3</a>                                
+055520,000431: 43,3634           11377                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055521,000432: 43,3635           03541                           <span class="op">TC      </span> <a href="#434F4D41445253">COMADRS</a>                               
+055522,000433: 43,3636           03541                           <span class="op">TC      </span> <a href="#434F4D41445253">COMADRS</a>                               
+055523,000434: 43,3637           03565                           <span class="op">TC      </span> <a href="#465841445253">FXADRS</a>                                
+055524,000435: 43,3640           03565                           <span class="op">TC      </span> <a href="#465841445253">FXADRS</a>                                
+055525,000436: 
+<a name="4E5854424E4B"></a>055526,000437: 43,3641           41374        <span class="sm">NXTBNK  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
+055527,000438: 43,3642           63731                           <span class="op">AD      </span> <a href="#4C5354424E4B4348">LSTBNKCH</a>                              <span class="co">#  LAST BANK TO BE CHECKED</span>
+055528,000439: 43,3643           00006                           <span class="op">EXTEND  </span>                                       
+055529,000440: 43,3644           13137                           <span class="op">BZF     </span> <a href="EXTENDED_VERBS.agc.html#454E4453554D53">ENDSUMS</a>                               <span class="co">#  END OF SUMMING OF BANKS.</span>
+055530,000441: 43,3645           31374                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
+055531,000442: 43,3646           64741                           <span class="op">AD      </span> <a href="#534249543131">SBIT11</a>                                
+055532,000443: 43,3647           55374                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  37 TO 40 INCRMTS SKEEP4 BY END RND CARRY</span>
+055533,000444: 43,3650           03654                           <span class="op">TC      </span> <a href="#43484B53555052">CHKSUPR</a>                               
+<a name="3137544F3230"></a>055534,000445: 43,3651           34735        <span class="sm">17TO20  </span>           <span class="op">CA      </span> <a href="#534249543135">SBIT15</a>                                
+055535,000446: 43,3652           27374                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  SET FOR BANK 20</span>
+055536,000447: 43,3653           03670                           <span class="op">TC      </span> <a href="#474F4E5854424E4B">GONXTBNK</a>                              
+<a name="43484B53555052"></a>055537,000448: 43,3654           74350        <span class="sm">CHKSUPR </span>           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   
+055538,000449: 43,3655           00006                           <span class="op">EXTEND  </span>                                       
+055539,000450: 43,3656           13666                           <span class="op">BZF     </span> <a href="#4E585453555052">NXTSUPR</a>                               <span class="co">#  INCREMENT SUPER BANK</span>
+<a name="3237544F3330"></a>055540,000451: 43,3657           63246        <span class="sm">27TO30  </span>           <span class="op">AD      </span> <a href="#53313342495453">S13BITS</a>                               
+055541,000452: 43,3660           00006                           <span class="op">EXTEND  </span>                                       
+055542,000453: 43,3661           13663                           <span class="op">BZF     </span> +2                                    <span class="co">#  BANK SET FOR 30</span>
+055543,000454: 43,3662           03670                           <span class="op">TC      </span> <a href="#474F4E5854424E4B">GONXTBNK</a>                              
+055544,000455: 43,3663           33244                           <span class="op">CA      </span> <a href="#5349585459">SIXTY</a>                                 <span class="co">#  FIRST SUPER BANK</span>
+055545,000456: 43,3664           27374                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
+055546,000457: 43,3665           03670                           <span class="op">TC      </span> <a href="#474F4E5854424E4B">GONXTBNK</a>                              
+<a name="4E585453555052"></a>055547,000458: 43,3666           63245        <span class="sm">NXTSUPR </span>           <span class="op">AD      </span> <a href="#53555052434F4E">SUPRCON</a>                               <span class="co">#  SET BNK 30 + INCR SUPR BNK AND CANCEL</span>
+055548,000459: 43,3667           27374                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                <span class="co">#  ERC BIT OF THE 37 TO 40 ADVANCE.</span>
+<a name="474F4E5854424E4B"></a>055549,000460: 43,3670           11377        <span class="sm">GONXTBNK</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                
+055550,000461: 43,3671           03533                           <span class="op">TC      </span> <a href="#434F4D4D4658">COMMFX</a>                                
+055551,000462: 43,3672           34753                           <span class="op">CA      </span> <a href="#532B31">S+1</a>                                   
+055552,000463: 43,3673           03551                           <span class="op">TC      </span> <a href="#46584658">FXFX</a>                                  
+055553,000464: 43,3674           34745                           <span class="op">CA      </span> <a href="#5342495437">SBIT7</a>                                 <span class="co">#  HAS TO BE LARGER THAN NO OF FXSW BANKS.</span>
+055554,000465: 43,3675           03533                           <span class="op">TC      </span> <a href="#434F4D4D4658">COMMFX</a>                                
+055555,000466: 
+<a name="534F5054494F4E"></a>055556,000467: 43,3676           31374        <span class="sm">SOPTION </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
+055557,000468: 43,3677           74350                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#484935">HI5</a>                                   <span class="co">#  = BANK BITS</span>
+055558,000469: 43,3700           04331                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C45465435">LEFT5</a>                                 
+055559,000470: 43,3701           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  BANK NUMBER BEFORE SUPER BANK</span>
 </pre>
 </span>
 </p>
@@ -699,33 +717,33 @@ Page 1287
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-055386,000472: 43,3702           31374                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
-055387,000473: 43,3703           74357                           <span class="op">MASK    </span> <a href="#533842495453">S8BITS</a>                                <span class="co">#  = SUPER BANK BITS</span>
-055388,000474: 43,3704           00006                           <span class="op">EXTEND  </span>                                       
-055389,000475: 43,3705           13713                           <span class="op">BZF     </span> <a href="#534F5054">SOPT</a>                                  <span class="co">#  BEFORE SUPER BANK</span>
-055390,000476: 43,3706           54021                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  SUPER BANK NECESSARY</span>
-055391,000477: 43,3707           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-055392,000478: 43,3710           74757                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
-055393,000479: 43,3711           60021                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    
-055394,000480: 43,3712           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  BANK NUMBER WITH SUPER BANK</span>
-<a name="534F5054"></a>055395,000481: 43,3713           31376        <span class="sm">SOPT    </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455036">SKEEP6</a>                                <span class="co">#  *</span>
-055396,000482: 43,3714           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  *</span>
-055397,000483: 43,3715           13717                           <span class="op">BZF     </span> +2                                    <span class="co">#  * ON -0 CONTINUE WITH ROPE CHECK.</span>
-055398,000484: 43,3716           03121                           <span class="op">TC      </span> <a href="EXTENDED_VERBS.agc.html#53444953504C4159">SDISPLAY</a>                              <span class="co">#  * ON +1 GO TO DISPLAY OF SUM.</span>
-055399,000485: 43,3717           11371                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  FORCE SUM TO ABSOLUTE VALUE.</span>
-055400,000486: 43,3720           03722                           <span class="op">TC      </span> +2                                    
-055401,000487: 43,3721           03723                           <span class="op">TC      </span> +2                                    
-055402,000488: 43,3722           64753                           <span class="op">AD      </span> <a href="#532B31">S+1</a>                                   
-055403,000489: 43,3723           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-<a name="424E4B43484B"></a>055404,000490: 43,3724           40001        <span class="sm">BNKCHK  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  = - BANK NUMBER</span>
-055405,000491: 43,3725           61371                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
-055406,000492: 43,3726           67746                           <span class="op">AD      </span> <a href="#532D31">S-1</a>                                   
-055407,000493: 43,3727           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 <span class="co">#  CHECK SUM</span>
-055408,000494: 43,3730           03641                           <span class="op">TC      </span> <a href="#4E5854424E4B">NXTBNK</a>                                
-055409,000495: 
-055410,000496: 43,3731     0067                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-<a name="4C5354424E4B4348"></a>055411,000497: 43,3731           66100        <span class="sm">LSTBNKCH</span>           <span class="ps">BBCON*  </span>                                       <span class="co">#  * CONSTANT, LAST BANK.</span>
-055412,000498: 
+055561,000472: 43,3702           31374                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455034">SKEEP4</a>                                
+055562,000473: 43,3703           74357                           <span class="op">MASK    </span> <a href="#533842495453">S8BITS</a>                                <span class="co">#  = SUPER BANK BITS</span>
+055563,000474: 43,3704           00006                           <span class="op">EXTEND  </span>                                       
+055564,000475: 43,3705           13713                           <span class="op">BZF     </span> <a href="#534F5054">SOPT</a>                                  <span class="co">#  BEFORE SUPER BANK</span>
+055565,000476: 43,3706           54021                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    <span class="co">#  SUPER BANK NECESSARY</span>
+055566,000477: 43,3707           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+055567,000478: 43,3710           74757                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534556454E">SEVEN</a>                                 
+055568,000479: 43,3711           60021                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5352">SR</a>                                    
+055569,000480: 43,3712           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  BANK NUMBER WITH SUPER BANK</span>
+<a name="534F5054"></a>055570,000481: 43,3713           31376        <span class="sm">SOPT    </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455036">SKEEP6</a>                                <span class="co">#  *</span>
+055571,000482: 43,3714           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  *</span>
+055572,000483: 43,3715           13717                           <span class="op">BZF     </span> +2                                    <span class="co">#  * ON -0 CONTINUE WITH ROPE CHECK.</span>
+055573,000484: 43,3716           03121                           <span class="op">TC      </span> <a href="EXTENDED_VERBS.agc.html#53444953504C4159">SDISPLAY</a>                              <span class="co">#  * ON +1 GO TO DISPLAY OF SUM.</span>
+055574,000485: 43,3717           11371                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                <span class="co">#  FORCE SUM TO ABSOLUTE VALUE.</span>
+055575,000486: 43,3720           03722                           <span class="op">TC      </span> +2                                    
+055576,000487: 43,3721           03723                           <span class="op">TC      </span> +2                                    
+055577,000488: 43,3722           64753                           <span class="op">AD      </span> <a href="#532B31">S+1</a>                                   
+055578,000489: 43,3723           55371                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+<a name="424E4B43484B"></a>055579,000490: 43,3724           40001        <span class="sm">BNKCHK  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  = - BANK NUMBER</span>
+055580,000491: 43,3725           61371                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455031">SKEEP1</a>                                
+055581,000492: 43,3726           67746                           <span class="op">AD      </span> <a href="#532D31">S-1</a>                                   
+055582,000493: 43,3727           03301                           <span class="op">TC      </span> <a href="#2D3143484B">-1CHK</a>                                 <span class="co">#  CHECK SUM</span>
+055583,000494: 43,3730           03641                           <span class="op">TC      </span> <a href="#4E5854424E4B">NXTBNK</a>                                
+055584,000495: 
+055585,000496: 43,3731     0067                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+<a name="4C5354424E4B4348"></a>055586,000497: 43,3731           66100        <span class="sm">LSTBNKCH</span>           <span class="ps">BBCON*  </span>                                       <span class="co">#  * CONSTANT, LAST BANK.</span>
+055587,000498: 
 
 End of include-file AGC_BLOCK_TWO_SELF-CHECK.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -74,23 +73,25 @@ and AURORA 12. <a href="http://www.ibiblio.org/apollo/Restoration.html">
 <u>Read about the process here.</u></a>  Assembling this source code with
 yaYUL produces core ropes identical to those of the physical modules. 
 Page-number references refer to corresponding sections of RETREAD 44 source
-code.  No printouts of RETREAD 50 program listings are available.  Names of
-variables and program constants of the form "UNK<i>nnnn</i>" appear in areas not yet correlated
-with other pre-existing source code, and which are therefore unknown.
+code.  No printouts of RETREAD 50 program listings are available.  New sections of the
+software (appearing in EXTENDED_VERBS_FOR_MODING.agc) have been disassembled; labels
+and comments have been either taken from similar code in later programs or, in cases
+where this was not possible, added by VirtualAGC for clarity.
 </td></tr></tbody></table>
 
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000148,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-000149,000003:                                                                                                  <span class="co">## Filename:    ERASABLE_ASSIGNMENTS.agc</span>
-000150,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for AGC program Retread 50. </span>
-000151,000005:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-000152,000006:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-000153,000007:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/Restoration.html</span>
-000154,000008:                                                                                                  <span class="co">## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's</span>
-000155,000009:                                                                                                  <span class="co">##                              physical core-rope modules.</span>
-000156,000010: 
+000161,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+000162,000003:                                                                                                  <span class="co">## Filename:    ERASABLE_ASSIGNMENTS.agc</span>
+000163,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for AGC program Retread 50. </span>
+000164,000005:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+000165,000006:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+000166,000007:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/Restoration.html</span>
+000167,000008:                                                                                                  <span class="co">## Mod history: 2019-06-12 MAS  Recreated from Computer History Museum's</span>
+000168,000009:                                                                                                  <span class="co">##                              physical core-rope modules.</span>
+000169,000010:                                                                                                  <span class="co">##              2019-10-01 MAS  Assigned names to the UNK12xx erasables.</span>
+000170,000011: 
 </pre>
 </span>
 </p>
@@ -106,57 +107,57 @@ Page 5
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000158,000012: 
-<a name="41"></a>000159,000013: ???????                        <span class="sm">A       </span>           <span class="ps">EQUALS  </span> 0                                     
-<a name="4C"></a>000160,000014: ???????                        <span class="sm">L       </span>           <span class="ps">EQUALS  </span> 1                                     <span class="co">#  L AND Q ARE BOTH CHANNELS AND REGISTERS.</span>
-<a name="51"></a>000161,000015: ???????                        <span class="sm">Q       </span>           <span class="ps">EQUALS  </span> 2                                     
-<a name="4542414E4B"></a>000162,000016: ???????                        <span class="sm">EBANK   </span>           <span class="ps">EQUALS  </span> 3                                     
-<a name="4642414E4B"></a>000163,000017: ???????                        <span class="sm">FBANK   </span>           <span class="ps">EQUALS  </span> 4                                     
-<a name="5A"></a>000164,000018: ???????                        <span class="sm">Z       </span>           <span class="ps">EQUALS  </span> 5                                     <span class="co">#  ADJACENT TO FBANK AND BBANK FOR DXCH Z</span>
-<a name="4242414E4B"></a>000165,000019: ???????                        <span class="sm">BBANK   </span>           <span class="ps">EQUALS  </span> 6                                     <span class="co">#  (DTCB) AND DXCH FBANK (DTCF).</span>
-000166,000020:                                                                                                  <span class="co">#  REGISTER 7 IS A ZERO-SOURCE, USED BY ZL.</span>
-000167,000021: 
-<a name="4152555054"></a>000168,000022: ???????                        <span class="sm">ARUPT   </span>           <span class="ps">EQUALS  </span> 10                                    <span class="co">#  INTERRUPT STORAGE.</span>
-<a name="4C52555054"></a>000169,000023: ???????                        <span class="sm">LRUPT   </span>           <span class="ps">EQUALS  </span> 11                                    
-<a name="5152555054"></a>000170,000024: ???????                        <span class="sm">QRUPT   </span>           <span class="ps">EQUALS  </span> 12                                    
-<a name="5A52555054"></a>000171,000025: ???????                        <span class="sm">ZRUPT   </span>           <span class="ps">EQUALS  </span> 15                                    <span class="co">#  (13 AND 14 ARE SPARES.)</span>
-<a name="42414E4B52555054"></a>000172,000026: ???????                        <span class="sm">BANKRUPT</span>           <span class="ps">EQUALS  </span> 16                                    <span class="co">#  USUALLY HOLDS FBANK OR BBANK.</span>
-<a name="4252555054"></a>000173,000027: ???????                        <span class="sm">BRUPT   </span>           <span class="ps">EQUALS  </span> 17                                    <span class="co">#  RESUME ADDRESS AS WELL.</span>
-000174,000028: 
-<a name="435952"></a>000175,000029: ???????                        <span class="sm">CYR     </span>           <span class="ps">EQUALS  </span> 20                                    
-<a name="5352"></a>000176,000030: ???????                        <span class="sm">SR      </span>           <span class="ps">EQUALS  </span> 21                                    
-<a name="43594C"></a>000177,000031: ???????                        <span class="sm">CYL     </span>           <span class="ps">EQUALS  </span> 22                                    
-<a name="45444F50"></a>000178,000032: ???????                        <span class="sm">EDOP    </span>           <span class="ps">EQUALS  </span> 23                                    <span class="co">#  EDITS INTERPRETIVE OPERATION CODE PAIRS.</span>
-000179,000033: 
-000180,000034: 
-000181,000035: 
-<a name="54494D4532"></a>000182,000036: ???????                        <span class="sm">TIME2   </span>           <span class="ps">EQUALS  </span> 24                                    
-<a name="54494D4531"></a>000183,000037: ???????                        <span class="sm">TIME1   </span>           <span class="ps">EQUALS  </span> 25                                    
-<a name="54494D4533"></a>000184,000038: ???????                        <span class="sm">TIME3   </span>           <span class="ps">EQUALS  </span> 26                                    
-<a name="54494D4534"></a>000185,000039: ???????                        <span class="sm">TIME4   </span>           <span class="ps">EQUALS  </span> 27                                    
-<a name="54494D4535"></a>000186,000040: ???????                        <span class="sm">TIME5   </span>           <span class="ps">EQUALS  </span> 30                                    
-<a name="54494D4536"></a>000187,000041: ???????                        <span class="sm">TIME6   </span>           <span class="ps">EQUALS  </span> 31                                    
-<a name="43445558"></a>000188,000042: ???????                        <span class="sm">CDUX    </span>           <span class="ps">EQUALS  </span> 32                                    
-<a name="43445559"></a>000189,000043: ???????                        <span class="sm">CDUY    </span>           <span class="ps">EQUALS  </span> 33                                    
-<a name="4344555A"></a>000190,000044: ???????                        <span class="sm">CDUZ    </span>           <span class="ps">EQUALS  </span> 34                                    
-<a name="4F505459"></a>000191,000045: ???????                        <span class="sm">OPTY    </span>           <span class="ps">EQUALS  </span> 35                                    
-<a name="4F505458"></a>000192,000046: ???????                        <span class="sm">OPTX    </span>           <span class="ps">EQUALS  </span> 36                                    
-<a name="5049504158"></a>000193,000047: ???????                        <span class="sm">PIPAX   </span>           <span class="ps">EQUALS  </span> 37                                    
-<a name="5049504159"></a>000194,000048: ???????                        <span class="sm">PIPAY   </span>           <span class="ps">EQUALS  </span> 40                                    
-<a name="504950415A"></a>000195,000049: ???????                        <span class="sm">PIPAZ   </span>           <span class="ps">EQUALS  </span> 41                                    
-<a name="424D414758"></a>000196,000050: ???????                        <span class="sm">BMAGX   </span>           <span class="ps">EQUALS  </span> 42                                    
-<a name="424D414759"></a>000197,000051: ???????                        <span class="sm">BMAGY   </span>           <span class="ps">EQUALS  </span> 43                                    
-<a name="424D41475A"></a>000198,000052: ???????                        <span class="sm">BMAGZ   </span>           <span class="ps">EQUALS  </span> 44                                    
-<a name="494E4C494E4B"></a>000199,000053: ???????                        <span class="sm">INLINK  </span>           <span class="ps">EQUALS  </span> 45                                    
-<a name="524E524144"></a>000200,000054: ???????                        <span class="sm">RNRAD   </span>           <span class="ps">EQUALS  </span> 46                                    
-<a name="4759524F435452"></a>000201,000055: ???????                        <span class="sm">GYROCTR </span>           <span class="ps">EQUALS  </span> 47                                    
-<a name="43445558434D44"></a>000202,000056: ???????                        <span class="sm">CDUXCMD </span>           <span class="ps">EQUALS  </span> 50                                    
-<a name="43445559434D44"></a>000203,000057: ???????                        <span class="sm">CDUYCMD </span>           <span class="ps">EQUALS  </span> 51                                    
-<a name="4344555A434D44"></a>000204,000058: ???????                        <span class="sm">CDUZCMD </span>           <span class="ps">EQUALS  </span> 52                                    
-<a name="4F505459434D44"></a>000205,000059: ???????                        <span class="sm">OPTYCMD </span>           <span class="ps">EQUALS  </span> 53                                    
-<a name="4F505458434D44"></a>000206,000060: ???????                        <span class="sm">OPTXCMD </span>           <span class="ps">EQUALS  </span> 54                                    
-<a name="454D5344"></a>000207,000061: ???????                        <span class="sm">EMSD    </span>           <span class="ps">EQUALS  </span> 55                                    
-<a name="4C454D4F4E4D"></a>000208,000062: ???????                        <span class="sm">LEMONM  </span>           <span class="ps">EQUALS  </span> 56                                    
+000172,000013: 
+<a name="41"></a>000173,000014: ???????                        <span class="sm">A       </span>           <span class="ps">EQUALS  </span> 0                                     
+<a name="4C"></a>000174,000015: ???????                        <span class="sm">L       </span>           <span class="ps">EQUALS  </span> 1                                     <span class="co">#  L AND Q ARE BOTH CHANNELS AND REGISTERS.</span>
+<a name="51"></a>000175,000016: ???????                        <span class="sm">Q       </span>           <span class="ps">EQUALS  </span> 2                                     
+<a name="4542414E4B"></a>000176,000017: ???????                        <span class="sm">EBANK   </span>           <span class="ps">EQUALS  </span> 3                                     
+<a name="4642414E4B"></a>000177,000018: ???????                        <span class="sm">FBANK   </span>           <span class="ps">EQUALS  </span> 4                                     
+<a name="5A"></a>000178,000019: ???????                        <span class="sm">Z       </span>           <span class="ps">EQUALS  </span> 5                                     <span class="co">#  ADJACENT TO FBANK AND BBANK FOR DXCH Z</span>
+<a name="4242414E4B"></a>000179,000020: ???????                        <span class="sm">BBANK   </span>           <span class="ps">EQUALS  </span> 6                                     <span class="co">#  (DTCB) AND DXCH FBANK (DTCF).</span>
+000180,000021:                                                                                                  <span class="co">#  REGISTER 7 IS A ZERO-SOURCE, USED BY ZL.</span>
+000181,000022: 
+<a name="4152555054"></a>000182,000023: ???????                        <span class="sm">ARUPT   </span>           <span class="ps">EQUALS  </span> 10                                    <span class="co">#  INTERRUPT STORAGE.</span>
+<a name="4C52555054"></a>000183,000024: ???????                        <span class="sm">LRUPT   </span>           <span class="ps">EQUALS  </span> 11                                    
+<a name="5152555054"></a>000184,000025: ???????                        <span class="sm">QRUPT   </span>           <span class="ps">EQUALS  </span> 12                                    
+<a name="5A52555054"></a>000185,000026: ???????                        <span class="sm">ZRUPT   </span>           <span class="ps">EQUALS  </span> 15                                    <span class="co">#  (13 AND 14 ARE SPARES.)</span>
+<a name="42414E4B52555054"></a>000186,000027: ???????                        <span class="sm">BANKRUPT</span>           <span class="ps">EQUALS  </span> 16                                    <span class="co">#  USUALLY HOLDS FBANK OR BBANK.</span>
+<a name="4252555054"></a>000187,000028: ???????                        <span class="sm">BRUPT   </span>           <span class="ps">EQUALS  </span> 17                                    <span class="co">#  RESUME ADDRESS AS WELL.</span>
+000188,000029: 
+<a name="435952"></a>000189,000030: ???????                        <span class="sm">CYR     </span>           <span class="ps">EQUALS  </span> 20                                    
+<a name="5352"></a>000190,000031: ???????                        <span class="sm">SR      </span>           <span class="ps">EQUALS  </span> 21                                    
+<a name="43594C"></a>000191,000032: ???????                        <span class="sm">CYL     </span>           <span class="ps">EQUALS  </span> 22                                    
+<a name="45444F50"></a>000192,000033: ???????                        <span class="sm">EDOP    </span>           <span class="ps">EQUALS  </span> 23                                    <span class="co">#  EDITS INTERPRETIVE OPERATION CODE PAIRS.</span>
+000193,000034: 
+000194,000035: 
+000195,000036: 
+<a name="54494D4532"></a>000196,000037: ???????                        <span class="sm">TIME2   </span>           <span class="ps">EQUALS  </span> 24                                    
+<a name="54494D4531"></a>000197,000038: ???????                        <span class="sm">TIME1   </span>           <span class="ps">EQUALS  </span> 25                                    
+<a name="54494D4533"></a>000198,000039: ???????                        <span class="sm">TIME3   </span>           <span class="ps">EQUALS  </span> 26                                    
+<a name="54494D4534"></a>000199,000040: ???????                        <span class="sm">TIME4   </span>           <span class="ps">EQUALS  </span> 27                                    
+<a name="54494D4535"></a>000200,000041: ???????                        <span class="sm">TIME5   </span>           <span class="ps">EQUALS  </span> 30                                    
+<a name="54494D4536"></a>000201,000042: ???????                        <span class="sm">TIME6   </span>           <span class="ps">EQUALS  </span> 31                                    
+<a name="43445558"></a>000202,000043: ???????                        <span class="sm">CDUX    </span>           <span class="ps">EQUALS  </span> 32                                    
+<a name="43445559"></a>000203,000044: ???????                        <span class="sm">CDUY    </span>           <span class="ps">EQUALS  </span> 33                                    
+<a name="4344555A"></a>000204,000045: ???????                        <span class="sm">CDUZ    </span>           <span class="ps">EQUALS  </span> 34                                    
+<a name="4F505459"></a>000205,000046: ???????                        <span class="sm">OPTY    </span>           <span class="ps">EQUALS  </span> 35                                    
+<a name="4F505458"></a>000206,000047: ???????                        <span class="sm">OPTX    </span>           <span class="ps">EQUALS  </span> 36                                    
+<a name="5049504158"></a>000207,000048: ???????                        <span class="sm">PIPAX   </span>           <span class="ps">EQUALS  </span> 37                                    
+<a name="5049504159"></a>000208,000049: ???????                        <span class="sm">PIPAY   </span>           <span class="ps">EQUALS  </span> 40                                    
+<a name="504950415A"></a>000209,000050: ???????                        <span class="sm">PIPAZ   </span>           <span class="ps">EQUALS  </span> 41                                    
+<a name="424D414758"></a>000210,000051: ???????                        <span class="sm">BMAGX   </span>           <span class="ps">EQUALS  </span> 42                                    
+<a name="424D414759"></a>000211,000052: ???????                        <span class="sm">BMAGY   </span>           <span class="ps">EQUALS  </span> 43                                    
+<a name="424D41475A"></a>000212,000053: ???????                        <span class="sm">BMAGZ   </span>           <span class="ps">EQUALS  </span> 44                                    
+<a name="494E4C494E4B"></a>000213,000054: ???????                        <span class="sm">INLINK  </span>           <span class="ps">EQUALS  </span> 45                                    
+<a name="524E524144"></a>000214,000055: ???????                        <span class="sm">RNRAD   </span>           <span class="ps">EQUALS  </span> 46                                    
+<a name="4759524F435452"></a>000215,000056: ???????                        <span class="sm">GYROCTR </span>           <span class="ps">EQUALS  </span> 47                                    
+<a name="43445558434D44"></a>000216,000057: ???????                        <span class="sm">CDUXCMD </span>           <span class="ps">EQUALS  </span> 50                                    
+<a name="43445559434D44"></a>000217,000058: ???????                        <span class="sm">CDUYCMD </span>           <span class="ps">EQUALS  </span> 51                                    
+<a name="4344555A434D44"></a>000218,000059: ???????                        <span class="sm">CDUZCMD </span>           <span class="ps">EQUALS  </span> 52                                    
+<a name="4F505459434D44"></a>000219,000060: ???????                        <span class="sm">OPTYCMD </span>           <span class="ps">EQUALS  </span> 53                                    
+<a name="4F505458434D44"></a>000220,000061: ???????                        <span class="sm">OPTXCMD </span>           <span class="ps">EQUALS  </span> 54                                    
+<a name="454D5344"></a>000221,000062: ???????                        <span class="sm">EMSD    </span>           <span class="ps">EQUALS  </span> 55                                    
+<a name="4C454D4F4E4D"></a>000222,000063: ???????                        <span class="sm">LEMONM  </span>           <span class="ps">EQUALS  </span> 56                                    
 </pre>
 </span>
 </p>
@@ -172,20 +173,20 @@ Page 6
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4F55544C494E4B"></a>000210,000064: ???????                        <span class="sm">OUTLINK </span>           <span class="ps">EQUALS  </span> 57                                    
-<a name="414C544D"></a>000211,000065: ???????                        <span class="sm">ALTM    </span>           <span class="ps">EQUALS  </span> 60                                    
-000212,000066: 
-000213,000067:    0067                                           <span class="ps">SETLOC  </span> 67                                    <span class="co">#  DECODED REGISTER FOR NIGHT-WATCHMAN ALM.</span>
-<a name="4E45574A4F42"></a>000214,000068:    0067                        <span class="sm">NEWJOB  </span>           <span class="ps">ERASE   </span>                                       
-000215,000069: 
-<a name="4C56535155415245"></a>000216,000070:    0070                        <span class="sm">LVSQUARE</span>           <span class="ps">EQUALS  </span> 34D                                   <span class="co">#  SQUARE OF VECTOR INPUT TO ABVAL AND UNIT</span>
-<a name="4C56"></a>000217,000071:    0070                        <span class="sm">LV      </span>           <span class="ps">EQUALS  </span> 36D                                   <span class="co">#  LENGTH OF VECTOR INPUT TO UNIT.</span>
-<a name="5831"></a>000218,000072:    0070                        <span class="sm">X1      </span>           <span class="ps">EQUALS  </span> 38D                                   <span class="co">#  INTERPRETIVE SPECIAL REGISTERS RELATIVE</span>
-<a name="5832"></a>000219,000073:    0070                        <span class="sm">X2      </span>           <span class="ps">EQUALS  </span> 39D                                   <span class="co">#  TO THE WORK AREA.</span>
-<a name="5331"></a>000220,000074:    0070                        <span class="sm">S1      </span>           <span class="ps">EQUALS  </span> 40D                                   
-<a name="5332"></a>000221,000075:    0070                        <span class="sm">S2      </span>           <span class="ps">EQUALS  </span> 41D                                   
-<a name="5150524554"></a>000222,000076:    0070                        <span class="sm">QPRET   </span>           <span class="ps">EQUALS  </span> 42D                                   
-000223,000077: 
+<a name="4F55544C494E4B"></a>000224,000065: ???????                        <span class="sm">OUTLINK </span>           <span class="ps">EQUALS  </span> 57                                    
+<a name="414C544D"></a>000225,000066: ???????                        <span class="sm">ALTM    </span>           <span class="ps">EQUALS  </span> 60                                    
+000226,000067: 
+000227,000068:    0067                                           <span class="ps">SETLOC  </span> 67                                    <span class="co">#  DECODED REGISTER FOR NIGHT-WATCHMAN ALM.</span>
+<a name="4E45574A4F42"></a>000228,000069:    0067                        <span class="sm">NEWJOB  </span>           <span class="ps">ERASE   </span>                                       
+000229,000070: 
+<a name="4C56535155415245"></a>000230,000071:    0070                        <span class="sm">LVSQUARE</span>           <span class="ps">EQUALS  </span> 34D                                   <span class="co">#  SQUARE OF VECTOR INPUT TO ABVAL AND UNIT</span>
+<a name="4C56"></a>000231,000072:    0070                        <span class="sm">LV      </span>           <span class="ps">EQUALS  </span> 36D                                   <span class="co">#  LENGTH OF VECTOR INPUT TO UNIT.</span>
+<a name="5831"></a>000232,000073:    0070                        <span class="sm">X1      </span>           <span class="ps">EQUALS  </span> 38D                                   <span class="co">#  INTERPRETIVE SPECIAL REGISTERS RELATIVE</span>
+<a name="5832"></a>000233,000074:    0070                        <span class="sm">X2      </span>           <span class="ps">EQUALS  </span> 39D                                   <span class="co">#  TO THE WORK AREA.</span>
+<a name="5331"></a>000234,000075:    0070                        <span class="sm">S1      </span>           <span class="ps">EQUALS  </span> 40D                                   
+<a name="5332"></a>000235,000076:    0070                        <span class="sm">S2      </span>           <span class="ps">EQUALS  </span> 41D                                   
+<a name="5150524554"></a>000236,000077:    0070                        <span class="sm">QPRET   </span>           <span class="ps">EQUALS  </span> 42D                                   
+000237,000078: 
 </pre>
 </span>
 </p>
@@ -201,56 +202,56 @@ Page 7
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000225,000079:                                                                                                  <span class="co">#  GENERAL ERASABLE ASSIGNMENTS.</span>
-000226,000080: 
-000227,000081:                                                                                                  <span class="co">#           THE FOLLOWING ARE EXECUTIVE TEMPORARIES WHICH MAY BE USED BETWEEN CCS NEWJOB INQUIRIES.</span>
-000228,000082: 
-000229,000083:    0100                                           <span class="ps">SETLOC  </span> 100                                   
-000230,000084: 
-<a name="494E544231352B"></a>000231,000085:    0100                        <span class="sm">INTB15+ </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  REFLECTS 15TH BIT OF INDEXABLE ADDRESSES</span>
-<a name="445345584954"></a>000232,000086:    0101     0100               <span class="sm">DSEXIT  </span>           <span class="ps">=       </span> <a href="#494E544231352B">INTB15+</a>                               <span class="co">#  RETURN FOR DSPIN</span>
-<a name="45584954454D"></a>000233,000087:    0101     0100               <span class="sm">EXITEM  </span>           <span class="ps">=       </span> <a href="#494E544231352B">INTB15+</a>                               <span class="co">#  RETURN FOR SCALE FACTOR ROUTINE SELECT</span>
-<a name="424C414E4B524554"></a>000234,000088:    0101     0100               <span class="sm">BLANKRET</span>           <span class="ps">=       </span> <a href="#494E544231352B">INTB15+</a>                               <span class="co">#  RETURN FOR 2BLANK</span>
-000235,000089: 
-<a name="494E544249543135"></a>000236,000090:    0101                        <span class="sm">INTBIT15</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  SIMILAR TO ABOVE.</span>
-<a name="575244524554"></a>000237,000091:    0102     0101               <span class="sm">WRDRET  </span>           <span class="ps">=       </span> <a href="#494E544249543135">INTBIT15</a>                              <span class="co">#  RETURN FOR 5BLANK</span>
-<a name="5744524554"></a>000238,000092:    0102     0101               <span class="sm">WDRET   </span>           <span class="ps">=       </span> <a href="#494E544249543135">INTBIT15</a>                              <span class="co">#  RETURN FOR DSPWD</span>
-<a name="444543524554"></a>000239,000093:    0102     0101               <span class="sm">DECRET  </span>           <span class="ps">=       </span> <a href="#494E544249543135">INTBIT15</a>                              <span class="co">#  RETURN FOR PUTCOM(DEC LOAD)</span>
-<a name="32312F3232524547"></a>000240,000094:    0102     0101               <span class="sm">21/22REG</span>           <span class="ps">=       </span> <a href="#494E544249543135">INTBIT15</a>                              <span class="co">#  TEMP FOR CHARIN</span>
-000241,000095: 
-<a name="414444525744"></a>000242,000096:    0102                        <span class="sm">ADDRWD  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  12 BIT INTERPRETIVE OPERAND SUB-ADDRESS.</span>
-<a name="504F4C495348"></a>000243,000097:    0103                        <span class="sm">POLISH  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  HOLDS CADR MADE FROM POLISH ADDRESS.</span>
-<a name="5550444154524554"></a>000244,000098:    0104     0103               <span class="sm">UPDATRET</span>           <span class="ps">=       </span> <a href="#504F4C495348">POLISH</a>                                <span class="co">#  RETURN FOR UPDATNN, UPDATVB</span>
-<a name="43484152"></a>000245,000099:    0104     0103               <span class="sm">CHAR    </span>           <span class="ps">=       </span> <a href="#504F4C495348">POLISH</a>                                <span class="co">#  TEMP FOR CHARIN</span>
-<a name="4552434E54"></a>000246,000100:    0104     0103               <span class="sm">ERCNT   </span>           <span class="ps">=       </span> <a href="#504F4C495348">POLISH</a>                                <span class="co">#  COUNTER FOR ERROR LIGHT RESET</span>
-<a name="4445434F554E54"></a>000247,000101:    0104     0103               <span class="sm">DECOUNT </span>           <span class="ps">=       </span> <a href="#504F4C495348">POLISH</a>                                <span class="co">#  COUNTER FOR SCALING AND DISPLAY (DEC)</span>
-000248,000102: 
-<a name="4649584C4F43"></a>000249,000103:    0104                        <span class="sm">FIXLOC  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  WORK AREA ADDRESS.</span>
-000250,000104: 
-<a name="4F5646494E44"></a>000251,000105:    0105                        <span class="sm">OVFIND  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  SET NON-ZERO ON OVERFLOW.</span>
-000252,000106: 
-<a name="56425546"></a>000253,000107:    0106                        <span class="sm">VBUF    </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  TEMPORARY STORAGE USED FOR VECTORS.</span>
-<a name="53474E4F4E"></a>000254,000108:    0114     0106               <span class="sm">SGNON   </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>                                  <span class="co">#  TEMP FOR +,- ON</span>
-<a name="4E4F554E54454D"></a>000255,000109:    0114     0106               <span class="sm">NOUNTEM </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>                                  <span class="co">#  COUNTER FOR MIXNOUN FETCH</span>
-<a name="44495354454D"></a>000256,000110:    0114     0106               <span class="sm">DISTEM  </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>                                  <span class="co">#  COUNTER FOR OCTAL DISPLAY VERBS</span>
-<a name="44454354454D"></a>000257,000111:    0114     0106               <span class="sm">DECTEM  </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>                                  <span class="co">#  COUNTER FOR FETCH (DEC DISPLAY VERBS)</span>
-000258,000112: 
-<a name="53474E4F4646"></a>000259,000113:    0114     0107               <span class="sm">SGNOFF  </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +1                         <span class="co">#  TEMP FOR +,- ON</span>
-<a name="4E5654454D50"></a>000260,000114:    0114     0107               <span class="sm">NVTEMP  </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +1                         <span class="co">#  TEMP FOR NVSUB</span>
-<a name="534654454D5031"></a>000261,000115:    0114     0107               <span class="sm">SFTEMP1 </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +1                         <span class="co">#  STORAGE FOR SF CONST HI PART(=SFTEMP2-1)</span>
-000262,000116: 
-<a name="434F4445"></a>000263,000117:    0114     0110               <span class="sm">CODE    </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +2                         <span class="co">#  FOR DSPIN</span>
-<a name="534654454D5032"></a>000264,000118:    0114     0110               <span class="sm">SFTEMP2 </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +2                         <span class="co">#  STORAGE FOR SF CONST LO PART(=SFTEMP1+1)</span>
-000265,000119: 
-<a name="4D495854454D50"></a>000266,000120:    0114     0111               <span class="sm">MIXTEMP </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +3                         <span class="co">#  FOR MIXNOUN DATA</span>
-<a name="5349474E524554"></a>000267,000121:    0114     0111               <span class="sm">SIGNRET </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +3                         <span class="co">#  RETURN FOR +,- ON</span>
-000268,000122: 
-000269,000123:                                                                                                  <span class="co">#  ALSO MIXTEMP+1 = VBUF+4, MIXTEMP+2 = VBUF+5.</span>
-000270,000124: 
-<a name="425546"></a>000271,000125:    0114                        <span class="sm">BUF     </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  TEMPORARY SCALAR STORAGE.</span>
-<a name="42554632"></a>000272,000126:    0117                        <span class="sm">BUF2    </span>           <span class="ps">ERASE   </span> +1                                    
-<a name="494E4445584C4F43"></a>000273,000127:    0121     0114               <span class="sm">INDEXLOC</span>           <span class="ps">EQUALS  </span> <a href="#425546">BUF</a>                                   <span class="co">#  CONTAINS ADDRESS OF SPECIFIED INDEX.</span>
-<a name="5357574F5244"></a>000274,000128:    0121     0114               <span class="sm">SWWORD  </span>           <span class="ps">EQUALS  </span> <a href="#425546">BUF</a>                                   <span class="co">#  ADDRESS OF SWITCH WORD.</span>
+000239,000080:                                                                                                  <span class="co">#  GENERAL ERASABLE ASSIGNMENTS.</span>
+000240,000081: 
+000241,000082:                                                                                                  <span class="co">#           THE FOLLOWING ARE EXECUTIVE TEMPORARIES WHICH MAY BE USED BETWEEN CCS NEWJOB INQUIRIES.</span>
+000242,000083: 
+000243,000084:    0100                                           <span class="ps">SETLOC  </span> 100                                   
+000244,000085: 
+<a name="494E544231352B"></a>000245,000086:    0100                        <span class="sm">INTB15+ </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  REFLECTS 15TH BIT OF INDEXABLE ADDRESSES</span>
+<a name="445345584954"></a>000246,000087:    0101     0100               <span class="sm">DSEXIT  </span>           <span class="ps">=       </span> <a href="#494E544231352B">INTB15+</a>                               <span class="co">#  RETURN FOR DSPIN</span>
+<a name="45584954454D"></a>000247,000088:    0101     0100               <span class="sm">EXITEM  </span>           <span class="ps">=       </span> <a href="#494E544231352B">INTB15+</a>                               <span class="co">#  RETURN FOR SCALE FACTOR ROUTINE SELECT</span>
+<a name="424C414E4B524554"></a>000248,000089:    0101     0100               <span class="sm">BLANKRET</span>           <span class="ps">=       </span> <a href="#494E544231352B">INTB15+</a>                               <span class="co">#  RETURN FOR 2BLANK</span>
+000249,000090: 
+<a name="494E544249543135"></a>000250,000091:    0101                        <span class="sm">INTBIT15</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  SIMILAR TO ABOVE.</span>
+<a name="575244524554"></a>000251,000092:    0102     0101               <span class="sm">WRDRET  </span>           <span class="ps">=       </span> <a href="#494E544249543135">INTBIT15</a>                              <span class="co">#  RETURN FOR 5BLANK</span>
+<a name="5744524554"></a>000252,000093:    0102     0101               <span class="sm">WDRET   </span>           <span class="ps">=       </span> <a href="#494E544249543135">INTBIT15</a>                              <span class="co">#  RETURN FOR DSPWD</span>
+<a name="444543524554"></a>000253,000094:    0102     0101               <span class="sm">DECRET  </span>           <span class="ps">=       </span> <a href="#494E544249543135">INTBIT15</a>                              <span class="co">#  RETURN FOR PUTCOM(DEC LOAD)</span>
+<a name="32312F3232524547"></a>000254,000095:    0102     0101               <span class="sm">21/22REG</span>           <span class="ps">=       </span> <a href="#494E544249543135">INTBIT15</a>                              <span class="co">#  TEMP FOR CHARIN</span>
+000255,000096: 
+<a name="414444525744"></a>000256,000097:    0102                        <span class="sm">ADDRWD  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  12 BIT INTERPRETIVE OPERAND SUB-ADDRESS.</span>
+<a name="504F4C495348"></a>000257,000098:    0103                        <span class="sm">POLISH  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  HOLDS CADR MADE FROM POLISH ADDRESS.</span>
+<a name="5550444154524554"></a>000258,000099:    0104     0103               <span class="sm">UPDATRET</span>           <span class="ps">=       </span> <a href="#504F4C495348">POLISH</a>                                <span class="co">#  RETURN FOR UPDATNN, UPDATVB</span>
+<a name="43484152"></a>000259,000100:    0104     0103               <span class="sm">CHAR    </span>           <span class="ps">=       </span> <a href="#504F4C495348">POLISH</a>                                <span class="co">#  TEMP FOR CHARIN</span>
+<a name="4552434E54"></a>000260,000101:    0104     0103               <span class="sm">ERCNT   </span>           <span class="ps">=       </span> <a href="#504F4C495348">POLISH</a>                                <span class="co">#  COUNTER FOR ERROR LIGHT RESET</span>
+<a name="4445434F554E54"></a>000261,000102:    0104     0103               <span class="sm">DECOUNT </span>           <span class="ps">=       </span> <a href="#504F4C495348">POLISH</a>                                <span class="co">#  COUNTER FOR SCALING AND DISPLAY (DEC)</span>
+000262,000103: 
+<a name="4649584C4F43"></a>000263,000104:    0104                        <span class="sm">FIXLOC  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  WORK AREA ADDRESS.</span>
+000264,000105: 
+<a name="4F5646494E44"></a>000265,000106:    0105                        <span class="sm">OVFIND  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  SET NON-ZERO ON OVERFLOW.</span>
+000266,000107: 
+<a name="56425546"></a>000267,000108:    0106                        <span class="sm">VBUF    </span>           <span class="ps">ERASE   </span> +5                                    <span class="co">#  TEMPORARY STORAGE USED FOR VECTORS.</span>
+<a name="53474E4F4E"></a>000268,000109:    0114     0106               <span class="sm">SGNON   </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>                                  <span class="co">#  TEMP FOR +,- ON</span>
+<a name="4E4F554E54454D"></a>000269,000110:    0114     0106               <span class="sm">NOUNTEM </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>                                  <span class="co">#  COUNTER FOR MIXNOUN FETCH</span>
+<a name="44495354454D"></a>000270,000111:    0114     0106               <span class="sm">DISTEM  </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>                                  <span class="co">#  COUNTER FOR OCTAL DISPLAY VERBS</span>
+<a name="44454354454D"></a>000271,000112:    0114     0106               <span class="sm">DECTEM  </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>                                  <span class="co">#  COUNTER FOR FETCH (DEC DISPLAY VERBS)</span>
+000272,000113: 
+<a name="53474E4F4646"></a>000273,000114:    0114     0107               <span class="sm">SGNOFF  </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +1                         <span class="co">#  TEMP FOR +,- ON</span>
+<a name="4E5654454D50"></a>000274,000115:    0114     0107               <span class="sm">NVTEMP  </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +1                         <span class="co">#  TEMP FOR NVSUB</span>
+<a name="534654454D5031"></a>000275,000116:    0114     0107               <span class="sm">SFTEMP1 </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +1                         <span class="co">#  STORAGE FOR SF CONST HI PART(=SFTEMP2-1)</span>
+000276,000117: 
+<a name="434F4445"></a>000277,000118:    0114     0110               <span class="sm">CODE    </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +2                         <span class="co">#  FOR DSPIN</span>
+<a name="534654454D5032"></a>000278,000119:    0114     0110               <span class="sm">SFTEMP2 </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +2                         <span class="co">#  STORAGE FOR SF CONST LO PART(=SFTEMP1+1)</span>
+000279,000120: 
+<a name="4D495854454D50"></a>000280,000121:    0114     0111               <span class="sm">MIXTEMP </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +3                         <span class="co">#  FOR MIXNOUN DATA</span>
+<a name="5349474E524554"></a>000281,000122:    0114     0111               <span class="sm">SIGNRET </span>           <span class="ps">=       </span> <a href="#56425546">VBUF</a>       +3                         <span class="co">#  RETURN FOR +,- ON</span>
+000282,000123: 
+000283,000124:                                                                                                  <span class="co">#  ALSO MIXTEMP+1 = VBUF+4, MIXTEMP+2 = VBUF+5.</span>
+000284,000125: 
+<a name="425546"></a>000285,000126:    0114                        <span class="sm">BUF     </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  TEMPORARY SCALAR STORAGE.</span>
+<a name="42554632"></a>000286,000127:    0117                        <span class="sm">BUF2    </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="494E4445584C4F43"></a>000287,000128:    0121     0114               <span class="sm">INDEXLOC</span>           <span class="ps">EQUALS  </span> <a href="#425546">BUF</a>                                   <span class="co">#  CONTAINS ADDRESS OF SPECIFIED INDEX.</span>
+<a name="5357574F5244"></a>000288,000129:    0121     0114               <span class="sm">SWWORD  </span>           <span class="ps">EQUALS  </span> <a href="#425546">BUF</a>                                   <span class="co">#  ADDRESS OF SWITCH WORD.</span>
 </pre>
 </span>
 </p>
@@ -266,58 +267,58 @@ Page 8
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="5357424954"></a>000276,000130:    0121     0115               <span class="sm">SWBIT   </span>           <span class="ps">EQUALS  </span> <a href="#425546">BUF</a>        +1                         <span class="co">#  SWITCH BIT WITHIN SWITCH WORD.</span>
-<a name="4D5054454D50"></a>000277,000131:    0121                        <span class="sm">MPTEMP  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMPORARY USED IN MULTIPLY AND SHIFT.</span>
-<a name="444F54494E43"></a>000278,000132:    0122                        <span class="sm">DOTINC  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  COMPONENT INCREMENT FOR DOT SUBROUTINE.</span>
-<a name="44565349474E"></a>000279,000133:    0123     0122               <span class="sm">DVSIGN  </span>           <span class="ps">EQUALS  </span> <a href="#444F54494E43">DOTINC</a>                                <span class="co">#  DETERMINES SIGN OF DDV RESULT.</span>
-<a name="455343415045"></a>000280,000134:    0123     0122               <span class="sm">ESCAPE  </span>           <span class="ps">EQUALS  </span> <a href="#444F54494E43">DOTINC</a>                                <span class="co">#  USED IN ARCSIN/ARCCOS.</span>
-<a name="454E54524554"></a>000281,000135:    0123     0122               <span class="sm">ENTRET  </span>           <span class="ps">=       </span> <a href="#444F54494E43">DOTINC</a>                                <span class="co">#  EXIT FROM ENTER</span>
-000282,000136: 
-<a name="444F54524554"></a>000283,000137:    0123                        <span class="sm">DOTRET  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  RETURN FROM DOT SUBROUTINE.</span>
-<a name="44564E4F524D4354"></a>000284,000138:    0124     0123               <span class="sm">DVNORMCT</span>           <span class="ps">EQUALS  </span> <a href="#444F54524554">DOTRET</a>                                <span class="co">#  DIVIDEND NORMALIZATION COUNT IN DDV.</span>
-<a name="45534341504532"></a>000285,000139:    0124     0123               <span class="sm">ESCAPE2 </span>           <span class="ps">EQUALS  </span> <a href="#444F54524554">DOTRET</a>                                <span class="co">#  ALTERNATE ARCSIN/ARCCOS SWITCH.</span>
-<a name="5744434E54"></a>000286,000140:    0124     0123               <span class="sm">WDCNT   </span>           <span class="ps">=       </span> <a href="#444F54524554">DOTRET</a>                                <span class="co">#  CHAR COUNTER FOR DSPWD</span>
-<a name="494E52454C"></a>000287,000141:    0124     0123               <span class="sm">INREL   </span>           <span class="ps">=       </span> <a href="#444F54524554">DOTRET</a>                                <span class="co">#  INPUT BUFFER SELECTOR ( X,Y,Z, REG )</span>
-000288,000142: 
-<a name="4D4154494E43"></a>000289,000143:    0124                        <span class="sm">MATINC  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  VECTOR INCREMENT IN MXV AND VXM.</span>
-<a name="4D415844565357"></a>000290,000144:    0125     0124               <span class="sm">MAXDVSW </span>           <span class="ps">EQUALS  </span> <a href="#4D4154494E43">MATINC</a>                                <span class="co">#  +0 IF DP QUOTIENT IS NEAR ONE - ELSE -1.</span>
-<a name="504F4C59434E54"></a>000291,000145:    0125     0124               <span class="sm">POLYCNT </span>           <span class="ps">EQUALS  </span> <a href="#4D4154494E43">MATINC</a>                                <span class="co">#  POLYNOMIAL LOOP COUNTER</span>
-<a name="4453504D4D54454D"></a>000292,000146:    0125     0124               <span class="sm">DSPMMTEM</span>           <span class="ps">=       </span> <a href="#4D4154494E43">MATINC</a>                                <span class="co">#  DSPCOUNT SAVE FOR DSPMM</span>
-<a name="4D49584252"></a>000293,000147:    0125     0124               <span class="sm">MIXBR   </span>           <span class="ps">=       </span> <a href="#4D4154494E43">MATINC</a>                                <span class="co">#  INDICATOR FOR MIXED OR NORMAL NOUN</span>
-000294,000148: 
-<a name="54454D31"></a>000295,000149:    0125                        <span class="sm">TEM1    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
-<a name="504F4C59524554"></a>000296,000150:    0126     0125               <span class="sm">POLYRET </span>           <span class="ps">=       </span> <a href="#54454D31">TEM1</a>                                  
-<a name="445352454C"></a>000297,000151:    0126     0125               <span class="sm">DSREL   </span>           <span class="ps">=       </span> <a href="#54454D31">TEM1</a>                                  <span class="co">#  REL ADDRESS FOR DSPIN</span>
-000298,000152: 
-<a name="54454D32"></a>000299,000153:    0126                        <span class="sm">TEM2    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
-<a name="44534D4147"></a>000300,000154:    0127     0126               <span class="sm">DSMAG   </span>           <span class="ps">=       </span> <a href="#54454D32">TEM2</a>                                  <span class="co">#  MAGNITUDE STORE FOR DSPIN</span>
-<a name="494441444454454D"></a>000301,000155:    0127     0126               <span class="sm">IDADDTEM</span>           <span class="ps">=       </span> <a href="#54454D32">TEM2</a>                                  <span class="co">#  MIXNOUN INDIRECT ADDRESS STORAGE</span>
-000302,000156: 
-<a name="54454D33"></a>000303,000157:    0127                        <span class="sm">TEM3    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
-<a name="434F554E54"></a>000304,000158:    0130     0127               <span class="sm">COUNT   </span>           <span class="ps">=       </span> <a href="#54454D33">TEM3</a>                                  <span class="co">#  FOR DSPIN</span>
-000305,000159: 
-<a name="54454D34"></a>000306,000160:    0130                        <span class="sm">TEM4    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
-<a name="4C5354505452"></a>000307,000161:    0131     0130               <span class="sm">LSTPTR  </span>           <span class="ps">=       </span> <a href="#54454D34">TEM4</a>                                  <span class="co">#  LIST POINTER FOR GRABUSY</span>
-<a name="52454C524554"></a>000308,000162:    0131     0130               <span class="sm">RELRET  </span>           <span class="ps">=       </span> <a href="#54454D34">TEM4</a>                                  <span class="co">#  RETURN FOR RELDSP</span>
-<a name="46524545524554"></a>000309,000163:    0131     0130               <span class="sm">FREERET </span>           <span class="ps">=       </span> <a href="#54454D34">TEM4</a>                                  <span class="co">#  RETURN FOR FREEDSP</span>
-000310,000164: 
-<a name="54454D35"></a>000311,000165:    0131                        <span class="sm">TEM5    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
-<a name="4E4F554E414444"></a>000312,000166:    0132     0131               <span class="sm">NOUNADD </span>           <span class="ps">=       </span> <a href="#54454D35">TEM5</a>                                  <span class="co">#  TEMP STORAGE FOR NOUN ADDRESS</span>
-000313,000167: 
-<a name="4E4E414454454D"></a>000314,000168:    0132                        <span class="sm">NNADTEM </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR NOUN ADDRESS TABLE ENTRY</span>
-<a name="4E4E54595054454D"></a>000315,000169:    0133                        <span class="sm">NNTYPTEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR NOUN TYPE TABLE ENTRY</span>
-<a name="494441443154454D"></a>000316,000170:    0134                        <span class="sm">IDAD1TEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)</span>
-000317,000171:                                                                                                  <span class="co">#  MUST = IDAD2TEM-1, = IDAD3TEM-2.</span>
-<a name="494441443254454D"></a>000318,000172:    0135                        <span class="sm">IDAD2TEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)</span>
-000319,000173:                                                                                                  <span class="co">#  MUST = IDAD1TEM+1, = IDAD3TEM-1.</span>
-<a name="494441443354454D"></a>000320,000174:    0136                        <span class="sm">IDAD3TEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)</span>
-000321,000175:                                                                                                  <span class="co">#  MUST = IDAD1TEM+2, = IDAD2TEM+1.</span>
-<a name="5255544D5854454D"></a>000322,000176:    0137                        <span class="sm">RUTMXTEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR SF ROUT TABLE ENTRY(MIXNN ONLY)</span>
-000323,000177: 
-000324,000178: 
-000325,000179: 
-000326,000180:                                                                                                  <span class="co">#           STORAGE USED BY THE EXECUTIVE.</span>
-000327,000181: 
+<a name="5357424954"></a>000290,000131:    0121     0115               <span class="sm">SWBIT   </span>           <span class="ps">EQUALS  </span> <a href="#425546">BUF</a>        +1                         <span class="co">#  SWITCH BIT WITHIN SWITCH WORD.</span>
+<a name="4D5054454D50"></a>000291,000132:    0121                        <span class="sm">MPTEMP  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMPORARY USED IN MULTIPLY AND SHIFT.</span>
+<a name="444F54494E43"></a>000292,000133:    0122                        <span class="sm">DOTINC  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  COMPONENT INCREMENT FOR DOT SUBROUTINE.</span>
+<a name="44565349474E"></a>000293,000134:    0123     0122               <span class="sm">DVSIGN  </span>           <span class="ps">EQUALS  </span> <a href="#444F54494E43">DOTINC</a>                                <span class="co">#  DETERMINES SIGN OF DDV RESULT.</span>
+<a name="455343415045"></a>000294,000135:    0123     0122               <span class="sm">ESCAPE  </span>           <span class="ps">EQUALS  </span> <a href="#444F54494E43">DOTINC</a>                                <span class="co">#  USED IN ARCSIN/ARCCOS.</span>
+<a name="454E54524554"></a>000295,000136:    0123     0122               <span class="sm">ENTRET  </span>           <span class="ps">=       </span> <a href="#444F54494E43">DOTINC</a>                                <span class="co">#  EXIT FROM ENTER</span>
+000296,000137: 
+<a name="444F54524554"></a>000297,000138:    0123                        <span class="sm">DOTRET  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  RETURN FROM DOT SUBROUTINE.</span>
+<a name="44564E4F524D4354"></a>000298,000139:    0124     0123               <span class="sm">DVNORMCT</span>           <span class="ps">EQUALS  </span> <a href="#444F54524554">DOTRET</a>                                <span class="co">#  DIVIDEND NORMALIZATION COUNT IN DDV.</span>
+<a name="45534341504532"></a>000299,000140:    0124     0123               <span class="sm">ESCAPE2 </span>           <span class="ps">EQUALS  </span> <a href="#444F54524554">DOTRET</a>                                <span class="co">#  ALTERNATE ARCSIN/ARCCOS SWITCH.</span>
+<a name="5744434E54"></a>000300,000141:    0124     0123               <span class="sm">WDCNT   </span>           <span class="ps">=       </span> <a href="#444F54524554">DOTRET</a>                                <span class="co">#  CHAR COUNTER FOR DSPWD</span>
+<a name="494E52454C"></a>000301,000142:    0124     0123               <span class="sm">INREL   </span>           <span class="ps">=       </span> <a href="#444F54524554">DOTRET</a>                                <span class="co">#  INPUT BUFFER SELECTOR ( X,Y,Z, REG )</span>
+000302,000143: 
+<a name="4D4154494E43"></a>000303,000144:    0124                        <span class="sm">MATINC  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  VECTOR INCREMENT IN MXV AND VXM.</span>
+<a name="4D415844565357"></a>000304,000145:    0125     0124               <span class="sm">MAXDVSW </span>           <span class="ps">EQUALS  </span> <a href="#4D4154494E43">MATINC</a>                                <span class="co">#  +0 IF DP QUOTIENT IS NEAR ONE - ELSE -1.</span>
+<a name="504F4C59434E54"></a>000305,000146:    0125     0124               <span class="sm">POLYCNT </span>           <span class="ps">EQUALS  </span> <a href="#4D4154494E43">MATINC</a>                                <span class="co">#  POLYNOMIAL LOOP COUNTER</span>
+<a name="4453504D4D54454D"></a>000306,000147:    0125     0124               <span class="sm">DSPMMTEM</span>           <span class="ps">=       </span> <a href="#4D4154494E43">MATINC</a>                                <span class="co">#  DSPCOUNT SAVE FOR DSPMM</span>
+<a name="4D49584252"></a>000307,000148:    0125     0124               <span class="sm">MIXBR   </span>           <span class="ps">=       </span> <a href="#4D4154494E43">MATINC</a>                                <span class="co">#  INDICATOR FOR MIXED OR NORMAL NOUN</span>
+000308,000149: 
+<a name="54454D31"></a>000309,000150:    0125                        <span class="sm">TEM1    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
+<a name="504F4C59524554"></a>000310,000151:    0126     0125               <span class="sm">POLYRET </span>           <span class="ps">=       </span> <a href="#54454D31">TEM1</a>                                  
+<a name="445352454C"></a>000311,000152:    0126     0125               <span class="sm">DSREL   </span>           <span class="ps">=       </span> <a href="#54454D31">TEM1</a>                                  <span class="co">#  REL ADDRESS FOR DSPIN</span>
+000312,000153: 
+<a name="54454D32"></a>000313,000154:    0126                        <span class="sm">TEM2    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
+<a name="44534D4147"></a>000314,000155:    0127     0126               <span class="sm">DSMAG   </span>           <span class="ps">=       </span> <a href="#54454D32">TEM2</a>                                  <span class="co">#  MAGNITUDE STORE FOR DSPIN</span>
+<a name="494441444454454D"></a>000315,000156:    0127     0126               <span class="sm">IDADDTEM</span>           <span class="ps">=       </span> <a href="#54454D32">TEM2</a>                                  <span class="co">#  MIXNOUN INDIRECT ADDRESS STORAGE</span>
+000316,000157: 
+<a name="54454D33"></a>000317,000158:    0127                        <span class="sm">TEM3    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
+<a name="434F554E54"></a>000318,000159:    0130     0127               <span class="sm">COUNT   </span>           <span class="ps">=       </span> <a href="#54454D33">TEM3</a>                                  <span class="co">#  FOR DSPIN</span>
+000319,000160: 
+<a name="54454D34"></a>000320,000161:    0130                        <span class="sm">TEM4    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
+<a name="4C5354505452"></a>000321,000162:    0131     0130               <span class="sm">LSTPTR  </span>           <span class="ps">=       </span> <a href="#54454D34">TEM4</a>                                  <span class="co">#  LIST POINTER FOR GRABUSY</span>
+<a name="52454C524554"></a>000322,000163:    0131     0130               <span class="sm">RELRET  </span>           <span class="ps">=       </span> <a href="#54454D34">TEM4</a>                                  <span class="co">#  RETURN FOR RELDSP</span>
+<a name="46524545524554"></a>000323,000164:    0131     0130               <span class="sm">FREERET </span>           <span class="ps">=       </span> <a href="#54454D34">TEM4</a>                                  <span class="co">#  RETURN FOR FREEDSP</span>
+000324,000165: 
+<a name="54454D35"></a>000325,000166:    0131                        <span class="sm">TEM5    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXEC TEMP</span>
+<a name="4E4F554E414444"></a>000326,000167:    0132     0131               <span class="sm">NOUNADD </span>           <span class="ps">=       </span> <a href="#54454D35">TEM5</a>                                  <span class="co">#  TEMP STORAGE FOR NOUN ADDRESS</span>
+000327,000168: 
+<a name="4E4E414454454D"></a>000328,000169:    0132                        <span class="sm">NNADTEM </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR NOUN ADDRESS TABLE ENTRY</span>
+<a name="4E4E54595054454D"></a>000329,000170:    0133                        <span class="sm">NNTYPTEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR NOUN TYPE TABLE ENTRY</span>
+<a name="494441443154454D"></a>000330,000171:    0134                        <span class="sm">IDAD1TEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)</span>
+000331,000172:                                                                                                  <span class="co">#  MUST = IDAD2TEM-1, = IDAD3TEM-2.</span>
+<a name="494441443254454D"></a>000332,000173:    0135                        <span class="sm">IDAD2TEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)</span>
+000333,000174:                                                                                                  <span class="co">#  MUST = IDAD1TEM+1, = IDAD3TEM-1.</span>
+<a name="494441443354454D"></a>000334,000175:    0136                        <span class="sm">IDAD3TEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR INDIR ADRESS TABLE ENTRY(MIXNN)</span>
+000335,000176:                                                                                                  <span class="co">#  MUST = IDAD1TEM+2, = IDAD2TEM+1.</span>
+<a name="5255544D5854454D"></a>000336,000177:    0137                        <span class="sm">RUTMXTEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  TEMP FOR SF ROUT TABLE ENTRY(MIXNN ONLY)</span>
+000337,000178: 
+000338,000179: 
+000339,000180: 
+000340,000181:                                                                                                  <span class="co">#           STORAGE USED BY THE EXECUTIVE.</span>
+000341,000182: 
 </pre>
 </span>
 </p>
@@ -333,51 +334,51 @@ Page 9
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4D504143"></a>000329,000183:    0140                        <span class="sm">MPAC    </span>           <span class="ps">ERASE   </span> +6                                    <span class="co">#  MULTI-PURPOSE ACCUMULATOR.</span>
-<a name="4D4F4445"></a>000330,000184:    0147                        <span class="sm">MODE    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  +1 FOR TP, +0 FOR DP, OR -1 FOR VECTOR.</span>
-<a name="4C4F43"></a>000331,000185:    0150                        <span class="sm">LOC     </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  LOCATION ASSOCIATED WITH JOB.</span>
-<a name="42414E4B534554"></a>000332,000186:    0151                        <span class="sm">BANKSET </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  USUALLY CONTAINS BBANK SETTING.</span>
-<a name="505553484C4F43"></a>000333,000187:    0152                        <span class="sm">PUSHLOC </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  WORD OF PACKED INTERPRETIVE PARAMETERS.</span>
-<a name="5052494F52495459"></a>000334,000188:    0153                        <span class="sm">PRIORITY</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  PRIORITY OF PRESENT JOB AND WORK AREA.</span>
-000335,000189: 
-000336,000190:    0154                                           <span class="ps">ERASE   </span> +71D                                  <span class="co">#  SEVEN SETS OF 12 REGISTERS EACH.</span>
-000337,000191: 
-<a name="56414331555345"></a>000338,000192:    0264                        <span class="sm">VAC1USE </span>           <span class="ps">ERASE   </span>                                       
-<a name="56414331"></a>000339,000193:    0265                        <span class="sm">VAC1    </span>           <span class="ps">ERASE   </span> +42D                                  
-<a name="56414332555345"></a>000340,000194:    0340                        <span class="sm">VAC2USE </span>           <span class="ps">ERASE   </span>                                       
-<a name="56414332"></a>000341,000195:    0341                        <span class="sm">VAC2    </span>           <span class="ps">ERASE   </span> +42D                                  
-<a name="56414333555345"></a>000342,000196:    0414                        <span class="sm">VAC3USE </span>           <span class="ps">ERASE   </span>                                       
-<a name="56414333"></a>000343,000197:    0415                        <span class="sm">VAC3    </span>           <span class="ps">ERASE   </span> +42D                                  
-<a name="56414334555345"></a>000344,000198:    0470                        <span class="sm">VAC4USE </span>           <span class="ps">ERASE   </span>                                       
-<a name="56414334"></a>000345,000199:    0471                        <span class="sm">VAC4    </span>           <span class="ps">ERASE   </span> +42D                                  
-<a name="56414335555345"></a>000346,000200:    0544                        <span class="sm">VAC5USE </span>           <span class="ps">ERASE   </span>                                       
-<a name="56414335"></a>000347,000201:    0545                        <span class="sm">VAC5    </span>           <span class="ps">ERASE   </span> +42D                                  
-000348,000202: 
-000349,000203:                                                                                                  <span class="co">#           INTERPRETIVE SWITCH RESERVATIONS.</span>
-000350,000204: 
-<a name="5354415445"></a>000351,000205:    0620                        <span class="sm">STATE   </span>           <span class="ps">ERASE   </span> +3                                    <span class="co">#  60 SWITCHES PRESENTLY.</span>
-000352,000206: 
-000353,000207:                                                                                                  <span class="co">#           THE FOLLOWING SET COMPRISES THE INTERRUPT TEMPORARY STORAGE POOL.</span>
-000354,000208: 
-<a name="5741495445584954"></a>000355,000209:    0624                        <span class="sm">WAITEXIT</span>           <span class="ps">ERASE   </span>                                       
-<a name="4B455954454D5031"></a>000356,000210:    0625     0624               <span class="sm">KEYTEMP1</span>           <span class="ps">=       </span> <a href="#5741495445584954">WAITEXIT</a>                              <span class="co">#  TEMP FOR KEYRUPT, UPRUPT</span>
-<a name="445352555054454D"></a>000357,000211:    0625     0624               <span class="sm">DSRUPTEM</span>           <span class="ps">=       </span> <a href="#5741495445584954">WAITEXIT</a>                              <span class="co">#  TEMP FOR DSPOUT</span>
-000358,000212: 
-<a name="5741495442414E4B"></a>000359,000213:    0625                        <span class="sm">WAITBANK</span>           <span class="ps">ERASE   </span>                                       
-<a name="4558454354454D31"></a>000360,000214:    0626                        <span class="sm">EXECTEM1</span>           <span class="ps">ERASE   </span>                                       
-<a name="4558454354454D32"></a>000361,000215:    0627                        <span class="sm">EXECTEM2</span>           <span class="ps">ERASE   </span>                                       
-<a name="57414954414452"></a>000362,000216:    0630                        <span class="sm">WAITADR </span>           <span class="ps">ERASE   </span>                                       
-<a name="5741495454454D50"></a>000363,000217:    0631                        <span class="sm">WAITTEMP</span>           <span class="ps">ERASE   </span>                                       
-000364,000218: 
-<a name="4E45575052494F"></a>000365,000219:    0632                        <span class="sm">NEWPRIO </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXECUTIVE RESERVATIONS (TEMP ONLY).</span>
-<a name="4E45574C4F43"></a>000366,000220:    0633                        <span class="sm">NEWLOC  </span>           <span class="ps">ERASE   </span> +1                                    
-<a name="4C4F43435452"></a>000367,000221:    0635                        <span class="sm">LOCCTR  </span>           <span class="ps">ERASE   </span>                                       
-000368,000222: 
-000369,000223:                                                                                                  <span class="co">#           WAITLIST REPEAT FLAG:</span>
-000370,000224: 
-<a name="5255505441474E"></a>000371,000225:    0636                        <span class="sm">RUPTAGN </span>           <span class="ps">ERASE   </span>                                       
-<a name="4B455954454D5032"></a>000372,000226:    0637     0636               <span class="sm">KEYTEMP2</span>           <span class="ps">=       </span> <a href="#5255505441474E">RUPTAGN</a>                               <span class="co">#  TEMP FOR KEYRUPT, UPRUPT</span>
-000373,000227: 
+<a name="4D504143"></a>000343,000184:    0140                        <span class="sm">MPAC    </span>           <span class="ps">ERASE   </span> +6                                    <span class="co">#  MULTI-PURPOSE ACCUMULATOR.</span>
+<a name="4D4F4445"></a>000344,000185:    0147                        <span class="sm">MODE    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  +1 FOR TP, +0 FOR DP, OR -1 FOR VECTOR.</span>
+<a name="4C4F43"></a>000345,000186:    0150                        <span class="sm">LOC     </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  LOCATION ASSOCIATED WITH JOB.</span>
+<a name="42414E4B534554"></a>000346,000187:    0151                        <span class="sm">BANKSET </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  USUALLY CONTAINS BBANK SETTING.</span>
+<a name="505553484C4F43"></a>000347,000188:    0152                        <span class="sm">PUSHLOC </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  WORD OF PACKED INTERPRETIVE PARAMETERS.</span>
+<a name="5052494F52495459"></a>000348,000189:    0153                        <span class="sm">PRIORITY</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  PRIORITY OF PRESENT JOB AND WORK AREA.</span>
+000349,000190: 
+000350,000191:    0154                                           <span class="ps">ERASE   </span> +71D                                  <span class="co">#  SEVEN SETS OF 12 REGISTERS EACH.</span>
+000351,000192: 
+<a name="56414331555345"></a>000352,000193:    0264                        <span class="sm">VAC1USE </span>           <span class="ps">ERASE   </span>                                       
+<a name="56414331"></a>000353,000194:    0265                        <span class="sm">VAC1    </span>           <span class="ps">ERASE   </span> +42D                                  
+<a name="56414332555345"></a>000354,000195:    0340                        <span class="sm">VAC2USE </span>           <span class="ps">ERASE   </span>                                       
+<a name="56414332"></a>000355,000196:    0341                        <span class="sm">VAC2    </span>           <span class="ps">ERASE   </span> +42D                                  
+<a name="56414333555345"></a>000356,000197:    0414                        <span class="sm">VAC3USE </span>           <span class="ps">ERASE   </span>                                       
+<a name="56414333"></a>000357,000198:    0415                        <span class="sm">VAC3    </span>           <span class="ps">ERASE   </span> +42D                                  
+<a name="56414334555345"></a>000358,000199:    0470                        <span class="sm">VAC4USE </span>           <span class="ps">ERASE   </span>                                       
+<a name="56414334"></a>000359,000200:    0471                        <span class="sm">VAC4    </span>           <span class="ps">ERASE   </span> +42D                                  
+<a name="56414335555345"></a>000360,000201:    0544                        <span class="sm">VAC5USE </span>           <span class="ps">ERASE   </span>                                       
+<a name="56414335"></a>000361,000202:    0545                        <span class="sm">VAC5    </span>           <span class="ps">ERASE   </span> +42D                                  
+000362,000203: 
+000363,000204:                                                                                                  <span class="co">#           INTERPRETIVE SWITCH RESERVATIONS.</span>
+000364,000205: 
+<a name="5354415445"></a>000365,000206:    0620                        <span class="sm">STATE   </span>           <span class="ps">ERASE   </span> +3                                    <span class="co">#  60 SWITCHES PRESENTLY.</span>
+000366,000207: 
+000367,000208:                                                                                                  <span class="co">#           THE FOLLOWING SET COMPRISES THE INTERRUPT TEMPORARY STORAGE POOL.</span>
+000368,000209: 
+<a name="5741495445584954"></a>000369,000210:    0624                        <span class="sm">WAITEXIT</span>           <span class="ps">ERASE   </span>                                       
+<a name="4B455954454D5031"></a>000370,000211:    0625     0624               <span class="sm">KEYTEMP1</span>           <span class="ps">=       </span> <a href="#5741495445584954">WAITEXIT</a>                              <span class="co">#  TEMP FOR KEYRUPT, UPRUPT</span>
+<a name="445352555054454D"></a>000371,000212:    0625     0624               <span class="sm">DSRUPTEM</span>           <span class="ps">=       </span> <a href="#5741495445584954">WAITEXIT</a>                              <span class="co">#  TEMP FOR DSPOUT</span>
+000372,000213: 
+<a name="5741495442414E4B"></a>000373,000214:    0625                        <span class="sm">WAITBANK</span>           <span class="ps">ERASE   </span>                                       
+<a name="4558454354454D31"></a>000374,000215:    0626                        <span class="sm">EXECTEM1</span>           <span class="ps">ERASE   </span>                                       
+<a name="4558454354454D32"></a>000375,000216:    0627                        <span class="sm">EXECTEM2</span>           <span class="ps">ERASE   </span>                                       
+<a name="57414954414452"></a>000376,000217:    0630                        <span class="sm">WAITADR </span>           <span class="ps">ERASE   </span>                                       
+<a name="5741495454454D50"></a>000377,000218:    0631                        <span class="sm">WAITTEMP</span>           <span class="ps">ERASE   </span>                                       
+000378,000219: 
+<a name="4E45575052494F"></a>000379,000220:    0632                        <span class="sm">NEWPRIO </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXECUTIVE RESERVATIONS (TEMP ONLY).</span>
+<a name="4E45574C4F43"></a>000380,000221:    0633                        <span class="sm">NEWLOC  </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="4C4F43435452"></a>000381,000222:    0635                        <span class="sm">LOCCTR  </span>           <span class="ps">ERASE   </span>                                       
+000382,000223: 
+000383,000224:                                                                                                  <span class="co">#           WAITLIST REPEAT FLAG:</span>
+000384,000225: 
+<a name="5255505441474E"></a>000385,000226:    0636                        <span class="sm">RUPTAGN </span>           <span class="ps">ERASE   </span>                                       
+<a name="4B455954454D5032"></a>000386,000227:    0637     0636               <span class="sm">KEYTEMP2</span>           <span class="ps">=       </span> <a href="#5255505441474E">RUPTAGN</a>                               <span class="co">#  TEMP FOR KEYRUPT, UPRUPT</span>
+000387,000228: 
 </pre>
 </span>
 </p>
@@ -393,53 +394,53 @@ Page 10
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000375,000229:                                                                                                  <span class="co">#  THE FOLLOWING REGISTERS ARE RESERVED FOR PINBALL</span>
-000376,000230: 
-000377,000231: 
-000378,000232: 
-000379,000233:                                                                                                  <span class="co">#  RESERVED FOR PINBALL EXECUTIVE ACTION</span>
-000380,000234: 
-<a name="445350434F554E54"></a>000381,000235:    0637                        <span class="sm">DSPCOUNT</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  DISPLAY POSITION INDICATOR</span>
-<a name="44454342524E4348"></a>000382,000236:    0640                        <span class="sm">DECBRNCH</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  +DEC, - DEC, OCT INDICATOR</span>
-<a name="56455242524547"></a>000383,000237:    0641                        <span class="sm">VERBREG </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  VERB CODE</span>
-<a name="4E4F554E524547"></a>000384,000238:    0642                        <span class="sm">NOUNREG </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  NOUN CODE</span>
-<a name="58524547"></a>000385,000239:    0643                        <span class="sm">XREG    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  R1 INPUT BUFFER</span>
-<a name="59524547"></a>000386,000240:    0644                        <span class="sm">YREG    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  R2 INPUT BUFFER</span>
-<a name="5A524547"></a>000387,000241:    0645                        <span class="sm">ZREG    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  R3 INPUT BUFFER</span>
-<a name="585245474C50"></a>000388,000242:    0646                        <span class="sm">XREGLP  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  LO PART OF XREG (FOR DEC CONV ONLY)</span>
-<a name="595245474C50"></a>000389,000243:    0647                        <span class="sm">YREGLP  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  LO PART OF YREG (FOR DEC CONV ONLY)</span>
-<a name="5A5245474C50"></a>000390,000244:    0650                        <span class="sm">ZREGLP  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  LO PART OF ZREG (FOR DEC CONV ONLY)</span>
-<a name="4D4F44524547"></a>000391,000245:    0651                        <span class="sm">MODREG  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  MODE CODE</span>
-<a name="4453504C4F434B"></a>000392,000246:    0652                        <span class="sm">DSPLOCK </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  KEYBOARD/SUBROUTINE CALL INTERLOCK</span>
-<a name="524551524554"></a>000393,000247:    0653                        <span class="sm">REQRET  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  RETURN REGISTER FOR LOAD</span>
-<a name="4C4F414453544154"></a>000394,000248:    0654                        <span class="sm">LOADSTAT</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  STATUS INDICATOR FOR LOADTST</span>
-<a name="434C50415353"></a>000395,000249:    0655                        <span class="sm">CLPASS  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  PASS INDICATOR CLEAR</span>
-<a name="4E4F5554"></a>000396,000250:    0656                        <span class="sm">NOUT    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  ACTIVITY COUNTER FOR DSPTAB</span>
-<a name="4E4F554E43414452"></a>000397,000251:    0657                        <span class="sm">NOUNCADR</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  MACHINE CADR FOR NOUN</span>
-<a name="4D4F4E53415645"></a>000398,000252:    0660                        <span class="sm">MONSAVE </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  N/V CODE FOR MONITOR. (= MONSAVE1-1)</span>
-<a name="4D4F4E5341564531"></a>000399,000253:    0661                        <span class="sm">MONSAVE1</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  NOUNCADR FOR MONITOR(MATBS) =MONSAVE+1</span>
-<a name="445350544142"></a>000400,000254:    0662                        <span class="sm">DSPTAB  </span>           <span class="ps">ERASE   </span> +11D                                  <span class="co">#  0-10D, DISPLAY PANEL BUFF. 11D, C/S LTS.</span>
-<a name="4341445253544F52"></a>000401,000255:    0676                        <span class="sm">CADRSTOR</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  ENDIDLE STORAGE</span>
-<a name="475241424C4F434B"></a>000402,000256:    0677                        <span class="sm">GRABLOCK</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  INTERNAL INTERLOCK FOR DISPLAY SYSTEM </span>
-<a name="4E565154454D"></a>000403,000257:    0700                        <span class="sm">NVQTEM  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  NVSUB STORAGE FOR CALLING ADDRESS</span>
-000404,000258:                                                                                                  <span class="co">#  MUST = NVBNKTEM-1</span>
-<a name="4E56424E4B54454D"></a>000405,000259:    0701                        <span class="sm">NVBNKTEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  NVSUB STORAGE FOR CALLING BANK</span>
-000406,000260:                                                                                                  <span class="co">#  MUST = NVQTEM+1</span>
-<a name="4453504C495354"></a>000407,000261:    0702                        <span class="sm">DSPLIST </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  WAITING LIST FOR DSP SYST INTERNAL USE</span>
-<a name="4558545642414354"></a>000408,000262:    0705                        <span class="sm">EXTVBACT</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXTENDED VERB ACTIVITY INTERLOCK</span>
-<a name="44535054454D31"></a>000409,000263:    0706                        <span class="sm">DSPTEM1 </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  BUFFER STORAGE AREA 1 (MOSTLY FOR TIME)</span>
-<a name="44535054454D32"></a>000410,000264:    0711                        <span class="sm">DSPTEM2 </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  BUFFER STORAGE AREA 2 (MOSTLY FOR DEG)</span>
-000411,000265:                                                                                                  <span class="co">#  END OF ERASABLES RESERVED FOR PINBALL EXECUTIVE ACTION</span>
-000412,000266: 
-000413,000267: 
-000414,000268: 
-000415,000269:                                                                                                  <span class="co">#  RESERVED FOR PINBALL INTERRUPT ACTION</span>
-000416,000270: 
-<a name="445350434E54"></a>000417,000271:    0714                        <span class="sm">DSPCNT  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  COUNTER FOR DSPOUT</span>
-<a name="55504C4F434B"></a>000418,000272:    0715                        <span class="sm">UPLOCK  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  BIT1 = UPLINK INTERLOCK (ACTIVATED BY</span>
-000419,000273:                                                                                                  <span class="co">#  RECEPTION OF A BAD MESSAGE IN UPLINK)</span>
-000420,000274:                                                                                                  <span class="co">#  END OF ERASABLES RESERVED FOR PINBALL INTERRUPT ACTION</span>
-000421,000275: 
+000389,000230:                                                                                                  <span class="co">#  THE FOLLOWING REGISTERS ARE RESERVED FOR PINBALL</span>
+000390,000231: 
+000391,000232: 
+000392,000233: 
+000393,000234:                                                                                                  <span class="co">#  RESERVED FOR PINBALL EXECUTIVE ACTION</span>
+000394,000235: 
+<a name="445350434F554E54"></a>000395,000236:    0637                        <span class="sm">DSPCOUNT</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  DISPLAY POSITION INDICATOR</span>
+<a name="44454342524E4348"></a>000396,000237:    0640                        <span class="sm">DECBRNCH</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  +DEC, - DEC, OCT INDICATOR</span>
+<a name="56455242524547"></a>000397,000238:    0641                        <span class="sm">VERBREG </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  VERB CODE</span>
+<a name="4E4F554E524547"></a>000398,000239:    0642                        <span class="sm">NOUNREG </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  NOUN CODE</span>
+<a name="58524547"></a>000399,000240:    0643                        <span class="sm">XREG    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  R1 INPUT BUFFER</span>
+<a name="59524547"></a>000400,000241:    0644                        <span class="sm">YREG    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  R2 INPUT BUFFER</span>
+<a name="5A524547"></a>000401,000242:    0645                        <span class="sm">ZREG    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  R3 INPUT BUFFER</span>
+<a name="585245474C50"></a>000402,000243:    0646                        <span class="sm">XREGLP  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  LO PART OF XREG (FOR DEC CONV ONLY)</span>
+<a name="595245474C50"></a>000403,000244:    0647                        <span class="sm">YREGLP  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  LO PART OF YREG (FOR DEC CONV ONLY)</span>
+<a name="5A5245474C50"></a>000404,000245:    0650                        <span class="sm">ZREGLP  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  LO PART OF ZREG (FOR DEC CONV ONLY)</span>
+<a name="4D4F44524547"></a>000405,000246:    0651                        <span class="sm">MODREG  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  MODE CODE</span>
+<a name="4453504C4F434B"></a>000406,000247:    0652                        <span class="sm">DSPLOCK </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  KEYBOARD/SUBROUTINE CALL INTERLOCK</span>
+<a name="524551524554"></a>000407,000248:    0653                        <span class="sm">REQRET  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  RETURN REGISTER FOR LOAD</span>
+<a name="4C4F414453544154"></a>000408,000249:    0654                        <span class="sm">LOADSTAT</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  STATUS INDICATOR FOR LOADTST</span>
+<a name="434C50415353"></a>000409,000250:    0655                        <span class="sm">CLPASS  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  PASS INDICATOR CLEAR</span>
+<a name="4E4F5554"></a>000410,000251:    0656                        <span class="sm">NOUT    </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  ACTIVITY COUNTER FOR DSPTAB</span>
+<a name="4E4F554E43414452"></a>000411,000252:    0657                        <span class="sm">NOUNCADR</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  MACHINE CADR FOR NOUN</span>
+<a name="4D4F4E53415645"></a>000412,000253:    0660                        <span class="sm">MONSAVE </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  N/V CODE FOR MONITOR. (= MONSAVE1-1)</span>
+<a name="4D4F4E5341564531"></a>000413,000254:    0661                        <span class="sm">MONSAVE1</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  NOUNCADR FOR MONITOR(MATBS) =MONSAVE+1</span>
+<a name="445350544142"></a>000414,000255:    0662                        <span class="sm">DSPTAB  </span>           <span class="ps">ERASE   </span> +11D                                  <span class="co">#  0-10D, DISPLAY PANEL BUFF. 11D, C/S LTS.</span>
+<a name="4341445253544F52"></a>000415,000256:    0676                        <span class="sm">CADRSTOR</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  ENDIDLE STORAGE</span>
+<a name="475241424C4F434B"></a>000416,000257:    0677                        <span class="sm">GRABLOCK</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  INTERNAL INTERLOCK FOR DISPLAY SYSTEM </span>
+<a name="4E565154454D"></a>000417,000258:    0700                        <span class="sm">NVQTEM  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  NVSUB STORAGE FOR CALLING ADDRESS</span>
+000418,000259:                                                                                                  <span class="co">#  MUST = NVBNKTEM-1</span>
+<a name="4E56424E4B54454D"></a>000419,000260:    0701                        <span class="sm">NVBNKTEM</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  NVSUB STORAGE FOR CALLING BANK</span>
+000420,000261:                                                                                                  <span class="co">#  MUST = NVQTEM+1</span>
+<a name="4453504C495354"></a>000421,000262:    0702                        <span class="sm">DSPLIST </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  WAITING LIST FOR DSP SYST INTERNAL USE</span>
+<a name="4558545642414354"></a>000422,000263:    0705                        <span class="sm">EXTVBACT</span>           <span class="ps">ERASE   </span>                                       <span class="co">#  EXTENDED VERB ACTIVITY INTERLOCK</span>
+<a name="44535054454D31"></a>000423,000264:    0706                        <span class="sm">DSPTEM1 </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  BUFFER STORAGE AREA 1 (MOSTLY FOR TIME)</span>
+<a name="44535054454D32"></a>000424,000265:    0711                        <span class="sm">DSPTEM2 </span>           <span class="ps">ERASE   </span> +2                                    <span class="co">#  BUFFER STORAGE AREA 2 (MOSTLY FOR DEG)</span>
+000425,000266:                                                                                                  <span class="co">#  END OF ERASABLES RESERVED FOR PINBALL EXECUTIVE ACTION</span>
+000426,000267: 
+000427,000268: 
+000428,000269: 
+000429,000270:                                                                                                  <span class="co">#  RESERVED FOR PINBALL INTERRUPT ACTION</span>
+000430,000271: 
+<a name="445350434E54"></a>000431,000272:    0714                        <span class="sm">DSPCNT  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  COUNTER FOR DSPOUT</span>
+<a name="55504C4F434B"></a>000432,000273:    0715                        <span class="sm">UPLOCK  </span>           <span class="ps">ERASE   </span>                                       <span class="co">#  BIT1 = UPLINK INTERLOCK (ACTIVATED BY</span>
+000433,000274:                                                                                                  <span class="co">#  RECEPTION OF A BAD MESSAGE IN UPLINK)</span>
+000434,000275:                                                                                                  <span class="co">#  END OF ERASABLES RESERVED FOR PINBALL INTERRUPT ACTION</span>
+000435,000276: 
 </pre>
 </span>
 </p>
@@ -455,35 +456,35 @@ Page 11
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000423,000277:                                                                                                  <span class="co">#  TEMPORARY PHONY ASSIGNMENTS TO KEEP PINBALL FROM HAVING BAD ASSEMBLIES</span>
-000424,000278: 
-<a name="544845544144"></a>000425,000279:    0716                        <span class="sm">THETAD  </span>           <span class="ps">ERASE   </span> +2                                    
-<a name="4641494C524547"></a>000426,000280:    0721                        <span class="sm">FAILREG </span>           <span class="ps">ERASE   </span>                                       
-<a name="54444543"></a>000427,000281:    0722                        <span class="sm">TDEC    </span>           <span class="ps">ERASE   </span> +1                                    
-<a name="544554"></a>000428,000282:    0724                        <span class="sm">TET     </span>           <span class="ps">ERASE   </span> +1                                    
-<a name="4D45415351"></a>000429,000283:    0726                        <span class="sm">MEASQ   </span>           <span class="ps">ERASE   </span> +1                                    
-<a name="524F4C4C"></a>000430,000284:    0730                        <span class="sm">ROLL    </span>           <span class="ps">ERASE   </span> +2                                    
-<a name="4C414E444D41524B"></a>000431,000285:    0733                        <span class="sm">LANDMARK</span>           <span class="ps">ERASE   </span> +5                                    
-<a name="474249415358"></a>000432,000286:    0741                        <span class="sm">GBIASX  </span>           <span class="ps">ERASE   </span> +2                                    
-<a name="4144494158"></a>000433,000287:    0744                        <span class="sm">ADIAX   </span>           <span class="ps">ERASE   </span> +2                                    
-<a name="414453524158"></a>000434,000288:    0747                        <span class="sm">ADSRAX  </span>           <span class="ps">ERASE   </span> +2                                    
-<a name="4445534F505458"></a>000435,000289:    0752                        <span class="sm">DESOPTX </span>           <span class="ps">ERASE   </span> +1                                    
-<a name="53414D5054494D45"></a>000436,000290:    0754                        <span class="sm">SAMPTIME</span>           <span class="ps">ERASE   </span> +1                                    
-<a name="44454C5658"></a>000437,000291:    0756                        <span class="sm">DELVX   </span>           <span class="ps">ERASE   </span> +5                                    
-<a name="504249415358"></a>000438,000292:    0764                        <span class="sm">PBIASX  </span>           <span class="ps">ERASE   </span>                                       
-<a name="5049504153434658"></a>000439,000293:    0765                        <span class="sm">PIPASCFX</span>           <span class="ps">ERASE   </span>                                       
-<a name="504249415359"></a>000440,000294:    0766                        <span class="sm">PBIASY  </span>           <span class="ps">ERASE   </span>                                       
-<a name="5049504153434659"></a>000441,000295:    0767                        <span class="sm">PIPASCFY</span>           <span class="ps">ERASE   </span>                                       
-<a name="50424941535A"></a>000442,000296:    0770                        <span class="sm">PBIASZ  </span>           <span class="ps">ERASE   </span>                                       
-<a name="504950415343465A"></a>000443,000297:    0771                        <span class="sm">PIPASCFZ</span>           <span class="ps">ERASE   </span>                                       
-000444,000298:    1000                                           <span class="ps">SETLOC  </span> 1000                                  
-<a name="44454C52"></a>000445,000299:    1000                        <span class="sm">DELR    </span>           <span class="ps">ERASE   </span> +5                                    
-<a name="44454C56454C"></a>000446,000300:    1006                        <span class="sm">DELVEL  </span>           <span class="ps">ERASE   </span> +5                                    
-<a name="4D4541534D4F4445"></a>000447,000301:    1014                        <span class="sm">MEASMODE</span>           <span class="ps">ERASE   </span>                                       
-<a name="44454C544151"></a>000448,000302:    1015                        <span class="sm">DELTAQ  </span>           <span class="ps">ERASE   </span> +1                                    
-<a name="5741534B534554"></a>000449,000303:    1017                        <span class="sm">WASKSET </span>           <span class="ps">ERASE   </span>                                       
-000450,000304:                                                                                                  <span class="co">#  END OF PHONY ASSIGNMENTS</span>
-000451,000305: 
+000437,000278:                                                                                                  <span class="co">#  TEMPORARY PHONY ASSIGNMENTS TO KEEP PINBALL FROM HAVING BAD ASSEMBLIES</span>
+000438,000279: 
+<a name="544845544144"></a>000439,000280:    0716                        <span class="sm">THETAD  </span>           <span class="ps">ERASE   </span> +2                                    
+<a name="4641494C524547"></a>000440,000281:    0721                        <span class="sm">FAILREG </span>           <span class="ps">ERASE   </span>                                       
+<a name="54444543"></a>000441,000282:    0722                        <span class="sm">TDEC    </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="544554"></a>000442,000283:    0724                        <span class="sm">TET     </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="4D45415351"></a>000443,000284:    0726                        <span class="sm">MEASQ   </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="524F4C4C"></a>000444,000285:    0730                        <span class="sm">ROLL    </span>           <span class="ps">ERASE   </span> +2                                    
+<a name="4C414E444D41524B"></a>000445,000286:    0733                        <span class="sm">LANDMARK</span>           <span class="ps">ERASE   </span> +5                                    
+<a name="474249415358"></a>000446,000287:    0741                        <span class="sm">GBIASX  </span>           <span class="ps">ERASE   </span> +2                                    
+<a name="4144494158"></a>000447,000288:    0744                        <span class="sm">ADIAX   </span>           <span class="ps">ERASE   </span> +2                                    
+<a name="414453524158"></a>000448,000289:    0747                        <span class="sm">ADSRAX  </span>           <span class="ps">ERASE   </span> +2                                    
+<a name="4445534F505458"></a>000449,000290:    0752                        <span class="sm">DESOPTX </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="53414D5054494D45"></a>000450,000291:    0754                        <span class="sm">SAMPTIME</span>           <span class="ps">ERASE   </span> +1                                    
+<a name="44454C5658"></a>000451,000292:    0756                        <span class="sm">DELVX   </span>           <span class="ps">ERASE   </span> +5                                    
+<a name="504249415358"></a>000452,000293:    0764                        <span class="sm">PBIASX  </span>           <span class="ps">ERASE   </span>                                       
+<a name="5049504153434658"></a>000453,000294:    0765                        <span class="sm">PIPASCFX</span>           <span class="ps">ERASE   </span>                                       
+<a name="504249415359"></a>000454,000295:    0766                        <span class="sm">PBIASY  </span>           <span class="ps">ERASE   </span>                                       
+<a name="5049504153434659"></a>000455,000296:    0767                        <span class="sm">PIPASCFY</span>           <span class="ps">ERASE   </span>                                       
+<a name="50424941535A"></a>000456,000297:    0770                        <span class="sm">PBIASZ  </span>           <span class="ps">ERASE   </span>                                       
+<a name="504950415343465A"></a>000457,000298:    0771                        <span class="sm">PIPASCFZ</span>           <span class="ps">ERASE   </span>                                       
+000458,000299:    1000                                           <span class="ps">SETLOC  </span> 1000                                  
+<a name="44454C52"></a>000459,000300:    1000                        <span class="sm">DELR    </span>           <span class="ps">ERASE   </span> +5                                    
+<a name="44454C56454C"></a>000460,000301:    1006                        <span class="sm">DELVEL  </span>           <span class="ps">ERASE   </span> +5                                    
+<a name="4D4541534D4F4445"></a>000461,000302:    1014                        <span class="sm">MEASMODE</span>           <span class="ps">ERASE   </span>                                       
+<a name="44454C544151"></a>000462,000303:    1015                        <span class="sm">DELTAQ  </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="5741534B534554"></a>000463,000304:    1017                        <span class="sm">WASKSET </span>           <span class="ps">ERASE   </span>                                       
+000464,000305:                                                                                                  <span class="co">#  END OF PHONY ASSIGNMENTS</span>
+000465,000306: 
 </pre>
 </span>
 </p>
@@ -499,43 +500,43 @@ Page 12
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000453,000307: 
-000454,000308:                                                                                                  <span class="co">#  ASSIGNMENTS FOR T4RUPT PROGRAM</span>
-<a name="4453525550545357"></a>000455,000309:    1020                        <span class="sm">DSRUPTSW</span>           <span class="ps">ERASE   </span>                                       
-<a name="4F4C44455252"></a>000456,000310:    1021                        <span class="sm">OLDERR  </span>           <span class="ps">ERASE   </span>                                       
-<a name="5741534F50534554"></a>000457,000311:    1022                        <span class="sm">WASOPSET</span>           <span class="ps">ERASE   </span>                                       
-000458,000312:                                                                                                  <span class="co">#  END OF T4RUPT ASSIGNMENTS</span>
-000459,000313: 
-000460,000314: 
-000461,000315: 
-000462,000316:                                                                                                  <span class="co">#  ASSIGNMENTS FOR DOWNRUPT</span>
-000463,000317: 
-<a name="44495350425546"></a>000464,000318:    1023                        <span class="sm">DISPBUF </span>           <span class="ps">ERASE   </span>                                       
-<a name="544D4B4559425546"></a>000465,000319:    1024                        <span class="sm">TMKEYBUF</span>           <span class="ps">ERASE   </span>                                       
-000466,000320:                                                                                                  <span class="co">#  END OF DOWNRUPT ASSIGNMENTS</span>
-000467,000321: 
-000468,000322: 
-000469,000323: 
-000470,000324:                                                                                                  <span class="co">#  ASSIGNMENTS FOR SELF CHECK</span>
-000471,000325: 
-000472,000326:                                                                                                  <span class="co">#  ADDRESSES TO BE USED FOR INDEX INSTRUCTION WITHOUT EXTRACODES</span>
-<a name="4E44582B30"></a>000473,000327:    1025                        <span class="sm">NDX+0   </span>           <span class="ps">ERASE   </span>                                       
-<a name="4E44582B4D4158"></a>000474,000328:    1026                        <span class="sm">NDX+MAX </span>           <span class="ps">ERASE   </span>                                       
-<a name="4E44584B45455031"></a>000475,000329:    1027                        <span class="sm">NDXKEEP1</span>           <span class="ps">ERASE   </span>                                       
-<a name="4E44584B45455032"></a>000476,000330:    1030                        <span class="sm">NDXKEEP2</span>           <span class="ps">ERASE   </span>                                       
-<a name="4E44584B45455033"></a>000477,000331:    1031                        <span class="sm">NDXKEEP3</span>           <span class="ps">ERASE   </span>                                       
-<a name="4E445853454C4631"></a>000478,000332:    1032                        <span class="sm">NDXSELF1</span>           <span class="ps">ERASE   </span>                                       
-<a name="4E445853454C4632"></a>000479,000333:    1033                        <span class="sm">NDXSELF2</span>           <span class="ps">ERASE   </span>                                       
-000480,000334: 
-<a name="4B45455031"></a>000481,000335:    1034                        <span class="sm">KEEP1   </span>           <span class="ps">ERASE   </span>                                       
-<a name="4B45455032"></a>000482,000336:    1035                        <span class="sm">KEEP2   </span>           <span class="ps">ERASE   </span>                                       
-<a name="4B45455033"></a>000483,000337:    1036                        <span class="sm">KEEP3   </span>           <span class="ps">ERASE   </span>                                       
-<a name="4B45455034"></a>000484,000338:    1037                        <span class="sm">KEEP4   </span>           <span class="ps">ERASE   </span>                                       
-<a name="4B45455035"></a>000485,000339:    1040                        <span class="sm">KEEP5   </span>           <span class="ps">ERASE   </span>                                       
-<a name="4B45455036"></a>000486,000340:    1041                        <span class="sm">KEEP6   </span>           <span class="ps">ERASE   </span>                                       
-<a name="4B45455037"></a>000487,000341:    1042                        <span class="sm">KEEP7   </span>           <span class="ps">ERASE   </span>                                       
-000488,000342: 
-<a name="53454C46524554"></a>000489,000343:    1043                        <span class="sm">SELFRET </span>           <span class="ps">ERASE   </span>                                       
+000467,000308: 
+000468,000309:                                                                                                  <span class="co">#  ASSIGNMENTS FOR T4RUPT PROGRAM</span>
+<a name="4453525550545357"></a>000469,000310:    1020                        <span class="sm">DSRUPTSW</span>           <span class="ps">ERASE   </span>                                       
+<a name="4F4C44455252"></a>000470,000311:    1021                        <span class="sm">OLDERR  </span>           <span class="ps">ERASE   </span>                                       
+<a name="5741534F50534554"></a>000471,000312:    1022                        <span class="sm">WASOPSET</span>           <span class="ps">ERASE   </span>                                       
+000472,000313:                                                                                                  <span class="co">#  END OF T4RUPT ASSIGNMENTS</span>
+000473,000314: 
+000474,000315: 
+000475,000316: 
+000476,000317:                                                                                                  <span class="co">#  ASSIGNMENTS FOR DOWNRUPT</span>
+000477,000318: 
+<a name="44495350425546"></a>000478,000319:    1023                        <span class="sm">DISPBUF </span>           <span class="ps">ERASE   </span>                                       
+<a name="544D4B4559425546"></a>000479,000320:    1024                        <span class="sm">TMKEYBUF</span>           <span class="ps">ERASE   </span>                                       
+000480,000321:                                                                                                  <span class="co">#  END OF DOWNRUPT ASSIGNMENTS</span>
+000481,000322: 
+000482,000323: 
+000483,000324: 
+000484,000325:                                                                                                  <span class="co">#  ASSIGNMENTS FOR SELF CHECK</span>
+000485,000326: 
+000486,000327:                                                                                                  <span class="co">#  ADDRESSES TO BE USED FOR INDEX INSTRUCTION WITHOUT EXTRACODES</span>
+<a name="4E44582B30"></a>000487,000328:    1025                        <span class="sm">NDX+0   </span>           <span class="ps">ERASE   </span>                                       
+<a name="4E44582B4D4158"></a>000488,000329:    1026                        <span class="sm">NDX+MAX </span>           <span class="ps">ERASE   </span>                                       
+<a name="4E44584B45455031"></a>000489,000330:    1027                        <span class="sm">NDXKEEP1</span>           <span class="ps">ERASE   </span>                                       
+<a name="4E44584B45455032"></a>000490,000331:    1030                        <span class="sm">NDXKEEP2</span>           <span class="ps">ERASE   </span>                                       
+<a name="4E44584B45455033"></a>000491,000332:    1031                        <span class="sm">NDXKEEP3</span>           <span class="ps">ERASE   </span>                                       
+<a name="4E445853454C4631"></a>000492,000333:    1032                        <span class="sm">NDXSELF1</span>           <span class="ps">ERASE   </span>                                       
+<a name="4E445853454C4632"></a>000493,000334:    1033                        <span class="sm">NDXSELF2</span>           <span class="ps">ERASE   </span>                                       
+000494,000335: 
+<a name="4B45455031"></a>000495,000336:    1034                        <span class="sm">KEEP1   </span>           <span class="ps">ERASE   </span>                                       
+<a name="4B45455032"></a>000496,000337:    1035                        <span class="sm">KEEP2   </span>           <span class="ps">ERASE   </span>                                       
+<a name="4B45455033"></a>000497,000338:    1036                        <span class="sm">KEEP3   </span>           <span class="ps">ERASE   </span>                                       
+<a name="4B45455034"></a>000498,000339:    1037                        <span class="sm">KEEP4   </span>           <span class="ps">ERASE   </span>                                       
+<a name="4B45455035"></a>000499,000340:    1040                        <span class="sm">KEEP5   </span>           <span class="ps">ERASE   </span>                                       
+<a name="4B45455036"></a>000500,000341:    1041                        <span class="sm">KEEP6   </span>           <span class="ps">ERASE   </span>                                       
+<a name="4B45455037"></a>000501,000342:    1042                        <span class="sm">KEEP7   </span>           <span class="ps">ERASE   </span>                                       
+000502,000343: 
+<a name="53454C46524554"></a>000503,000344:    1043                        <span class="sm">SELFRET </span>           <span class="ps">ERASE   </span>                                       
 </pre>
 </span>
 </p>
@@ -551,7 +552,7 @@ Page 12
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="534641494C"></a>000491,000345:    1044                        <span class="sm">SFAIL   </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="534641494C"></a>000505,000346:    1044                        <span class="sm">SFAIL   </span>           <span class="ps">ERASE   </span> +1                                    
 </pre>
 </span>
 </p>
@@ -567,12 +568,12 @@ Page 12
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4552434F554E54"></a>000493,000347:    1046                        <span class="sm">ERCOUNT </span>           <span class="ps">ERASE   </span>                                       
-<a name="53434F554E54"></a>000494,000348:    1047                        <span class="sm">SCOUNT  </span>           <span class="ps">ERASE   </span>                                       
-<a name="534D4F4445"></a>000495,000349:    1050                        <span class="sm">SMODE   </span>           <span class="ps">ERASE   </span>                                       
-000496,000350: 
-000497,000351:                                                                                                  <span class="co">#  END OF SELF CHECK ASSIGNMENTS</span>
-000498,000352: 
+<a name="4552434F554E54"></a>000507,000348:    1046                        <span class="sm">ERCOUNT </span>           <span class="ps">ERASE   </span>                                       
+<a name="53434F554E54"></a>000508,000349:    1047                        <span class="sm">SCOUNT  </span>           <span class="ps">ERASE   </span>                                       
+<a name="534D4F4445"></a>000509,000350:    1050                        <span class="sm">SMODE   </span>           <span class="ps">ERASE   </span>                                       
+000510,000351: 
+000511,000352:                                                                                                  <span class="co">#  END OF SELF CHECK ASSIGNMENTS</span>
+000512,000353: 
 </pre>
 </span>
 </p>
@@ -589,15 +590,18 @@ IMU PERFORMANCE TESTS
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000501,000355:    1200                                           <span class="ps">SETLOC  </span> 1200                                  
-<a name="434455494E44"></a>000502,000356:    1200                        <span class="sm">CDUIND  </span>           <span class="ps">ERASE   </span>                                       
-<a name="4954454D5031"></a>000503,000357:    1201                        <span class="sm">ITEMP1  </span>           <span class="ps">ERASE   </span>                                       
-<a name="434F4D4D414E44"></a>000504,000358:    1202                        <span class="sm">COMMAND </span>           <span class="ps">ERASE   </span>                                       
-000505,000359:    1205                                           <span class="ps">SETLOC  </span> 1205                                  
-<a name="554E4B31323035"></a>000506,000360:    1205                        <span class="sm">UNK1205 </span>           <span class="ps">ERASE   </span>                                       
-<a name="554E4B31323036"></a>000507,000361:    1206                        <span class="sm">UNK1206 </span>           <span class="ps">ERASE   </span>                                       
-<a name="554E4B31323037"></a>000508,000362:    1207                        <span class="sm">UNK1207 </span>           <span class="ps">ERASE   </span>                                       
-<a name="554E4B31323130"></a>000509,000363:    1210                        <span class="sm">UNK1210 </span>           <span class="ps">ERASE   </span>                                       
+000515,000356:    1200                                           <span class="ps">SETLOC  </span> 1200                                  
+<a name="434455494E44"></a>000516,000357:    1200                        <span class="sm">CDUIND  </span>           <span class="ps">ERASE   </span>                                       
+<a name="4954454D5031"></a>000517,000358:    1201                        <span class="sm">ITEMP1  </span>           <span class="ps">ERASE   </span>                                       
+<a name="434F4D4D414E44"></a>000518,000359:    1202                        <span class="sm">COMMAND </span>           <span class="ps">ERASE   </span> +2                                    
+000519,000360: 
+<a name="4759524F4E554D"></a>000520,000361:    1205                        <span class="sm">GYRONUM </span>           <span class="ps">ERASE   </span>                                       
+<a name="4759434D44494458"></a>000521,000362:    1206                        <span class="sm">GYCMDIDX</span>           <span class="ps">ERASE   </span> +1                                    
+000522,000363: 
+000523,000364:                                                                                                  <span class="co">#  GYRO PULSE TORQUE COMMANDS</span>
+<a name="4F4743"></a>000524,000365:    1210                        <span class="sm">OGC     </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="4D4743"></a>000525,000366:    1212                        <span class="sm">MGC     </span>           <span class="ps">ERASE   </span> +1                                    
+<a name="494743"></a>000526,000367:    1214                        <span class="sm">IGC     </span>           <span class="ps">ERASE   </span> +1                                    
 </pre>
 </span>
 </p>
@@ -613,12 +617,12 @@ IMU PERFORMANCE TESTS
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-000511,000365: 
-000512,000366: 
-000513,000367:                                                                                                  <span class="co">#  WAITLIST TASK LISTS:</span>
-000514,000368: 
-000515,000369: E3,1400                                           <span class="ps">SETLOC  </span> 1400                                  
-000516,000370: 
+000528,000369: 
+000529,000370: 
+000530,000371:                                                                                                  <span class="co">#  WAITLIST TASK LISTS:</span>
+000531,000372: 
+000532,000373: E3,1400                                           <span class="ps">SETLOC  </span> 1400                                  
+000533,000374: 
 </pre>
 </span>
 </p>
@@ -634,8 +638,8 @@ Page 13
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4C535431"></a>000518,000372: E3,1400                        <span class="sm">LST1    </span>           <span class="ps">ERASE   </span> +4                                    <span class="co">#  DELTA TS.</span>
-<a name="4C535432"></a>000519,000373: E3,1405                        <span class="sm">LST2    </span>           <span class="ps">ERASE   </span> +11D                                  <span class="co">#  2CADR TASK ADDRESSES.</span>
+<a name="4C535431"></a>000535,000376: E3,1400                        <span class="sm">LST1    </span>           <span class="ps">ERASE   </span> +4                                    <span class="co">#  DELTA TS.</span>
+<a name="4C535432"></a>000536,000377: E3,1405                        <span class="sm">LST2    </span>           <span class="ps">ERASE   </span> +11D                                  <span class="co">#  2CADR TASK ADDRESSES.</span>
 
 End of include-file ERASABLE_ASSIGNMENTS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

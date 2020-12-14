@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -97,117 +96,117 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-013640,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-013641,000003:                                                                                                  <span class="co">## Filename:    SYSTEM_TEST_STANDARD_LEAD_INS.agc</span>
-013642,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
-013643,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
-013644,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
-013645,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
-013646,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
-013647,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
-013648,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-013649,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-013650,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-013651,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
-013652,000014: 
-013653,000015:                                                                                                  <span class="co">## Sundance 292</span>
-013654,000016: 22,3236  E5,1642                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-013655,000017: 
-013656,000018: 33,2000                                           <span class="ps">BANK    </span> 33                                    
-013657,000019: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#452F50524F47">E/PROG</a>                                
-013658,000020: 04,2000                                           <span class="ps">BANK    </span>                                       
-013659,000021: 
-013660,000022: 04,2450                                           <span class="ps">COUNT*  </span> $$/P07                                
-013661,000023: 
-013662,000024:                                                                                                  <span class="co">#  SPECIAL PROGRAMS TO EASE THE PANGS OF ERASABLE MEMORY PROGRAMS.</span>
-013663,000025: 
-013664,000026:                                                                                                  <span class="co">#  E/BKCALL      FOR DOING BANKCALLS FROM AND RETURNING TO ERASABLE.</span>
-013665,000027: 
-013666,000028:                                                                                                  <span class="co">#  THIS ROUTINE IS CALLABLE FROM ERASABLE OR FIXED.  LIKE BANKCALL, HOWEVER, SWITCHING BETWEEN S3 AND S4</span>
-013667,000029:                                                                                                  <span class="co">#  IS NOT POSSIBLE.</span>
-013668,000030: 
-013669,000031:                                                                                                  <span class="co">#  THE CALLING SEQUENCE IS:</span>
-013670,000032: 
-013671,000033:                                                                                                  <span class="co">#        TC      BANKCALL</span>
-013672,000034:                                                                                                  <span class="co">#        CADR    E/BKCALL</span>
-013673,000035:                                                                                                  <span class="co">#        CADR    ROUTINE         WHERE YOU WANT TO GO IN FIXED.</span>
-013674,000036:                                                                                                  <span class="co">#        RETURN HERE FROM DISPLAY TERMINATE, BAD STALL OR TC Q.</span>
-013675,000037:                                                                                                  <span class="co">#        RETURN HERE FROM DISPLAY PROCEED OR GOOD RETURN FROM STALL.</span>
-013676,000038:                                                                                                  <span class="co">#        RETURN HERE FROM DISPLAY ENTER OR RECYCLE.</span>
-013677,000039: 
-013678,000040:                                                                                                  <span class="co">#  THIS ROUTINE REQUIRES TWO ERASABLES (EBUF2, +1) IN UNSWITCHED WHICH ARE UNSHARED BY INTERRUPTS AND</span>
-013679,000041:                                                                                                  <span class="co">#  OTHER EMEMORY PROGRAMS.</span>
-013680,000042: 
-013681,000043:                                                                                                  <span class="co">#  A + L ARE PRESERVED THROUGH BANKCALL AND E/BKCALL.</span>
-013682,000044: 
-<a name="452F424B43414C4C"></a>013683,000045: 04,2450           52134        <span class="sm">E/BKCALL</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  SAVE A,L AND GET DP RETURN.</span>
-013684,000046: 04,2451           52302                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  SAVE DP RETURN.</span>
-013685,000047: 04,2452           24301                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  RETURN +1 BECAUSE DOUBLE CADR.</span>
-013686,000048: 04,2453           30006                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-013687,000049: 04,2454           75062                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  GET CURRENT EBANK.  (SBANK SOMEDAY)</span>
-013688,000050: 04,2455           26302                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>      +1                         <span class="co">#  FORM BBCON.  (WAS FBANK)</span>
-013689,000051: 04,2456           50301                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 
-013690,000052: 04,2457           27777                           <span class="op">CA      </span> 0          -1                         <span class="co">#  GET CADR OF ROUTINE.</span>
-013691,000053: 04,2460           04661                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  GO TO ROUTINE, SETTING Q TO SWRETURN</span>
-013692,000054:                                                                                                  <span class="co">#  AND RESTORING A + L.</span>
-013693,000055: 04,2461           02465                           <span class="op">TC      </span> +4                                    <span class="co">#  TX Q, V34, OR BAD STALL RETURN.</span>
-013694,000056: 04,2462           02464                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED OR GOOD STALL RETURN.</span>
-013695,000057: 04,2463           24301                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  ENTER OR RECYCLE RETURN.</span>
-013696,000058: 04,2464           24301                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 
-<a name="452F535749544348"></a>013697,000059: 04,2465           52302        <span class="sm">E/SWITCH</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 
-013698,000060: 04,2466           52006                           <span class="op">DTCB    </span>                                       
-013699,000061: 
-013700,000062:                                                                                                  <span class="co">#  E/CALL        FOR CALLING A FIXED MEMORY INTERPRETIVE SUBROUTINE FROM ERASABLE AND RETURNING TO ERASABLE.</span>
-013701,000063: 
-013702,000064:                                                                                                  <span class="co">#  THE CALLING SEQUENCE IS...</span>
-013703,000065: 
-013704,000066:                                                                                                  <span class="co">#        RTB</span>
-013705,000067:                                                                                                  <span class="co">#                E/CALL</span>
-013706,000068:                                                                                                  <span class="co">#        CADR    ROUTINE                 THE INTERPRETIVE SUBROUTINE YOU WANT.</span>
-013707,000069:                                                                                                  <span class="co">#                                        RETURNS HERE IN INTERPRETIVE.</span>
-013708,000070: 
-<a name="452F43414C4C"></a>013709,000071: 04,2467           22164        <span class="sm">E/CALL  </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  ADRES -1 OF CADR.</span>
-013710,000072: 04,2470           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-013711,000073: 04,2471           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  CADR IN A.</span>
-013712,000074: 04,2472           24001                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-013713,000075: 04,2473           24001                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RETURN ADRES IN L.</span>
-013714,000076: 04,2474           52302                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  STORE CADR AND RETURN.</span>
-013715,000077: 04,2475           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-013716,000078: 04,2476           77624                           <span class="in">CALL    </span>                                       
-013717,000079: 04,2477           00301                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  INDIRECTLY EXECUTE ROUTINE.  IT MUST</span>
-013718,000080: 04,2500           77776                           <span class="in">EXIT    </span>                                       <span class="co">#  LEAVE VIA RVQ OR EQUIVALENT.</span>
-013719,000081: 04,2501           22302                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>      +1                         <span class="co">#  PICK UP RETURN.</span>
-013720,000082: 04,2502           16015                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>    +1                         <span class="co">#  SET LOC AND RETURN TO CALLER.</span>
-013721,000083: 
-013722,000084:                                                                                                  <span class="co">#  E/JOBWAK      FOR WAKING UP ERASABLE MEMORY JOBS.</span>
-013723,000085: 
-013724,000086:                                                                                                  <span class="co">#  THIS ROUTINE MUST BE CALLED IN INTERRUPT OR WITH INTERRUPTS INHIBITED.</span>
-013725,000087: 
-013726,000088:                                                                                                  <span class="co">#  THE CALLING SEQUENCE IS:</span>
-013727,000089: 
-013728,000090:                                                                                                  <span class="co">#        INHINT</span>
-013729,000091:                                                                                                  <span class="co">#          .</span>
-013730,000092:                                                                                                  <span class="co">#          .</span>
-013731,000093:                                                                                                  <span class="co">#        CA      WAKEADR         ADDRESS OF SLEEPING JOB</span>
-013732,000094:                                                                                                  <span class="co">#        TC      IBNKCALL</span>
-013733,000095:                                                                                                  <span class="co">#        CADR    E/JOBWAK</span>
-013734,000096:                                                                                                  <span class="co">#          .                     RETURNS HERE</span>
-013735,000097:                                                                                                  <span class="co">#          .</span>
-013736,000098:                                                                                                  <span class="co">#          .</span>
-013737,000099:                                                                                                  <span class="co">#        RELINT                  IF YOU DID AN INHINT.</span>
-013738,000100: 
-013739,000101: 33,2000                                           <span class="ps">BANK    </span> 33                                    
-013740,000102: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#452F50524F47">E/PROG</a>                                
-013741,000103: 04,2000                                           <span class="ps">BANK    </span>                                       
-013742,000104: 
-013743,000105: 04,2503                                           <span class="ps">COUNT*  </span> $$/P07                                
-013744,000106: 
-<a name="452F4A4F4257414B"></a>013745,000107: 04,2503           05207        <span class="sm">E/JOBWAK</span>           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F4257414B45">JOBWAKE</a>                               <span class="co">#  ARRIVE IWTH ADRES IN A.</span>
-013746,000108: 04,2504           45014                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
-013747,000109: 04,2505           50064                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-013748,000110: 04,2506           26164                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  KNOCK FIXED MEMORY BIT OUT OF ADRES.</span>
-013749,000111: 04,2507           00072                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              <span class="co">#  RETURN</span>
-013750,000112: 
+013642,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+013643,000003:                                                                                                  <span class="co">## Filename:    SYSTEM_TEST_STANDARD_LEAD_INS.agc</span>
+013644,000004:                                                                                                  <span class="co">## Purpose:     A section of a reconstructed, mixed version of Sundance</span>
+013645,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the Lunar</span>
+013646,000006:                                                                                                  <span class="co">##              Module's (LM) Apollo Guidance Computer (AGC) for Apollo 9.</span>
+013647,000007:                                                                                                  <span class="co">##              No original listings of this program are available;</span>
+013648,000008:                                                                                                  <span class="co">##              instead, this file was created via disassembly of dumps</span>
+013649,000009:                                                                                                  <span class="co">##              of various revisions of Sundance core rope modules.</span>
+013650,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+013651,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+013652,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+013653,000013:                                                                                                  <span class="co">## Mod history: 2020-06-17 MAS  Created from Luminary 69.</span>
+013654,000014: 
+013655,000015:                                                                                                  <span class="co">## Sundance 292</span>
+013656,000016: 22,3236  E5,1642                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+013657,000017: 
+013658,000018: 33,2000                                           <span class="ps">BANK    </span> 33                                    
+013659,000019: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#452F50524F47">E/PROG</a>                                
+013660,000020: 04,2000                                           <span class="ps">BANK    </span>                                       
+013661,000021: 
+013662,000022: 04,2450                                           <span class="ps">COUNT*  </span> $$/P07                                
+013663,000023: 
+013664,000024:                                                                                                  <span class="co">#  SPECIAL PROGRAMS TO EASE THE PANGS OF ERASABLE MEMORY PROGRAMS.</span>
+013665,000025: 
+013666,000026:                                                                                                  <span class="co">#  E/BKCALL      FOR DOING BANKCALLS FROM AND RETURNING TO ERASABLE.</span>
+013667,000027: 
+013668,000028:                                                                                                  <span class="co">#  THIS ROUTINE IS CALLABLE FROM ERASABLE OR FIXED.  LIKE BANKCALL, HOWEVER, SWITCHING BETWEEN S3 AND S4</span>
+013669,000029:                                                                                                  <span class="co">#  IS NOT POSSIBLE.</span>
+013670,000030: 
+013671,000031:                                                                                                  <span class="co">#  THE CALLING SEQUENCE IS:</span>
+013672,000032: 
+013673,000033:                                                                                                  <span class="co">#        TC      BANKCALL</span>
+013674,000034:                                                                                                  <span class="co">#        CADR    E/BKCALL</span>
+013675,000035:                                                                                                  <span class="co">#        CADR    ROUTINE         WHERE YOU WANT TO GO IN FIXED.</span>
+013676,000036:                                                                                                  <span class="co">#        RETURN HERE FROM DISPLAY TERMINATE, BAD STALL OR TC Q.</span>
+013677,000037:                                                                                                  <span class="co">#        RETURN HERE FROM DISPLAY PROCEED OR GOOD RETURN FROM STALL.</span>
+013678,000038:                                                                                                  <span class="co">#        RETURN HERE FROM DISPLAY ENTER OR RECYCLE.</span>
+013679,000039: 
+013680,000040:                                                                                                  <span class="co">#  THIS ROUTINE REQUIRES TWO ERASABLES (EBUF2, +1) IN UNSWITCHED WHICH ARE UNSHARED BY INTERRUPTS AND</span>
+013681,000041:                                                                                                  <span class="co">#  OTHER EMEMORY PROGRAMS.</span>
+013682,000042: 
+013683,000043:                                                                                                  <span class="co">#  A + L ARE PRESERVED THROUGH BANKCALL AND E/BKCALL.</span>
+013684,000044: 
+<a name="452F424B43414C4C"></a>013685,000045: 04,2450           52134        <span class="sm">E/BKCALL</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42554632">BUF2</a>                                  <span class="co">#  SAVE A,L AND GET DP RETURN.</span>
+013686,000046: 04,2451           52302                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  SAVE DP RETURN.</span>
+013687,000047: 04,2452           24301                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  RETURN +1 BECAUSE DOUBLE CADR.</span>
+013688,000048: 04,2453           30006                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+013689,000049: 04,2454           75062                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  GET CURRENT EBANK.  (SBANK SOMEDAY)</span>
+013690,000050: 04,2455           26302                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>      +1                         <span class="co">#  FORM BBCON.  (WAS FBANK)</span>
+013691,000051: 04,2456           50301                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 
+013692,000052: 04,2457           27777                           <span class="op">CA      </span> 0          -1                         <span class="co">#  GET CADR OF ROUTINE.</span>
+013693,000053: 04,2460           04661                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  GO TO ROUTINE, SETTING Q TO SWRETURN</span>
+013694,000054:                                                                                                  <span class="co">#  AND RESTORING A + L.</span>
+013695,000055: 04,2461           02465                           <span class="op">TC      </span> +4                                    <span class="co">#  TX Q, V34, OR BAD STALL RETURN.</span>
+013696,000056: 04,2462           02464                           <span class="op">TC      </span> +2                                    <span class="co">#  PROCEED OR GOOD STALL RETURN.</span>
+013697,000057: 04,2463           24301                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  ENTER OR RECYCLE RETURN.</span>
+013698,000058: 04,2464           24301                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 
+<a name="452F535749544348"></a>013699,000059: 04,2465           52302        <span class="sm">E/SWITCH</span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 
+013700,000060: 04,2466           52006                           <span class="op">DTCB    </span>                                       
+013701,000061: 
+013702,000062:                                                                                                  <span class="co">#  E/CALL        FOR CALLING A FIXED MEMORY INTERPRETIVE SUBROUTINE FROM ERASABLE AND RETURNING TO ERASABLE.</span>
+013703,000063: 
+013704,000064:                                                                                                  <span class="co">#  THE CALLING SEQUENCE IS...</span>
+013705,000065: 
+013706,000066:                                                                                                  <span class="co">#        RTB</span>
+013707,000067:                                                                                                  <span class="co">#                E/CALL</span>
+013708,000068:                                                                                                  <span class="co">#        CADR    ROUTINE                 THE INTERPRETIVE SUBROUTINE YOU WANT.</span>
+013709,000069:                                                                                                  <span class="co">#                                        RETURNS HERE IN INTERPRETIVE.</span>
+013710,000070: 
+<a name="452F43414C4C"></a>013711,000071: 04,2467           22164        <span class="sm">E/CALL  </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  ADRES -1 OF CADR.</span>
+013712,000072: 04,2470           50001                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+013713,000073: 04,2471           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  CADR IN A.</span>
+013714,000074: 04,2472           24001                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+013715,000075: 04,2473           24001                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RETURN ADRES IN L.</span>
+013716,000076: 04,2474           52302                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  STORE CADR AND RETURN.</span>
+013717,000077: 04,2475           06014                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+013718,000078: 04,2476           77624                           <span class="in">CALL    </span>                                       
+013719,000079: 04,2477           00301                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>                                 <span class="co">#  INDIRECTLY EXECUTE ROUTINE.  IT MUST</span>
+013720,000080: 04,2500           77776                           <span class="in">EXIT    </span>                                       <span class="co">#  LEAVE VIA RVQ OR EQUIVALENT.</span>
+013721,000081: 04,2501           22302                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542554632">EBUF2</a>      +1                         <span class="co">#  PICK UP RETURN.</span>
+013722,000082: 04,2502           16015                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>    +1                         <span class="co">#  SET LOC AND RETURN TO CALLER.</span>
+013723,000083: 
+013724,000084:                                                                                                  <span class="co">#  E/JOBWAK      FOR WAKING UP ERASABLE MEMORY JOBS.</span>
+013725,000085: 
+013726,000086:                                                                                                  <span class="co">#  THIS ROUTINE MUST BE CALLED IN INTERRUPT OR WITH INTERRUPTS INHIBITED.</span>
+013727,000087: 
+013728,000088:                                                                                                  <span class="co">#  THE CALLING SEQUENCE IS:</span>
+013729,000089: 
+013730,000090:                                                                                                  <span class="co">#        INHINT</span>
+013731,000091:                                                                                                  <span class="co">#          .</span>
+013732,000092:                                                                                                  <span class="co">#          .</span>
+013733,000093:                                                                                                  <span class="co">#        CA      WAKEADR         ADDRESS OF SLEEPING JOB</span>
+013734,000094:                                                                                                  <span class="co">#        TC      IBNKCALL</span>
+013735,000095:                                                                                                  <span class="co">#        CADR    E/JOBWAK</span>
+013736,000096:                                                                                                  <span class="co">#          .                     RETURNS HERE</span>
+013737,000097:                                                                                                  <span class="co">#          .</span>
+013738,000098:                                                                                                  <span class="co">#          .</span>
+013739,000099:                                                                                                  <span class="co">#        RELINT                  IF YOU DID AN INHINT.</span>
+013740,000100: 
+013741,000101: 33,2000                                           <span class="ps">BANK    </span> 33                                    
+013742,000102: 04,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#452F50524F47">E/PROG</a>                                
+013743,000103: 04,2000                                           <span class="ps">BANK    </span>                                       
+013744,000104: 
+013745,000105: 04,2503                                           <span class="ps">COUNT*  </span> $$/P07                                
+013746,000106: 
+<a name="452F4A4F4257414B"></a>013747,000107: 04,2503           05207        <span class="sm">E/JOBWAK</span>           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F4257414B45">JOBWAKE</a>                               <span class="co">#  ARRIVE IWTH ADRES IN A.</span>
+013748,000108: 04,2504           45014                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 
+013749,000109: 04,2505           50064                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+013750,000110: 04,2506           26164                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  KNOCK FIXED MEMORY BIT OUT OF ADRES.</span>
+013751,000111: 04,2507           00072                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              <span class="co">#  RETURN</span>
+013752,000112: 
 
 End of include-file SYSTEM_TEST_STANDARD_LEAD_INS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

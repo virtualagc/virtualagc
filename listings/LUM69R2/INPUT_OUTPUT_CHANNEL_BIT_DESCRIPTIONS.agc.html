@@ -6,7 +6,6 @@
 <style type="text/css">
 p.nobreak { white-space:nowrap; }
 a { text-decoration:none; }
-a:visited { COLOR: #000850; }
 </style>
 <style type="text/css">
 .op{
@@ -66,47 +65,66 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files are part of a reconstructed copy of LUM69 Revision 2, the
-flown Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
+These source-code files are part of a reconstructed copy of Luminary 69/2,
+the flown, final release of the Apollo 10 Lunar Module (LM) Apollo Guidance Computer (AGC) software. 
 <br><br>
-The reconstruction began with source code of Luminary 69 revision 0 previously
-transcribed from a digitized copy of that program.  The code was then updated 
-by back-porting the R-2 lunar potential model from previously-transcribed source
-code of Luminary 99. These required changes were described in the original
-Luminary memos 75 and 78. The reconstructed code was verified by 
-matching memory-bank checksums to those listed in drawing 2021152G. Note that
-page numbers in the reconstructed code match those on the Luminary 069 printout, 
-although the added code would likely have changed page numbers for a real LUM69 
-Revision 2 listing.
+The reconstruction is based on the source code of Luminary 69 &mdash; i.e., the
+initial, unflown version, "revision 0" &mdash; of which 
+a contemporary listing was available.  The code was then updated by incorporating the 
+differences between Luminary 69 and Luminary 69/2, known from other contemporary
+documentation.  The only such difference is the implementation in 
+Luminary 69/2 of the "R-2 Lunar Potential Model", the source code for which was taken 
+from program Luminary 99/1 (Apollo 11 LM), of which a contemporary listing was also available.
+Finally, the now-reconstructed Luminary 69/2 was then validated by assembling it to
+executable form and verifying that its memory banks had the correct checksums,
+known from still other contemporary documentation.
 <br><br>
+Note that page numbers in the reconstructed code match those in the original Luminary 69
+program listing, or in the ORBITAL INTEGRATION log section, in Luminary 99/1. Page numbers 
+would certainly differ somewhat in a contemporary Luminary 69/2 listing.
+Moreover, annotations that were not present in the contemporary source code have been added 
+to the reconstructed code to justify each change in Luminary 69/2 relative to 
+Luminary 69. Here's a guide to the Apollo documentation referenced in those annotations:<br>
+<ul>
+<li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n80/mode/1up">
+    MIT/IL engineering drawing 2021152N, sheet 3</a>.  Listing of the memory-bank 
+    checksums for Luminary 69/2 (called "LUMINARY 69 REV. 2" in the document itself).</li>
+<li><a href="https://archive.org/details/Luminary99001J2k60/mode/1up">
+       Luminary 99/1 (Apollo 11 LM final release) assembly listing</a>.</li>
+<li><a href="https://archive.org/details/luminary6900miti/mode/1up">
+       Luminary 69 (Apollo 10 LM initial release) assembly listing</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">
+       LUMINARY Memo #75, "R-2 Lunar Potential Model Added to LUM"</a>.</li>
+<li><a href="http://www.ibiblio.org/apollo/Documents/LUM78_text.pdf">
+       LUMINARY Memo #78, "LUMINARY Revisions 93-96"</a>.</li>
+</ul>
 Comments from the original source code are prefixed with a single '#' symbol, 
 whereas comments added later are prefixed by "##" or "###".  Report any errors 
 noted by creating an 
 issue report at <a href="https://github.com/rburkey2005/virtualagc/issues">the Virtual AGC
 project's GitHub repository</a>.
 </td></tr></tbody></table>
-
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-002788,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-002789,000003:                                                                                                  <span class="co">## Filename:    INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc</span>
-002790,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
-002791,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
-002792,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
-002793,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
-002794,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
-002795,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
-002796,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
-002797,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
-002798,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
-002799,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
-002800,000014:                                                                                                  <span class="co">## Reference:   pp. 70-76</span>
-002801,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-002802,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-002803,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-002804,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
-002805,000019: 
+002821,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+002822,000003:                                                                                                  <span class="co">## Filename:    INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc</span>
+002823,000004:                                                                                                  <span class="co">## Purpose:     A section of LUM69 revision 2.</span>
+002824,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the flown</span>
+002825,000006:                                                                                                  <span class="co">##              version of the flight software for the Lunar Module's (LM)</span>
+002826,000007:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 10. The code has</span>
+002827,000008:                                                                                                  <span class="co">##              been recreated from a copy of Luminary revsion 069, using</span>
+002828,000009:                                                                                                  <span class="co">##              changes present in Luminary 099 which were described in</span>
+002829,000010:                                                                                                  <span class="co">##              Luminary memos 75 and 78. The code has been adapted such</span>
+002830,000011:                                                                                                  <span class="co">##              that the resulting bugger words exactly match those specified</span>
+002831,000012:                                                                                                  <span class="co">##              for LUM69 revision 2 in NASA drawing 2021152B, which gives</span>
+002832,000013:                                                                                                  <span class="co">##              relatively high confidence that the reconstruction is correct.</span>
+002833,000014:                                                                                                  <span class="co">## Reference:   pp. 70-76</span>
+002834,000015:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+002835,000016:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+002836,000017:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+002837,000018:                                                                                                  <span class="co">## Mod history: 2019-07-27 MAS  Created from Luminary 69.</span>
+002838,000019: 
 </pre>
 </span>
 </p>
@@ -122,56 +140,56 @@ Page 70
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-002807,000021: 
-002808,000022:                                                                                                  <span class="co">#  *** CHANNEL DESCRIPTIONSF WORDS ARE ALLOCATED IN ERASABLE ASSIGNMENTS ***</span>
-002809,000023: 
-002810,000024:                                                                                                  <span class="co">#      CHANNEL 1     IDENTICAL TO COMPUTER REGISTER L (0001)</span>
-002811,000025: 
-002812,000026: 
-002813,000027:                                                                                                  <span class="co">#      CHANNEL 2     IDENTICAL TO COMPUTER REGISTER Q (0002)</span>
-002814,000028: 
-002815,000029: 
-002816,000030:                                                                                                  <span class="co">#      CHANNEL 3     HISCALAR; INPUT CHANNEL; MOST SIGNIFICANT 14 BITS FROM 33 STAGE BINARY COUNTER. SCALE</span>
-002817,000031:                                                                                                  <span class="co">#                    FACTOR IS B23 IN CSEC, SO MAX VALUE ABOUT 23.3 HOURS AND LEAST SIGNIFICANT BIT 5.12 SECS.</span>
-002818,000032: 
-002819,000033: 
-002820,000034:                                                                                                  <span class="co">#      CHANNEL 4     LOSCALAR; INPUT CHANNEL; NEXT MOST SIGNIFICANT 14 BITS FROM THE 33 STAGE BINARY COUNTER</span>
-002821,000035:                                                                                                  <span class="co">#                    ASSOCIATED WITH CHANNEL 3. SCALE FACTOR IS B9 IN  CSEC. SO MAX VAL IS 5.12 SEC AND LEAST</span>
-002822,000036:                                                                                                  <span class="co">#                    SIGNIFICANT BIT IS 1/3200 SEC. SCALE FACTOR OF D.P. WORD WITH CHANNEL 3 IS B23 CSEC.</span>
-002823,000037: 
-002824,000038: 
-002825,000039:                                                                                                  <span class="co">#      CHANNEL 5     PYJETS; OUTPUT CHANNEL; PITCH RCS JET CONTROL.   (REACTION CONTROL SYSTEM) USES BITS 1-8.</span>
-002826,000040: 
-002827,000041: 
-002828,000042:                                                                                                  <span class="co">#      CHANNEL 6     ROLLJETS; OUTPUT CHANNEL; ROLL RCS JET CONTROL.   (REACTION CONTROL SYSTEM) USES BIT 1-8.</span>
-002829,000043: 
-002830,000044: 
-002831,000045:                                                                                                  <span class="co">#      CHANNEL 7     SUPERBNK; OUTPUT CHANNEL; NOT RESET BY RESTART;   FIXED EXTENSION BITS USED TO SELECT THE</span>
-002832,000046:                                                                                                  <span class="co">#                    APPROPRIATE FIXED MEMORY BANK IF FBANK IS 30 OCTAL OR MORE. USES BITS 5-7.</span>
-002833,000047: 
-002834,000048: 
-002835,000049:                                                                                                  <span class="co">#      CHANNEL 10    OUTO; OUTPUT CHANNEL; REGISTER USED TO TRANSMIT   LATCHING-RELAY DRIVING INFORMATION FOR</span>
-002836,000050:                                                                                                  <span class="co">#                    THE DISPLAY SYSTEM. BITS 15-12 ARE SET TO THE ROW NUMBER (1-14 OCTAL) OF THE RELAY TO BE</span>
-002837,000051:                                                                                                  <span class="co">#                    CHANGED AND BITS 11-1 CONTAIN THE REQUIRED SETTINGS FOR THE RELAYS IN THE ROW.</span>
-002838,000052: 
-002839,000053: 
-002840,000054:                                                                                                  <span class="co">#      CHANNEL 11    DSALMOUT; OUTPUT CHANNEL; REGISTER WHOSE BITS ARE USED FOR ENGINE ON-OFF CONTROL AND TO</span>
-002841,000055:                                                                                                  <span class="co">#                    DRIVE INDIVIDUAL INDICATORS OF THE DISPLAY SYSTEM. BITS 1-7 ARE A RELAYS.</span>
-002842,000056: 
-002843,000057:                                                                                                  <span class="co">#        BIT 1       ISS WARNING</span>
-002844,000058: 
-002845,000059:                                                                                                  <span class="co">#        BIT 2       LIGHT COMPUTER ACTIVITY LAMP</span>
-002846,000060: 
-002847,000061:                                                                                                  <span class="co">#        BIT 3       LIGHT UPLINK ACTIVITY LAMP</span>
-002848,000062: 
-002849,000063:                                                                                                  <span class="co">#        BIT 4       LIGHT TEMP CAUTION LAMP</span>
-002850,000064: 
-002851,000065:                                                                                                  <span class="co">#        BIT 5       LIGHT KEYBOARD RELEASE LAMP</span>
-002852,000066: 
-002853,000067:                                                                                                  <span class="co">#        BIT 6       FLASH VERB AND NOUN LAMPS</span>
-002854,000068: 
-002855,000069:                                                                                                  <span class="co">#        BIT 7       LIGHT OPERATOR ERROR LAMP</span>
-002856,000070: 
+002840,000021: 
+002841,000022:                                                                                                  <span class="co">#  *** CHANNEL DESCRIPTIONSF WORDS ARE ALLOCATED IN ERASABLE ASSIGNMENTS ***</span>
+002842,000023: 
+002843,000024:                                                                                                  <span class="co">#      CHANNEL 1     IDENTICAL TO COMPUTER REGISTER L (0001)</span>
+002844,000025: 
+002845,000026: 
+002846,000027:                                                                                                  <span class="co">#      CHANNEL 2     IDENTICAL TO COMPUTER REGISTER Q (0002)</span>
+002847,000028: 
+002848,000029: 
+002849,000030:                                                                                                  <span class="co">#      CHANNEL 3     HISCALAR; INPUT CHANNEL; MOST SIGNIFICANT 14 BITS FROM 33 STAGE BINARY COUNTER. SCALE</span>
+002850,000031:                                                                                                  <span class="co">#                    FACTOR IS B23 IN CSEC, SO MAX VALUE ABOUT 23.3 HOURS AND LEAST SIGNIFICANT BIT 5.12 SECS.</span>
+002851,000032: 
+002852,000033: 
+002853,000034:                                                                                                  <span class="co">#      CHANNEL 4     LOSCALAR; INPUT CHANNEL; NEXT MOST SIGNIFICANT 14 BITS FROM THE 33 STAGE BINARY COUNTER</span>
+002854,000035:                                                                                                  <span class="co">#                    ASSOCIATED WITH CHANNEL 3. SCALE FACTOR IS B9 IN  CSEC. SO MAX VAL IS 5.12 SEC AND LEAST</span>
+002855,000036:                                                                                                  <span class="co">#                    SIGNIFICANT BIT IS 1/3200 SEC. SCALE FACTOR OF D.P. WORD WITH CHANNEL 3 IS B23 CSEC.</span>
+002856,000037: 
+002857,000038: 
+002858,000039:                                                                                                  <span class="co">#      CHANNEL 5     PYJETS; OUTPUT CHANNEL; PITCH RCS JET CONTROL.   (REACTION CONTROL SYSTEM) USES BITS 1-8.</span>
+002859,000040: 
+002860,000041: 
+002861,000042:                                                                                                  <span class="co">#      CHANNEL 6     ROLLJETS; OUTPUT CHANNEL; ROLL RCS JET CONTROL.   (REACTION CONTROL SYSTEM) USES BIT 1-8.</span>
+002862,000043: 
+002863,000044: 
+002864,000045:                                                                                                  <span class="co">#      CHANNEL 7     SUPERBNK; OUTPUT CHANNEL; NOT RESET BY RESTART;   FIXED EXTENSION BITS USED TO SELECT THE</span>
+002865,000046:                                                                                                  <span class="co">#                    APPROPRIATE FIXED MEMORY BANK IF FBANK IS 30 OCTAL OR MORE. USES BITS 5-7.</span>
+002866,000047: 
+002867,000048: 
+002868,000049:                                                                                                  <span class="co">#      CHANNEL 10    OUTO; OUTPUT CHANNEL; REGISTER USED TO TRANSMIT   LATCHING-RELAY DRIVING INFORMATION FOR</span>
+002869,000050:                                                                                                  <span class="co">#                    THE DISPLAY SYSTEM. BITS 15-12 ARE SET TO THE ROW NUMBER (1-14 OCTAL) OF THE RELAY TO BE</span>
+002870,000051:                                                                                                  <span class="co">#                    CHANGED AND BITS 11-1 CONTAIN THE REQUIRED SETTINGS FOR THE RELAYS IN THE ROW.</span>
+002871,000052: 
+002872,000053: 
+002873,000054:                                                                                                  <span class="co">#      CHANNEL 11    DSALMOUT; OUTPUT CHANNEL; REGISTER WHOSE BITS ARE USED FOR ENGINE ON-OFF CONTROL AND TO</span>
+002874,000055:                                                                                                  <span class="co">#                    DRIVE INDIVIDUAL INDICATORS OF THE DISPLAY SYSTEM. BITS 1-7 ARE A RELAYS.</span>
+002875,000056: 
+002876,000057:                                                                                                  <span class="co">#        BIT 1       ISS WARNING</span>
+002877,000058: 
+002878,000059:                                                                                                  <span class="co">#        BIT 2       LIGHT COMPUTER ACTIVITY LAMP</span>
+002879,000060: 
+002880,000061:                                                                                                  <span class="co">#        BIT 3       LIGHT UPLINK ACTIVITY LAMP</span>
+002881,000062: 
+002882,000063:                                                                                                  <span class="co">#        BIT 4       LIGHT TEMP CAUTION LAMP</span>
+002883,000064: 
+002884,000065:                                                                                                  <span class="co">#        BIT 5       LIGHT KEYBOARD RELEASE LAMP</span>
+002885,000066: 
+002886,000067:                                                                                                  <span class="co">#        BIT 6       FLASH VERB AND NOUN LAMPS</span>
+002887,000068: 
+002888,000069:                                                                                                  <span class="co">#        BIT 7       LIGHT OPERATOR ERROR LAMP</span>
+002889,000070: 
 </pre>
 </span>
 </p>
@@ -187,57 +205,57 @@ Page 71
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-002858,000072: 
-002859,000073:                                                                                                  <span class="co">#        BIT 8       SPARE</span>
-002860,000074: 
-002861,000075:                                                                                                  <span class="co">#        BIT 9       TEST CONNECTOR OUTBIT</span>
-002862,000076: 
-002863,000077:                                                                                                  <span class="co">#        BIT 10      CAUTION RESET</span>
-002864,000078: 
-002865,000079:                                                                                                  <span class="co">#        BIT 11      SPARE</span>
-002866,000080: 
-002867,000081:                                                                                                  <span class="co">#        BIT 12      SPARE</span>
-002868,000082: 
-002869,000083:                                                                                                  <span class="co">#        BIT 13      ENGINE ON</span>
-002870,000084: 
-002871,000085:                                                                                                  <span class="co">#        BIT 14      ENGINE OFF</span>
-002872,000086: 
-002873,000087:                                                                                                  <span class="co">#        BIT 15      SPARE</span>
-002874,000088: 
-002875,000089: 
-002876,000090:                                                                                                  <span class="co">#      CHANNEL 12    CHAN12; OUTPUT CHANNEL; BITS USED TO DRIVE NAVIGATION AND SPAECRAFT HARDWARE</span>
-002877,000091: 
-002878,000092:                                                                                                  <span class="co">#        BIT 1       ZERO RR CDU; CDU'S GIVE RRADAR INFORMATION FOR LM</span>
-002879,000093: 
-002880,000094:                                                                                                  <span class="co">#        BIT 2       ENABLE CDU RADAR ERROR COUNTERS</span>
-002881,000095: 
-002882,000096:                                                                                                  <span class="co">#        BIT 3       NOT USED</span>
-002883,000097: 
-002884,000098:                                                                                                  <span class="co">#        BIT 4       COARSE ALIGN ENABLE OF IMU</span>
-002885,000099: 
-002886,000100:                                                                                                  <span class="co">#        BIT 5       ZERO IMU CDU'S</span>
-002887,000101: 
-002888,000102:                                                                                                  <span class="co">#        BIT 6       ENABLE IMU ERROR COUNTER, CDU ERROR COUNTER.</span>
-002889,000103: 
-002890,000104:                                                                                                  <span class="co">#        BIT 7       SPARE</span>
-002891,000105: 
-002892,000106:                                                                                                  <span class="co">#        BIT 8       DISPLAY INERTIAL DATA</span>
-002893,000107: 
-002894,000108:                                                                                                  <span class="co">#        BIT 9       -PITCH GIMBAL TRIM (BELL MOTION) DESCENT ENGINE</span>
-002895,000109: 
-002896,000110:                                                                                                  <span class="co">#        BIT 10      +PITCH GIMBAL TRIM (BELL MOTION) DESCENT ENGINE</span>
-002897,000111: 
-002898,000112:                                                                                                  <span class="co">#        BIT 11      -ROLL GIMBAL TRIM (BELL MOTION) DESCENT ENGINE</span>
-002899,000113: 
-002900,000114:                                                                                                  <span class="co">#        BIT 12      +ROLL GIMBAL TRIM (BELL MOTION) DESCENT ENGINE</span>
-002901,000115: 
-002902,000116:                                                                                                  <span class="co">#        BIT 13      LR POSITION 2 COMMAND</span>
-002903,000117: 
-002904,000118:                                                                                                  <span class="co">#        BIT 14      ENABLE RENDESVOUS RADAR LOCK-ON;AUTO ANGLE TRACK'G</span>
-002905,000119: 
-002906,000120:                                                                                                  <span class="co">#        BIT 15      ISS TURN ON DELAY COMPLETE</span>
-002907,000121: 
-002908,000122: 
+002891,000072: 
+002892,000073:                                                                                                  <span class="co">#        BIT 8       SPARE</span>
+002893,000074: 
+002894,000075:                                                                                                  <span class="co">#        BIT 9       TEST CONNECTOR OUTBIT</span>
+002895,000076: 
+002896,000077:                                                                                                  <span class="co">#        BIT 10      CAUTION RESET</span>
+002897,000078: 
+002898,000079:                                                                                                  <span class="co">#        BIT 11      SPARE</span>
+002899,000080: 
+002900,000081:                                                                                                  <span class="co">#        BIT 12      SPARE</span>
+002901,000082: 
+002902,000083:                                                                                                  <span class="co">#        BIT 13      ENGINE ON</span>
+002903,000084: 
+002904,000085:                                                                                                  <span class="co">#        BIT 14      ENGINE OFF</span>
+002905,000086: 
+002906,000087:                                                                                                  <span class="co">#        BIT 15      SPARE</span>
+002907,000088: 
+002908,000089: 
+002909,000090:                                                                                                  <span class="co">#      CHANNEL 12    CHAN12; OUTPUT CHANNEL; BITS USED TO DRIVE NAVIGATION AND SPAECRAFT HARDWARE</span>
+002910,000091: 
+002911,000092:                                                                                                  <span class="co">#        BIT 1       ZERO RR CDU; CDU'S GIVE RRADAR INFORMATION FOR LM</span>
+002912,000093: 
+002913,000094:                                                                                                  <span class="co">#        BIT 2       ENABLE CDU RADAR ERROR COUNTERS</span>
+002914,000095: 
+002915,000096:                                                                                                  <span class="co">#        BIT 3       NOT USED</span>
+002916,000097: 
+002917,000098:                                                                                                  <span class="co">#        BIT 4       COARSE ALIGN ENABLE OF IMU</span>
+002918,000099: 
+002919,000100:                                                                                                  <span class="co">#        BIT 5       ZERO IMU CDU'S</span>
+002920,000101: 
+002921,000102:                                                                                                  <span class="co">#        BIT 6       ENABLE IMU ERROR COUNTER, CDU ERROR COUNTER.</span>
+002922,000103: 
+002923,000104:                                                                                                  <span class="co">#        BIT 7       SPARE</span>
+002924,000105: 
+002925,000106:                                                                                                  <span class="co">#        BIT 8       DISPLAY INERTIAL DATA</span>
+002926,000107: 
+002927,000108:                                                                                                  <span class="co">#        BIT 9       -PITCH GIMBAL TRIM (BELL MOTION) DESCENT ENGINE</span>
+002928,000109: 
+002929,000110:                                                                                                  <span class="co">#        BIT 10      +PITCH GIMBAL TRIM (BELL MOTION) DESCENT ENGINE</span>
+002930,000111: 
+002931,000112:                                                                                                  <span class="co">#        BIT 11      -ROLL GIMBAL TRIM (BELL MOTION) DESCENT ENGINE</span>
+002932,000113: 
+002933,000114:                                                                                                  <span class="co">#        BIT 12      +ROLL GIMBAL TRIM (BELL MOTION) DESCENT ENGINE</span>
+002934,000115: 
+002935,000116:                                                                                                  <span class="co">#        BIT 13      LR POSITION 2 COMMAND</span>
+002936,000117: 
+002937,000118:                                                                                                  <span class="co">#        BIT 14      ENABLE RENDESVOUS RADAR LOCK-ON;AUTO ANGLE TRACK'G</span>
+002938,000119: 
+002939,000120:                                                                                                  <span class="co">#        BIT 15      ISS TURN ON DELAY COMPLETE</span>
+002940,000121: 
+002941,000122: 
 </pre>
 </span>
 </p>
@@ -253,57 +271,57 @@ Page 72
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-002910,000124:                                                                                                  <span class="co">#      CHANNEL 13    CHAN13; OUTPUT CHANNEL</span>
-002911,000125: 
-002912,000126:                                                                                                  <span class="co">#        BIT 1       RADAR C         PROPER SETTING OF THE A,B,C MATRIX</span>
-002913,000127:                                                                                                  <span class="co">#        BIT 2       RADAR B         SELECTS CERTAIN RADAR</span>
-002914,000128:                                                                                                  <span class="co">#        BIT 3       RADAR A         PARAMETERS TO BE READ.</span>
-002915,000129: 
-002916,000130:                                                                                                  <span class="co">#        BIT 4       RADAR ACTIVITY</span>
-002917,000131: 
-002918,000132:                                                                                                  <span class="co">#        BIT 5       NOT USED (CONNECTS AN ALTERNATE INPUT TO UPLINK)</span>
-002919,000133: 
-002920,000134:                                                                                                  <span class="co">#        BIT 6       BLOCK INPUTS TO UPLINK CELL</span>
-002921,000135: 
-002922,000136:                                                                                                  <span class="co">#        BIT 7       DOWNLINK TELEMETRY WORD ORDER CODE BIT</span>
-002923,000137: 
-002924,000138:                                                                                                  <span class="co">#        BIT 8       RHC COUNTER ENABLE (READ HAND CONTROLLER ANGLES)</span>
-002925,000139: 
-002926,000140:                                                                                                  <span class="co">#        BIT 9       START RHC READ INTO COUNTERS IF BIT 8 SET</span>
-002927,000141: 
-002928,000142:                                                                                                  <span class="co">#        BIT 10      TEST ALARMS, TEST DSKY LIGHTS</span>
-002929,000143: 
-002930,000144:                                                                                                  <span class="co">#        BIT 11      ENABLE STANDBY</span>
-002931,000145: 
-002932,000146:                                                                                                  <span class="co">#        BIT 12      RESET TRAP 31-A    ALWAYS APPEAR TO BE SET TO 0</span>
-002933,000147: 
-002934,000148:                                                                                                  <span class="co">#        BIT 13      RESET TRAP 31-B    ALWAYS APPEAR TO BE SET TO 0</span>
-002935,000149: 
-002936,000150:                                                                                                  <span class="co">#        BIT 14      RESET TRAP 32      ALWAYS APPEAR TO BE SET TO 0</span>
-002937,000151: 
-002938,000152:                                                                                                  <span class="co">#        BIT 15      ENABLE T6 RUPT</span>
-002939,000153: 
-002940,000154: 
-002941,000155:                                                                                                  <span class="co">#      CHANNEL 14    CHAN14; OUTPUT CHANNEL; USED TO CONTROL COMPUTER COUNTER CELLS (CDU,GYRO,SPACECRAFT FUNC.</span>
-002942,000156: 
-002943,000157:                                                                                                  <span class="co">#        BIT 1       OUTLINK ACTIVITY (NOT USED)</span>
-002944,000158: 
-002945,000159:                                                                                                  <span class="co">#        BIT 2       ALTITUDE RATE OR ALTITIDE SELECTOR</span>
-002946,000160: 
-002947,000161:                                                                                                  <span class="co">#        BIT 3       ALTITUDE METER ACTIVITY</span>
-002948,000162: 
-002949,000163:                                                                                                  <span class="co">#        BIT 4       THRUST DRIVE ACTIVITY FOR DESCENT ENGINE</span>
-002950,000164: 
-002951,000165:                                                                                                  <span class="co">#        BIT 5       SPARE</span>
-002952,000166: 
-002953,000167:                                                                                                  <span class="co">#        BIT 6       GYRO ENABLE POWER FOR PULSES</span>
-002954,000168: 
-002955,000169:                                                                                                  <span class="co">#        BIT 7       GYRO SELECT B    PAIR OF BITS IDENTIFIES AXIS OF -</span>
-002956,000170:                                                                                                  <span class="co">#        BIT 8       GYRO SELECT A    GYRO SYSTEM TO BE TORQUED.</span>
-002957,000171: 
-002958,000172:                                                                                                  <span class="co">#        BIT 9       GYRO TORQUING COMMAND IN NEGATIVE DIRECTION</span>
-002959,000173: 
-002960,000174: 
+002943,000124:                                                                                                  <span class="co">#      CHANNEL 13    CHAN13; OUTPUT CHANNEL</span>
+002944,000125: 
+002945,000126:                                                                                                  <span class="co">#        BIT 1       RADAR C         PROPER SETTING OF THE A,B,C MATRIX</span>
+002946,000127:                                                                                                  <span class="co">#        BIT 2       RADAR B         SELECTS CERTAIN RADAR</span>
+002947,000128:                                                                                                  <span class="co">#        BIT 3       RADAR A         PARAMETERS TO BE READ.</span>
+002948,000129: 
+002949,000130:                                                                                                  <span class="co">#        BIT 4       RADAR ACTIVITY</span>
+002950,000131: 
+002951,000132:                                                                                                  <span class="co">#        BIT 5       NOT USED (CONNECTS AN ALTERNATE INPUT TO UPLINK)</span>
+002952,000133: 
+002953,000134:                                                                                                  <span class="co">#        BIT 6       BLOCK INPUTS TO UPLINK CELL</span>
+002954,000135: 
+002955,000136:                                                                                                  <span class="co">#        BIT 7       DOWNLINK TELEMETRY WORD ORDER CODE BIT</span>
+002956,000137: 
+002957,000138:                                                                                                  <span class="co">#        BIT 8       RHC COUNTER ENABLE (READ HAND CONTROLLER ANGLES)</span>
+002958,000139: 
+002959,000140:                                                                                                  <span class="co">#        BIT 9       START RHC READ INTO COUNTERS IF BIT 8 SET</span>
+002960,000141: 
+002961,000142:                                                                                                  <span class="co">#        BIT 10      TEST ALARMS, TEST DSKY LIGHTS</span>
+002962,000143: 
+002963,000144:                                                                                                  <span class="co">#        BIT 11      ENABLE STANDBY</span>
+002964,000145: 
+002965,000146:                                                                                                  <span class="co">#        BIT 12      RESET TRAP 31-A    ALWAYS APPEAR TO BE SET TO 0</span>
+002966,000147: 
+002967,000148:                                                                                                  <span class="co">#        BIT 13      RESET TRAP 31-B    ALWAYS APPEAR TO BE SET TO 0</span>
+002968,000149: 
+002969,000150:                                                                                                  <span class="co">#        BIT 14      RESET TRAP 32      ALWAYS APPEAR TO BE SET TO 0</span>
+002970,000151: 
+002971,000152:                                                                                                  <span class="co">#        BIT 15      ENABLE T6 RUPT</span>
+002972,000153: 
+002973,000154: 
+002974,000155:                                                                                                  <span class="co">#      CHANNEL 14    CHAN14; OUTPUT CHANNEL; USED TO CONTROL COMPUTER COUNTER CELLS (CDU,GYRO,SPACECRAFT FUNC.</span>
+002975,000156: 
+002976,000157:                                                                                                  <span class="co">#        BIT 1       OUTLINK ACTIVITY (NOT USED)</span>
+002977,000158: 
+002978,000159:                                                                                                  <span class="co">#        BIT 2       ALTITUDE RATE OR ALTITIDE SELECTOR</span>
+002979,000160: 
+002980,000161:                                                                                                  <span class="co">#        BIT 3       ALTITUDE METER ACTIVITY</span>
+002981,000162: 
+002982,000163:                                                                                                  <span class="co">#        BIT 4       THRUST DRIVE ACTIVITY FOR DESCENT ENGINE</span>
+002983,000164: 
+002984,000165:                                                                                                  <span class="co">#        BIT 5       SPARE</span>
+002985,000166: 
+002986,000167:                                                                                                  <span class="co">#        BIT 6       GYRO ENABLE POWER FOR PULSES</span>
+002987,000168: 
+002988,000169:                                                                                                  <span class="co">#        BIT 7       GYRO SELECT B    PAIR OF BITS IDENTIFIES AXIS OF -</span>
+002989,000170:                                                                                                  <span class="co">#        BIT 8       GYRO SELECT A    GYRO SYSTEM TO BE TORQUED.</span>
+002990,000171: 
+002991,000172:                                                                                                  <span class="co">#        BIT 9       GYRO TORQUING COMMAND IN NEGATIVE DIRECTION</span>
+002992,000173: 
+002993,000174: 
 </pre>
 </span>
 </p>
@@ -319,57 +337,57 @@ Page 73
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-002962,000176:                                                                                                  <span class="co">#        BIT 10      GYRO ACTIVITY</span>
-002963,000177: 
-002964,000178:                                                                                                  <span class="co">#        BIT 11      DRIVE CDU S</span>
-002965,000179: 
-002966,000180:                                                                                                  <span class="co">#        BIT 12      DRIVE CDU T</span>
-002967,000181: 
-002968,000182:                                                                                                  <span class="co">#        BIT 13      DRIVE CDU Z</span>
-002969,000183: 
-002970,000184:                                                                                                  <span class="co">#        BIT 14      DRIVE CDU Y</span>
-002971,000185: 
-002972,000186:                                                                                                  <span class="co">#        BIT 15      DRIVE CDU X</span>
-002973,000187: 
-002974,000188: 
-002975,000189:                                                                                                  <span class="co">#      CHANNEL 15    MNKEYIN; INPUT CHANNEL;KEY CODE INPUT FROM KEYBOARD OF DSKY, SENSED BY PROGRAM WHEN</span>
-002976,000190:                                                                                                  <span class="co">#                    PROGRAM INTERRUPT #5 IS RECEIVED. USES BITS 5-1</span>
-002977,000191: 
-002978,000192: 
-002979,000193:                                                                                                  <span class="co">#      CHANNEL 16    NAVKEYIN; INPUT CHANNEL; OPTICS MARK INFORMATION AND NAVIGA ION PANEL DSKY (CM) OR THRUST</span>
-002980,000194:                                                                                                  <span class="co">#                    CONTROL (LM) SENSED BY PROGRAM WHEN PROGRAM INTER-RUPT #6 IS RECEIVED. USES BITS 3-7 ONLY.</span>
-002981,000195: 
-002982,000196:                                                                                                  <span class="co">#        BIT 1       NOT ASSIGNED</span>
-002983,000197: 
-002984,000198:                                                                                                  <span class="co">#        BIT 2       NOT ASSIGNED</span>
-002985,000199: 
-002986,000200:                                                                                                  <span class="co">#        BIT 3       OPTICS X-AXIS MARK SIGNAL FOR ALIGN OPTICAL TSCOPE</span>
-002987,000201: 
-002988,000202:                                                                                                  <span class="co">#        BIT 4       OPTICS Y-AXIS MARK SIGNAL FOR AOT</span>
-002989,000203: 
-002990,000204:                                                                                                  <span class="co">#        BIT 5       OPTICS MARK REJECT SIGNAL</span>
-002991,000205: 
-002992,000206:                                                                                                  <span class="co">#        BIT 6       DESCENT+ ; CREW DESIRED SLOWING RATE OF DESCENT</span>
-002993,000207: 
-002994,000208:                                                                                                  <span class="co">#        BIT 7       DESCENT- ; CREW DESIRED SPEEDING UP RATE OF D'CENT</span>
-002995,000209: 
-002996,000210: 
-002997,000211:                                                                                                  <span class="co">#      NOTE: ALL BITS IN CHANNELS 30-33 ARE INVERTED AS SENSED BY THE PROGRAM, SO THAT A VALUE OF ZERO MEANS</span>
-002998,000212:                                                                                                  <span class="co">#      THAT THE INDICATED SIGNAL IS PRESENT.</span>
-002999,000213: 
-003000,000214: 
-003001,000215:                                                                                                  <span class="co">#      CHANNEL 30    INPUT CHANNEL</span>
-003002,000216: 
-003003,000217:                                                                                                  <span class="co">#        BIT 1       ABORT WITH DESCENT STAGE</span>
-003004,000218: 
-003005,000219:                                                                                                  <span class="co">#        BIT 2          UNUSED</span>
-003006,000220: 
-003007,000221:                                                                                                  <span class="co">#        BIT 3       ENGINE ARMED SIGNAL</span>
-003008,000222: 
-003009,000223:                                                                                                  <span class="co">#        BIT 4       ABORT WITH ASCENT ENGINE STAGE</span>
-003010,000224: 
-003011,000225:                                                                                                  <span class="co">#        BIT 5       AUTO THROTTLE; COMPUTER CONTROL OF DESCENT ENGINE</span>
-003012,000226: 
+002995,000176:                                                                                                  <span class="co">#        BIT 10      GYRO ACTIVITY</span>
+002996,000177: 
+002997,000178:                                                                                                  <span class="co">#        BIT 11      DRIVE CDU S</span>
+002998,000179: 
+002999,000180:                                                                                                  <span class="co">#        BIT 12      DRIVE CDU T</span>
+003000,000181: 
+003001,000182:                                                                                                  <span class="co">#        BIT 13      DRIVE CDU Z</span>
+003002,000183: 
+003003,000184:                                                                                                  <span class="co">#        BIT 14      DRIVE CDU Y</span>
+003004,000185: 
+003005,000186:                                                                                                  <span class="co">#        BIT 15      DRIVE CDU X</span>
+003006,000187: 
+003007,000188: 
+003008,000189:                                                                                                  <span class="co">#      CHANNEL 15    MNKEYIN; INPUT CHANNEL;KEY CODE INPUT FROM KEYBOARD OF DSKY, SENSED BY PROGRAM WHEN</span>
+003009,000190:                                                                                                  <span class="co">#                    PROGRAM INTERRUPT #5 IS RECEIVED. USES BITS 5-1</span>
+003010,000191: 
+003011,000192: 
+003012,000193:                                                                                                  <span class="co">#      CHANNEL 16    NAVKEYIN; INPUT CHANNEL; OPTICS MARK INFORMATION AND NAVIGA ION PANEL DSKY (CM) OR THRUST</span>
+003013,000194:                                                                                                  <span class="co">#                    CONTROL (LM) SENSED BY PROGRAM WHEN PROGRAM INTER-RUPT #6 IS RECEIVED. USES BITS 3-7 ONLY.</span>
+003014,000195: 
+003015,000196:                                                                                                  <span class="co">#        BIT 1       NOT ASSIGNED</span>
+003016,000197: 
+003017,000198:                                                                                                  <span class="co">#        BIT 2       NOT ASSIGNED</span>
+003018,000199: 
+003019,000200:                                                                                                  <span class="co">#        BIT 3       OPTICS X-AXIS MARK SIGNAL FOR ALIGN OPTICAL TSCOPE</span>
+003020,000201: 
+003021,000202:                                                                                                  <span class="co">#        BIT 4       OPTICS Y-AXIS MARK SIGNAL FOR AOT</span>
+003022,000203: 
+003023,000204:                                                                                                  <span class="co">#        BIT 5       OPTICS MARK REJECT SIGNAL</span>
+003024,000205: 
+003025,000206:                                                                                                  <span class="co">#        BIT 6       DESCENT+ ; CREW DESIRED SLOWING RATE OF DESCENT</span>
+003026,000207: 
+003027,000208:                                                                                                  <span class="co">#        BIT 7       DESCENT- ; CREW DESIRED SPEEDING UP RATE OF D'CENT</span>
+003028,000209: 
+003029,000210: 
+003030,000211:                                                                                                  <span class="co">#      NOTE: ALL BITS IN CHANNELS 30-33 ARE INVERTED AS SENSED BY THE PROGRAM, SO THAT A VALUE OF ZERO MEANS</span>
+003031,000212:                                                                                                  <span class="co">#      THAT THE INDICATED SIGNAL IS PRESENT.</span>
+003032,000213: 
+003033,000214: 
+003034,000215:                                                                                                  <span class="co">#      CHANNEL 30    INPUT CHANNEL</span>
+003035,000216: 
+003036,000217:                                                                                                  <span class="co">#        BIT 1       ABORT WITH DESCENT STAGE</span>
+003037,000218: 
+003038,000219:                                                                                                  <span class="co">#        BIT 2          UNUSED</span>
+003039,000220: 
+003040,000221:                                                                                                  <span class="co">#        BIT 3       ENGINE ARMED SIGNAL</span>
+003041,000222: 
+003042,000223:                                                                                                  <span class="co">#        BIT 4       ABORT WITH ASCENT ENGINE STAGE</span>
+003043,000224: 
+003044,000225:                                                                                                  <span class="co">#        BIT 5       AUTO THROTTLE; COMPUTER CONTROL OF DESCENT ENGINE</span>
+003045,000226: 
 </pre>
 </span>
 </p>
@@ -385,56 +403,56 @@ Page 74
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-003014,000228:                                                                                                  <span class="co">#        BIT 6       DISPLAY INERTIAL DATA</span>
-003015,000229: 
-003016,000230:                                                                                                  <span class="co">#        BIT 7       RR CDU FAIL</span>
-003017,000231: 
-003018,000232:                                                                                                  <span class="co">#        BIT 8       SPARE</span>
-003019,000233: 
-003020,000234:                                                                                                  <span class="co">#        BIT 9       IMU OPERATE WITH NO MALFUNCTION</span>
-003021,000235: 
-003022,000236:                                                                                                  <span class="co">#        BIT 10      LM COMPUTER (NOT AGS) HAS CONTROL OF LM</span>
-003023,000237: 
-003024,000238:                                                                                                  <span class="co">#        BIT 11      IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0.</span>
-003025,000239: 
-003026,000240:                                                                                                  <span class="co">#        BIT 12      IMU CDU FAIL (MALFUNCTION OF IMU CDU,S)</span>
-003027,000241: 
-003028,000242:                                                                                                  <span class="co">#        BIT 13      IMU FAIL (MALFUNCTION OF IMU STABILIZATION LOOPS)</span>
-003029,000243: 
-003030,000244:                                                                                                  <span class="co">#        BIT 14      ISS TURN ON REQUESTED</span>
-003031,000245: 
-003032,000246:                                                                                                  <span class="co">#        BIT 15      TEMPERATURE OF STABLE MEMBER WITHIN DESIGN LIMITS</span>
-003033,000247: 
-003034,000248: 
-003035,000249:                                                                                                  <span class="co">#      CHANNEL 31    INPUT CHANNEL; BITS ASSOCIATED WITH THE ATTITUDE  CONTROLLER, TRANSLATIONAL CONTROLLER,</span>
-003036,000250:                                                                                                  <span class="co">#                    AND SPACECRAFT ATTITUDE CONTROL; USED BY RCS DAP</span>
-003037,000251: 
-003038,000252:                                                                                                  <span class="co">#        BIT 1       ROTATION (BY RHC) COMMANDED IN POSITIVE PITCH DIRECTION; MUST BE IN MINIMUM IMPULSE MODE.</span>
-003039,000253:                                                                                                  <span class="co">#                    ALSO POSITIVE ELEVATION CHANGE FOR LANDING POINT  DESIGNATOR</span>
-003040,000254: 
-003041,000255:                                                                                                  <span class="co">#        BIT 2       AS BIT 1 EXCEPT NEGATIVE PITCH AND ELEVATION</span>
-003042,000256: 
-003043,000257:                                                                                                  <span class="co">#        BIT 3       ROTATION (BY RHC) COMMANDED IN POSITIVE YAW DIRECTION; MUST BE IN MINUMUM IMPULSE MODE.</span>
-003044,000258: 
-003045,000259:                                                                                                  <span class="co">#        BIT 4       AS BIT 3 EXCEPT NEGATIVE YAW</span>
-003046,000260: 
-003047,000261:                                                                                                  <span class="co">#        BIT 5       ROTATION (BY RHC) COMMANDED IN POSITIVE ROLL DIRECTION; MUST BE IN MINIMUM IMPULSE MODE.</span>
-003048,000262:                                                                                                  <span class="co">#                    ALSO POSITIVE AZIMUTH CHANGE FOR LANDING POINT DESIGNATOR</span>
-003049,000263: 
-003050,000264:                                                                                                  <span class="co">#        BIT 6       AS BIT 5 EXCEPT NEGATIVE ROLL AND AZIMUTH</span>
-003051,000265: 
-003052,000266:                                                                                                  <span class="co">#        BIT 7       TRANSLATION IN +X DIRECTION COMMANDED BY THC</span>
-003053,000267: 
-003054,000268:                                                                                                  <span class="co">#        BIT 8       TRANSLATION IN -X DIRECTION COMMANDED BY THC</span>
-003055,000269: 
-003056,000270:                                                                                                  <span class="co">#        BIT 9       TRANSLATION IN +Y DIRECTION COMMANDED BY THC</span>
-003057,000271: 
-003058,000272:                                                                                                  <span class="co">#        BIT 10      TRANSLATION IN -Y DIRECTION COMMANDED BY THC</span>
-003059,000273: 
-003060,000274:                                                                                                  <span class="co">#        BIT 11      TRANSLATION IN +Z DIRECTION COMMANDED BY THC</span>
-003061,000275: 
-003062,000276:                                                                                                  <span class="co">#        BIT 12      TRANSLATION IN -Z DIRECTION COMMANDED BY THC</span>
-003063,000277: 
+003047,000228:                                                                                                  <span class="co">#        BIT 6       DISPLAY INERTIAL DATA</span>
+003048,000229: 
+003049,000230:                                                                                                  <span class="co">#        BIT 7       RR CDU FAIL</span>
+003050,000231: 
+003051,000232:                                                                                                  <span class="co">#        BIT 8       SPARE</span>
+003052,000233: 
+003053,000234:                                                                                                  <span class="co">#        BIT 9       IMU OPERATE WITH NO MALFUNCTION</span>
+003054,000235: 
+003055,000236:                                                                                                  <span class="co">#        BIT 10      LM COMPUTER (NOT AGS) HAS CONTROL OF LM</span>
+003056,000237: 
+003057,000238:                                                                                                  <span class="co">#        BIT 11      IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0.</span>
+003058,000239: 
+003059,000240:                                                                                                  <span class="co">#        BIT 12      IMU CDU FAIL (MALFUNCTION OF IMU CDU,S)</span>
+003060,000241: 
+003061,000242:                                                                                                  <span class="co">#        BIT 13      IMU FAIL (MALFUNCTION OF IMU STABILIZATION LOOPS)</span>
+003062,000243: 
+003063,000244:                                                                                                  <span class="co">#        BIT 14      ISS TURN ON REQUESTED</span>
+003064,000245: 
+003065,000246:                                                                                                  <span class="co">#        BIT 15      TEMPERATURE OF STABLE MEMBER WITHIN DESIGN LIMITS</span>
+003066,000247: 
+003067,000248: 
+003068,000249:                                                                                                  <span class="co">#      CHANNEL 31    INPUT CHANNEL; BITS ASSOCIATED WITH THE ATTITUDE  CONTROLLER, TRANSLATIONAL CONTROLLER,</span>
+003069,000250:                                                                                                  <span class="co">#                    AND SPACECRAFT ATTITUDE CONTROL; USED BY RCS DAP</span>
+003070,000251: 
+003071,000252:                                                                                                  <span class="co">#        BIT 1       ROTATION (BY RHC) COMMANDED IN POSITIVE PITCH DIRECTION; MUST BE IN MINIMUM IMPULSE MODE.</span>
+003072,000253:                                                                                                  <span class="co">#                    ALSO POSITIVE ELEVATION CHANGE FOR LANDING POINT  DESIGNATOR</span>
+003073,000254: 
+003074,000255:                                                                                                  <span class="co">#        BIT 2       AS BIT 1 EXCEPT NEGATIVE PITCH AND ELEVATION</span>
+003075,000256: 
+003076,000257:                                                                                                  <span class="co">#        BIT 3       ROTATION (BY RHC) COMMANDED IN POSITIVE YAW DIRECTION; MUST BE IN MINUMUM IMPULSE MODE.</span>
+003077,000258: 
+003078,000259:                                                                                                  <span class="co">#        BIT 4       AS BIT 3 EXCEPT NEGATIVE YAW</span>
+003079,000260: 
+003080,000261:                                                                                                  <span class="co">#        BIT 5       ROTATION (BY RHC) COMMANDED IN POSITIVE ROLL DIRECTION; MUST BE IN MINIMUM IMPULSE MODE.</span>
+003081,000262:                                                                                                  <span class="co">#                    ALSO POSITIVE AZIMUTH CHANGE FOR LANDING POINT DESIGNATOR</span>
+003082,000263: 
+003083,000264:                                                                                                  <span class="co">#        BIT 6       AS BIT 5 EXCEPT NEGATIVE ROLL AND AZIMUTH</span>
+003084,000265: 
+003085,000266:                                                                                                  <span class="co">#        BIT 7       TRANSLATION IN +X DIRECTION COMMANDED BY THC</span>
+003086,000267: 
+003087,000268:                                                                                                  <span class="co">#        BIT 8       TRANSLATION IN -X DIRECTION COMMANDED BY THC</span>
+003088,000269: 
+003089,000270:                                                                                                  <span class="co">#        BIT 9       TRANSLATION IN +Y DIRECTION COMMANDED BY THC</span>
+003090,000271: 
+003091,000272:                                                                                                  <span class="co">#        BIT 10      TRANSLATION IN -Y DIRECTION COMMANDED BY THC</span>
+003092,000273: 
+003093,000274:                                                                                                  <span class="co">#        BIT 11      TRANSLATION IN +Z DIRECTION COMMANDED BY THC</span>
+003094,000275: 
+003095,000276:                                                                                                  <span class="co">#        BIT 12      TRANSLATION IN -Z DIRECTION COMMANDED BY THC</span>
+003096,000277: 
 </pre>
 </span>
 </p>
@@ -450,57 +468,57 @@ Page 75
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-003065,000279: 
-003066,000280:                                                                                                  <span class="co">#        BIT 13      ATTITUDE HOLD MODE ON SCS MODE CONTROL SWITCH</span>
-003067,000281: 
-003068,000282:                                                                                                  <span class="co">#        BIT 14      AUTO STABILIZATION OF ATTITUDE ON SCS MODE SWITCH</span>
-003069,000283: 
-003070,000284:                                                                                                  <span class="co">#        BIT 15      ATTITUDE CONTROL OUT OF DETENT (RHC NOT IN NEUTRAL</span>
-003071,000285: 
-003072,000286: 
-003073,000287:                                                                                                  <span class="co">#      CHANNEL 32       INPUT CHANNEL.</span>
-003074,000288: 
-003075,000289:                                                                                                  <span class="co">#        BIT 1          THRUSTERS 2 &amp; 4 DISABLED BY CREW</span>
-003076,000290: 
-003077,000291:                                                                                                  <span class="co">#        BIT 2          THRUSTERS 5 &amp; 8 DISABLED BY CREW</span>
-003078,000292: 
-003079,000293:                                                                                                  <span class="co">#        BIT 3          THRUSTERS 1 &amp; 3 DISABLED BY CREW</span>
-003080,000294: 
-003081,000295:                                                                                                  <span class="co">#        BIT 4          THRUSTERS 6 &amp; 7 DISABLED BY CREW</span>
-003082,000296: 
-003083,000297:                                                                                                  <span class="co">#        BIT 5          THRUSTERS 14 &amp; 16 DISABLED BY CREW</span>
-003084,000298: 
-003085,000299:                                                                                                  <span class="co">#        BIT 6          THRUSTERS 13 &amp; 15 DISABLED BY CREW</span>
-003086,000300: 
-003087,000301:                                                                                                  <span class="co">#        BIT 7          THRUSTERS 9  &amp; 12 DISABLED BY CREW</span>
-003088,000302: 
-003089,000303:                                                                                                  <span class="co">#        BIT 8          THRUSTERS 10 &amp; 11 DISABLED BY CREW</span>
-003090,000304: 
-003091,000305:                                                                                                  <span class="co">#        BIT 9          DESCENT ENGINE GIMBALS DISABLED BY CREW</span>
-003092,000306: 
-003093,000307:                                                                                                  <span class="co">#        BIT 10         APPARENT DESCENT ENGINE GIMBAL FAILURE</span>
-003094,000308: 
-003095,000309:                                                                                                  <span class="co">#        BIT 14      INDICATES PROCEED KEY IS DEPRESSED</span>
-003096,000310: 
-003097,000311: 
-003098,000312:                                                                                                  <span class="co">#      CHANNEL 33    CHAN33; INPUT CHANNEL; FOR HARDWARE STATUS AND COMMAND INFORMATION. BITS 15-11 ARE FLIP-</span>
-003099,000313:                                                                                                  <span class="co">#                    FLOP BITS RESET BY A CHANNEL "WRITE" COMMAND THAT ARE RESET BY A RESTART &amp; BY T4RUPT LOOP.</span>
-003100,000314: 
-003101,000315:                                                                                                  <span class="co">#        BIT 1       SPARE</span>
-003102,000316: 
-003103,000317:                                                                                                  <span class="co">#        BIT 2       RR AUTO-POWER ON</span>
-003104,000318: 
-003105,000319:                                                                                                  <span class="co">#        BIT 3       RR RANGE LOW SCALE</span>
-003106,000320: 
-003107,000321:                                                                                                  <span class="co">#        BIT 4       RR DATA GOOD</span>
-003108,000322: 
-003109,000323:                                                                                                  <span class="co">#        BIT 5       LR RANGE DATA GOOD</span>
-003110,000324: 
-003111,000325:                                                                                                  <span class="co">#        BIT 6       LR POS1</span>
-003112,000326: 
-003113,000327:                                                                                                  <span class="co">#        BIT 7       LR POS2</span>
-003114,000328: 
-003115,000329: 
+003098,000279: 
+003099,000280:                                                                                                  <span class="co">#        BIT 13      ATTITUDE HOLD MODE ON SCS MODE CONTROL SWITCH</span>
+003100,000281: 
+003101,000282:                                                                                                  <span class="co">#        BIT 14      AUTO STABILIZATION OF ATTITUDE ON SCS MODE SWITCH</span>
+003102,000283: 
+003103,000284:                                                                                                  <span class="co">#        BIT 15      ATTITUDE CONTROL OUT OF DETENT (RHC NOT IN NEUTRAL</span>
+003104,000285: 
+003105,000286: 
+003106,000287:                                                                                                  <span class="co">#      CHANNEL 32       INPUT CHANNEL.</span>
+003107,000288: 
+003108,000289:                                                                                                  <span class="co">#        BIT 1          THRUSTERS 2 &amp; 4 DISABLED BY CREW</span>
+003109,000290: 
+003110,000291:                                                                                                  <span class="co">#        BIT 2          THRUSTERS 5 &amp; 8 DISABLED BY CREW</span>
+003111,000292: 
+003112,000293:                                                                                                  <span class="co">#        BIT 3          THRUSTERS 1 &amp; 3 DISABLED BY CREW</span>
+003113,000294: 
+003114,000295:                                                                                                  <span class="co">#        BIT 4          THRUSTERS 6 &amp; 7 DISABLED BY CREW</span>
+003115,000296: 
+003116,000297:                                                                                                  <span class="co">#        BIT 5          THRUSTERS 14 &amp; 16 DISABLED BY CREW</span>
+003117,000298: 
+003118,000299:                                                                                                  <span class="co">#        BIT 6          THRUSTERS 13 &amp; 15 DISABLED BY CREW</span>
+003119,000300: 
+003120,000301:                                                                                                  <span class="co">#        BIT 7          THRUSTERS 9  &amp; 12 DISABLED BY CREW</span>
+003121,000302: 
+003122,000303:                                                                                                  <span class="co">#        BIT 8          THRUSTERS 10 &amp; 11 DISABLED BY CREW</span>
+003123,000304: 
+003124,000305:                                                                                                  <span class="co">#        BIT 9          DESCENT ENGINE GIMBALS DISABLED BY CREW</span>
+003125,000306: 
+003126,000307:                                                                                                  <span class="co">#        BIT 10         APPARENT DESCENT ENGINE GIMBAL FAILURE</span>
+003127,000308: 
+003128,000309:                                                                                                  <span class="co">#        BIT 14      INDICATES PROCEED KEY IS DEPRESSED</span>
+003129,000310: 
+003130,000311: 
+003131,000312:                                                                                                  <span class="co">#      CHANNEL 33    CHAN33; INPUT CHANNEL; FOR HARDWARE STATUS AND COMMAND INFORMATION. BITS 15-11 ARE FLIP-</span>
+003132,000313:                                                                                                  <span class="co">#                    FLOP BITS RESET BY A CHANNEL "WRITE" COMMAND THAT ARE RESET BY A RESTART &amp; BY T4RUPT LOOP.</span>
+003133,000314: 
+003134,000315:                                                                                                  <span class="co">#        BIT 1       SPARE</span>
+003135,000316: 
+003136,000317:                                                                                                  <span class="co">#        BIT 2       RR AUTO-POWER ON</span>
+003137,000318: 
+003138,000319:                                                                                                  <span class="co">#        BIT 3       RR RANGE LOW SCALE</span>
+003139,000320: 
+003140,000321:                                                                                                  <span class="co">#        BIT 4       RR DATA GOOD</span>
+003141,000322: 
+003142,000323:                                                                                                  <span class="co">#        BIT 5       LR RANGE DATA GOOD</span>
+003143,000324: 
+003144,000325:                                                                                                  <span class="co">#        BIT 6       LR POS1</span>
+003145,000326: 
+003146,000327:                                                                                                  <span class="co">#        BIT 7       LR POS2</span>
+003147,000328: 
+003148,000329: 
 </pre>
 </span>
 </p>
@@ -516,25 +534,25 @@ Page 76
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-003117,000331:                                                                                                  <span class="co">#        BIT 8       LR VEL DATA GOOD</span>
-003118,000332: 
-003119,000333:                                                                                                  <span class="co">#        BIT 9       LR RANGE LOW SCALE</span>
-003120,000334: 
-003121,000335:                                                                                                  <span class="co">#        BIT 10      BLOCK UPLINK INPUT</span>
-003122,000336: 
-003123,000337:                                                                                                  <span class="co">#        BIT 11      UPLINK TOO FAST</span>
-003124,000338: 
-003125,000339:                                                                                                  <span class="co">#        BIT 12      DOWNLINK TOO FAST</span>
-003126,000340: 
-003127,000341:                                                                                                  <span class="co">#        BIT 13      PIPA FAIL</span>
-003128,000342: 
-003129,000343:                                                                                                  <span class="co">#        BIT 14      WARNING OF REPEATED ALARMS: RESTART,COUNTER FAIL, VOLTAGE FAIL,AND SCALAR DOUBLE.</span>
-003130,000344: 
-003131,000345:                                                                                                  <span class="co">#        BIT 15      LGC OSCILLATOR STOPPED</span>
-003132,000346: 
-003133,000347: 
-003134,000348:                                                                                                  <span class="co">#      CHANNEL 34    DNT M1; OUTPUT CHANNEL; DOWNLINK 1  FIRST OF TWO WORDS SERIALIZATION.</span>
-003135,000349:                                                                                                  <span class="co">#      CHANNEL 35    DNT M2; OUTPUT CHANNEL DOWNLINK 2 SOCOND OF TWO   WORDS SERIALIZATION.</span>
+003150,000331:                                                                                                  <span class="co">#        BIT 8       LR VEL DATA GOOD</span>
+003151,000332: 
+003152,000333:                                                                                                  <span class="co">#        BIT 9       LR RANGE LOW SCALE</span>
+003153,000334: 
+003154,000335:                                                                                                  <span class="co">#        BIT 10      BLOCK UPLINK INPUT</span>
+003155,000336: 
+003156,000337:                                                                                                  <span class="co">#        BIT 11      UPLINK TOO FAST</span>
+003157,000338: 
+003158,000339:                                                                                                  <span class="co">#        BIT 12      DOWNLINK TOO FAST</span>
+003159,000340: 
+003160,000341:                                                                                                  <span class="co">#        BIT 13      PIPA FAIL</span>
+003161,000342: 
+003162,000343:                                                                                                  <span class="co">#        BIT 14      WARNING OF REPEATED ALARMS: RESTART,COUNTER FAIL, VOLTAGE FAIL,AND SCALAR DOUBLE.</span>
+003163,000344: 
+003164,000345:                                                                                                  <span class="co">#        BIT 15      LGC OSCILLATOR STOPPED</span>
+003165,000346: 
+003166,000347: 
+003167,000348:                                                                                                  <span class="co">#      CHANNEL 34    DNT M1; OUTPUT CHANNEL; DOWNLINK 1  FIRST OF TWO WORDS SERIALIZATION.</span>
+003168,000349:                                                                                                  <span class="co">#      CHANNEL 35    DNT M2; OUTPUT CHANNEL DOWNLINK 2 SOCOND OF TWO   WORDS SERIALIZATION.</span>
 
 End of include-file INPUT_OUTPUT_CHANNEL_BIT_DESCRIPTIONS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
