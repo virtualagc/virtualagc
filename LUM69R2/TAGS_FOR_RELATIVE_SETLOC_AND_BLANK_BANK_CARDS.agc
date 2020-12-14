@@ -17,6 +17,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
 ##              2019-07-27 MAS  Added tag for LUM69 rev 2 lunar potential code.
+##		2020-12-14 RSB	Tweaked the annotation relevant to the
+##				change mentioned above to conform to the
+##				style and extent of similar justifying
+##				annotations previously added to 
+##				Comanche 44 and 51.
 
 ## Page 27
                 COUNT           BANKSUM
@@ -105,9 +110,22 @@ ORBITAL         EQUALS
 ORBITAL1        EQUALS
 INTVEL          EQUALS
 INTPRET2        EQUALS
-## The following tag has been added for the LUM69 rev 2 code for the R-2 lunar
-## potential model. The exact tag name may have been different in the original
-## code (or they have have used ORBITAL or ORBITAL1 directly instead).
+## <b>Reconstruction:</b> The alias immediately following this annotation
+## was not present in Luminary 69. It is associated with the incorporation of the 
+## R-2 Lunar Potential Model (see
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">LUMINARY Memo #75</a>).
+## The alias is used for the purpose of placing the R-2 model functions QUALITY1
+## and QUALITY2 into desired memory banks. The placement used differs between different revisions of Luminary and Colossus.
+## The particular choice of BANK 11 in reconstructing Luminary 69/2 was determined empirically.
+## Moreover, this particular placement of QUALITY1 and QUALITY2 into BANK 11 is not
+## matched by any other available AGC software version, and hence there is no 
+## particular reason to believe that the specific string "MODCHG1" was the alias used in the
+## original Luminary 69/2 source code.  The string MODCHG1 was selected in the reconstruction
+## process by analogy to the use in the original Comanche 55 source code of the
+## aliases MODCHG2 and MODCHG3 for relocation of QUALITY1 and QUALITY2
+## (into BANK 12 and BANK 13, respectively).  However, some other alias
+## for BANK 11 (such as ORBITAL or ORBITAL1) could have just as easily been used for
+## this purpose in Luminary 69/2.
 MODCHG1         EQUALS
                 BNKSUM          11
 

@@ -18,6 +18,11 @@
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
 ##              2019-07-27 MAS  Added E3J22R2M and E32C31RM padload erasables
 ##                              for LUM69 rev 2.
+##		2020-12-14 RSB	Tweaked the annotation relevant to the
+##				change mentioned above to conform to the
+##				style and extent of similar justifying
+##				annotations previously added to 
+##				Comanche 44 and 51.
 
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -800,11 +805,26 @@ AZ              ERASE           +1D                     # B(1)  AZ AND EL MUST B
 EL              EQUALS          AZ              +1D     # B(1)
 #
 
-## The following two erasables for the R-2 lunar potential model were added
-## betwen Luminary 69 and LUM69 rev 2. The code was adapted from Luminary 099. Exact
-## comments may differ from the original LUM69 rev 2.
 # ERASABLES FOR THE R2 LUNAR POTENTIAL MODEL                            (2D)
 
+## <b>Reconstruction:</b> The two lines immediately following this annotation
+## were not present in Luminary 69. They have been added to Luminary 69/2 due 
+## to incorporation of the R-2 Lunar Potential Model &mdash; see
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">LUMINARY Memo #75</a>.
+## The lines have been taken without change from Luminary 99/1, which 
+## also incorporates the R-2 model. According to 
+## <a href="http://www.ibiblio.org/apollo/Documents/LUM78_text.pdf">LUMINARY Memo #78"</a>,
+## the implementation of the R-2 model was dictated by Program Change Notice
+## (PCN) 761.1, of which we don't have a copy of the full text, but whose title
+## is "R-2 Lunar Potential Model".  The memo goes on to state that PCN 761.1 
+## required the addition of two single-precision padloads, E3J22R2M and E32C31RM.
+## <br><br>
+## A point which at first may confuse is that PCN 761.1 was incorporated in 
+## Luminary 95.  So why does the change appear in Luminary 69/2?  But the 
+## confusion is only momentary after a little thought:  Luminary 95 derives from Luminary 69,
+## and Luminary 69/2 derives from Luminary 69 as well.  So what?  Luminary 69/2 
+## does not derive from Luminary 95, or vice-versa.  We don't know which of them
+## came first, and in the present context don't care.
 E3J22R2M	ERASE			# I(1)
 E32C31RM	ERASE			# I(1)
 
