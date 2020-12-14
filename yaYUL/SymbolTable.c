@@ -1,5 +1,5 @@
 /*
- * Copyright 2003,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003,2009-2010,2016,2020 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -92,6 +92,16 @@
  *                              notations only in block 1, now does it for all targets.
  *                              EditSymbolNew() now tracks how many symbol values have
  *                              *changed*" during a pass, for post-analysis by pass().
+ *              2020-12-14 RSB  In colorized html of assembly listings, changed the
+ *                              formerly-custom color used for visited hyperlinks back to
+ *                              the default.  I think the reason I originally customized it
+ *                              must have been that I thought the default was too close to
+ *                              the color being used for colorized comments. But the custom
+ *                              color is far too close to the (black) color of the text in
+ *                              ##-style annotations, so it's made it really, really hard
+ *                              to visually distinguish visited lines in annotations from
+ *                              the plain text. And in retrospect, I don't see any way for
+ *                              it to really be confused with a comment.
  *
  * Concerning the concept of a symbol's namespace.  I had originally
  * intended to implement this, and so many functions had a namespace
@@ -237,7 +247,7 @@ HtmlCreate(char *Filename)
           "<style type=\"text/css\">\n"
           "p.nobreak { white-space:nowrap; }\n"
           "a { text-decoration:none; }\n"
-          "a:visited { COLOR: #000850; }\n"
+          // "a:visited { COLOR: #000850; }\n"
           "</style>\n"
 
           "<style type=\"text/css\">\n"
