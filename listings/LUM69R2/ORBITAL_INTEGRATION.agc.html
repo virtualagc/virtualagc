@@ -1359,48 +1359,55 @@ Page 1246
    # ****************************************************************************************************************
    # ****************************************************************************************************************
 </pre>
-As the function's own comments indicate, this is present <i>only</i> for the Luminary 99/1
-release to memory-module manufacturing, and is not used for any other manufacturing release.  In particular, 
-it should not be there for Luminary 69/2.  This conclusion is reinforced by
+Also, refer to
 <a href="http://www.ibiblio.org/apollo/Documents/LUM83_text.pdf">LUMINARY Memo #83, "LUMINARY Revision 98"</a>.
+As the function's own comments indicate, this should have been present for the very next memory-module manufacturing release.
+The most-recent manufacturing release at that point was Luminary 97 (in April 1969), and the next one would be Luminary 
+99 (in May 1969).  (Those release dates are from
+<a href="http://www.ibiblio.org/apollo/Documents/R-700.pdf#page=170">
+<i>MIT's Role in Project Apollo, Final Report</i>, Table 4-II</a>.)  Naively, from the program comments, we'd conclude that
+the code should have been removed by the time of the Luminary 99/1 release.  However, as it turned out, Luminary 99/1 differed 
+from Luminary 99 in a single memory module, indeed in a single memory bank
+&mdash; not the one containing this code &mdash; so by leaving the code in place it meant that a single new memory module needed
+to be manufactured for Luminary 99/1; and the other 5 memory modules for Luminary 99/1 could be recycled from Luminary 99.
 </td></tr></tbody></table>
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053623,000926: 
-053624,000927: 11,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4F52424954414C31">ORBITAL1</a>                              
-053625,000928: 11,2000                                           <span class="ps">BANK    </span>                                       
-053626,000929: 
-<a name="332F35"></a>053627,000930: 11,3671           04631 23146  <span class="sm">3/5     </span>           <span class="ps">2DEC    </span> .6         B-2                        
-053628,000931: 
-<a name="54485245452F38"></a>053629,000932: 11,3673           14000 00000  <span class="sm">THREE/8 </span>           <span class="ps">2DEC    </span> .375                                  
 053630,000933: 
-<a name="2E3344"></a>053631,000934: 11,3675           02314 31463  <span class="sm">.3D     </span>           <span class="ps">2DEC    </span> .3         B-2                        
-053632,000935: 
-<a name="332F3634"></a>053633,000936: 11,3677           01400 00000  <span class="sm">3/64    </span>           <span class="ps">2DEC    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#33">3</a>          B-6                        
-053634,000937: 
-<a name="4450312F34"></a>053635,000938: 11,3701           10000 00000  <span class="sm">DP1/4   </span>           <span class="ps">2DEC    </span> .25                                   
-053636,000939: 
-<a name="4451554152544552"></a>053637,000940: 11,3703  11,3701               <span class="sm">DQUARTER</span>           <span class="ps">EQUALS  </span> <a href="#4450312F34">DP1/4</a>                                 
-<a name="504F53312F34"></a>053638,000941: 11,3703  11,3701               <span class="sm">POS1/4  </span>           <span class="ps">EQUALS  </span> <a href="#4450312F34">DP1/4</a>                                 
-<a name="332F3332"></a>053639,000942: 11,3703           03000 00000  <span class="sm">3/32    </span>           <span class="ps">2DEC    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#33">3</a>          B-5                        
-053640,000943: 
-<a name="31352F3136"></a>053641,000944: 11,3705           36000 00000  <span class="sm">15/16   </span>           <span class="ps">2DEC    </span> 15.        B-4                        
-053642,000945: 
-<a name="332F34"></a>053643,000946: 11,3707           30000 00000  <span class="sm">3/4     </span>           <span class="ps">2DEC    </span> 3.0        B-2                        
-053644,000947: 
-<a name="372F3132"></a>053645,000948: 11,3711           22525 12525  <span class="sm">7/12    </span>           <span class="ps">2DEC    </span> .5833333333                            
-053646,000949: 
-<a name="392F3136"></a>053647,000950: 11,3713           22000 00000  <span class="sm">9/16    </span>           <span class="ps">2DEC    </span> 9          B-4                        
-053648,000951: 
-<a name="352F313238"></a>053649,000952: 11,3715           01200 00000  <span class="sm">5/128   </span>           <span class="ps">2DEC    </span> 5          B-7                        
-053650,000953: 
-<a name="44505A45524F"></a>053651,000954: 11,3717  11,2274               <span class="sm">DPZERO  </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F564543">ZEROVEC</a>                               
-<a name="4450322F33"></a>053652,000955: 11,3717           25252 25253  <span class="sm">DP2/3   </span>           <span class="ps">2DEC    </span> .6666666667                            
+053631,000934: 11,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4F52424954414C31">ORBITAL1</a>                              
+053632,000935: 11,2000                                           <span class="ps">BANK    </span>                                       
+053633,000936: 
+<a name="332F35"></a>053634,000937: 11,3671           04631 23146  <span class="sm">3/5     </span>           <span class="ps">2DEC    </span> .6         B-2                        
+053635,000938: 
+<a name="54485245452F38"></a>053636,000939: 11,3673           14000 00000  <span class="sm">THREE/8 </span>           <span class="ps">2DEC    </span> .375                                  
+053637,000940: 
+<a name="2E3344"></a>053638,000941: 11,3675           02314 31463  <span class="sm">.3D     </span>           <span class="ps">2DEC    </span> .3         B-2                        
+053639,000942: 
+<a name="332F3634"></a>053640,000943: 11,3677           01400 00000  <span class="sm">3/64    </span>           <span class="ps">2DEC    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#33">3</a>          B-6                        
+053641,000944: 
+<a name="4450312F34"></a>053642,000945: 11,3701           10000 00000  <span class="sm">DP1/4   </span>           <span class="ps">2DEC    </span> .25                                   
+053643,000946: 
+<a name="4451554152544552"></a>053644,000947: 11,3703  11,3701               <span class="sm">DQUARTER</span>           <span class="ps">EQUALS  </span> <a href="#4450312F34">DP1/4</a>                                 
+<a name="504F53312F34"></a>053645,000948: 11,3703  11,3701               <span class="sm">POS1/4  </span>           <span class="ps">EQUALS  </span> <a href="#4450312F34">DP1/4</a>                                 
+<a name="332F3332"></a>053646,000949: 11,3703           03000 00000  <span class="sm">3/32    </span>           <span class="ps">2DEC    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#33">3</a>          B-5                        
+053647,000950: 
+<a name="31352F3136"></a>053648,000951: 11,3705           36000 00000  <span class="sm">15/16   </span>           <span class="ps">2DEC    </span> 15.        B-4                        
+053649,000952: 
+<a name="332F34"></a>053650,000953: 11,3707           30000 00000  <span class="sm">3/4     </span>           <span class="ps">2DEC    </span> 3.0        B-2                        
+053651,000954: 
+<a name="372F3132"></a>053652,000955: 11,3711           22525 12525  <span class="sm">7/12    </span>           <span class="ps">2DEC    </span> .5833333333                            
 053653,000956: 
-<a name="322F33"></a>053654,000957: 11,3721  11,3717               <span class="sm">2/3     </span>           <span class="ps">EQUALS  </span> <a href="#4450322F33">DP2/3</a>                                 
-<a name="4F43543237"></a>053655,000958: 11,3721           00027        <span class="sm">OCT27   </span>           <span class="ps">OCT     </span> 27                                    
-053656,000959: 
+<a name="392F3136"></a>053654,000957: 11,3713           22000 00000  <span class="sm">9/16    </span>           <span class="ps">2DEC    </span> 9          B-4                        
+053655,000958: 
+<a name="352F313238"></a>053656,000959: 11,3715           01200 00000  <span class="sm">5/128   </span>           <span class="ps">2DEC    </span> 5          B-7                        
+053657,000960: 
+<a name="44505A45524F"></a>053658,000961: 11,3717  11,2274               <span class="sm">DPZERO  </span>           <span class="ps">EQUALS  </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F564543">ZEROVEC</a>                               
+<a name="4450322F33"></a>053659,000962: 11,3717           25252 25253  <span class="sm">DP2/3   </span>           <span class="ps">2DEC    </span> .6666666667                            
+053660,000963: 
+<a name="322F33"></a>053661,000964: 11,3721  11,3717               <span class="sm">2/3     </span>           <span class="ps">EQUALS  </span> <a href="#4450322F33">DP2/3</a>                                 
+<a name="4F43543237"></a>053662,000965: 11,3721           00027        <span class="sm">OCT27   </span>           <span class="ps">OCT     </span> 27                                    
+053663,000966: 
 </pre>
 </span>
 </p>
@@ -1419,8 +1426,8 @@ It seems reasonable to retain this comment.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053661,000964:                                                                                                  <span class="co">#  LM504 IS TEMPORARY</span>
-053662,000965: 
+053668,000971:                                                                                                  <span class="co">#  LM504 IS TEMPORARY</span>
+053669,000972: 
 </pre>
 </span>
 </p>
@@ -1436,46 +1443,46 @@ Page 1247
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053664,000967: 13,3721                                           <span class="ps">BANK    </span> 13                                    
-053665,000968: 13,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4F52424954414C32">ORBITAL2</a>                              
-053666,000969: 13,2000                                           <span class="ps">BANK    </span>                                       
-053667,000970:                                                                                                  <span class="co">#  IT IS VITAL THAT THE FOLLOWING CONSTANTS NOT BE SHUFFLED</span>
-053668,000971: 13,3721           77764                           <span class="ps">DEC     </span> -11        B-14                       
-053669,000972: 13,3722           77775                           <span class="ps">DEC     </span> -2         B-14                       
-053670,000973: 13,3723           77766                           <span class="ps">DEC     </span> -9         B-14                       
-053671,000974: 13,3724           77771                           <span class="ps">DEC     </span> -6         B-14                       
-053672,000975: 13,3725           77775                           <span class="ps">DEC     </span> -2         B-14                       
-053673,000976: 13,3726           77775                           <span class="ps">DEC     </span> -2         B-14                       
-053674,000977: 13,3727           00000                           <span class="ps">DEC     </span> 0          B-14                       
-053675,000978: 13,3730           77763                           <span class="ps">DEC     </span> -12        B-14                       
-053676,000979: 13,3731           77766                           <span class="ps">DEC     </span> -9         B-14                       
-053677,000980: 13,3732           77773                           <span class="ps">DEC     </span> -4         B-14                       
-<a name="415343414C45"></a>053678,000981: 13,3733           77770        <span class="sm">ASCALE  </span>           <span class="ps">DEC     </span> -7         B-14                       
-053679,000982: 13,3734           77771                           <span class="ps">DEC     </span> -6         B-14                       
-<a name="352F38"></a>053680,000983: 13,3735           24000 00000  <span class="sm">5/8     </span>           <span class="ps">2DEC    </span> 5          B-3                        
-053681,000984: 
-<a name="2D312F3132"></a>053682,000985: 13,3737           74631 63145  <span class="sm">-1/12   </span>           <span class="ps">2DEC    </span> -.1                                   
-053683,000986: 
-<a name="524543524154494F"></a>053684,000987: 13,3741           00243 32703  <span class="sm">RECRATIO</span>           <span class="ps">2DEC    </span> .01                                   
-053685,000988: 
-<a name="52535048455245"></a>053686,000989: 13,3743           03654 21000  <span class="sm">RSPHERE </span>           <span class="ps">2DEC    </span> 64373.76   E3         B-29            
-053687,000990: 
-<a name="52444D"></a>053688,000991: 13,3745           03654 21000  <span class="sm">RDM     </span>           <span class="ps">2DEC    </span> 16093.44   E3         B-27            
-053689,000992: 
-<a name="524445"></a>053690,000993: 13,3747           04627 25200  <span class="sm">RDE     </span>           <span class="ps">2DEC    </span> 80467.20   E3         B-29            
-053691,000994: 
-<a name="52415454"></a>053692,000995: 13,3751                        <span class="sm">RATT    </span>           <span class="ps">EQUALS  </span> 00                                    
-<a name="56415454"></a>053693,000996: 13,3751                        <span class="sm">VATT    </span>           <span class="ps">EQUALS  </span> 6D                                    
-<a name="544154"></a>053694,000997: 13,3751                        <span class="sm">TAT     </span>           <span class="ps">EQUALS  </span> 12D                                   
-<a name="5241545431"></a>053695,000998: 13,3751                        <span class="sm">RATT1   </span>           <span class="ps">EQUALS  </span> 14D                                   
-<a name="5641545431"></a>053696,000999: 13,3751                        <span class="sm">VATT1   </span>           <span class="ps">EQUALS  </span> 20D                                   
-<a name="4D55285029"></a>053697,001000: 13,3751                        <span class="sm">MU(P)   </span>           <span class="ps">EQUALS  </span> 26D                                   
-<a name="5444454331"></a>053698,001001: 13,3751                        <span class="sm">TDEC1   </span>           <span class="ps">EQUALS  </span> 32D                                   
-<a name="55525056"></a>053699,001002: 13,3751                        <span class="sm">URPV    </span>           <span class="ps">EQUALS  </span> 14D                                   
-<a name="434F535048492F32"></a>053700,001003: 13,3751     0022               <span class="sm">COSPHI/2</span>           <span class="ps">EQUALS  </span> <a href="#55525056">URPV</a>       +4                         
-<a name="555A"></a>053701,001004: 13,3751                        <span class="sm">UZ      </span>           <span class="ps">EQUALS  </span> 20D                                   
-<a name="54564543"></a>053702,001005: 13,3751                        <span class="sm">TVEC    </span>           <span class="ps">EQUALS  </span> 26D                                   
-053703,001006: 
+053671,000974: 13,3721                                           <span class="ps">BANK    </span> 13                                    
+053672,000975: 13,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4F52424954414C32">ORBITAL2</a>                              
+053673,000976: 13,2000                                           <span class="ps">BANK    </span>                                       
+053674,000977:                                                                                                  <span class="co">#  IT IS VITAL THAT THE FOLLOWING CONSTANTS NOT BE SHUFFLED</span>
+053675,000978: 13,3721           77764                           <span class="ps">DEC     </span> -11        B-14                       
+053676,000979: 13,3722           77775                           <span class="ps">DEC     </span> -2         B-14                       
+053677,000980: 13,3723           77766                           <span class="ps">DEC     </span> -9         B-14                       
+053678,000981: 13,3724           77771                           <span class="ps">DEC     </span> -6         B-14                       
+053679,000982: 13,3725           77775                           <span class="ps">DEC     </span> -2         B-14                       
+053680,000983: 13,3726           77775                           <span class="ps">DEC     </span> -2         B-14                       
+053681,000984: 13,3727           00000                           <span class="ps">DEC     </span> 0          B-14                       
+053682,000985: 13,3730           77763                           <span class="ps">DEC     </span> -12        B-14                       
+053683,000986: 13,3731           77766                           <span class="ps">DEC     </span> -9         B-14                       
+053684,000987: 13,3732           77773                           <span class="ps">DEC     </span> -4         B-14                       
+<a name="415343414C45"></a>053685,000988: 13,3733           77770        <span class="sm">ASCALE  </span>           <span class="ps">DEC     </span> -7         B-14                       
+053686,000989: 13,3734           77771                           <span class="ps">DEC     </span> -6         B-14                       
+<a name="352F38"></a>053687,000990: 13,3735           24000 00000  <span class="sm">5/8     </span>           <span class="ps">2DEC    </span> 5          B-3                        
+053688,000991: 
+<a name="2D312F3132"></a>053689,000992: 13,3737           74631 63145  <span class="sm">-1/12   </span>           <span class="ps">2DEC    </span> -.1                                   
+053690,000993: 
+<a name="524543524154494F"></a>053691,000994: 13,3741           00243 32703  <span class="sm">RECRATIO</span>           <span class="ps">2DEC    </span> .01                                   
+053692,000995: 
+<a name="52535048455245"></a>053693,000996: 13,3743           03654 21000  <span class="sm">RSPHERE </span>           <span class="ps">2DEC    </span> 64373.76   E3         B-29            
+053694,000997: 
+<a name="52444D"></a>053695,000998: 13,3745           03654 21000  <span class="sm">RDM     </span>           <span class="ps">2DEC    </span> 16093.44   E3         B-27            
+053696,000999: 
+<a name="524445"></a>053697,001000: 13,3747           04627 25200  <span class="sm">RDE     </span>           <span class="ps">2DEC    </span> 80467.20   E3         B-29            
+053698,001001: 
+<a name="52415454"></a>053699,001002: 13,3751                        <span class="sm">RATT    </span>           <span class="ps">EQUALS  </span> 00                                    
+<a name="56415454"></a>053700,001003: 13,3751                        <span class="sm">VATT    </span>           <span class="ps">EQUALS  </span> 6D                                    
+<a name="544154"></a>053701,001004: 13,3751                        <span class="sm">TAT     </span>           <span class="ps">EQUALS  </span> 12D                                   
+<a name="5241545431"></a>053702,001005: 13,3751                        <span class="sm">RATT1   </span>           <span class="ps">EQUALS  </span> 14D                                   
+<a name="5641545431"></a>053703,001006: 13,3751                        <span class="sm">VATT1   </span>           <span class="ps">EQUALS  </span> 20D                                   
+<a name="4D55285029"></a>053704,001007: 13,3751                        <span class="sm">MU(P)   </span>           <span class="ps">EQUALS  </span> 26D                                   
+<a name="5444454331"></a>053705,001008: 13,3751                        <span class="sm">TDEC1   </span>           <span class="ps">EQUALS  </span> 32D                                   
+<a name="55525056"></a>053706,001009: 13,3751                        <span class="sm">URPV    </span>           <span class="ps">EQUALS  </span> 14D                                   
+<a name="434F535048492F32"></a>053707,001010: 13,3751     0022               <span class="sm">COSPHI/2</span>           <span class="ps">EQUALS  </span> <a href="#55525056">URPV</a>       +4                         
+<a name="555A"></a>053708,001011: 13,3751                        <span class="sm">UZ      </span>           <span class="ps">EQUALS  </span> 20D                                   
+<a name="54564543"></a>053709,001012: 13,3751                        <span class="sm">TVEC    </span>           <span class="ps">EQUALS  </span> 26D                                   
+053710,001013: 
 </pre>
 </span>
 </p>
@@ -1500,19 +1507,19 @@ are a part of the R-2 model).
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053714,001017: 11,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4443484731">MODCHG1</a>                               
-053715,001018: 11,2000                                           <span class="ps">BANK    </span>                                       
-<a name="5155414C49545931"></a>053716,001019: 11,3722           71214        <span class="sm">QUALITY1</span>           <span class="in">BOF     </span> <span class="in">DLOAD     </span>                            
-053717,001020: 11,3723           00343                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              
-053718,001021: 11,3724           23136                                    <a href="#4E4252414E4348">NBRANCH</a>                               
-053719,001022: 11,3725           00017                                    <a href="#55525056">URPV</a>                                  
-053720,001023: 11,3726           77716                           <span class="in">DSQ     </span>                                       
-<a name="5155414C49545932"></a>053721,001024: 11,3727           63525        <span class="sm">QUALITY2</span>           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            <span class="co">#  SQUARE INTO 2D, B2</span>
-053722,001025: 11,3730           00021                                    <a href="#55525056">URPV</a>       +2                         <span class="co">#  Y COMPONENT, B1</span>
-053723,001026: 11,3731           77625                           <span class="in">DSU     </span>                                       
-053724,001027: 11,3732           74205                           <span class="in">DMP     </span> <span class="in">VXSC      </span>                            <span class="co">#  5(Y**2-X**2)UR</span>
-053725,001028: 11,3733           27736                                    <a href="#352F38">5/8</a>                                   <span class="co">#  CONSTANT, 5B3</span>
-053726,001029: 11,3734           00017                                    <a href="#55525056">URPV</a>                                  <span class="co">#  VECTOR.  RESULT MAXIMUM IS 5, SCALING</span>
+053721,001024: 11,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D4F4443484731">MODCHG1</a>                               
+053722,001025: 11,2000                                           <span class="ps">BANK    </span>                                       
+<a name="5155414C49545931"></a>053723,001026: 11,3722           71214        <span class="sm">QUALITY1</span>           <span class="in">BOF     </span> <span class="in">DLOAD     </span>                            
+053724,001027: 11,3723           00343                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4D4F4F4E464C4147">MOONFLAG</a>                              
+053725,001028: 11,3724           23136                                    <a href="#4E4252414E4348">NBRANCH</a>                               
+053726,001029: 11,3725           00017                                    <a href="#55525056">URPV</a>                                  
+053727,001030: 11,3726           77716                           <span class="in">DSQ     </span>                                       
+<a name="5155414C49545932"></a>053728,001031: 11,3727           63525        <span class="sm">QUALITY2</span>           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            <span class="co">#  SQUARE INTO 2D, B2</span>
+053729,001032: 11,3730           00021                                    <a href="#55525056">URPV</a>       +2                         <span class="co">#  Y COMPONENT, B1</span>
+053730,001033: 11,3731           77625                           <span class="in">DSU     </span>                                       
+053731,001034: 11,3732           74205                           <span class="in">DMP     </span> <span class="in">VXSC      </span>                            <span class="co">#  5(Y**2-X**2)UR</span>
+053732,001035: 11,3733           27736                                    <a href="#352F38">5/8</a>                                   <span class="co">#  CONSTANT, 5B3</span>
+053733,001036: 11,3734           00017                                    <a href="#55525056">URPV</a>                                  <span class="co">#  VECTOR.  RESULT MAXIMUM IS 5, SCALING</span>
 </pre>
 </span>
 </p>
@@ -1528,24 +1535,24 @@ Page 1248
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-053728,001031:                                                                                                  <span class="co">#  HERE B6</span>
-053729,001032: 11,3735           65332                           <span class="in">VSL3    </span> <span class="in">PDDL      </span>                            <span class="co">#  STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ</span>
-053730,001033: 11,3736           00017                                    <a href="#55525056">URPV</a>                                  <span class="co">#  X COMPONENT, B1</span>
-053731,001034: 11,3737           43342                           <span class="in">SR1     </span> <span class="in">DAD       </span>                            <span class="co">#  2 X X COMPONENT FOR B3 SCALING</span>
-053732,001035: 11,3740           00003                                    2D                                    <span class="co">#  ADD TO VECTOR X COMPONENT OF ANSWER,</span>
-053733,001036:                                                                                                  <span class="co">#  SAME AS MULTIPLYING BY UNITX.  MAX IS 7.</span>
-053734,001037: 11,3741           14003                           <span class="in">STODL   </span> 2D                                    
-053735,001038: 11,3742           00021                                    <a href="#55525056">URPV</a>       +2                         <span class="co">#  Y COMPONENT, B1</span>
-053736,001039: 11,3743           44342                           <span class="in">SR1     </span> <span class="in">BDSU      </span>                            <span class="co">#  2 X Y COMPONENT FOR B3 SCALING</span>
-053737,001040: 11,3744           00005                                    4D                                    <span class="co">#  SUBTRACT FROM VECTOR Y COMPONENT OF</span>
-053738,001041:                                                                                                  <span class="co">#  ANSWER, SAME AS MULTIPLYING BY UNITY.</span>
-053739,001042:                                                                                                  <span class="co">#  MAX IS 7.</span>
-053740,001043: 11,3745           00005                           <span class="in">STORE   </span> 4D                                    <span class="co">#  2D HAS VECTOR, B3.</span>
-053741,001044: 11,3746           74335                           <span class="in">SLOAD   </span> <span class="in">VXSC      </span>                            <span class="co">#  MULTIPLY COEFFIECIENT TIMES VECTOR IN 2D</span>
-053742,001045: 11,3747           01352                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#45334A323252324D">E3J22R2M</a>                              
-053743,001046: 11,3750           43525                           <span class="in">PDDL    </span> <span class="in">RVQ       </span>                            <span class="co">#  J22 TERM X R**4 IN 2D, SCALED B61</span>
-053744,001047: 11,3751           00023                                    <a href="#434F535048492F32">COSPHI/2</a>                              <span class="co">#  SAME AS URPV +4  Z COMPONENT</span>
-053745,001048: 
+053735,001038:                                                                                                  <span class="co">#  HERE B6</span>
+053736,001039: 11,3735           65332                           <span class="in">VSL3    </span> <span class="in">PDDL      </span>                            <span class="co">#  STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ</span>
+053737,001040: 11,3736           00017                                    <a href="#55525056">URPV</a>                                  <span class="co">#  X COMPONENT, B1</span>
+053738,001041: 11,3737           43342                           <span class="in">SR1     </span> <span class="in">DAD       </span>                            <span class="co">#  2 X X COMPONENT FOR B3 SCALING</span>
+053739,001042: 11,3740           00003                                    2D                                    <span class="co">#  ADD TO VECTOR X COMPONENT OF ANSWER,</span>
+053740,001043:                                                                                                  <span class="co">#  SAME AS MULTIPLYING BY UNITX.  MAX IS 7.</span>
+053741,001044: 11,3741           14003                           <span class="in">STODL   </span> 2D                                    
+053742,001045: 11,3742           00021                                    <a href="#55525056">URPV</a>       +2                         <span class="co">#  Y COMPONENT, B1</span>
+053743,001046: 11,3743           44342                           <span class="in">SR1     </span> <span class="in">BDSU      </span>                            <span class="co">#  2 X Y COMPONENT FOR B3 SCALING</span>
+053744,001047: 11,3744           00005                                    4D                                    <span class="co">#  SUBTRACT FROM VECTOR Y COMPONENT OF</span>
+053745,001048:                                                                                                  <span class="co">#  ANSWER, SAME AS MULTIPLYING BY UNITY.</span>
+053746,001049:                                                                                                  <span class="co">#  MAX IS 7.</span>
+053747,001050: 11,3745           00005                           <span class="in">STORE   </span> 4D                                    <span class="co">#  2D HAS VECTOR, B3.</span>
+053748,001051: 11,3746           74335                           <span class="in">SLOAD   </span> <span class="in">VXSC      </span>                            <span class="co">#  MULTIPLY COEFFIECIENT TIMES VECTOR IN 2D</span>
+053749,001052: 11,3747           01352                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#45334A323252324D">E3J22R2M</a>                              
+053750,001053: 11,3750           43525                           <span class="in">PDDL    </span> <span class="in">RVQ       </span>                            <span class="co">#  J22 TERM X R**4 IN 2D, SCALED B61</span>
+053751,001054: 11,3751           00023                                    <a href="#434F535048492F32">COSPHI/2</a>                              <span class="co">#  SAME AS URPV +4  Z COMPONENT</span>
+053752,001055: 
 
 End of include-file ORBITAL_INTEGRATION.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
