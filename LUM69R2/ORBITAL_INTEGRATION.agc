@@ -930,6 +930,9 @@ DOW..1		VLOAD	VSR4
 ## from Luminary 99 in a single memory module, indeed in a single memory bank
 ## &mdash; not the one containing this code &mdash; so by leaving the code in place it meant that a single new memory module needed
 ## to be manufactured for Luminary 99/1; and the other 5 memory modules for Luminary 99/1 could be recycled from Luminary 99.
+## <br><br>
+## However interesting that may or may not be, the lesson we need to take away from it is that there would be no reason at
+## all for this code to be present in Luminary 69/2.  Hence it has been removed.
 
 		SETLOC	ORBITAL1
 		BANK
