@@ -919,10 +919,17 @@ DOW..1		VLOAD	VSR4
 ##    # ****************************************************************************************************************
 ##    # ****************************************************************************************************************
 ## </pre>
-## As the function's own comments indicate, this is present <i>only</i> for the Luminary 99/1
-## release to memory-module manufacturing, and is not used for any other manufacturing release.  In particular, 
-## it should not be there for Luminary 69/2.  This conclusion is reinforced by
+## Also, refer to
 ## <a href="http://www.ibiblio.org/apollo/Documents/LUM83_text.pdf">LUMINARY Memo #83, "LUMINARY Revision 98"</a>.
+## As the function's own comments indicate, this should have been present for the very next memory-module manufacturing release.
+## The most-recent manufacturing release at that point was Luminary 97 (in April 1969), and the next one would be Luminary 
+## 99 (in May 1969).  (Those release dates are from
+## <a href="http://www.ibiblio.org/apollo/Documents/R-700.pdf#page=170">
+## <i>MIT's Role in Project Apollo, Final Report</i>, Table 4-II</a>.)  Naively, from the program comments, we'd conclude that
+## the code should have been removed by the time of the Luminary 99/1 release.  However, as it turned out, Luminary 99/1 differed 
+## from Luminary 99 in a single memory module, indeed in a single memory bank
+## &mdash; not the one containing this code &mdash; so by leaving the code in place it meant that a single new memory module needed
+## to be manufactured for Luminary 99/1; and the other 5 memory modules for Luminary 99/1 could be recycled from Luminary 99.
 
 		SETLOC	ORBITAL1
 		BANK
