@@ -14,6 +14,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-06 MAS  Created from Comanche 44.
+##              2020-12-12 MAS  Added a possible implementation of PCR 747
+##                              (Remove TVCDAP initial attitude errors),
+##                              which makes the bank 17 checksum correct.
 
 ## Page 937
 # NAME		TVCDAPON (TVC DAP INITIALIZATION AND STARTUP CALL)
@@ -153,7 +156,8 @@ TVCINIT3	CAE	PACTOFF		# TRIM VALUES TO TRIM-TRACKERS, OUTPUT
 		TS	YCMD
 		TS	DELYBAR
 
-ATTINIT		CAF     BIT1
+## Reconstruction: PCR 747 (Remove TVCDAP initial attitude errors)??
+ATTINIT		TCF     NEEDLEIN
  +1		TS	TTMP1
 
 		INDEX	TTMP1

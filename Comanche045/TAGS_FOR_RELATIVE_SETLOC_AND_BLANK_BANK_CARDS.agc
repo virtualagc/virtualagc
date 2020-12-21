@@ -15,6 +15,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-06 MAS  Created from Comanche 44 and added the
 ##                              MODCHG1 tag to bank 17.
+##              2020-12-20 MAS  Moved the MODCHG1 tag to bank 16, based on
+##                              new evidence that PCR 747 (Remove TVCDAP
+##                              initial attitude errors) is responsible for
+##                              the bank 17 checksum difference.
 
 ## Page 27
 FIXED		MEMORY	120000 - 167777
@@ -158,6 +162,7 @@ DAPROLL		EQUALS
 P50S2		EQUALS
 P23S1		EQUALS
 RTE2		EQUALS
+MODCHG1		EQUALS
 		BNKSUM	16
 		
 		BANK	17
@@ -165,7 +170,6 @@ DAPS4		EQUALS
 DAPS5		EQUALS
 DAPS7		EQUALS
 P50S3		EQUALS
-MODCHG1         EQUALS
 		BNKSUM	17
 		
 		BANK	20
