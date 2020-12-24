@@ -13,7 +13,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-12-24 MAS  Created from Comanche 45.
+## Mod history: 2020-12-24 MAS  Created from Comanche 45, and added the new
+##                              padloads needed for the R-2 potential model.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2232,9 +2233,16 @@ RMAG		ERASE	+1
 EK1VAL		ERASE	+1		# I(2)PL 1-SEC SPS IMPULSE NEWTSEC/100/B23
 FANG		ERASE			# I(1)PL SPS THRUST USED BY IMPULSIVE BURN
 
+## Reconstruction: the following padloads were added in 45/2 for the R-2 lunar potential model.
+# **********LUNAR MODULE CHANGE  ***********
+
+# *9 (2D)
+E3J22R2M	EQUALS	FANG	+2
+E32C31RM	EQUALS	E3J22R2M +1
+
 # **** CONICSEX (PLANETARY INERT. ORIEN.) ****
 TIMSUBO		EQUALS	TEPHEM		# CSEC B-42 (TRIPLE PREC)
-END-E3		EQUALS	FANG		# LAST USED E3 ADDRESS
+END-E3		EQUALS	E32C31RM	# LAST USED E3 ADDRESS
 
 ## Page 88
 # EBANK-4 ASSIGNMENTS

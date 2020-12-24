@@ -13,7 +13,8 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-12-24 MAS  Created from Comanche 45.
+## Mod history: 2020-12-24 MAS  Created from Comanche 45 and integrated the
+##                              R-2 potential model update.
 
 ## Page 1334
 # DELETE
@@ -357,6 +358,7 @@ COMTERM		STORE	UZ
 		PDDL	DMPR
 			2
 			5/128
+## Page 1342
 		BDSU
 		DMP*
 			J4REQ/J3,2
@@ -390,64 +392,76 @@ COMTERM		STORE	UZ
 			S1		#         4
 		PUSH	BDDV*		# NORMED R  TO 0D
 			J2REQSQ,2
-		VXSC
+## Reconstruction: The following code is for the new R-2 lunar potential model added in
+## Comanche 45/2. It has been imported from Comanche 55.
+		VXSC	BOV
 			TVEC
-		STORE	TVEC
+			+1		# (RESET OVERFLOW INDICATOR)
 		XAD,1	XAD,1
 			X1
 			X1
-		XAD,1	BOF
+		XAD,1	VSL*
 			S1
-			MOONFLAG
-			NBRANCH1
-		DLOAD	DSQ		#  2
-			URPV		# X  B-2 TO 2D
-		PDDL	DSQ
-			URPV +2		#  2  2
-		DAD	PDDL		# Y +X  B-2 TO 2D
-			2D
-		SL1	DSU
-
-## Page 1232
-			2D
-		PDDL	PUSH		# X -Y  B-2 TO 4D  COSPHI2 TO 6D
-			COSPHI/2
-		VXSC	PDDL		# 2COSPHI(UZ) B-3 TO 6D
-			UZ
-		DSQ	DSU
-			3/5		#   2   2      2
-		DMP	SL3		# (X -Y)((5COS (PHI)-3)UR 2COS(PHI)UZ)
-			5/8
-		VXSC	VSU		#      B-3 TO 4D
-			ALPHAV
-		VXSC	VSL2
-		PDDL
-			URPV
-		DMP	PDVL		# XY B-2 TO 10D
-			URPV +2
-			ALPHAV
-		VXV	VXSC
-			UZ
-		VSL3	VAD		# 4XY(UR X UZ) +D( 4D) B-3
-		PDDL
-		NORM	DMP
-			X2
-			0D		# 3J22R2MU/(X +Y )R
-		BDDV	VXSC
-			3J22R2MU
-		VSL*	VAD
-			0 -7,2
-			TVEC
-		LXA,2
-			PBODY
-NBRANCH1	BOV
-			+1
-		VSL*	VAD
-			0 -22D,1
+			0	-22D,1
+		VAD	BOV
 			FV
-		STORE	FV
-		BOV
 			GOBAQUE
+		STCALL	FV
+			QUALITY1
+QUALITY3	DSQ			# J22 TERM X R**4 IN 2D,  SCALED B61
+					# AS VECTOR.
+		PUSH	DMP		# STORE COSPHI**2 SCALED B2 IN 8D
+## Page 1343		
+			5/8		# 5 SCALED B3
+		PDDL	SR2		# PUT 5 COSPHI**2, D5, IN 8D. GET
+					# COSPHI**2 D2 FROM 8D
+		DAD	BDSU		# END UP WITH (1-7 COSPHI**2), B5
+			8D		# ADDING COSPHI**2 B4 SAME AS COSPHI**2
+					# X 2 D5
+			D1/32		# 1 SCALED B5
+		DMP	DMP
+			URPV		# X COMPONENT
+			5/8		# 5 SCALED B3
+		VXSC	VSL5		# AFTER SHIFT, SCALED B5
+			URPV		# VECTOR, B1.
+		PDDL			# VECTOR INTO 8D, 10D, 12D, SCALED B5.
+					# GET 5 COSPHI**2 OUT OF 8D
+		DSU	DAD
+			D1/32		# 1 B5
+			8D		# X COMPONENT (SAME AS MULTIPLYING
+					# BY UNITX)
+		STODL	8D
+			URPV		# X COMPONENT
+		DMP	DMP
+			URPV	+4	# Z COMPONENT
+			5/8		# 5 B3 ANSWER B5
+		SL1	DAD		# FROM 12D FOR Z COMPONENT (SL1 GIVES 10
+					# INSTEAD OF 5 FOR COEFFICIENT)
+		PDDL	NORM		# BACK INTO 12D FOR Z COMPONENT.
+			ALPHAM		# SCALED B27 FOR MOON
+			X2
+		PUSH	SLOAD		# STORE IN 14D, DESTROYING URPV
+					# X COMPONENT
+			E32C31RM
+		DDV	VXSC		# IF X2 = 0, DIVISION GIVES B53, VXSC
+					# OUT OF 8D B5 GIVES B58
+		VSL*	VAD		# SHIFT MAKES B61, FOR ADDITION OF
+					# VECTOR IN 2D
+			0	-3,2
+		VSL*	V/SC		# OPERAND FROM 0D, B108 FOR X1 = 0
+			0	-27D,1	# FOR X1 = 0, MAKES B88, GIVING B-20
+					# FOR RESULT.
+		PDDL	PDDL
+			TET
+			5/8		# ANY NON-ZERO CONSTANT
+		LXA,2	CALL		# POSITION IN 0D, TIME IN 6D. X2 LEFT
+					# ALONE.
+			PBODY
+			RP-TO-R
+		VAD	BOV		# OVERFLOW INDICATOR RESET IN "RP-TO-R"
+			FV
+			GOBAQUE
+		STORE	FV
 ## Page 1344
 NBRANCH		SLOAD	LXA,1
 			DIFEQCNT
@@ -866,7 +880,7 @@ ASCALE		DEC	-7
 MUEARTH		2DEC*	3.986032 E10 B-36*
 		2DEC	0
 J4REQ/J3	2DEC*	.4991607391 E7 B-26*
-		2DEC	0
+		2DEC	-176236.02 B-25
 2J3RE/J2	2DEC*	-.1355426363 E5 B-27*
 		2DEC*	.3067493316 E18 B-60*
 J2REQSQ		2DEC*	1.75501139 E21 B-72*

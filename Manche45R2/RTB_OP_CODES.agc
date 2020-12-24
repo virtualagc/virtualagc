@@ -13,7 +13,9 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2020-12-24 MAS  Created from Comanche 45.
+## Mod history: 2020-12-24 MAS  Created from Comanche 45 and added in the
+##                              QUALITY1 and QUALITY2 functions for the R-2
+##                              potential model.
 
 ## Page 1508
 		BANK	22
@@ -302,8 +304,6 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## Page 1516
-
-## <a name="S401A"></a>
 		SETLOC  MODCHG1
 		BANK
 S40.1A		VLOAD	ABVAL
@@ -311,3 +311,40 @@ S40.1A		VLOAD	ABVAL
 		STOVL	DELVSAB		# COMPUTE FOR P30/P40 INTERFACE
 			VTIG
 		RVQ
+
+## Reconstruction: the following code for the R-2 potential model has been pulled in
+## from Comanche 55.
+# MODULE CHANGE FOR NEW LUNAR GRAVITY MODEL
+		SETLOC	MODCHG3
+		BANK
+QUALITY1	BOF	DLOAD
+			MOONFLAG
+			NBRANCH
+			URPV
+		DSQ	GOTO
+			QUALITY2
+		SETLOC	MODCHG2
+		BANK
+QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
+			URPV	+2	# Y COMPONENT, B1
+		DSU
+		DMP	VXSC		# 5(Y**2-X**2)UR
+			5/8		# CONSTANT, 5B3
+			URPV		# VECTOR, RESULT MAXIMUM IS 5, SCALING
+					# HERE B6
+		VSL3	PDDL		# STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ
+			URPV		# X COMPONENT, B1
+		SR1	DAD		# 2 X X COMPONENT FOR B3 SCALING
+			2D		# ADD TO VECTOR X COMPONENT OF ANSWER.
+					# SAME AS MULTIPLYING BY UNITX.  MAX IS 7.
+		STODL	2D
+			URPV	+2	# Y COMPONENT, B1
+		SR1	BDSU		# 2 X Y COMPONENT FOR B3 SCALING
+			4D		# SUBTRACT FROM VECTOR Y COMPONENT OF
+					# ANSWER, SAME AS MULTIPLYING BY UNITY.
+					# MAX IS 7.
+		STORE 	4D		# 2D HAS VECTOR, B3.
+		SLOAD	VXSC		# MULTIPLY COEFFIECIENT TIMES VECTOR IN 2D
+			E3J22R2M
+		PDDL	RVQ		# J22 TERM X R**4 IN 2D, SCALED B61
+			COSPHI/2	# SAME AS URPV +4, Z COMPONENT
