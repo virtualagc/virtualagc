@@ -15,6 +15,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-06 MAS  Created from Comanche 44. Added a stub for the
 ##                              COM-4 anomaly fix.
+##              2020-12-23 MAS  Implemented a fix for COM-4 that gives correct
+##                              checksums, and renamed the function to the more
+##                              mundane but more likely "S40.1A".
 
 ## Page 1508
 		BANK	22
@@ -303,6 +306,11 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## Page 1516
-                SETLOC  MODCHG1
-                BANK
-COM4FIX         OCT     0
+## Reconstruction: COM-4 anomaly fix
+		SETLOC  MODCHG1
+		BANK
+S40.1A		VLOAD	ABVAL
+			DELVSIN
+		STOVL	DELVSAB		# COMPUTE FOR P30/P40 INTERFACE
+			VTIG
+		RVQ

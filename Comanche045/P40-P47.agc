@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-06 MAS  Created from Comanche 44.
+##              2020-12-23 MAS  Implemented the COM-4 anomaly fix in S40.1.
 
 ## Page 684
 # PROGRAM DESCRIPTION ** P40CSM **
@@ -1190,9 +1191,11 @@ S40.1		SET	VLOAD
 			QTEMP
 			XDELVFLG
 			S40.1B		# LAMBERT
-		SETPD	VLOAD		# EXTERNAL DELTA V
+## Reconstruction: COM-4 anomaly fix
+		SETPD	CALL		# EXTERNAL DELTA V
 			0
-			VTIG
+			S40.1A          # JUMP TO END OF BANK TO CALCULATE DELVSAB 
+					#	THUS PERMITTING MODULE-ONLY CHANGE
 		STORE	VINIT
 		VXV	UNIT
 			RTIG
