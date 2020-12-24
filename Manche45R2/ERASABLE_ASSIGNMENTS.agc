@@ -15,6 +15,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-24 MAS  Created from Comanche 45, and added the new
 ##                              padloads needed for the R-2 potential model.
+##		2020-12-24 RSB	Added or beefed up reconstruction-justifying
+##				annotations.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2233,7 +2235,11 @@ RMAG		ERASE	+1
 EK1VAL		ERASE	+1		# I(2)PL 1-SEC SPS IMPULSE NEWTSEC/100/B23
 FANG		ERASE			# I(1)PL SPS THRUST USED BY IMPULSIVE BURN
 
-## Reconstruction: the following padloads were added in 45/2 for the R-2 lunar potential model.
+## <b>Reconstruction:</b> Between Comanche 45 and 45/2, two new padloaded erasables
+## (<code>E3J22R2M</code> and <code>E32C31RM</code>) were added here.
+## For justification, refer to
+## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=9">
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. 9</a>.
 # **********LUNAR MODULE CHANGE  ***********
 
 # *9 (2D)
@@ -2242,6 +2248,8 @@ E32C31RM	EQUALS	E3J22R2M +1
 
 # **** CONICSEX (PLANETARY INERT. ORIEN.) ****
 TIMSUBO		EQUALS	TEPHEM		# CSEC B-42 (TRIPLE PREC)
+## <b>Reconstruction:</b> The following line is part of the change described in the 
+## preceding annotation above.  For obvious reasons, in Comanche 45 it reads <code>END-E3 EQUALS FANG</code>.
 END-E3		EQUALS	E32C31RM	# LAST USED E3 ADDRESS
 
 ## Page 88

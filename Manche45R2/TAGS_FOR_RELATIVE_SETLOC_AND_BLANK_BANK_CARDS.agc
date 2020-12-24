@@ -15,6 +15,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-24 MAS  Created from Comanche 45 and added the MODCHG2
 ##                              and MODCHG3 tags for the R-2 model.
+##		2020-12-24 RSB	Beefed up reconstruction-justifying annotations.
 
 ## Page 27
 FIXED		MEMORY	120000 - 167777
@@ -119,7 +120,9 @@ INTINIT1	EQUALS
 CONICS		EQUALS
 CSIPROG2	EQUALS
 CSI/CDH2	EQUALS
-## Reconstruction: the following tag was added to fit in the new R-2 potential model.
+## <b>Reconstruction:</b>  As decribed in <a href="ORBITAL_INTEGRATION.agc.html#R2MODEL">an annotation
+## in the ORBITAL INTEGRATION log section</a>, the same R-2 model changes made between Comanche 51 and 55 have been
+## backported into Comanche 45.  The following line is one of those associated changes.
 MODCHG2		EQUALS
 		BNKSUM	12
 		
@@ -131,7 +134,9 @@ SR52/1		EQUALS
 ORBITAL2	EQUALS
 CDHTAGS		EQUALS
 E/PROG1		EQUALS
-## Reconstruction: the following tag was added to fit in the new R-2 potential model.
+## <b>Reconstruction:</b>  As decribed in <a href="ORBITAL_INTEGRATION.agc.html#R2MODEL">an annotation
+## in the ORBITAL INTEGRATION log section</a>, the same R-2 model changes made between Comanche 51 and 55 have been
+## backported into Comanche 45.  The following line is one of those associated changes.
 MODCHG3		EQUALS
 		BNKSUM	13
 

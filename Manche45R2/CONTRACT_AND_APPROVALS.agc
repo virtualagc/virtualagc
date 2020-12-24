@@ -14,14 +14,15 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-24 MAS  Created from Comanche 45.
+##		2020-12-24 RSB	Fixed reconstruction-justifying annotations.
 
 ## Page 1
 
 ## <b>Reconstruction:</b> We don't know of any surviving specific contemporary
 ## documentation supporting the material in this log section, absent an
 ## Apollo-era assembly listing of it.  The section contains
-## only comments and no executable code.  We have simply modeled the Comanche 45 version of it on the 
-## corresponding log section of Comanche 44, but have changed a handful of
+## only comments and no executable code.  We have simply modeled the Comanche 45/2 version of it on the 
+## corresponding log section of Comanche 45, but have changed a handful of
 ## items in ways that seem sensible to us.  The annotations below thus 
 ## provide our common-sense reasoning on the matter, rather than justification from 
 ## contemporary documentation.
@@ -45,52 +46,52 @@
 # ************************************************************************
 
 ## <b>Reconstruction:</b> The signature names and titles below are not
-## actually known for certain.  Because Comanche 44 through 45 were separated by
+## actually known for certain.  Because Comanche 45 through 45/2 were separated by
 ## less than 2 months in time (see below), we assume that personnel turnover 
 ## in that limited period of time would be unlikely. Hence we have retained the 
-## same names and titles for Comanche 44 as for Comanche 45. Also, these are
+## same names and titles for Comanche 45/2 as for Comanche 45. Also, these are
 ## the same names and titles as appear in Comanche 55.
 ## <br><br>
 ## On the other hand, the DATE fields below are more speculative, 
 ## and are very likely to be wrong but unlikely to be <i>too</i> wrong. In 
 ## <a href="http://www.ibiblio.org/apollo/listings/Comanche044/CONTRACT_AND_APPROVALS.agc.html">
-## the previous reconstruction of Comanche 44</a>, it was concluded as a 
+## an earlier reconstruction, Comanche 44</a>, it was concluded as a 
 ## rule of thumb that the signoff dates listed in the CONTRACT AND APPROVALS
 ## section should precede the date of release of the software to manufacturing
 ## by about 3 weeks.  To determine the date of release to manufacturing,
 ## the best information we're aware of comes from
 ## <a href="http://www.ibiblio.org/apollo/Documents/R-700.pdf#page=170">
 ## <i>MIT's Role in Project Apollo, Final Report</i>, Table 4-II</a>, where
-## we find the Comanche 45 was released in March 1969, and that Comanche 44 was
-## released in February 1969.  This is a bit non-specific, but if we interpret
-## Comanche 45's release date as March 15 and subtract 3 weeks,
-## we tentatively arrive at a signoff date of February 21.  That happened to
-## be a Friday in 1969.
-#	SUBMITTED:	MARGARET H. HAMILTON		DATE:	21 FEB 69
+## we find the Comanche 45 was released in March 1969, and that Comanche 45/2 was
+## released in April 1969.  This is a bit non-specific, but if we interpret
+## Comanche 45/2's release date as April 15 and subtract 3 weeks,
+## we tentatively arrive at a signoff date of March 25.  That happened to
+## be a Tuesday in 1969.
+#	SUBMITTED:	MARGARET H. HAMILTON		DATE:	25 March 69
 #		M.H.HAMILTON, COLOSSUS PROGRAMMING LEADER
 #		APOLLO GUIDANCE AND NAVIGATION
 
-#	APPROVED:	DANIEL J. LICKLY		DATE:	21 FEB 69
+#	APPROVED:	DANIEL J. LICKLY		DATE:	25 March 69
 #		D.J.LICKLY, DIRECTOR, MISSION PROGRAM DEVELOPMENT
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	FRED H. MARTIN			DATE:	21 FEB 69
+#	APPROVED:	FRED H. MARTIN			DATE:	25 March 69
 #		FRED H. MARTIN, COLOSSUS PROJECT MANGER
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	NORMAN E. SEARS			DATE:	21 FEB 69
+#	APPROVED:	NORMAN E. SEARS			DATE:	25 March 69
 #		N.E. SEARS, DIRECTOR, MISSION DEVELOPMENT
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	RICHARD H. BATTIN		DATE:	21 FEB 69
+#	APPROVED:	RICHARD H. BATTIN		DATE:	25 March 69
 #		R.H. BATTIN, DIRECTOR, MISSION DEVELOPMENT
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	DAVID G. HOAG			DATE:	21 FEB 69
+#	APPROVED:	DAVID G. HOAG			DATE:	25 March 69
 #		D.G. HOAG, DIRECTOR
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	RALPH R. RAGAN			DATE:	21 FEB 69
+#	APPROVED:	RALPH R. RAGAN			DATE:	25 March 69
 #		R.R. RAGAN, DEPUTY DIRECTOR
 #		INSTRUMENTATION LABORATORY
 

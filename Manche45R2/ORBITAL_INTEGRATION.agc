@@ -15,6 +15,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-24 MAS  Created from Comanche 45 and integrated the
 ##                              R-2 potential model update.
+##		2020-12-24 RSB	Added reconstruction-justifying annotations.
 
 ## Page 1334
 # DELETE
@@ -392,8 +393,26 @@ COMTERM		STORE	UZ
 			S1		#         4
 		PUSH	BDDV*		# NORMED R  TO 0D
 			J2REQSQ,2
-## Reconstruction: The following code is for the new R-2 lunar potential model added in
-## Comanche 45/2. It has been imported from Comanche 55.
+## <a name="R2MODEL"></a>
+## <b>Reconstruction:</b> 65 lines of interpretive code at the point in Comanche 45
+## corresponding to this position have been
+## replaced in Comanche 45/2 by the 56 lines of not-obviously-related interpretive instructions
+## that follow this annotation.  (For visual convenience, we've also added a terminating 
+## annotation at the end of the block.)  
+## <br><br>
+## The key to understanding the situation is 
+## <a href="https://www.ibiblio.org/apollo/Documents/LUM75_text.pdf">LUMINARY Memo #75,
+## titled "R-2 Lunar Potential Model Added to LUMINARY", and dated April 1, 1969</a>. 
+## The memo states specifically that the new model will be implemented in Luminary 69/2
+## (the final release of the Apollo 10 LM) software, and it mentions less specifically
+## that a "similar change has been directed in COLOSSUS 2".  While by itself this doesn't 
+## tell us which specific Comanche revision the generic term "COLOSSUS 2" relates to,
+## the very next Colossus 2 software releases after April 1 were Comanche 45/2 (April 2) and 
+## Comanche 55 (April 18).  Our position on the matter is that the change was made both in
+## Comanche 45 &rarr; Comanche 45/2 and in Comanche 51 &rarr; Comanche 55. Given that 
+## Comanche 51 source code (reconstructed) and Comanche 55 source code (actual, from hardcopy)
+## are both available, the changes to this log section have been made simply by importing
+## the differences between Comanche 51 and 55 into the Comanche 45 source code.
 		VXSC	BOV
 			TVEC
 			+1		# (RESET OVERFLOW INDICATOR)
@@ -461,6 +480,8 @@ QUALITY3	DSQ			# J22 TERM X R**4 IN 2D,  SCALED B61
 		VAD	BOV		# OVERFLOW INDICATOR RESET IN "RP-TO-R"
 			FV
 			GOBAQUE
+## <b>Reconstruction:</b> Termination of block of R-2 Lunar Potential Model 
+## code begun a couple of annotations above.
 		STORE	FV
 ## Page 1344
 NBRANCH		SLOAD	LXA,1
@@ -878,6 +899,9 @@ ASCALE		DEC	-7
 		2DEC*	1.32715445 E16 B-54*	# S
 		2DEC*	4.9027780 E8 B-30*	# M
 MUEARTH		2DEC*	3.986032 E10 B-36*
+## <b>Reconstruction:</b>  As decribed in <a href="#R2MODEL">an earlier annotation
+## above</a> the same R-2 model changes made between Comanche 51 and 55 have been
+## backported into Comanche 45.  The following line is one of those associated changes.
 		2DEC	0
 J4REQ/J3	2DEC*	.4991607391 E7 B-26*
 		2DEC	-176236.02 B-25

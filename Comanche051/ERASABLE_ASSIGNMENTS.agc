@@ -2243,7 +2243,7 @@ FANG		ERASE			# I(1)PL SPS THRUST USED BY IMPULSIVE BURN
 ## (E3J22R2M and E32C31RM) were added here.
 ## Those have been removed for Comanche 51.  For justification, refer to
 ## <a href="http://www.ibiblio.org/apollo/Documents/Programmed%20Guidance%20Equations%20for%20Colossus%202.pdf#page=9">
-## <i>Programmed Guidance Equations for Colossus 2</i>, p. 91</a>.  Note that
+## <i>Programmed Guidance Equations for Colossus 2</i>, p. 9</a>.  Note that
 ## some of the variables above (EK2VAL and EK3VAL) shown as changed in the 
 ## <i>Programmed Guidance Equations</i> were added between Comanche 45/2
 ## to 51, and therefore don't represent changes from Comanche 51 to 55.

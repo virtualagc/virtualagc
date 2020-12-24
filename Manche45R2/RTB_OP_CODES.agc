@@ -16,6 +16,7 @@
 ## Mod history: 2020-12-24 MAS  Created from Comanche 45 and added in the
 ##                              QUALITY1 and QUALITY2 functions for the R-2
 ##                              potential model.
+##		2020-12-24 RSB	Beefed up reconstruction-justification annotation.
 
 ## Page 1508
 		BANK	22
@@ -312,8 +313,10 @@ S40.1A		VLOAD	ABVAL
 			VTIG
 		RVQ
 
-## Reconstruction: the following code for the R-2 potential model has been pulled in
-## from Comanche 55.
+## <b>Reconstruction:</b>  As decribed in <a href="ORBITAL_INTEGRATION.agc.html#R2MODEL">an annotation
+## in the ORBITAL INTEGRATION log section</a> the same R-2 model changes made between Comanche 51 and 55 have been
+## backported into Comanche 45.  The following block of code, through the end of this log section, is
+## one of those associated changes.
 # MODULE CHANGE FOR NEW LUNAR GRAVITY MODEL
 		SETLOC	MODCHG3
 		BANK

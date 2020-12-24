@@ -124,9 +124,9 @@
  *          	                (phase 1 reconstrunction).
  *          	2020-12-05 RSB  Added Comanche 44 and 45, though 45 isn't available yet, so
  *          	                it isn't enabled.
- *              2020-12-24 RSB  Enabled Comanche 45.  Also, filled in the details for the later
- *                              release of Comanche 45/2 (Manche45R2) that hadn't been available
- *                              before, although still not enabled.  Also, I found that the message
+ *              2020-12-24 RSB  Enabled Comanche 45 and 45/2.  Also, filled in the details for
+ *                              Comanche 45/2 (Manche45R2) that hadn't been available
+ *                              before.  Also, I found that the message
  *                              displayed in the Simulation Status window was unnecessarily wide
  *                              and couldn't be used without the horizontal scroll bar.  I've
  *                              reformatted the message to fix that.
@@ -208,7 +208,7 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche045", "CM.ini" },
             { "Apollo 10 Command Module", "Manche45R2/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 10 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "Manche45R2", "CM.ini" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Manche45R2", "CM.ini" },
             { "LUMINARY 69 rev 0 (LM)", "Luminary069/MAIN.agc.html",
                 "Click this to select Luminary 69 rev 0, a preliminary revision of the Apollo 10 LM software.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary069", "CM.ini" /* Yes, the CM is intentional */},
