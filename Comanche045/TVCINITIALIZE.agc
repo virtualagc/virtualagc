@@ -159,17 +159,47 @@ TVCINIT3	CAE	PACTOFF		# TRIM VALUES TO TRIM-TRACKERS, OUTPUT
 		TS	DELYBAR
 
 ## <a name="ATTINIT"></a>
-## <b>Reconstruction:</b>  In Comanche 44, the line following this annotation instead reads<br>
+## <b>Reconstruction:</b>  In Comanche 44, the two lines following this annotation read<br>
 ## <pre>
 ##    ATTINIT         CAF     BIT1
+##                    TS      TTMP1
 ## </pre>
 ## The change is believed to be authorized by Program Change Request (PCR) 747.  The description
 ## of that PCR is known to be "Remove TVCDAP initial attitude errors", but unfortunately we don't
 ## have the full text of the PCR.  
 ## <a href="http://www.ibiblio.org/apollo/Documents/Colossus%202(A)%20Software%20Changes.pdf#page=4&view=FitH">
 ## Table A of COLOSSUS Memo #140, rev 2, "Final Content of COLOSSUS 2 (Comanche, Rev. 45)"</a> notes PCR 747 as
-## a change incorporated into Comanche 45. The actual line of code appearing below in Comanche 45
-## has been imported from Comanche 55.
+## a change incorporated into Comanche 45. Lacking the full text, deducing the specific form of the 
+## code change is impossible, and it's necessarily to fall back on what we can infer by looking at
+## the corresponding code in Comanche 51.
+## <br><br>
+## The code in Comanche 51 that corresponds to the pair of instructions following this annotation is<br>
+## <pre>
+##    ATTINIT         CAE     DAPDATR1  # ATTITUDE-ERROR INITIALIZATION LOGIC
+##                    MASK    BIT13     #       TEST FOR CSM OR CSM/LM
+##                    EXTEND
+##                    BZF     NEEDLEIN  #       BYPASS INITIALIZATION FOR CSM/LM
+##                    CAF     BIT1      #       SET UP TEMPORARY COUNTER
+##     +5             TS      TTMP1
+## </pre>
+## Simply importing this Comanche 51 code into Comanche 45 here does not work, in the sense that 
+## memory-bank checksums are not correct.  What the code leading up to <code>BZF NEEDLEIN</code> does is to 
+## test to whether the CSM and LM are docked, and if not, then branches to <code>NEEDLEIN</code>.  A simplified
+## alternative is therefore simply always to branch to <code>NEEDLEIN</code> without performing the docking test.
+## That's essentially what the following code does, and it produces the correct memory-bank checksum.
+## Comanche 44 code <i>also</i> does not have the docking test, and there is a Program Change Request
+## (PCR 749) which may call for such a test to be added at some later point.  Nor does Comanche 44 have
+## the jump to <code>NEEDLEIN</code>.  Thus the following code
+## is, in a sense, intermediate between Comanche 44 and 51, in that it does have <code>NEEDLEIN</code>, but does
+## not yet have the docking test.
+## <br><br>
+## But what about the missing <code>CAF BIT1</code> instruction?  Well, the code between 
+## <code>TCF NEEDLEIN</code> and the program label <code>NEEDLEIN</code> is never executed.  It has simply
+## been left in place to insure that the same number of memory words is used up, and hence that all 
+## addresses referenced externally to bank 17 remain the same.  This was important because the change 
+## between Comanche 44 and 45 was intended to affect only core-rope module 3 &mdash; recall that there
+## were 6 memory modules altogether &mdash; thus minimizing the remanufacturing expense and effort.
+## Memory module 3 is, of course, the one containing memory banks 16 and 17 (among others).
 ATTINIT		TCF     NEEDLEIN
  +1		TS	TTMP1
 
