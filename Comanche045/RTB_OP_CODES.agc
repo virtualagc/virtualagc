@@ -306,7 +306,12 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## Page 1516
-## Reconstruction: COM-4 anomaly fix
+
+## <a name="S401A"></a>
+## <b>Reconstruction:</b> From this point through the end of the RTB OP CODES log section, we have code in Comanche 45
+## that was not present in Comanche 44. This is the very end of memory-bank 16.  It is part of the fix for the problem
+## described in MIT Software Anomaly Report COM-4.  This is discussed in detail in the 
+## <a href="P40-P47.agc.html#DELVSAB">related annotation in log section P40-P47</a>.
 		SETLOC  MODCHG1
 		BANK
 S40.1A		VLOAD	ABVAL

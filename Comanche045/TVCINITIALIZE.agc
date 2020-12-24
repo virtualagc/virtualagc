@@ -17,6 +17,8 @@
 ##              2020-12-12 MAS  Added a possible implementation of PCR 747
 ##                              (Remove TVCDAP initial attitude errors),
 ##                              which makes the bank 17 checksum correct.
+##		2020-12-24 RSB	Beefed up the reconstruction-justifying
+##				annotation.
 
 ## Page 937
 # NAME		TVCDAPON (TVC DAP INITIALIZATION AND STARTUP CALL)
@@ -156,7 +158,18 @@ TVCINIT3	CAE	PACTOFF		# TRIM VALUES TO TRIM-TRACKERS, OUTPUT
 		TS	YCMD
 		TS	DELYBAR
 
-## Reconstruction: PCR 747 (Remove TVCDAP initial attitude errors)??
+## <a name="ATTINIT"></a>
+## <b>Reconstruction:</b>  In Comanche 44, the line following this annotation instead reads<br>
+## <pre>
+##    ATTINIT         CAF     BIT1
+## </pre>
+## The change is believed to be authorized by Program Change Request (PCR) 747.  The description
+## of that PCR is known to be "Remove TVCDAP initial attitude errors", but unfortunately we don't
+## have the full text of the PCR.  
+## <a href="http://www.ibiblio.org/apollo/Documents/Colossus%202(A)%20Software%20Changes.pdf#page=4&view=FitH">
+## Table A of COLOSSUS Memo #140, rev 2, "Final Content of COLOSSUS 2 (Comanche, Rev. 45)"</a> notes PCR 747 as
+## a change incorporated into Comanche 45. The actual line of code appearing below in Comanche 45
+## has been imported from Comanche 55.
 ATTINIT		TCF     NEEDLEIN
  +1		TS	TTMP1
 

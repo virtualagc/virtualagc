@@ -15,6 +15,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-12-06 MAS  Created from Comanche 44.
 ##              2020-12-23 MAS  Implemented the COM-4 anomaly fix in S40.1.
+##		2020-12-24 RSB	Beefed-up the annotation justifying reconstruction.
 
 ## Page 684
 # PROGRAM DESCRIPTION ** P40CSM **
@@ -1191,7 +1192,71 @@ S40.1		SET	VLOAD
 			QTEMP
 			XDELVFLG
 			S40.1B		# LAMBERT
-## Reconstruction: COM-4 anomaly fix
+## <a name="DELVSAB"></a>
+## <b>Reconstruction:</b>  At this point in Comanche 44, we would find the interpretive-code sequence<br>
+## <pre>
+##    SETPD   VLOAD
+##            0
+##            VTIG
+## </pre>
+## while in Comanche 45 it has been replaced by<br>
+## <pre>
+##    SETPD   CALL
+##            0
+##            S40.1A
+## </pre>
+## In Comanche 45, this is paired with the related change of an added subroutine <code>S40.1A</code> at the very end
+## of memory bank 16, whose source code we have placed at <a href="RTB_OP_CODES.agc.html#S401A">the end of log section RTB OP CODES</a>.
+## <br><br>
+## This change relates to <a href="http://www.ibiblio.org/apollo/Documents/Colossus%202(A)%20Software%20Changes.pdf#page=10&view=FitH">
+## MIT Software Anomaly Report COM-4</a>.  What the report
+## authorizes is a computation in Comanche 45, in routines P40 and P41, that can be symbolized in pseudocode as<br>
+## <pre>
+##    DELVSAB = | DELVSIN |     # Compute length of vector DELVSIN.
+## </pre>
+## There are <i>many</i> ways to implement such a computation, but there are a number of constraints which
+## help to weed out the forest of coding possibilities.  Here's a list of some of those constraints:<br>
+## <ul>
+## <li>The routine <code>S40.1</code> is called both by P40 and P41, so it would be reasonable to implement the
+## change just once in <code>S40.1</code> rather than twice in P40 and P41.  If the computation itself involves calling
+## a subroutine, it cannot be done until this point in <code>S40.1</code>, since the <code>STQ</code> instruction which immediately
+## precedes it is the one which preserves <code>S40.1</code>'s return address.  For similar pragmatic reasons, the
+## computation can't be performed in a natural way below this point.  And indeed, if we examine later Colossus
+## revisions like Comanche 55, we find that the computation occurs exactly at this point in those revisions.</li>
+## <li><a href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n89/mode/1up">
+## The list of correct memory-bank checksums</a> is <i>very</i> suggestive that the only changes between
+## Comanche 44 and 45 appeared in memory banks 16 and 17.  Routine <code>S40.1</code> is itself located in bank 16, so
+## it would be reasonable to suppose that the side effects of the change should also be localized in bank 16.
+## Besides, it turns out that <a href="TVCINITIALIZE.agc.html#ATTINIT">a separate change in log section TVCINITIALIZE</a>
+## is responsible for entirety the changes in bank 17, at least in so far as checksums are concerned.</li>  
+## <li>For the side effects of the calculation to be localized to bank
+## 16, it is necessary that the combined length (in words of memory) of routines <code>S40.1</code> and <code>S40.1B</code> (plus
+## the 2 words of the constant <code>THETACON</code> following <code>S40.1B</code>) must not change between Comanche 44
+## and 45, for if that length changes, than addresses in bank 16 that are referenced outside of bank 16 change as well.
+## If the length of <code>S40.1</code> by itself were preserved, it would be be better still in terms of plausibility.</li>
+## <li><a href="https://www.ibiblio.org/apollo/Documents/a042186.pdf#page=39">Table 4-1 of document </i>Software Systems
+## Development: A CSDL Project History</i></a> is suggestive that Comanche 45 uses 5 words of memory more than Comanche 44.
+## <a href="TVCINITIALIZE.agc.html#ATTINIT">The change in bank 17, log section TVCINITIALIZE</a>, mentioned earlier, is known not
+## to affect the length of bank 17.  Therefore, we might speculate that the <code>DELVSAB</code>-computation fix would add
+## 5 additional words to the end of bank 16.  (However, the document we've referenced is neither as accurate nor as specific 
+## as we'd need to be to insure that this is a true constraint.)</li>
+## </ul>
+## Rather than elaborate further, I'll simply note that the proposed fix satisfies all of the constraints
+## mentioned above, in their strongest forms.
+## <br><br>
+## And I'd note additionally that many other logically-corrected codings of the calculation
+## that also satisfied the constraints (in their stronger and weaker forms) were tested, but none other then the proposed one produced
+## the correct checksum for memory-bank 16.  So while we cannot guarantee absolutely that this particular coding is the one and
+## only coding meeting the constraints, it is extremely suggestive that this the coding used in Comanche 45.
+## One curious point should be mentioned in the interest of complete disclosure:  In this Comanche 45
+## code, the interpretive instruction <code>SETPD 0</code> is 
+## executed, and then <code>DELVSAB</code> is computed.  Whereas in the later Comanche 55 coded, the computation order is reversed, with no 
+## satisfying reason for the difference and no contemporary documentation justifying it.  We are inclined to discount the 
+## significance of this difference.
+## <br><br>
+## Finally, the choice of the name "S40.1A" for the newly-added routine <code>S40.1A</code> at the end of memory bank 16
+## is somewhat arbitrary.  The choice is consistent with naming used elsewhere in AGC code, but could well be something
+## entirely different in a contemporary Comanche 45 program listing.
 		SETPD	CALL		# EXTERNAL DELTA V
 			0
 			S40.1A          # JUMP TO END OF BANK TO CALCULATE DELVSAB 

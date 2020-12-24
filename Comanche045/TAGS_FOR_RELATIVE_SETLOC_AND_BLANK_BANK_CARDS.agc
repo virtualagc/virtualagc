@@ -19,6 +19,8 @@
 ##                              new evidence that PCR 747 (Remove TVCDAP
 ##                              initial attitude errors) is responsible for
 ##                              the bank 17 checksum difference.
+##		2020-12-24 RSB	Added an annotation justifying a reconstruction
+##				change.
 
 ## Page 27
 FIXED		MEMORY	120000 - 167777
@@ -162,6 +164,10 @@ DAPROLL		EQUALS
 P50S2		EQUALS
 P23S1		EQUALS
 RTE2		EQUALS
+## <b>Reconstruction:</b> The following line is an arbitrary addition, relating to the addition of the code at the end of memory-bank
+## 16, <a href="RTB_OP_CODES.agc.html#S401A">at the end of log section RTB OP CODE</a>.  In 
+## contemporary Comanche 45, the alias <code>MODCHG1</code> could be a different string, could 
+## appear a few lines earlier in this log section, or indeed may not even be needed at all.
 MODCHG1		EQUALS
 		BNKSUM	16
 		

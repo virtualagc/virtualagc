@@ -124,6 +124,12 @@
  *          	                (phase 1 reconstrunction).
  *          	2020-12-05 RSB  Added Comanche 44 and 45, though 45 isn't available yet, so
  *          	                it isn't enabled.
+ *              2020-12-24 RSB  Enabled Comanche 45.  Also, filled in the details for the later
+ *                              release of Comanche 45/2 (Manche45R2) that hadn't been available
+ *                              before, although still not enabled.  Also, I found that the message
+ *                              displayed in the Simulation Status window was unnecessarily wide
+ *                              and couldn't be used without the horizontal scroll bar.  I've
+ *                              reformatted the message to fix that.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -198,11 +204,11 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 "Click this to select software originally targeted (but not subsequently flown) in the CM for the Apollo 10 mission.",
                 ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche044", "CM.ini" },
             { "COMANCHE 45 (CM)", "Comanche045/MAIN.agc.html",
-                "Click this to select software originally targeted (but not subsequently flown) in the CM for the Apollo 10 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "Comanche045", "CM.ini" },
-            { "Apollo 10 Command Module", "",
+                "Click this to select software released (but not subsequently flown) in the CM for the Apollo 10 mission.",
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche045", "CM.ini" },
+            { "Apollo 10 Command Module", "Manche45R2/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 10 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
+                DISABLED, CM, BLOCK2, PERIPHERALS, "Manche45R2", "CM.ini" },
             { "LUMINARY 69 rev 0 (LM)", "Luminary069/MAIN.agc.html",
                 "Click this to select Luminary 69 rev 0, a preliminary revision of the Apollo 10 LM software.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary069", "CM.ini" /* Yes, the CM is intentional */},
@@ -1262,19 +1268,15 @@ VirtualAGC::RunButtonEvent(wxCommandEvent &event)
     }
   Script.Close();
 #ifdef WIN32
-  OutDummy += wxT ("\n\nNote that WinAGC is used for the purpose of insuring that all simulated");
+  OutDummy += wxT ("\n\nNote that WinAGC is used for the purpose of");
 #else
-  OutDummy +=
-      wxT(
-          "\n\nNote that SimStop is used for the purpose of insuring that all simulated");
+  OutDummy += wxT("\n\nNote that SimStop is used for the purpose of");
 #endif
-  OutDummy +=
-      wxT(
-          "\ncomponents shut down after any one of them has shut down.  It does not");
-  OutDummy +=
-      wxT(
-          "\nin itself provide any simulation capabilities and might be unnecessary");
-  OutDummy += wxT("\noutside of the context of the VirtualAGC GUI.");
+  OutDummy += wxT("\ninsuring that all simulated components shut");
+  OutDummy += wxT("\ndown after any one of them has shut down.  It");
+  OutDummy += wxT("\ndoes not provide any other simulation capability");
+  OutDummy += wxT("\nand might be unnecessary outside the context of");
+  OutDummy += wxT("\nthe VirtualAGC GUI.");
   SimulationWindow->ScriptText->SetValue(OutDummy);
   SimulationWindow->LessButton->Disable();
   SimulationWindow->MoreButton->Enable();
