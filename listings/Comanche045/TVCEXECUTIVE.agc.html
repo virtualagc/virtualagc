@@ -112,22 +112,22 @@ Project's GitHub repository</a>.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041252,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-041253,000003:                                                                                                  <span class="co">## Filename:    TVCEXECUTIVE.agc</span>
-041254,000004:                                                                                                  <span class="co">## Purpose:     A section of Comanche revision 045.</span>
-041255,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
-041256,000006:                                                                                                  <span class="co">##              second release of the flight software for the Command</span>
-041257,000007:                                                                                                  <span class="co">##              Module's (CM) Apollo Guidance Computer (AGC) for Apollo 10.</span>
-041258,000008:                                                                                                  <span class="co">##              The code has been recreated from a copy of Comanche 055. It</span>
-041259,000009:                                                                                                  <span class="co">##              has been adapted such that the resulting bugger words</span>
-041260,000010:                                                                                                  <span class="co">##              exactly match those specified for Comanche 45 in NASA drawing</span>
-041261,000011:                                                                                                  <span class="co">##              2021153D, which gives relatively high confidence that the</span>
-041262,000012:                                                                                                  <span class="co">##              reconstruction is correct.</span>
-041263,000013:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-041264,000014:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-041265,000015:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-041266,000016:                                                                                                  <span class="co">## Mod history: 2020-12-06 MAS  Created from Comanche 44.</span>
-041267,000017: 
+041282,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+041283,000003:                                                                                                  <span class="co">## Filename:    TVCEXECUTIVE.agc</span>
+041284,000004:                                                                                                  <span class="co">## Purpose:     A section of Comanche revision 045.</span>
+041285,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the</span>
+041286,000006:                                                                                                  <span class="co">##              second release of the flight software for the Command</span>
+041287,000007:                                                                                                  <span class="co">##              Module's (CM) Apollo Guidance Computer (AGC) for Apollo 10.</span>
+041288,000008:                                                                                                  <span class="co">##              The code has been recreated from a copy of Comanche 055. It</span>
+041289,000009:                                                                                                  <span class="co">##              has been adapted such that the resulting bugger words</span>
+041290,000010:                                                                                                  <span class="co">##              exactly match those specified for Comanche 45 in NASA drawing</span>
+041291,000011:                                                                                                  <span class="co">##              2021153D, which gives relatively high confidence that the</span>
+041292,000012:                                                                                                  <span class="co">##              reconstruction is correct.</span>
+041293,000013:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+041294,000014:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+041295,000015:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+041296,000016:                                                                                                  <span class="co">## Mod history: 2020-12-06 MAS  Created from Comanche 44.</span>
+041297,000017: 
 </pre>
 </span>
 </p>
@@ -143,54 +143,54 @@ Page 945
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041269,000019:                                                                                                  <span class="co">#  PROGRAM NAME....      TVCEXECUTIVE, CONSISTING OF TVCEXEC, NEEDLEUP, VARGAINS</span>
-041270,000020:                                                                                                  <span class="co">#                        1SHOTCHK, REPCHEK, CG.CORR, COPYCYCLES, ETC.</span>
-041271,000021:                                                                                                  <span class="co">#  LOG SECTION...        TVCEXECUTIVE            SUBROUTINE...DAPCSM</span>
-041272,000022:                                                                                                  <span class="co">#  MODIFIED BY SCHLUNDT                          21 OCTOBER 1968</span>
-041273,000023: 
-041274,000024:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
-041275,000025:                                                                                                  <span class="co">#       *A SELF-PERPETUATING WAITLIST TASK AT 1/2 SECOND INTERVALS WHICH:</span>
-041276,000026:                                                                                                  <span class="co">#        PREPARES THE ROLL DAP WITH OGA (CDUX)</span>
-041277,000027:                                                                                                  <span class="co">#        PREPARES THE ROLL FDAI NEEDLE (FLY-TO  OGA ERROR)</span>
-041278,000028:                                                                                                  <span class="co">#        PREPARES THE ROLL PHASE PLANE  OGAERR  (FLY-FROM  OGA ERROR)</span>
-041279,000029:                                                                                                  <span class="co">#        PREPARES THE TVC ROLLDAP TASK WAITLIST CALL (3 CS DELAY)</span>
-041280,000030:                                                                                                  <span class="co">#        UPDATES THE NEEDLES DISPLAY</span>
-041281,000031:                                                                                                  <span class="co">#        UPDATES VEHICLE MASS AND CALLS MASSPROP TO UPDATE INERTIA DATA</span>
-041282,000032:                                                                                                  <span class="co">#        UPDATES PITCH, YAW, AND ROLL DAP GAINS FROM MASSPROP DATA</span>
-041283,000033:                                                                                                  <span class="co">#        PERFORMS ONE-SHOT CORRECTION FOR TMC LOOP 0-3 SEC AFTER IGNITION</span>
-041284,000034:                                                                                                  <span class="co">#        PERFORMS REPETITIVE UPDATES FOR TMC LOOP AFTER THE ONE-SHOT CORR.</span>
-041285,000035: 
-041286,000036:                                                                                                  <span class="co">#  CALLING SEQUENCE....</span>
-041287,000037:                                                                                                  <span class="co">#       *TVCEXEC CALLED AS A WAITLIST TASK, IN PARTICULAR BY TVCINIT4 AND BY</span>
-041288,000038:                                                                                                  <span class="co">#        ITSELF, BOTH AT 1/2 SECOND INTERVALS</span>
-041289,000039: 
-041290,000040:                                                                                                  <span class="co">#  NORMAL EXIT MODE.... TASKOVER</span>
-041291,000041: 
-041292,000042:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES.... NONE</span>
-041293,000043: 
-041294,000044:                                                                                                  <span class="co">#  SUBROUTINES CALLED....NEEDLER, S40.15, MASSPROP, TASKOVER, IBNKCALL</span>
-041295,000045: 
-041296,000046:                                                                                                  <span class="co">#  OTHER INTERFACES....</span>
-041297,000047:                                                                                                  <span class="co">#       *TVCRESTART PACKAGE FOR RESTARTS</span>
-041298,000048:                                                                                                  <span class="co">#       *PITCHDAP, YAWDAP FOR VARIABLE GAINS AND ENGINE TRIM ANGLES</span>
-041299,000049: 
-041300,000050:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
-041301,000051:                                                                                                  <span class="co">#       *SEE TVCDAPON....TVCINIT4</span>
-041302,000052:                                                                                                  <span class="co">#       *VARK AND 1/CONACC (S40.15 OF TVCINITIALIZE)</span>
-041303,000053:                                                                                                  <span class="co">#       *PAD LOAD EREPFRAC</span>
-041304,000054:                                                                                                  <span class="co">#       *BITS 15,14 OF FLAGWRD6 (T5 BITS)</span>
-041305,000055:                                                                                                  <span class="co">#       *TVCEXPHS FOR RESTARTS</span>
-041306,000056:                                                                                                  <span class="co">#       *ENGINE-ON BIT (11.13) FOR RESTARTS</span>
-041307,000057:                                                                                                  <span class="co">#       *CDUX, OGAD</span>
-041308,000058: 
-041309,000059:                                                                                                  <span class="co">#  OUTPUT....</span>
-041310,000060:                                                                                                  <span class="co">#       *ROLL DAP OGANOW, FDAI NEEDLE (AK). AND PHASE PLANE OGAERR</span>
-041311,000061:                                                                                                  <span class="co">#       *VARIABLE GAINS FOR PITCH/YAW AND ROLL TVC DAPS</span>
-041312,000062:                                                                                                  <span class="co">#       *SINGLE-SHOT AND REPETITIVE CORRECTIONS TO ENGINE TRIM ANGLES</span>
-041313,000063:                                                                                                  <span class="co">#        PACTOFF AND YACTOFF</span>
-041314,000064: 
-041315,000065:                                                                                                  <span class="co">#  DEBRIS....    MUCH, BUT SHAREABLE WITH RCS/ENTRY, ALL IN EBANK6</span>
-041316,000066: 
+041299,000019:                                                                                                  <span class="co">#  PROGRAM NAME....      TVCEXECUTIVE, CONSISTING OF TVCEXEC, NEEDLEUP, VARGAINS</span>
+041300,000020:                                                                                                  <span class="co">#                        1SHOTCHK, REPCHEK, CG.CORR, COPYCYCLES, ETC.</span>
+041301,000021:                                                                                                  <span class="co">#  LOG SECTION...        TVCEXECUTIVE            SUBROUTINE...DAPCSM</span>
+041302,000022:                                                                                                  <span class="co">#  MODIFIED BY SCHLUNDT                          21 OCTOBER 1968</span>
+041303,000023: 
+041304,000024:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
+041305,000025:                                                                                                  <span class="co">#       *A SELF-PERPETUATING WAITLIST TASK AT 1/2 SECOND INTERVALS WHICH:</span>
+041306,000026:                                                                                                  <span class="co">#        PREPARES THE ROLL DAP WITH OGA (CDUX)</span>
+041307,000027:                                                                                                  <span class="co">#        PREPARES THE ROLL FDAI NEEDLE (FLY-TO  OGA ERROR)</span>
+041308,000028:                                                                                                  <span class="co">#        PREPARES THE ROLL PHASE PLANE  OGAERR  (FLY-FROM  OGA ERROR)</span>
+041309,000029:                                                                                                  <span class="co">#        PREPARES THE TVC ROLLDAP TASK WAITLIST CALL (3 CS DELAY)</span>
+041310,000030:                                                                                                  <span class="co">#        UPDATES THE NEEDLES DISPLAY</span>
+041311,000031:                                                                                                  <span class="co">#        UPDATES VEHICLE MASS AND CALLS MASSPROP TO UPDATE INERTIA DATA</span>
+041312,000032:                                                                                                  <span class="co">#        UPDATES PITCH, YAW, AND ROLL DAP GAINS FROM MASSPROP DATA</span>
+041313,000033:                                                                                                  <span class="co">#        PERFORMS ONE-SHOT CORRECTION FOR TMC LOOP 0-3 SEC AFTER IGNITION</span>
+041314,000034:                                                                                                  <span class="co">#        PERFORMS REPETITIVE UPDATES FOR TMC LOOP AFTER THE ONE-SHOT CORR.</span>
+041315,000035: 
+041316,000036:                                                                                                  <span class="co">#  CALLING SEQUENCE....</span>
+041317,000037:                                                                                                  <span class="co">#       *TVCEXEC CALLED AS A WAITLIST TASK, IN PARTICULAR BY TVCINIT4 AND BY</span>
+041318,000038:                                                                                                  <span class="co">#        ITSELF, BOTH AT 1/2 SECOND INTERVALS</span>
+041319,000039: 
+041320,000040:                                                                                                  <span class="co">#  NORMAL EXIT MODE.... TASKOVER</span>
+041321,000041: 
+041322,000042:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES.... NONE</span>
+041323,000043: 
+041324,000044:                                                                                                  <span class="co">#  SUBROUTINES CALLED....NEEDLER, S40.15, MASSPROP, TASKOVER, IBNKCALL</span>
+041325,000045: 
+041326,000046:                                                                                                  <span class="co">#  OTHER INTERFACES....</span>
+041327,000047:                                                                                                  <span class="co">#       *TVCRESTART PACKAGE FOR RESTARTS</span>
+041328,000048:                                                                                                  <span class="co">#       *PITCHDAP, YAWDAP FOR VARIABLE GAINS AND ENGINE TRIM ANGLES</span>
+041329,000049: 
+041330,000050:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
+041331,000051:                                                                                                  <span class="co">#       *SEE TVCDAPON....TVCINIT4</span>
+041332,000052:                                                                                                  <span class="co">#       *VARK AND 1/CONACC (S40.15 OF TVCINITIALIZE)</span>
+041333,000053:                                                                                                  <span class="co">#       *PAD LOAD EREPFRAC</span>
+041334,000054:                                                                                                  <span class="co">#       *BITS 15,14 OF FLAGWRD6 (T5 BITS)</span>
+041335,000055:                                                                                                  <span class="co">#       *TVCEXPHS FOR RESTARTS</span>
+041336,000056:                                                                                                  <span class="co">#       *ENGINE-ON BIT (11.13) FOR RESTARTS</span>
+041337,000057:                                                                                                  <span class="co">#       *CDUX, OGAD</span>
+041338,000058: 
+041339,000059:                                                                                                  <span class="co">#  OUTPUT....</span>
+041340,000060:                                                                                                  <span class="co">#       *ROLL DAP OGANOW, FDAI NEEDLE (AK). AND PHASE PLANE OGAERR</span>
+041341,000061:                                                                                                  <span class="co">#       *VARIABLE GAINS FOR PITCH/YAW AND ROLL TVC DAPS</span>
+041342,000062:                                                                                                  <span class="co">#       *SINGLE-SHOT AND REPETITIVE CORRECTIONS TO ENGINE TRIM ANGLES</span>
+041343,000063:                                                                                                  <span class="co">#        PACTOFF AND YACTOFF</span>
+041344,000064: 
+041345,000065:                                                                                                  <span class="co">#  DEBRIS....    MUCH, BUT SHAREABLE WITH RCS/ENTRY, ALL IN EBANK6</span>
+041346,000066: 
 </pre>
 </span>
 </p>
@@ -206,54 +206,54 @@ Page 946
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041318,000068: 16,2715                                           <span class="ps">BANK    </span> 16                                    
-041319,000069: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444150524F4C4C">DAPROLL</a>                               
-041320,000070: 16,2000                                           <span class="ps">BANK    </span>                                       
-041321,000071: 16,2715  E6,1702                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425A45524F">BZERO</a>                                 
-041322,000072: 16,2715                                           <span class="ps">COUNT*  </span> $$/TVCX                               
-041323,000073: 
-<a name="54564345584543"></a>041324,000074: 16,2715           40102        <span class="sm">TVCEXEC </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              <span class="co">#  CHECK FOR TERMINATION (BITS 15,14 READ</span>
-041325,000075: 16,2716           74105                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543630303030">OCT60000</a>                              <span class="co">#        10 FROM TVCDAPON TO RCSDAPON)</span>
-041326,000076: 16,2717           00006                           <span class="op">EXTEND  </span>                                       
-041327,000077: 16,2720           63131                           <span class="op">BZMF    </span> <a href="#545643455846494E">TVCEXFIN</a>                              <span class="co">#  TERMINATE</span>
-041328,000078: 
-041329,000079: 16,2721           35036                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#2E35534543">.5SEC</a>                                 <span class="co">#  W.L. CALL TO PERPETUATE TVCEXEC</span>
-041330,000080: 16,2722           05245                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-041331,000081: 16,2723  E6,1702                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425A45524F">BZERO</a>                                 
-041332,000082: 16,2723           02715 34066                     <span class="ps">2CADR   </span> <a href="#54564345584543">TVCEXEC</a>                               
-041333,000083: 
-<a name="524F4C4C50524550"></a>041334,000084: 16,2725           30032        <span class="sm">ROLLPREP</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  UPDATE ROLL LADDERS (NO NEED TO RESTART-</span>
-041335,000085: 16,2726           57662                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F47414E4F57">OGANOW</a>                                <span class="co">#        PROTECT, SINCE ROLL DAPS RE-START)</span>
-041336,000086: 16,2727           57663                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474150415354">OGAPAST</a>                               
-041337,000087: 
-041338,000088: 16,2730           31450                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474144">OGAD</a>                                  <span class="co">#  PREPARE ROLL FDAI NEEDLE WITH FLY-TO</span>
-041339,000089: 16,2731           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        ERROR (COMMAND - MEASURED)</span>
-041340,000090: 16,2732           21662                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F47414E4F57">OGANOW</a>                                
-041341,000091: 16,2733           55476                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  FLY-TO OGA ERROR, SC.AT B-1 REVS</span>
-041342,000092: 
-041343,000093: 16,2734           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PREPARE ROLL DAP PHASE PLANE OGAERR</span>
-041344,000094: 16,2735           77705                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#2D4249543134">-BIT14</a>                                
-041345,000095: 16,2736           55664                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741455252">OGAERR</a>                                <span class="co">#  PHASE-PLANE (FLY-FROM) OGAERROR,</span>
-041346,000096:                                                                                                  <span class="co">#        SC.AT B+0 REVS</span>
-041347,000097: 
-041348,000098: 16,2737           36214                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  SET UP ROLL DAP TASK (ALLOW SOME TIME)</span>
-041349,000099: 16,2740           05245                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-041350,000100: 16,2741  E6,1702                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425A45524F">BZERO</a>                                 
-041351,000101: 16,2741           03267 34066                     <span class="ps">2CADR   </span> <a href="TVCROLLDAP.agc.html#524F4C4C444150">ROLLDAP</a>                               
-041352,000102: 
-<a name="4E4545444C455550"></a>041353,000103: 16,2743           04740        <span class="sm">NEEDLEUP</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  DO A NEEDLES UPDATE (RETURNS AFTER CADR)</span>
-041354,000104: 16,2744           42420                           <span class="ps">CADR    </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4E4545444C4552">NEEDLER</a>                               <span class="co">#        (NEEDLES RESTARTS ITSELF)</span>
-041355,000105: 
-<a name="5641524741494E53"></a>041356,000106: 16,2745           35003        <span class="sm">VARGAINS</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  CHECK ENGINE-ON BIT TO INHIBIT VARIABLE</span>
-041357,000107: 16,2746           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        GAINS AND MASS IF ENGINE OFF</span>
-041358,000108: 16,2747           02011                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              <span class="co">#  CHANNEL 11</span>
-041359,000109: 16,2750           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041360,000110: 16,2751           12755                           <span class="op">TCF     </span> +4                                    <span class="co">#        ON, SO OK TO UPDATE GAINS AND MASS</span>
-041361,000111: 16,2752           35016                 +5        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#        OFF, SO BYPASS MASS/GAIN UPDATES,</span>
-041362,000112: 16,2753           55651                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#                ALSO ENTRY FROM CCS BELOW WITH</span>
-041363,000113: 16,2754           13006                           <span class="op">TCF     </span> <a href="#3153484F5443484B">1SHOTCHK</a>                              <span class="co">#                VCNTR = -0 (V97 R40 ENGFAIL)</span>
-041364,000114: 16,2755           11643                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452">VCNTR</a>                                 <span class="co">#        TEST FOR GAIN UPDATE TIME</span>
-041365,000115: 16,2756           12762                           <span class="op">TCF     </span> +4                                    <span class="co">#                NOT YET</span>
+041348,000068: 16,2715                                           <span class="ps">BANK    </span> 16                                    
+041349,000069: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444150524F4C4C">DAPROLL</a>                               
+041350,000070: 16,2000                                           <span class="ps">BANK    </span>                                       
+041351,000071: 16,2715  E6,1702                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425A45524F">BZERO</a>                                 
+041352,000072: 16,2715                                           <span class="ps">COUNT*  </span> $$/TVCX                               
+041353,000073: 
+<a name="54564345584543"></a>041354,000074: 16,2715           40102        <span class="sm">TVCEXEC </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              <span class="co">#  CHECK FOR TERMINATION (BITS 15,14 READ</span>
+041355,000075: 16,2716           74105                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543630303030">OCT60000</a>                              <span class="co">#        10 FROM TVCDAPON TO RCSDAPON)</span>
+041356,000076: 16,2717           00006                           <span class="op">EXTEND  </span>                                       
+041357,000077: 16,2720           63131                           <span class="op">BZMF    </span> <a href="#545643455846494E">TVCEXFIN</a>                              <span class="co">#  TERMINATE</span>
+041358,000078: 
+041359,000079: 16,2721           35036                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#2E35534543">.5SEC</a>                                 <span class="co">#  W.L. CALL TO PERPETUATE TVCEXEC</span>
+041360,000080: 16,2722           05245                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+041361,000081: 16,2723  E6,1702                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425A45524F">BZERO</a>                                 
+041362,000082: 16,2723           02715 34066                     <span class="ps">2CADR   </span> <a href="#54564345584543">TVCEXEC</a>                               
+041363,000083: 
+<a name="524F4C4C50524550"></a>041364,000084: 16,2725           30032        <span class="sm">ROLLPREP</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  UPDATE ROLL LADDERS (NO NEED TO RESTART-</span>
+041365,000085: 16,2726           57662                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F47414E4F57">OGANOW</a>                                <span class="co">#        PROTECT, SINCE ROLL DAPS RE-START)</span>
+041366,000086: 16,2727           57663                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474150415354">OGAPAST</a>                               
+041367,000087: 
+041368,000088: 16,2730           31450                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F474144">OGAD</a>                                  <span class="co">#  PREPARE ROLL FDAI NEEDLE WITH FLY-TO</span>
+041369,000089: 16,2731           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        ERROR (COMMAND - MEASURED)</span>
+041370,000090: 16,2732           21662                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F47414E4F57">OGANOW</a>                                
+041371,000091: 16,2733           55476                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  FLY-TO OGA ERROR, SC.AT B-1 REVS</span>
+041372,000092: 
+041373,000093: 16,2734           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  PREPARE ROLL DAP PHASE PLANE OGAERR</span>
+041374,000094: 16,2735           77705                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#2D4249543134">-BIT14</a>                                
+041375,000095: 16,2736           55664                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4741455252">OGAERR</a>                                <span class="co">#  PHASE-PLANE (FLY-FROM) OGAERROR,</span>
+041376,000096:                                                                                                  <span class="co">#        SC.AT B+0 REVS</span>
+041377,000097: 
+041378,000098: 16,2737           36214                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5448524545">THREE</a>                                 <span class="co">#  SET UP ROLL DAP TASK (ALLOW SOME TIME)</span>
+041379,000099: 16,2740           05245                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+041380,000100: 16,2741  E6,1702                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425A45524F">BZERO</a>                                 
+041381,000101: 16,2741           03267 34066                     <span class="ps">2CADR   </span> <a href="TVCROLLDAP.agc.html#524F4C4C444150">ROLLDAP</a>                               
+041382,000102: 
+<a name="4E4545444C455550"></a>041383,000103: 16,2743           04740        <span class="sm">NEEDLEUP</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  DO A NEEDLES UPDATE (RETURNS AFTER CADR)</span>
+041384,000104: 16,2744           42420                           <span class="ps">CADR    </span> <a href="RCS-CSM_DIGITAL_AUTOPILOT.agc.html#4E4545444C4552">NEEDLER</a>                               <span class="co">#        (NEEDLES RESTARTS ITSELF)</span>
+041385,000105: 
+<a name="5641524741494E53"></a>041386,000106: 16,2745           35003        <span class="sm">VARGAINS</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  CHECK ENGINE-ON BIT TO INHIBIT VARIABLE</span>
+041387,000107: 16,2746           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        GAINS AND MASS IF ENGINE OFF</span>
+041388,000108: 16,2747           02011                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              <span class="co">#  CHANNEL 11</span>
+041389,000109: 16,2750           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041390,000110: 16,2751           12755                           <span class="op">TCF     </span> +4                                    <span class="co">#        ON, SO OK TO UPDATE GAINS AND MASS</span>
+041391,000111: 16,2752           35016                 +5        <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#        OFF, SO BYPASS MASS/GAIN UPDATES,</span>
+041392,000112: 16,2753           55651                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#                ALSO ENTRY FROM CCS BELOW WITH</span>
+041393,000113: 16,2754           13006                           <span class="op">TCF     </span> <a href="#3153484F5443484B">1SHOTCHK</a>                              <span class="co">#                VCNTR = -0 (V97 R40 ENGFAIL)</span>
+041394,000114: 16,2755           11643                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452">VCNTR</a>                                 <span class="co">#        TEST FOR GAIN UPDATE TIME</span>
+041395,000115: 16,2756           12762                           <span class="op">TCF     </span> +4                                    <span class="co">#                NOT YET</span>
 </pre>
 </span>
 </p>
@@ -269,55 +269,55 @@ Page 947
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041367,000117: 16,2757           12766                           <span class="op">TCF     </span> <a href="#4741494E43484E47">GAINCHNG</a>                              <span class="co">#                NOW</span>
-041368,000118: 16,2760           12760                           <span class="op">TCF     </span> +0                                    <span class="co">#                NOT USED</span>
-041369,000119: 16,2761           12752                           <span class="op">TCF     </span> <a href="#5641524741494E53">VARGAINS</a>   +5                         <span class="co">#                NO, LOTHRUST (S40.8 R40)</span>
-041370,000120: 
-041371,000121: 16,2762           55653                 +4        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452544D50">VCNTRTMP</a>                              <span class="co">#        PROTECT VCNTR AND</span>
-041372,000122: 16,2763           31474                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               <span class="co">#        CSMMASS DURING AN IMPULSIVE BURN</span>
-041373,000123: 16,2764           55652                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353544D50">MASSTMP</a>                               
-041374,000124: 16,2765           12777                           <span class="op">TCF     </span> <a href="#45584543434F5059">EXECCOPY</a>                              
-041375,000125: 
-<a name="4741494E43484E47"></a>041376,000126: 16,2766           04740        <span class="sm">GAINCHNG</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  UPDATE IXX, IAVG, IAVG/TLX</span>
-041377,000127: 16,2767           13422                           <span class="ps">CADR    </span> <a href="TVCMASSPROP.agc.html#4649584357">FIXCW</a>                                 <span class="co">#  MASSPROP ENTRY (ALREADY INITIALIZED)</span>
-041378,000128: 16,2770           04740                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  UPDATE 1/CONACC, VARK</span>
-041379,000129: 16,2771           36462                           <span class="ps">CADR    </span> <a href="TVCINITIALIZE.agc.html#5334302E3135">S40.15</a>                                <span class="co">#        (S40.15 IS IN TVCINITIALIZE)</span>
-041380,000130: 16,2772           41637                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454E4D444F54">TENMDOT</a>                               <span class="co">#  UPDATE MASS FOR NEXT 10 SEC. OF BURN</span>
-041381,000131: 16,2773           61474                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               
-041382,000132: 16,2774           55652                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353544D50">MASSTMP</a>                               <span class="co">#  KG B+16</span>
-041383,000133: 
-041384,000134: 16,2775           34374                           <span class="op">CAF     </span> <a href="TVCINITIALIZE.agc.html#4E494E455445454E">NINETEEN</a>                              <span class="co">#  RESET THE VARIABLE-GAIN UPDATE COUNTER</span>
-041385,000135: 16,2776           55653                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452544D50">VCNTRTMP</a>                              
-041386,000136: 
-<a name="45584543434F5059"></a>041387,000137: 16,2777           25651        <span class="sm">EXECCOPY</span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  RESTART-PROTECT THE COPYCYCLE         (1)</span>
-041388,000138: 
-041389,000139: 16,3000           31652                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353544D50">MASSTMP</a>                               <span class="co">#  CSMMASS KG B+16</span>
-041390,000140: 16,3001           55474                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               
-041391,000141: 
-041392,000142: 16,3002           31653                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452544D50">VCNTRTMP</a>                              <span class="co">#  VCNTR</span>
-041393,000143: 16,3003           55643                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452">VCNTR</a>                                 
-041394,000144: 16,3004           55444                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56393756434E5452">V97VCNTR</a>                              <span class="co">#  FOR ENGFAIL (R41) MASS UPDATES AT SPSOFF</span>
-041395,000145: 
-041396,000146: 16,3005           25651                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  COPYCYCLE OVER                        (2)</span>
-041397,000147: 
-<a name="3153484F5443484B"></a>041398,000148: 16,3006           11447        <span class="sm">1SHOTCHK</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452">CNTR</a>                                  <span class="co">#  CHECK TIME FOR ONE-SHOT OR REPCORR</span>
-041399,000149: 16,3007           13013                           <span class="op">TCF     </span> +4                                    <span class="co">#        NOT YET</span>
-041400,000150: 16,3010           13026                           <span class="op">TCF     </span> <a href="#3153484F544F4B">1SHOTOK</a>                               <span class="co">#        NOW</span>
-041401,000151: 16,3011           13017                           <span class="op">TCF     </span> <a href="#5245504348454B">REPCHEK</a>                               <span class="co">#        ONE-SHOT OVER, ON TO REPCORR</span>
-041402,000152: 16,3012           13026                           <span class="op">TCF     </span> <a href="#3153484F544F4B">1SHOTOK</a>                               <span class="co">#        NOW (ONE-SHOT ONLY, NO REPCORR)</span>
-041403,000153: 
-041404,000154: 16,3013           55676                 +4        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452544D50">CNTRTMP</a>                               <span class="co">#  COUNT DOWN</span>
-041405,000155: 16,3014           36211                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  SETUP TVCEXPHS FOR ENTRY AT CNTRCOPY</span>
-041406,000156: 16,3015           55651                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              
-041407,000157: 16,3016           13127                           <span class="op">TCF     </span> <a href="#434E5452434F5059">CNTRCOPY</a>                              
-041408,000158: 
-<a name="5245504348454B"></a>041409,000159: 16,3017           31642        <span class="sm">REPCHEK </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455046524143">REPFRAC</a>                               <span class="co">#  CHECK FOR REPETITIVE UPDATES</span>
-041410,000160: 16,3020           00006                           <span class="op">EXTEND  </span>                                       
-041411,000161: 16,3021           63131                           <span class="op">BZMF    </span> <a href="#545643455846494E">TVCEXFIN</a>                              <span class="co">#        NO,  OVER-AND-OUT</span>
-041412,000162: 16,3022           55446                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>    +1                         <span class="co">#        YES, SET UP CORRECTION FRACTION</span>
-041413,000163: 16,3023           35015                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  SET UP TVCEXPHS FOR ENTRY AT CORSETUP</span>
-041414,000164: 16,3024           55651                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              
-041415,000165: 16,3025           13040                           <span class="op">TCF     </span> <a href="#434F525345545550">CORSETUP</a>                              
+041397,000117: 16,2757           12766                           <span class="op">TCF     </span> <a href="#4741494E43484E47">GAINCHNG</a>                              <span class="co">#                NOW</span>
+041398,000118: 16,2760           12760                           <span class="op">TCF     </span> +0                                    <span class="co">#                NOT USED</span>
+041399,000119: 16,2761           12752                           <span class="op">TCF     </span> <a href="#5641524741494E53">VARGAINS</a>   +5                         <span class="co">#                NO, LOTHRUST (S40.8 R40)</span>
+041400,000120: 
+041401,000121: 16,2762           55653                 +4        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452544D50">VCNTRTMP</a>                              <span class="co">#        PROTECT VCNTR AND</span>
+041402,000122: 16,2763           31474                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               <span class="co">#        CSMMASS DURING AN IMPULSIVE BURN</span>
+041403,000123: 16,2764           55652                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353544D50">MASSTMP</a>                               
+041404,000124: 16,2765           12777                           <span class="op">TCF     </span> <a href="#45584543434F5059">EXECCOPY</a>                              
+041405,000125: 
+<a name="4741494E43484E47"></a>041406,000126: 16,2766           04740        <span class="sm">GAINCHNG</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  UPDATE IXX, IAVG, IAVG/TLX</span>
+041407,000127: 16,2767           13422                           <span class="ps">CADR    </span> <a href="TVCMASSPROP.agc.html#4649584357">FIXCW</a>                                 <span class="co">#  MASSPROP ENTRY (ALREADY INITIALIZED)</span>
+041408,000128: 16,2770           04740                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#  UPDATE 1/CONACC, VARK</span>
+041409,000129: 16,2771           36462                           <span class="ps">CADR    </span> <a href="TVCINITIALIZE.agc.html#5334302E3135">S40.15</a>                                <span class="co">#        (S40.15 IS IN TVCINITIALIZE)</span>
+041410,000130: 16,2772           41637                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454E4D444F54">TENMDOT</a>                               <span class="co">#  UPDATE MASS FOR NEXT 10 SEC. OF BURN</span>
+041411,000131: 16,2773           61474                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               
+041412,000132: 16,2774           55652                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353544D50">MASSTMP</a>                               <span class="co">#  KG B+16</span>
+041413,000133: 
+041414,000134: 16,2775           34374                           <span class="op">CAF     </span> <a href="TVCINITIALIZE.agc.html#4E494E455445454E">NINETEEN</a>                              <span class="co">#  RESET THE VARIABLE-GAIN UPDATE COUNTER</span>
+041415,000135: 16,2776           55653                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452544D50">VCNTRTMP</a>                              
+041416,000136: 
+<a name="45584543434F5059"></a>041417,000137: 16,2777           25651        <span class="sm">EXECCOPY</span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  RESTART-PROTECT THE COPYCYCLE         (1)</span>
+041418,000138: 
+041419,000139: 16,3000           31652                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D415353544D50">MASSTMP</a>                               <span class="co">#  CSMMASS KG B+16</span>
+041420,000140: 16,3001           55474                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               
+041421,000141: 
+041422,000142: 16,3002           31653                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452544D50">VCNTRTMP</a>                              <span class="co">#  VCNTR</span>
+041423,000143: 16,3003           55643                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56434E5452">VCNTR</a>                                 
+041424,000144: 16,3004           55444                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56393756434E5452">V97VCNTR</a>                              <span class="co">#  FOR ENGFAIL (R41) MASS UPDATES AT SPSOFF</span>
+041425,000145: 
+041426,000146: 16,3005           25651                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  COPYCYCLE OVER                        (2)</span>
+041427,000147: 
+<a name="3153484F5443484B"></a>041428,000148: 16,3006           11447        <span class="sm">1SHOTCHK</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452">CNTR</a>                                  <span class="co">#  CHECK TIME FOR ONE-SHOT OR REPCORR</span>
+041429,000149: 16,3007           13013                           <span class="op">TCF     </span> +4                                    <span class="co">#        NOT YET</span>
+041430,000150: 16,3010           13026                           <span class="op">TCF     </span> <a href="#3153484F544F4B">1SHOTOK</a>                               <span class="co">#        NOW</span>
+041431,000151: 16,3011           13017                           <span class="op">TCF     </span> <a href="#5245504348454B">REPCHEK</a>                               <span class="co">#        ONE-SHOT OVER, ON TO REPCORR</span>
+041432,000152: 16,3012           13026                           <span class="op">TCF     </span> <a href="#3153484F544F4B">1SHOTOK</a>                               <span class="co">#        NOW (ONE-SHOT ONLY, NO REPCORR)</span>
+041433,000153: 
+041434,000154: 16,3013           55676                 +4        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452544D50">CNTRTMP</a>                               <span class="co">#  COUNT DOWN</span>
+041435,000155: 16,3014           36211                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   <span class="co">#  SETUP TVCEXPHS FOR ENTRY AT CNTRCOPY</span>
+041436,000156: 16,3015           55651                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              
+041437,000157: 16,3016           13127                           <span class="op">TCF     </span> <a href="#434E5452434F5059">CNTRCOPY</a>                              
+041438,000158: 
+<a name="5245504348454B"></a>041439,000159: 16,3017           31642        <span class="sm">REPCHEK </span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52455046524143">REPFRAC</a>                               <span class="co">#  CHECK FOR REPETITIVE UPDATES</span>
+041440,000160: 16,3020           00006                           <span class="op">EXTEND  </span>                                       
+041441,000161: 16,3021           63131                           <span class="op">BZMF    </span> <a href="#545643455846494E">TVCEXFIN</a>                              <span class="co">#        NO,  OVER-AND-OUT</span>
+041442,000162: 16,3022           55446                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>    +1                         <span class="co">#        YES, SET UP CORRECTION FRACTION</span>
+041443,000163: 16,3023           35015                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#464F5552">FOUR</a>                                  <span class="co">#  SET UP TVCEXPHS FOR ENTRY AT CORSETUP</span>
+041444,000164: 16,3024           55651                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              
+041445,000165: 16,3025           13040                           <span class="op">TCF     </span> <a href="#434F525345545550">CORSETUP</a>                              
 </pre>
 </span>
 </p>
@@ -333,56 +333,56 @@ Page 948
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="3153484F544F4B"></a>041417,000167: 16,3026           35003        <span class="sm">1SHOTOK </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  CHECK ENGINE-ON BIT, NOT PERMITTING</span>
-041418,000168: 16,3027           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        ONE-SHOT DURING ENGINE-SHUTDOWN</span>
-041419,000169: 16,3030           02011                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              
-041420,000170: 16,3031           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-041421,000171: 16,3032           13034                           <span class="op">TCF     </span> +2                                    <span class="co">#        ONE-SHOT OK</span>
-041422,000172: 16,3033           13131                           <span class="op">TCF     </span> <a href="#545643455846494E">TVCEXFIN</a>                              <span class="co">#        NO, TERMINATE</span>
-041423,000173: 
-041424,000174: 16,3034           25651                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#                                        (3)</span>
-041425,000175: 
-<a name="54454D50534554"></a>041426,000176: 16,3035           33134        <span class="sm">TEMPSET </span>           <span class="op">CAF     </span> <a href="#46434F5246524143">FCORFRAC</a>                              <span class="co">#        SET UP CORRECTION FRACTION</span>
-041427,000177: 16,3036           55446                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>    +1                         
-041428,000178: 
-041429,000179: 16,3037           25651                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  ENTRY FROM REPCHEK AT NEXT LOCATION   (4)</span>
-041430,000180: 
-<a name="434F525345545550"></a>041431,000181: 16,3040           31466        <span class="sm">CORSETUP</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  CHECK FOR LEM-OFF/ON</span>
-041432,000182: 16,3041           75003                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  (NOTE, SHOWS LEM-OFF)</span>
-041433,000183: 16,3042           00006                           <span class="op">EXTEND  </span>                                       
-041434,000184: 16,3043           13045                           <span class="op">BZF     </span> +2                                    <span class="co">#  LEM IS ON,  PICK UP   TEMPDAP+1</span>
-041435,000185: 16,3044           31446                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>    +1                         <span class="co">#  LEM IS OFF, PICK UP 2(TEMPDAP+1)</span>
-041436,000186: 16,3045           61446                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>    +1                         
-041437,000187: 16,3046           55445                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>                               <span class="co">#  CG.CORR USES TEMPDAP</span>
-041438,000188: 
-041439,000189: 16,3047           37716                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  SET UP FOR CNTR = -1 (ONE-SHOT DONE)</span>
-041440,000190: 16,3050           55676                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452544D50">CNTRTMP</a>                               <span class="co">#        (COPYCYCLE AT .CNTRCOPY.)</span>
-041441,000191: 
-<a name="43472E434F5252"></a>041442,000192: 16,3051           00006        <span class="sm">CG.CORR </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  PITCH TMC LOOP</span>
-041443,000193: 16,3052           31606                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5044454C4F4646">PDELOFF</a>                               
-041444,000194: 16,3053           53673                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50414354544D50">PACTTMP</a>                               
-041445,000195: 16,3054           00006                           <span class="op">EXTEND  </span>                                       
-041446,000196: 16,3055           41606                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5044454C4F4646">PDELOFF</a>                               
-041447,000197: 16,3056           20001                           <span class="op">DDOUBL  </span>                                       
-041448,000198: 16,3057           20001                           <span class="op">DDOUBL  </span>                                       
-041449,000199: 16,3060           53612                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
-041450,000200: 16,3061           00006                           <span class="op">EXTEND  </span>                                       
-041451,000201: 16,3062           31602                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C50424152">DELPBAR</a>                               
-041452,000202: 16,3063           20001                           <span class="op">DDOUBL  </span>                                       
-041453,000203: 16,3064           20001                           <span class="op">DDOUBL  </span>                                       
-041454,000204: 16,3065           21612                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
-041455,000205: 16,3066           00006                           <span class="op">EXTEND  </span>                                       
-041456,000206: 16,3067           31612                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
-041457,000207: 16,3070           00006                           <span class="op">EXTEND  </span>                                       
-041458,000208: 16,3071           71445                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>                               
-041459,000209: 16,3072           21673                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50414354544D50">PACTTMP</a>                               
-041460,000210: 
-041461,000211: 16,3073           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  YAW TMC LOOP</span>
-041462,000212: 16,3074           31610                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5944454C4F4646">YDELOFF</a>                               
-041463,000213: 16,3075           53675                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59414354544D50">YACTTMP</a>                               
-041464,000214: 16,3076           00006                           <span class="op">EXTEND  </span>                                       
-041465,000215: 16,3077           41610                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5944454C4F4646">YDELOFF</a>                               
-041466,000216: 16,3100           20001                           <span class="op">DDOUBL  </span>                                       
+<a name="3153484F544F4B"></a>041447,000167: 16,3026           35003        <span class="sm">1SHOTOK </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  CHECK ENGINE-ON BIT, NOT PERMITTING</span>
+041448,000168: 16,3027           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        ONE-SHOT DURING ENGINE-SHUTDOWN</span>
+041449,000169: 16,3030           02011                           <span class="op">RAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              
+041450,000170: 16,3031           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+041451,000171: 16,3032           13034                           <span class="op">TCF     </span> +2                                    <span class="co">#        ONE-SHOT OK</span>
+041452,000172: 16,3033           13131                           <span class="op">TCF     </span> <a href="#545643455846494E">TVCEXFIN</a>                              <span class="co">#        NO, TERMINATE</span>
+041453,000173: 
+041454,000174: 16,3034           25651                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#                                        (3)</span>
+041455,000175: 
+<a name="54454D50534554"></a>041456,000176: 16,3035           33134        <span class="sm">TEMPSET </span>           <span class="op">CAF     </span> <a href="#46434F5246524143">FCORFRAC</a>                              <span class="co">#        SET UP CORRECTION FRACTION</span>
+041457,000177: 16,3036           55446                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>    +1                         
+041458,000178: 
+041459,000179: 16,3037           25651                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  ENTRY FROM REPCHEK AT NEXT LOCATION   (4)</span>
+041460,000180: 
+<a name="434F525345545550"></a>041461,000181: 16,3040           31466        <span class="sm">CORSETUP</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  CHECK FOR LEM-OFF/ON</span>
+041462,000182: 16,3041           75003                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543133">BIT13</a>                                 <span class="co">#  (NOTE, SHOWS LEM-OFF)</span>
+041463,000183: 16,3042           00006                           <span class="op">EXTEND  </span>                                       
+041464,000184: 16,3043           13045                           <span class="op">BZF     </span> +2                                    <span class="co">#  LEM IS ON,  PICK UP   TEMPDAP+1</span>
+041465,000185: 16,3044           31446                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>    +1                         <span class="co">#  LEM IS OFF, PICK UP 2(TEMPDAP+1)</span>
+041466,000186: 16,3045           61446                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>    +1                         
+041467,000187: 16,3046           55445                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>                               <span class="co">#  CG.CORR USES TEMPDAP</span>
+041468,000188: 
+041469,000189: 16,3047           37716                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474F4E45">NEGONE</a>                                <span class="co">#  SET UP FOR CNTR = -1 (ONE-SHOT DONE)</span>
+041470,000190: 16,3050           55676                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452544D50">CNTRTMP</a>                               <span class="co">#        (COPYCYCLE AT .CNTRCOPY.)</span>
+041471,000191: 
+<a name="43472E434F5252"></a>041472,000192: 16,3051           00006        <span class="sm">CG.CORR </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  PITCH TMC LOOP</span>
+041473,000193: 16,3052           31606                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5044454C4F4646">PDELOFF</a>                               
+041474,000194: 16,3053           53673                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50414354544D50">PACTTMP</a>                               
+041475,000195: 16,3054           00006                           <span class="op">EXTEND  </span>                                       
+041476,000196: 16,3055           41606                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5044454C4F4646">PDELOFF</a>                               
+041477,000197: 16,3056           20001                           <span class="op">DDOUBL  </span>                                       
+041478,000198: 16,3057           20001                           <span class="op">DDOUBL  </span>                                       
+041479,000199: 16,3060           53612                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
+041480,000200: 16,3061           00006                           <span class="op">EXTEND  </span>                                       
+041481,000201: 16,3062           31602                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C50424152">DELPBAR</a>                               
+041482,000202: 16,3063           20001                           <span class="op">DDOUBL  </span>                                       
+041483,000203: 16,3064           20001                           <span class="op">DDOUBL  </span>                                       
+041484,000204: 16,3065           21612                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
+041485,000205: 16,3066           00006                           <span class="op">EXTEND  </span>                                       
+041486,000206: 16,3067           31612                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
+041487,000207: 16,3070           00006                           <span class="op">EXTEND  </span>                                       
+041488,000208: 16,3071           71445                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>                               
+041489,000209: 16,3072           21673                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50414354544D50">PACTTMP</a>                               
+041490,000210: 
+041491,000211: 16,3073           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  YAW TMC LOOP</span>
+041492,000212: 16,3074           31610                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5944454C4F4646">YDELOFF</a>                               
+041493,000213: 16,3075           53675                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59414354544D50">YACTTMP</a>                               
+041494,000214: 16,3076           00006                           <span class="op">EXTEND  </span>                                       
+041495,000215: 16,3077           41610                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5944454C4F4646">YDELOFF</a>                               
+041496,000216: 16,3100           20001                           <span class="op">DDOUBL  </span>                                       
 </pre>
 </span>
 </p>
@@ -398,42 +398,42 @@ Page 949
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041468,000218: 16,3101           20001                           <span class="op">DDOUBL  </span>                                       
-041469,000219: 16,3102           53612                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
-041470,000220: 16,3103           00006                           <span class="op">EXTEND  </span>                                       
-041471,000221: 16,3104           31604                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C59424152">DELYBAR</a>                               
-041472,000222: 16,3105           20001                           <span class="op">DDOUBL  </span>                                       
-041473,000223: 16,3106           20001                           <span class="op">DDOUBL  </span>                                       
-041474,000224: 16,3107           21612                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
-041475,000225: 16,3110           00006                           <span class="op">EXTEND  </span>                                       
-041476,000226: 16,3111           31612                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
-041477,000227: 16,3112           00006                           <span class="op">EXTEND  </span>                                       
-041478,000228: 16,3113           71445                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>                               
-041479,000229: 16,3114           21675                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59414354544D50">YACTTMP</a>                               
-041480,000230: 
-<a name="434F52434F5059"></a>041481,000231: 16,3115           25651        <span class="sm">CORCOPY </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  RESTART PROTECT THE COPYCYCLE         (5)</span>
-041482,000232: 
-041483,000233: 16,3116           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  TRIM-ESTIMATES, AND</span>
-041484,000234: 16,3117           31673                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50414354544D50">PACTTMP</a>                               
-041485,000235: 16,3120           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               <span class="co">#        TRIMS</span>
-041486,000236: 16,3121           53606                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5044454C4F4646">PDELOFF</a>                               
-041487,000237: 
-041488,000238: 16,3122           00006                           <span class="op">EXTEND  </span>                                       
-041489,000239: 16,3123           31675                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59414354544D50">YACTTMP</a>                               
-041490,000240: 16,3124           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#594143544F4646">YACTOFF</a>                               
-041491,000241: 16,3125           53610                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5944454C4F4646">YDELOFF</a>                               
-041492,000242: 
-041493,000243: 16,3126           25651                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  ENTRY FROM 1SHOTCHK AT NEXT LOCATION  (6)</span>
-041494,000244: 
-<a name="434E5452434F5059"></a>041495,000245: 16,3127           31676        <span class="sm">CNTRCOPY</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452544D50">CNTRTMP</a>                               <span class="co">#  UPDATE CNTR (RESTARTS OK, FOLLOWS CPYCY)</span>
-041496,000246: 16,3130           55447                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452">CNTR</a>                                  
-041497,000247: 
-<a name="545643455846494E"></a>041498,000248: 16,3131           35021        <span class="sm">TVCEXFIN</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  RESET TVCEXPHS</span>
-041499,000249: 16,3132           55651                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              
-041500,000250: 16,3133           15324                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  TVCEXECUTIVE FINISHED</span>
-041501,000251: 
-<a name="46434F5246524143"></a>041502,000252: 16,3134           10000        <span class="sm">FCORFRAC</span>           <span class="ps">OCT     </span> 10000                                 <span class="co">#  ONE-SHOT CORRECTION FRACTION  </span>
-041503,000253: 
+041498,000218: 16,3101           20001                           <span class="op">DDOUBL  </span>                                       
+041499,000219: 16,3102           53612                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
+041500,000220: 16,3103           00006                           <span class="op">EXTEND  </span>                                       
+041501,000221: 16,3104           31604                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C59424152">DELYBAR</a>                               
+041502,000222: 16,3105           20001                           <span class="op">DDOUBL  </span>                                       
+041503,000223: 16,3106           20001                           <span class="op">DDOUBL  </span>                                       
+041504,000224: 16,3107           21612                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
+041505,000225: 16,3110           00006                           <span class="op">EXTEND  </span>                                       
+041506,000226: 16,3111           31612                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544D5031">TTMP1</a>                                 
+041507,000227: 16,3112           00006                           <span class="op">EXTEND  </span>                                       
+041508,000228: 16,3113           71445                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D50444150">TEMPDAP</a>                               
+041509,000229: 16,3114           21675                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59414354544D50">YACTTMP</a>                               
+041510,000230: 
+<a name="434F52434F5059"></a>041511,000231: 16,3115           25651        <span class="sm">CORCOPY </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  RESTART PROTECT THE COPYCYCLE         (5)</span>
+041512,000232: 
+041513,000233: 16,3116           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  TRIM-ESTIMATES, AND</span>
+041514,000234: 16,3117           31673                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50414354544D50">PACTTMP</a>                               
+041515,000235: 16,3120           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               <span class="co">#        TRIMS</span>
+041516,000236: 16,3121           53606                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5044454C4F4646">PDELOFF</a>                               
+041517,000237: 
+041518,000238: 16,3122           00006                           <span class="op">EXTEND  </span>                                       
+041519,000239: 16,3123           31675                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59414354544D50">YACTTMP</a>                               
+041520,000240: 16,3124           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#594143544F4646">YACTOFF</a>                               
+041521,000241: 16,3125           53610                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5944454C4F4646">YDELOFF</a>                               
+041522,000242: 
+041523,000243: 16,3126           25651                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  ENTRY FROM 1SHOTCHK AT NEXT LOCATION  (6)</span>
+041524,000244: 
+<a name="434E5452434F5059"></a>041525,000245: 16,3127           31676        <span class="sm">CNTRCOPY</span>           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452544D50">CNTRTMP</a>                               <span class="co">#  UPDATE CNTR (RESTARTS OK, FOLLOWS CPYCY)</span>
+041526,000246: 16,3130           55447                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434E5452">CNTR</a>                                  
+041527,000247: 
+<a name="545643455846494E"></a>041528,000248: 16,3131           35021        <span class="sm">TVCEXFIN</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  RESET TVCEXPHS</span>
+041529,000249: 16,3132           55651                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              
+041530,000250: 16,3133           15324                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  TVCEXECUTIVE FINISHED</span>
+041531,000251: 
+<a name="46434F5246524143"></a>041532,000252: 16,3134           10000        <span class="sm">FCORFRAC</span>           <span class="ps">OCT     </span> 10000                                 <span class="co">#  ONE-SHOT CORRECTION FRACTION  </span>
+041533,000253: 
 </pre>
 </span>
 </p>
@@ -450,8 +450,8 @@ This page is empty.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-041506,000256: 
-041507,000257: 
+041536,000256: 
+041537,000257: 
 
 End of include-file TVCEXECUTIVE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
