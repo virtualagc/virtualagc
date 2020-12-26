@@ -14,6 +14,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Removed XMODULO and TMODULO to correct
+##				pad-load addresses.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2055,8 +2057,12 @@ TRUNBIAS	ERASE			# B(1)PRM RESULT OF R57 CALIBR OF TRUNION
 
 # KEPLER STORAGE				(6D)
 
-XMODULO		ERASE	+1		# I(2) GREATER 2PI KEPLER
-TMODULO		ERASE	+1		# I(2) GREATER 2 KEPLER
+## <b>Reconstruction:</b>  In Comanche 55, at this point, the variables <code>XMODULO</code>
+## and <code>TMODULO</code> appear.  In Comanche 67, however, I find that their presence 
+## causes the address of <code>RTED1</code> to be incorrect (per 
+## <a href="http://www.ibiblio.org/apollo/Documents/padload_12_cm.pdf#page=3">
+## the list of Comanche 67 erasable pad loads</a>.  Moreover, I find that those 
+## variables are referenced nowhere else in the code.  Hence then have been removed here.
 EPSILONT	ERASE	+1		# I(2)TMP
 
 ## Page 83
