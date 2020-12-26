@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 1334
 # DELETE
@@ -303,7 +304,9 @@ GOBAQUE		VLOAD	ABVAL
 
 INT-ABRT	EXIT
 		TC	POODOO
-		OCT	00430
+## <b>Reconstruction:<b>  The following was just <code>OCT 00430</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	20430
 
 ## Page 1341
 # THE OBLATE ROUTINE COMPUTES THE ACCELERATION DUE TO OBLATENESS.  IT USES THE UNIT OF THE VEHICLE

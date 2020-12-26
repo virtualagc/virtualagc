@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 1107
 # SECTION 1   DISPATCHER
@@ -2518,7 +2519,9 @@ ZEROANS		CAF	ZERO		# FORCE ANSWER TO ZERO HERE.
 		TCF	FIXROOT
 
 SQRTABRT	TC	POODOO
-		OCT	1302
+## <b>Reconstruction:<b>  The following was just <code>OCT 1302</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	21302
 
 ## Page 1185
 SMPAC+		AD	-1/2+2		# SEE IF ARGUMENT GREATER THAN OR EQUAL TO

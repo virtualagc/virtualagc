@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -477,7 +478,9 @@ SYSTEST		TC	CHKPOOH
 		EXTEND
 		BZF	V92CONT		# IF IT'S NOT YET SET, CONTINUE
 		TC	POODOO		# IT'S ON. SEND NODO ALARM FOR P07
-		OCT	1521
+## <b>Reconstruction:<b>  The following was just <code>OCT 1521</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	21521
 V92CONT		TC	EXDAPOFF	# TURN DAP OFF IT IT'S ON
 		CAF	PRIO20
 		TC	FINDVAC

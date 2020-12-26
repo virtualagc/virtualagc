@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 423
 # NAME-		IMU PERFORMANCE TESTS 2
@@ -849,7 +850,9 @@ GTSCPSS		CA	FLAGWRD1	# CALLED BY V37
 		EXTEND
 		BZF	GTSCPSSA
 		TC	POODOO
-		OCT	1521		# NODO ALARM FOR P01 - P11 ALREADY DONE
+## <b>Reconstruction:<b>  The following was just <code>OCT 1521</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	21521		# NODO ALARM FOR P01 - P11 ALREADY DONE
 		
 GTSCPSSA	CAF	ONE
 		TS	GEOCOMP1	# THIS IS THE LEAD IN FOR COMPASS.

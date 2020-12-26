@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 1485
 		BLOCK	3
@@ -145,7 +146,9 @@ DELLOOP		TS	RUPTREG1
 		TCF	DELLOOP
 
 		TC	BAILOUT		# NO AVAILABLE LOCS AVAILABLE.
-		OCT	1104
+## <b>Reconstruction:<b>  The following was just <code>OCT 1104</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	31104
 
 OK2DELAY	CA	TCSLEEP		# SET WAITLIST IMMEDIATE RETURN
 		TS	WAITEXIT

@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 1420
 		BLOCK	02
@@ -813,7 +814,9 @@ MODESLP		TC	MAKECADR	# CALL FROM SWITCHABLE FIXED ONLY.
 		TCF	JOBSLEEP
 
 MODABORT	TC	POODOO		# TWO PROGRAMS USING SAME DEVICE.
-		OCT	1210
+## <b>Reconstruction:<b>  The following was just <code>OCT 1210</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	21210
 
 ## Page 1442
 # CONSTANTS FOR MODE SWITCHING ROUTINES
@@ -830,7 +833,9 @@ GOMANUR		CA	ATTCADR		# IS KALCMANU FREE
 		EXTEND
 		BZF	+3
 		TC	POODOO		# NO
-		OCT	1210		# 2 TRYING TO USE SAME DEVICE
+## <b>Reconstruction:<b>  The following was just <code>OCT 1210</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	21210		# 2 TRYING TO USE SAME DEVICE
 
  +3		EXTEND
 		DCA	BUF2

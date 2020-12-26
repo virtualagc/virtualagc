@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 307
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -2702,7 +2703,9 @@ DSPALARM	CS	NVSBENDL
 CHARALRM	TC	FALTON		# NOT NVSUB INITIATED. TURN ON OPR ERROR
 		TC	ENDOFJOB
 		TC	POODOO
-		OCT	01501
+## <b>Reconstruction:<b>  The following was just <code>OCT 01501</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	21501
 MONADR		GENADR	PASTEVB
 NVSBENDL	TC	NVSUBEND
 
@@ -3127,7 +3130,9 @@ ISLIST+0	CCS	DSPLIST		# ABORTS (CODE 01206) IF DSPLIST NOT= +0.
 		TC	DSPABORT	# RETURNS IF DSPLIST = +0.
 		TC	Q
 DSPABORT	TC	POODOO
-		OCT	01206
+## <b>Reconstruction:<b>  The following was just <code>OCT 01206</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	21206
 		
 # JAMTERM ALLOWS PROGRAMS TO PERFORM THE TERMINATE FUNCTION.
 # IT DOES ENDOFJOB.

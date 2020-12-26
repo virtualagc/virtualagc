@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 890
 		BANK	31
@@ -1287,7 +1288,9 @@ V2T100		STQ	DLOAD
 			V2T101
 V2TERROR	EXIT			#	OR IF LAMBDA LESS THAN ONE
 		TC	POODOO		# NO SOLUTION IF LAMBDA LESS THAN 1
-		OCT	00610
+## <b>Reconstruction:<b>  The following was just <code>OCT 00610</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	20610
 V2T101		SETPD	CLEAR
 			0		#					PL00D
 			F2RTE

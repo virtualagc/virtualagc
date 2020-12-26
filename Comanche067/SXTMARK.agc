@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 222
 # PROGRAM NAME - SXTMARK					DATE - 5 APRIL 1967
@@ -78,7 +79,9 @@ SXTMARK		INHINT
 		TC	MARKOK			# YES, FIND VAC AREA
 		
 MKABORT		TC	BAILOUT
-		OCT	01211
+## <b>Reconstruction:<b>  The following was just <code>OCT 01211</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	31211
 MARKOK		CCS	VAC1USE			# FIND VAC AREA
 		TC	MKVACFND
 		CCS	VAC2USE
@@ -90,7 +93,9 @@ MARKOK		CCS	VAC1USE			# FIND VAC AREA
 		CCS	VAC5USE
 		TC	MKVACFND
 		TC	BAILOUT
-		OCT	01207
+## <b>Reconstruction:<b>  The following was just <code>OCT 01207</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	31207
 		
 MKVACFND	AD	TWO			# ADDRESS OF VAC AREA
 		TS	MARKSTAT

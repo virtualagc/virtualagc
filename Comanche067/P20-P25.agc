@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -468,7 +469,9 @@ ENDR57		TC	DOWNFLAG	# RESET V59FLAG
 		GOTO
 			EGRESS
 P23ABRT		TC	BAILOUT
-		OCT	01211
+## <b>Reconstruction:<b>  The following was just <code>OCT 01211</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	31211
 V06N87NB	VN	0687
 V59NB		VN	5900
 V51NB		VN	5100

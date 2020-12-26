@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 1221
 # PROGRAM DESCRIPTION						DATE - 10 OCTOBER 1966
@@ -132,7 +133,9 @@ DLY2		CAF	WAITBB		# ENTRY FROM FIXDELAY AND VARDELAY.
 		TCF	WAIT2
 
 WATLST0-	TC	POODOO
-		OCT	1204		# WAITLIST CALL WITH ZERO OR NEG DT
+## <b>Reconstruction:<b>  The following was just <code>OCT 1204</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	21204		# WAITLIST CALL WITH ZERO OR NEG DT
 
 # RETURN TO CALLER AFTER TASK INSERTION:
 
@@ -319,7 +322,9 @@ WTLST5		CCS	A		# TEST TD - T2 + 1
 
  +4		CCS	A
 WTABORT		TC	BAILOUT		# NO ROOM IN THE INN.
-		OCT	1203
+## <b>Reconstruction:<b>  The following was just <code>OCT 1203</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	31203
 		
 		AD	ONE
 		TC	WTLST2

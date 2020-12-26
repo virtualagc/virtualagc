@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##				Added fix for PCR801.1.
 
 ## Page 1208
 		BLOCK	02
@@ -131,7 +132,9 @@ FINDVAC2	TS	EXECTEM1	# (SAVE CALLER'S BANK FIRST.)
 		CCS	VAC5USE
 		TCF	VACFOUND
 		TC	BAILOUT
-		OCT	1201		# NO VAC AREAS.
+## <b>Reconstruction:<b>  The following was just <code>OCT 1201</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	31201		# NO VAC AREAS.
 
 VACFOUND	AD	TWO		# RESERVE THIS VAC AREA BY STORING A ZERO
 		ZL			# IN ITS VAC USE REGISTER AND STORE THE
@@ -190,7 +193,9 @@ NEXTCORE	CAF	COREINC
 		CCS	EXECTEM2
 		TCF	NOVAC3
 		TC	BAILOUT		# NO CORE SETS.
-		OCT	1202
+## <b>Reconstruction:<b>  The following was just <code>OCT 1202</code> in Comanche 55.
+## The change is due to PCR801.1.		
+		OCT	31202
 ## Page 1213
 # THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.
 
