@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
+##		2020-12-27 MAS	Implemented PCR 278.
 
 ## Page 1093
 # PROGRAM NAME - DOWN TELEMETRY PROGRAM
