@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
 
 ## Page 635
 		BANK	32
@@ -567,8 +568,17 @@ AVFLAGA		EXTEND			# AVFLAG = CSM
 		QXCH	SUBEXIT
 		TC	DOWNFLAG
 		ADRES	AVFLAG		# BIT 5 FLAG 2
-		CAF	EBANK7
-		TS	EBANK
+## <b>Reconstruction 3:</b> The addition of the line of code following this annotation is related to the fact that 
+## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads revealed the use of 12
+## extra words of fixed-fixed memory, compared to Comanche 55; but it did not reveal the specific locations
+## of those extra words.  In Artemis 71, there are 12 extra words due to the migration of <code>DODOWNTM</code>, 
+## <code>E6SETTER</code>, and <code>E7SETTER</code> to fixed-fixed memory.  That change has been ported here.
+## The original baseline code was:
+## <pre>
+##		CAF	EBANK7
+##		TS	EBANK
+## </pre>
+		TC	E7SETTER
 		EBANK=	ECSTEER
 		CAF	BIT13
 		TS	ECSTEER		# SET ECSTEER = 1

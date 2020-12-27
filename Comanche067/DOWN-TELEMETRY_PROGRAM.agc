@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
 
 ## Page 1093
 # PROGRAM NAME - DOWN TELEMETRY PROGRAM
@@ -147,6 +148,22 @@
 #	2. NEGONE INTO SUBLIST
 #	3. NEGONE INTO DNECADR
 
+## <b>Reconstruction 3:</b> This code, down to the matching "End" annotation has been added to the baseline.
+## It is related to the fact that 
+## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads revealed the use of 12
+## extra words of fixed-fixed memory, compared to Comanche 55; but it did not reveal the specific locations
+## of those extra words.  In Artemis 71, there are 12 extra words due to the migration of <code>DODOWNTM</code>, 
+## <code>E6SETTER</code>, and <code>E7SETTER</code> to fixed-fixed memory.  That change has been ported here.
+		BLOCK	02
+DODOWNTM	TS	BANKRUPT
+		EXTEND
+		QXCH	QRUPT		# SAVE Q
+		CA	BIT7		# SET WORD ORDER CODE TO 1.  EXCEPTION- AT
+		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
+		WOR	CHAN13		# CODE WILL BE SET BACK TO 0.
+		TC	DNTMGOTO	# GOTO APPROPRIATE PHASE OF PROGRAM
+## <b>Reconstruction 3:</b> End.  See the annotation above.
+
 		BANK	22
 		SETLOC	DOWNTELM
 		BANK
@@ -155,13 +172,16 @@
 		
 		COUNT	05/DPROG
 		
-DODOWNTM	TS	BANKRUPT
-		EXTEND
-		QXCH	QRUPT		# SAVE Q
-		CA	BIT7		# SET WORD ORDER CODE TO 1.  EXCEPTION- AT
-		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
-		WOR	CHAN13		# CODE WILL BE SET BACK TO 0.
-		TC	DNTMGOTO	# GOTO APPROPRIATE PHASE OF PROGRAM
+## <b>Reconstruction 3:</b> See the annotations above. Here's where the original Comanche 55 code was:
+## <pre>
+## DODOWNTM        TS      BANKRUPT
+##                 EXTEND
+##                 QXCH    QRUPT        # SAVE Q
+##                 CA      BIT7         # SET WORD ORDER CODE TO 1.  EXCEPTION- AT
+##                 EXTEND               # THE BEGINNING OF EACH LIST THE WORD
+##                 WOR     CHAN13       # CODE WILL BE SET BACK TO 0.
+##                 TC      DNTMGOTO     # GOTO APPROPRIATE PHASE OF PROGRAM
+## </pre>
 
 DNPHASE1	CA	NEGONE		# INITIALIZE ALL CONTROL WORDS
 		TS	SUBLIST		# WORDS TO MINUS ONE
@@ -436,3 +456,4 @@ SENDID		EXTEND			# ** ENTRANCE USED BY ERASABLE DUMP PROG. **
 		CAF	LOWIDCOD	# PLACE SPECIAL ID CODE INTO L
 		XCH	L		# AND ID BACK INTO A
 		TCF	DNTMEXIT	# SEND DOWNLIST ID CODE(S).
+		

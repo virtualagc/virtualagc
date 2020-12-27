@@ -2703,7 +2703,7 @@ DSPALARM	CS	NVSBENDL
 CHARALRM	TC	FALTON		# NOT NVSUB INITIATED. TURN ON OPR ERROR
 		TC	ENDOFJOB
 		TC	POODOO
-## <b>Reconstruction:<b>  The following was just <code>OCT 01501</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 01501</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21501
 MONADR		GENADR	PASTEVB
@@ -3130,7 +3130,7 @@ ISLIST+0	CCS	DSPLIST		# ABORTS (CODE 01206) IF DSPLIST NOT= +0.
 		TC	DSPABORT	# RETURNS IF DSPLIST = +0.
 		TC	Q
 DSPABORT	TC	POODOO
-## <b>Reconstruction:<b>  The following was just <code>OCT 01206</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 01206</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21206
 		

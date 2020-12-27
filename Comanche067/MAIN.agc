@@ -14,6 +14,12 @@
 #				CONTRACT AND APPROVALS log section;
 #				there's no reason to believe that
 #				any mission other than Apollo 11 had one.
+#
+# Note that this file is provided as a convenience for use with the modern
+# AGC assembler, and was not present in contemporary AGC source code.
+# Hence while this file differs in various ways from the baseline Comanche 55
+# equivalent file, no annotations have been added here to justify any of
+# those differences.
 
 $ASSEMBLY_AND_OPERATION_INFORMATION.agc
 $TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc

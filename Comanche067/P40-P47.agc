@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
 
 ## Page 684
 # PROGRAM DESCRIPTION ** P40CSM **
@@ -935,6 +936,14 @@ ENGREQST	CAF	V06N40
 NOFLASH		CAE	NVWORD1		# DISPLAY NVWORD1 NORMALLY
 		TC	BANKCALL
 		CADR	REGODSP
+
+## <a name="12WORDS"></a>
+## <b>Reconstruction 3:</b> The addition of the line of code following this annotation is related to the fact that 
+## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads revealed the use of 12
+## extra words of fixed-fixed memory, compared to Comanche 55; but it did not reveal the specific locations
+## of those extra words.  In Artemis 71, there are 12 extra words due to the migration of <code>DODOWNTM</code>, 
+## <code>E6SETTER</code>, and <code>E7SETTER</code> to fixed-fixed memory.  That change has been ported here.
+		BLOCK	02
 		
 E7SETTER	CAF	EBANK7
 		TS	EBANK
@@ -945,7 +954,12 @@ E6SETTER	CAF	EBANK6		# SET UP EBANK6
 		TS	EBANK
 		EBANK=	DAPDATR1
 		TC	Q
-		
+
+## <b>Reconstruction 3:</b> See the annotation above, where the added line of code switched memory banks.
+## The following two lines are code that has been added to switch back.
+		SETLOC	P40S
+		BANK
+
 		EBANK=	DAPDATR1
 V99E		TC	2PHSCHNG
 		OCT	00006		# KILL PRE40.6/CLOKTASK PROTECTION

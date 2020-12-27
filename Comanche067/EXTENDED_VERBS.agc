@@ -478,7 +478,7 @@ SYSTEST		TC	CHKPOOH
 		EXTEND
 		BZF	V92CONT		# IF IT'S NOT YET SET, CONTINUE
 		TC	POODOO		# IT'S ON. SEND NODO ALARM FOR P07
-## <b>Reconstruction:<b>  The following was just <code>OCT 1521</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 1521</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21521
 V92CONT		TC	EXDAPOFF	# TURN DAP OFF IT IT'S ON
@@ -555,8 +555,11 @@ IMUATTCK	TC	CHKPOOH
 		CADR	GOXDSPF
 		TCF	TRMATTCK
 		TC	+1
-		CAF	EBANK6
-		TS	EBANK		# SET E6 FOR NEEDLES.
+
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
+    		CAF     EBANK6
+  		TS      EBANK		# SET E6 FOR NEEDLES.
 		
 		EBANK=	AK
 		
@@ -643,9 +646,10 @@ STROKON		CS	FLAGWRD6	# V68	PERMITTED ONLY DURING TVC
 #	2.	IF TVC IS ON, SETS UP CSM/LM SWITCH-OVER
 #			FROM HIGH BW TO LOW BW
 
-
-STABLISH	CAF	EBANK6		# V46 - SET EBANK TO E6
-		TS	EBANK
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
+STABLISH       	CAF     EBANK6		# V46 - SET EBANK TO E6
+		TS      EBANK
 
 		CS	FLAGWRD6	# TEST FOR TVC
 		MASK	OCT60000	
@@ -729,8 +733,10 @@ DAPDISP		CS	FLAGWRD6
 		BANK
 		COUNT	24/R03
 		
-DAPDISP1	CAF	EBANK6
-		TS	EBANK
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
+DAPDISP1        CAF     EBANK6
+                TS      EBANK
 		
 		CAF	PRIO10
 		TC	PRIOCHNG
@@ -957,8 +963,10 @@ TRACKTRM	CA	RNDVZBIT	# IS REND FLAG ON
 		TC	DOWNFLAG
 		ADRES	IMUSE
 		
-		CAF	EBANK6
-		TS	EBANK
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
+		CAF     EBANK6
+		TS      EBANK
 		
 		INHINT
 		TC	STOPRATE

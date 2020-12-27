@@ -2519,7 +2519,7 @@ ZEROANS		CAF	ZERO		# FORCE ANSWER TO ZERO HERE.
 		TCF	FIXROOT
 
 SQRTABRT	TC	POODOO
-## <b>Reconstruction:<b>  The following was just <code>OCT 1302</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 1302</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21302
 

@@ -132,7 +132,7 @@ FINDVAC2	TS	EXECTEM1	# (SAVE CALLER'S BANK FIRST.)
 		CCS	VAC5USE
 		TCF	VACFOUND
 		TC	BAILOUT
-## <b>Reconstruction:<b>  The following was just <code>OCT 1201</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 1201</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	31201		# NO VAC AREAS.
 
@@ -193,7 +193,7 @@ NEXTCORE	CAF	COREINC
 		CCS	EXECTEM2
 		TCF	NOVAC3
 		TC	BAILOUT		# NO CORE SETS.
-## <b>Reconstruction:<b>  The following was just <code>OCT 1202</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 1202</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	31202
 ## Page 1213

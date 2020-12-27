@@ -1737,7 +1737,7 @@ INFINAPO	DLOAD	GOTO		# RETURNS WITH APOAPSIS IN MPAC, PERIAPSIS
 ## Page 1304
 ABTCONIC	EXIT
 		TC	POODOO
-## <b>Reconstruction:<b>  The following was just <code>OCT 00607</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 00607</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	20607
 

@@ -133,7 +133,7 @@ DLY2		CAF	WAITBB		# ENTRY FROM FIXDELAY AND VARDELAY.
 		TCF	WAIT2
 
 WATLST0-	TC	POODOO
-## <b>Reconstruction:<b>  The following was just <code>OCT 1204</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 1204</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21204		# WAITLIST CALL WITH ZERO OR NEG DT
 
@@ -322,7 +322,7 @@ WTLST5		CCS	A		# TEST TD - T2 + 1
 
  +4		CCS	A
 WTABORT		TC	BAILOUT		# NO ROOM IN THE INN.
-## <b>Reconstruction:<b>  The following was just <code>OCT 1203</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 1203</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	31203
 		

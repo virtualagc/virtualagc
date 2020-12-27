@@ -2057,7 +2057,7 @@ TRUNBIAS	ERASE			# B(1)PRM RESULT OF R57 CALIBR OF TRUNION
 
 # KEPLER STORAGE				(6D)
 
-## <b>Reconstruction:</b>  In Comanche 55, at this point, the variables <code>XMODULO</code>
+## <b>Reconstruction 2:</b>  In Comanche 55, at this point, the variables <code>XMODULO</code>
 ## and <code>TMODULO</code> appear.  In Comanche 67, however, I find that their presence 
 ## causes the address of <code>RTED1</code> to be incorrect (per 
 ## <a href="http://www.ibiblio.org/apollo/Documents/padload_12_cm.pdf#page=3">

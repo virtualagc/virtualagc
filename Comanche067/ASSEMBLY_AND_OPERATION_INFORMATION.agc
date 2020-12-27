@@ -877,7 +877,7 @@
 
 ## Page 23
 
-## <b>Reconstruction:<b>  Due to PCR801.1, all alarm codes (17 places) of "ABORT TYPE" have their leading
+## <b>Reconstruction 1:<b>  Due to PCR801.1, all alarm codes (17 places) of "ABORT TYPE" have their leading
 ## digit changed from 0 to 2 (for POODOO) or 3 (for BAILOUT).  There's no way to know whether the 
 ## list of alarm codes was re-sorted in numerical order in the original Comanche 67 source, or whether
 ## the list remained in the original sorting order.  In Artemis 71, the list has been re-sorted, so

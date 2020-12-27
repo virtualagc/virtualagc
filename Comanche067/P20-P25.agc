@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Added fix for PCR801.1.
+##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -420,8 +421,10 @@ DE-GR-50	TC	2PHSCHNG
 		EBANK=	MRKBUF1
 R57		STQ	EXIT
 			EGRESS
-		CAF	EBANK7
-		TS	EBANK
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
+		CAF     EBANK7
+		TS      EBANK
 		CAF	SIX		# BIT2 = MARKING SYSTEM IN USE
 		MASK	EXTVBACT	# BIT3 = EXTENDED VERB IN PROGRESS
 		CCS	A
@@ -469,7 +472,7 @@ ENDR57		TC	DOWNFLAG	# RESET V59FLAG
 		GOTO
 			EGRESS
 P23ABRT		TC	BAILOUT
-## <b>Reconstruction:<b>  The following was just <code>OCT 01211</code> in Comanche 55.
+## <b>Reconstruction 1:<b>  The following was just <code>OCT 01211</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	31211
 V06N87NB	VN	0687

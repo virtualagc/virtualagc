@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
 
 ## Page 181
 # PROGRAM DESCRIPTION						8 APRIL, 1967
@@ -415,8 +416,10 @@ PCLOOP		TS	MPAC +5
 		MASK	OCT60000	# FLAGWRD6 = 01)
 		EXTEND			# YES, DO STOPRATE
 		BZMF	NXTRST -1	# NO, SKIP TO NXTRST -1
-		CAF	EBANK6		# STOPRATE IS DONE IN EBANK 6
-		TS	EBANK
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
+		CAF     EBANK6		# STOPRATE IS DONE IN EBANK 6
+		TS      EBANK
 		TC	STOPRATE	# ZERO DELCDUS, WBODYS, AND BIASES THUS
 					# STOPPING AUTOMATIC MANEUVERING
 
@@ -811,9 +814,11 @@ V37		TS	MMNUMBER		# SAVE MAJOR MODE
 		BZMF	ISITP00			# NO, CONTINUE WITH ROO
 
 R00TOP00	INHINT
-		CAF	EBANK6
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
+		CAF     EBANK6
 ## Page 198
-		TS	EBANK
+		TS      EBANK
 		EBANK=	DAPDATR1
 		CAE	CSMMASS
 		TS	MASSTMP
@@ -1074,8 +1079,10 @@ V37XEQC		CA	MMTEMP			# UPON RETURN FROM FINDVAC PLACE THE
 INITSUB		EXTEND
 		QXCH	MPAC	+1
 
-		CAF	EBANK6			# SET E6 FOR DEADBAND CODING
-		TS	EBANK			# WILL BE RESET IN STARTSB2.
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
+		CAF     EBANK6                    # SET E6 FOR DEADBAND CODING
+		TS      EBANK                     # WILL BE RESET IN STARTSB2.
 		INHINT
 		TC	STOPRATE
 
