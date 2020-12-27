@@ -1666,6 +1666,8 @@ STARM		=	32D
 DNLSTADR	EQUALS	DNLSTCOD	# CONTENTS NO LONGER AN ADDR BUT A CODE
 
 DNLSTCOD	ERASE			# B(1)PRM ID CODE OF DOWNLIST
+## <b>Reconstruction 5:</b> The erasable DUMPCNT was defined here in Comanche 55. It has
+## been removed as part of PCR 278, Fixed DUMPCNT.
 DUMPCNT		ERASE			# B(1)PRM
 LDATALST	ERASE			# B(1)
 DNTMGOTO	ERASE			# B(1)
