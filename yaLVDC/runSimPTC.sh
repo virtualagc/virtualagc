@@ -1,11 +1,17 @@
 #!/bin/bash
 
+PROGRAM=PROC9
+if [[ "$1" != "" && -f "$1.lvdc" ]]
+then
+	PROGRAM="$1"
+fi
+
 xterm -rightbar -e ./yaPTC.py &
 
-# Assemble the PAST program (as slightly altered by me) source code.
-../yaASM.py/yaASM.py --ptc --past-bugs <PAST.lvdc >PAST.listing && \
-mv yaASM.src PAST.src && \
-mv yaASM.tsv PAST.tsv && \
-mv yaASM.sym PAST.sym && \
+# Assemble the PROGRAM's source code.
+../yaASM.py/yaASM.py --ptc --past-bugs <$PROGRAM.lvdc >$PROGRAM.listing && \
+mv yaASM.src $PROGRAM.src && \
+mv yaASM.tsv $PROGRAM.tsv && \
+mv yaASM.sym $PROGRAM.sym && \
 make && \
-./yaLVDC --ptc --cold-start --run --assembly=PAST
+./yaLVDC --ptc --cold-start --run --assembly=$PROGRAM

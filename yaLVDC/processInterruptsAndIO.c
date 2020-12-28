@@ -355,6 +355,11 @@ processInterruptsAndIO(void)
             }
           else if (channel == 0210)
             {
+              // Treat payload 077 as special:  reset all data lines.  It probably
+              // is supposed to do something more than just this, but I don't know
+              // what.
+              if (payload == 077)
+                payload = 0;
               // Route the discrete outputs back into the (gated) discrete inputs.
               state.progRegA17_22 = (payload & 077) << 3;
               if ((payload & 035) != 0 && !state.bbPrinter) // D.O. 1, 3, 4, or 5.
