@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Added fix for PCR801.1.
+##              2020-12-28 MAS	Removed clearing of FAILREG +2 per PCR 802.1.
 
 ## Page 307
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -3755,7 +3756,7 @@ ERCOM		INDEX	ERCNT		# ETC.
 		CAF	ZERO
 		TS	FAILREG
 		TS	FAILREG +1
-		TS	FAILREG +2
+## <b>Reconstruction 6:</b> Comanche 55 had "TS FAILREG +2" here; it has been removed as part of PCR 802.1.
 		TS	SFAIL
 		TC	ENDOFJOB
 
