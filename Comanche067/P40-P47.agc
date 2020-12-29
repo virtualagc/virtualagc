@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
+##		2020-12-28 RSB	Added an experimental fix for PCN 833.
 
 ## Page 684
 # PROGRAM DESCRIPTION ** P40CSM **
@@ -1671,13 +1672,22 @@ SPBIT1			00D
 		BDSU
 		BMN	EXIT
 			LOTHRUST
+			
+## <b>Reconstruction 7:</b>  The following 3 lines were imported from Artemis 71 as part
+## of the fix for PCN 833.  See also the FREPSET code below.
+		BON	EXIT		# ENABLE TVCDAP CG TRACKING
+			SWTOVER
+			FREPSET		# V46 SWITCHOVER HAS OCCURRED (CSM/LM)
+
 		CAE	DAPDATR1	# ENABLE TVCDAP CG TRACKING
 		MASK	BIT14
 		CCS	A
 		CAF	BIT1
 		INDEX	A		# LM-OFF, LM-ON VALUE
 		CAE	EREPFRAC
-		TS	REPFRAC
+## <b>Reconstruction 7:</b>  The following line of code existed in Comanche 55, but the
+## symbolic label was added as part of the fix for PCN 833.  See also the FREPSET code below.
+REPFRACS	TS	REPFRAC
 		
 		TC	INTPRET
 TGOCALC		VLOAD	BVSU		# GET DELVG
@@ -1732,6 +1742,13 @@ XPRODUCT	VLOAD	VXSC
 OMEGACLC	STORE	OMEGAC
 		GOTO
 			QTEMP
+
+## <b>Reconstruction 7:</b>  The following 4 lines were imported from Artemis 71 as part
+## of the fix for PCN 833.  See also the two annotations above.
+FREPSET		DLOAD	EXIT		# POST-SQITCHOVER CSM/LM.  LOAD FROM LOW-
+			FREPFRAC	#	BANDWIDTH PARAMETER IN FIXED MEMORY
+		CAE	MPAC
+		TCF	REPFRACS
 			
 		SETLOC	DAPS7
 		BANK
