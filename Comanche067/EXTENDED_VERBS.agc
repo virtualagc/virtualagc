@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Added fix for PCR801.1.
+##              2020-12-29 MAS	Implemented PCR 832.1.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -601,8 +602,9 @@ CKLFTBTS	CAF	GRRBKBIT	# HAS LIFTOFF OCCURRED
 XACT0Q		TC	Q		# YES
 
 OCTAL30		OCT	30
-VB64		TC	CHKPOOH		# DEMAND PROGRAM 00.
-		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY, MAKE IT BUSY.
+## <b>Reconstruction 10:</b> Comanche 55 begins VB64 with "TC CHKPOOH". It has been removed
+## per PCR 832.1, Remove restriction of running R05 only in P00.
+VB64		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY, MAKE IT BUSY.
 		INHINT
 		CAF	PRIO4
 		TC	FINDVAC
