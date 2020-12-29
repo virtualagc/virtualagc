@@ -16,6 +16,7 @@
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Added fix for PCR801.1.
 ##              2020-12-28 MAS	Removed clearing of FAILREG +2 per PCR 802.1.
+##              2020-12-28 MA9	Implemented PCR 791.1 in PROCKEY.
 
 ## Page 307
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -2837,7 +2838,17 @@ VBTERM		CS	ONE
 # PROCKEY PERFORMS THE SAME FUNCTION AS VBPROC.  IT MUST BE CALLED UNDER
 # EXECUTIVE CONTROL, WITH CHRPRIO.
 
-PROCKEY		CAF	ZERO		# SET REQRET FOR ENTER PASS 0.
+## <b>Reconstruction 11:</b> This code, down to the matching "End" annotation, has been changed
+## from Comanche 55 due to PCR 791.1, "Do not allow Proceed response to V21, V22, V23". It has
+## been copied over from Luminary 116, which received the identical PCR 791.2.
+PROCKEY		CS	VERBREG		# DONT ALLOW PROCEED DURING LOAD.
+		AD	VBSP2LD*	# DEC 22
+		EXTEND
+		DIM	A
+		EXTEND
+		BZF	CHARALRM
+PROCKEY1	CAF	ZERO		# SET REQRET FOR ENTER PASS 0.
+## <b>Reconstruction 11:</b> End.  See the annotation above.
 		TS	REQRET
 		CS	VD1		# BLOCK NUMERICAL CHARACTERS, SIGNS, CLEAR
 		TS	DSPCOUNT
@@ -2851,6 +2862,10 @@ PROCKEY		CAF	ZERO		# SET REQRET FOR ENTER PASS 0.
 VBRESEQ		CS	ZERO		# MAKE IT LOOK LIKE DATA IN.
 		TC	VBPROC +1
 		
+## <b>Reconstruction 11:</b> This constant was added as part of PCR 791.1. Artemis doesn't have
+## this constant; instead it moved VBSP2LD to fixed-fixed memory.
+VBSP2LD*	DEC	22		# VB22 = BLOAD
+
 # FLASH IS TURNED OFF BY PROCEED WITHOUT DATA, TERMINATE, RESEQUENCE,
 # END OF LOAD.
 ## Page 368
