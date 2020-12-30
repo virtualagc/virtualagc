@@ -16,6 +16,8 @@
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Added fix for PCR801.1.
 ##              2020-12-29 MAS	Implemented PCR 832.1.
+##		2020-12-29 RSB	Put a placeholder annotation on a potential
+##				Reconstruction 3A that I had missed before.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -922,6 +924,8 @@ R22ALARM	TC	ALARM		# VERB 57 WAS SELECTED AND NEITHER REND
 #	V86 IS TO R23 AS MARK REJECT IS TO R21
 #	V86 IS THE MARK REJECT FOR R23 (THE BACKUP MARKING ROUTINE)
 
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
 		EBANK=	MRKBUF1
 V86PERF		CAF	EBANK7		# BACKUP MARK REJECT (R23)
 		XCH	EBANK

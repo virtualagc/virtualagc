@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2020-12-29 RSB	Experimental fix for PCR 787. See also SERVICE207.agc.
 
 ## Page 789
 # PROGRAM:	P61
@@ -62,6 +63,21 @@ P61		CA	BIT14		# EXTENDED VERB SHOULD BE FREE THIS CLOSE
 					
 		CA	V06N61		# LAT(SPL)	LNG(SPL)	HEADSUP
 					# XXX.XX DEG	XXX.XX DEG	XXXXX.
+## <b>Reconstruction 9:</b>  All of the "Reconstruction 9" annotations here within the P61 
+## program relate to implementation of PCR 787. At each point in P61 where the Comanche 55 
+## baseline code for P61 differs from the Artemis 71 code for P61 (which includes the PCR 787
+## fix), an annotation is added to describe whether the baseline code was retained, or else
+## whether Artemis 71 code was imported instead.  The decision is based on 
+## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1228&view=FitV">
+## document E-2456's Colossus 2D flowchart for P61</a>.  While we have the corresponding
+## flowchart document for Colossus 2C (Comanche 67), the P61 flowchart in it had not been
+## updated, and remained in the same form as for Colossus 2A (Comanche 55), which is of 
+## no use to us. That the 2D version of the flowcharts is valid for 2C is an
+## unproved assumption.
+## <br><br>
+## In <i>this</i> particular location, the flowchart shows that <code>GOFLASHR</code> is 
+## called as in Comanche 55, rather than <code>VNFLASHR</code> as in Artemis 71.  The following
+## 5 instructions are retained from Comanche 55 on that basis.
 		TC	BANKCALL
 		CADR	GOFLASHR
 		TC	GOTOPOOH
@@ -79,14 +95,30 @@ P61.4		ZL
 		CA	BIT14		# IF HEADSUP POS,ROLLC =180 DEG.(LIFT DWN)
 		NOOP			# IF HEADSUP NEG,ROLLC =0 (LIFT UP)
 		DXCH	ROLLC		# ROLLC IS USED BY S62.3: GIM ANG AT .05G
+
+## <b>Reconstruction 9:</b> At this point, Artemis 71 inserts the 2 instructions 
+## following this annotation. The corresponding operation appears in the flowchart.
+AGIN,MON	CA	BIT14		# LOCK OUT EXTENDED VERBS.(REDUNDANT ON
+		TS	EXTVBACT	#  INITIAL PASS)		
 		
 		TC	INTPRET
 NEWRNVN		DLOAD
 			PIPTIME		# SAVE TIME OF RN,VN TO DETERMINE IF AN
 		STCALL	MM		# UPDATE HAS OCCURRED
 			STARTEN1	# INITIALIZE
-		VLOAD
+## <b>Reconstruction 9:</b> At this point, Comanche 55 would have the two lines
+## of code
+## <pre>
+##		VLOAD
+##			RN
+## </pre>
+## However, the flowchart instead matches Artemis 71, the following 4 lines of code
+## &mdash; 3 active lines, plus a continued comment.
+		VLOAD	CLEAR		# 'TTE' WILL BE DECREMENTED UNTIL
 			RN
+			.05GSW		# THE DRAG > 0.05 G .
+					# .05GSW SET =1 BY  FRESH START.
+
 		STORE	RONE
 		UNIT
 		STOVL	URONE
@@ -105,32 +137,64 @@ DUMPP61		DLOAD	DSU
 P61.1		TC	CLEARMRK
 		CA	V06N60		# GMAX		VPRED		GAMMAEI
 					# XXX.XX G	XXXXX. FPS	XXX.XX DEG
+
+## <b>Reconstruction 9:</b>  At this point, there is a fairly long block of differences
+## between Comanche 55 and Artemis 71, but they can't all be handled the same way.
+## This first annotation relates only the the following 5 instructions.  In the case
+## of these instructions, the flowchart matches Comanche 55, so Comanche 55 instructions
+## have been retained as-is.
 		TC	BANKCALL
 		CADR	GOFLASH
 		
 		TC	GOTOPOOH
 		TC	P61.2		# PROCEED
 		TC	-5
-		
-P61.2		TC	INTPRET		# CORRECT TTE FOR TIME LAPSE DURING
-					# ABOVE DISPLAY.
-		RTB	DSU
-			LOADTIME	# CURRENT TIME.
-## Page 791
-			MM		# PIPTIME FOR RONE & VONE.
-		DAD
-			TTE1		# NEGATIVE OF FREE FALL TIME.
-		STORE	TTE		# DECREMENTED
-		
-		EXIT
-		
-		CA	V06N63		# RTGO		VIO		TTE
+
+## <b>Reconstruction 9:</b>  At this point, what we would have in Comanche 55 is the 
+## <code>P61.2</code> code.  <code>P61.2</code> is a complete mismatch vs the flowchart,
+## and is removed entirely.
+## <pre> 		
+## P61.2		TC	INTPRET		# CORRECT TTE FOR TIME LAPSE DURING
+## 					# ABOVE DISPLAY.
+## 		RTB	DSU
+## 			LOADTIME	# CURRENT TIME.
+## ## Page 791
+## 			MM		# PIPTIME FOR RONE & VONE.
+## 		DAD
+## 			TTE1		# NEGATIVE OF FREE FALL TIME.
+## 		STORE	TTE		# DECREMENTED
+## 		
+## 		EXIT
+## 		
+## 		CA	V06N63		# RTGO		VIO		TTE
+## 					# XXXX.X NM	XXXXX. FPS	XXBXX M,S
+## 		TC	BANKCALL
+## 		CADR	GOFLASH
+## 		TC	GOTOPOOH
+## 		TC	+2
+## 		TC	P61.2		# REDO
+</pre>
+## Instead, the entire remainder of the <code>P1.1</code> block of code from Artemis 71
+## is used.  The symbolic label <code>P61.2</code> has been added because it is referenced
+## above, but is not on the flowchart.  (Alternatively, where <code>TC P61.2 # PROCEED</code> is used
+## above, it could have been changed to <code>TC +2 # PROCEED</code>, and the addition of 
+## the label could have been avoided.)
+# 'TICKTTE' DECREMENTS 'TTE' DISPLAY NOUN N63 AT A 2 SECOND RATE. 'TICKTTE' IS LOCATED IN 'SERVICER' AND
+# OPERATES ONLY DURING P61 THROUGH P63. THUS N63 IS 'ON CALL' & ON ENTRY  DOWNLIST THROUGH P63.
+# 'TICKTTE' WILL GIVE PROPER ANSWER IN EVENT OF RESTART OR A RECYCLE VIA   V32.
+
+P61.2		CA	V16N63		# RTGO		VIO		TTE
 					# XXXX.X NM	XXXXX. FPS	XXBXX M,S
 		TC	BANKCALL
 		CADR	GOFLASH
 		TC	GOTOPOOH
 		TC	+2
-		TC	P61.2		# REDO
+		TC	AGIN,MON	# REDO CONIC CALC. ASSUME EXT VB INACTIVE
+## <b>Reconstruction 9:</b> End of local changes.  For the code just above, note that the 
+## flowchart also says that "TTE is decremented (at a 2 sec. rate) by TICKTTE".  I.e.,
+## the code above relies on the operation of <code>TICKTTE</code> in the SERVICER207
+## log section.  Since <code>TICKTTE</code> does not exist in the Comanche 55 version of 
+## SERVICER207, SERVICER207 must also be updated to include it.
 		
 #		.... THEN FALL INTO P62
 ## Page 792
@@ -312,7 +376,13 @@ P63.1		TC	PHASCHNG
 		
 V06N60		VN	0660
 V06N61		VN	0661
-V06N63		VN	0663
+## <b>Reconstruction 9:</b> In Comanche 55, we would find
+## <pre>
+## V06N63	VN	0663
+## </pre>
+## here.  It has been changed to the following line to conform to Artemis 71
+## for the purpose of implementing PCR 787.
+V16N63		VN	1663
 ## Page 796
 V06N64		VN	0664
 ENTCADR		CADR	STARTENT

@@ -764,6 +764,8 @@ BOOP		DLOAD*	DMPR
 			BOOP
 			
 PERFERAS	EXIT
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
 		CA	EBANK7
 		EBANK=	LAT(SPL)
 		TS	EBANK

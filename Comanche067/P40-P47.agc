@@ -16,6 +16,9 @@
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
 ##		2020-12-28 RSB	Added an experimental fix for PCN 833.
+##		2020-12-29 RSB	Inexplicably, for the "12 words" problem, I had 
+##				imported E6SETTER and E7SETTER from Artemis
+##				*incorrectly*.  Fixed now.
 
 ## Page 684
 # PROGRAM DESCRIPTION ** P40CSM **
@@ -947,12 +950,12 @@ NOFLASH		CAE	NVWORD1		# DISPLAY NVWORD1 NORMALLY
 		BLOCK	02
 		
 E7SETTER	CAF	EBANK7
-		TS	EBANK
+		XCH	EBANK
 		EBANK=	TIG
 		TC	Q
 		
 E6SETTER	CAF	EBANK6		# SET UP EBANK6
-		TS	EBANK
+		XCH	EBANK
 		EBANK=	DAPDATR1
 		TC	Q
 

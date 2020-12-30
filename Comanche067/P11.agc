@@ -317,6 +317,8 @@ MATRXJOB	ZL	                # STORE DP GIMBAL ANGLES FOR ATTITUDE
 		TS	1/PIPADT
 		
 		EBANK=	RCSFLAGS
+## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
+## No change was made here.
 		CA	EBANK6
 		TS	EBANK
 		

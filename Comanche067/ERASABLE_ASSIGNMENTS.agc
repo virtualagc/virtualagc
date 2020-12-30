@@ -16,6 +16,7 @@
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Removed XMODULO and TMODULO to correct
 ##				pad-load addresses.
+##		2020-12-29 RSB	Added experimental PCR 787 fix.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -3458,6 +3459,9 @@ TTE		EQUALS	VIO	+2	# 2P DSP NOUN 63 FOR P61.
 ASPS		EQUALS	TTE	+2	# I(2) HI-WORD ONLY ON DNLIST FOR TEMP
 TTE1		EQUALS	ASPS	+2	# I(2ETMP HOLDS UNDECREMENTED TTE VALUE
 
+## <b>Reconstruction 9:</b> The following was added in implementing PCR 787.
+TTE2		EQUALS	TTE1 +2		# I(2) HOLDS COMPENSATED TTE VALUE DURING
+					#      P61 THRU P63 FOR  N63 DISPLAY			
 # **** P6OS ****
 RTGON64		EQUALS	RTGO		# RANGE ERRORS NEGATIVE IF FALLS SHORT
 ## Page 120

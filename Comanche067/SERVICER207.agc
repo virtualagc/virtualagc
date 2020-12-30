@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2020-12-29 RSB	Experimental fix for PCR 787.  See also P61-P67.agc.
 
 ## Page 819
 # PROGRAM NAME -	PREREAD, READACCS, SERVICER, AVERAGE G.
@@ -443,6 +444,36 @@ PIPLOOP		CCS	RUPTREG1
 		CADR	1/PIPA
 		
 DVTOTUP		TC	INTPRET
+
+## <b>Reconstruction 9:</b> In the implementation of PCR 787, we selectively 
+## make changes in the baseline (Comanche 55) based on code from Artemis 71.
+## The decision as to whether to do so or not is based on 
+## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1129&view=FitV">
+## document E-2456, flowchart FC-2683, for the Colossus 2D SERVICER</a>.  We _should_
+## be basing this instead on the corresponding document for Colossus 2C, however 
+## the SERVICER flowchart was never updated past Colossus 2 (Apollo 10) in the 2C
+## document.
+## <br><br>
+## Note that there are <i>many</i> differences between the Comanche 55 and Artemis 71
+## versions of the SERVICER207 log section, and it is possible that some relevant ones
+## have not been addressed in these reconstruction changes. PCR 787 relates to a 
+## change in program P61, and insofar as SERVICER207 is concerned, the P61 flowchart 
+## (FC-2760) in the document mentioned above indicates only the addition of `TICKTTE` as 
+## relevant.  Therefore, we have focused only on `TICKTTE`, which comprises the following
+## lines taken from Artemis 71.
+					# THE FOLLOWING SECTION DECREMENTS 'TTE' DURING P61
+					# THROUGH P63 ONLY. (IE: IN P60'S IF DRAG< 0.05 G)
+TICKTTE		BON	DLOAD		# .05GSW IS SET =1 IN FRESH START.
+			.05GSW		# FLAG IS ASSIGNED ONLY TO P61-P67.
+			+5		# DO NOT COUNT 'TTE' IF DRAG > 0.05 G.
+			TTE2
+		DAD
+			PIPTIME1	# DECREMENT 'TTE' BY 'PIPTIME1'. (BY 2 SEC)
+		STORE	TTE		# NEGATIVE AS IN A COUNTDOWN.
+					# DURING P61 THRU P63, 'TTE' IS DECREMENTED 
+					# AND IS ON CALL AND ON ENTRY DNLIST.
+## <b>Reconstruction 9:</b> End of `TICKTTE`.
+
 		VLOAD	ABVAL		# GET ABS VALUE OF DELV
 			DELV
 		DMP	EXIT
