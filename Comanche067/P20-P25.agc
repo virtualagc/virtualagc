@@ -18,6 +18,11 @@
 ##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
 ##		2020-12-29 RSB	Implemented Reconstruction 3A in 2 places, to 
 ##				recover 2 words from bank 37.
+##		2021-01-05 RSB	Rolled back the Reconstruction 3A changes (which I had
+##				marked as Reconstruction 9).  Firstly, they didn't
+##				recover enough words.  Secondly, because I found 
+##				changes elsewhere that would recover enough
+##				words.  Look for Reconstruction 9A.
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -159,7 +164,9 @@ P20R52JB	TC	INTPRET
 		CAF	ONE		# HOLD PRESENT ATTITUDE
 		TS	HOLDFLAG
 		TC	ENDOFJOB
-OCT203		OCT	00203
+## <b>Reconstruction 9A:</b>  The following constant was removed to conserve
+## a word of memory in bank 37 that overflowed due to implementing PCR 787.
+## OCT203		OCT	00203
 FIRST3		EQUALS	FURST3
 
 ## Page 565
@@ -423,16 +430,8 @@ DE-GR-50	TC	2PHSCHNG
 		EBANK=	MRKBUF1
 R57		STQ	EXIT
 			EGRESS
-## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
-## There is no evidence that a change should be made here, but given that Reconstruction 9 has
-## overflowed bank 37 by a couple of words, I'm making this change to get back one of those words.
-## The Comanche 55 code &mdash; note that it does not exist in Artemis &mdash; read
-## <pre>
-##		CAF     EBANK7
-##		TS      EBANK
-## </pre>
-## It is replaced here by the following single line of code. 
-		TC	E7SETTER
+		CAF     EBANK7
+		TS      EBANK
 		CAF	SIX		# BIT2 = MARKING SYSTEM IN USE
 		MASK	EXTVBACT	# BIT3 = EXTENDED VERB IN PROGRESS
 		CCS	A
@@ -649,16 +648,8 @@ V0694		VN	0694
 		EBANK=	GENRET
 		COUNT*	$$/R61		# ROUTINES - NAVIGATION - PREF. TR. 9TT=
 	
-## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
-## There is no evidence that a change should be made here, but given that Reconstruction 9 has
-## overflowed bank 37 by a couple of words, I'm making this change to get back one of those words.
-## The Comanche 55 code &mdash; note that it does not exist in Artemis &mdash; read
-## <pre>
-## R61CSM		CAF	EBANK6		# SWITCH TO EBANK 6
-## 			XCH	EBANK
-## </pre>
-## It is replaced here by the following single line of code. 
-R61CSM		TC	E6SETTER
+R61CSM		CAF	EBANK6		# SWITCH TO EBANK 6
+		XCH	EBANK
 		TS	SAVBNK		# SAVE EBANK
 		TC	MAKECADR
 		TS	GENRET

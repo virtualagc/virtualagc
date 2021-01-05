@@ -15,6 +15,9 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##		2020-12-29 RSB	Experimental fix for PCR 787.  See also P61-P67.agc.
+##		2020-01-05 RSB	Made related experimental fixes (Reconstruction 9A)
+##				to recover words from bank 37 lost in the change above
+##				(Reconstruction 9).
 
 ## Page 819
 # PROGRAM NAME -	PREREAD, READACCS, SERVICER, AVERAGE G.
@@ -565,10 +568,12 @@ DVTHRUSH	EQUALS	ELEVEN		# 15 PERCENT OF 2SEC PIPA ACCUMULATION,
 
 JTAGTIME	DEC	120		# = 1 SEC + T CDU, T CDU = .1 SEC
 
-2.5SEC		DEC	250
-MDOTFAIL	DEC	144.0 B-16	# 5 SEC MASS LOSS AT 28.8 KG/SEC
-					# SHOULD BE 2-4 SECS FOR NO START
-					#	    6-8 SECS FOR FAILURE
+## <b>Reconstruction 9A:</b>  The following two constants were removed to conserve
+## a word of memory in bank 37 that overflowed due to implementing PCR 787.
+## 2.5SEC		DEC	250
+## MDOTFAIL	DEC	144.0 B-16	# 5 SEC MASS LOSS AT 28.8 KG/SEC
+##					# SHOULD BE 2-4 SECS FOR NO START
+##					#	    6-8 SECS FOR FAILURE
 					
 ## Page 831
 # NORMLIZE PERFORMS THE INITIALIZATION REQUIRED PRIOR TO THE FIRST ENTRY TO AVERAGEG, AND SCALES RN SO THAT IT
@@ -798,7 +803,9 @@ CALCRVG		VLOAD	VXSC
 		STCALL	VN1		# TEMP STORAGE OF VN SCALED 2(+7) M/CS
 			31D
 			
-KPIP		2DEC	.1024		# SCALES DELV TO 2(+4)
+## <b>Reconstruction 9A:</b>  The following constant was removed to conserve
+## a word of memory in bank 37 that overflowed due to implementing PCR 787.
+## KPIP		2DEC	.1024		# SCALES DELV TO 2(+4)
 
 KPIP1		2DEC	0.074880	# 207 DELV SCALING.  1 PULSE = 5.85 CM/SEC.
 
