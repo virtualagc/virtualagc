@@ -481,7 +481,7 @@ SYSTEST		TC	CHKPOOH
 		EXTEND
 		BZF	V92CONT		# IF IT'S NOT YET SET, CONTINUE
 		TC	POODOO		# IT'S ON. SEND NODO ALARM FOR P07
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 1521</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 1521</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21521
 V92CONT		TC	EXDAPOFF	# TURN DAP OFF IT IT'S ON
@@ -559,8 +559,6 @@ IMUATTCK	TC	CHKPOOH
 		TCF	TRMATTCK
 		TC	+1
 
-## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
-## No change was made here.
     		CAF     EBANK6
   		TS      EBANK		# SET E6 FOR NEEDLES.
 		
@@ -604,7 +602,7 @@ CKLFTBTS	CAF	GRRBKBIT	# HAS LIFTOFF OCCURRED
 XACT0Q		TC	Q		# YES
 
 OCTAL30		OCT	30
-## <b>Reconstruction 10:</b> Comanche 55 begins VB64 with "TC CHKPOOH". It has been removed
+## <b>Reconstruction:</b> Comanche 55 begins VB64 with "TC CHKPOOH". It has been removed
 ## per PCR 832.1, Remove restriction of running R05 only in P00.
 VB64		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY, MAKE IT BUSY.
 		INHINT
@@ -650,8 +648,6 @@ STROKON		CS	FLAGWRD6	# V68	PERMITTED ONLY DURING TVC
 #	2.	IF TVC IS ON, SETS UP CSM/LM SWITCH-OVER
 #			FROM HIGH BW TO LOW BW
 
-## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
-## No change was made here.
 STABLISH       	CAF     EBANK6		# V46 - SET EBANK TO E6
 		TS      EBANK
 
@@ -737,8 +733,6 @@ DAPDISP		CS	FLAGWRD6
 		BANK
 		COUNT	24/R03
 		
-## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
-## No change was made here.
 DAPDISP1        CAF     EBANK6
                 TS      EBANK
 		
@@ -924,8 +918,6 @@ R22ALARM	TC	ALARM		# VERB 57 WAS SELECTED AND NEITHER REND
 #	V86 IS TO R23 AS MARK REJECT IS TO R21
 #	V86 IS THE MARK REJECT FOR R23 (THE BACKUP MARKING ROUTINE)
 
-## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
-## No change was made here.
 		EBANK=	MRKBUF1
 V86PERF		CAF	EBANK7		# BACKUP MARK REJECT (R23)
 		XCH	EBANK
@@ -969,8 +961,6 @@ TRACKTRM	CA	RNDVZBIT	# IS REND FLAG ON
 		TC	DOWNFLAG
 		ADRES	IMUSE
 		
-## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
-## No change was made here.
 		CAF     EBANK6
 		TS      EBANK
 		

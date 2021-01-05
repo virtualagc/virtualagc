@@ -17,6 +17,8 @@
 ##              2020-12-28 MAS	Implemented PCR 802.1, and fixed the CCSHOLE
 ##                            	alarm code which had been missed as part of
 ##                            	PCR 801.1.
+##		2021-01-05 RSB	Adapted for use with preprocessor in 
+##				reconstruction process.
 
 ## Page 1493
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -60,7 +62,7 @@ LARMENT		CA	Q		# STORE RETURN FOR ALARM
 
 CHKFAIL1	CCS	FAILREG		# IS ANYTHING IN FAILREG
 		TCF	CHKFAIL2	# YES TRY NEXT REG
-## <b>Reconstruction 6:</b> This code, down to the matching "End" annotation, has been heavily changed
+## <b>Reconstruction:</b> This code, down to the matching "End" annotation, has been heavily changed
 ## from Comanche 55 due to PCR 802.1, Save Alarm Data after "Error Reset". The changes make FAILREG +2
 ## always contain the most recent program alarm, and a corresponding change in PINBALL prevents the
 ## RSET key from erasing it.
@@ -76,7 +78,7 @@ CHKFAIL2	CCS	FAILREG +1
 PROGLARM	LXCH	FAILREG +2	# STORE AS "MOST RECENT" ALARM CODE
 
 		CS	DSPTAB +11D	# TURN ON PROGRAM ALARM IF OFF
-## <b>Reconstruction 6:</b> End.  See the annotation above.
+## <b>Reconstruction:</b> End of reconstructed block.
 		MASK	OCT40400
 		ADS	DSPTAB +11D
 
@@ -85,8 +87,9 @@ MULTEXIT	XCH	ITEMP1		# OBTAIN RETURN ADDRESS IN A
 		INDEX	A
 		TC	1
 
-## <b>Reconstruction 6:</b> A chunk of code labeled "MULTFAIL" is defined here in Comanche 55. It has
+## <b>Reconstruction:</b> A chunk of code labeled "MULTFAIL" is defined here in Comanche 55. It has
 ## been removed as part of PCR 802.1.
+
 # PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND
 # AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,
 #		CAF	OCTXX		ALARM CODE
@@ -182,11 +185,11 @@ CCSHOLE		INHINT
 		TS	ALMCADR
 		TC	BANKCALL
 		CADR	VAC5STOR
-## <b>Reconstruction 1:<b>  The following line loaded "OCT1103" instead of "OCT21103" in Comanche 55.
+## <b>Reconstruction:<b>  The following line loaded "OCT1103" instead of "OCT21103" in Comanche 55.
 ## The change is due to PCR801.1.		
 		CA	OCT21103
 		TC	ABORT2
-## <b>Reconstruction 1:<b>  The following constant was <code>OCT21103 OCT 21103</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following constant was <code>OCT1103 OCT 1103</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 OCT21103	OCT	21103
 CURTAINS	INHINT

@@ -63,7 +63,7 @@ P61		CA	BIT14		# EXTENDED VERB SHOULD BE FREE THIS CLOSE
 					
 		CA	V06N61		# LAT(SPL)	LNG(SPL)	HEADSUP
 					# XXX.XX DEG	XXX.XX DEG	XXXXX.
-## <b>Reconstruction 9:</b>  All of the "Reconstruction 9" annotations here within the P61 
+## <b>Reconstruction:</b>  Unless otherwise stated, all of the annotations here within the P61 
 ## program relate to implementation of PCR 787. At each point in P61 where the Comanche 55 
 ## baseline code for P61 differs from the Artemis 71 code for P61 (which includes the PCR 787
 ## fix), an annotation is added to describe whether the baseline code was retained, or else
@@ -96,17 +96,17 @@ P61.4		ZL
 		NOOP			# IF HEADSUP NEG,ROLLC =0 (LIFT UP)
 		DXCH	ROLLC		# ROLLC IS USED BY S62.3: GIM ANG AT .05G
 
-## <b>Reconstruction 9:</b> At this point, Artemis 71 inserts the 2 instructions 
+## <b>Reconstruction:</b> At this point, Artemis 71 inserts the 2 instructions 
 ## following this annotation. The corresponding operation appears in the flowchart.
 AGIN,MON	CA	BIT14		# LOCK OUT EXTENDED VERBS.(REDUNDANT ON
-		TS	EXTVBACT	#  INITIAL PASS)		
+		TS	EXTVBACT	#  INITIAL PASS)
 		
 		TC	INTPRET
 NEWRNVN		DLOAD
 			PIPTIME		# SAVE TIME OF RN,VN TO DETERMINE IF AN
 		STCALL	MM		# UPDATE HAS OCCURRED
 			STARTEN1	# INITIALIZE
-## <b>Reconstruction 9:</b> At this point, Comanche 55 would have the two lines
+## <b>Reconstruction:</b> At this point, Comanche 55 would have the two lines
 ## of code
 ## <pre>
 ##		VLOAD
@@ -138,7 +138,7 @@ P61.1		TC	CLEARMRK
 		CA	V06N60		# GMAX		VPRED		GAMMAEI
 					# XXX.XX G	XXXXX. FPS	XXX.XX DEG
 
-## <b>Reconstruction 9:</b>  At this point, there is a fairly long block of differences
+## <b>Reconstruction:</b>  At this point, there is a fairly long block of differences
 ## between Comanche 55 and Artemis 71, but they can't all be handled the same way.
 ## This first annotation relates only the the following 5 instructions.  In the case
 ## of these instructions, the flowchart matches Comanche 55, so Comanche 55 instructions
@@ -150,7 +150,7 @@ P61.1		TC	CLEARMRK
 		TC	P61.2		# PROCEED
 		TC	-5
 
-## <b>Reconstruction 9:</b>  At this point, what we would have in Comanche 55 is the 
+## <b>Reconstruction:</b>  At this point, what we would have in Comanche 55 is the 
 ## <code>P61.2</code> code.  <code>P61.2</code> is a complete mismatch vs the flowchart,
 ## and is removed entirely.
 ## <pre> 		
@@ -190,7 +190,7 @@ P61.2		CA	V16N63		# RTGO		VIO		TTE
 		TC	GOTOPOOH
 		TC	+2
 		TC	AGIN,MON	# REDO CONIC CALC. ASSUME EXT VB INACTIVE
-## <b>Reconstruction 9:</b> End of local changes.  For the code just above, note that the 
+## <b>Reconstruction:</b> End of local changes.  For the code just above, note that the 
 ## flowchart also says that "TTE is decremented (at a 2 sec. rate) by TICKTTE".  I.e.,
 ## the code above relies on the operation of <code>TICKTTE</code> in the SERVICER207
 ## log section.  Since <code>TICKTTE</code> does not exist in the Comanche 55 version of 
@@ -376,7 +376,7 @@ P63.1		TC	PHASCHNG
 		
 V06N60		VN	0660
 V06N61		VN	0661
-## <b>Reconstruction 9:</b> In Comanche 55, we would find
+## <b>Reconstruction:</b> In Comanche 55, we would find
 ## <pre>
 ## V06N63	VN	0663
 ## </pre>

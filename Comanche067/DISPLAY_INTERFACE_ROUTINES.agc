@@ -796,7 +796,7 @@ IFLEGAL		CAF	TWO
 		BZF	OKTOPLAY	# NO
 
 PRIOBORT	TC	POODOO
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 1502</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 1502</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21502
 ## Page 1471		

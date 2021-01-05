@@ -814,7 +814,7 @@ MODESLP		TC	MAKECADR	# CALL FROM SWITCHABLE FIXED ONLY.
 		TCF	JOBSLEEP
 
 MODABORT	TC	POODOO		# TWO PROGRAMS USING SAME DEVICE.
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 1210</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 1210</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21210
 
@@ -833,7 +833,7 @@ GOMANUR		CA	ATTCADR		# IS KALCMANU FREE
 		EXTEND
 		BZF	+3
 		TC	POODOO		# NO
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 1210</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 1210</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21210		# 2 TRYING TO USE SAME DEVICE
 

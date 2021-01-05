@@ -942,13 +942,15 @@ NOFLASH		CAE	NVWORD1		# DISPLAY NVWORD1 NORMALLY
 		CADR	REGODSP
 
 ## <a name="12WORDS"></a>
-## <b>Reconstruction 3:</b> The addition of the line of code following this annotation is related to the fact that 
-## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads revealed the use of 12
-## extra words of fixed-fixed memory, compared to Comanche 55; but it did not reveal the specific locations
+## <b>Reconstruction:</b> The <code>E6SETTER</code> and <code>E7SETTER</code> functions were originally
+## present in Comanche 55, but they need to be moved to memory bank 2, and to be slightly tweaked
+## (replacing <code>TS</code> with <code>XCH</code>) in Comanche 67.  This is related to the fact that 
+## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads reveals the use of 12
+## extra words of fixed-fixed memory, compared to Comanche 55; but it does not reveal the specific locations
 ## of those extra words.  In Artemis 71, there are 12 extra words due to the migration of <code>DODOWNTM</code>, 
 ## <code>E6SETTER</code>, and <code>E7SETTER</code> to fixed-fixed memory.  That change has been ported here.
 		BLOCK	02
-		
+
 E7SETTER	CAF	EBANK7
 		XCH	EBANK
 		EBANK=	TIG
@@ -959,8 +961,6 @@ E6SETTER	CAF	EBANK6		# SET UP EBANK6
 		EBANK=	DAPDATR1
 		TC	Q
 
-## <b>Reconstruction 3:</b> See the annotation above, where the added line of code switched memory banks.
-## The following two lines are code that has been added to switch back.
 		SETLOC	P40S
 		BANK
 
@@ -1675,8 +1675,8 @@ SPBIT1			00D
 		BDSU
 		BMN	EXIT
 			LOTHRUST
-			
-## <b>Reconstruction 7:</b>  The following 3 lines were imported from Artemis 71 as part
+
+## <b>Reconstruction:</b>  The following 3 lines were imported from Artemis 71 as part
 ## of the fix for PCN 833.  See also the FREPSET code below.
 		BON	EXIT		# ENABLE TVCDAP CG TRACKING
 			SWTOVER
@@ -1688,7 +1688,7 @@ SPBIT1			00D
 		CAF	BIT1
 		INDEX	A		# LM-OFF, LM-ON VALUE
 		CAE	EREPFRAC
-## <b>Reconstruction 7:</b>  The following line of code existed in Comanche 55, but the
+## <b>Reconstruction:</b>  The following line of code existed in Comanche 55, but the
 ## symbolic label was added as part of the fix for PCN 833.  See also the FREPSET code below.
 REPFRACS	TS	REPFRAC
 		
@@ -1746,7 +1746,7 @@ OMEGACLC	STORE	OMEGAC
 		GOTO
 			QTEMP
 
-## <b>Reconstruction 7:</b>  The following 4 lines were imported from Artemis 71 as part
+## <b>Reconstruction:</b>  The following 4 lines were imported from Artemis 71 as part
 ## of the fix for PCN 833.  See also the two annotations above.
 FREPSET		DLOAD	EXIT		# POST-SQITCHOVER CSM/LM.  LOAD FROM LOW-
 			FREPFRAC	#	BANDWIDTH PARAMETER IN FIXED MEMORY

@@ -2705,7 +2705,7 @@ DSPALARM	CS	NVSBENDL
 CHARALRM	TC	FALTON		# NOT NVSUB INITIATED. TURN ON OPR ERROR
 		TC	ENDOFJOB
 		TC	POODOO
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 01501</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 01501</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21501
 MONADR		GENADR	PASTEVB
@@ -2838,7 +2838,7 @@ VBTERM		CS	ONE
 # PROCKEY PERFORMS THE SAME FUNCTION AS VBPROC.  IT MUST BE CALLED UNDER
 # EXECUTIVE CONTROL, WITH CHRPRIO.
 
-## <b>Reconstruction 11:</b> This code, down to the matching "End" annotation, has been changed
+## <b>Reconstruction:</b> This code, down to the matching "End" annotation, has been changed
 ## from Comanche 55 due to PCR 791.1, "Do not allow Proceed response to V21, V22, V23". It has
 ## been copied over from Luminary 116, which received the identical PCR 791.2.
 PROCKEY		CS	VERBREG		# DONT ALLOW PROCEED DURING LOAD.
@@ -2848,7 +2848,7 @@ PROCKEY		CS	VERBREG		# DONT ALLOW PROCEED DURING LOAD.
 		EXTEND
 		BZF	CHARALRM
 PROCKEY1	CAF	ZERO		# SET REQRET FOR ENTER PASS 0.
-## <b>Reconstruction 11:</b> End.  See the annotation above.
+## <b>Reconstruction:</b> End.  See the annotation above.
 		TS	REQRET
 		CS	VD1		# BLOCK NUMERICAL CHARACTERS, SIGNS, CLEAR
 		TS	DSPCOUNT
@@ -2861,8 +2861,8 @@ PROCKEY1	CAF	ZERO		# SET REQRET FOR ENTER PASS 0.
 
 VBRESEQ		CS	ZERO		# MAKE IT LOOK LIKE DATA IN.
 		TC	VBPROC +1
-		
-## <b>Reconstruction 11:</b> This constant was added as part of PCR 791.1. Artemis doesn't have
+
+## <b>Reconstruction:</b> This constant was added as part of PCR 791.1. Artemis doesn't have
 ## this constant; instead it moved VBSP2LD to fixed-fixed memory.
 VBSP2LD*	DEC	22		# VB22 = BLOAD
 
@@ -3146,7 +3146,7 @@ ISLIST+0	CCS	DSPLIST		# ABORTS (CODE 01206) IF DSPLIST NOT= +0.
 		TC	DSPABORT	# RETURNS IF DSPLIST = +0.
 		TC	Q
 DSPABORT	TC	POODOO
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 01206</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 01206</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21206
 		
@@ -3771,7 +3771,7 @@ ERCOM		INDEX	ERCNT		# ETC.
 		CAF	ZERO
 		TS	FAILREG
 		TS	FAILREG +1
-## <b>Reconstruction 6:</b> Comanche 55 had "TS FAILREG +2" here; it has been removed as part of PCR 802.1.
+## <b>Reconstruction:</b> Comanche 55 had "TS FAILREG +2" here; it has been removed as part of PCR 802.1.
 		TS	SFAIL
 		TC	ENDOFJOB
 

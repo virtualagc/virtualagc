@@ -764,8 +764,6 @@ BOOP		DLOAD*	DMPR
 			BOOP
 			
 PERFERAS	EXIT
-## <b>Reconstruction 3A:</b> Memory optimization. <a href="P40-P47.agc.html#12WORDS">(See here.)</a>
-## No change was made here.
 		CA	EBANK7
 		EBANK=	LAT(SPL)
 		TS	EBANK
@@ -852,7 +850,7 @@ GTSCPSS		CA	FLAGWRD1	# CALLED BY V37
 		EXTEND
 		BZF	GTSCPSSA
 		TC	POODOO
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 1521</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 1521</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	21521		# NODO ALARM FOR P01 - P11 ALREADY DONE
 		

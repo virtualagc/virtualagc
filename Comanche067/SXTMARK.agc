@@ -79,7 +79,7 @@ SXTMARK		INHINT
 		TC	MARKOK			# YES, FIND VAC AREA
 		
 MKABORT		TC	BAILOUT
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 01211</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 01211</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	31211
 MARKOK		CCS	VAC1USE			# FIND VAC AREA
@@ -93,7 +93,7 @@ MARKOK		CCS	VAC1USE			# FIND VAC AREA
 		CCS	VAC5USE
 		TC	MKVACFND
 		TC	BAILOUT
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 01207</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 01207</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	31207
 		

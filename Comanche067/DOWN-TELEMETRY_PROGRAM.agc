@@ -149,7 +149,7 @@
 #	2. NEGONE INTO SUBLIST
 #	3. NEGONE INTO DNECADR
 
-## <b>Reconstruction 3:</b> This code, down to the matching "End" annotation has been added to the baseline.
+## <b>Reconstruction:</b> This code, down to the matching "End" annotation has been added to the baseline.
 ## It is related to the fact that 
 ## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads revealed the use of 12
 ## extra words of fixed-fixed memory, compared to Comanche 55; but it did not reveal the specific locations
@@ -163,7 +163,7 @@ DODOWNTM	TS	BANKRUPT
 		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
 		WOR	CHAN13		# CODE WILL BE SET BACK TO 0.
 		TC	DNTMGOTO	# GOTO APPROPRIATE PHASE OF PROGRAM
-## <b>Reconstruction 3:</b> End.  See the annotation above.
+## <b>Reconstruction:</b> End.  See the annotation above.
 
 		BANK	22
 		SETLOC	DOWNTELM
@@ -172,8 +172,8 @@ DODOWNTM	TS	BANKRUPT
 		EBANK=	DNTMBUFF
 		
 		COUNT	05/DPROG
-		
-## <b>Reconstruction 3:</b> See the annotations above. Here's where the original Comanche 55 code was:
+
+## <b>Reconstruction:</b> See the annotations above. Here's where the original Comanche 55 code was:
 ## <pre>
 ## DODOWNTM        TS      BANKRUPT
 ##                 EXTEND
@@ -356,7 +356,7 @@ SUBLIST		EQUALS 	DNQ
 #	BY THE FOLLOWING:
 #
 #	1.	A FRESH START
-## <b>Reconstruction 5:</b> The following comment line referenced DUMPCNT in Comanche 55, which was deleted
+## <b>Reconstruction:</b> Comment 2 below referenced DUMPCNT in Comanche 55, which was deleted
 ## as part of PCR 278.
 #	2. COMPLETION OF BOTH COMPLETE DUMPS
 #	3.	AND INVOLUNTARILY BY A RESTART.
@@ -368,9 +368,10 @@ SUBLIST		EQUALS 	DNQ
 # *SUBROUTINES CALLED- NONE.
 #
 # ERASABLE INITIALIZATION REQUIRED-
-## <b>Reconstruction 5:</b> Comanche 55 details here the initialization required for DUMPCNT. Since this
+## <b>Reconstruction:</b> Comanche 55 details here the initialization required for DUMPCNT. Since this
 ## variable no longer exists in Comanche 67, it has instead been replaced with "NONE".
 #	NONE
+#
 # DEBRIS- DUMPLOC, DUMPSW, DNTMGOTO, EBANK AND CENTRAL REGISTERS
 #
 # TIMING-	TIME (IN SECS) = ((NO.DUMPS)*(NO.EBANKS)*(WDSPEREBANK + NO.IDWDS)) / NO.WDSPERSEC
@@ -422,19 +423,21 @@ DNDUMP		CA	TWO		# INCREMENT ECADR IN DUMPLOC
 		CCS	A		# IS THIS THE BEGINNING OF A NEW EBANK
 		TCF	DNDUMP2		# NO- THEN CONTINUE DUMPING
 		CA	DUMPLOC		# YES- IS THIS THE END OF THE
-## <b>Reconstruction 5:</b> This code, down to the matching "End" annotation has been added to the baseline.
+## <b>Reconstruction:</b> This code, down to the matching "End" annotation has been added to the baseline.
 ## It is an implementation of PCR 278, Fixed DUMPCNT, matching both Luminary 116 and Artemis 72.
 		MASK	BIT13		# SECOND COMPLETE ERASABLE DUMP?
 		EXTEND
 		BZF	DNDUMPI +2	# NO - GO BACK AND INITIALIZE NEXT BANK
 		TCF	DNPHASE1	# YES - SEND DOWNLIST AGAIN
-## <b>Reconstruction 5:</b> End.  See the annotation above. The original implementation was:
+## <b>Reconstruction:</b> End.  See the annotation above. The original implementation was:
+## <pre>
 ##		MASK	DUMPCNT		# N TH(N = 1 TO 4) COMPLETE ERASABLE
 ##		MASK	PRIO34		# DUMP(BIT14 FOR 4, BIT13 FOR 2 OR BIT12
 ##		CCS	A		# FOR 1 COMPLETE ERASABLE DUMP(S)).
 ##		TCF	DNPHASE1	# YES- START SENDING INTERRUPTED DOWNLIST
 ##					# AGAIN
 ##		TCF	DNDUMPI +2	# NO- GO BACK AND INITIALIZE NEXT BANK
+## </pre>
 		
 DNDUMP1		CA	LDNDUMP		# SET DNTMGOTO
 		TS	DNTMGOTO	# FOR WORDS 3 TO 256D OF CURRENT EBANK

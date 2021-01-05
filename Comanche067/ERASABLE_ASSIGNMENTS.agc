@@ -1667,9 +1667,8 @@ STARM		=	32D
 DNLSTADR	EQUALS	DNLSTCOD	# CONTENTS NO LONGER AN ADDR BUT A CODE
 
 DNLSTCOD	ERASE			# B(1)PRM ID CODE OF DOWNLIST
-## <b>Reconstruction 5:</b> The erasable DUMPCNT was defined here in Comanche 55. It has
+## <b>Reconstruction:</b> The erasable DUMPCNT was defined here in Comanche 55. It has
 ## been removed as part of PCR 278, Fixed DUMPCNT.
-DUMPCNT		ERASE			# B(1)PRM
 LDATALST	ERASE			# B(1)
 DNTMGOTO	ERASE			# B(1)
 TMINDEX		ERASE			# B(1)
@@ -2060,7 +2059,7 @@ TRUNBIAS	ERASE			# B(1)PRM RESULT OF R57 CALIBR OF TRUNION
 
 # KEPLER STORAGE				(6D)
 
-## <b>Reconstruction 2:</b>  In Comanche 55, at this point, the variables <code>XMODULO</code>
+## <b>Reconstruction:</b>  In Comanche 55, at this point, the variables <code>XMODULO</code>
 ## and <code>TMODULO</code> appear.  In Comanche 67, however, I find that their presence 
 ## causes the address of <code>RTED1</code> to be incorrect (per 
 ## <a href="http://www.ibiblio.org/apollo/Documents/padload_12_cm.pdf#page=3">
@@ -3459,9 +3458,10 @@ TTE		EQUALS	VIO	+2	# 2P DSP NOUN 63 FOR P61.
 ASPS		EQUALS	TTE	+2	# I(2) HI-WORD ONLY ON DNLIST FOR TEMP
 TTE1		EQUALS	ASPS	+2	# I(2ETMP HOLDS UNDECREMENTED TTE VALUE
 
-## <b>Reconstruction 9:</b> The following was added in implementing PCR 787.
+## <b>Reconstruction:</b> The following was added in implementing PCR 787.
 TTE2		EQUALS	TTE1 +2		# I(2) HOLDS COMPENSATED TTE VALUE DURING
-					#      P61 THRU P63 FOR  N63 DISPLAY			
+					#      P61 THRU P63 FOR  N63 DISPLAY
+								
 # **** P6OS ****
 RTGON64		EQUALS	RTGO		# RANGE ERRORS NEGATIVE IF FALLS SHORT
 ## Page 120

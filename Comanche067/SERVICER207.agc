@@ -448,7 +448,7 @@ PIPLOOP		CCS	RUPTREG1
 		
 DVTOTUP		TC	INTPRET
 
-## <b>Reconstruction 9:</b> In the implementation of PCR 787, we selectively 
+## <b>Reconstruction:</b> In the implementation of PCR 787, we selectively 
 ## make changes in the baseline (Comanche 55) based on code from Artemis 71.
 ## The decision as to whether to do so or not is based on 
 ## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1129&view=FitV">
@@ -475,7 +475,7 @@ TICKTTE		BON	DLOAD		# .05GSW IS SET =1 IN FRESH START.
 		STORE	TTE		# NEGATIVE AS IN A COUNTDOWN.
 					# DURING P61 THRU P63, 'TTE' IS DECREMENTED 
 					# AND IS ON CALL AND ON ENTRY DNLIST.
-## <b>Reconstruction 9:</b> End of `TICKTTE`.
+## <b>Reconstruction:</b> End of `TICKTTE`.
 
 		VLOAD	ABVAL		# GET ABS VALUE OF DELV
 			DELV
@@ -568,7 +568,7 @@ DVTHRUSH	EQUALS	ELEVEN		# 15 PERCENT OF 2SEC PIPA ACCUMULATION,
 
 JTAGTIME	DEC	120		# = 1 SEC + T CDU, T CDU = .1 SEC
 
-## <b>Reconstruction 9A:</b>  The following two constants were removed to conserve
+## <b>Reconstruction:</b>  The following two constants were removed to conserve
 ## a word of memory in bank 37 that overflowed due to implementing PCR 787.
 ## 2.5SEC		DEC	250
 ## MDOTFAIL	DEC	144.0 B-16	# 5 SEC MASS LOSS AT 28.8 KG/SEC
@@ -802,8 +802,8 @@ CALCRVG		VLOAD	VXSC
 			VN
 		STCALL	VN1		# TEMP STORAGE OF VN SCALED 2(+7) M/CS
 			31D
-			
-## <b>Reconstruction 9A:</b>  The following constant was removed to conserve
+
+## <b>Reconstruction:</b>  The following constant was removed to conserve
 ## a word of memory in bank 37 that overflowed due to implementing PCR 787.
 ## KPIP		2DEC	.1024		# SCALES DELV TO 2(+4)
 

@@ -361,7 +361,7 @@ MMATRIX		=	20D		# 18		M MATRIX
 COB		=	32D		# 2		COS(B) B-1
 SOB		=	34D		# 2		SIN(B) B-1
 504F		=	6D		# 2		F(MOON)
-## <b>Reconstruction 4:</b> In Comanche 55 at this point, the following occupies the remainder
+## <b>Reconstruction:</b> In Comanche 55 at this point, the following occupies the remainder
 ## of the PLANETARY INERTIAL ORIENTATION log section:
 ## <pre>
 ## NODDOT          2DEC    -.457335121 E-2    # REVS/CSEC B+28=-1.07047011 E-8  RAD/SEC
@@ -396,5 +396,6 @@ NODIO		2DEC*	9.862094363 E-1*	# REV
 FSUBO		2DEC*	8.290901511 E-1*	# REV
 BSUBO		2DEC	6.512013939 E-2		# REVS
 WEARTH		2DEC*	1.160576171 E-7 B23*	# REV/CSEC
+
 
 

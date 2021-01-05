@@ -164,9 +164,8 @@ P20R52JB	TC	INTPRET
 		CAF	ONE		# HOLD PRESENT ATTITUDE
 		TS	HOLDFLAG
 		TC	ENDOFJOB
-## <b>Reconstruction 9A:</b>  The following constant was removed to conserve
+## <b>Reconstruction:</b>  The constant <code>OCT203</code> was removed to conserve
 ## a word of memory in bank 37 that overflowed due to implementing PCR 787.
-## OCT203		OCT	00203
 FIRST3		EQUALS	FURST3
 
 ## Page 565
@@ -479,7 +478,7 @@ ENDR57		TC	DOWNFLAG	# RESET V59FLAG
 		GOTO
 			EGRESS
 P23ABRT		TC	BAILOUT
-## <b>Reconstruction 1:<b>  The following was just <code>OCT 01211</code> in Comanche 55.
+## <b>Reconstruction:<b>  The following was just <code>OCT 01211</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 		OCT	31211
 V06N87NB	VN	0687
