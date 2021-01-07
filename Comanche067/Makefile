@@ -9,7 +9,14 @@
 # Website:	http://www.ibiblio.org/apollo
 # Mod history:	2020-12-25 RSB	Adapted from Mike's Comanche 044 Makefile.
 #		2021-01-05 RSB	Changed to use preprocessor.
+#		2021-01-07 RSB	Restored the original non-gpp build whenever
+#				ReconstructionLevel is not defined.  The 
+#				gpp build occurs only with ReconstructionLevel.
 
+# To build as before, using the .agc files that are already in the folder, just
+# use the same 'make' CLI syntax as before.  To use the with the preprocessor,
+# the ReconstructionLevel constant must be defined.  Further instructions follow.
+#
 # Here are the basic ideas behind using the preprocessor for the reconstruction
 # process:
 #
@@ -43,7 +50,7 @@
 #						(i.e., Comanche 55)
 #		ReconstructThrough3		Just Reconstruction1, 2, and 3.
 #   6.  The 'make' command-line syntax is
-#		[ReconstructionLevel=NAME] make clean default
+#		ReconstructionLevel=NAME make clean default
 #	where NAME is one of the catch-all names just described above.
 #	The default is PreferredReconstruction.
 #	This automatically runs the preprocessor, then builts the preprocessed
@@ -52,7 +59,7 @@
 #	using (for example, changing from ReconstructionLevel=PreferredReconstruction
 #	to ReconstructionLevel=NoReconstruction), then 'make' doesn't know to 
 #	re-preprocess the files.  You have to do
-#		touch gpp/*.gpp
+#		touch gpp/defines.default
 #	to trick it into doing so.
 #   8.  Annotations now just read
 #		## <b>Reconstruction:</b> ...
@@ -74,13 +81,10 @@ include ../Makefile.inc
 diffComanche067sums:
 	../Tools/check_buggers.py Comanche067.bin Comanche067.buggers
 
-#==================================================================================
-# Comment out the following in a production configuration.  It's only for use
-# during the reconstruction process.
-
-ifndef ReconstructionLevel
-ReconstructionLevel=PreferredReconstruction
-endif
+ifdef ReconstructionLevel
 
 %.agc : gpp/%.gpp gpp/defines.default Makefile
 	gpp -D$(ReconstructionLevel) -Igpp --include defines.default gpp/$*.gpp >$*.agc
+
+endif
+	
