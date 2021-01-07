@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##				Added fix for PCR801.1.
+##		2020-01-07 RSB	Addd Mike's fix for PCR 831.1.
 
 ## Page 1262
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION	DATE - 1 SEPTEMBER 1967
@@ -1495,8 +1496,26 @@ LAMBLOOP	DMP
 		BPL	RTB
 			INITV
 			CHECKCTR
-		BHIZ	CALL
+## <b>Reconstruction:</b> The three lines
+## <pre>
+##		BHIZ	CALL
+##			SUFFCHEK
+##			ITERATOR
+## </pre>
+## from Comanche 55 were replaced by the following block of code
+## (through `GOITER +1`), due to PCR 831.1.  It reflects a 
+## LAMBERT-related change from Luminary 99 to Luminary 116, the
+## LM software revision corresponding to this CM software revision.
+		BHIZ	BON
 			SUFFCHEK
+			SLOPESW
+			GOITER
+		DLOAD	DSU
+			T
+			TPREV
+		BZE
+			SUFFCHEK
+GOITER		CALL
 			ITERATOR
 		DLOAD	BZE
 			MPAC

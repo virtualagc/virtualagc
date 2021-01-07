@@ -311,8 +311,10 @@ QUALITY1	BOF	DLOAD
 			URPV
 		DSQ	GOTO
 			QUALITY2
-		SETLOC	MODCHG2
-		BANK
+## `QUALITY2` has been _temporarily_ stashed in bank 16 simply because there're room
+## for it there, but isn't room for it in bank 12 where it was originally. 
+## Undoubtedly we'll have to eventually move it elsewhere. 
+		BANK	16
 QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 			URPV	+2	# Y COMPONENT, B1
 		DSU
