@@ -1402,9 +1402,20 @@ VREFER		DEC	.019288		# REFERENCE VELOCITY SCALED V/51532.3946
 		DEC	-.0159061  B3
 		DEC	-.0159061  B3
 		
+#ifdef Reconstruction803
+## <b>Reconstruction:</b>  The following 3 values have been changed due to 
+## PCR 803, by pulling them in from Artemis 71.  According to the 
+## <a href="http://www.ibiblio.org/apollo/Documents/HSI-208454.pdf#page=469">
+## Artemis GSOP, Figure 7.0-14a</a>, those are the correct values required
+## by PCR 803.
+		DEC	.00137037	#  3.7	RTOGO SCALED RTOGO/2700
+		DEC	.00385185	# 10.4
+		DEC	.00874074	# 23.6
+#else
 		DEC	.0008067	# RANGE TO GO SCALED RTOGO/2700
 		DEC	.0032963	#	8.9
 		DEC	.0081852	#	22.1
+#endif
 		DEC	.017148
 		DEC	.027926
 		DEC	.037
