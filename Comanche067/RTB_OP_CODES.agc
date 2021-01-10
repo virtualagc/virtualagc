@@ -338,3 +338,74 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 			E3J22R2M
 		PDDL	RVQ		# J22 TERM X R**4 IN 2D, SCALED B61
 			COSPHI/2	# SAME AS URPV +4, Z COMPONENT
+
+## <b>Reconstruction:</b>  The <code>TIMEOPT</code> subroutine has been copied
+## directly out of Artemis 71, due to PCR 799.  If you refer to the 
+## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1027&view=FitV">
+## Colossus 2C flowchart for V82, sheet 5</a>, you'll notice that almost the entire
+## sheet, from "DSPTEMX<sub>D</sub>&larr;+0<sub>D</sub> through STRTDEC1, does not 
+## appear in the <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=326&view=FitV">
+## corresponding sheet 6 of the Colossus 2 flowchart for V82</a>, and that 
+## furthermore, that block of the flowchart closely matches the code in 
+## <code>TIMEOPT</code. In Artemis, <code>TIMEOPT</code> simply appears in 
+## bank 23 along with the subroutine <code>V82CALL</code> that calls it.
+## That positioning is no good in Comanche 67, since bank 23 isn't big enough.
+## Either <code>TIMEOPT</code> must have been put in some other bank, or else
+## some other code must have moved to a different bank to make room for 
+## <code>TIMEOPT</code>.  The former makes more sense.  I simply chose
+## bank 20 because it had enough space in it, but also had a relatively poor
+## checksum diff compared to the few other available banks.  This may
+## be a poor choice that needs to be revisited later, although this choice
+## does reduce the checksum diff of bank 20 substantially.
+		BANK	20
+		
+TIMEOPT		STORE	DSPTEMX
+ +1		STQ	EXIT
+			VEHRET
+		CAF	V06N16X
+		TC	BANKCALL
+		CADR	GOXDSPF 
+		TC	ENDEXT
+		TC	+2
+		TC	-5
+## Page 519	
+		TC	INTPRET
+		DLOAD	BZE
+			DSPTEMX
+			GETNOW
+STRTDEC1  	STCALL	TDEC1 
+			VEHRET
+GETNOW		RTB	GOTO
+			LOADTIME
+			STRTDEC1
+V06N16X		VN	0616
+## <b>Reconstruction:</b>  Allocation of <code>VEHRET</code>
+## a potential error. There are two possibilities:
+## <ul>
+## <li>It may be allocated in E0, E1, or E2 in such a way that erasable pad
+## load addresses are not affected.  This would require it to be in E0
+## from 0111-0377, or in E3 from 01353-01377.</li>
+## <li>It may share a previously-allocated location for a routine not used
+## simultaneously with V82.</li>
+## </ul>
+## In Artemis, it's actually a standalone variable (i.e., the first of the
+## two options above). That makes little sense to me in Comanche 67,
+## since it's only needed for temporary storage of <code>TIMEOPT</code>'s 
+## return address above.  (It may make a little more sense in Artemis, 
+## since in Artemis <code>TIMEOPT</code> is called through V90 in addition
+## to V82.  I don't know.  But the positioning used in Artemis isn't 
+## possible in Comanche 67 due to the affect on erasable pad load addresses.)
+## <br></br>
+## So the second option, shared storage, seems much more natural to me.  
+## Unfortunately, that doesn't really narrow it down too 
+## much.  One thing I notice about <code>TIMEOPT</code> is that it also uses the
+## temporary variable <code>DSPTEMX</code>, which is itself aliased in 
+## ERASABLE ASSIGMENTS as the last 2 words of the 3-word area <code>DSPTEM2</code>
+## It seems not unreasonable that the 1st word of <code>DSPTEM2</code> might have
+## been originally used for <code>VEHRET</code> and then only later turned into
+## a standalone variable in Artemis for reasons I don't know.
+## <br><br>
+## However, ultimately this is little more than a guess, so it is likely to
+## be very wrong, and needs to be revisited later. 
+VEHRET		EQUALS	DSPTEM2
+			
