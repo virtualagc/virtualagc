@@ -141,17 +141,27 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
 
 
 
-          --ptc --cold-start --run --assembly=PAST</tt>".&nbsp; This
-        starts the LVDC/PTC CPU emulation running the PAST
-        program.&nbsp; At this point, it's just running freely, without
-        any input from the PTC front panel.&nbsp; Don't do anything
-        additionally at this command line (such as hitting a keyboard
-        key), since that would pause the emulation and give you access
-        instead to yaLVDC's native LVDC/PTC debugger.&nbsp; If that
-        happens accidentally, just type the command <tt>PANEL</tt> or <tt>CONTINUE</tt>
-        into yaLVDC's native debugger to resume the emulation.<br>
+
+          --ptc --cold-start --run --assembly=<i>PRO</i><i>GRAM</i></tt>".&nbsp;
+        This starts the LVDC/PTC CPU emulation running the <i>PROGRAM</i>
+        program.&nbsp; For the sake of discussion, let's suppose that <i>PROGRAM</i>
+        is "PROC9".&nbsp; The specific program to run depends on which
+        particular set of test procedures you want to try, but PROC9
+        (the PTC Self-Test Program) is the one for test procedure 9, and
+        by far the most-comprehensive test.&nbsp; Later on, there will
+        be a table that lists the specific <i>PROGRAM</i> for each test
+        procedure.</li>
+      <li>At this point, the <i>PROGRAM</i> is just running freely in
+        the emulated CPU, without any input from the PTC front
+        panel.&nbsp; Don't do anything additionally at <i>this</i>
+        command line (such as hitting a keyboard key), since that would
+        pause the emulation and give you access instead to yaLVDC's
+        native LVDC/PTC debugger.&nbsp; If that happens accidentally,
+        just type the command <tt>PANEL</tt> or <tt>CONTINUE</tt> into
+        yaLVDC's native debugger to resume the emulation.<br>
       </li>
       <li>At the second command line, execute this command:&nbsp; "<tt>./yaPTC.py</tt>".&nbsp;
+
 
 
 
@@ -361,6 +371,22 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
     providing my own comments as to how the instructions have to be
     interpreted in order to use them in our emulation.<br>
     <br>
+    <a href="#Starting_Up_the_PTC_Emulation">As mentioned earlier</a>,
+    one of the things you have to do to run the test procedures on the
+    emulated CPU is to start the emulated CPU using the command "<tt>./yaLVDC
+
+
+
+
+
+
+
+      --ptc --cold-start --run --assembly=<i>PRO</i><i>GRAM</i></tt>",
+    and I promised that the specific value of <i>PROGRAM</i> would be
+    given later; that's one of the things in the table below.&nbsp; The
+    PAST program itself is used in only one of the procedures, procedure
+    #9.<br>
+    <br>
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
@@ -377,6 +403,8 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           <th valign="bottom" align="left">Link to the Corrected Test
             Procedure<br>
           </th>
+          <th valign="bottom">Comment<br>
+          </th>
         </tr>
         <tr>
           <td valign="middle">1<br>
@@ -388,6 +416,8 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           </td>
           <td valign="middle">Useless; relates to non-emulated hardware.</td>
           <td valign="middle">n/a<br>
+          </td>
+          <td valign="top"><br>
           </td>
         </tr>
         <tr>
@@ -401,6 +431,8 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           </td>
           <td valign="middle">Useless; relates to non-emulated hardware.</td>
           <td valign="middle">n/a<br>
+          </td>
+          <td valign="top"><br>
           </td>
         </tr>
         <tr>
@@ -416,6 +448,8 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           <td valign="middle">Useless; relates to non-emulated hardware.</td>
           <td valign="middle">n/a<br>
           </td>
+          <td valign="top"><br>
+          </td>
         </tr>
         <tr>
           <td valign="middle">4<br>
@@ -429,6 +463,8 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           <td valign="middle">Useless; relates to non-emulated hardware.</td>
           <td valign="middle">n/a<br>
           </td>
+          <td valign="top"><br>
+          </td>
         </tr>
         <tr>
           <td valign="middle">5<br>
@@ -436,12 +472,21 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           <td valign="middle">Memory Loader Manual Checks</td>
           <td valign="middle">7-7<br>
           </td>
-          <td valign="middle">tape p/n 6001247 (do not have)<br>
+          <td valign="middle">tape p/n 6001247<br>
+            <i>PROGRAM</i>=PROC5-7<br>
           </td>
           <td valign="middle">Partially useful.<br>
           </td>
           <td valign="middle"><a
               href="Test%20procedure%20Figure%207-7.html">Procedure</a><br>
+          </td>
+          <td valign="middle">We don't actually have a program listing
+            for the test software from the original tape, or any
+            documentation for that program.&nbsp; The test program
+            specified is one that I intend to write myself, though I
+            have not yet done so.&nbsp; Test procedure #5 seems to work
+            fine if the program PROC9 is used instead; procedures 6-8,
+            however, will fail if that is done.<br>
           </td>
         </tr>
         <tr>
@@ -450,11 +495,13 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           <td valign="middle">Data Display Checks</td>
           <td valign="middle">7-8<br>
           </td>
-          <td valign="middle">tape p/n 6001247 (do not have<br>
-          </td>
+          <td valign="middle">tape p/n 6001247<br>
+            <i>PROGRAM</i>=PROC5-7 </td>
           <td valign="middle">TBD<br>
           </td>
           <td valign="middle">TBD<br>
+          </td>
+          <td valign="middle">See the comment above.<br>
           </td>
         </tr>
         <tr>
@@ -463,12 +510,13 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           <td valign="middle">Central Processor Manual Checks</td>
           <td valign="middle">7-9<br>
           </td>
-          <td valign="middle">tape p/n 6001247 (do not have)<br>
-          </td>
+          <td valign="middle">tape p/n 6001247<br>
+            <i>PROGRAM</i>=PROC5-7 </td>
           <td valign="middle">TBD<br>
           </td>
           <td valign="middle">TBD<br>
           </td>
+          <td valign="middle">See the comment above.</td>
         </tr>
         <tr>
           <td valign="middle">8<br>
@@ -476,22 +524,32 @@ document.write(headerTemplate.replace("@TITLE@","Programmable Test Controller (P
           <td valign="middle">Central Processor Memory Automatic Check</td>
           <td valign="middle">7-10<br>
           </td>
-          <td valign="middle">tape p/n 6001232 (do not have)<br>
-          </td>
+          <td valign="middle">tape p/n 6001232<br>
+            <i>PROGRAM</i>=PROC8 </td>
           <td valign="middle">TBD<br>
           </td>
           <td valign="middle">TBD<br>
           </td>
+          <td valign="middle">See the comment above.</td>
         </tr>
         <tr>
           <td valign="middle">9<br>
           </td>
           <td valign="middle">Self-Test Program Checks</td>
           <td valign="middle">7-11</td>
-          <td valign="middle">tape p/n 6001236 (PAST program)<br>
-          </td>
+          <td valign="middle">tape p/n 6001236<br>
+            <i>PROGRAM</i>=PROC9 </td>
           <td valign="middle">The test procedure is 100% useful.</td>
           <td valign="middle">TBD<br>
+          </td>
+          <td valign="middle">The PROC9 program is <i>essentially</i>
+            the PAST program.&nbsp; However, there's a handful of steps
+            in the test procedure that I have simply been unable to
+            comprehend, after much effort in attempting to do so.&nbsp;
+            For those few steps, the corresponding lines of code in the
+            software have been commented out and replaced by an equal
+            number of instructions which have no effect, thus preserving
+            memory addresses but bypassing the failing steps.<br>
           </td>
         </tr>
       </tbody>
@@ -621,10 +679,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2020-06-14.<br>
+          2020-07-06.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
