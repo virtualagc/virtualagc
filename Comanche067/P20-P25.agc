@@ -23,6 +23,7 @@
 ##				recover enough words.  Secondly, because I found 
 ##				changes elsewhere that would recover enough
 ##				words.  Look for Reconstruction 9A.
+##		2021-01-11 RSB	Incorporated PCR 809.
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -97,6 +98,8 @@ PROG20		TC	BANKCALL
 		ADRES	UPDATFLG	# BIT 7 FLAG 1
 		TC	UPFLAG		# SET RNDVZFLG
 		ADRES	RNDVZFLG	# BIT 7 FLAG 0
+		TC	UPFLAG		# SET V50N18FL
+		ADRES	V50N18FL	# 
 		TC	2PHSCHNG
 		OCT	4
 		OCT	05022
@@ -429,8 +432,7 @@ DE-GR-50	TC	2PHSCHNG
 		EBANK=	MRKBUF1
 R57		STQ	EXIT
 			EGRESS
-		CAF     EBANK7
-		TS      EBANK
+		TC	E7SETTER
 		CAF	SIX		# BIT2 = MARKING SYSTEM IN USE
 		MASK	EXTVBACT	# BIT3 = EXTENDED VERB IN PROGRESS
 		CCS	A
@@ -647,8 +649,7 @@ V0694		VN	0694
 		EBANK=	GENRET
 		COUNT*	$$/R61		# ROUTINES - NAVIGATION - PREF. TR. 9TT=
 	
-R61CSM		CAF	EBANK6		# SWITCH TO EBANK 6
-		XCH	EBANK
+R61CSM		TC	E6SETTER
 		TS	SAVBNK		# SAVE EBANK
 		TC	MAKECADR
 		TS	GENRET
@@ -660,6 +661,8 @@ R61CSM		CAF	EBANK6		# SWITCH TO EBANK 6
 		CALL
 			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
 		EXIT
+		TC	DOWNFLAG
+		ADRES	V50N18FL
 		INDEX	MPAC
 		TC	+1
 		TC	R61END		# SUBROUTINE DRIVING DAP	(EXIT R61)
@@ -1554,11 +1557,45 @@ CDULOOP		TS	DTHETASM
 		TC	CDULOOP		# NO - DIM COUNT, CHECK NEXT ANGLE DIFF.
 		TC	AUTOCK
 STKTEST		EXIT
-		CS	FLAGWRD1
-		MASK	STIKBIT
-## Page 594
+## <b>Reconstruction:</b>  At this point, the 4 instructions from Comanche 55 reading
+## <pre>
+##		CS	FLAGWRD1
+##		MASK	STIKBIT
+##		CCS	A
+##		TC	MANUEXIS	# STIKFLAG IS NOT SET (DO R63)
+## </pre>
+## have been replaced by the 4 instructions following this annotation.  This
+## replacement is due to incorporation of PCR 809.  What the original Comanche 55
+## instructions did was to check the value of a flag bit called <code>STIKBIT</code>,
+## jumping to <code>MANUEXIS</code> if the flag is not set, but instead proceeding
+## (to the <code>CAF</code> instruction) if set.  However, for Comanche 67,
+## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=727&view=FitV">
+## the Colossus 2C flowchart (FC-2550, sheet 16)</a> indicates instead that the
+## test should be performed on a flag called <code>V50N18FL</code> (flagword 3,
+## bit 15) rather than on <code>STIKBIT</code> (flagword 1, bit 14).
+## <br><br>
+## Notice, however, that this change cannot be a simple matter of replacing
+## <code>FLAGWRD1&rarr;FLAGWRD3</code> and <code>STIKBIT&rarr;V50N18FL</code>.  That's
+## because the test performed by the <code>CCS</code> instruction distinguishes 
+## between the cases of the >0, +0, <0, -0.  In the case of <code>STIKBIT</code>,
+## the value being tested is either >0 (20000<sub>8</sub>) or +0 (00000<sub>8</sub>, 
+## so the test by <code>CCS</code> is very efficient in terms of the number of 
+## instructions used.  In the case of <code>V50N18FL</code>, on the other hand, 
+## the value being tested is either <0 (-37777<sub>8</sub>) or +0, and a test 
+## using <code>CCS</code> would require an extra word of memory.  That leaves us
+## with several possible alternative implementations:  We could continue to use
+## <code>CCS</code>, but could pad the output table (output >0) with <code>NOOP</code>
+## because it's unused.  Or, we could switch to using <code>BZF</code> in place
+## of <code>CCS</code>; unfortunately, <code>BZF</code> is an "extracode"
+## instruction, so it requires us to waste a word of memory by inserting an
+## <code>EXTEND</code> in front of it.  So in either case, we use an extra word
+## of memory.
+		CS	FLAGWRD3
+		MASK	V50N18FL	# 40000=NOT SET, 00000=SET
 		CCS	A
-		TC	MANUEXIS	# STIKFLAG IS NOT SET (DO R63)
+		NOOP			# A>0; CANNOT HAPPEN!
+		TC	MANUEXIS	# A=+0; V50N18FL SET
+					# A<0; V50N18FL NOT SET
 		CAF	BIT3
 		EXTEND			# STIKFLG IS SET
 		WOR	DSALMOUT	# TURN ON UPACTY LIGHT

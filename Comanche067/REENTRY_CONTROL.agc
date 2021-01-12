@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-01-11 RSB	Incorporated PCR 837.
 
 ## Page 844
 # ENTRY INITIALIZATION ROUTINE
@@ -1530,7 +1531,9 @@ C21		2DEC	.17391304	# 140/805
 
 K1D		2DEC	.0314453125	# =C16 805/256 = .01 805/256
 
-K2D		2DEC	-.201298418	# -C17 2VS/256 = -.001 2VS/256
+## <b>Reconstruction:</b> The value of the constant <code>K2D</code> has been
+## doubled (relative to Comanche 55), per PCR 837.
+K2D		2DEC	-.402596836	# -C17 2VS/256 = -.002 2VS/256
 
 KVSCALE		2DEC	.81491944	# 12800/(2 VS .3048)
 

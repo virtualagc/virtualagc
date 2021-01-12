@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-01-11 RSB	Incorporated PCR 837.
 
 ## Page 837
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE *		COMPUTER NAME
@@ -248,7 +249,9 @@
 #
 # C1		FACTOR IN ALP COMPUTATION				1.25
 # C16		CONSTD GAIN ON DRAG					.01
-# C17		CONSTD GAIN ON RDOT					.001
+## <b>Reconstruction:</b>  Comment for C17 changed to reflect change to definition of 
+## <code>K2D</code> in REENTRY CONTROL log section, per PCR 837.
+# C17		CONSTD GAIN ON RDOT					0.002
 # C18		BIAS VEL. FOR FINAL PHASE START				500	FPS
 # C20		MAX DRAG FOR DOWN-LIFT					175	FPSS
 # CHOOK		FACTOR IN AHOOK COMPUTATION				.25
