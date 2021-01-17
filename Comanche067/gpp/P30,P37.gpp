@@ -105,6 +105,12 @@ COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
 		
 P30		TC	P30/P31
 		TC	CNTNUP30
+#ifdef Reconstruction812
+## <b>Reconstruction:</b>  <code>XDELVFLG</code> is set here due to 
+## PCR 812.1.
+		TC	UPFLAG		# SET XDELVFLG
+		ADRES	XDELVFLG
+#endif
 		TC	DOWNFLAG	# RESET UPDATFLG
 		ADRES	UPDATFLG	# BIT 7 FLAG 1
 		TC	INTPRET
