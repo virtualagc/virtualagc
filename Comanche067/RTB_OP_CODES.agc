@@ -311,7 +311,7 @@ QUALITY1	BOF	DLOAD
 			URPV
 		DSQ	GOTO
 			QUALITY2
-## `QUALITY2` has been _temporarily_ stashed in bank 16 simply because there're room
+## `QUALITY2` has been _temporarily_ stashed in a different bank simply because there's room
 ## for it there, but isn't room for it in bank 12 where it was originally. 
 ## Undoubtedly we'll have to eventually move it elsewhere. 
 		BANK	16

@@ -15,6 +15,7 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
 ##		2020-12-27 RSB	Added proposed fixes for the TB6JOB "12 words" problem.
+##		2021-01-17 RSB	Incorporated PCR 798.1.
 
 ## Page 181
 # PROGRAM DESCRIPTION						8 APRIL, 1967
@@ -1112,7 +1113,14 @@ RAKE		CAF	ELEVEN			# THIS PART CLEARS FLAGWORD BITS.
 FLAGTABL	OCT	0
 		OCT	00040			# IDLEFAIL
 		OCT	06000			# P21FLAG, STEERSW
-		OCT	0
+## <b>Reconstruction:</b> The following value changed from 0 in Comanche 55,
+## due to PCR 798.1, requiring <code>ROO</code> to reset the <code>GLOKFAIL</code>
+## flag (bit 14 of `FLAGWRD3`).  Selected flagwords are cleared by using 
+## <code>FLAGTABL</code> in conjunction with the <code>RAKE</code> subroutine's
+## loop.  Notice that <code>RAKE</code> uses the 1's complement of the values
+## in the table, so what a value of 20000 does is to clear bit 14 rather than to 
+## set it.
+		OCT	20000			# GLOKFAIL
 		OCT	0
 		OCT	04140			# V59FLAG, ENGONFLG, 3AXISFLG
 		OCT	10000			# STRULLSW
