@@ -527,6 +527,10 @@ FWDFLTR		CAF	ZERO
 		TCF	3DAPCAS		# LEM ON
 		EXTEND			# LEM OFF
 		DCA	DAP2
+## <b>Reconstruction:</b>  <code>DAP2</code> is multiplied by 4 here due
+## to PCR 811.
+		DDOUBL
+		DDOUBL
 		DXCH	DAP3
 		TCF	OPTVARK
 
@@ -542,19 +546,21 @@ FWDFLTR		CAF	ZERO
 		DXCH	TMP5
 		DAS	DAP3
 
+## <b>Reconstruction:</b>  Most of the comments in the <code>OPTVARK</code>
+## subroutine have been changed due to PCR 811.
 OPTVARK		CS	DAP3	+1	# VARIABLE GAIN PACKAGE
 		EXTEND			# (ALSO, SIGN CHANGE IN FORWARD LOOP)
-		MP	VARK		# SCALED AT 1/(8 ASCREV) OF ACTUAL VALUE
-		TS	CMDTMP	+1
+		MP	VARK		#	SCALED (1.08 B+2)   CSM/LM
+		TS	CMDTMP +1	#	       (  "  B+4)   CSM
 		CS	DAP3
 		EXTEND
 		MP	VARK
 		DAS	CMDTMP
 		
-		DXCH	CMDTMP		# FIX UP SCALING - SCALED B+3 ASCREVS
+		DXCH	CMDTMP		# FIX UP SCALING - SCALED B+1 ASCREV
 		DDOUBL
-		DDOUBL
-		DXCH	CMDTMP		#		 - SCALED B+1 ASCREVS
+## <b>Reconstruction:</b>  One <code>DDOUBL</code> instruction removed, per PCR 811.
+		DXCH	CMDTMP		#		 - SCALED B+0 ASCREV
 					# NOTE - THERE IS AN INHERANT GAIN OF
 					# (B+1 ASCREVS) ON THE OUTPUT DACS.
 					

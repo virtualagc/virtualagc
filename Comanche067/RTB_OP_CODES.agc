@@ -353,11 +353,9 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 ## Either <code>TIMEOPT</code> must have been put in some other bank, or else
 ## some other code must have moved to a different bank to make room for 
 ## <code>TIMEOPT</code>.  The former makes more sense.  I simply chose
-## bank 20 because it had enough space in it, but also had a relatively poor
-## checksum diff compared to the few other available banks.  This may
-## be a poor choice that needs to be revisited later, although this choice
-## does reduce the checksum diff of bank 20 substantially.
-		BANK	20
+## a bank that had enough space in it, but also had a relatively poor
+## checksum diff compared to the few other available banks.
+		BANK	16
 		
 TIMEOPT		STORE	DSPTEMX
  +1		STQ	EXIT

@@ -101,8 +101,9 @@ TVCINIT1	LXCH	BANKRUPT
 		TC	LOADCOEF
 		
 		INDEX	CNTR		# PICK UP LM-OFF,-ON KTLX/I
-		CAE	EKTLX/I		# SCALED AT 1/(8 ASCREV) OF ACTUAL VALUE
-		TS	KTLX/I
+## <b>Reconstruction:</b>  The following two lines' comments changed, due to PCR 811.
+		CAE	EKTLX/I		#	SCALED (1.08 B+2) 1/SECSQ CSM/LM
+		TS	KTLX/I		#	       ( "   B+4)    "    CSM
 		
 		TCR	S40.15		# COMPUTE 1/CONACC, VARK
 		
@@ -325,13 +326,16 @@ S40.15		CAE	IXX		# GAIN COMPUTATIONS (1/CONACC, VARK)
 		DDOUBL
 		TS	1/CONACC	#	      SCALED B+9 SEC-SQ/REV
 
- +7		CAE	KTLX/I		# ENTRY FROM CSM/LM V46 SWITCH-OVER
-		EXTEND			#            SCALED (B+3 ASCREV)  1/SECSQ
+## <b>Reconstruction:</b>  Comments changed in the following 3 lines, due to PCR 811.
+					# ENTRY FROM CSM/LM V46 SWITCHOVER
+ +7		CAE	KTLX/I		#	SCALED (1.08 B+2) 1/SECSQ CSM/LM
+		EXTEND			#	       (  "  B+4)   CSM
 		MP	IAVG/TLX	#            SCALED B+2 SECSQ
 		DDOUBL
 		DDOUBL
-		TS	VARK		#            SCALED (B+3 ASCREV)
-		TC	Q
+## <b>Reconstruction:</b>  Comments changed in the following 3 lines, due to PCR 811.
+		TS	VARK		#	SCALED (1.08 B+2)   CSM/LM
+		TC	Q		#	       (  "  B+4)   CSM
 
 CSMN10		DEC	.99999		# N10	CSM ONLY FILTER COEFFICIENTS
 		DEC	-.2549		# N11/2
