@@ -872,6 +872,21 @@ AGAINMM		TS	MPAC +1
 		CA	MPAC +1
 		TS	MINDEX			# SAVE INDEX FOR LATER
 
+## <b>Reconstruction:</b>  This annotation relates to PCR 809.  At this point,
+## Artemis 71 has the following two lines,
+## <pre>
+##              TC      UPFLAG
+##              ADRES   V50N18FL		# 66935 55  518 490731Y
+## </pre>
+## which are of course not present in the Comanche 55 baseline, since Comanche 55
+## does not have <code>V50N18FL</code>.  But this operation is not present in the
+## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=41&view=FitV">
+## Colossus 2D flowchart, FC-2020</a>.  (The Colossus 2C flowchart is not available.)
+## I am undecided as to whether this is an error in the flowchart or not.  There is
+## room for the added instructions (bank 04), but at this writing, adding them
+## significantly worsens the banksum.  I am assuming that the flowchart is correct and
+## that the lines should not be added at this point.
+
 ISSERVON	CS	FLAGWRD7		# V37 FLAG SET - I.E. IS SERVICER GOING
 		MASK	V37FLBIT
 		CCS	A

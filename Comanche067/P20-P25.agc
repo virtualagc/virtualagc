@@ -667,12 +667,36 @@ R61CSM		TC	E6SETTER
 		TC	+2		# DO R61
 		TC	DECRM61 +1
 		TC	INTPRET
+## <b>Reconstruction:</b>  Per Colossus 2C flowchart FC-2550, due to PCR 809,
+## new instructions to clear the flag <code>V50N18FL</code> must be added to 
+## Colossus 67 after the pre-existing code to call <code>CRS61.1</code> is 
+## executed.  I see two ways of doing that, and cannot resolve which is the 
+## correct way from the available documentation.  Here's how Artemis 71 does it:
+## <pre>
+##		CALL
+##			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
+## R61DMPTG	EXIT
+##		TC	DOWNFLAG
+##		ADRES	V50N18FL
+## </pre>
+## The second way is this:
+## <pre>
+##		CALL	CLEAR
+##			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
+##			V50N18FL
+##		EXIT
+## </pre>
+## The second way requires one less word of memory (in a very crowded memory bank 37).  
+## It does not have the label <code>R61DMPTG</code>, but that label is not present in
+## Comanche 55 and is not referenced in Comanche 67, so its presence is unnecessary.
+## <br><br>
+## While I've selected one of these for inclusion, my choice is tentative
+## and may need to be revisited in the future.
 		CALL
 			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
 		EXIT
-## <b>Reconstruction:</b>  The following two lines were added due to PCR 809.
-		TC	DOWNFLAG
-		ADRES	V50N18FL
+		TC	DOWNFLAG	# RESET FLAG TO INHIBIT FURTHER R60
+		ADRES	V50N18FL	#    ATTITUDE MANEUVERS
 		INDEX	MPAC
 		TC	+1
 		TC	R61END		# SUBROUTINE DRIVING DAP	(EXIT R61)
@@ -1566,46 +1590,11 @@ CDULOOP		TS	DTHETASM
 		CCS	DTHETASM	# HAVE ALL 3 ANGLE DIFFS BEEN CHECKED.
 		TC	CDULOOP		# NO - DIM COUNT, CHECK NEXT ANGLE DIFF.
 		TC	AUTOCK
-STKTEST		EXIT
-## <b>Reconstruction:</b>  At this point, the 4 instructions from Comanche 55 reading
-## <pre>
-##		CS	FLAGWRD1
-##		MASK	STIKBIT
-##		CCS	A
-##		TC	MANUEXIS	# STIKFLAG IS NOT SET (DO R63)
-## </pre>
-## have been replaced by the 4 instructions following this annotation.  This
-## replacement is due to incorporation of PCR 809.  What the original Comanche 55
-## instructions did was to check the value of a flag bit called <code>STIKBIT</code>,
-## jumping to <code>MANUEXIS</code> if the flag is not set, but instead proceeding
-## (to the <code>CAF</code> instruction) if set.  However, for Comanche 67,
-## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=727&view=FitV">
-## the Colossus 2C flowchart (FC-2550, sheet 16)</a> indicates instead that the
-## test should be performed on a flag called <code>V50N18FL</code> (flagword 3,
-## bit 15) rather than on <code>STIKBIT</code> (flagword 1, bit 14).
-## <br><br>
-## Notice, however, that this change cannot be a simple matter of replacing
-## <code>FLAGWRD1&rarr;FLAGWRD3</code> and <code>STIKBIT&rarr;V50N18FL</code>.  That's
-## because the test performed by the <code>CCS</code> instruction distinguishes 
-## between the cases of the >0, +0, <0, -0.  In the case of <code>STIKBIT</code>,
-## the value being tested is either >0 (20000<sub>8</sub>) or +0 (00000<sub>8</sub>, 
-## so the test by <code>CCS</code> is very efficient in terms of the number of 
-## instructions used.  In the case of <code>V50N18FL</code>, on the other hand, 
-## the value being tested is either <0 (-37777<sub>8</sub>) or +0, and a test 
-## using <code>CCS</code> would require an extra word of memory.  That leaves us
-## with several possible alternative implementations:  We could continue to use
-## <code>CCS</code>, but could pad the output table (output >0) with <code>NOOP</code>
-## because it's unused.  Or, we could switch to using <code>BZF</code> in place
-## of <code>CCS</code>; unfortunately, <code>BZF</code> is an "extracode"
-## instruction, so it requires us to waste a word of memory by inserting an
-## <code>EXTEND</code> in front of it.  So in either case, we use an extra word
-## of memory.
-		CS	FLAGWRD3
-		MASK	V50N18FL	# 40000=NOT SET, 00000=SET
-		CCS	A
-		NOOP			# A>0; CANNOT HAPPEN!
-		TC	MANUEXIS	# A=+0; V50N18FL SET
-					# A<0; V50N18FL NOT SET
+## <b>Reconstruction:</b>  The first 5 lines of <code>STKTEST</code> have been replaced
+## by the following 3 lines (taken from Artemis 71), due to PCR 809.
+STKTEST		BON	EXIT
+			V50N18FL
+			MANUEXIT
 		CAF	BIT3
 		EXTEND			# STIKFLG IS SET
 		WOR	DSALMOUT	# TURN ON UPACTY LIGHT
