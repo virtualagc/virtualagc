@@ -348,6 +348,7 @@ DNTM2		EQUALS	35
 # UPDATFLG	023D		BIT 7 FLAG 1
 # UPLOCKFL	116D		BIT 4 FLAG 7
 # V37FLAG	114D		BIT 6 FLAG 7
+## <b>Reconstruction:</b>  The following line was added due to PCR 809.
 # V50N18FL	045D		BIT 15 FLAG 3
 # V59FLAG	078D		BIT 12 FLAG 5
 # V82EMFLG	137D		BIT 13 FLAG 9
@@ -649,6 +650,8 @@ FLAGWRD3	=	STATE +3	# (045-059)
 					# (SET)			(RESET)
 					
 # BIT 15 FLAG 3
+## <b>Reconstruction:</b>  The following two lines replace the simple `= 045D` that was 
+## present in Comanche 55, due to PCR 809.
 V50N18FL	=	045D		# ENABLE R60 ATT	INHIBIT R60 ATTITUDE
 V50N18BT	=	BIT15		#  MANEUVER		 MANEUVER
 		

@@ -626,7 +626,7 @@ VB64		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY, MAKE IT BUSY.
 ## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=500&view=FitV">
 ## flowchart FC-2370, sheet 18</a>, though unfortunately the flowchart is for 
 ## Colossus 2D rather than Colossus 2C, so it is not an absolute guarantee of 
-## applicability.
+## applicability.  The change was made in implementing PCR 809.
 ENATMA		TC	UPFLAG		# SET FLAG TO ENABLE R60 MANEUVER
 		ADRES	V50N18FL
 		TC	DOWNFLAG	# RESET STIKFLAG.

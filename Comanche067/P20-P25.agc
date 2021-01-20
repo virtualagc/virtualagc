@@ -98,6 +98,7 @@ PROG20		TC	BANKCALL
 		ADRES	UPDATFLG	# BIT 7 FLAG 1
 		TC	UPFLAG		# SET RNDVZFLG
 		ADRES	RNDVZFLG	# BIT 7 FLAG 0
+## <b>Reconstruction:</b>  The following two lines were added due to PCR 809.
 		TC	UPFLAG		# SET V50N18FL
 		ADRES	V50N18FL	# 
 		TC	2PHSCHNG
@@ -432,6 +433,10 @@ DE-GR-50	TC	2PHSCHNG
 		EBANK=	MRKBUF1
 R57		STQ	EXIT
 			EGRESS
+## <b>Reconstruction:</b>  The following line replaced Comanche 55's
+## <code>CAF EBANK7</code>/<code>TS EBANK</code>, due to the need to recover
+## some memory in implementing PCR 809.  However, PCR 809 does not itself
+## imply that this change is logically necessary.
 		TC	E7SETTER
 		CAF	SIX		# BIT2 = MARKING SYSTEM IN USE
 		MASK	EXTVBACT	# BIT3 = EXTENDED VERB IN PROGRESS
@@ -649,6 +654,10 @@ V0694		VN	0694
 		EBANK=	GENRET
 		COUNT*	$$/R61		# ROUTINES - NAVIGATION - PREF. TR. 9TT=
 	
+## <b>Reconstruction:</b>  The following line replaced Comanche 55's
+## <code>CAF EBANK6</code>/<code>TS EBANK</code>, due to the need to recover
+## some memory in implementing PCR 809.  However, PCR 809 does not itself
+## imply that this change is logically necessary.
 R61CSM		TC	E6SETTER
 		TS	SAVBNK		# SAVE EBANK
 		TC	MAKECADR
@@ -661,6 +670,7 @@ R61CSM		TC	E6SETTER
 		CALL
 			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
 		EXIT
+## <b>Reconstruction:</b>  The following two lines were added due to PCR 809.
 		TC	DOWNFLAG
 		ADRES	V50N18FL
 		INDEX	MPAC
