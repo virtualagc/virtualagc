@@ -941,7 +941,7 @@ NOFLASH		CAE	NVWORD1		# DISPLAY NVWORD1 NORMALLY
 		TC	BANKCALL
 		CADR	REGODSP
 
-#ifdef Reconstruction3
+#ifdef ReconstructionTB6
 ## <a name="12WORDS"></a>
 ## <b>Reconstruction:</b> The <code>E6SETTER</code> and <code>E7SETTER</code> functions were originally
 ## present in Comanche 55, but they need to be moved to memory bank 2, and to be slightly tweaked
@@ -1688,7 +1688,7 @@ SPBIT1			00D
 		BMN	EXIT
 			LOTHRUST
 
-#ifdef Reconstruction7			
+#ifdef Reconstruction833			
 ## <b>Reconstruction:</b>  The following 3 lines were imported from Artemis 71 as part
 ## of the fix for PCN 833.  See also the FREPSET code below.
 		BON	EXIT		# ENABLE TVCDAP CG TRACKING
@@ -1702,7 +1702,7 @@ SPBIT1			00D
 		CAF	BIT1
 		INDEX	A		# LM-OFF, LM-ON VALUE
 		CAE	EREPFRAC
-#ifdef Reconstruction7
+#ifdef Reconstruction833
 ## <b>Reconstruction:</b>  The following line of code existed in Comanche 55, but the
 ## symbolic label was added as part of the fix for PCN 833.  See also the FREPSET code below.
 REPFRACS	TS	REPFRAC
@@ -1764,7 +1764,7 @@ OMEGACLC	STORE	OMEGAC
 		GOTO
 			QTEMP
 
-#ifdef Reconstruction7
+#ifdef Reconstruction833
 ## <b>Reconstruction:</b>  The following 4 lines were imported from Artemis 71 as part
 ## of the fix for PCN 833.  See also the two annotations above.
 FREPSET		DLOAD	EXIT		# POST-SQITCHOVER CSM/LM.  LOAD FROM LOW-

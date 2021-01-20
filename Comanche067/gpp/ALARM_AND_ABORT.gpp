@@ -62,7 +62,7 @@ LARMENT		CA	Q		# STORE RETURN FOR ALARM
 
 CHKFAIL1	CCS	FAILREG		# IS ANYTHING IN FAILREG
 		TCF	CHKFAIL2	# YES TRY NEXT REG
-#ifdef Reconstruction6
+#ifdef Reconstruction802
 ## <b>Reconstruction:</b> This code, down to the matching "End" annotation, has been heavily changed
 ## from Comanche 55 due to PCR 802.1, Save Alarm Data after "Error Reset". The changes make FAILREG +2
 ## always contain the most recent program alarm, and a corresponding change in PINBALL prevents the
@@ -107,7 +107,7 @@ MULTEXIT	XCH	ITEMP1		# OBTAIN RETURN ADDRESS IN A
 		INDEX	A
 		TC	1
 
-#ifdef Reconstruction6
+#ifdef Reconstruction802
 ## <b>Reconstruction:</b> A chunk of code labeled "MULTFAIL" is defined here in Comanche 55. It has
 ## been removed as part of PCR 802.1.
 #else
@@ -213,7 +213,7 @@ CCSHOLE		INHINT
 		TS	ALMCADR
 		TC	BANKCALL
 		CADR	VAC5STOR
-#ifdef Reconstruction1
+#ifdef Reconstruction801
 ## <b>Reconstruction:<b>  The following line loaded "OCT1103" instead of "OCT21103" in Comanche 55.
 ## The change is due to PCR801.1.		
 		CA	OCT21103
@@ -221,7 +221,7 @@ CCSHOLE		INHINT
 		CA	OCT1103
 #endif
 		TC	ABORT2
-#ifdef Reconstruction1		
+#ifdef Reconstruction801		
 ## <b>Reconstruction:<b>  The following constant was <code>OCT1103 OCT 1103</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 OCT21103	OCT	21103

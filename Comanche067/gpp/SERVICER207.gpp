@@ -448,7 +448,7 @@ PIPLOOP		CCS	RUPTREG1
 		
 DVTOTUP		TC	INTPRET
 
-#ifdef Reconstruction9
+#ifdef Reconstruction787
 ## <b>Reconstruction:</b> In the implementation of PCR 787, we selectively 
 ## make changes in the baseline (Comanche 55) based on code from Artemis 71.
 ## The decision as to whether to do so or not is based on 
@@ -570,7 +570,7 @@ DVTHRUSH	EQUALS	ELEVEN		# 15 PERCENT OF 2SEC PIPA ACCUMULATION,
 
 JTAGTIME	DEC	120		# = 1 SEC + T CDU, T CDU = .1 SEC
 
-#ifdef Reconstruction9A
+#ifdef ReconstructionUNREF
 ## <b>Reconstruction:</b>  The following two constants were removed to conserve
 ## a word of memory in bank 37 that overflowed due to implementing PCR 787.
 ## 2.5SEC		DEC	250
@@ -812,7 +812,7 @@ CALCRVG		VLOAD	VXSC
 		STCALL	VN1		# TEMP STORAGE OF VN SCALED 2(+7) M/CS
 			31D
 
-#ifdef Reconstruction9A
+#ifdef ReconstructionUNREF
 ## <b>Reconstruction:</b>  The following constant was removed to conserve
 ## a word of memory in bank 37 that overflowed due to implementing PCR 787.
 ## KPIP		2DEC	.1024		# SCALES DELV TO 2(+4)

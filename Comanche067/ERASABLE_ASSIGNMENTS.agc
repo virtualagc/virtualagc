@@ -2071,6 +2071,7 @@ TRUNBIAS	ERASE			# B(1)PRM RESULT OF R57 CALIBR OF TRUNION
 ## <a href="http://www.ibiblio.org/apollo/Documents/padload_12_cm.pdf#page=3">
 ## the list of Comanche 67 erasable pad loads</a>.  Moreover, I find that those 
 ## variables are referenced nowhere else in the code.  Hence then have been removed here.
+## This is PCR 659.1.
 EPSILONT	ERASE	+1		# I(2)TMP
 
 ## Page 83

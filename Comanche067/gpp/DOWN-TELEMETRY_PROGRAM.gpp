@@ -149,7 +149,7 @@
 #	2. NEGONE INTO SUBLIST
 #	3. NEGONE INTO DNECADR
 
-#ifdef Reconstruction3
+#ifdef ReconstructionTB6
 ## <b>Reconstruction:</b> This code, down to the matching "End" annotation has been added to the baseline.
 ## It is related to the fact that 
 ## disassembly of the EMP <code>TB6JOB</code> from the Comanche 67 pad loads revealed the use of 12
@@ -175,7 +175,7 @@ DODOWNTM	TS	BANKRUPT
 		
 		COUNT	05/DPROG
 
-#ifdef Reconstruction3
+#ifdef ReconstructionTB6
 ## <b>Reconstruction:</b> See the annotations above. Here's where the original Comanche 55 code was:
 ## <pre>
 ## DODOWNTM        TS      BANKRUPT
@@ -368,7 +368,7 @@ SUBLIST		EQUALS 	DNQ
 #	BY THE FOLLOWING:
 #
 #	1.	A FRESH START
-#ifdef Reconstruction5
+#ifdef Reconstruction278
 ## <b>Reconstruction:</b> Comment 2 below referenced DUMPCNT in Comanche 55, which was deleted
 ## as part of PCR 278.
 #	2. COMPLETION OF BOTH COMPLETE DUMPS
@@ -385,7 +385,7 @@ SUBLIST		EQUALS 	DNQ
 # *SUBROUTINES CALLED- NONE.
 #
 # ERASABLE INITIALIZATION REQUIRED-
-#ifdef Reconstruction5
+#ifdef Reconstruction278
 ## <b>Reconstruction:</b> Comanche 55 details here the initialization required for DUMPCNT. Since this
 ## variable no longer exists in Comanche 67, it has instead been replaced with "NONE".
 #	NONE
@@ -446,7 +446,7 @@ DNDUMP		CA	TWO		# INCREMENT ECADR IN DUMPLOC
 		CCS	A		# IS THIS THE BEGINNING OF A NEW EBANK
 		TCF	DNDUMP2		# NO- THEN CONTINUE DUMPING
 		CA	DUMPLOC		# YES- IS THIS THE END OF THE
-#ifdef Reconstruction5
+#ifdef Reconstruction278
 ## <b>Reconstruction:</b> This code, down to the matching "End" annotation has been added to the baseline.
 ## It is an implementation of PCR 278, Fixed DUMPCNT, matching both Luminary 116 and Artemis 72.
 		MASK	BIT13		# SECOND COMPLETE ERASABLE DUMP?

@@ -63,7 +63,7 @@ P61		CA	BIT14		# EXTENDED VERB SHOULD BE FREE THIS CLOSE
 					
 		CA	V06N61		# LAT(SPL)	LNG(SPL)	HEADSUP
 					# XXX.XX DEG	XXX.XX DEG	XXXXX.
-#ifdef Reconstruction9
+#ifdef Reconstruction787
 ## <b>Reconstruction:</b>  Unless otherwise stated, all of the annotations here within the P61 
 ## program relate to implementation of PCR 787. At each point in P61 where the Comanche 55 
 ## baseline code for P61 differs from the Artemis 71 code for P61 (which includes the PCR 787
@@ -98,7 +98,7 @@ P61.4		ZL
 		NOOP			# IF HEADSUP NEG,ROLLC =0 (LIFT UP)
 		DXCH	ROLLC		# ROLLC IS USED BY S62.3: GIM ANG AT .05G
 
-#ifdef Reconstruction9
+#ifdef Reconstruction787
 ## <b>Reconstruction:</b> At this point, Artemis 71 inserts the 2 instructions 
 ## following this annotation. The corresponding operation appears in the flowchart.
 AGIN,MON	CA	BIT14		# LOCK OUT EXTENDED VERBS.(REDUNDANT ON
@@ -110,7 +110,7 @@ NEWRNVN		DLOAD
 			PIPTIME		# SAVE TIME OF RN,VN TO DETERMINE IF AN
 		STCALL	MM		# UPDATE HAS OCCURRED
 			STARTEN1	# INITIALIZE
-#ifdef Reconstruction9			
+#ifdef Reconstruction787			
 ## <b>Reconstruction:</b> At this point, Comanche 55 would have the two lines
 ## of code
 ## <pre>
@@ -147,7 +147,7 @@ P61.1		TC	CLEARMRK
 		CA	V06N60		# GMAX		VPRED		GAMMAEI
 					# XXX.XX G	XXXXX. FPS	XXX.XX DEG
 
-#ifdef Reconstruction9
+#ifdef Reconstruction787
 ## <b>Reconstruction:</b>  At this point, there is a fairly long block of differences
 ## between Comanche 55 and Artemis 71, but they can't all be handled the same way.
 ## This first annotation relates only the the following 5 instructions.  In the case
@@ -161,7 +161,7 @@ P61.1		TC	CLEARMRK
 		TC	P61.2		# PROCEED
 		TC	-5
 
-#ifdef Reconstruction9
+#ifdef Reconstruction787
 ## <b>Reconstruction:</b>  At this point, what we would have in Comanche 55 is the 
 ## <code>P61.2</code> code.  <code>P61.2</code> is a complete mismatch vs the flowchart,
 ## and is removed entirely.
@@ -409,7 +409,7 @@ P63.1		TC	PHASCHNG
 		
 V06N60		VN	0660
 V06N61		VN	0661
-#ifdef Reconstruction9
+#ifdef Reconstruction787
 ## <b>Reconstruction:</b> In Comanche 55, we would find
 ## <pre>
 ## V06N63	VN	0663
