@@ -264,6 +264,15 @@ FAZA1		CA	WIXB		# START FIRST PHASE OF INCORP2
 			ZI,2
 		DCOMP	NORM		# CALC UPPER 3X9 PARTITION OF W MATRIX
 			S2
+#ifdef ReconstructionFAZA2
+## <b>Reconstruction:</b>  All of the reconstructions in MEASUREMENT INCORPORATION
+## are experimental ways to save words of memory, by introducing a subroutine called
+## <code>FAZA2</code> in place of replicated inline blocks of code.  This is taken
+## directly from Artemis 71.
+		VXSC	CALL
+			OMEGAM1
+			FAZA2
+#else
 		VXSC	XCHX,2
 			OMEGAM1
 			S2
@@ -273,6 +282,7 @@ FAZA1		CA	WIXB		# START FIRST PHASE OF INCORP2
 		VSL*	XCHX,2
 			0,2
 			S2
+#endif
 		VAD*
 			W +54D,1
 		STORE	HOLDW
@@ -281,6 +291,15 @@ FAZA1		CA	WIXB		# START FIRST PHASE OF INCORP2
 		NORM	VXSC
 			S2
 			OMEGAM2
+#ifdef ReconstructionFAZA2
+## <b>Reconstruction:</b>  All of the reconstructions in MEASUREMENT INCORPORATION
+## are experimental ways to save words of memory, by introducing a subroutine called
+## <code>FAZA2</code> in place of replicated inline blocks of code.  This is taken
+## directly from Artemis 71.
+		CALL
+			FAZA2
+		VAD*
+#else
 		XCHX,2	LXC,2
 			S2
 			X2
@@ -289,6 +308,7 @@ FAZA1		CA	WIXB		# START FIRST PHASE OF INCORP2
 			0,2
 		XCHX,2	VAD*
 			S2
+#endif
 			W +108D,1
 		STORE	HOLDW +6
 		BOFF
@@ -300,6 +320,15 @@ FAZA1		CA	WIXB		# START FIRST PHASE OF INCORP2
 ## Page 1258
 			S2
 			OMEGAM3
+#ifdef ReconstructionFAZA2
+## <b>Reconstruction:</b>  All of the reconstructions in MEASUREMENT INCORPORATION
+## are experimental ways to save words of memory, by introducing a subroutine called
+## <code>FAZA2</code> in place of replicated inline blocks of code.  This is taken
+## directly from Artemis 71.
+		CALL
+			FAZA2
+		VAD*
+#else
 		XCHX,2	LXC,2
 			S2
 			X2
@@ -308,6 +337,7 @@ FAZA1		CA	WIXB		# START FIRST PHASE OF INCORP2
 			0,2
 		XCHX,2	VAD*
 			S2
+#endif
 			W +162D,1
 		STORE	HOLDW +12D
 FAZB		CALL
@@ -420,6 +450,20 @@ DOCSM1		RTB	CALL
 			SVDWN1		# STORE DOWNLINK STATE VECTOR
 		GOTO
 			FAZAB4
+#ifdef ReconstructionFAZA2
+## <b>Reconstruction:</b>  All of the reconstructions in MEASUREMENT INCORPORATION
+## are experimental ways to save words of memory, by introducing a subroutine called
+## <code>FAZA2</code> in place of replicated inline blocks of code.  This is taken
+## directly from Artemis 71.
+FAZA2		XCHX,2	LXC,2
+			S2
+			X2
+		XAD,2	VSL*
+			NORMGAM
+			0,2
+		XCHX,2	RVQ
+			S2
+#endif
 ZEROD		=	ZEROVECS
 54DD		DEC	54
 6DD		DEC	-6
