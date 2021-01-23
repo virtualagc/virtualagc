@@ -302,42 +302,6 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## Page 1516
-# MODULE CHANGE FOR NEW LUNAR GRAVITY MODEL
-		SETLOC	MODCHG3
-		BANK
-QUALITY1	BOF	DLOAD
-			MOONFLAG
-			NBRANCH
-			URPV
-		DSQ	GOTO
-			QUALITY2
-## `QUALITY2` has been _temporarily_ stashed in a different bank simply because there's room
-## for it there, but isn't room for it in bank 12 where it was originally. 
-## Undoubtedly we'll have to eventually move it elsewhere. 
-		BANK	16
-QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
-			URPV	+2	# Y COMPONENT, B1
-		DSU
-		DMP	VXSC		# 5(Y**2-X**2)UR
-			5/8		# CONSTANT, 5B3
-			URPV		# VECTOR, RESULT MAXIMUM IS 5, SCALING
-					# HERE B6
-		VSL3	PDDL		# STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ
-			URPV		# X COMPONENT, B1
-		SR1	DAD		# 2 X X COMPONENT FOR B3 SCALING
-			2D		# ADD TO VECTOR X COMPONENT OF ANSWER.
-					# SAME AS MULTIPLYING BY UNITX.  MAX IS 7.
-		STODL	2D
-			URPV	+2	# Y COMPONENT, B1
-		SR1	BDSU		# 2 X Y COMPONENT FOR B3 SCALING
-			4D		# SUBTRACT FROM VECTOR Y COMPONENT OF
-					# ANSWER, SAME AS MULTIPLYING BY UNITY.
-					# MAX IS 7.
-		STORE 	4D		# 2D HAS VECTOR, B3.
-		SLOAD	VXSC		# MULTIPLY COEFFIECIENT TIMES VECTOR IN 2D
-			E3J22R2M
-		PDDL	RVQ		# J22 TERM X R**4 IN 2D, SCALED B61
-			COSPHI/2	# SAME AS URPV +4, Z COMPONENT
 
 ## <b>Reconstruction:</b>  The <code>TIMEOPT</code> subroutine has been copied
 ## directly out of Artemis 71, due to PCR 799.  If you refer to the 
@@ -355,7 +319,7 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 ## <code>TIMEOPT</code>.  The former makes more sense.  I simply chose
 ## a bank that had enough space in it, but also had a relatively poor
 ## checksum diff compared to the few other available banks.
-		BANK	16
+		BANK	30
 		
 TIMEOPT		STORE	DSPTEMX
  +1		STQ	EXIT

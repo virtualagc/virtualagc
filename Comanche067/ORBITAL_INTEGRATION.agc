@@ -329,139 +329,151 @@ OBLATE		LXA,2	DLOAD
 		PDDL	CALL
 			3/5
 			R-TO-RP
-		STORE	URPV
-		VLOAD	VXV
-			504LM
+		STOVL	URPV		# RP/R	B-1	IN PLANETARY COORDINATES
 			ZUNIT
-		VAD	VXM
-			ZUNIT
-			MMATRIX
-		UNIT			# POSSIBLY UNNECESSARY
-COMTERM		STORE	UZ
-		DLOAD	DMPR
+		PUSH	CALL		# ZUNIT	B-1	IN PLANETARY COORDL	 AT 00D
+			MATRIX
+		PDVL			# UZ	B-2	IN INERT COORD		 AT 00D
+			XUNIT
+		PUSH	CALL		# XUNIT	B-1	IN PLANETARY COORD.	 AT 06D
+			MATRIX
+		VSL1
+		STOVL	32D		# UX	B-1	IN INERT. COORD		 AT 32D
+		VSL1
+COMTERM		STODL	UZ		# UZ	B-1	IN INERTIAL COORD	 AT 20D
+			COSPHI/2	#  '		Z-COMPONENT OF URPV
+		DMPR	PDDL		# P	B-6	 ,  3COSPHI/64		 AT 00D
+			3/32		#  2
 			COSPHI/2
-			3/32
-		PDDL	DSQ		# P2/64 TO PD0
+		DSQ	DMPR	
+			15/16		#  '                            2
+		DSU	PUSH		# P	B-5	 ,(1/2)(15COSPHI -3)	 AT 02D
+			3/64		#  3
+		DMPR	DMP
 			COSPHI/2
-		DMPR	DSU
-			15/16
-			3/64
-		PUSH	DMPR		# P3/32 TO PD2
-			COSPHI/2
-		DMP	SL1R
 			7/12
-		PDDL	DMPR
-			0
-			2/3
-		BDSU	PUSH		# P4/128 TO PD4
-		DMPR	DMPR
-			COSPHI/2	# BEGIN COMPUTING P5/1024
+		SL1R	PDDL
+			0D
+		DMPR	BDSU
+			2/3		#  '				 '    '
+		PUSH	DMPR		# P	B-7	 ,(1/3)(7COSPHI P  -4P ) AT 04D
+			COSPHI/2	#  4				 3    2
+		DMPR	PDDL
 			9/16
-		PDDL	DMPR
-			2
-			5/128
-## Page 1342
-		BDSU
-		DMP*
-			J4REQ/J3,2
-		DDV	DAD		#              -3
-			ALPHAM		# (((P5/256)B 2  /R+P4/32)  /R+P3/8)ALPHAV
-			4		#            4             3
-		DMPR*	DDV
-			2J3RE/J2,2
-			ALPHAM
-		DAD	VXSC
-			2
-			ALPHAV
-		STODL	TVEC
-		DMP*	SR1
-			J4REQ/J3,2
-		DDV	DAD
-			ALPHAM		#		 -3
-		DMPR*	SR3	           
-			2J3RE/J2,2	#  3	       4
-		DDV	DAD	
-			ALPHAM
-		VXSC	VSL1	      
-			UZ	
-		BVSU		
-			TVEC	        
-		STODL	TVEC	
-			ALPHAM	
-		NORM	DSQ	
-			X1	
+## Page 1341
+			2D		#  '				 '    '
+		DMPR	BDSU		# P	B-10	 ,(1/4)(9COSPHI P  -5P )
+			5/128		#  5				 4    3
+		DMP*	DDV		#			     '
+			J4REQ/J3,2	#	B-	 ,(J RP/J R)P
+			ALPHAM		# 		    4    3   5
+		DAD	DMPR*
+			4D		# 		        2     2  '              '
+			2J3RE/J2,2	# 	B	 ,(2J RP /J2 R )P  +(2J RP/J2R)P
+		DDV	DAD		# 		     4           5     3        4
+			ALPHAM		#  -        2 '  2         '        '
+			2D		# (R/R)(J RP P /R + 2J RP P /  + J P )
+		VXSC			#        4    5       3    4  2   2 3
+			ALPHAV		#                   4       2  '           -
+		STODL	TVEC		# 	B-6	, (SUM((J /R )P   (COSPHI))UR)
+		DMP*	SR1		#                  I=2   I     I+1
+			J4REQ/J3,2	#                          '
+		DDV	DAD		# 		(J RP/J R)P
+			ALPHAM		# 		  4    3   4
+		DMPR*	SR3		# 	      2    2  '              '
+			2J3RE/J2,2	# 	(2J RP /J R )P  +(2J RP/J R)P
+		DDV	DAD		# 	   4     2    4     3    2   3
+			ALPHAM		# 
+		VXSC	VSL1		# 		 4   '        -
+			UZ		# 	B-6	SUM(P(COSPHI))UZ
+		BVSU			#		I=2  I
+			TVEC	        #  4              I-2   '          -
+		STODL	TVEC		# SUM((MU J (RP/R)   )(P   (COSPHI)UR -
+			ALPHAM		# I=2      I            I+2
+		NORM	DSQ		#             P (COSPHI)UZ))	B-6 	AT 20D
+			X1		#              I
 		DSQ	NORM
-			S1		#         4
-		PUSH	BDDV*		# NORMED R  TO 0D
+			S1		#             4
+		PUSH	BDDV*		# NORMALIZED R				AT 00D
 			J2REQSQ,2
 		VXSC	BOV
 			TVEC
-			+1		# (RESET OVERFLOW INDICATOR)
+			+1		# B+38 FOR EARTH, B+42 FOR MOON
 		XAD,1	XAD,1
 			X1
 			X1
 		XAD,1	VSL*
 			S1
-			0	-22D,1
+			0 -22D,1
 		VAD	BOV
 			FV
 			GOBAQUE
-		STCALL	FV
-			QUALITY1
-QUALITY3	DSQ			# J22 TERM X R**4 IN 2D,  SCALED B61
-					# AS VECTOR.
-		PUSH	DMP		# STORE COSPHI**2 SCALED B2 IN 8D
-## Page 1343		
-			5/8		# 5 SCALED B3
-		PDDL	SR2		# PUT 5 COSPHI**2, D5, IN 8D. GET
-					# COSPHI**2 D2 FROM 8D
-		DAD	BDSU		# END UP WITH (1-7 COSPHI**2), B5
-			8D		# ADDING COSPHI**2 B4 SAME AS COSPHI**2
-					# X 2 D5
-			D1/32		# 1 SCALED B5
-		DMP	DMP
-			URPV		# X COMPONENT
-			5/8		# 5 SCALED B3
-		VXSC	VSL5		# AFTER SHIFT, SCALED B5
-			URPV		# VECTOR, B1.
-		PDDL			# VECTOR INTO 8D, 10D, 12D, SCALED B5.
-					# GET 5 COSPHI**2 OUT OF 8D
-		DSU	DAD
-			D1/32		# 1 B5
-			8D		# X COMPONENT (SAME AS MULTIPLYING
-					# BY UNITX)
-		STODL	8D
-			URPV		# X COMPONENT
-		DMP	DMP
-			URPV	+4	# Z COMPONENT
-			5/8		# 5 B3 ANSWER B5
-		SL1	DAD		# FROM 12D FOR Z COMPONENT (SL1 GIVES 10
-					# INSTEAD OF 5 FOR COEFFICIENT)
-		PDDL	NORM		# BACK INTO 12D FOR Z COMPONENT.
-			ALPHAM		# SCALED B27 FOR MOON
-			X2
-		PUSH	SLOAD		# STORE IN 14D, DESTROYING URPV
-					# X COMPONENT
+		STODL	FV		# B+16 FOR EARTH, B+20 FOR MOON
+			URPV		# B-1  X-COMPONENT OF POSITION  IN
+		BOF	PUSH		# 	    PLANETORY COORD.	  AT 02D
+## Page 1342
+			MOONFLAG
+			NBRANCH		# 	 2
+		DSQ	PDDL		# B-2	X				AT 04D
+			URPV +2		# B-1	Y-COMPONENT
+		DSQ	DSU
+		DMP	VXSC
+			5/8		# 	   2  2 -
+			ALPHAV		# B-6	5(Y -X )UR	   2  2 -
+		VSL3	PDDL		# B-3			5(Y -X )UR	AT 02D
+		VXSC	VAD
+			32D		#     2  2 -   2         -
+		PDVL	VXV		# (5(Y.-X )UR/R ) +(2X/R)UX		AT 02D
+			32D		# B-1	 UX
+			UZ		# B-2	-UY =(UX * UZ)
+		VSL1	VXSC		# B-3	 -(2Y/R)UY
+			URPV +2		# 	    2  2 -   2        -
+		VAD	PUSH		# B-3	(5(X -Y )UR/R )+(2X/R)UX -(
+		DLOAD			# 	     -
+			COSPHI/2	# 	2Y/R)UY				AT 02D
+		DSQ	PUSH		# B-2	(Z.COMPONENT)			AT 08D
+		DMP	PDDL		# 		2
+			5/8		# B-5	5COSPHI/2			AT 08D
+		SR2	DAD
+			08D
+		BDSU	DMP		# 	            2
+			D1/32		# B-5	(1 - 7COSPHI )
+			URPV
+		DMP	VXSC
+			5/8
+			ALPHAV		# 	                2 -
+		VSL5	PDDL		# B-5	(5X/R)(1-7COSPHI )UR		AT 08D
+		DSU	VXSC
+			D1/32
+			32D
+		VSL1	VAD		# 	                2 -           -
+		PDDL	DMP		# B-5	(5X/R)(1-7COSPHI )UR +(5COSPHI
+			URPV		#    -
+			URPV +4		# -1)UX					AT 08D
+		DMP	VXSC
+			5/8		# B-5	5X Y
+			UZ		# 	  M M
+		VSL2	VAD		# 	                2             2
+		PDDL	NORM		# B-5	(5X/R)(1-7COSPHI )UR +(5COSPHI
+			ALPHAM		#    -          2 -
+			X2		# -1)UX +(10XZ/R )UZ			AT 08D
+		PUSH	SLOAD
 			E32C31RM
-		DDV	VXSC		# IF X2 = 0, DIVISION GIVES B53, VXSC
-					# OUT OF 8D B5 GIVES B58
-		VSL*	VAD		# SHIFT MAKES B61, FOR ADDITION OF
-					# VECTOR IN 2D
-			0	-3,2
-		VSL*	V/SC		# OPERAND FROM 0D, B108 FOR X1 = 0
-			0	-27D,1	# FOR X1 = 0, MAKES B88, GIVING B-20
-					# FOR RESULT.
-		PDDL	PDDL
-			TET
-			5/8		# ANY NON-ZERO CONSTANT
-		LXA,2	CALL		# POSITION IN 0D, TIME IN 6D. X2 LEFT
-					# ALONE.
-			PBODY
-			RP-TO-R
-		VAD	BOV		# OVERFLOW INDICATOR RESET IN "RP-TO-R"
+		DDV	VXSC
+		VSL*	PDVL
+			0 -3,2
+## Page 1343
+		PUSH	SLOAD
+			E3J22R2M
+		VXSC	VAD
+		VSL*	V/SC
+			0 -27D,1	# B+16 OR B+20 (J   + C  )
+		VAD	BOV		#                22    31
 			FV
 			GOBAQUE
 		STORE	FV
+		LXA,2
+			PBODY
 ## Page 1344
 NBRANCH		SLOAD	LXA,1
 			DIFEQCNT
@@ -476,6 +488,13 @@ COSPHIE		DLOAD
 			ZUNIT
 		GOTO
 			COMTERM
+			
+MATRIX		VXV	VCOMP
+			504LM		# ROUTINE TRANSLATES FROM PLANETARY
+		VAD			# TO INERTIAL COORDINATES
+		VXM	RVQ
+			MMATRIX
+			
 DIFEQTAB	CADR	DIFEQ+0
 		CADR	DIFEQ+1
 		CADR	DIFEQ+2

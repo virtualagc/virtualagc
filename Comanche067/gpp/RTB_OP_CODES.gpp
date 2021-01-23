@@ -302,6 +302,7 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## Page 1516
+#ifndef Reconstruction772
 # MODULE CHANGE FOR NEW LUNAR GRAVITY MODEL
 		SETLOC	MODCHG3
 		BANK
@@ -315,11 +316,7 @@ QUALITY1	BOF	DLOAD
 ## `QUALITY2` has been _temporarily_ stashed in a different bank simply because there's room
 ## for it there, but isn't room for it in bank 12 where it was originally. 
 ## Undoubtedly we'll have to eventually move it elsewhere. 
-#ifdef Reconstruction772_776
 		BANK	17
-#else
-		BANK	16
-#endif
 #else			
 		SETLOC	MODCHG2
 		BANK
@@ -347,6 +344,7 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 			E3J22R2M
 		PDDL	RVQ		# J22 TERM X R**4 IN 2D, SCALED B61
 			COSPHI/2	# SAME AS URPV +4, Z COMPONENT
+#endif
 
 #ifdef Reconstruction799
 ## <b>Reconstruction:</b>  The <code>TIMEOPT</code> subroutine has been copied
@@ -365,7 +363,7 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 ## <code>TIMEOPT</code>.  The former makes more sense.  I simply chose
 ## a bank that had enough space in it, but also had a relatively poor
 ## checksum diff compared to the few other available banks.
-		BANK	16
+		BANK	30
 		
 TIMEOPT		STORE	DSPTEMX
  +1		STQ	EXIT
