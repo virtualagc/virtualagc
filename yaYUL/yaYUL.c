@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2009-2010,2016-2018 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2005,2009-2010,2016-2018,2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -106,6 +106,7 @@
  *                            	builds with "--hardware --parity" was giving hardware-
  *                            	incompatible binaries).
  *             	2018-10-12 RSB  Added stuff associated with --simulation.
+ *             	2021-01-24 RSB  Added --reconstruction.
  */
 
 #include "yaYUL.h"
@@ -219,6 +220,8 @@ main(int argc, char *argv[])
     {
       if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "/?"))
         goto Done;
+      else if (!strcmp(argv[i], "--reconstruction"))
+        reconstructionComments = 1;
       else if (1 == sscanf(argv[i], "--debug=%d", &j))
 	debugLevel = j;
       else if (1 == sscanf(argv[i], "--max-passes=%d", &j))
@@ -656,6 +659,10 @@ main(int argc, char *argv[])
       printf("                 is the initial card-sequence number.  L (a string) is the\n");
       printf("                 name of the log section to use as a P-card.\n");
       printf("--simulation     Reacts to the string -SIMULATION and +SIMULATION in comments.\n");
+      printf("--reconstruction Normally, most ##-style comments are removed from output lst\n");
+      printf("                 files.  With --reconstruction, blocks of ##-style comments\n");
+      printf("                 starting with a line containing the 'Reconstruction:' are\n");
+      printf("                 are instead displayed in lst files, in a special format.\n");
     }
   if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);

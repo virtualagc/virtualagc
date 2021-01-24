@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2005,2009-2010,2016-2018 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2005,2009-2010,2016-2018,2021 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -71,6 +71,7 @@
  *                               superbank data storage.
  *             	  2017-08-31 RSB Added stuff associated with --debug.
  *             	  2018-10-12 RSB Added stuff associated with --simulation.
+ *                2021-01-24 RSB reconstructionComments.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -599,6 +600,9 @@ extern int debugPass;
 extern int debugLine;
 extern char *debugLineString;
 void debugPrint(char *msg);
+
+extern int reconstructionComments;
+extern int inReconstructionComment;
 
 #endif // INCLUDED_YAYUL_H
 

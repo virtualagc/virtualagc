@@ -329,6 +329,8 @@ HtmlClose(void)
 
 static int StyleInitialized = 0;
 int StyleOnly = 0;
+int inReconstructionComment = 0;
+int reconstructionComments = 0;
 
 int
 HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
@@ -502,6 +504,8 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
     {
       //if (WriteOutput)
       //  printf("HERE\n");
+      if (WriteOutput && inReconstructionComment && reconstructionComments)
+        printf ("%s", s);
       // Set proper style and output the line.
       if (WriteOutput && Html && HtmlOut != NULL)
         {
@@ -523,6 +527,8 @@ HtmlCheck(int WriteOutput, FILE *InputFile, char *s, int sSize,
           (*CurrentLineInFile)++;
           if (strncmp(s, "## ", 3) && strncmp(s, "##\t", 3))
             break;
+          if (WriteOutput && inReconstructionComment && reconstructionComments)
+            printf ("%s", s);
           if (WriteOutput && Html && HtmlOut != NULL)
             fprintf(HtmlOut, "%s", &s[3]);
         }
