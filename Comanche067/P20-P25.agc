@@ -23,7 +23,7 @@
 ##				recover enough words.  Secondly, because I found 
 ##				changes elsewhere that would recover enough
 ##				words.  Look for Reconstruction 9A.
-##		2021-01-11 RSB	Incorporated PCR 809.
+##		2021-01-11 RSB	Incorporated PCR 785.
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -73,6 +73,8 @@
 #	RNDVZFLG,VEHUPFLG,UPDATFLG,TRACKFLG,TARG1FLG
 #	HOLDFLAG,WBODY,WBODY1,WBODY2,DELCDUX,DELCDUY,DELCDUZ
 #	STIKFLAG,PRFTRKAT,VINTFLAG,DIM0FLAG,R60FLAG,R61CNTR
+## <b>Reconstruction:</b>  The following comment line was added per PCR 785.
+#	V50N18FL
 
 		BANK	33
 		SETLOC	P20S
@@ -98,7 +100,7 @@ PROG20		TC	BANKCALL
 		ADRES	UPDATFLG	# BIT 7 FLAG 1
 		TC	UPFLAG		# SET RNDVZFLG
 		ADRES	RNDVZFLG	# BIT 7 FLAG 0
-## <b>Reconstruction:</b>  The following two lines were added due to PCR 809.
+## <b>Reconstruction:</b>  The following two lines were added due to PCR 785.
 		TC	UPFLAG		# SET V50N18FL
 		ADRES	V50N18FL	# 
 		TC	2PHSCHNG
@@ -435,7 +437,7 @@ R57		STQ	EXIT
 			EGRESS
 ## <b>Reconstruction:</b>  The following line replaced Comanche 55's
 ## <code>CAF EBANK7</code>/<code>TS EBANK</code>, due to the need to recover
-## some memory in implementing PCR 809.  However, PCR 809 does not itself
+## some memory in implementing PCR 785.  However, PCR 785 does not itself
 ## imply that this change is logically necessary.
 		TC	E7SETTER
 		CAF	SIX		# BIT2 = MARKING SYSTEM IN USE
@@ -656,7 +658,7 @@ V0694		VN	0694
 	
 ## <b>Reconstruction:</b>  The following line replaced Comanche 55's
 ## <code>CAF EBANK6</code>/<code>TS EBANK</code>, due to the need to recover
-## some memory in implementing PCR 809.  However, PCR 809 does not itself
+## some memory in implementing PCR 785.  However, PCR 785 does not itself
 ## imply that this change is logically necessary.
 R61CSM		TC	E6SETTER
 		TS	SAVBNK		# SAVE EBANK
@@ -667,7 +669,7 @@ R61CSM		TC	E6SETTER
 		TC	+2		# DO R61
 		TC	DECRM61 +1
 		TC	INTPRET
-## <b>Reconstruction:</b>  Per Colossus 2C flowchart FC-2550, due to PCR 809,
+## <b>Reconstruction:</b>  Per Colossus 2C flowchart FC-2550, due to PCR 785,
 ## new instructions to clear the flag <code>V50N18FL</code> must be added to 
 ## Colossus 67 after the pre-existing code to call <code>CRS61.1</code> is 
 ## executed.  I see two ways of doing that, and cannot resolve which is the 
@@ -1591,7 +1593,7 @@ CDULOOP		TS	DTHETASM
 		TC	CDULOOP		# NO - DIM COUNT, CHECK NEXT ANGLE DIFF.
 		TC	AUTOCK
 ## <b>Reconstruction:</b>  The first 5 lines of <code>STKTEST</code> have been replaced
-## by the following 3 lines (taken from Artemis 71), due to PCR 809.
+## by the following 3 lines (taken from Artemis 71), due to PCR 785.
 STKTEST		BON	EXIT
 			V50N18FL
 			MANUEXIT

@@ -110,7 +110,7 @@ NEWRNVN		DLOAD
 			PIPTIME		# SAVE TIME OF RN,VN TO DETERMINE IF AN
 		STCALL	MM		# UPDATE HAS OCCURRED
 			STARTEN1	# INITIALIZE
-#ifdef Reconstruction787			
+#ifdef Reconstruction787 			
 ## <b>Reconstruction:</b> At this point, Comanche 55 would have the two lines
 ## of code
 ## <pre>
@@ -843,10 +843,23 @@ CALLCON		CALL
 		DAD	CALL
 			EMSALT
 			CALCTFF		# SAVES MPAC IN RTERM		(18D)
-			
+
+#ifdef Reconstruction787
+## <b>Reconstruction:</b>  The following 6 instructions (update of <code>TTE1</code>
+## and <code>TTE2</code> replace 2 instructions (update of <code>TTE1</code> only),
+## per PCR 787.
+		STORE	TTE1		# USED IN TARGET ITERATION (DISPTARG)
+		DAD	DCOMP		# DECR 'TTE' FROM BASE 'TTE2' IN 'SERVICER
+			MM		# 'PIPTIME' FOR STATE VECTOR
+					# DNLIST AND DSKY WILL USE TTE.
+		STORE	TTE2		# TTE=PIPTIME+TTE2=-(TTE1+MM-PIPTIME)
+		DAD			# DECREMENT 'TTE' FOR DISPLAY AND DOWNLINK
+			PIPTIME		# UNTIL SERVICER COMES ALONG.
+#else		
 		DCOMP			# NEGATIVE AS IN COUNTDOWN.
 		STORE	TTE1		# DECR TTE FROM BASE TTE1.  (RESTART)
 					# DNLIST AND DSKY WILL USE TTE.
+#endif
 		STCALL	TTE		# LET MISS CONTRL DECR BY ELAPSED TIME
 					# TTE= TIME FROM NOW TO EMSALT +FISCHER
 					

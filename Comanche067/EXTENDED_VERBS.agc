@@ -18,7 +18,7 @@
 ##              2020-12-29 MAS	Implemented PCR 832.1.
 ##		2020-12-29 RSB	Put a placeholder annotation on a potential
 ##				Reconstruction 3A that I had missed before.
-##		2021-01-11 RSB	Incorporated PCR 809.
+##		2021-01-11 RSB	Incorporated PCR 785.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -606,7 +606,6 @@ OCTAL30		OCT	30
 ## <b>Reconstruction:</b> Comanche 55 begins VB64 with "TC CHKPOOH". It has been removed
 ## per PCR 832.1, Remove restriction of running R05 only in P00.
 VB64		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY, MAKE IT BUSY.
-		INHINT
 		CAF	PRIO4
 		TC	FINDVAC
 		EBANK=	RHOSB
@@ -620,17 +619,16 @@ VB64		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY, MAKE IT BUSY.
 # VERB58 RESETS STIKFLAG TO ENABLE R61 TO PERFORM AUTOMATIC TRACKING MANEUVERS, AFTER INTERUPTIONS BY RHC ACT-
 # IVITY.
 
-## <b>Reconstruction:</b>  In Comanche 55, what appears at <code>ENATMA</code>
-## begins <code>ENATMA TC DOWNFLAG</code> / <code>ADRES STIKFLAG</code> / <code>...</code>.
-## It has been expanded slightly in Comanche 67 due to 
+ENATMA		TC	DOWNFLAG	# RESET STIKFLAG.
+		ADRES	STIKFLAG	# BIT 14 FLAG 1
+## <b>Reconstruction:</b>  The following two lines were added to `ENATMA`
+## per PCR 785 and  
 ## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=500&view=FitV">
 ## flowchart FC-2370, sheet 18</a>, though unfortunately the flowchart is for 
 ## Colossus 2D rather than Colossus 2C, so it is not an absolute guarantee of 
-## applicability.  The change was made in implementing PCR 809.
-ENATMA		TC	UPFLAG		# SET FLAG TO ENABLE R60 MANEUVER
+## applicability.
+		TC	UPFLAG		# SET FLAG TO ENABLE R60 MANEUVER
 		ADRES	V50N18FL
-		TC	DOWNFLAG	# RESET STIKFLAG.
-		ADRES	STIKFLAG	# BIT 14 FLAG 1
 		TC	GOPIN
 		
 ## Page 251

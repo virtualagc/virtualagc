@@ -17,7 +17,7 @@
 ##				Removed XMODULO and TMODULO to correct
 ##				pad-load addresses.
 ##		2020-12-29 RSB	Added experimental PCR 787 fix.
-##		2021-01-11 RSB	Incorporated PCR 809.
+##		2021-01-11 RSB	Incorporated PCR 785.
 
 ## Page 37
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -348,7 +348,7 @@ DNTM2		EQUALS	35
 # UPDATFLG	023D		BIT 7 FLAG 1
 # UPLOCKFL	116D		BIT 4 FLAG 7
 # V37FLAG	114D		BIT 6 FLAG 7
-## <b>Reconstruction:</b>  The following line was added due to PCR 809.
+## <b>Reconstruction:</b>  The following line was added due to PCR 785.
 # V50N18FL	045D		BIT 15 FLAG 3
 # V59FLAG	078D		BIT 12 FLAG 5
 # V82EMFLG	137D		BIT 13 FLAG 9
@@ -651,7 +651,7 @@ FLAGWRD3	=	STATE +3	# (045-059)
 					
 # BIT 15 FLAG 3
 ## <b>Reconstruction:</b>  The following two lines replace the simple `= 045D` that was 
-## present in Comanche 55, due to PCR 809.
+## present in Comanche 55, due to PCR 785.
 V50N18FL	=	045D		# ENABLE R60 ATT	INHIBIT R60 ATTITUDE
 V50N18BT	=	BIT15		#  MANEUVER		 MANEUVER
 		
@@ -3377,7 +3377,8 @@ MARK2DWN	EQUALS	R53EXIT	+1	#  (7) USED BY ALLIGNMENT P50S
 ## Page 118
 # *-*-*-*- OVERLAY 1 IN EBANK 7 -*-*-*-*
 
-# REENTRY ERASABLES			(206D)
+## <b>Reconstruction:</b>  The following comment changed per PCR 787 (due to adding
+## <code>TTE2</code> below).
 RTINIT		EQUALS	END-SVCR	# 6P
 RTEAST		EQUALS	RTINIT	+6	# 6P
 RTNORM		EQUALS	RTEAST	+6	# 6P
@@ -3487,7 +3488,8 @@ VGDISP		EQUALS	GAMMAEI	+2	# B(2)DSP N.40,42,99 FOR P30,34,35,37,40,
 					#	    41 VG DISPLAY
 
 # SOME P11 DISPLAY REGISTERS.		(6D)
-ALTI		EQUALS	TTE1	+2	# 2P DSP NOUN 62 FOR P11.
+## <b>Reconstruction:</b> The following line is changed per PCR 787.
+ALTI		EQUALS	TTE2	+2	# 2P DSP NOUN 62 FOR P11.
 HDOT		EQUALS	ALTI	+2	# 2P DSP NOUN 62 FOR P11.
 
 ## Page 121

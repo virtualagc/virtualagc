@@ -872,7 +872,7 @@ AGAINMM		TS	MPAC +1
 		CA	MPAC +1
 		TS	MINDEX			# SAVE INDEX FOR LATER
 
-## <b>Reconstruction:</b>  This annotation relates to PCR 809.  At this point,
+## <b>Reconstruction:</b>  This annotation relates to PCR 785.  At this point,
 ## Artemis 71 has the following two lines,
 ## <pre>
 ##              TC      UPFLAG
