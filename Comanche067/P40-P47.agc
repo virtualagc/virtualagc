@@ -1673,11 +1673,11 @@ SPBIT1			00D
 			DVTHRESH	# SC.AT B-2 M/CS
 			DPB-9
 		BDSU
-		BMN	EXIT
-			LOTHRUST
 
 ## <b>Reconstruction:</b>  The following 3 lines were imported from Artemis 71 as part
 ## of the fix for PCN 833.  See also the FREPSET code below.
+		BMN
+			LOTHRUST
 		BON	EXIT		# ENABLE TVCDAP CG TRACKING
 			SWTOVER
 			FREPSET		# V46 SWITCHOVER HAS OCCURRED (CSM/LM)
