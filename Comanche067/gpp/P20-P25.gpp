@@ -1620,12 +1620,37 @@ CDULOOP		TS	DTHETASM
 		CCS	DTHETASM	# HAVE ALL 3 ANGLE DIFFS BEEN CHECKED.
 		TC	CDULOOP		# NO - DIM COUNT, CHECK NEXT ANGLE DIFF.
 		TC	AUTOCK
-#ifdef Reconstruction785
+#if defined(Reconstruction785A)
 ## <b>Reconstruction:</b>  The first 5 lines of <code>STKTEST</code> have been replaced
 ## by the following 3 lines (taken from Artemis 71), due to PCR 785.
 STKTEST		BON	EXIT
 			V50N18FL
 			MANUEXIT
+#elif defined(Reconstruction785B)
+## <b>Reconstruction:</b>  The first 5 lines of <code>STKTEST</code> have been replaced
+## by the following 6 lines, due to PCR 785.  Notice that <code>FLAGWRD3</code> is 
+## loaded into the accumulator with <code>CS</code>, so that it is bitwise inverted.
+## Thus the <code>V50N18FL</code> bit in it is 0 when the bit is set or 1 when the
+## bit is clear, thus after masking the value in the accumulator is either 00000=+0 (flag set)
+## or 40000=-37777 (bit clear).  So only the 2nd and 3rd branches from the <code>CCS</code>
+## are possible.
+STKTEST		EXIT
+		CS	FLAGWRD3
+		MASK	V50N18FL
+		CCS	A
+		NOOP
+		TC	MANUEXIS	# V50N18FL IS SET (DO R63)
+#elif defined(Reconstruction785)
+## <b>Reconstruction:</b>  The first 5 lines of <code>STKTEST</code> have been replaced
+## by the following 5 lines, due to PCR 785.  Notice that <code>FLAGWRD3</code> is 
+## loaded into the accumulator with <code>CS</code>, so that it is bitwise inverted.
+## Thus the <code>V50N18FL</code> bit in it is 0 when the bit is set or 1 when the
+## bit is clear.
+STKTEST		EXIT
+		CS	FLAGWRD3
+		MASK	V50N18FL
+		EXTEND
+		BZF	MANUEXIS	# BRANCH IF V50N18FL IS SET (DO R63)
 #else		
 STKTEST		EXIT
 		CS	FLAGWRD1

@@ -1593,10 +1593,15 @@ CDULOOP		TS	DTHETASM
 		TC	CDULOOP		# NO - DIM COUNT, CHECK NEXT ANGLE DIFF.
 		TC	AUTOCK
 ## <b>Reconstruction:</b>  The first 5 lines of <code>STKTEST</code> have been replaced
-## by the following 3 lines (taken from Artemis 71), due to PCR 785.
-STKTEST		BON	EXIT
-			V50N18FL
-			MANUEXIT
+## by the following 5 lines, due to PCR 785.  Notice that <code>FLAGWRD3</code> is 
+## loaded into the accumulator with <code>CS</code>, so that it is bitwise inverted.
+## Thus the <code>V50N18FL</code> bit in it is 0 when the bit is set or 1 when the
+## bit is clear.
+STKTEST		EXIT
+		CS	FLAGWRD3
+		MASK	V50N18FL
+		EXTEND
+		BZF	MANUEXIS	# BRANCH IF V50N18FL IS SET (DO R63)
 		CAF	BIT3
 		EXTEND			# STIKFLG IS SET
 		WOR	DSALMOUT	# TURN ON UPACTY LIGHT
