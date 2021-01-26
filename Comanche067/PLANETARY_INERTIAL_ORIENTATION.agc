@@ -373,15 +373,15 @@ SOB		=	34D		# 2		SIN(B) B-1
 ## WEARTH          2DEC    .973561595         # REVS/CSEC B+23= 7.29211494 E-5  RAD/SEC
 ## </pre>
 ## These values have all been replaced in reconstructing Comanche 67.  The changes are due to Program Change Request
-## (PCR) 738.1, "Fix Constants for Planetary Intertial Orientation Subroutine".  Unfortunately,
+## (PCR) 738.1, "Fix Constants for Planetary Inertial Orientation Subroutine".  Unfortunately,
 ## we do not have the full text of this PCR, but the relevant information is contained in
 ## <a href="http://www.ibiblio.org/apollo/Documents/Colossus%202%28A%29%20Software%20Changes.pdf#page=20&view=FitV">
 ## MIT Software Anomaly Report COM-11, "Errors in COLOSSUS 2A fixed constants, viz &omega;<sub>E</sub>,
 ## ..."</a>.  The numerical values below superficially differ somewhat from the desired
 ## values quoted in the report, because different units are used for some of them: e.g., revolutions/centisecond
-## (<code>WEARTH</code>) vs radians/second (&omega;<sub>E</sub>).  Fortunately, Luminary 116 (Apollo 12
+## (<code>WEARTH</code>) vs radians/second (&omega;<sub>E</sub>).  Luckily, Luminary 116 (Apollo 12
 ## LM) has the corrected values, in the proper units, with the same symbolic names
-## &mdash; which is very fortunate, since some of the values in the Software Anomaly Report
+## &mdash; which is very fortunate indeed, since some of the values in the Software Anomaly Report
 ## are illegible, as for example the value of F<sub>0</sub> (<code>FSUB0</code>), which the report quotes as
 ## "F<sub>0</sub> = 5.209<u>&nbsp;&nbsp;&nbsp;</u>056 RAD".  It is only because we have Luminary that we can deduce
 ## that the report meant "5.209<u>327</u>056".  At any rate, the block of assignments below was simply copied from 

@@ -414,11 +414,7 @@ EBQPLACE	ECADR	QPLACES
 
 		BANK	37
 		EBANK=	RN1
-## <b>Reconstruction:</b>  The following constant was removed to conserve
-## a word of memory in bank 37 that overflowed due to implementing PCR TBD.
-## <pre>
-## EBRN1		ECADR	RN1
-## </pre>
+EBRN1		ECADR	RN1
 
 #****************************************************************************************************************
 

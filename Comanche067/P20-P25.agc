@@ -672,28 +672,7 @@ R61CSM		TC	E6SETTER
 ## <b>Reconstruction:</b>  Per Colossus 2C flowchart FC-2550, due to PCR 785,
 ## new instructions to clear the flag <code>V50N18FL</code> must be added to 
 ## Colossus 67 after the pre-existing code to call <code>CRS61.1</code> is 
-## executed.  I see two ways of doing that, and cannot resolve which is the 
-## correct way from the available documentation.  Here's how Artemis 71 does it:
-## <pre>
-##		CALL
-##			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
-## R61DMPTG	EXIT
-##		TC	DOWNFLAG
-##		ADRES	V50N18FL
-## </pre>
-## The second way is this:
-## <pre>
-##		CALL	CLEAR
-##			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
-##			V50N18FL
-##		EXIT
-## </pre>
-## The second way requires one less word of memory (in a very crowded memory bank 37).  
-## It does not have the label <code>R61DMPTG</code>, but that label is not present in
-## Comanche 55 and is not referenced in Comanche 67, so its presence is unnecessary.
-## <br><br>
-## While I've selected one of these for inclusion, my choice is tentative
-## and may need to be revisited in the future.
+## executed.  
 		CALL
 			CRS61.1		# LOS DETERMINATION + VEH ATTITUDE
 		EXIT

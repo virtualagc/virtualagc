@@ -63,7 +63,7 @@ LARMENT		CA	Q		# STORE RETURN FOR ALARM
 CHKFAIL1	CCS	FAILREG		# IS ANYTHING IN FAILREG
 		TCF	CHKFAIL2	# YES TRY NEXT REG
 ## <b>Reconstruction:</b> This code, down to the matching "End" annotation, has been heavily changed
-## from Comanche 55 due to PCR 802.1, Save Alarm Data after "Error Reset". The changes make FAILREG +2
+## from Comanche 55 due to PCR 802.1, "Save Alarm Data after 'Error Reset'". The changes make FAILREG +2
 ## always contain the most recent program alarm, and a corresponding change in PINBALL prevents the
 ## RSET key from erasing it.
 		CA	L
