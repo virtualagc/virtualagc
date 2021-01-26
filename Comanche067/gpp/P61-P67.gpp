@@ -110,7 +110,7 @@ NEWRNVN		DLOAD
 			PIPTIME		# SAVE TIME OF RN,VN TO DETERMINE IF AN
 		STCALL	MM		# UPDATE HAS OCCURRED
 			STARTEN1	# INITIALIZE
-#ifdef Reconstruction787 			
+#if defined(Reconstruction787) 			
 ## <b>Reconstruction:</b> At this point, Comanche 55 would have the two lines
 ## of code
 ## <pre>
@@ -123,6 +123,10 @@ NEWRNVN		DLOAD
 			RN
 			.05GSW		# THE DRAG > 0.05 G .
 					# .05GSW SET =1 BY  FRESH START.
+#elif defined(Reconstruction787A)
+		CLEAR	VLOAD
+			.05GSW
+			RN
 #else
 		VLOAD
 			RN

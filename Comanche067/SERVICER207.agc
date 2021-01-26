@@ -768,8 +768,19 @@ CALCGRAV	UNIT	PUSH		# ENTER WITH RN IN MPAC
 		STORE	GOBL1/2
 		VAD	PUSH
 			UNITR
-ITISMOON	DLOAD	NORM
-			34D
+## <b>Reconstruction:</b> 3 lines in Comanche 55 are replaced by the following 4 lines
+## in Comanche 67, taken from Artemis 71.  I do not presently know what PCR/PCN/COM this
+## relates to.  However, this is the `ITISMOON` behavior described in 
+## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2D.pdf#page=1152&view=FitV">
+## the Colossus 2D flowchart for SERVICER, namely FC-2683</a>, whereas replaced lines
+## from Comanche 55 are what's described in
+## <a href="http://www.ibiblio.org/apollo/Documents/E-2456-2C.pdf#page=382&view=FitV">
+## the Colossus 2 flowchart</a>.  So it's possible that this change was supposed to 
+## occur at Colossus 2D rather than at 2C, though I've found no Colossus 2D PCRs/PCNs
+## that seem to relate to it.
+ITISMOON	DLOAD	DSQ
+			36D
+		NORM
 			X2
 		BDDV*	SLR*
 ## Page 836
@@ -805,7 +816,9 @@ CALCRVG		VLOAD	VXSC
 
 ## <b>Reconstruction:</b>  The following constant was removed to conserve
 ## a word of memory in bank 37 that overflowed due to implementing PCR 787.
+## <pre>
 ## KPIP		2DEC	.1024		# SCALES DELV TO 2(+4)
+## </pre>
 
 KPIP1		2DEC	0.074880	# 207 DELV SCALING.  1 PULSE = 5.85 CM/SEC.
 
