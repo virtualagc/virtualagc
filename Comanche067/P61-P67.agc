@@ -23,6 +23,9 @@
 # MOD NO: 1	MOD BY:  RR BAIRNSFATHER	DATE: 22 JUN 67		RESTARTS.
 # MOD NO: 2	MOD BY:  RR BAIRNSFATHER	DATE: 17 JAN 68		COLOSSUS GSOP CHANGES.
 # MOD NO: 3	MOD BY:  RR BAIRNSFATHER	DATE:  8 MAY 68		DELETE CMSM MANEUVER (PCR 50)
+## <b>Reconstruction:</b> The following comment was copied from Artemis 71,
+## per PCR 787.
+# MOD NO: 4		MOD BY:  RR BAIRNSFATHER	DATE:  1 JUL 69		PCR 787: TICK TTE
 # FUNCTION:	TO CALCULATE AND DISPLAY EMS INITIALIZATION DATA
 # CALLING SEQUENCE-  BY V37
 # EXIT-		TO P62
@@ -138,64 +141,27 @@ P61.1		TC	CLEARMRK
 		CA	V06N60		# GMAX		VPRED		GAMMAEI
 					# XXX.XX G	XXXXX. FPS	XXX.XX DEG
 
-## <b>Reconstruction:</b>  At this point, there is a fairly long block of differences
-## between Comanche 55 and Artemis 71, but they can't all be handled the same way.
-## This first annotation relates only the the following 5 instructions.  In the case
-## of these instructions, the flowchart matches Comanche 55, so Comanche 55 instructions
-## have been retained as-is.
 		TC	BANKCALL
 		CADR	GOFLASH
 		
 		TC	GOTOPOOH
-		TC	P61.2		# PROCEED
-		TC	-5
+## <b>Reconstruction:</b>  The code from here to the beginning of the comments
+## preceding <code>P62</code> has been replaced from Artemis 71.
+		TC	+2		# PROCEED
+		TC	-5	
 
-## <b>Reconstruction:</b>  At this point, what we would have in Comanche 55 is the 
-## <code>P61.2</code> code.  <code>P61.2</code> is a complete mismatch vs the flowchart,
-## and is removed entirely.
-## <pre> 		
-## P61.2		TC	INTPRET		# CORRECT TTE FOR TIME LAPSE DURING
-## 					# ABOVE DISPLAY.
-## 		RTB	DSU
-## 			LOADTIME	# CURRENT TIME.
-## ## Page 791
-## 			MM		# PIPTIME FOR RONE & VONE.
-## 		DAD
-## 			TTE1		# NEGATIVE OF FREE FALL TIME.
-## 		STORE	TTE		# DECREMENTED
-## 		
-## 		EXIT
-## 		
-## 		CA	V06N63		# RTGO		VIO		TTE
-## 					# XXXX.X NM	XXXXX. FPS	XXBXX M,S
-## 		TC	BANKCALL
-## 		CADR	GOFLASH
-## 		TC	GOTOPOOH
-## 		TC	+2
-## 		TC	P61.2		# REDO
-</pre>
-## Instead, the entire remainder of the <code>P1.1</code> block of code from Artemis 71
-## is used.  The symbolic label <code>P61.2</code> has been added because it is referenced
-## above, but is not on the flowchart.  (Alternatively, where <code>TC P61.2 # PROCEED</code> is used
-## above, it could have been changed to <code>TC +2 # PROCEED</code>, and the addition of 
-## the label could have been avoided.)
 # 'TICKTTE' DECREMENTS 'TTE' DISPLAY NOUN N63 AT A 2 SECOND RATE. 'TICKTTE' IS LOCATED IN 'SERVICER' AND
 # OPERATES ONLY DURING P61 THROUGH P63. THUS N63 IS 'ON CALL' & ON ENTRY  DOWNLIST THROUGH P63.
 # 'TICKTTE' WILL GIVE PROPER ANSWER IN EVENT OF RESTART OR A RECYCLE VIA   V32.
 
-P61.2		CA	V16N63		# RTGO		VIO		TTE
+		CA	V16N63		# RTGO		VIO		TTE
 					# XXXX.X NM	XXXXX. FPS	XXBXX M,S
 		TC	BANKCALL
 		CADR	GOFLASH
 		TC	GOTOPOOH
 		TC	+2
-		TC	AGIN,MON	# REDO CONIC CALC. ASSUME EXT VB INACTIVE
-## <b>Reconstruction:</b> End of local changes.  For the code just above, note that the 
-## flowchart also says that "TTE is decremented (at a 2 sec. rate) by TICKTTE".  I.e.,
-## the code above relies on the operation of <code>TICKTTE</code> in the SERVICER207
-## log section.  Since <code>TICKTTE</code> does not exist in the Comanche 55 version of 
-## SERVICER207, SERVICER207 must also be updated to include it.
-		
+		TC	AGIN,MON	# REDO CONIC CALC. ASSUME EXT VB INACTIVE		
+
 #		.... THEN FALL INTO P62
 ## Page 792
 

@@ -655,7 +655,11 @@ SWINIT		OCT	0
 
 		OCT	0
 		OCT	00200
-		OCT	0
+## <b>Reconstruction:</b>  In the following line, the constant 0 was changed
+## to 00004, per PCN 835.  Refer also to sheet 6 of the Colossus 2D flowchart
+## FC-2020.  The Colossus 2C flowchart is unfortunately unavailable, but the
+## change is consistent with the corresponding code in Artemis 71.
+		OCT	00004		# .05GSW
 		OCT	0
 		OCT	0
 		OCT	0
