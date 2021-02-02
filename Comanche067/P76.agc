@@ -46,13 +46,21 @@
 P76		TC	UPFLAG
 		ADRES	TRACKFLG
 
-		CAF	V06N84          # FLASH LAST DELTA V,
+## <b>Reconstruction:</b>  The instructions `CAF V06N84` and `CAF V06N84 +1` (see next 
+## annotation as well) are swapped in Comanche 55 vs Comanche 67.  This is known from
+## the mission checklists.  There is a similar swap in Luminary 99 vs Luminary 116, due
+## to PCR 826.2, "REVERSE P76 DISPLAY" 
+## <a href="https://www.ibiblio.org/apollo/Documents/LUM92_text.pdf">
+## see LUMINARY Memo 92</a>  We do not have a record of the corresponding PCR for Comanche, 
+## but it's possible that such a PCR would be numbered PCR 826.1.
+                CAF     V06N84 +1       # FLASH VERB 06 NOUN 33, DISPLAY LAST TIG,
 		TC      BANKCALL        # AND WAIT FOR KEYBOARD ACTION.
 	        CADR    GOFLASH
 		TCF     ENDP76	
 		TC	+2		# PROCEED
 		TC	-5		# STORE DATA AND REPEAT FLASHING
-		CAF	V06N84 +1	# FLASH VERB 06 NOUN 33, DISPLAY LAST TIG,
+## <b>Reconstruction:</b>  See the annotation above.
+                CAF     V06N84          # FLASH LAST DELTA V,
 		TC	BANKCALL	# AND WAIT FOR KEYBOARD ACTION.
 		CADR	GOFLASH
 		TCF	ENDP76

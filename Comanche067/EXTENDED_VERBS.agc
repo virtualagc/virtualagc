@@ -603,8 +603,10 @@ CKLFTBTS	CAF	GRRBKBIT	# HAS LIFTOFF OCCURRED
 XACT0Q		TC	Q		# YES
 
 OCTAL30		OCT	30
-## <b>Reconstruction:</b> Comanche 55 begins VB64 with "TC CHKPOOH". It has been removed
-## per PCR 832.1, Remove restriction of running R05 only in P00.
+## <b>Reconstruction:</b> Comanche 55 begins VB64 with <code>TC CHKPOOH</code>. It 
+## has been removed per PCR 832.1, "Remove restriction of running R05 only in P00".
+## An associated <code>INHINT</code> instruction was also removed, per the Colossus 2C
+## flowchart FC-2360 (sheet 2).
 VB64		TC	TESTXACT	# IF DISPLAY SYS. NOT BUSY, MAKE IT BUSY.
 		CAF	PRIO4
 		TC	FINDVAC
