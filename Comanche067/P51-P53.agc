@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-02-03 RSB	Changed for  and .
 
 ## Page 737
 # PROGRAM NAME - PROG52			DATE - NOV 30, 1966
@@ -129,7 +130,9 @@ PROG52		TC	PHASCHNG
 		MASK	STATE +2	# IS PFRATFLG SET(PREFERRED ORIENTATION)
 		CCS	A
 		TC	P52A		# YES
-		CAF	BIT2		# NO
+## <b>Reconstruction:</b> In the following line the constant operand was changed from
+## a value of 2 to a value of 3, per the hypothetical PCR 825.1.
+                CAF     THREE           # DISPLAY REFSMMAT OPTION 3
 		TC	P52A +1
 P52A		CAF	BIT1
 		TS	OPTION2
@@ -265,7 +268,9 @@ GYCRS		VLOAD	MXV
 		CADR	IMUPULSE
 		TC	BANKCALL
 		CADR	IMUSTALL
-		TC	CURTAINS
+## <b>Reconstruction:</b>  The following subroutine call was changed to reflect 
+## replacement of <code>CURTAINS</code> by <code>217ALARM</code> throughout P51-P53.
+		TC	217ALARM
 		TC	PHASCHNG
 		OCT	04024
 		TC	INTPRET
@@ -1045,7 +1050,9 @@ R55.2		TC	PHASCHNG
 		CADR	IMUPULSE
 		TC	BANKCALL
 		CADR	IMUSTALL
-		TC	CURTAINS
+## <b>Reconstruction:</b>  The following subroutine call was changed to reflect 
+## replacement of <code>CURTAINS</code> by <code>217ALARM</code> throughout P51-P53.
+		TC	217ALARM
 		TC	PHASCHNG
 		OCT	05024
 		OCT	13000
@@ -1172,17 +1179,12 @@ CALOOP		DLOAD*	SR1
 COARFINE	EXIT
 		TC	PHASCHNG
 		OCT	04024
-		TC	BANKCALL
-		CADR	IMUCOARS	# PERFORM COARSE ALIGNMENT
-		TC	BANKCALL
-		CADR	IMUSTALL	# REQUEST MODE SWITCH
-## Page 762		
-		TC	CURTAINS
-		TC	BANKCALL
-		CADR	IMUFIN20
-		TC	BANKCALL
-		CADR	IMUSTALL
-		TC	CURTAINS	# TEST FOR MALFUNCTION
+## <b>Reconstruction:</b>  The following line in Comanche 67 replaces a block of 
+## 10 instructions in Comanche 55. The need for it was discovered in sheet 23 of
+## Colossus 2C flowchart FC-2720, while implementing the change for PCR 825.1,
+## but the change is <i>not</i> part of PCR 825.1.  Perhaps the correct PCR
+## authorizing it will be discovered in the future.
+		TC	COARSUB		# PERFORM ALIGNMENT
 		TC	INTPRET
 		RTB	VLOAD
 			SET1/PDT
@@ -1453,16 +1455,8 @@ P51AA		CAF	PRFMSTAQ
 		CAF	V41K		# NOW DISPLAY COARSE ALIGN VERB 41
 		TC	BANKCALL
 		CADR	GODSPRET
-		TC	BANKCALL
-		CADR	IMUCOARS
-		TC	BANKCALL
-		CADR	IMUSTALL
-		TC	CURTAINS	# CAGING OR BAD END
-		TC	BANKCALL	# SCHEDULE IFAILOK AND IMUFINED TASKS, IN 5
-		CADR	IMUFIN20	# AND 20 SECS. DIRECT RETURN AND NO STALL,
-		TC	BANKCALL	# IF CAGING, BUT T4 WILL ZERO C/A ENABLE.
-		CADR	IMUSTALL	# IF PUT TO SLEEP, IMUFINED WILL WAKE US
-		TC	CURTAINS	# UP.
+## <b>Reconstruction:</b>  See earlier annotation for `COARFINE`.
+		TC	COARSUB		# PERFORM ALIGNMENT
 		TC	PHASCHNG
 		OCT	05024
 		OCT	13000
@@ -1659,7 +1653,9 @@ R53A		CA	MARKINDX	# NUMBER OF MARKS
 		CADR	SXTMARK
 		TC	BANKCALL
 		CADR	OPTSTALL
-		TC	CURTAINS
+## <b>Reconstruction:</b>  The following subroutine call was changed to reflect 
+## replacement of <code>CURTAINS</code> by <code>217ALARM</code> throughout P51-P53.
+		TC	217ALARM
 		INDEX	MARKSTAT
 		CCS	QPRET		# NUMBER OF MARKS ACTUALLY DONE
 		TCF	R53B
@@ -2189,4 +2185,34 @@ DEC227		DEC	227
 VNPLANV		VN	0688
 1/SQR3		2DEC	.57735021
 
+## <b>Reconstruction:</b> See the annotation for <code>COARFINE</code> earlier.
+		SETLOC	P50S1
+		BANK
+		COUNT*	$$/R50
+COARSUB		CA	Q
+		TS	QMIN
+## Page 788
+STALLOOP	CA	MODECADR	# IS IMU IN USE?
+		EXTEND
+		BZF	CORSCALL	# NO, GO AHEAD WITH COARSE ALIGN
+		CAF	1SEC		# YES, SO WAIT A SEC
+		TC	BANKCALL
+		CADR	DELAYJOB
+		TC	STALLOOP	# 			AND TRY AGAIN
+CORSCALL	TC	BANKCALL
+		CADR	IMUCOARS	# PERFORM COARSE ALIGN
+		TC	BANKCALL
+		CADR	IMUSTALL
+		TC	217ALARM	# BAD END
+		TC	BANKCALL
+		CADR	IMUFIN20	# PERFORM FINE ALIGN
+		TC	BANKCALL
+		CADR	IMUSTALL
+		TC	217ALARM	# BAD END
+		TC	QMIN
+217ALARM	INHINT			# JUST LIKE 'CURTAINS', NOW DEPARTED
+		CA	Q
+		TC	ALARM2
+		OCT	00217
+		TC	ALMCADR		# RETURN TO USER
 

@@ -192,11 +192,6 @@ CCSHOLE		INHINT
 ## <b>Reconstruction:<b>  The following constant was <code>OCT1103 OCT 1103</code> in Comanche 55.
 ## The change is due to PCR801.1.		
 OCT21103	OCT	21103
-CURTAINS	INHINT
-		CA	Q
-		TC	ALARM2
-OCT217		OCT	00217
-		TC	ALMCADR		# RETURN TO USER
 
 DOALARM		EQUALS	ENDOFJOB
 
