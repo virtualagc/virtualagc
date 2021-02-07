@@ -42,6 +42,7 @@ document.write(headerTemplate.replace("@TITLE@","Programmer's Manual").replace("
     <h2><a name="Blocks_for_All_Occasions" id="Blocks_for_All_Occasions"></a>Blocks
 for
 
+
       All Occasions</h2>
     <p>The design of the AGC went through several stages, which for the
       sake of this discussion we'll call "blocks".&nbsp; However, the
@@ -85,6 +86,7 @@ for
       <li><a href="NARA-SW/E-2052.pdf"><span style="font-style: italic;">E-2052:&nbsp;
 AGC4
 
+
             Basic Training</span> <span style="font-style: italic;">Manual</span>,
           <span style="font-style: italic;">Volume I</span></a>, by
         Bernard Savage and Alice Drake, January 1967.&nbsp;</li>
@@ -102,15 +104,18 @@ AGC4
       <li><a href="NARA-SW/E-1077.pdf" style="font-style: italic;">E-1077:&nbsp;
 Preliminary
 
+
           MOD 3C Programmers Manual</a>, by R. Alonso, J. H. Laning,
         Jr., and H. Blair-Smith, November 1961.</li>
       <li><a href="hrst/archive/1706.pdf" style="font-style: italic;">Keyboard
 and
 
+
           Display Program and Operation</a>, by Alan I. Greene and
         Robert J. Filene, June 1, 1967.</li>
       <li><a href="hrst/archive/1705.pdf" style="font-style: italic;">Block
 II
+
 
           AGC Self-Check and Show-Banksum</a>, by Edwin D. Smally,
         December 1966.</li>
@@ -369,6 +374,7 @@ II
           generally 1 more than that of the card before</small><small>—no
 missing
 
+
           numbers due to spacing. But having said that, I have to
           explain why the card number following a remark over 72 columns
           wide is generally 2 more than the one you can see on the
@@ -515,6 +521,7 @@ missing
     the CPU)&nbsp; is that the <span style="font-style: italic;">x,y,z</span>&nbsp;
 components
 
+
     of a vector can be represented by three consecutive DP values.<br>
     <h3>Unsigned-Integer (2's-Complement) Format</h3>
     There are some cases, such as the CDU counters described in the next
@@ -592,6 +599,7 @@ components
     decrementing the counter/timer registers is (and was) actually
     implemented by the use of "<a href="#UnprogrammedSequences">unprogrammed
 
+
       sequences</a>", which are similar to CPU instructions, but which
     cannot be directly used by the programmer.&nbsp; The unprogrammed
     sequences have names like <span style="font-family: monospace;">PINC</span>,
@@ -636,7 +644,7 @@ components
       href="#io_channels">i/o channels</a> rather than as memory-mapped
     CPU registers, and therefore are not listed in the following table.<br>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Address
@@ -688,6 +696,7 @@ components
             accumulator to a true 15-bit register, it is <span
               style="font-style: italic;">overflow-corrected</span>.&nbsp;
 Overflow-correction
+
 
             implies:<br>
             <ol>
@@ -1154,13 +1163,13 @@ Overflow-correction
           </td>
           <td rowspan="2" style="vertical-align: top;"> TIME1 is a
             15-bit 1's-complement counter which is incremented every 10
-            ms. TIME1 by itself overflows every 2<sup>14</sup>*10
-            ms., or 163.84 seconds.&nbsp; Upon overflow of TIME1, the
-            14-bit counter TIME2 is automatically incremented.&nbsp;
-            Thus, the two counters together form a 28-bit value which
-            can keep track of time for up to 2<sup>28</sup>*10 ms., or
-            just over 31 days.&nbsp; The TIME1/TIME2 register pair acts
-            as a master clock for the AGC.&nbsp;&nbsp; <span
+            ms. TIME1 by itself overflows every 2<sup>14</sup>*10 ms.,
+            or 163.84 seconds.&nbsp; Upon overflow of TIME1, the 14-bit
+            counter TIME2 is automatically incremented.&nbsp; Thus, the
+            two counters together form a 28-bit value which can keep
+            track of time for up to 2<sup>28</sup>*10 ms., or just over
+            31 days.&nbsp; The TIME1/TIME2 register pair acts as a
+            master clock for the AGC.&nbsp;&nbsp; <span
               style="font-weight: bold;">yaAGC</span> internally clocks
             this counter.<br>
           </td>
@@ -1255,6 +1264,7 @@ Overflow-correction
             every interrupt the counter would be reloaded with 2<sup>14</sup>-100=16284
 (decimal).&nbsp;
 
+
             Because 10 ms. is usually much longer than the amount of
             time needed to vector to the interrupt service routine, it
             is unnecessary in such calculations to account for the time
@@ -1274,6 +1284,7 @@ Overflow-correction
             by means of a <span style="font-family: monospace;">DINC</span><a
               href="#UnprogrammedSequences">unprogrammed sequence</a>.&nbsp;
 There
+
 
             is a CPU flag which can mask counting of TIME6 on or
             off.&nbsp;&nbsp; By writing 1 to bit 15 of i/o channel 13
@@ -1389,6 +1400,7 @@ There
             sequence (<a
               href="assembly_language_manual.html#UnprogrammedSequences">see
 
+
               below</a>) in order to increase the angles by one unit,
             and are processed with the <span style="font-family:
               monospace;">MCDU</span> unprogrammed sequence to decrease
@@ -1496,6 +1508,7 @@ There
             reports the count to <span style="font-weight: bold;">yaAGC</span>
             via <a href="developer.html#Fictitious_IO_Channels">fictitious
 input
+
 
               channels</a>, 0170 (roll) or 0167 (yaw) or 0166
             (pitch).&nbsp; The value in the input channel is a
@@ -1716,6 +1729,7 @@ input
     (thanks Mirko!) has sent us a <a href="MirkoMattioliMemoryMap.pdf">diagram
 of
 
+
       the structure of the memory map</a>, and it may prove helpful to
     have his diagram at hand whilst reading the following description.<br>
     <br>
@@ -1843,6 +1857,7 @@ of
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Interrupt_Processing" id="Interrupt_Processing"></a>Interrupt
 
+
       Processing</h2>
     The AGC has 11 interrupt types.&nbsp; Interrupts are triggered by
     external events, but usually not directly so.&nbsp; Various external
@@ -1857,7 +1872,7 @@ of
     the vector table.<br>
     <br>
     <table summary="" style="text-align: left; margin-left: auto;
-      margin-right: auto;" cellpadding="2" cellspacing="2" border="1">
+      margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="font-weight: bold; text-align: center;
@@ -2152,6 +2167,7 @@ of
           style="font-family: monospace;">CCC PPP AAA AAA AAA</span>.&nbsp;
 The
 
+
         field <span style="font-family: monospace;">PPP</span> is
         referred to as the "peripheral code" or "PC".</li>
       <li>Finally, a fourth bit was made available beyond the 15 within
@@ -2167,6 +2183,7 @@ The
         completely different set of instructions called <span
           style="font-style: italic; font-weight: bold;">extracodes</span>.&nbsp;
 In
+
 
         effect, "basic instructions" use one word of memory, while
         "extracodes" use two words of memory.</li>
@@ -2197,11 +2214,12 @@ In
     <h2><a name="AGC4_Instruction_Set" id="AGC4_Instruction_Set"></a>AGC4
 Instruction
 
+
       Set</h2>
     <h3>AD<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2286,6 +2304,7 @@ Instruction
             <br>
             For the special case "<span style="font-family: monospace;">AD
 
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">DOUBLE</span> instruction.<br>
           </td>
@@ -2295,7 +2314,7 @@ Instruction
     <br>
     <h3>ADS</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2369,6 +2388,7 @@ Instruction
             accumulator and in <span style="font-family: monospace;">K</span>.&nbsp;
 The
 
+
             accumulator is neither overflow-corrected prior to the
             addition nor after it.&nbsp; However, the sum is
             overflow-corrected prior to being saved at <span
@@ -2391,7 +2411,7 @@ The
     <h3>AUG<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2492,7 +2512,7 @@ The
     <br>
     <h3>BZF</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2593,7 +2613,7 @@ The
     <br>
     <h3>BZMF</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2698,7 +2718,7 @@ The
     <h3>CA (or CAE or CAF)<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2797,6 +2817,7 @@ The
             </span><br>
             For the special case "<span style="font-family: monospace;">CA
 
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">NOOP</span> instruction.<br>
           </td>
@@ -2806,7 +2827,7 @@ The
     <br>
     <h3>CCS</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -2913,6 +2934,7 @@ The
                 execution continues at the 4<sup>th</sup> instruction
                 after the <span style="font-family: monospace;">CCS</span>.&nbsp;&nbsp;
 
+
                 <span style="color: rgb(0, 0, 0);">(If <span
                     style="font-family: monospace;">K</span> is 16 bits,
                   then the original contents may contain + or -
@@ -2947,7 +2969,7 @@ The
     <h3>COM<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3028,7 +3050,7 @@ The
     <h3>CS<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3116,6 +3138,7 @@ The
             </span><br>
             For the special case "<span style="font-family: monospace;">CS
 
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">COM</span> instruction.<br>
           </td>
@@ -3125,7 +3148,7 @@ The
     <br>
     <h3>DAS</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3199,6 +3222,7 @@ The
             is the case "<span style="font-family: monospace;">DAS A</span>"&nbsp;
 Refer
 
+
             to the <span style="font-family: monospace;">DDOUBL</span>
             instruction for an explanation of this case.<br>
             <br>
@@ -3208,12 +3232,13 @@ Refer
             more-significant word first and the less-significant word
             second.&nbsp; <span style="color: rgb(0, 153, 0);"><span
                 style="color: rgb(0, 0, 0);">The signs of the contents
-                of A and L need not agree, nor need the signs of</span><span
-                style="font-family: monospace; color: rgb(0, 0, 0);">K</span><span
+                of A and L need not agree, nor need the signs of </span><span
+                style="font-family: monospace; color: rgb(0, 0, 0);">K </span><span
                 style="color: rgb(0, 0, 0);">and</span> <span
                 style="font-family: monospace; color: rgb(0, 0, 0);">K+1</span><span
                 style="color: rgb(0, 0, 0);">.&nbsp;</span> (</span><a
               style="color: rgb(0, 153, 0);" href="#Data_Representation">See
+
 
               above</a><span style="color: rgb(0, 153, 0);">.)<br>
               <br>
@@ -3254,7 +3279,7 @@ Refer
     <h3>DCA<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3339,6 +3364,7 @@ Refer
                 <br>
                 The instruction "<span style="font-family: monospace;">DCA
 
+
                   L</span>" is an unusual case.&nbsp;&nbsp; Since the
                 less-significant word is processed first and then the
                 more-significant word, the effect will be to first load
@@ -3361,7 +3387,7 @@ Refer
     <h3>DCOM<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3441,7 +3467,7 @@ Refer
     <h3>DCS<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3525,11 +3551,13 @@ Refer
             <br>
             For the special case "<span style="font-family: monospace;">DCS
 
+
               A</span>", refer to the <span style="font-family:
               monospace;">DCOM</span> instruction.<span style="color:
               rgb(0, 153, 0);"><span style="color: rgb(0, 0, 0);"><br>
                 <br>
                 The instruction "<span style="font-family: monospace;">DCS
+
 
                   L</span>" is an unusual case.&nbsp;&nbsp; Since the
                 less-significant word is processed first and then the
@@ -3554,7 +3582,7 @@ Refer
     <h3>DDOUBL<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3643,7 +3671,7 @@ Refer
     <h3>DIM<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3753,7 +3781,7 @@ Refer
     <h3>DOUBLE<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3835,7 +3863,7 @@ Refer
     <h3>DTCB<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -3927,7 +3955,7 @@ Refer
     <h3>DTCF<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4016,7 +4044,7 @@ Refer
     <h3>DV<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4161,7 +4189,7 @@ Refer
             <br>
             Several numerical examples are given in Smally:<br>
             <table summary="" style="text-align: left; margin-left:
-              auto; margin-right: auto;" cellpadding="2" cellspacing="2"
+              auto; margin-right: auto;" cellspacing="2" cellpadding="2"
               border="1">
               <tbody>
                 <tr>
@@ -4220,21 +4248,26 @@ Refer
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
 
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+20000
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
 
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
 
                     (00001)<br>
                   </td>
@@ -4251,21 +4284,26 @@ Refer
                     +0.0000000037</td>
                   <td style="vertical-align: top; text-align: center;">+17777
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
 
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-20000
 
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
 
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
 
                     (00001)<br>
                   </td>
@@ -4282,21 +4320,26 @@ Refer
                     -0.0000000037</td>
                   <td style="vertical-align: top; text-align: center;">-17777
 
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+20000
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
 
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
 
                     (77776)<br>
                   </td>
@@ -4313,21 +4356,26 @@ Refer
                     -0.0000000037</td>
                   <td style="vertical-align: top; text-align: center;">-17777
 
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-20000
 
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
 
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
 
                     (77776)<br>
                   </td>
@@ -4347,21 +4395,26 @@ Refer
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+20000
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
+
 
                     (17777)<br>
                   </td>
@@ -4379,21 +4432,26 @@ Refer
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
 
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
 
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
+
 
                     (37776)<br>
                   </td>
@@ -4412,22 +4470,27 @@ Refer
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
 
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
 
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                 </tr>
@@ -4445,21 +4508,26 @@ Refer
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
 
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
 
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
 
                     (77777)<br>
                   </td>
@@ -4478,21 +4546,26 @@ Refer
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
 
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
@@ -4511,21 +4584,26 @@ Refer
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
 
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
@@ -4540,7 +4618,7 @@ Refer
     <br>
     <h3>DXCH</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4630,6 +4708,7 @@ Refer
             <br>
             In the case of the "<span style="font-family: monospace;">DXCH
 
+
               L</span>" instruction (in which the source and destination
             ranges overlap, Q&nbsp; (full 16 bits, including overflow)
             goes into A, A&nbsp; goes into L, and L goes into Q.<br>
@@ -4643,7 +4722,7 @@ Refer
     <h3>EDRUPT<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4759,7 +4838,7 @@ Refer
     <br>
     <h3>EXTEND</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4886,7 +4965,7 @@ Refer
     <br>
     <h3>INCR</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -4986,7 +5065,7 @@ Refer
     <h3>INDEX (or NDX)<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5102,6 +5181,7 @@ Refer
               <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 TC&nbsp;
 
+
                 &nbsp;&nbsp;&nbsp; JMPTAB<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -5186,6 +5266,7 @@ TC&nbsp;
             preceding <span style="font-family: monospace;">EXTEND</span>),
 the
 
+
             special case of <span style="font-family: monospace;">K</span>
             being address&nbsp; 017 octal is not an <span
               style="font-family: monospace;">INDEX</span> instruction,
@@ -5200,7 +5281,7 @@ the
     </table>
     <h3>INHINT</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5313,7 +5394,7 @@ the
     <br>
     <h3>LXCH</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5398,7 +5479,7 @@ the
     <h3>MASK (or MSK)<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5488,7 +5569,7 @@ the
     <h3>MP<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5595,11 +5676,13 @@ the
             the octal value 2 (which would really be the SP value 2×2<sup>-14</sup>),
 then
 
+
             you would indeed find a result of 4, but it would be in L
             register because it would be part of the DP value 4×2<sup>-28</sup>
             rather than just the integer 4.<br>
             <br>
             For the special case "<span style="font-family: monospace;">MP
+
 
               A</span>", refer instead to the <span style="font-family:
               monospace;">SQUARE</span> instruction.<br>
@@ -5611,7 +5694,7 @@ then
     <h3>MSU<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5713,7 +5796,7 @@ then
     <h3>NOOP<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5810,7 +5893,7 @@ then
     <h3>OVSK<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5891,7 +5974,7 @@ then
     <br>
     <h3>QXCH</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -5975,7 +6058,7 @@ then
     <h3>RAND<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6061,7 +6144,7 @@ then
     <h3>READ<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6141,7 +6224,7 @@ then
     <br>
     <h3>RELINT</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6243,7 +6326,7 @@ then
     <br>
     <h3>RESUME</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6371,6 +6454,7 @@ then
                 monospace;">
               <span style="font-family: monospace; font-style: italic;">Some
 
+
                 instruction</span><br>
             </div>
             would not index the final instruction as shown, because "<span
@@ -6426,7 +6510,7 @@ then
     <br>
     <h3>RETURN</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6506,7 +6590,7 @@ then
     <h3>ROR<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6595,7 +6679,7 @@ then
     <h3>RXOR<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6684,7 +6768,7 @@ then
     <h3>SQUARE<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6766,7 +6850,7 @@ then
     <h3>SU<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6860,7 +6944,7 @@ then
     <br>
     <h3>TC (or TCR)</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -6947,6 +7031,7 @@ then
             <span style="text-decoration: underline;">Indirect jumps</span>:&nbsp;
 The
 
+
             <span style="font-family: monospace;">TC</span> instruction
             may also be used to accomplish an indirect jump (i.e., a
             jump to a computed rather than a hard-coded address) by
@@ -6978,6 +7063,7 @@ The
             will contain a value of 1.&nbsp; Incidentally, it should
             also be obvious that <span style="font-family: monospace;">TC
 
+
               A</span> will require 2 MCT of CPU time instead of the 1
             MCT quoted earlier, since it actually results in <span
               style="font-style: italic;">two</span> <span
@@ -6992,6 +7078,7 @@ The
             <br>
             <span style="text-decoration: underline;">Indirect calls</span>:&nbsp;
 For
+
 
             an indirect call, it is necessary to combine an <span
               style="font-family: monospace;">INDEX</span> instruction
@@ -7028,7 +7115,7 @@ For
     <h3>TCAA<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7109,7 +7196,7 @@ For
     <br>
     <h3>TCF</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7185,6 +7272,7 @@ For
             <span style="text-decoration: underline;">Indirect jumps</span>:&nbsp;
 For
 
+
             an indirect jump, it is necessary to combine an <span
               style="font-family: monospace;">INDEX</span> instruction
             with a <span style="font-family: monospace;">TCF</span>
@@ -7197,7 +7285,7 @@ For
     <br>
     <h3>TS</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7300,7 +7388,7 @@ For
     <h3>WAND<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7390,7 +7478,7 @@ For
     <h3>WOR<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7483,7 +7571,7 @@ For
     <h3>WRITE<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7567,7 +7655,7 @@ For
     <br>
     <h3>XCH</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7658,7 +7746,7 @@ For
     <br>
     <h3>XLQ</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7770,7 +7858,7 @@ For
     <br>
     <h3>XXALQ</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7894,7 +7982,7 @@ For
     <h3>ZL<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -7970,7 +8058,7 @@ For
     <h3>ZQ<br>
     </h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -8092,6 +8180,7 @@ For
         style="font-family: monospace;">
       <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 =
+
 
         4</span><br style="font-family: monospace;">
       <span style="font-family: monospace;">FIFOHAF = 8</span><br>
@@ -8233,33 +8322,43 @@ For
         monospace;">MYJUMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 2FCADR&nbsp;&nbsp;
 
+
         MYLABEL<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
         EXTEND<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
         MYJUMP<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
         DTCF<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
         .<br>
         MYLABEL<br>
@@ -8625,6 +8724,7 @@ DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     any) to <span style="font-style: italic; font-family: monospace;">m</span>.&nbsp;
 The
 
+
     <span style="font-style: italic; font-family: monospace;">n</span>
     operand is discarded, and is present principally for documentation
     purposes.<br>
@@ -8691,16 +8791,19 @@ The
 A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;
 
+
           0</tt><tt><br>
         </tt> <tt>000006,000006:</tt> <tt><br>
         </tt> <tt>000007,000007:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 BLOCK&nbsp;&nbsp;&nbsp;
 
+
           2</tt><tt><br>
         </tt> <tt>000008,000008:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
 
           25</tt><tt><br>
         </tt> <tt>000009,000009:&nbsp;&nbsp;&nbsp;
@@ -8709,11 +8812,13 @@ SECSIZ&nbsp;&nbsp;
           FIRST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A</tt><tt><br>
         </tt> <tt>000010,000010:&nbsp;&nbsp;&nbsp;
           4001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           A</tt><tt><br>
         </tt> <tt>000011,000011:</tt> <tt><br>
@@ -8721,10 +8826,12 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 BLOCK&nbsp;&nbsp;&nbsp;
 
+
           3</tt><tt><br>
         </tt> <tt>000013,000013:&nbsp;&nbsp;&nbsp;
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
 
           64</tt><tt><br>
         </tt> <tt>000014,000014:&nbsp;&nbsp;&nbsp;
@@ -8733,14 +8840,17 @@ SECSIZ&nbsp;&nbsp;
           SECOND&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 XCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A</tt><tt><br>
         </tt> <tt>000015,000015:&nbsp;&nbsp;&nbsp;
           6001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           BANK</tt><tt><br>
         </tt> <tt>000016,000016:&nbsp;&nbsp;&nbsp;
           6064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
 
           6</tt><tt><br>
         </tt> <tt>000017,000017:&nbsp;&nbsp;&nbsp;
@@ -8749,20 +8859,24 @@ SECSIZ&nbsp;&nbsp;
           SECONDB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A</tt><tt><br>
         </tt> <tt>000018,000018:</tt> <tt><br>
         </tt> <tt>000019,000019:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SETLOC&nbsp;&nbsp;
 
+
           FIRST</tt><tt><br>
         </tt> <tt>000020,000020:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           BANK</tt><tt><br>
         </tt> <tt>000021,000021:&nbsp;&nbsp;&nbsp;
           4025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
 
           12</tt><tt><br>
         </tt> <tt>000022,000022:&nbsp;&nbsp;&nbsp;
@@ -8771,16 +8885,19 @@ SECSIZ&nbsp;&nbsp;
           THIRD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A</tt><tt><br>
         </tt> <tt>000023,000023:</tt> <tt><br>
         </tt> <tt>000024,000024:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 BLOCK&nbsp;&nbsp;&nbsp;
 
+
           3</tt><tt><br>
         </tt> <tt>000025,000025:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
 
           14</tt><tt><br>
         </tt> <tt>000026,000026:&nbsp;&nbsp;&nbsp;
@@ -8789,16 +8906,19 @@ SECSIZ&nbsp;&nbsp;
           FOURTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A</tt><tt><br>
         </tt> <tt>000027,000027:</tt> <tt><br>
         </tt> <tt>000028,000028:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 BLOCK&nbsp;&nbsp;&nbsp;
 
+
           3</tt><tt><br>
         </tt> <tt>000029,000029:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
 
           31</tt><tt><br>
         </tt> <tt>000030,000030:&nbsp;&nbsp;&nbsp;
@@ -8807,16 +8927,19 @@ SECSIZ&nbsp;&nbsp;
           FIFTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A</tt><tt><br>
         </tt> <tt>000031,000031:</tt> <tt><br>
         </tt> <tt>000032,000032:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 BANK&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           2</tt><tt><br>
         </tt> <tt>000033,000033:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
 
           17</tt><tt><br>
         </tt> <tt>000034,000034:
@@ -8825,14 +8948,17 @@ SECSIZ&nbsp;&nbsp;
           SIXTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A</tt><tt><br>
         </tt> <tt>000035,000035:
           02,2040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           BANK</tt><tt><br>
         </tt> <tt>000036,000036:
           02,2056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 SECSIZ&nbsp;&nbsp;
+
 
           18</tt><tt><br>
         </tt> <tt>000037,000037:
@@ -8840,6 +8966,7 @@ SECSIZ&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SEVENTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           A</tt><br>
         <br>
@@ -8876,6 +9003,7 @@ AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <h3>SUBRO</h3>
     This is simply discarded by <span style="font-weight: bold;">yaYUL</span>.&nbsp;
 Its
+
 
     original purpose (in <span style="font-weight: bold;">YUL</span>)
     was seemingly to help maintain a list of subroutines for later
@@ -8981,6 +9109,7 @@ Its
     <span style="text-decoration: underline;">Operands in fixed memory.</span>&nbsp;&nbsp;
 These
 
+
     encode to 15-bit values, and can be used to represent any address in
     fixed-memory banks 00-37.&nbsp; (Superbanks 40-43 are not accesible
     to the interpreter.)&nbsp; I'll designate this rule by <span
@@ -8990,6 +9119,7 @@ These
           = X</span></li>
       <li>Common-fixed:&nbsp; <span style="font-family: monospace;">f(X)
 =
+
 
           02000 * <span style="font-style: italic;">FixedBankNumOfX</span>
           + (X - 02000)</span><br>
@@ -9033,7 +9163,7 @@ These
     "<span style="font-family: monospace;">Y</span>").<br>
     <h3>STCALL</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9085,7 +9215,7 @@ These
     <br>
     <h3>STODL</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9137,7 +9267,7 @@ These
     <br>
     <h3>STORE</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9188,7 +9318,7 @@ These
     <br>
     <h3>STOVL</h3>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="0">
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold; width:
@@ -9352,6 +9482,7 @@ These
     basic code instead of interpretive code.&nbsp; <i>But why <u>DANZIG</u>?</i>&nbsp;
 I'd
 
+
     often wondered about that, but after a dozen years of wondering
     about it and inventing my own little stories about it, I finally
     thought to <i>ask</i> someone about it ... and as luck would have
@@ -9385,7 +9516,7 @@ I'd
     So there you have it.<br>
     <h4><font color="#663300">Interpreter Registers</font></h4>
     <p><font color="#663300">The Interpreter simulates these registers:</font></p>
-    <table align="center" border="1">
+    <table border="1" align="center">
       <tbody>
         <tr>
           <td><font color="#663300">MPAC</font></td>
@@ -9476,7 +9607,7 @@ I'd
     <p><font color="#663300">The memory organization presented to a
         program differs, depending on whether a program is located in
         low fixed memory or high fixed memory:</font></p>
-    <table align="center" border="1">
+    <table border="1" align="center">
       <tbody>
         <tr>
           <th><font color="#663300">Address (oct)</font></th>
@@ -9490,6 +9621,7 @@ I'd
           <td colspan="2" align="center"><font color="#663300">Unswitched
 erasable
 
+
               memory (i.e. erasable banks 0 - 2)</font></td>
         </tr>
         <tr>
@@ -9497,6 +9629,7 @@ erasable
           <td align="center"><font color="#663300">256</font></td>
           <td colspan="2" align="center"><font color="#663300">Currently-selected
 erasable
+
 
               bank*</font></td>
         </tr>
@@ -9541,7 +9674,7 @@ erasable
     <h4><font color="#663300">Instructions</font></h4>
     <p><font color="#663300">Interpreter instructions pack two 7-bit
         opcodes into a single word, like so:</font></p>
-    <table align="center" border="1">
+    <table border="1" align="center">
       <tbody>
         <tr>
           <td align="center"><font color="#663300">1</font></td>
@@ -9577,7 +9710,7 @@ erasable
           color="#663300">—</font> specifies whether the opcode requires
         an argument, and bit 2 determines whether the argument may be
         indexed. Specifically, the four categories work like this:</font></p>
-    <table align="center" border="1">
+    <table border="1" align="center">
       <tbody>
         <tr>
           <th><font color="#663300">Bit 2 &amp; 1</font></th>
@@ -9634,7 +9767,7 @@ erasable
     <p><font color="#663300">The documentations didn't provide the
         numeric opcodes for any of the instructions, so it's hard to
         tell which of the four classes each opcode falls into.</font></p>
-    <table align="center" border="1">
+    <table border="1" align="center">
       <tbody>
         <tr>
           <th><font color="#663300">Opcode</font></th>
@@ -10323,10 +10456,11 @@ erasable
     channels are covered <a href="developer.html#Table_of_IO_Channels">on
 the
 
+
       developer page</a>.<br>
     <br>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold;"> Address<br>
@@ -10431,7 +10565,7 @@ the
       Tables</h2>
     <br>
     <table summary="" style="width: 95%; text-align: left; margin-left:
-      auto; margin-right: auto;" cellpadding="2" cellspacing="2"
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
       border="1">
       <caption> <span style="font-weight: bold;">Numerical Summary of
           the CPU Instruction Set</span><br>
@@ -11357,11 +11491,12 @@ the
     <br>
     <div style="text-align: center;"> <span style="font-weight: bold;">Instruction
 
+
         Map</span><br>
     </div>
     <table summary="" style="width: 100%; height: 451px; text-align:
-      left; margin-left: auto; margin-right: auto;" cellpadding="2"
-      cellspacing="2" border="1">
+      left; margin-left: auto; margin-right: auto;" cellspacing="2"
+      cellpadding="2" border="1">
       <tbody>
         <tr>
           <td colspan="3" rowspan="1" style="text-align: center;
@@ -11601,8 +11736,10 @@ the
       are not shown.</span><br>
     <h2><a name="UnprogrammedSequences" id="UnprogrammedSequences"></a>Unprogrammed
 
+
       Sequences</h2>
     As mentioned earlier in the <a href="#CPU_Architecture_Registers">CPU
+
 
       Architecture</a> section, the AGC provides instruction-like
     entities called "unprogrammed sequences" which are activated
@@ -11620,7 +11757,7 @@ the
     software.&nbsp;<br>
     <br>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold;"> Name<br>
@@ -11873,14 +12010,15 @@ the
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-04-29.<br>
+          2021-01-19.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
   </body>
