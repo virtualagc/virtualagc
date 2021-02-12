@@ -414,7 +414,8 @@ EBQPLACE	ECADR	QPLACES
 
 		BANK	37
 		EBANK=	RN1
-EBRN1		ECADR	RN1
+## <b>Reconstruction:</b>  The constant <code>EBRN1</code> was not being referenced.
+## It has been removed to conserve a word of memory in bank 37.
 
 #****************************************************************************************************************
 

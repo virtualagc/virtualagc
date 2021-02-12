@@ -14,6 +14,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history: 2020-12-25 RSB	Began adaptation from Comanche 55 baseline.
+##		2021-02-03 RSB	Implemented PCR 807.1.
 
 ## Page 456
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -82,14 +83,21 @@
 		EBANK=	P21TIME
 		COUNT	24/P21
 		
+## <b>Reconstruction:</b> From here through the next annotation, various pieces of 
+## code have been changed or imported from Artemis 71, due to PCR 807.1 and sheet 2 
+## of the Colossus 2C flowchart FC-2580.
 PROG21		CAF	ONE
 		TS	OPTION2		# ASSUMED VEHICLE IS LM, R2 = 00001
+
 		CAF	BIT2		#  OPTION 2
 		TC	BANKCALL
 		CADR	GOPERF4
 		TC	GOTOPOOH	# TERMINATE
 		TC	+2		# PROCEED VALUE OF ASSUMED VEHICLE OK
 		TC	-5		# R2 LOADED THROUGH DSKY
+		CAF	ZERO		# ZERO DSPTEM
+		TS	DSPTEM1
+		TS	DSPTEM1 +1
 P21PROG1	CAF	V6N34		# LOAD DESIRED TIME OF LAT-LONG.
 		TC	BANKCALL
 		CADR	GOFLASH
@@ -97,10 +105,12 @@ P21PROG1	CAF	V6N34		# LOAD DESIRED TIME OF LAT-LONG.
 		TC	+2		# PROCEED VALUES OK
 		TC	-5		# TIME LOADED THROUGH DSKY
 		TC	INTPRET
-		DLOAD	
+		DLOAD	BZE
 			DSPTEM1
-		STCALL	TDEC1		# INTEG TO TIME SPECIFIED IN TDEC
+			P21PRTM		# SET TO INTEG TO PRES TIME
+P21PROG2	STCALL	TDEC1		# INTEG TO TIME SPECIFIED IN TDEC
 			INTSTALL
+## <b>Reconstruction:</b>  End of changed block of code for PCR 807.1.
 		BON	SET
 			P21FLAG
 			P21CONT		# ON...RECYCLE USING BASE VECTOR
@@ -184,7 +194,13 @@ P21DSP		CLEAR	SLOAD		# GENERATE DISPLAY DATA
 		STORE	DSPTEM1
 		RTB	
 			P21PROG1
-	
+
+## <b>Reconstruction:</b> Subroutine <code>P21PRTM</code> has been inserted here
+## due to PCR 807.1.
+P21PRTM		RTB	GOTO
+			LOADTIME
+			P21PROG2
+
 600SEC		2DEC	60000		# 10 MIN
 
 P21ONENN	OCT	00001		# NEEDED TO DETERMINE VEHICLE

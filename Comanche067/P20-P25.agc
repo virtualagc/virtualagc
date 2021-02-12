@@ -656,11 +656,9 @@ V0694		VN	0694
 		EBANK=	GENRET
 		COUNT*	$$/R61		# ROUTINES - NAVIGATION - PREF. TR. 9TT=
 	
-## <b>Reconstruction:</b>  The following line replaced Comanche 55's
-## <code>CAF EBANK6</code>/<code>TS EBANK</code>, due to the need to recover
-## some memory in implementing PCR 785.  However, PCR 785 does not itself
-## imply that this change is logically necessary.
-R61CSM		TC	E6SETTER
+## <b>Reconstruction:</b>  The Colossus 2C flowchart (FC-2550, sheet 10) explicitly 
+## shows <code>CAF EBANK6</code>/<code>XCH EBANK</code> in place of the following instruction.
+R61CSM		TC	E6SETTER	# SWITCH TO EBANK 6
 		TS	SAVBNK		# SAVE EBANK
 		TC	MAKECADR
 		TS	GENRET

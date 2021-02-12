@@ -3377,8 +3377,14 @@ MARK2DWN	EQUALS	R53EXIT	+1	#  (7) USED BY ALLIGNMENT P50S
 ## Page 118
 # *-*-*-*- OVERLAY 1 IN EBANK 7 -*-*-*-*
 
-## <b>Reconstruction:</b>  The following comment changed per PCR 787 (due to adding
-## <code>TTE2</code> below).
+## <b>Reconstruction:</b>  The following comment has been retained from Comanche 55, 
+## in spite of the addition of <code>TTE2</code> below per PCR 787. While it's not
+## entirely clear what's included in the REENTRY ERASABLES block, if the block is
+## is <code>RTINIT</code> up to (but not including) <code>VPRED</code>, then that block
+## is only 205D words rather than the 206D quoted in Comanche 55.  Regardless of whether
+## 205D or 206D is correct, however, the addition of <code>TTE2</code> does not change
+## the length of that memory range in Comanche 67, so it remains either 205D or 206D.
+# REENTRY ERASABLES			(206D)
 RTINIT		EQUALS	END-SVCR	# 6P
 RTEAST		EQUALS	RTINIT	+6	# 6P
 RTNORM		EQUALS	RTEAST	+6	# 6P

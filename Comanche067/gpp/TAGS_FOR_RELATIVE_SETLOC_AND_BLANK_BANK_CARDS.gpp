@@ -291,6 +291,9 @@ MSGSCAN1	EQUALS
 RTE		EQUALS
 DELRSPL1	EQUALS
 IMUCAL3		EQUALS
+#ifdef ReconstructionTest2
+P20S9		EQUALS
+#endif
 		BNKSUM	32
 		
 		BANK	33
@@ -424,12 +427,9 @@ EBQPLACE	ECADR	QPLACES
 
 		BANK	37
 		EBANK=	RN1
-#ifdef ReconstructionTBD
-## <b>Reconstruction:</b>  The following constant was removed to conserve
-## a word of memory in bank 37 that overflowed due to implementing PCR TBD.
-## <pre>
-## EBRN1		ECADR	RN1
-## </pre>
+#ifdef Reconstruction807
+## <b>Reconstruction:</b>  The constant <code>EBRN1</code> was not being referenced.
+## It has been removed to conserve a word of memory in bank 37.
 #else
 EBRN1		ECADR	RN1
 #endif

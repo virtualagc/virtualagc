@@ -237,7 +237,11 @@ PREREAD1	EXTEND
 		MASK	BIT1
 		ADS	FLAGWRD1
 		
+#if defined(ReconstructionTest2)
+		CS	DRFTBIT
+#else
 		CA	POSMAX
+#endif
 		MASK	FLAGWRD2
 		TS	FLAGWRD2	# KNOCK DOWN DRIFT FLAG
 		
@@ -445,9 +449,9 @@ PIPLOOP		CCS	RUPTREG1
 		
 		TC	BANKCALL	# PIPA COMPENSATION CALL
 		CADR	1/PIPA
-		
-DVTOTUP		TC	INTPRET
 
+DVTOTUP		TC	INTPRET
+		
 #ifdef Reconstruction787
 ## <b>Reconstruction:</b> In the implementation of PCR 787, we selectively 
 ## make changes in the baseline (Comanche 55) based on code from Artemis 71.
@@ -476,7 +480,7 @@ TICKTTE		BON	DLOAD		# .05GSW IS SET =1 IN FRESH START.
 		STORE	TTE		# NEGATIVE AS IN A COUNTDOWN.
 					# DURING P61 THRU P63, 'TTE' IS DECREMENTED 
 					# AND IS ON CALL AND ON ENTRY DNLIST.
-## <b>Reconstruction:</b> End of `TICKTTE`.
+## <b>Reconstruction:</b> End of `TICKTTE` related changes.
 #endif
 
 		VLOAD	ABVAL		# GET ABS VALUE OF DELV
@@ -503,7 +507,11 @@ AVERAGEG	TC	PHASCHNG
 		TC	GENTRAN		# INTO RN, VN, GDT/12, GOBL/2,PIPTIME
 		ADRES	RN1
 		ADRES	RN
+#if defined(Reconstruction807)
+ENDCOPY		RELINT
+#else		
 		RELINT			# GENTRAN DOES AN INHINT
+#endif
 		TC	PHASCHNG
 		OCT	10035
 

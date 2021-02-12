@@ -445,9 +445,9 @@ PIPLOOP		CCS	RUPTREG1
 		
 		TC	BANKCALL	# PIPA COMPENSATION CALL
 		CADR	1/PIPA
-		
-DVTOTUP		TC	INTPRET
 
+DVTOTUP		TC	INTPRET
+		
 ## <b>Reconstruction:</b> In the implementation of PCR 787, we selectively 
 ## make changes in the baseline (Comanche 55) based on code from Artemis 71.
 ## The decision as to whether to do so or not is based on 
@@ -475,7 +475,7 @@ TICKTTE		BON	DLOAD		# .05GSW IS SET =1 IN FRESH START.
 		STORE	TTE		# NEGATIVE AS IN A COUNTDOWN.
 					# DURING P61 THRU P63, 'TTE' IS DECREMENTED 
 					# AND IS ON CALL AND ON ENTRY DNLIST.
-## <b>Reconstruction:</b> End of `TICKTTE`.
+## <b>Reconstruction:</b> End of `TICKTTE` related changes.
 
 		VLOAD	ABVAL		# GET ABS VALUE OF DELV
 			DELV
@@ -501,7 +501,7 @@ AVERAGEG	TC	PHASCHNG
 		TC	GENTRAN		# INTO RN, VN, GDT/12, GOBL/2,PIPTIME
 		ADRES	RN1
 		ADRES	RN
-		RELINT			# GENTRAN DOES AN INHINT
+ENDCOPY		RELINT
 		TC	PHASCHNG
 		OCT	10035
 

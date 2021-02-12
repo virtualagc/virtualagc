@@ -17,6 +17,12 @@
 #				broke the ability to build the installer
 #				for VirtualAGC.
 #		2016-11-11 RSB	Added the (optional) EXTRA_TARGETS.
+#		2021-02-12 RSB	When assembling, now first erases the existing
+#				MAIN.agc.bin file, if any.  I had found that for
+#				the work in progress on Comanche067 reconstruction,
+#				an older MAIN.agc.bin file could be used after
+#				failure of assembly, if it existed prior to the
+#				start of assembly.
 
 # Notes: 
 #
@@ -78,6 +84,7 @@ $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst: $(SOURCE)
 ifeq ($(BASENAME),TRIVIUM)
 	@echo TRIVIUM contains intentional errors and will not be assembled.
 else
+	-rm $(TOPLEVEL).agc.bin
 	../yaYUL/yaYUL --unpound-page $(EXTRA_YAYUL_ARGS) $(TOPLEVEL).agc >$(TOPLEVEL).agc.lst
 endif
 

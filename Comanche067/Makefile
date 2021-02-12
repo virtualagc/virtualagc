@@ -12,6 +12,17 @@
 #		2021-01-07 RSB	Restored the original non-gpp build whenever
 #				ReconstructionLevel is not defined.  The 
 #				gpp build occurs only with ReconstructionLevel.
+#		2021-02-12 RSB	Have reached the point in reconstruction where
+#				there are bank overflows (bank 37) that I just
+#				can't get rid of immediately, and will have to
+#				let persist for a while.  Under those 
+#				circumstances, no banksum diffs were generated
+#				for checking, so I've modified this makefile
+#				to get around that and always generate the diffs,
+#				as long as either Comanche067.bin *or* MAIN.agc.bin
+#				exists, in spite of assembly failure.  However, 
+#				it requires a special command-line construct:
+#					make || make diffComanche067sums
 
 # To build as before, using the .agc files that are already in the folder, just
 # use the same 'make' CLI syntax as before.  To use the with the preprocessor,
@@ -55,17 +66,22 @@
 #	The default is PreferredReconstruction.
 #	This automatically runs the preprocessor, then builts the preprocessed
 #	.agc files normally.
-#   7.	ONE IMPORTANT TRICK: If you change the ReconstructionLevel you've been
+#   7.	AN IMPORTANT TRICK: If there's an assembly error, and in *particular* if there's
+#	a memory-bank overflow, 'make' will not generate the banksum diffs if run as
+#	shown above, but it will generate all of the files needed for the diffs.  The
+#	trick is to run
+#		ReconstructionLevel=NAME make [TARGETS] || make diffComanche067sums
+#   8.	ANOTHER IMPORTANT TRICK: If you change the ReconstructionLevel you've been
 #	using (for example, changing from ReconstructionLevel=PreferredReconstruction
 #	to ReconstructionLevel=NoReconstruction), then 'make' doesn't know to 
 #	re-preprocess the files.  You have to do
 #		touch gpp/defines.default
 #	to trick it into doing so.
-#   8.  Annotations now just read
+#   9.  Annotations now just read
 #		## <b>Reconstruction:</b> ...
 #	rather than things like
 #		## <b>Reconstruction 5:</b> ...
-#   9.	When the reconstruction is eventually complete, we'll comment out the
+#   10.	When the reconstruction is eventually complete, we'll comment out the
 #	final stuff in this file.  That will prevent the 
 #	preprocessor from operating in the future, and therefore freeze the
 #	.agc files at that point in time.
@@ -74,12 +90,14 @@ BASENAME=Comanche067
 
 NO_BINSOURCE=yes
 EXTRA_TARGETS=diffComanche067sums
-EXTRA_YAYUL_ARGS=--reconstruction
+EXTRA_YAYUL_ARGS=--reconstruction --force
 
 include ../Makefile.inc
 
+.NOTPARALLEL:
 .PHONY: diffComanche067sums
-diffComanche067sums:
+diffComanche067sums: 
+	if test -f MAIN.agc.bin ; then mv MAIN.agc.bin Comanche067.bin ; fi
 	../Tools/check_buggers.py Comanche067.bin Comanche067.buggers
 
 ifdef ReconstructionLevel

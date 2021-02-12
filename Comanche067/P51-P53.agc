@@ -268,9 +268,7 @@ GYCRS		VLOAD	MXV
 		CADR	IMUPULSE
 		TC	BANKCALL
 		CADR	IMUSTALL
-## <b>Reconstruction:</b>  The following subroutine call was changed to reflect 
-## replacement of <code>CURTAINS</code> by <code>217ALARM</code> throughout P51-P53.
-		TC	217ALARM
+		TC	CURTAINS
 		TC	PHASCHNG
 		OCT	04024
 		TC	INTPRET
@@ -1050,9 +1048,7 @@ R55.2		TC	PHASCHNG
 		CADR	IMUPULSE
 		TC	BANKCALL
 		CADR	IMUSTALL
-## <b>Reconstruction:</b>  The following subroutine call was changed to reflect 
-## replacement of <code>CURTAINS</code> by <code>217ALARM</code> throughout P51-P53.
-		TC	217ALARM
+		TC	CURTAINS
 		TC	PHASCHNG
 		OCT	05024
 		OCT	13000
@@ -1653,9 +1649,7 @@ R53A		CA	MARKINDX	# NUMBER OF MARKS
 		CADR	SXTMARK
 		TC	BANKCALL
 		CADR	OPTSTALL
-## <b>Reconstruction:</b>  The following subroutine call was changed to reflect 
-## replacement of <code>CURTAINS</code> by <code>217ALARM</code> throughout P51-P53.
-		TC	217ALARM
+		TC	CURTAINS
 		INDEX	MARKSTAT
 		CCS	QPRET		# NUMBER OF MARKS ACTUALLY DONE
 		TCF	R53B
@@ -2203,16 +2197,11 @@ CORSCALL	TC	BANKCALL
 		CADR	IMUCOARS	# PERFORM COARSE ALIGN
 		TC	BANKCALL
 		CADR	IMUSTALL
-		TC	217ALARM	# BAD END
+		TC	CURTAINS	# BAD END
 		TC	BANKCALL
 		CADR	IMUFIN20	# PERFORM FINE ALIGN
 		TC	BANKCALL
 		CADR	IMUSTALL
-		TC	217ALARM	# BAD END
+		TC	CURTAINS	# BAD END
 		TC	QMIN
-217ALARM	INHINT			# JUST LIKE 'CURTAINS', NOW DEPARTED
-		CA	Q
-		TC	ALARM2
-		OCT	00217
-		TC	ALMCADR		# RETURN TO USER
 
