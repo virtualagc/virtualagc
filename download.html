@@ -89,6 +89,7 @@ You
 
 
 
+
                     will be prompted for a password, which is
                     "virtualagc".]</font></li>
               </ul>
@@ -163,6 +164,7 @@ the
 
 
 
+
               VM</a><br>
             <br>
             or <br>
@@ -178,6 +180,7 @@ the
           </td>
           <td valign="middle"><a
               href="Downloads/VirtualAGC-Ubuntu-14.04-32-2017-08-31.tar.xz">2017-08-31,
+
 
 
 
@@ -218,6 +221,7 @@ the
           </td>
           <td valign="middle"><a
               href="Downloads/VirtualAGC-Windows-2017-08-31.tar.xz">2017-08-31,
+
 
 
 
@@ -275,6 +279,7 @@ the
 
 
 
+
               21MB</a></td>
           <td valign="top"><a
               href="#Installer_for_Ubuntu_14.04_32-bit_x86">Using Ubuntu
@@ -297,11 +302,13 @@ the
 
 
 
+
               23MB</a><br>
           </td>
           <td valign="top"><a
               href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
 Ubuntu
+
 
 
 
@@ -332,11 +339,13 @@ Ubuntu
 
 
 
+
               42MB</a><br>
           </td>
           <td valign="top"><a
               href="download.html#Installer_for_Ubuntu_14.04_32-bit_x86">Using
 Ubuntu
+
 
 
 
@@ -371,6 +380,7 @@ Ubuntu
 
 
 
+
                 installer</a><br>
             </font> </td>
         </tr>
@@ -381,6 +391,7 @@ Ubuntu
           </td>
           <td valign="top"><a
               href="Downloads/VirtualAGC-Raspbian-2017-03-29.tar.xz">2017-03-29,
+
 
 
 
@@ -426,6 +437,7 @@ Ubuntu
 
 
 
+
               23MB</a></td>
           <td valign="top"><a href="#Installer_for_Windows">Using
               Windows tarball</a></td>
@@ -451,6 +463,7 @@ Ubuntu
       <ul>
         <li><a href="#Characteristics_of_the_Virtual_AGC_VM">Characteristics
 of
+
 
 
 
@@ -530,6 +543,7 @@ to
 
 
 
+
           this page</a>) FreeBSD as well even though the latter is not
         obvious from the VirtualBox website.<br>
       </li>
@@ -550,6 +564,7 @@ to
           href="#Downloading_and_Building_Virtual_AGC">download the
           Virtual AGC source code, and perhaps build it yourself</a>.&nbsp;
 This
+
 
 
 
@@ -597,6 +612,7 @@ This
     <p>The virtual-machine approach should work with any host system
       supported by <a href="http://www.virtualbox.org">VirtualBox</a>:&nbsp;
 namely,
+
 
 
 
@@ -771,6 +787,7 @@ namely,
 
 
 
+
           4.3.40</a>, but it should work with later versions as
         well.&nbsp; If you have a different version, you may find
         yourself wanting to reinstall VirtualBox's "guest additions"; if
@@ -860,6 +877,7 @@ a
 
 
 
+
         script</a> that does the same thing.&nbsp; Just put it somewhere
       (say in the "home" directory, /home/virtualagc/), and then from a
       command-line run the following command:<br>
@@ -925,6 +943,7 @@ about
 
 
 
+
           configuring it</a>.<br>
       </li>
     </ol>
@@ -959,6 +978,7 @@ about
       <li> The popup window that appears will ask you for the location
         of the program you want to run.&nbsp; It is C:\Users\<i>YourNameHere</i>\VirtualAGC\bin\VirtualAGC.exe.</li>
       <li> After the shortcut has been created on the desktop, <i>right</i>-click
+
 
 
 
@@ -1009,10 +1029,12 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
 
 
 
@@ -1045,11 +1067,13 @@ the
 
 
 
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
 
 
 
@@ -1075,6 +1099,7 @@ href="https://github.com/virtualagc/virtualagc/archive/master.zip">in a
     to run Virtual AGC on, and that's the topic of the next few
     sections.&nbsp; It's also possible that <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
 
 
 
@@ -1125,6 +1150,13 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
       <ul>
         <li>Could be liballegro4-dev</li>
         <li>Could be libwxgtk3.0-dev</li>
+        <li>Note that using wxWidgets 3.1.<i>x</i> (developmental
+          version) or 3.2.<i>x</i> (stable version, when it is
+          eventually released) should also be possible.&nbsp; At the
+          present writing, that would entail building wxWidgets from
+          source.&nbsp; Moreover, it requires Virtual AGC source code
+          from 2021-03-22 or later which while it <i>appears</i> to
+          work, may not be entirely debugged.</li>
       </ul>
       <li>Versions of Linux I don't personally support, but about which
         I have learned possibly-helpful info:</li>
@@ -1192,6 +1224,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
+
         Makefile</a> itself for more explanation.&nbsp; The switches can
       override not merely the filesystem paths for locating the compiler
       (when you have multiple versions of gcc or g++ installed), but can
@@ -1254,9 +1287,8 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
         libwxgtk2.8-dev libsdl-dev libncurses5-dev liballegro4-dev git<br>
         git clone --depth 1 https://github.com/virtualagc/virtualagc</p>
     </blockquote>
-    <p>The "sudo apt-get install ..." step given above is inadequate in
-      some versions of Raspbian, and may need modifications:<br>
-    </p>
+    The "sudo apt-get install ..." step given above is inadequate in
+    some versions of Raspbian, and may need modifications:<br>
     <ul>
       <li>If libsdl1.2debian is pre-installed on your system, it may
         conflict with the installation of libsdl-dev described
@@ -1314,6 +1346,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
 That
+
 
 
 
@@ -1401,6 +1434,7 @@ That
     <ol>
       <li><a
 href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads/index.html">Install
+
 
 
 
@@ -1505,6 +1539,7 @@ version
 
 
 
+
           of Xcode for your version of Mac OS X</a> ... of course!&nbsp;
         I use Xcode 4.6.3.<br>
       </li>
@@ -1552,6 +1587,7 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
 
 
 
@@ -1625,15 +1661,25 @@ You
     </p>
     <ol>
       <li>Install Xcode as usual.</li>
-      <li>I am told (thanks to Ludo Visser) that at least once you reach
-        MacOS X 11.2, wxWidgets 2.8 and 3.0 either can no longer be used
-        or else no longer work properly with Virtual AGC, so it is
-        necessary to go to the <i>next</i> version of wxWidgets ...
-        which at the time I'm writing this is the developmental version
-        3.1, which will eventually be released as 3.2.&nbsp; Ludo
-        advises installing it via "<tt>port install wxWidgets-3.2</tt>"
-        from macports; Virtual AGC source code from 2021-03-22 or later
-        is also needed.<br>
+      <li>I am told (thanks to Ludo Visser) that (at least once you
+        reach MacOS X 11.2), wxWidgets 2.8 and 3.0 either can no longer
+        be used or else no longer work properly with Virtual AGC.&nbsp;
+        So in that case it is apparently necessary on the Mac to go to
+        the <i>next</i> version of wxWidgets ... which at the time I'm
+        writing this is the developmental version 3.1, which will
+        eventually be released as 3.2.&nbsp; Ludo advises installing it
+        via "<tt>port install wxWidgets-3.2</tt>" from macports; Virtual
+        AGC source code from 2021-03-22 or later is also needed.&nbsp;
+        Also, for that same vintage of MacOS X, I'm told that the
+        yaLVDC, yaACA3, and jWiz programs in Virtual AGC currently won't
+        build.&nbsp; If you have no joystick and don't want to simulate
+        the LVDC, you can eliminate these programs directly from the
+        Makefile by removing the lines reading "<tt>SUBDIRS += yaLVDC</tt>",
+        "<tt>SUBDIRS += yaLVDC</tt>", and "<tt>SUBDIRS += yaLVDC</tt>".&nbsp;
+        I apologize for forcing you to do that yourself rather than
+        handling it transparently for you, but I don't want to eliminate
+        these programs without understanding more precisely why and
+        whether or not it really needs to be done on a permanent basis.
       </li>
       <li>Presumably, most of the instructions in <a
           href="download.html#Older_Macs:_Xcode_with_gcc">the preceding
@@ -1665,7 +1711,7 @@ compiler.&nbsp; You need to know the actual paths to the true
 gcc and g++ programs, and do this:</li></ol><blockquote><blockquote><tt>make MACOSX=yes FORCE_cc=<i>/path/to/gcc</i>
 FORCE_CC=<i>/path/to/g++</i> clean install<br></tt></blockquote></blockquote>
 As to whether either of these approaches does anything useful at
-all, your guess is as good as mine.&nbsp; If you try it, let me know
+all, your mileage may vary.&nbsp; If you try it, feel free to let me know
 what happens.<br><blockquote><blockquote> </blockquote></blockquote><h3><a name="Windows" id="Windows"></a>Windows</h3><table summary="" cellspacing="2" cellpadding="2" border="1"><tbody><tr><td valign="middle" align="center"><img alt="" src="greenCheckmark.png" width="72" height="75"><br></td><td valign="middle" align="center"><big><big><b>This works!<br></b> <small><small><small><i>Last verified: 2017-08-31</i></small></small></small><br></big></big></td></tr></tbody></table><br>
 This section relates to building Virtual AGC on 64-bit Windows 7,
 though the procedure doesn't seem to have anything in it that's
