@@ -138,7 +138,8 @@
  *                              invocations; it seems never to have been
  *                              supported, and is now causing assertion
  *                              failures with wxWidgets 3.1.x. Eliminated combinations
- *                              of wxEXPAND with wxCENTER_xxx.
+ *                              of wxEXPAND with wxCENTER_xxx.  Eliminated
+ *                              wxALIGN_CENTER_HORIZONTAL in horizontal sizers.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -1752,11 +1753,11 @@ VirtualAGC::do_layout()
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
       HeaderSizer->Add(LeftSizer, 1, wxEXPAND, 0);
       MiddleSizer->Add(20, 20, 1,
-          wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+          wxALIGN_CENTER_VERTICAL, 0);
       MiddleSizer->Add(PatchBitmap, 0,
-          wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+          wxALIGN_CENTER_VERTICAL, 0);
       MiddleSizer->Add(20, 20, 1,
-          wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+          wxALIGN_CENTER_VERTICAL, 0);
       HeaderSizer->Add(MiddleSizer, 1, wxEXPAND, 0);
       RightSizer->Add(Patch12Bitmap, 0,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
@@ -1778,7 +1779,7 @@ VirtualAGC::do_layout()
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
       sizer_4->Add(SimTypeLabel, 0, wxALIGN_CENTER_HORIZONTAL, 0);
       sizer_11->Add(20, 20, 0,
-          wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+          wxALIGN_CENTER_VERTICAL, 0);
       sizer_14->Add(20, 10, 0, wxEXPAND, 0);
     }
   int mission;
@@ -1795,13 +1796,13 @@ VirtualAGC::do_layout()
   sizer_11->Add(sizer_13, 1, wxEXPAND, 0);
   if (!maximumSquish)
     sizer_11->Add(20, 20, 0,
-        wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+       wxALIGN_CENTER_VERTICAL, 0);
   sizer_4->Add(sizer_11, 1, wxEXPAND, 0);
   sizer_2->Add(sizer_4, 1, wxEXPAND, 0);
 
   sizer_6->Add(static_line_2, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_6->Add(20, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+    sizer_6->Add(20, 20, 0, wxALIGN_CENTER_VERTICAL,
         0);
   if (!maximumSquish)
     sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
@@ -1856,15 +1857,15 @@ VirtualAGC::do_layout()
   sizer_12->Add(NoviceButton, 0, 0, 2);
   if (!maximumSquish)
     sizer_12->Add(20, 20, 0,
-        wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+        wxALIGN_CENTER_VERTICAL, 0);
   sizer_12->Add(ExpertButton, 0, 0, 0);
   sizer_7->Add(sizer_12, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   if (!maximumSquish)
     sizer_7->Add(20, 10, 0, 0, 0);
-  sizer_6->Add(sizer_7, 1, wxALIGN_CENTER_HORIZONTAL, 0);
+  sizer_6->Add(sizer_7, 1, 0, 0);
   if (!maximumSquish)
-    sizer_6->Add(20, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+    sizer_6->Add(20, 20, 0, wxALIGN_CENTER_VERTICAL,
         0);
   sizer_6->Add(static_line_3, 0, wxEXPAND, 0);
   sizer_5->Add(sizer_6, 0, wxEXPAND, 0);
@@ -1873,7 +1874,7 @@ VirtualAGC::do_layout()
     sizer_5->Add(20, 10, 10, wxEXPAND, 0);
   if (!maximumSquish)
     sizer_1_copy->Add(20, 20, 1, 0, 0);
-  sizer_1_copy->Add(AgcSourceButton, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+  sizer_1_copy->Add(AgcSourceButton, 0, 0, 0);
   if (!maximumSquish)
     sizer_1_copy->Add(20, 20, 0, 0, 0);
   sizer_1_copy->Add(AeaSourceButton, 0, 0, 0);
@@ -1895,7 +1896,7 @@ VirtualAGC::do_layout()
       sizer_8->Add(20, 10, 0,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
       sizer_9->Add(20, 20, 0,
-          wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+          wxALIGN_CENTER_VERTICAL, 0);
     }
   agcStartupBox = sizer_18;
   sizer_18->Add(StartupWipeButton, 0, 0, 0);
@@ -1959,7 +1960,7 @@ VirtualAGC::do_layout()
     sizer_10->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL, 0);
   sizer_9->Add(sizer_10, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_9->Add(20, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+    sizer_9->Add(20, 20, 0, wxALIGN_CENTER_VERTICAL,
         0);
   sizer_8->Add(sizer_9, 1, wxEXPAND, 0);
   sizer_2->Add(sizer_8, 1, wxEXPAND, 0);
@@ -1969,15 +1970,15 @@ VirtualAGC::do_layout()
     TopSizer->Add(20, 15, 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
   sizer_3->Add(RunButton, 0,
-      wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+      wxALIGN_CENTER_VERTICAL, 0);
+  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(DefaultsButton, 0,
-      wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+      wxALIGN_CENTER_VERTICAL, 0);
+  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(ExitButton, 0,
-      wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+      wxALIGN_CENTER_VERTICAL, 0);
   TopSizer->Add(sizer_3, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   if (!maximumSquish)
