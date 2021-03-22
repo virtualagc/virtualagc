@@ -797,7 +797,7 @@ else
 	@echo "Run Virtual AGC from its desktop icon."
 	@echo "Or else, run Virtual AGC from a command-line as follows:"
 	@echo "  cd ~/VirtualAGC/Resources"
-	@echo "  ../bin//VirtualAGC"
+	@echo "  ../bin/VirtualAGC"
 	@echo "================================================================"
 endif
 endif
