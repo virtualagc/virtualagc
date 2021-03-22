@@ -137,7 +137,8 @@
  *                              all wxALIGN_CENTRE's from wxStaticText
  *                              invocations; it seems never to have been
  *                              supported, and is now causing assertion
- *                              failures with wxWidgets 3.1.x.
+ *                              failures with wxWidgets 3.1.x. Eliminated combinations
+ *                              of wxEXPAND with wxCENTER_xxx.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -1784,12 +1785,12 @@ VirtualAGC::do_layout()
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
     sizer_19->Add(missionRadioButtons[mission - ID_FIRSTMISSION], 0, 0, 0);
   sizer_15->Add(AgcCustomButton, 0, 0, 0);
-  sizer_15->Add(AgcCustomFilename, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL, 0);
+  sizer_15->Add(AgcCustomFilename, 1, wxEXPAND, 0);
   sizer_15->Add(AgcFilenameBrowse, 0, 0, 0);
-  sizer_19->Add(sizer_15, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL, 0);
+  sizer_19->Add(sizer_15, 0, wxEXPAND, 0);
   sizer_14->Add(sizer_19, 1, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_14->Add(20, 10, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL, 0);
+    sizer_14->Add(20, 10, 0, wxEXPAND, 0);
   sizer_13->Add(sizer_14, 1, wxEXPAND, 0);
   sizer_11->Add(sizer_13, 1, wxEXPAND, 0);
   if (!maximumSquish)
@@ -1901,7 +1902,7 @@ VirtualAGC::do_layout()
   sizer_18->Add(StartupPreserveButton, 0, 0, 0);
   sizer_18->Add(StartupResumeButton, 0, 0, 0);
   sizer_34->Add(CustomResumeButton, 0, 0, 0);
-  sizer_34->Add(CoreFilename, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL, 0);
+  sizer_34->Add(CoreFilename, 1, wxEXPAND, 0);
   sizer_34->Add(CoreBrowse, 0, 0, 0);
   sizer_34->Add(CoreSaveButton, 0, 0, 0);
   sizer_18->Add(sizer_34, 1, wxEXPAND, 0);
@@ -1933,14 +1934,12 @@ VirtualAGC::do_layout()
   grid_sizer_1->Add(AgcDebugNormalButton, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_1->Add(AgcDebugMonitorButton, 0, wxALIGN_CENTER_VERTICAL, 0);
   grid_sizer_1->Add(AeaDebugLabel, 0, wxALIGN_CENTER_VERTICAL, 0);
-  grid_sizer_1->Add(AeaDebugNormalButton, 0, wxEXPAND | wxALIGN_CENTER_VERTICAL,
-      0);
-  grid_sizer_1->Add(AeaDebugMonitorButton, 0,
-      wxEXPAND | wxALIGN_CENTER_VERTICAL, 0);
+  grid_sizer_1->Add(AeaDebugNormalButton, 0, wxEXPAND, 0);
+  grid_sizer_1->Add(AeaDebugMonitorButton, 0, wxEXPAND, 0);
   sizer_38->Add(grid_sizer_1, 1, wxEXPAND, 0);
   sizer_10->Add(sizer_38, 0, wxEXPAND, 0);
   if (!maximumSquish)
-    sizer_10->Add(20, 1, 1, wxEXPAND | wxALIGN_CENTER_HORIZONTAL, 0);
+    sizer_10->Add(20, 1, 1, wxEXPAND, 0);
   sizer_20->Add(FlightProgram4Button, 0, 0, 0);
   sizer_20->Add(FlightProgram5Button, 0, 0, 0);
   sizer_20->Add(FlightProgram6Button, 0, 0, 0);
@@ -1949,10 +1948,9 @@ VirtualAGC::do_layout()
   if (!maximumSquish)
     {
       sizer_15_copy->Add(AeaCustomButton, 0, 0, 0);
-      sizer_15_copy->Add(AeaCustomFilename, 1,
-          wxEXPAND | wxALIGN_CENTER_VERTICAL, 0);
+      sizer_15_copy->Add(AeaCustomFilename, 1, wxEXPAND, 0);
       sizer_15_copy->Add(AeaFilenameBrowse, 0, 0, 0);
-      sizer_20->Add(sizer_15_copy, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL, 0);
+      sizer_20->Add(sizer_15_copy, 0, wxEXPAND, 0);
     }
   sizer_30->Add(sizer_20, 0, wxEXPAND, 0);
   sizer_29->Add(sizer_30, 1, wxEXPAND, 0);
@@ -3304,16 +3302,14 @@ Simulation::do_layout()
       sizer_26->Add(20, 20, 1,
           wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
     }
-  sizer_25->Add(sizer_26, 0,
-      wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+  sizer_25->Add(sizer_26, 0, wxEXPAND, 0);
   if (!maximumSquish)
     sizer_25->Add(20, 20, 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
   if (!maximumSquish)
     sizer_27->Add(20, 20, 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_27->Add(SimulationLabel, 1,
-      wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+  sizer_27->Add(SimulationLabel, 1, wxEXPAND, 0);
   if (!maximumSquish)
     sizer_27->Add(20, 20, 0,
         wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
