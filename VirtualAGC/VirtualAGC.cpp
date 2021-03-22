@@ -1,5 +1,5 @@
 /*
- * Copyright 2009,2010,2016-2020 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2009,2010,2016-2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -130,6 +130,10 @@
  *                              displayed in the Simulation Status window was unnecessarily wide
  *                              and couldn't be used without the horizontal scroll bar.  I've
  *                              reformatted the message to fix that.
+ *              2021-03-22 RSB  Changed constants (wxFONTFAMILY_xxx,
+ *                              wxFONTSTYLE_xxx, wxFONTWEIGHT_xxx) used
+ *                              in wxFont invocations, to avoid "deprecated"
+ *                              warnings with wxWidgets 3.1.x.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -1427,13 +1431,13 @@ VirtualAGC::set_properties()
               "This is the mission patch for Apollo 17, the last moon landing in the Apollo program.  This was the only night launch in the Apollo program, and thus the only one which could be seen easily by large numbers of Americans.  It was also the first and only mission with a geologist aboard.  The astronauts were Gene Cernan, Ronald Evans, and Jack Schmitt.  Schmitt was the geologist and later a U.S. Senator."));
       SimTypeLabel->SetBackgroundColour(wxColour(255, 255, 255));
       SimTypeLabel->SetFont(
-          wxFont(12, wxDEFAULT, wxNORMAL, wxBOLD, 1, wxT("")));
+          wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 1, wxT("")));
       SimTypeLabel->SetToolTip(
           wxT(
               "In this area, you can select the Apollo mission and the spacecraft software version."));
       SimTypeLabel2->SetBackgroundColour(wxColour(255, 255, 255));
       SimTypeLabel2->SetFont(
-          wxFont(12, wxDEFAULT, wxNORMAL, wxBOLD, 1, wxT("")));
+          wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 1, wxT("")));
       SimTypeLabel2->SetToolTip(
           wxT(
               "In this area, you can select the Apollo mission and the spacecraft software version."));
@@ -1455,7 +1459,7 @@ VirtualAGC::set_properties()
   AgcCustomFilename->SetBackgroundColour(wxColour(255, 255, 255));
   AgcCustomFilename->SetForegroundColour(wxColour(16, 16, 16));
   AgcCustomFilename->SetFont(
-      wxFont(10, wxDEFAULT, wxNORMAL, wxNORMAL, 0, wxT("")));
+      wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   AgcCustomFilename->SetToolTip(
       wxT(
           "If you wish to run guidance-computer software you have written yourself rather than actual mission software, you can put the filename here.  It must already have been compiled into binary executable format.  If you want to actually compile the software in addition, use the \"...\" button to the right."));
@@ -1470,7 +1474,7 @@ VirtualAGC::set_properties()
     {
       DeviceListLabel->SetBackgroundColour(wxColour(255, 255, 255));
       DeviceListLabel->SetFont(
-          wxFont(12, wxDEFAULT, wxNORMAL, wxBOLD, 1, wxT("")));
+          wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 1, wxT("")));
       DeviceListLabel->SetToolTip(
           wxT(
               "In this area, you can select the particular computers and peripherals devices which will be simulated, along with the controls that will be displayed."));
@@ -1556,7 +1560,7 @@ VirtualAGC::set_properties()
   if (!maximumSquish)
     {
       OptionList->SetBackgroundColour(wxColour(255, 255, 255));
-      OptionList->SetFont(wxFont(12, wxDEFAULT, wxNORMAL, wxBOLD, 1, wxT("")));
+      OptionList->SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 1, wxT("")));
       OptionList->SetToolTip(
           wxT(
               "In this area, you can select various infrequently-used options that can assist in special purposes."));
@@ -3253,7 +3257,7 @@ Simulation::set_properties()
   _icon.CopyFromBitmap(wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
   SetIcon(_icon);
   SetBackgroundColour(wxColour(255, 255, 255));
-  SimulationLabel->SetFont(wxFont(14, wxDEFAULT, wxNORMAL, wxBOLD, 0, wxT("")));
+  SimulationLabel->SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, wxT("")));
   MoreButton->SetToolTip(
       wxT(
           "Click this button to display the script which is being run.  This could be helpful to know if you'd like to run a custom simulation that VirtualAGC can't handle, such as having 2 DSKYs, ganging multiple PCs interconnected via ethernet, etc."));
@@ -3264,12 +3268,12 @@ Simulation::set_properties()
           "Click this button to use the digital-uplink to send data to the AGC or AEA from a pre-created script of commands.  This allows setting the AGC or AEA to a known configuration suitable for your purposes, much in the same way mission control could have done this in real missions."));
   UplinkText->SetMinSize(wxSize(480, 480));
   UplinkText->SetBackgroundColour(wxColour(230, 230, 230));
-  UplinkText->SetFont(wxFont(10, wxMODERN, wxNORMAL, wxNORMAL, 0, wxT("")));
+  UplinkText->SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   UplinkPanel->SetBackgroundColour(wxColour(255, 255, 255));
   UplinkPanel->Hide();
   ScriptText->SetMinSize(wxSize(480, 480));
   ScriptText->SetBackgroundColour(wxColour(230, 230, 230));
-  ScriptText->SetFont(wxFont(8, wxMODERN, wxNORMAL, wxNORMAL, 0, wxT("")));
+  ScriptText->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
   DetailPanel->SetBackgroundColour(wxColour(255, 255, 255));
 }
 

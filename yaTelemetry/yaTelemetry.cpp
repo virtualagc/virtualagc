@@ -29,6 +29,10 @@
                                 error which appears in Windows.
                 2009-04-07 RSB  Began adding stuff related to MSK formtting.
                 2021-03-21 RSB  wxADJUST_MINSIZE no longer available.
+                2021-03-22 RSB  Changed constants (wxFONTFAMILY_xxx,
+                                wxFONTSTYLE_xxx, wxFONTWEIGHT_xxx) used
+                                in wxFont invocations, to avoid "deprecated"
+                                warnings with wxWidgets 3.1.x.
   
   The program does nothing more than connect to yaAGC on a socket, and then
   display any telemetry messages it receives.  There is a single active widget,
@@ -312,7 +316,7 @@ MainFrameClass::Print (int x, int y, wxString &Value)
 void 
 MainFrameClass::FontSize (int Points)
 {
-  TextCtrl->SetFont(wxFont(Points, wxMODERN, wxNORMAL, wxNORMAL, 0, wxT("")));
+  TextCtrl->SetFont(wxFont(Points, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
 }
 
 // Remove frame decorations.
@@ -418,7 +422,7 @@ SimpleFrameClass::Print (int x, int y, wxString &Value)
 void 
 SimpleFrameClass::FontSize (int Points)
 {
-  TextCtrl->SetFont(wxFont(Points, wxMODERN, wxNORMAL, wxNORMAL, 0, wxT("")));
+  TextCtrl->SetFont(wxFont(Points, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
 }
 
 void
@@ -598,7 +602,7 @@ void MainFrameClass::set_properties()
     bitmap_5->SetBackgroundColour(wxColour(0, 0, 0));
     TextCtrl->SetBackgroundColour(wxColour(0, 0, 0));
     TextCtrl->SetForegroundColour(wxColour(192, 192, 192));
-    TextCtrl->SetFont(wxFont(11, wxMODERN, wxNORMAL, wxNORMAL, 0, wxT("")));
+    TextCtrl->SetFont(wxFont(11, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, wxT("")));
     bitmap_3->SetBackgroundColour(wxColour(0, 0, 0));
     bitmap_2->SetBackgroundColour(wxColour(0, 0, 0));
     // end wxGlade
