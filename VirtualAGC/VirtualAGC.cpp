@@ -133,7 +133,11 @@
  *              2021-03-22 RSB  Changed constants (wxFONTFAMILY_xxx,
  *                              wxFONTSTYLE_xxx, wxFONTWEIGHT_xxx) used
  *                              in wxFont invocations, to avoid "deprecated"
- *                              warnings with wxWidgets 3.1.x.
+ *                              warnings with wxWidgets 3.1.x. Removed
+ *                              all wxALIGN_CENTRE's from wxStaticText
+ *                              invocations; it seems never to have been
+ *                              supported, and is now causing assertion
+ *                              failures with wxWidgets 3.1.x.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -529,11 +533,9 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   if (!maximumSquish)
     {
       SimTypeLabel = new wxStaticText(this, wxID_ANY,
-          wxT("AGC Simulation Type"), wxDefaultPosition, wxDefaultSize,
-          wxALIGN_CENTRE);
+          wxT("AGC Simulation Type"), wxDefaultPosition, wxDefaultSize);
       SimTypeLabel2 = new wxStaticText(this, wxID_ANY,
-          wxT("AGC Simulation Type"), wxDefaultPosition, wxDefaultSize,
-          wxALIGN_CENTRE);
+          wxT("AGC Simulation Type"), wxDefaultPosition, wxDefaultSize);
     }
   for (int i = ID_FIRSTMISSION; i < ID_AGCCUSTOMBUTTON; i++)
     {
@@ -558,7 +560,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
       wxDefaultPosition, wxDefaultSize, SoftwareVersionNames);
   if (!maximumSquish)
     DeviceListLabel = new wxStaticText(this, wxID_ANY, wxT("Interfaces"),
-        wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+        wxDefaultPosition, wxDefaultSize);
   DeviceAgcCheckbox = new wxCheckBox(this, ID_DEVICEAGCCHECKBOX,
       wxT("Guidance Computer"));
   DeviceDskyCheckbox = new wxCheckBox(this, ID_DEVICEDSKYCHECKBOX,
@@ -596,7 +598,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   if (!maximumSquish)
     {
       OptionList = new wxStaticText(this, wxID_ANY, wxT("Options"),
-          wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+          wxDefaultPosition, wxDefaultSize);
     }
   StartupWipeButton = new wxRadioButton(this, ID_STARTUPWIPEBUTTON,
       wxT("Restart program, wiping memory"), wxDefaultPosition, wxDefaultSize,
@@ -3151,7 +3153,7 @@ Simulation::Simulation(wxWindow* parent, int id, const wxString& title,
         wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
   SimulationLabel = new wxStaticText(this, ID_SIMULATIONLABEL,
       wxT("Apollo 13 Lunar Module\nsimulation in progress!"), wxDefaultPosition,
-      wxDefaultSize, wxALIGN_CENTRE);
+      wxDefaultSize);
   MoreButton = new wxButton(this, ID_MORE, wxT("More"));
   LessButton = new wxButton(this, ID_LESS, wxT("Less"));
   UploadButton = new wxButton(this, ID_UPLOAD, wxT("Uplink"));

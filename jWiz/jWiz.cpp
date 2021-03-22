@@ -30,7 +30,11 @@
 		2021-03-22 RSB  Changed constants (wxFONTFAMILY_xxx,
 		                wxFONTSTYLE_xxx, wxFONTWEIGHT_xxx) used
 		                in wxFont invocations, to avoid "deprecated"
-		                warnings with wxWidgets 3.1.x.
+		                warnings with wxWidgets 3.1.x. Removed
+		                all wxALIGN_CENTRE's from wxStaticText
+		                invocations; it seems never to have been
+		                supported, and is now causing assertion
+		                failures with wxWidgets 3.1.x.
 */
 
 #include "jWiz.h"
@@ -80,7 +84,7 @@ MainFrameClass::MainFrameClass(wxWindow* parent, int id, const wxString& title, 
     sizer_4_copy_copy_staticbox = new wxStaticBox(Panel3, -1, wxT("Configure Last-Resort Joystick Handler (yaACA)"));
     sizer_9_copy_staticbox = new wxStaticBox(Panel2, -1, wxT("Configure Alternative Joystick Handler (yaACA2)"));
     panel_1_copy_copy_copy_2 = new wxPanel(Panel1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER|wxTAB_TRAVERSAL);
-    Label1a_copy = new wxStaticText(panel_1_copy_copy_copy_2, wxID_ANY, wxT("Step\n#1"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+    Label1a_copy = new wxStaticText(panel_1_copy_copy_copy_2, wxID_ANY, wxT("Step\n#1"), wxDefaultPosition, wxDefaultSize);
     Label1b_copy = new wxStaticText(Panel1, wxID_ANY, wxT("Always try this first!\nRepeat as necessary."));
     Checkmark3 = new wxStaticBitmap(Panel1, wxID_ANY, wxBitmap(wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
     label_1_copy_2 = new wxStaticText(Panel1, wxID_ANY, wxT("Axis:"));
@@ -107,7 +111,7 @@ MainFrameClass::MainFrameClass(wxWindow* parent, int id, const wxString& title, 
     Default3Button = new wxButton(Panel1, ID_DEFAULT3BUTTON, wxT("Default"));
     Test3Button = new wxButton(Panel1, ID_TEST3BUTTON, wxT("Test"));
     Set3Button = new wxButton(Panel1, ID_SET3BUTTON, wxT("Set"));
-    Label2a = new wxStaticText(panel_1_copy_copy_copy_copy, wxID_ANY, wxT("Step\n#3"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+    Label2a = new wxStaticText(panel_1_copy_copy_copy_copy, wxID_ANY, wxT("Step\n#3"), wxDefaultPosition, wxDefaultSize);
     Label2b = new wxStaticText(Panel3, wxID_ANY, wxT("Try this only when steps #1-2 fail!\nRepeat as necessary."));
     Checkmark1 = new wxStaticBitmap(Panel3, wxID_ANY, wxBitmap(wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
     RollStickLabel_copy = new wxStaticText(Panel3, wxID_ANY, wxT("Stick:"));
@@ -136,11 +140,11 @@ MainFrameClass::MainFrameClass(wxWindow* parent, int id, const wxString& title, 
     YawOffset = new wxSpinCtrl(Panel3, ID_YAWOFFSET, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -255, 255);
     DefaultButton = new wxButton(Panel3, ID_DEFAULTBUTTON, wxT("Default"));
     TestButton = new wxButton(Panel3, ID_TESTBUTTON, wxT("Test/Set"));
-    Label3a_copy_copy_copy = new wxStaticText(panel_1_copy_copy_copy_1_copy_copy_copy, wxID_ANY, wxT("Step\n#2"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+    Label3a_copy_copy_copy = new wxStaticText(panel_1_copy_copy_copy_1_copy_copy_copy, wxID_ANY, wxT("Step\n#2"), wxDefaultPosition, wxDefaultSize);
     Label3b_copy_copy_copy = new wxStaticText(Panel2, wxID_ANY, wxT("Try this only when step #1 fails!"));
     Checkmark2 = new wxStaticBitmap(Panel2, wxID_ANY, wxBitmap(wxT("Check.jpg"), wxBITMAP_TYPE_ANY));
     Test2Button = new wxButton(Panel2, ID_TEST2BUTTON, wxT("Test/Set"));
-    Label3a_copy = new wxStaticText(panel_1_copy_copy_copy_1_copy, wxID_ANY, wxT("Step\n#4"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+    Label3a_copy = new wxStaticText(panel_1_copy_copy_copy_1_copy, wxID_ANY, wxT("Step\n#4"), wxDefaultPosition, wxDefaultSize);
     Label3b_copy = new wxStaticText(panel_3, wxID_ANY, wxT("Finish up!"));
     FinishButton = new wxButton(panel_3, ID_FINISHBUTTON, wxT("Finish"));
 
