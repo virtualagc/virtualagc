@@ -16,6 +16,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Zerlina 56.
+##              2021-05-30 ABS  ZEROD -> ZEROO
 
 ## Page 1140
 #  INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI
@@ -419,7 +420,7 @@ DOCSM1          RTB     CALL
                         SVDWN1          # STORE DOWNLINK STATE VECTOR
                 GOTO
                         FAZAB4
-ZEROD           =       ZEROVECS
+ZEROO           =       ZEROVECS
 54DD            DEC     54
 6DD             DEC     -6
 12DD            DEC     12

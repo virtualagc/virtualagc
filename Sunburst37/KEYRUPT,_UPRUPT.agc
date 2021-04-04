@@ -19,6 +19,7 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-29 HG   Transcribed
 ##		2017-06-21 RSB	Proofed using octopus/ProoferComments.
+##              2021-05-30 ABS  UPCK -> UPOK
 
 ## Page 215
                 BANK            13
@@ -65,7 +66,7 @@ UPRPT1          CAF             LOW5                    # TEST FOR TRIPLE CHAR R
                 MASK            LOW5                    # HIGH 5
                 COM
                 TC              UPTEST
-UPCK            TC              RESTORSR                # CODE IS GOOD
+UPOK            TC              RESTORSR                # CODE IS GOOD
 
                 CS              ELRCODE                 # IF CODE = ERROR LIGHT RESET, PUT +0
                 AD              KEYTEMP1                # INTO BIT1 OF UPLOCK.

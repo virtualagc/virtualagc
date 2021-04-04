@@ -11,6 +11,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  ISWCALLL -> ISWCALL
 
 ## Sundance 292
 
@@ -97,7 +98,7 @@ IBNKCALL        DXCH    RUPTREG3        # USES RUPTREG3,4 FOR DP RETURN ADDRESS.
                 CAF     0
                 INCR    Q
 
-ISWCALLL        TS      L
+ISWCALL         TS      L
                 LXCH    FBANK
                 MASK    LOW10
                 XCH     Q

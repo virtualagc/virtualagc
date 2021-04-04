@@ -11,6 +11,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  "--1" -> " -1" to match various scans and for
+##                              yaYUL compatibility.
 
 ## Sundance 302
 
@@ -830,7 +832,7 @@ SELECTP         CA      SIX
                 TCF     JETSOFF         # *****TCF ALARMJET *********************
 SELECTYZ        TS      NUMBERT
                 TCF     SELECTP +1
--1              TCF     ABORTYZ +2
+ -1             TCF     ABORTYZ +2
 JETSALL         OCT     00252
                 OCT     00125           # +P
                 OCT     00140           # -Y

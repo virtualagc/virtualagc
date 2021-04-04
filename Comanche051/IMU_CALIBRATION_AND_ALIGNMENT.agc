@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-30 MAS  Created from Comanche 55.
+##              2021-05-30 ABS  Single instance of $$/P03 -> $$/PO3 to match Comanche 55.
 
 ## Page 423
 # NAME-		IMU PERFORMANCE TESTS 2
@@ -1159,7 +1160,7 @@ TAR1		SLOAD*	SR2		# X1=2 X2=12 S2=6 X1=0 X2=6 S2=6
 		BANK	33
 		SETLOC	IMUCAL
 		BANK
-		COUNT*	$$/P03
+		COUNT*	$$/PO3
 		
 CONTIN33	CA	ONE
 		TS	STARCODE

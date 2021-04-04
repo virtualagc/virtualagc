@@ -18,6 +18,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2021-05-30 ABS	Removed four lines not present in scans.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -200,10 +201,6 @@ RENDGUID	EQUALS
 POWFLIT2	EQUALS
 R30LOC		EQUALS
 P11FOUR		EQUALS
-P12A		EQUALS
-NORMLIZ		EQUALS
-ASENT7		EQUALS
-RODTRAP		EQUALS
 		BNKSUM	23
 		
 		BANK	24

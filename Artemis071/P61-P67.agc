@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Artemis 072.
+##              2021-05-30 ABS  DEC -> DEC* for extended address field.
 
 ## Page 792
 
@@ -1062,7 +1063,7 @@ VRCALC		VLOAD	DOT
 			RT
 		SL2	ACOS
 		RVQ
-KTETA1		2DEC	.421844723 E2 B-14*	# 1100 2PI/16384(163.84)
+KTETA1		2DEC*	.421844723 E2 B-14*	# 1100 2PI/16384(163.84)
 # END OF PROGRAM S61.2
 
 ## Page 821

@@ -19,6 +19,7 @@
 ##                              and changed the pairing of its opcodes.
 ##		2020-12-11 RSB	Added justifying annotations for the steps
 ##				of Mike's reconstruction.
+##              2021-05-30 ABS  $/CRS61 -> $$/CRS61
 
 ## Page 562
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -1492,7 +1493,7 @@ INITB		STORE	W +90D,1	# CLEAR 54 - 89
 		BANK
 		
 		EBANK=	CDUXD
-		COUNT*	$/CRS61
+		COUNT*	$$/CRS61
 		
 CRS61.1		STQ	SETPD
 			Q611

@@ -18,6 +18,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  TGDCALC -> TGOCALC
 
 ## Page 752
 # PROGRAM DESCRIPTION  P40BOTH		DECEMBER 22, 1966
@@ -906,7 +907,7 @@ VGAIN*		STORE	VG		# VELOCITY TO BE GAINED SCALED AT (7) M/CS
 BDTOK		VLOAD	ABVAL
 			VG
 		STORE	VGDISP
-TGDCALC		SETPD	VLOAD
+TGOCALC		SETPD	VLOAD
 			0
 			VG
 		STOVL	VGPREV

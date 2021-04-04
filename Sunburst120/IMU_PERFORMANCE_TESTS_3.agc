@@ -15,6 +15,7 @@
 ##		2016-11-02 RSB	More typos.
 ##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
 ##				completed, changes made.
+##		2021-05-30 ABS	Fixed a page marker comment.
 
 ## Page 436
 		BANK	23
@@ -487,7 +488,7 @@ FINEZERO        EXTEND
                 TS      STATE
                 RELINT
                 
- # Page 447
+## Page 447
                 TC      BANKCALL
                 CADR    LEMLAB
                 

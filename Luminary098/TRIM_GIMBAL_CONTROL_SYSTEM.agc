@@ -14,6 +14,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-28 MAS  Created from Luminary 99.
+##              2021-05-30 ABS  GTSGO+DN -> GTSGO+ON
 
 ## Page 1472
 		BANK	21
@@ -54,7 +55,7 @@ GTS		CAF	NEGONE		# MAKE THE NEXT PASS THROUGH THE DAP BE
 		AD	A		# FOR THE RIGHT SHIFT DUE TO EDITING.
 		TS	SAVESR
 
-GTSGO+DN	CAF	TWO		# SET INDEXER FOR R-AXIS CALCULATIONS.
+GTSGO+ON	CAF	TWO		# SET INDEXER FOR R-AXIS CALCULATIONS.
 		TCF	GOQTRIMG +1
 
 GOQTRIMG	CAF	ZERO		# SET INDEXER FOR Q-AXIS CALCULATIONS

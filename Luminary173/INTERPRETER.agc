@@ -16,6 +16,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2021-05-30 ABS  B5TOBB -> B5TOB8
 
 ## Page 993
 # SECTION 1  DISPATCHER
@@ -2957,7 +2958,7 @@ BOV(B)		CCS	OVFIND		# BRANCH ON OVERFLOW TO BASIC OR INTERP.
 		TS	OVFIND
 		CCS	CYR
 		TCF	RTB		# IF BASIC.
-B5TOBB		OCT	360
+B5TOB8		OCT	360
 		TCF	GOTO
 
 ## Page 1082

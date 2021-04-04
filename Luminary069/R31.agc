@@ -29,6 +29,7 @@
 ##                              Fix some comments, remove tabs
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##              2021-05-30 ABS  Aligned IAW to field boundary.
 
 ## Page 712
                 BANK    34
@@ -146,7 +147,7 @@ V16N54          VN      1654
 
 STATEXTP        STQ     RTB
                         STATEXIT
-                LOADTIME
+                        LOADTIME
                 STCALL  TDEC1
                         OTHPREC         # GET BASE VECTORS
                 VLOAD

@@ -22,6 +22,7 @@
 ##				but no errors found.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##              2021-05-30 ABS  ISWCALLL -> ISWCALL
 
 ## Page 993
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -100,7 +101,7 @@ IBNKCALL	DXCH	RUPTREG3	# USES RUPTREG3,4 FOR DP RETURN ADDRESS.
 		CAF	0
 		INCR	Q
 
-ISWCALLL	TS	L
+ISWCALL		TS	L
 		LXCH	FBANK
 		MASK	LOW10
 		XCH	Q

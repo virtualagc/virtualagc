@@ -15,6 +15,7 @@
 ## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
 ##              2020-07-29 MAS  Added code to do an AUXFLAG-like cycle delay
 ##                              in DVMON.
+##              2021-05-30 ABS  Aligned IAW to field boundary.
 
 
                 BANK            33
@@ -182,7 +183,7 @@ MASSMON         BON             AXT,1                   # ARE WE ON THE SURFACE?
                 STODL           /AF/                    # /AF/ = MAGNITUDE DV/DT
                                 ABDVCONV
                 VSR4            DDV*
-                                APSVEX1
+                                APSVEX1,1
                 DMP             DAD
                                 MASS
                                 MASS

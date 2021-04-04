@@ -11,6 +11,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Replaced use of various descriptive *BIT symbols
+##                              with less descriptive BIT* symbols to match
+##                              Luminary 69.
 
 ## Sundance 302
 
@@ -667,10 +670,10 @@ R21LEM2         CAF             FOUR
                 TC              +2
                 TC              R21LEM1
                 CS              RADMODES
-                MASK            ANTENBIT
+                MASK            BIT12
                 EXTEND
                 BZF             R21LEM1
-                CAF             REMODBIT
+                CAF             BIT14
                 INHINT
                 ADS             RADMODES
                 CAF             TWO
@@ -1265,7 +1268,7 @@ RRZEROSB        EXTEND
 
                 CAF             ZERO
                 TCF             +2
-                CAF             ANTENBIT
+                CAF             BIT12
                 XCH             RADMODES
                 MASK            -BIT12
                 ADS             RADMODES
@@ -1511,7 +1514,7 @@ RR1AX2          CS              RADMODES                # IF SOMEONE REQUESTES A
                 MP              RRSPGAIN                # TRIES TO NULL .7 OF ERROR OVER NEXT .5
                 TS              L
                 CA              RADMODES
-                MASK            AUTOMBIT
+                MASK            BIT2
                 XCH             ITEMP1                  # STORE RR-OUT-OF-AUTO-MODE BIT.
                 TC              MAGSUB                  # SEE IF WITHIN ONE DEGREE.
                 DEC             -.00555                 # SCALED IN HALF-REVS.
@@ -1932,7 +1935,7 @@ NEGSHAFT        AD              20.5DEGS                # MAKE NEGATIVE SHAFT LI
 
 BEGDES          CS              RADMODES
 
-                MASK            REMODBIT
+                MASK            BIT14
                 CCS             A
                 TC              STDESIG
                 TC              REMODE

@@ -19,6 +19,7 @@
 ##              2019-09-01 MAS  Updated for Luminary 178. Added clearing
 ##                              of R12RDFLG, zeroing of R1SAVE, and
 ##                              initialization of SAMPLIM to STARTSB2.
+##              2021-05-30 ABS  CANTROD -> CANTROO
 
 ## Page 218
                 BANK            10
@@ -752,7 +753,7 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 CA              IMODES30                # IS IMU BEINB INITIALIZED
                 MASK            BIT6
                 CCS             A
-                TCF             CANTROD
+                TCF             CANTROO
 
                 CS              MMNUMBER                # IS P70 REQUESTED?
                 AD              DEC70
@@ -770,7 +771,7 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 MASK            NODOBIT
                 CCS             A
                 TCF             CHECKTAB                # NO
-CANTROD         TC              ALARM
+CANTROO         TC              ALARM
                 OCT             1520
 
 V37BAD          TC              RELDSP                  # RELEASES DISPLAY FROM ASTRONAUT

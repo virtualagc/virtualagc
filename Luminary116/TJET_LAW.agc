@@ -20,6 +20,7 @@
 ##                              side-by-side diff of Luminary 69/99/116/131/210.
 ##              2017-03-19 HG   Fix statement AD -3DEG --> TCF +3
 ##                              Add missing statement TCF +1
+##              2021-05-30 ABS  Fixed a page number to match scans.
 
 ## Page 1450
 # PROGRAM DESCRIPTION
@@ -174,7 +175,7 @@ TJCALC          TS              NUMBERT                         # SET TO +0,1,4 
                 BZMF            ZON1,2,3
 
 ZONE4,5         INDEX           ADRSDIF1
-## Page 1452
+## Page 1453
                 CAE             1/ACOAST                        # .5/ACC SCALED AT 2(6)/PI WHERE
                 EXTEND                                          #    ACC = MAX(AMIN, AOS-).
                 MP              EDOTSQ                          # SCALED AT PI/2(8).

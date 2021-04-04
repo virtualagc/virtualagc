@@ -15,6 +15,7 @@
 ##		2017-01-15 RSB	Comment-text proofed by 3-way diff'ing vs
 ##				Colossus 237 and Comanche 55.  No differences
 ##				were found, so no corrections were made.
+##		2021-05-30 ABS	EBANK= MPAC -> EBANK= KMPAC
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -44,7 +45,7 @@
 		SETLOC	MYSUBS
 		BANK
 		
-		EBANK=	MPAC
+		EBANK=	KMPAC
 SPCOS1		EQUALS	SPCOS
 SPSIN1		EQUALS	SPSIN
 SPCOS2		EQUALS	SPCOS

@@ -22,6 +22,7 @@
 ##                                                    -PHASE5 --> -PHASE1
 ##                              Value for BOOLSTRT reconstructed from core/rope listing  OCT 21312 -> OCT 21322
 ##		2017-08-15 RSB	Comment-text fixes identified in proofing vs AP11ROPE.
+##              2021-05-30 ABS  CANTROD -> CANTROO
 
 ## Page 212
                 BANK            10
@@ -768,7 +769,7 @@ V37             TS              MMNUMBER                        # SAVE MAJOR MOD
                 CA              IMODES30                        # IS IMU BEINB INITIALIZED
                 MASK            BIT6
                 CCS             A
-                TCF             CANTROD
+                TCF             CANTROO
 
                 CS              MMNUMBER                        # IS P70 REQUESTED?
                 AD              DEC70
@@ -786,7 +787,7 @@ V37             TS              MMNUMBER                        # SAVE MAJOR MOD
                 MASK            NODOBIT
                 CCS             A
                 TCF             CHECKTAB                        # NO
-CANTROD         TC              ALARM
+CANTROO         TC              ALARM
                 OCT             1520
 
 V37BAD          TC              RELDSP                          # RELEASES DISPLAY FROM ASTRONAUT

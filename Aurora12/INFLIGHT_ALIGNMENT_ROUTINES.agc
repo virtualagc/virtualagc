@@ -19,6 +19,7 @@
 ##				 respect to interpretive-operand alignment.)
 ##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
 ##				 and fixed the errors found.
+##		 2021-05-30 ABS	 Aligned various IAWs to field boundaries.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -406,7 +407,7 @@ AXISGEN2        XCHX,1          VLOAD*
 ## Page 414
                                 6,1                             
                 VXSC*                                           
-                STARAD          +12D,2                          
+                                STARAD          +12D,2          
                 STOVL*          24D                             # K=(VA)(VB1)   J=(VA)(VB2)     J=(VA)(VB3)
                                 12D,1                           
 
@@ -693,7 +694,7 @@ RRNB            SLOAD           RTB
 
                 COS             PUSH                            # .5 COS(T) TO 0.
                 SLOAD           RTB                             
-                TANG            +1                              
+                                TANG            +1              
                                 CDULOGIC                        
                 PUSH            COS                             # SHAFT ANGLE TO 2.
                 DMP             SL1                             
@@ -731,7 +732,7 @@ RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL 
                 STOVL           34D                             # UNIT THE PROJECTION OF THE VECTOR IN THE
                                 32D                             # X-Z PLANE.
                 UNIT            BOVB                            # CALL FOR S/C MANEUVER ON GIMBAL LOCK.
-                DESRETRN        +1                              
+                                DESRETRN        +1              
                 STODL           32D                             # PROJECTION VECTOR.
                                 32D                             
                 SR1             STQ                             

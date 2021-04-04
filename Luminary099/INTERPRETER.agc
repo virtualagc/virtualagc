@@ -21,6 +21,8 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2021-05-30 ABS	Added IRT0 location symbol to match scans.
+##				B5TOBB -> B5TOB8
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -416,7 +418,7 @@ DOSTORE		TS	ADDRWD
 		MASK	B12T14
 		EXTEND
 		MP	BIT5		# EACH TRANSFER VECTOR ENTRY IS TWO WORDS.
-		INDEX	A
+ITR0		INDEX	A
 		TCF	STORJUMP
 		
 ## Page 1015
@@ -2952,7 +2954,7 @@ BOV(B)		CCS	OVFIND		# BRANCH ON OVERFLOW TO BASIC OR INTERP.
 		TS	OVFIND
 		CCS	CYR
 		TCF	RTB		# IF BASIC.
-B5TOBB		OCT	360
+B5TOB8		OCT	360
 		TCF	GOTO
 
 ## Page 1091

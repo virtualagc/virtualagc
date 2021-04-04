@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2021-05-30 ABS  2DEC* -> DEC for non extended address field.
 
 
 
@@ -199,7 +200,7 @@ RATESP          2DEC    .03660098 B+4   #                     * 1968 - 1969    *
                 2DEC    .455880394      # LOMO                *
                 2DEC    .275337971      # LOSO                *
                 2DEC    .0398987882     # LONO                *
-VAL67           2DEC*   .017361944 B+1  # AMOD                *
+VAL67           2DEC    .017361944 B+1  # AMOD                *
                 2DEC    .286523072      # AARG                *
                 2DEC    .036291712 B+1  # 1/27                *
                 2DEC    .003534722 B+1  # BMOD                *

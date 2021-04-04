@@ -17,6 +17,7 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.  No differences
 ##				remain.
+##		2021-05-30 ABS	DFC-6 -> DEC-6, DFC-12 -> DEC-12
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -75,8 +76,8 @@ ZEROVEC		2DEC	0
 		2DEC	0
 
 		OCT	77777		# -0, -6, -12 MUST REMAIN IN THIS ORDER
-DFC-6		DEC	-6
-DFC-12		DEC	-12
+DEC-6		DEC	-6
+DEC-12		DEC	-12
 LODPMAX		2OCT	3777737777	# THESE TWO CONSTANTS MUST REMAIN
 LODPMAX1	2OCT	3777737777	# ADJACENT AND THE SAME FOR INTEGRATION
 

@@ -19,6 +19,7 @@
 ##		2017-02-16 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-08-18 RSB	Comment-text bug identified in ZERLINA 56.
+##		2021-05-30 ABS	Added missing RCSMON definition to match scans.
 
 ## Page 192
 # PROGRAM DESCRIPTION
@@ -74,8 +75,10 @@ RCSMONEX	EQUALS	RESUME
 		BANK
 ## Page 193
 		COUNT*	$$/T4RCS
+
+RCSMONIT	EQUALS	RCSMON
 		
-RCSMONIT	CS	ZERO
+RCSMON		CS	ZERO
 		EXTEND
 		RXOR	CHAN32			# PICK UP + INVERT INVERTED CHANNEL 32.
 		MASK	LOW8			# KEEP JET-FAIL BITS ONLY.

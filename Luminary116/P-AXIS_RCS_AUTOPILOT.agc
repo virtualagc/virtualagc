@@ -25,6 +25,7 @@
 ##                              i.e. no storage allocated
 ##                              Add missing statements RELINT
 ##                              Fix operand DAPBOOLS --> FLAGWRD5
+##              2021-05-30 ABS  Fixed a page number to match scans.
 
 ## Page 1411
                 BANK            16
@@ -590,7 +591,7 @@ CHECKP          EXTEND
 # THE DIRECT RATE MODE AFFORDS IMMEDIATE CONTROL WITHOUT OVERSHOOT. THE PSEUDO-AUTO MODE PROVIDES PRECISE
 # RATE CONTROL AND ATTITUDE HOLD.
 
-## Page 1432
+## Page 1422
 # IN DIRECT RATE, JETS ARE FIRED WHEN STICK POSITION CHANGES BY A FIXED NUMBER OF INCREMENTS IN ONE DAP CYCLE.
 # THE 'BREAKOUT LEVEL' IS .6 D/S FOR LM-ONLY AND .3 D/S FOR CSM-DOCKED. THIS LAW NULLS THE RATE ERROR TO WITHIN
 # THE 'TARGET DEADBAND', WHICH EQUALS THE BREAKOUT LEVEL.

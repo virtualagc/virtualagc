@@ -15,6 +15,7 @@
 ##				completed, changes made.
 ##		2017-06-05 MAS	Made comment corrections found during Sunburst 37
 ##				transcription.
+##		2021-05-30 ABS	Added missing EBANK= statement.
 
 ## Page 367
                 BANK            6
@@ -390,6 +391,7 @@ PERFORM         TC              GRABWAIT                        # KEY RELEASE MA
                 INHINT                                          # ENTER. THE FAIL HAS BEEN RESET.
                 CAF             BIT2                            # 20MS.
                 TC              WAITLIST
+                EBANK=          JETSTEP
                 2CADR           TRIMON                          # CHECK AGAIN TO BE SURE. THEN PROCEED..
 
                 TC              EJFREE

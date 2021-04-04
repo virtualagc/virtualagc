@@ -16,6 +16,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-09-18 MAS  Created from Luminary 178.
+##              2021-05-30 ABS  ISWCALLL -> ISWCALL
 
 ## Page 989
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -95,7 +96,7 @@ IBNKCALL        DXCH    RUPTREG3        # USES RUPTREG3,4 FOR DP RETURN ADDRESS.
                 CAF     0
                 INCR    Q
 
-ISWCALLL        TS      L
+ISWCALL         TS      L
                 LXCH    FBANK
                 MASK    LOW10
                 XCH     Q

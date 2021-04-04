@@ -16,6 +16,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  Removed R21LEM10 symbol not present in Luminary 69.
+##                              Replaced use of various descriptive *BIT symbols
+##                              with less descriptive BIT* symbols to match
+##                              Luminary 69.
+##                              R29REM0J -> R29REMOJ
+
 
 ## Page 504
 
@@ -823,7 +829,7 @@ R21LEM6         TC              DOWNFLAG
                 TC              BANKCALL
                 CADR            RADSTALL
                 TC              R21-503                 # BAD RETURN FROM DESIGNATE -ISSUE ALARM
-R21LEM10        TC              UPFLAG                  # INDICATES LOS TO BE COMPUTED
+                TC              UPFLAG                  # INDICATES LOS TO BE COMPUTED
                 ADRES           LOSCMFLG                # EVERY FOURTH PASS THRU DODES
                 CS              BIT14                   # REMOVE RR SELF TRACK ENABLE
                 EXTEND
@@ -1507,7 +1513,7 @@ RRZEROSB        EXTEND
 
                 CAF             ZERO
                 TCF             +2
-                CAF             ANTENBIT
+                CAF             BIT12
                 XCH             RADMODES
                 MASK            -BIT12
                 ADS             RADMODES
@@ -1771,7 +1777,7 @@ RR1AX2          CS              RADMODES                # IF SOMEONE REQUESTES A
                 MP              RRSPGAIN                # TRIES TO NULL .7 OF ERROR OVER NEXT .5
                 TS              L
                 CA              RADMODES
-                MASK            AUTOMBIT
+                MASK            BIT2
                 XCH             ITEMP1                  # STORE RR-OUT-OF-AUTO-MODE BIT.
                 TC              MAGSUB                  # SEE IF WITHIN ONE DEGREE.
                 DEC             -.00555                 # SCALED IN HALF-REVS.
@@ -2206,7 +2212,7 @@ NEGSHAFT        AD              20.5DEGS                # MAKE NEGATIVE SHAFT LI
 BEGDES          CS              RADMODES
 
 ## Page 557
-                MASK            REMODBIT
+                MASK            BIT14
                 CCS             A
                 TC              STDESIG
                 TC              REMODE
@@ -4406,7 +4412,7 @@ R29             CS              RADMODES
                 CA              PRIO21                  # MODE 1; MUST REMODE.
                 TC              NOVAC
                 EBANK=          LOSCOUNT
-                2CADR           R29REM0J                # NEEDS OWN JOB TO RADSTALL IN.
+                2CADR           R29REMOJ                # NEEDS OWN JOB TO RADSTALL IN.
 
                 CS              BIT10
                 MASK            RADMODES                # CLEAR DESIGNATE FLAG IN RADMODES
@@ -4427,7 +4433,7 @@ SETPRPOS        CA              ONE
 ## Page 608
 # FORCE RENDEZVOUS RADAR INTO MODE 2.
 
-R29REM0J        CA              ONE
+R29REMOJ        CA              ONE
                 TC              WAITLIST
                 EBANK=          LOSCOUNT
                 2CADR           REMODE                  # REMODE MUST RUN AS A TASK.
@@ -4778,7 +4784,7 @@ R29RDJOB        CA              FLAGWRD3                # CALLED VIA NOVAC.
                 TCF             ENDRRD29                # R29 IS NOW OVER, STOP AT ONCE.
 
                 CA              RADMODES
-                MASK            AUTOMBIT
+                MASK            BIT2
                 CCS             A                       # TEST RR-NOT-IN-AUTO-MODE BIT.
                 TCF             ENDRRD29                # ASTRO TOOK RR OUT OF AUTO MODE.
 

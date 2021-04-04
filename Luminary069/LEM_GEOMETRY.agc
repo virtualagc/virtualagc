@@ -19,6 +19,7 @@
 ##		2017-01-14 RRB	Updated for Luminary 69.
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##              2021-05-30 ABS  Replaced use of ANTENBIT with BIT12 to match scans.
 
 ## Page 334
 		BANK	23
@@ -136,7 +137,7 @@ RRANGLES	STORE	32D
 		EXIT
 		
 		CS	RADMODES	# SWAP MODEA AND MODEB IF RR IN MODE 2.
-		MASK	ANTENBIT
+		MASK	BIT12
 		CCS	A
 		TCF	+4
 		

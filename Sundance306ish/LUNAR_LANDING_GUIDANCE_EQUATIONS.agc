@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2021-05-30 ABS  DEC -> DEC* for extended address fields.
 
 
 
@@ -1130,13 +1131,13 @@ JDG2TTF         =               JBRFG*
 
 #          LUNAR LANDING TARGET PARAMETERS
 #
-ABRFG           2DEC*           -3.43285501     E-5 B+4
+ABRFG           2DEC*           -3.43285501     E-5 B+4*
                 2DEC*           +0.00000000     E+0 B+4*
                 2DEC*           -2.74418853     E-4 B+4*
 
 RBRFG           2DEC*           +3.12375000     E+3 B-24*
                 2DEC*           +0.00000000     E+0 B-24*
-                2DEC            -1.07834375     E+4 B-24*
+                2DEC*           -1.07834375     E+4 B-24*
 
 VBRFG           2DEC*           -4.92340088     E-1 B-10*
                 2DEC*           +0.00000000     E+0 B-10*

@@ -25,6 +25,7 @@
 ##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
 ##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
 ##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
+##		2021-05-30 ABS	$/CRS61 -> $$/CRS61
 
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -1502,7 +1503,7 @@ INITB		STORE	W +90D,1	# CLEAR 54 - 89
 		BANK
 		
 		EBANK=	CDUXD
-		COUNT*	$/CRS61
+		COUNT*	$$/CRS61
 		
 CRS61.1		STQ	SETPD
 			Q611

@@ -13,6 +13,7 @@
 ##				images from Luminary 1A.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				but no errors found.
+##		2021-05-30 ABS	DFC-6 -> DEC-6, DFC-12 -> DEC-12
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -72,8 +73,8 @@ ZEROVEC		2DEC	0
 		2DEC	0
 		
 		OCT	77777		# -0, -6, -12 MUST REMAIN IN THIS ORDER
-DFC-6		DEC	-6
-DFC-12		DEC	-12
+DEC-6		DEC	-6
+DEC-12		DEC	-12
 LODPMAX		2OCT	3777737777	# THESE TWO CONSTANTS MUST REMAIN
 
 LODPMAX1	2OCT	3777737777	# ADJACENT AND THE SAME FOR INTEGRATION

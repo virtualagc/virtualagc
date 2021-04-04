@@ -23,6 +23,7 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2021-05-30 ABS	UPCK -> UPOK
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -101,7 +102,7 @@ UPRPT1		CAF	LOW5		# TEST FOR TRIPLE CHAR REDUNDANCY
 		COM
 		TC	UPTEST
 
-UPCK		CS	ELRCODE		# CODE IS GOOD.  IF CODE = 'ERROR RESET',
+UPOK		CS	ELRCODE		# CODE IS GOOD.  IF CODE = 'ERROR RESET',
 		AD	KEYTEMP1	# CLEAR UPLOCKFL (SET BIT4 OF FLAGWRD7 = 0)
 		EXTEND			# IF CODE DOES NOT = 'ERROR RESET', ACCEPT
 		BZF	CLUPLOCK	# CODE ONLY IF UPLOCKFL IS CLEAR (=0).

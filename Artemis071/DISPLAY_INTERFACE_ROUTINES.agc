@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Artemis 072.
+##              2021-05-30 ABS  BLKNR1 -> BLNKR1
 
 ## Page 1448
 
@@ -1426,5 +1427,5 @@ PERFRQST	=	BIT5
 FLSHRQST	=	BIT4
 BLNKR3		=	BIT3
 BLNKR2		=	BIT2
-BLKNR1		=	BIT1
+BLNKR1		=	BIT1
 DSPONLY		=	ZERO

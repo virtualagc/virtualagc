@@ -20,6 +20,7 @@
 ##              2017-08-14 MAS  Began updates for Zerlina 56.
 ##              2017-08-16 MAS  Complated updating for Zerlia 56.
 ##              2017-08-24 MAS  Fixed an incorrect offset in lunar landing erasables.
+##              2021-05-30 ABS  TTPIO -> TTPI0
 
 ## Page 91
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2537,7 +2538,7 @@ QTEMP           ERASE                                   # I(1)TMP COMMON RETURN 
 
 TCSI            ERASE           +1                      # B(2) TMP CSI TIME IN CENTISECONDS
 TTPI            ERASE           +1                      # B(2) TMP TPI TIME IN CENTISECONDS
-TTPIO           ERASE           +1                      # B(2) TMP TTPI STORAGE FOR RECYCLE
+TTPI0           ERASE           +1                      # B(2) TMP TTPI STORAGE FOR RECYCLE
 
 
 #          P30,P40 INTERFACE.                                             (20D)

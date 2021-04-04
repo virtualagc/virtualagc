@@ -20,6 +20,7 @@
 ##		2017-08-28 RSB	Completed transcribing through page 1032.  Pages
 ##				1033-1085 remain.
 ##		2017-08-29 RSB	Completed remainder of transcription.
+##              2021-05-30 ABS  B5TOBB -> B5TOB8
 
 ## Page 993
 # SECTION 1  DISPATCHER
@@ -2961,7 +2962,7 @@ BOV(B)		CCS	OVFIND		# BRANCH ON OVERFLOW TO BASIC OR INTERP.
 		TS	OVFIND
 		CCS	CYR
 		TCF	RTB		# IF BASIC.
-B5TOBB		OCT	360
+B5TOB8		OCT	360
 		TCF	GOTO
 
 ## Page 1082

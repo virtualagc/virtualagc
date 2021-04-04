@@ -20,6 +20,7 @@
 ##                              back to 124.55 B-23.
 ##              2019-09-21 MAS  Restored the original landing analog displays
 ##                              constants from Luminary 131.
+##              2021-05-30 ABS  DEC -> DEC* for extended address fields.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -699,13 +700,13 @@ KONMAT          2DEC            1.0             B-1     #        *************
 
                 2DEC            0                       #                    *
 
-                2DEC            .91746          B-1*    # K1 COS (OBL)
+                2DEC*           .91746          B-1*    # K1 COS (OBL)
 
-                2DEC            -.035711        B-1*    # K2 SIN (OBL) SIN (IM)
+                2DEC*           -.035711        B-1*    # K2 SIN (OBL) SIN (IM)
 
                 2DEC            0                       #                    *
 
-                2DEC            .39784          B-1*    # K3 SIN (OBL)
+                2DEC*           .39784          B-1*    # K3 SIN (OBL)
 
 ## Page 53
                 2DEC*           .082354         B-1*    # K4 COS (OBL) SIN (IM)

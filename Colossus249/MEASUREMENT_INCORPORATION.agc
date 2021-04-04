@@ -20,6 +20,7 @@
 ##				differences remained vs Comanche 55
 ##				at the end, but there were differences vs
 ##				Colossus 237.
+##		2021-05-30 ABS	ZEROD -> ZEROO
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -449,7 +450,7 @@ DOCSM1		RTB	CALL
 			SVDWN1		# STORE DOWNLINK STATE VECTOR
 		GOTO
 			FAZAB4
-ZEROD		=	ZEROVECS
+ZEROO		=	ZEROVECS
 54DD		DEC	54
 6DD		DEC	-6
 12DD		DEC	12

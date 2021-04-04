@@ -27,6 +27,7 @@
 ##		2017-03-10 RSB	Comment-text fixes noted while transcribing Luminary 116.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##              2021-05-30 ABS  Removed DEC66 symbol not present in scans.
 
 ## Page 802
                 EBANK=          E2DPS
@@ -159,7 +160,7 @@ P67NOW?         TC              CHECKMM                 # NO:   ARE WE IN P67 NO
                 TCF             STABL?                  # NO
 STARTP66        TC              FASTCHNG                # YES
                 TC              NEWMODEX
-DEC66           DEC             66
+                DEC             66
                 EXTEND                                  # INITIALIZE VDGVERT USING
                 DCA             VGU                     #   PRESENT DOWNWARD VELOCITY
                 DXCH            VDGVERT

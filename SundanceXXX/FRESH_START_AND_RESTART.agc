@@ -11,6 +11,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  +8 -> +8D
+##                              Replaced use of ANTENBIT with BIT12 to match
+##                              Luminary 69.
 
 ## Sundance 292
 
@@ -123,8 +126,8 @@ DOFSTART        CAF             FOUR
                 DCA             SWINIT          +6
                 DXCH            STATE           +6
                 EXTEND
-                DCA             SWINIT          +8
-                DXCH            STATE           +8
+                DCA             SWINIT          +8D
+                DXCH            STATE           +8D
 
 ENDRSTRT        TC              POSTJUMP                # NOW IN ANOTHER BANK.
                 CADR            DUMMYJOB        +2      # PICKS UP AT RELINT.   (DONT ZERO NEWJOB)
@@ -263,7 +266,7 @@ ENEMA           TC              STARTSB2
 
                 CAF             ZERO
                 TCF             +2
-                CAF             ANTENBIT
+                CAF             BIT12
                 XCH             RADMODES
                 MASK            -BIT12
                 ADS             RADMODES

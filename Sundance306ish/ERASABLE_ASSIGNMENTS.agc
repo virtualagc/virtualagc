@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2021-05-30 ABS  TTPIO -> TTPI0
 
 
 ## This log section assembles such that the addresses of all erasables match
@@ -3145,7 +3146,7 @@ QTEMP           ERASE                                   # I(1)TMP COMMON RETURN 
 
 TCSI            ERASE           +1                      # B(2) TMP CSI TIME IN CENTISECONDS
 TTPI            ERASE           +1                      # B(2) TMP TPI TIME IN CENTISECONDS
-TTPIO           ERASE           +1                      # B(2) TMP TTPI STORAGE FOR RECYCLE
+TTPI0           ERASE           +1                      # B(2) TMP TTPI STORAGE FOR RECYCLE
 
 
 #          P30,P40 INTERFACE.                                            (21D)

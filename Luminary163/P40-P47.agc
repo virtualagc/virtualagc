@@ -21,6 +21,7 @@
 ##                              the CALL FINDCDUW -2 to GOTO, and removed the
 ##                              GOTO S40RET. Moved ALARMIT back to bank 27.
 ##                              Changed reference to GOFIND to FINDCDUW -2.
+##              2021-05-30 ABS  TGDCALC -> TGOCALC
 
 ## Page 738
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -942,7 +943,7 @@ BDTOK           VLOAD   ABVAL
                 TC      PHASCHNG
                 OCT     10035
                 TC      INTPRET
-TGDCALC         SETPD   VLOAD
+TGOCALC         SETPD   VLOAD
                         0
                         VG
                 STOVL   VGPREV

@@ -16,6 +16,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-21 MAS  Created from Luminary 173.
+##              2021-05-30 ABS  TICKTIFF -> TICKTFF
 
 ## Page 706
 # SUBROUTINE NAME:     V82CALL
@@ -200,7 +201,7 @@ BOTHPAD         STCALL  RPADTEM
                 STORE   TSTART82        #                SAVE IT
                 DLOAD   BZE             # SR30.1 SETS -TPER=0 IF HPER L/
                         -TPER           #  HPERMIN (300 OR 35) KFT.
-                        TICKTIFF        # (-TPER = 0)
+                        TICKTFF         # (-TPER = 0)
 TICKTPER        DLOAD   DAD             # (-TPER NON ZERO)  TFF WAS NOT COMPUTED,
                         -TPER           # BUT WAS SET TO 59M59S.DONT TICK TFF, DO
                         TSTART82        # TICK -TPER. DISPLAY BOTH.
@@ -210,7 +211,7 @@ TICKTPER        DLOAD   DAD             # (-TPER NON ZERO)  TFF WAS NOT COMPUTED
                 TS      V82FLAGS        # INFORMS TICKTEST TO INCREMENT ONLY -TPER
                 TC      ENDOFJOB
 
-TICKTIFF        DLOAD   DAD             # (-TPER=0)  TFF WAS COMPUTED.TICK TFF.
+TICKTFF         DLOAD   DAD             # (-TPER=0)  TFF WAS COMPUTED.TICK TFF.
                         TFF             # DO NOT TICK -TPER.DISPLAY TFF, BUT NOT
                         TSTART82        # -TPER.
                 STORE   TFF             # TFF CORRECTED FOR TIME SINCE V82GOFF1

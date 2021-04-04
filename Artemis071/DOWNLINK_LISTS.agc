@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Artemis 072.
+##              2021-05-30 ABS  Added empty page 191.
 
 ## Page 179
 		SETLOC	DOWNTELM
@@ -536,3 +537,5 @@ DNTABLE		GENADR	CMCSTADL
 
 # ------------------------------------------------------------------------
 
+## Page 191
+## Empty page

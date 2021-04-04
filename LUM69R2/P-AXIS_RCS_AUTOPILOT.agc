@@ -16,6 +16,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-07-27 MAS  Created from Luminary 69.
+##              2021-05-30 ABS  "--1" -> " -1" to match Luminary 69 and for
+##                              yaYUL compatibility.
 
 ## Page 1416
 		BANK	16
@@ -960,7 +962,7 @@ SELECTP		CA	SIX
 		TCF	JETSOFF		# *****TCF ALARMJET *********************
 SELECTYZ	TS	NUMBERT
 		TCF	SELECTP	+1
--1		TCF	ABORTYZ +2
+ -1		TCF	ABORTYZ +2
 JETSALL		OCT	00252
 		OCT	00125		# +P
 		OCT	00140		# -Y

@@ -15,6 +15,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2019-08-14 MAS  Created from Artemis 072.
+##              2021-05-30 ABS  Added SUPERRSM location symbol.
 
 ## Page 1221
 
@@ -435,7 +436,7 @@ TASKOVER	CCS	RUPTAGN		# IF +1 RETURN TO T3RUPT, IF -0 RESUME.
 		TS	BBANK
 		TCF	T3RUPT2		# DISPATCH NEXT TASK IF IT WAS DUE.
 
-		CA	BANKRUPT
+SUPERRSM	CA	BANKRUPT
 		EXTEND
 		WRITE	SUPERBNK	# RESTORE SUPERBANK BEFORE RESUME IS DONE
 

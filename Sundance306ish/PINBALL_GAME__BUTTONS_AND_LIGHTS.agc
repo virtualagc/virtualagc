@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2020-07-24 MAS  Created from SundanceXXX.
+##              2021-05-30 ABS  RCDUFBIT -> BIT7 to match Luminary 69.
 
 
 
@@ -3709,7 +3710,7 @@ TSTLTS3         CS      TSTCON3         # CALLED BY EXECUTIVE
                 
                 CS      RFAILS2
                 MASK    RADMODES
-                AD      RCDUFBIT
+                AD      BIT7
                 TS      RADMODES
                 
                 RELINT
@@ -3756,7 +3757,7 @@ ERROR           XCH     21/22REG        # RESTORE ORIGINAL C(DSPLOCK). THUS ERRO
                 
                 CS      RFAILS
                 MASK    RADMODES
-                AD      RCDUFBIT
+                AD      BIT7
                 TS      RADMODES
                 
                 CS      BIT10           # TURN OFF :TEST ALARM: OUTBIT.

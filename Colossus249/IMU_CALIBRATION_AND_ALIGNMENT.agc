@@ -19,6 +19,7 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
 ##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
+##		2021-05-30 ABS	Single instance of $$/P03 -> $$/PO3 to match scans.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -1166,7 +1167,7 @@ TAR1		SLOAD*	SR2		# X1=2 X2=12 S2=6 X1=0 X2=6 S2=6
 		BANK	33
 		SETLOC	IMUCAL
 		BANK
-		COUNT*	$$/P03
+		COUNT*	$$/PO3
 		
 CONTIN33	CA	ONE
 		TS	STARCODE

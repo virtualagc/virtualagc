@@ -28,6 +28,8 @@
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##              2021-05-30 ABS  "--1" -> " -1" to match scans and for
+##                              yaYUL compatibility.
 
 ## Page 1416
 		BANK	16
@@ -972,7 +974,7 @@ SELECTP		CA	SIX
 		TCF	JETSOFF		# *****TCF ALARMJET *********************
 SELECTYZ	TS	NUMBERT
 		TCF	SELECTP	+1
--1		TCF	ABORTYZ +2
+ -1		TCF	ABORTYZ +2
 JETSALL		OCT	00252
 		OCT	00125		# +P
 		OCT	00140		# -Y

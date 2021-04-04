@@ -19,6 +19,7 @@
 ##              2019-09-21 MAS  Re-based on Luminary 131. Implemented ACB L-11
 ##                              by moving three checks as shown in the
 ##                              Luminary 173 flowcharts.
+##              2021-05-30 ABS  LADFWDV -> LATFWDV
 
 ## Page 891
                 BANK    21
@@ -293,7 +294,7 @@ GET22/32        CAF     EBANK6          # GET SIN(AOG),COS(AOG) FROM GPMATRIX.
                 CAF     EBANK7
                 TS      EBANK
                 EBANK=  UNIT/R/
-LADFWDV         CA      ITEMP4          # COMPUTE LATERAL AND FORWARD VELOCITIES.
+LATFWDV         CA      ITEMP4          # COMPUTE LATERAL AND FORWARD VELOCITIES.
                 EXTEND
                 MP      VHY
                 XCH     RUPTREG1

@@ -10,6 +10,7 @@
 ##               2016-10-20 HG   finished transcription
 ##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
 ##				 and fixed the errors found.
+##		 2021-05-30 ABS	 Aligned RELINT line to match scans.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -475,7 +476,7 @@ STARTDES        CAF             MAXTRIES                # ALLOW 30 SECS.
                 TC              WAITLIST
                 2CADR           BEGDES
 
-DESRETRN                        RELINT                  # RETURN VIA DESRET
+DESRETRN        RELINT                                  # RETURN VIA DESRET
  +1             CA              DESRET
                 TCF             BANKJUMP
 

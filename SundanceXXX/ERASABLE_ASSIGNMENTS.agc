@@ -13,6 +13,7 @@
 ## Mod history: 2020-06-17 MAS  Created from Luminary 69.
 ##              2020-07-27 MAS  Corrected VVARMIN to be double-precision
 ##                              instead of triple-precision.
+##              2021-05-30 ABS  TTPIO -> TTPI0
 
 ## This log section assembles such that the addresses of all erasables match
 ## their locations for Sundance 306, to the best of our knowledge. The order
@@ -3144,7 +3145,7 @@ QTEMP           ERASE                                   # I(1)TMP COMMON RETURN 
 
 TCSI            ERASE           +1                      # B(2) TMP CSI TIME IN CENTISECONDS
 TTPI            ERASE           +1                      # B(2) TMP TPI TIME IN CENTISECONDS
-TTPIO           ERASE           +1                      # B(2) TMP TTPI STORAGE FOR RECYCLE
+TTPI0           ERASE           +1                      # B(2) TMP TTPI STORAGE FOR RECYCLE
 
 
 #          P30,P40 INTERFACE.                                            (21D)

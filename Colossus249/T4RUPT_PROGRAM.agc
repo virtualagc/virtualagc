@@ -24,6 +24,7 @@
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##		2017-03-03 RSB	Fixed comment-text errors identified while proofing
 ##				Luminary 116.
+##		2021-05-30 ABS	$$/T4RUPT -> $$/T4RPT
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -1339,7 +1340,7 @@ OPTDRIVE	CA	CDUS			# GRAB OPTIC SHAFT CDU
 		TCF	OZONE	+1
 OZONE		CAF	ZERO			# ABS(CDUS) LESS THEN 90 DEG-ZONE ZERO
 		TS	ZONE
-		COUNT*	$$/T4RUPT
+		COUNT*	$$/T4RPT
 CONTDRVE	CCS	OPTIND
 		TC	+4			# WORK COARS OPTICS
 		TC	+3			# WORK COARS OPTICS
