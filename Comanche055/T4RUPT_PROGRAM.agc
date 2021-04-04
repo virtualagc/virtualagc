@@ -21,6 +21,8 @@
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##		2017-03-03 RSB	Fixed comment-text errors identified while proofing
 ##				Luminary 116.
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed
 ## from scanned documents.
@@ -1332,7 +1334,7 @@ OPTDRIVE	CA	CDUS			# GRAB OPTIC SHAFT CDU
 		TCF	OZONE	+1
 OZONE		CAF	ZERO			# ABS(CDUS) LESS THEN 90 DEG-ZONE ZERO
 		TS	ZONE
-		COUNT*	$$/T4RUPT
+		COUNT*	$$/T4RPT
 CONTDRVE	CCS	OPTIND
 		TC	+4			# WORK COARS OPTICS
 		TC	+3			# WORK COARS OPTICS

@@ -19,7 +19,9 @@
 ##				and fixed the errors found.
 ##		2017-01-14 RSB	Fixed comment-text errors located while 
 ##				diff'ing with Colossus 249.
-
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
+##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
 ##
@@ -1181,7 +1183,7 @@ TAR1		SLOAD*	SR2		# X1=2 X2=12 S2=6 X1=0 X2=6 S2=6
 		BANK	33
 		SETLOC	IMUCAL
 		BANK
-		COUNT*	$$/P03
+		COUNT*	$$/PO3
 		
 CONTIN33	CA	ONE
 		TS	STARCODE

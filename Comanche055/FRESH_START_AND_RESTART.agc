@@ -20,6 +20,8 @@
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-03-13 RSB	GOP00FIX -> GOPOOFIX.
 ##		2017-08-19 MAS	Fixed label errors found transcribing Zerlina 56.
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed
 ## from scanned documents.
@@ -1227,7 +1229,7 @@ NEG7		EQUALS	OCT77770
 OCT44571	OCT	44571			# CONSTANTS TO CLEAR CHANNEL BITS IN V37
 OCT600		OCT	600
 		EBANK=	PACTOFF
-P00DAPAD	2CADR	T5IDLOC
+POODAPAD	2CADR	T5IDLOC
 
 MMTEMP		EQUALS	PHSPRDT3
 BASETEMP	EQUALS	TBASE4

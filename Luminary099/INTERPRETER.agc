@@ -21,7 +21,9 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
-
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
+##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -416,7 +418,7 @@ DOSTORE		TS	ADDRWD
 		MASK	B12T14
 		EXTEND
 		MP	BIT5		# EACH TRANSFER VECTOR ENTRY IS TWO WORDS.
-		INDEX	A
+ITR0		INDEX	A
 		TCF	STORJUMP
 		
 ## Page 1015

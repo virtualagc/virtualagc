@@ -15,6 +15,8 @@
 ##				and fixed the errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -621,7 +623,7 @@ MARKIT		CCS	CDUCHKWD
 		SETLOC	SXTMARK1
 		BANK
 		
-		COUNT	20/SXTMK
+		COUNT	10/SXTMK
 		
 # PROGRAM NAME - MARKDIF			DATE- 19 SEPT 1967
 #

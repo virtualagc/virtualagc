@@ -24,7 +24,9 @@
 ##				identified while proofing Artemis 072.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
-
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
+##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -369,7 +371,7 @@ MISCJUMP	TCF	AXT		# 00 - ADDRESS TO INDEX TRUE.
 
 ## Page 1118
 # THE FOLLOWING JUMP TABLE APPIES TO UNARY INSTRUCTIONS.
-		COUNT*	$$/INTER
+		COUNT   00/INTER
 		BANK	0		# 00 - EXIT - DETECTED EARLIER.
 UNAJUMP		TCF	SQRT		# 01 - SQUARE ROOT.
 		TCF	SINE		# 02 - SIN.

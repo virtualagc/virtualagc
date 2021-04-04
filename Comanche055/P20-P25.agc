@@ -28,7 +28,9 @@
 ##				Artemis 72.
 ##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
 ##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
-
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
+##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -1518,7 +1520,7 @@ INITB		STORE	W +90D,1	# CLEAR 54 - 89
 		BANK
 		
 		EBANK=	CDUXD
-		COUNT*	$/CRS61
+		COUNT*	$$/CRS61
 		
 CRS61.1		STQ	SETPD
 			Q611

@@ -32,7 +32,9 @@
 ##		2017-01-22 RSB	Fixed comment errors detected in cross-diff vs
 ##				Artemis 72.
 ##		2017-03-16 RSB	Fixed a ##-style comment.
-
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
+##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -984,7 +986,7 @@ ENDSPBIT	=	BIT13
 CMDAPARM	=	093D		# ALOW ENTRY FIRINGS	INHIBIT ENTRY FIRING
 					# AND CALCULATIONS	AND CONTROL FUNCTION
 ## Page 58					
-CMDARMBIT	=	BIT12
+CMARMBIT	=	BIT12
 
 # BIT 11 FLAG 6
 GAMDIFSW	=	094D		# CALCULATE GAMDOT	GAMDOT NOT TO BE
@@ -1237,7 +1239,7 @@ COGAFBIT	=	BIT4
 ## Page 63
 V96ONFLG	=	132D		# P00 INTEGRATION HAS	P00 INTEGRATION IS
 					# BEEN INHIBITED BY	PROCEEDING REGULARLY
-					# V96
+V96ONBIT        =       BIT3		# V96
 		
 # BIT 2 FLAG 8
 #		=	133D
@@ -3268,7 +3270,7 @@ TTEMP		EQUALS	TMIS	+4	# B   TMP
 KV2		EQUALS	TMIS	+6	# I(6)TMP
 BIASTEMP	EQUALS	TMIS	+6	# B   TMP
 KV3		EQUALS	TMIS	+12D	# I(6)TMP
-CGF		EQUALS	TMIS	+12D	# I   TMP
+OGF		EQUALS	TMIS	+12D	# I   TMP
 
 BRATE		EQUALS	COFSKEW		# B   TMP
 TM		EQUALS	CAM		# B   TMP

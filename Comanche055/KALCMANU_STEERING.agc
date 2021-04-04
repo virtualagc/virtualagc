@@ -12,6 +12,8 @@
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##              2021-04-04 ABS  Fixed minor symbol name transcription errors as
+##                              verified by sort order in end-of-listing tables.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -249,7 +251,7 @@ STOPYZ		CAF	ZERO
 		BANK
 
 ## Page 419
-ZEROERROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
+ZEROEROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
 		TS	CDUXD		# CDU DESIRED
 		CA	CDUY
 		TS	CDUYD
