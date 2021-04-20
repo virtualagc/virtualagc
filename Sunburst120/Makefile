@@ -10,6 +10,7 @@
 
 BASENAME=Sunburst120
 EXTRA_TARGETS=MAIN-test.agc.bin MAIN-test.agc.lst
+EXTRA_YAYUL_ARGS=--honeywell
 
 include ../Makefile.inc
 

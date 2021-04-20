@@ -9,6 +9,6 @@
 
 BASENAME=Sunburst37
 
-EXTRA_YAYUL_ARGS=--early-sbank --pos-checksums
+EXTRA_YAYUL_ARGS=--early-sbank --pos-checksums --honeywell
 
 include ../Makefile.inc

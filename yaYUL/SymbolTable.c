@@ -1,5 +1,5 @@
 /*
- * Copyright 2003,2009-2010,2016,2020 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003,2009-2010,2016,2020-2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -102,6 +102,7 @@
  *                              to visually distinguish visited lines in annotations from
  *                              the plain text. And in retrospect, I don't see any way for
  *                              it to really be confused with a comment.
+ *              2021-04-20 RSB  Added --ebcdic.
  *
  * Concerning the concept of a symbol's namespace.  I had originally
  * intended to implement this, and so many functions had a namespace
@@ -138,6 +139,12 @@
 // On the second pass, true values are assigned to the symbols.
 Symbol_t *SymbolTable = NULL;
 int SymbolTableSize = 0, SymbolTableMax = 0;
+
+// Set these variables to set symbol-table collation.  No more than one
+// of them non-zero.  If both zero, then native collation is used.
+int forceAscii = 1;  // Kept this way until just about to print symbol table.
+int ebcdic = 1;
+int honeywell = 0;
 
 // Set this variable non-zero to treat "## Page" as "# Page".
 int UnpoundPage = 0;
@@ -761,7 +768,12 @@ CompareSymbolName(const void *Raw1, const void *Raw2)
   if (Element1->Namespace > Element2->Namespace)
     return (1);
 
-  return (strcmp(Element1->Name, Element2->Name));
+  if (ebcdic && !forceAscii)
+    return (strcmpEBCDIC(Element1->Name, Element2->Name));
+  else if (honeywell && !forceAscii)
+    return (strcmpHoneywell(Element1->Name, Element2->Name));
+  else
+    return (strcmp(Element1->Name, Element2->Name));
 #undef Element1
 #undef Element2
 }
@@ -970,7 +982,7 @@ EditSymbolNew(const char *Name, Address_t *Value, int Type, char *FileName,
 #endif
 
   // Reassign the value.
-  if (memcmp(&Symbol->Value, Value, sizeof (*Value)))
+  if (memcmp(&Symbol->Value, Value, sizeof(*Value)))
     numSymbolsReassigned++;
   Symbol->Value = *Value;
 

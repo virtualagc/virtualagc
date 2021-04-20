@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2009-2010,2016-2018 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2005,2009-2010,2016-2018,2021 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -106,6 +106,7 @@
  *                            	builds with "--hardware --parity" was giving hardware-
  *                            	incompatible binaries).
  *             	2018-10-12 RSB  Added stuff associated with --simulation.
+ *             	2021-04-20 RSB  Added stuff associated with --ebcdic.
  */
 
 #include "yaYUL.h"
@@ -264,6 +265,21 @@ main(int argc, char *argv[])
         Parity = 1;
       else if (!strcmp(argv[i], "--format"))
         formatOnly = 1;
+      else if (!strcmp(argv[i], "--ebcdic"))
+        {
+        ebcdic = 1;
+        honeywell = 0;
+        }
+      else if (!strcmp(argv[i], "--honeywell"))
+        {
+        ebcdic = 0;
+        honeywell = 1;
+        }
+      else if (!strcmp(argv[i], "--ascii"))
+        {
+        ebcdic = 0;
+        honeywell = 0;
+        }
       else if (!strcmp(argv[i], "--syntax"))
         {
           syntaxOnly = 1;
@@ -323,7 +339,7 @@ main(int argc, char *argv[])
 
   printf("Apollo Guidance Computer (AGC) assembler, version " NVER
   ", built " __DATE__ ", target %s\n", assemblyTarget);
-  printf("(c)2003-2005,2009-2010,2016-2018 Ronald S. Burkey\n");
+  printf("(c)2003-2005,2009-2010,2016-2018,2021 Ronald S. Burkey\n");
   printf(
       "Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
 
@@ -430,25 +446,6 @@ main(int argc, char *argv[])
       return (Fatals);
     }
 
-  // Print the symbol table.
-  printf("\n\n");
-  PrintBankCounts();
-  printf("\n\n");
-  PrintSymbols();
-  printf("\nUnresolved symbols:  %d\n", UnresolvedSymbols());
-  printf("Fatal errors:  %d\n", Fatals);
-  printf("Warnings:  %d\n", Warnings);
-  if (HtmlOut != NULL)
-    {
-      fprintf(HtmlOut, "\n");
-      fprintf(HtmlOut, "</pre>\n<h1>Assembly Status</h1>\n<pre>\n");
-      fprintf(HtmlOut, "Unresolved symbols:  %d\n", UnresolvedSymbols());
-      fprintf(HtmlOut, "Fatal errors:  %d\n", Fatals);
-      fprintf(HtmlOut, "Warnings:  %d\n", Warnings);
-      fprintf(HtmlOut, "\n");
-      fprintf(HtmlOut, "</pre>\n<h1>Bugger Words</h1>\n<pre>\n");
-    }
-
   // JMS: 07.28
   // We sort the lines by increasing physical address so we can look them
   // up later.
@@ -465,6 +462,34 @@ main(int argc, char *argv[])
         }
       sprintf(SymbolFile, "%s.symtab", InputFilename);
       WriteSymbolsToFile(SymbolFile);
+    }
+
+  // Print the symbol table.  Note that up to this point we've been using the native collation
+  // of strings for sorting by symbol name, which we had to do to make sure that we got all the
+  // way to the point of being able to output the .symtab file above.  Otherwise, there was the
+  // possibility that the source code might have symbols with non-EBCDIC, non-Honeywell characters,
+  // and there might have been some subtle failure in accessing the symbols during compilation.
+  // But also, we needed the .symtab file to use the native collation, since otherwise the debugger
+  // might not have been able to use it.  Now, however, we need to resort it to whatever collation
+  // the user selected from the yaYUL command line.
+  forceAscii = 0;
+  SortSymbols ();
+  printf("\n\n");
+  PrintBankCounts();
+  printf("\n\n");
+  PrintSymbols();
+  printf("\nUnresolved symbols:  %d\n", UnresolvedSymbols());
+  printf("Fatal errors:  %d\n", Fatals);
+  printf("Warnings:  %d\n", Warnings);
+  if (HtmlOut != NULL)
+    {
+      fprintf(HtmlOut, "\n");
+      fprintf(HtmlOut, "</pre>\n<h1>Assembly Status</h1>\n<pre>\n");
+      fprintf(HtmlOut, "Unresolved symbols:  %d\n", UnresolvedSymbols());
+      fprintf(HtmlOut, "Fatal errors:  %d\n", Fatals);
+      fprintf(HtmlOut, "Warnings:  %d\n", Warnings);
+      fprintf(HtmlOut, "\n");
+      fprintf(HtmlOut, "</pre>\n<h1>Bugger Words</h1>\n<pre>\n");
     }
 
   // Output the executable object code.
@@ -590,6 +615,14 @@ main(int argc, char *argv[])
           "                 there were fatal errors during assembly.\n");
       //printf ("--g              Output the binary symbol table to the file\n"
       //        "                 InputFile.symtab\n");
+      printf("--ascii         Sort symbol table using native (presumably\n"
+          "                 ASCII) collation.  See --ebcdic, --honeywell.\n");
+      printf("--ebcdic         (Default) Sort symbol table using EBCDIC\n"
+          "                 rather than native (presumably ASCII)\n"
+          "                 collation.  See --ascii, --honeywell.\n");
+      printf("--honeywell      Sort symbol table using Honeywell\n"
+          "                 rather than native (presumably ASCII)\n"
+          "                 collation.  See --ebcdic, --ascii.\n");
       printf("--html           Causes an HTML file to be created, which is \n"
           "                 the same as the output listing except that it\n"
           "                 if a lot more convenient to use. It has syntax\n"
