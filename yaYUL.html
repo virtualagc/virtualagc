@@ -85,11 +85,13 @@ document.write(headerTemplate.replace("@TITLE@","yaYUL").replace("@SUBTITLE@","T
     </p>
     <p>There's a pretty extensive <a href="Documents/agcis_13_yul.pdf">AGC
 Information
-        Series document covering YUL and its operation</a>.&nbsp;
-      And <a href="Documents/yul_punched_cards.pdf">here's a short
-        excerpt from the same document</a>, describing the punched-card
-      format, but with the additional enticement of a couple of images
-      of actual cards.<br>
+
+
+        Series document covering YUL and its operation</a>.&nbsp; And <a
+        href="Documents/yul_punched_cards.pdf">here's a short excerpt
+        from the same document</a>, describing the punched-card format,
+      but with the additional enticement of a couple of images of actual
+      cards.<br>
     </p>
     <p><a href="klabs/images/IMG_9203.JPG"><img alt=""
           src="HughAndYUL.jpg" width="400" height="300" border="2"
@@ -185,32 +187,31 @@ Information
     so I feel entitled to ignore that fact.<br>
     <br>
     It is important to understand that when I wrote <b>yaYUL</b>, there
-    was almost no available
-    documentation of how the assembler was <span style="font-style:
-      italic;">supposed</span> to operate—i.e., of the syntax of AGC
-    assembly language.&nbsp; (Well, the manual for <span
-      style="font-weight: bold;">GAP</span> does exist, but I'd not
-    seen it.)&nbsp; In the end, most that is known of the syntax of
-    AGC assembly language has been deduced from <span
-      style="font-weight: bold;">Luminary</span> and/or <span
-      style="font-weight: bold;">Colossus</span> assembly listings and,
-    frankly, some of this syntax is very obscure.&nbsp; I have written
-    down what I have learned and what I have deduced in the <a
-      href="assembly_language_manual.html">assembly-language manual</a>.&nbsp;
-Therefore,
-    <span style="font-weight: bold;">yaYUL</span> is not so
-    much an assembler for AGC assembly language (which is fairly
-    nebulous idea), as much as it is a utility which processes <i>existing
+    was almost no available documentation of how the assembler was <span
+      style="font-style: italic;">supposed</span> to operate—i.e., of
+    the syntax of AGC assembly language.&nbsp; (Well, the manual for <span
+      style="font-weight: bold;">GAP</span> does exist, but I'd not seen
+    it.)&nbsp; In the end, most that is known of the syntax of AGC
+    assembly language has been deduced from <span style="font-weight:
+      bold;">Luminary</span> and/or <span style="font-weight: bold;">Colossus</span>
+    assembly listings and, frankly, some of this syntax is very
+    obscure.&nbsp; I have written down what I have learned and what I
+    have deduced in the <a href="assembly_language_manual.html">assembly-language
+
+      manual</a>.&nbsp; Therefore, <span style="font-weight: bold;">yaYUL</span>
+    is not so much an assembler for AGC assembly language (which is
+    fairly nebulous idea), as much as it is a utility which processes <i>existing
+
+
     </i><span style="font-weight: bold;">Luminary</span> and/or <span
       style="font-weight: bold;">Colossus</span> source-code to produce
     good core-rope images for those specific programs.&nbsp; But we've
     had good luck in feeding most AGC programs into it.<br>
     <br>
     Finally, of course,&nbsp; <span style="font-weight: bold;">yaYUL</span>
-    accepts source-code <i>files</i> rather than punch-card
-    decks or source-code libraries from magnetic tape.&nbsp; But like
-    YUL, <b>yaYUL</b> directly outputs binary
-    machine code, and there is no linker.<br>
+    accepts source-code <i>files</i> rather than punch-card decks or
+    source-code libraries from magnetic tape.&nbsp; But like YUL, <b>yaYUL</b>
+    directly outputs binary machine code, and there is no linker.<br>
     <h2><a name="Invoking_yaYUL" id="Invoking_yaYUL"></a>Invoking yaYUL</h2>
     Running the assembler is very simple.&nbsp; <span
       style="font-weight: bold;">yaYUL</span> is a command-line program,
@@ -381,6 +382,21 @@ Therefore,
         annotations to the source code.</a><br>
     </div>
     <br>
+    --ascii, --ebcdic, --honeywell<br>
+    <div style="margin-left: 40px;"> (20210420 and later.)&nbsp; By
+      default (or with --ebcdic), yaYUL sorts AGC symbol tables in the
+      ordering implied by an EBCDIC character encoding, which matches
+      the ordering of symbol tables produced by the original GAP
+      assembler.&nbsp; With the --honeywell switch, yaYUL instead sorts
+      according to the character encoding of the Honeywell H-800
+      computer system, which is the ordering that symbol tables created
+      by the original YUL assembler followed; the AGC programs RETREAD,
+      AURORA, SUNBURST, TRIVIUM, and SOLARIUM should be assembled with
+      the --honeywell switch.&nbsp; Finally, with the --ascii switch,
+      the native (ASCII) ordering is used; prior to the 20210420 version
+      of yaYUL, ASCII was the only available option.<br>
+    </div>
+    <br>
     --unpound-page<br>
     <div style="margin-left: 40px;"> (20100220 and later.)&nbsp; If
       --html is used, causes bypassing of "## Page ..." to be treated as
@@ -422,15 +438,23 @@ Therefore,
                 style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL4&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
+
                 SYMBOL3</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL3&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
+
                 SYMBOL2</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL2&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
+
                 SYMBOL1</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL1&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
+
                 42</span><br>
             </div>
             <br>
@@ -528,10 +552,14 @@ EQUALS&nbsp;&nbsp;&nbsp;
     above.)<br>
     <h2><a name="AGC4_Assembly_Language" id="AGC4_Assembly_Language"></a>AGC4
 Assembly
+
+
       Language</h2>
     For a full explanation of the formatting of assembly-language files,
     and of available AGC4 assembly-language instructions, refer to the
     separately-provided <a href="assembly_language_manual.html">assembly-language
+
+
       manual</a>.&nbsp; Anyone who's determined to write AGC4
     assembly-language will probably also need to consult the <a
       href="developer.html">developer-info page</a>, which covers
@@ -553,10 +581,12 @@ Assembly
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 Commons
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2019-05-11<br>
+          2021-04-20<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
