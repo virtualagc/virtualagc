@@ -7,7 +7,7 @@
 #             	2017-06-28 MAS	Converted from BLK2 to AGC.
 
 BASENAME=Borealis
-EXTRA_YAYUL_ARGS+=--parity
+EXTRA_YAYUL_ARGS+=--parity --honeywell
 
 # Borealis, being a custom program, will never have a binsource.
 NO_BINSOURCE=yes

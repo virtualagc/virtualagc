@@ -281,6 +281,8 @@ typedef struct
 #define SYMBOL_LABEL           (2)      // A program label
 #define SYMBOL_VARIABLE        (4)      // A memory address (ERASE)
 #define SYMBOL_CONSTANT        (8)      // A constant (EQUALS or =)
+#define SYMBOL_SEPARATOR       (256)    // Used for printing separators.
+#define SYMBOL_EMPTY           (0)      // Use only for end of table.
 
 // The SymbolLine_t structure represents a given line of code and the
 // source file in which it can be found and its line number in the source
