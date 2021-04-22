@@ -692,10 +692,15 @@ main(int argc, char *argv[])
       printf("                 is the initial card-sequence number.  L (a string) is the\n");
       printf("                 name of the log section to use as a P-card.\n");
       printf("--simulation     Reacts to the string -SIMULATION and +SIMULATION in comments.\n");
-      printf("--reconstruction Normally, most ##-style comments are removed from output lst\n");
-      printf("                 files.  With --reconstruction, blocks of ##-style comments\n");
-      printf("                 starting with a line containing the 'Reconstruction:' are\n");
+      printf("--reconstruction Normally, most ##-style comments are removed from output assembly-\n");
+      printf("                 listing files.  With --reconstruction, however, blocks of ##-style\n");
+      printf("                 comments starting with a line containing 'Reconstruction:' are\n");
       printf("                 are instead displayed in lst files, in a special format.\n");
+      printf("                 These comments can be useful during a source-code \n");
+      printf("                 reconstruction effort, but are not useful in normal use\n");
+      printf("                 because such ##-comments typically include HTML not appropriate\n");
+      printf("                 in a plain-vanilla text file like the assembly listing.\n");
+      printf("                 (Those comments are targeted for --html assembly listings.\n");
     }
   if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);
