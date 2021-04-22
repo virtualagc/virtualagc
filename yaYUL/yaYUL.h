@@ -71,6 +71,7 @@
  *                               superbank data storage.
  *             	  2017-08-31 RSB Added stuff associated with --debug.
  *             	  2018-10-12 RSB Added stuff associated with --simulation.
+ *                2021-01-24 RSB reconstructionComments.
  *             	  2021-04-20 RSB Added stuff associated wtih --ebcdic.
  */
 
@@ -611,6 +612,9 @@ extern int debugPass;
 extern int debugLine;
 extern char *debugLineString;
 void debugPrint(char *msg);
+
+extern int reconstructionComments;
+extern int inReconstructionComment;
 
 #endif // INCLUDED_YAYUL_H
 
