@@ -891,7 +891,7 @@ PrintSymbolsToFile(FILE *fp)
       if (initial != lastInitial && lastInitial != 0)
         {
           lastInitial = initial;
-          if (currentRow != 0 || currentColumn != 0)
+          if (honeywell == 0 || currentRow != 0 || currentColumn != 0)
             {
               dummySymbol = &separator;
               saveSymbol: position = currentPageOffset + currentRow * 3
