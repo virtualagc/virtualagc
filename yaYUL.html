@@ -87,6 +87,7 @@ document.write(headerTemplate.replace("@TITLE@","yaYUL").replace("@SUBTITLE@","T
 Information
 
 
+
         Series document covering YUL and its operation</a>.&nbsp; And <a
         href="Documents/yul_punched_cards.pdf">here's a short excerpt
         from the same document</a>, describing the punched-card format,
@@ -198,9 +199,11 @@ Information
     obscure.&nbsp; I have written down what I have learned and what I
     have deduced in the <a href="assembly_language_manual.html">assembly-language
 
+
       manual</a>.&nbsp; Therefore, <span style="font-weight: bold;">yaYUL</span>
     is not so much an assembler for AGC assembly language (which is
     fairly nebulous idea), as much as it is a utility which processes <i>existing
+
 
 
     </i><span style="font-weight: bold;">Luminary</span> and/or <span
@@ -397,6 +400,50 @@ Information
       of yaYUL, ASCII was the only available option.<br>
     </div>
     <br>
+    --reconstruction<br>
+    <div style="margin-left: 40px;"> (20220422 and later.)&nbsp;
+      Provides reconstruction support in assembly-listing files.&nbsp;
+      This command-line switch could optionally be used during the
+      engineering process of reconstructing source code, but then should
+      be removed once the reconstructed AGC source code was
+      released.&nbsp; To understand what that means, the following
+      background info is needed.<br>
+      <br>
+      For AGC source-code versions which are "reconstructed" rather than
+      transcribed from a contemporary assembly-listing printout — for
+      example, as of this writing, Comanche 44, 45, 45/2, and 51 are all
+      reconstructed versions of COLOSSUS — it is usual to add modern
+      ##-style comments to the reconstructed code at each point where
+      the reconstructed code differs from a baseline version of the code
+      used as a starting point for the reconstruction process.&nbsp;
+      Each change is documented and justified by an added comment.&nbsp;
+      For example, Comanche 51 was reconstructed starting from Comanche
+      55 as a baseline, so each difference between Comanche 51 and 55 is
+      justified by a ##-style comment.&nbsp; Actually, these justifying
+      comments tend to be <i>sequences</i> of ##-style comments rather
+      than just a single comment line, with the very first line
+      containing the string "Reconstruction:" somewhere within it.<br>
+      <br>
+      <i>Normally</i>, however, ##-style comments contain HTML tags in
+      addition to plain-text descriptions, because they are really
+      intended to be viewed in HTML versions of the assembly
+      listings.&nbsp; (See the --html command-line switch above.)&nbsp;
+      Therefore, ##-comments are not really very suitable for the
+      plain-text assembly-listing files output by yaYUL, and hence most
+      such comments are omitted from the plain-text assembly listings.
+      (Exceptions are page-numbering and file-header ##-comments, which
+      are always included.)&nbsp; Nevertheless, even though not suitable
+      for normal plain-text assembly listings, the reconstruction
+      ##-style comments can be very useful tools in the plain-text
+      assembly listings during the actual process of reconstructing
+      source code.&nbsp; What the --reconstruction switch does,
+      therefore, is to add the reconstruction ##-comments into the
+      plain-text assembly listings, while continuing to omit all other
+      ##-comments from them.&nbsp; The HTML assembly listings are not
+      affected, and always contain all ##-comments, regardless of the
+      use or absence of the --reconstruction switch.<br>
+    </div>
+    <br>
     --unpound-page<br>
     <div style="margin-left: 40px;"> (20100220 and later.)&nbsp; If
       --html is used, causes bypassing of "## Page ..." to be treated as
@@ -440,9 +487,11 @@ Information
 EQUALS&nbsp;&nbsp;&nbsp;
 
 
+
                 SYMBOL3</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL3&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
 
 
                 SYMBOL2</span><br style="font-family: monospace;">
@@ -450,9 +499,11 @@ EQUALS&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
 
 
+
                 SYMBOL1</span><br style="font-family: monospace;">
               <span style="font-family: monospace;">SYMBOL1&nbsp;&nbsp;&nbsp;
 EQUALS&nbsp;&nbsp;&nbsp;
+
 
 
                 42</span><br>
@@ -518,6 +569,7 @@ EQUALS&nbsp;&nbsp;&nbsp;
         </tr>
       </tbody>
     </table>
+    <br>
     --syntax<br>
     <div style="margin-left: 40px;"> (As of 20161009.)&nbsp; Simply
       check the syntax and then quit.&nbsp; This is useful, for example,
@@ -554,10 +606,12 @@ EQUALS&nbsp;&nbsp;&nbsp;
 Assembly
 
 
+
       Language</h2>
     For a full explanation of the formatting of assembly-language files,
     and of available AGC4 assembly-language instructions, refer to the
     separately-provided <a href="assembly_language_manual.html">assembly-language
+
 
 
       manual</a>.&nbsp; Anyone who's determined to write AGC4
@@ -583,10 +637,11 @@ Assembly
 Commons
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2021-04-20<br>
+          2021-04-22<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
