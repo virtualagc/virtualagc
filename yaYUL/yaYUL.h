@@ -72,6 +72,7 @@
  *             	  2017-08-31 RSB Added stuff associated with --debug.
  *             	  2018-10-12 RSB Added stuff associated with --simulation.
  *                2021-01-24 RSB reconstructionComments.
+ *             	  2021-04-20 RSB Added stuff associated wtih --ebcdic.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -281,6 +282,8 @@ typedef struct
 #define SYMBOL_LABEL           (2)      // A program label
 #define SYMBOL_VARIABLE        (4)      // A memory address (ERASE)
 #define SYMBOL_CONSTANT        (8)      // A constant (EQUALS or =)
+#define SYMBOL_SEPARATOR       (256)    // Used for printing separators.
+#define SYMBOL_EMPTY           (0)      // Use only for end of table.
 
 // The SymbolLine_t structure represents a given line of code and the
 // source file in which it can be found and its line number in the source
@@ -552,6 +555,12 @@ PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord);
 int
 CalculateParity(int Value);
 
+// From strcmpEBCDIC.c.
+int
+strcmpEBCDIC(const char *s1, const char *s2);
+int
+strcmpHoneywell(const char *s1, const char *s2);
+
 // Various parsers.
 Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
     ParseEquate, Parse2DEC, Parse2DECstar, ParseDEC, ParseDECstar, ParseSETLOC,
@@ -566,6 +575,9 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
     Parse2OCT, ParseSBANKEquals, ParseEDRUPT, ParseInterpretiveOperand,
     ParseEqMinus, ParseXCADR, ParseSECSIZ;
 
+extern int forceAscii;
+extern int ebcdic;
+extern int honeywell;
 extern int Block1;
 extern int EarlySBank;
 extern int Raytheon;
