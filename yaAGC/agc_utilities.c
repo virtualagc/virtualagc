@@ -53,13 +53,20 @@
 		                (namely, that yaAGC no longer listened on the
 		                specified port on 64-bit Linux Mint and Ubuntu)
 		                has actually been fixed in the makefile.
+		05/13/21 MKF    Defined WASI. netdb.h is not implemented in
+		                wasi-libc, and so, socket-related code has to
+		                be disabled in WASI.
 */
 
 // ... and the project's includes.
 #include <stdio.h>
 #include <string.h>
 #ifndef WIN32
+
+#ifndef WASI
 #include <netdb.h>
+#endif
+
 #include <netinet/in.h>
 #include <sys/socket.h>
 #endif
@@ -159,6 +166,7 @@ ParseIoPacketAGS (unsigned char *Packet, int *Type, int *Data)
   return (0);
 }
 
+#ifndef WASI
 /////////////////////////////////////////////////////////////////////////////////
 // Portable functions (*NIX and Win32) for working with sockets.  
 
@@ -390,3 +398,4 @@ CallSocket (char *hostname, unsigned short portnum)
   UnblockSocket (s);
   return (s);
 }
+#endif // #ifndef WASI

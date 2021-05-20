@@ -91,6 +91,8 @@
  * 		05/16/17 MAS    Enabled interrupts at startup.
  * 		05/31/17 RSB	Added --initialize-sunburst-37.
  * 		07/13/17 MAS	Added initialization of the three HANDRUPT traps.
+ * 		05/13/21 MKF	Disabled UnblockSocket for the WASI target
+ *  				(there are no sockets in wasi-libc)
  */
 
 // For Orbiter.
@@ -232,7 +234,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   int RetVal = 0, i, j, Bank;
   FILE *cd = NULL;
 
-#ifndef WIN32
+#if !defined (WIN32) && !defined(WASI)
   // The purpose of this is to make sure that getchar doesn't halt the program
   // when there's no keystroke immediately available.
   UnblockSocket (fileno (stdin));

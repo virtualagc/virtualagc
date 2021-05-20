@@ -45,6 +45,9 @@
 		08/13/05 RSB	Added the extern "C" stuff.
 		02/28/09 RSB	Added FORMAT_64U, FORMAT_64O for bypassing
 				some compiler warnings on 64-bit machines.
+		05/13/21 MKF	Disabled headers which are not implemented
+				in wasi-libc. Disabled functions which cannot
+				be ported to wasi-libc.
 */
 
 #ifdef __cplusplus
@@ -59,15 +62,19 @@ extern "C" {
 #endif
 
 // Figure out the right include-files for socket stuff.
-#if defined(unix)
+#if defined(unix) || defined(WASI)
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netdb.h>
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <stdint.h>
+
+#ifndef WASI
+#include <netdb.h>
+#endif
+
 #ifdef __APPLE_CC__
 #define FORMAT_64U "%llu"
 #define FORMAT_64O "%llo"
@@ -96,6 +103,7 @@ extern "C" {
 #define FORMAT_64O "%llo"
 
 #elif defined(SDCC)
+#elif defined(WASI)
 
 #else
 
@@ -115,10 +123,12 @@ int ParseIoPacket (unsigned char *Packet, int *Channel, int *Value,
 int FormIoPacketAGS (int Type, int Data, unsigned char *Packet);
 int ParseIoPacketAGS (unsigned char *Packet, int *Type, int *Data);
 
+#ifndef WASI
 int InitializeSocketSystem (void);
 void UnblockSocket (int SocketNum);
 int EstablishSocket (unsigned short portnum, int MaxClients);
 int CallSocket (char *hostname, unsigned short portnum);
+#endif
 
 #endif // YAAGC_H
 
