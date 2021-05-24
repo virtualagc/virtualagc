@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2004,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2004,2009,2021 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC. 
 
@@ -38,6 +38,7 @@
                                spills over into the Extra field. Fix handling
                                of numbers where the exponents are all in the
                                operand field.
+                2021-05-24 RSB Workaround for bad cygwin pow() function.
  */
 
 #include "yaYUL.h"
@@ -56,12 +57,12 @@ double ScaleFactor(char *s)
 
     if (*s == 'E') {
         n = atoi(s + 1);
-        return (pow(10.0, n));
+        return (agcPow(10.0, n));
     }
 
     if (*s == 'B') {
         n = atoi(s + 1);
-        return (pow(2.0, n));
+        return (agcPow(2.0, n));
     }
 
     return (1.0);
