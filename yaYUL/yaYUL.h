@@ -74,6 +74,7 @@
  *                2021-01-24 RSB reconstructionComments.
  *             	  2021-04-20 RSB Added stuff associated wtih --ebcdic.
  *                2021-05-24 RSB Workaround for bad cygwin pow() function.
+ *                2021-05-24 RSB ... and apparently, for MINGW as well.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -85,12 +86,12 @@
 #define MSC_VS
 #endif
 
-#if defined(__CYGWIN__)
-// As of this writing (2021-05-23), I'm told that Cygwin's pow() function does not
-// work properly, due to a bug in newlib.  The only place a problem shows up in our
+#if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__)
+// As of this writing (2021-05-23), I'm told that Cygwin's and MINGW's pow() functions
+// do not work as well as hoped.  The only place a problem shows up in our
 // current code base is in a couple of misassembled lines of SUNBURST 37 by yaYUL.
 // The pow() function is actually used not only in yaYUL.c, but also in yaLEMAP.c and
-// checkdec.c. So here's a replacement for pow(), *only* for Cygwin.  For our use case, only
+// checkdec.c. So here's a workaround for pow().  For our use case, only
 // small integer powers of 2 and 10 are ever needed, so that's all that's implemented.
 // Yes, the implementation is dumb and inefficient; but it's 100% obviously correct,
 // I hope, and that's the goal of this workaround.
