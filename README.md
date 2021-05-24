@@ -114,6 +114,13 @@ On Fedora 22 or later you may encounter that the wxWidgets doesn't have the wx-c
 * You will need SUNWgnome-common-devel, SUNWGtk, SUNWxorg-headers, FSWxorg-headers, SUNWncurses, SUNWtcl, SUNWtk and SUNWlibsdl
 * You will also need GNU readline 6.0, wxWidgets 2.8.9 (with `configure --disable-shared`), Allegro 4.2.2 (with "configure --enable-shared=no --enable-static=yes") and to put `/usr/local/bin` and/or `/usr/local/bin/wx-config` linked into your `PATH`.
 
+## WebAssembly
+
+* Requires `clang` from the LLVM project, plus a C standard library which compiles down to WASI system calls. Clang can directly emit WebAssembly since version 8.  [wasi-sdk](https://github.com/WebAssembly/wasi-sdk) provides a WebAssembly toolchain (clang plus C/C++ standard libraries).  A build from the source of [wasi-sdk revision a927856 ("use llvm 12.0.0 release")](https://github.com/WebAssembly/wasi-sdk/tree/a927856376271224d30c5d7732c00a0b359eaa45) has been tested with the Virtual AGC components listed in the section "WebAssembly" below, but the project also [supplies pre-built packages](https://github.com/WebAssembly/wasi-sdk/releases) for various platforms which should work just as well. In the build scripts of Virtual AGC, it is assumed that `wasi-sdk` is installed at `/opt/wasi-sdk`, but you can customize this path (see section "WebAssembly" below).
+* Requires `wasm-opt` (from the `binaryen` package) for WebAssembly code optimization.
+* Requires `wasm-strip` (from the `wabt` package) to minimize the size of the WebAssembly code.
+* Optionally, `wasm2wat` (from the `wabt` package) to translate binary code to human-readable text representation.
+
 
 More information at http://www.ibiblio.org/apollo/download.html#Build
 
@@ -254,6 +261,37 @@ To match the default setup of the installer program execute the following:
 You can make a desktop icon called *Virtual AGC* that links to `/VirtualAGC/bin/VirtualAGC`. The image normally used for the desktop icon is found at `/VirtualAGC/bin/ApolloPatch2.png`.
 
 Unfortunately the ACA simulation (joystick) programs do not work in this environment.
+
+
+## WebAssembly
+
+In the Virtual AGC build scripts, it is assumed that `wasi-sdk` is installed
+at `/opt/wasi-sdk`. You can customize the path by setting
+`WASI_SDK_PATH=/path/to/wasi-sdk` on the command line when executing `make`.
+
+For all builds to WebAssembly, put `WASI=yes` before `make`.
+
+Currently, only the following Virtual AGC components can be compiled for the
+WebAssembly target:
+
+### yaAGC
+
+If you have any leftover build artifacts in the `yaAGC` directory, run
+`make clean` in it.
+
+To build, simply `cd` into the root directory and do:
+
+`WASI=yes make yaAGC`
+
+This will produce `yaAGC.wasm` (about 100 kB).
+
+To additionally get a text representation, go into the `yaAGC` directory and
+run:
+
+`make yaAGC.wast`
+
+This will produce `yaAGC.wast` (about 900 kB).
+
 
 # Endnotes
 
