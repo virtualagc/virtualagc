@@ -27,6 +27,7 @@ add_subdirectory(yaLEMAP)
 add_subdirectory(yaLVDC)
 add_subdirectory(yaOBC)
 add_subdirectory(yaYUL)
+add_subdirectory(yaUniverse)
 
 add_subdirectory(enet)
 
