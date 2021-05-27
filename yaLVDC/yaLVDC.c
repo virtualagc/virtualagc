@@ -86,6 +86,10 @@ int cpuCurrentAccumulator = -1;
 
 #ifdef WIN32
 
+#if HAVE_TIME_H
+#include <time.h>
+#endif
+
 #include <windows.h>
 struct tms
   {
