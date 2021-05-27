@@ -16,6 +16,8 @@ if(WIN32)
   set(WINSOCK_LIBRARIES wsock32 ws2_32 Iphlpapi winmm)
 endif()
 
+add_subdirectory(Tools)
+
 add_subdirectory(yaAGC)
 add_subdirectory(yaASM)
 add_subdirectory(yaDSKY2)
