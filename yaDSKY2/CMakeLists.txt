@@ -1,3 +1,11 @@
+find_package(wxWidgets COMPONENTS gl core base)
+if(NOT wxWidgets_FOUND)
+  find_program(wxcfg NAMES wx-config)
+  if(NOT wxcfg)
+    return()
+  endif()
+endif()
+
 set(APPNAME yaDSKY2)
 
 set(SOURCES ${APPNAME}.cpp)
@@ -15,10 +23,9 @@ target_include_directories(${APPNAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../yaA
 target_compile_definitions(${APPNAME} PRIVATE NVER="${NVER}")
 
 if(WIN32)
-  target_link_libraries(${APPNAME} wsock32)
+  target_link_libraries(${APPNAME} PRIVATE ${WINSOCK_LIBRARIES})
 endif()
 
-find_package(wxWidgets COMPONENTS gl core base)
 if(wxWidgets_FOUND)
   target_include_directories(${APPNAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
   target_link_libraries(${APPNAME} PRIVATE ${wxWidgets_LIBRARIES})
