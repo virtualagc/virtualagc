@@ -10,6 +10,10 @@ set(NVER \\\"2020-12-24\\\")
 
 find_package(Threads)
 
+if(WIN32)
+  set(WINSOCK_LIBRARIES wsock32)
+endif()
+
 add_subdirectory(yaAGC)
 add_subdirectory(yaASM)
 add_subdirectory(yaDSKY2)

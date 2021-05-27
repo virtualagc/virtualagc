@@ -23,7 +23,7 @@ target_include_directories(${APPNAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../yaA
 target_compile_definitions(${APPNAME} PRIVATE NVER="${NVER}")
 
 if(WIN32)
-  target_link_libraries(${APPNAME} PRIVATE wsock32)
+  target_link_libraries(${APPNAME} PRIVATE ${WINSOCK_LIBRARIES})
 endif()
 
 if(wxWidgets_FOUND)

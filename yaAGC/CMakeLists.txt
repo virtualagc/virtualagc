@@ -14,9 +14,13 @@ if(Threads_FOUND)
   target_link_libraries(yaAGC PRIVATE Threads::Threads)
 endif()
 
+if(APPLE OR WIN32)
+  target_compile_definitions(yaAGC PRIVATE STDC_HEADERS)
+endif()
+
 if(WIN32)
   target_sources(yaAGC PRIVATE regex.c random.c)
-  target_link_libraries(yaAGC PRIVATE wsock32)
+  target_link_libraries(yaAGC PRIVATE ${WINSOCK_LIBRARIES})
 endif()
 
 install(TARGETS yaAGC)
