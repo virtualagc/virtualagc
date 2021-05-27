@@ -3,6 +3,8 @@ project(virtualAGC
 LANGUAGES C CXX
 HOMEPAGE_URL "https://github.com/virtualagc/virtualagc")
 
+include(CTest)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 set(NVER \\\"2020-12-24\\\")
@@ -20,9 +22,6 @@ add_subdirectory(yaDSKY2)
 add_subdirectory(yaLEMAP)
 add_subdirectory(yaLVDC)
 add_subdirectory(yaYUL)
-
-## install to ~/VirtualAGC upon:
-# cmake --build build --target install
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   if(WIN32)

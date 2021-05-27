@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.12)
-project(virtualASM LANGUAGES C)
-enable_testing()
-
 add_executable(yaASM yaASM.c)
 target_link_libraries(yaASM PRIVATE m)
 
