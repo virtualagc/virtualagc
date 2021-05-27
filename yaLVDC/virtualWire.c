@@ -26,7 +26,7 @@
  this file, you may extend this exception to your version of the file,
  but you are not obligated to do so. If you do not wish to do so, delete
  this exception statement from your version.
- 
+
  Filename:	virtualWire.c
  Purpose:	Portable functions (*NIX and Win32) for working with sockets
  for connecting yaLVDC to peripherals by "virtual wires".
@@ -56,7 +56,7 @@
 #include <winsock2.h>
 #endif
 
-#if (defined(__APPLE__) && defined(__MACH__))
+#if (defined(__APPLE__) && defined(__MACH__)) || WIN32
 #define MSG_NOSIGNAL 0
 #endif
 
@@ -872,7 +872,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// Portable functions (*NIX and Win32) for working with sockets.  
+// Portable functions (*NIX and Win32) for working with sockets.
 
 // Used for socket-operation error codes.
 int virtualWireErrorCodes = 0;
