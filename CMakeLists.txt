@@ -13,7 +13,7 @@ set(NVER \\\"2020-12-24\\\")
 find_package(Threads)
 
 if(WIN32)
-  set(WINSOCK_LIBRARIES wsock32)
+  set(WINSOCK_LIBRARIES wsock32 ws2_32 Iphlpapi winmm)
 endif()
 
 add_subdirectory(yaAGC)
@@ -21,7 +21,10 @@ add_subdirectory(yaASM)
 add_subdirectory(yaDSKY2)
 add_subdirectory(yaLEMAP)
 add_subdirectory(yaLVDC)
+add_subdirectory(yaOBC)
 add_subdirectory(yaYUL)
+
+add_subdirectory(enet)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   if(WIN32)
