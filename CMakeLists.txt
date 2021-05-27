@@ -17,8 +17,10 @@ if(WIN32)
 endif()
 
 add_subdirectory(Tools)
+add_subdirectory(Luminary099)
 
 add_subdirectory(yaAGC)
+add_subdirectory(yaAGS)
 add_subdirectory(yaASM)
 add_subdirectory(yaDSKY2)
 add_subdirectory(yaLEMAP)

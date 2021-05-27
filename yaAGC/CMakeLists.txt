@@ -19,8 +19,9 @@ if(APPLE OR WIN32)
 endif()
 
 if(WIN32)
-  target_sources(yaAGC PRIVATE regex.c random.c)
-  target_link_libraries(yaAGC PRIVATE ${WINSOCK_LIBRARIES})
+  add_library(regex regex.c)
+  target_sources(yaAGC PRIVATE random.c)
+  target_link_libraries(yaAGC PRIVATE regex ${WINSOCK_LIBRARIES})
 endif()
 
 install(TARGETS yaAGC)
