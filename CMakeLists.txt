@@ -1,10 +1,14 @@
-cmake_minimum_required(VERSION 3.12)
-project(virtualAGC LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.14...3.21)
+project(virtualAGC
+LANGUAGES C CXX
+HOMEPAGE_URL "https://github.com/virtualagc/virtualagc")
 
-# this helps linters e.g. Visual Studio Intellicode work properly
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
-set(NVER \\\"2019-09-22\\\")
+set(NVER \\\"2020-12-24\\\")
+
+
+find_package(Threads)
 
 add_subdirectory(yaAGC)
 add_subdirectory(yaASM)
@@ -22,5 +26,5 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(HOME $ENV{HOME})
   endif()
 
-  set(CMAKE_INSTALL_PREFIX "${HOME}/VirtualAGC" CACHE PATH "..." FORCE)
+  set(CMAKE_INSTALL_PREFIX "${HOME}/VirtualAGC" CACHE PATH "install prefix" FORCE)
 endif()
