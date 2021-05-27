@@ -13,6 +13,7 @@ find_package(Threads)
 add_subdirectory(yaAGC)
 add_subdirectory(yaASM)
 add_subdirectory(yaDSKY2)
+add_subdirectory(yaLEMAP)
 add_subdirectory(yaLVDC)
 add_subdirectory(yaYUL)
 
