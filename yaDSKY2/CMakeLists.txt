@@ -11,15 +11,15 @@ set(APPNAME yaDSKY2)
 set(SOURCES ${APPNAME}.cpp)
 
 set(SOURCESc
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/agc_utilities.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/agc_engine.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/Backtrace.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/random.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/SocketAPI.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/rfopen.c)
+${PROJECT_SOURCE_DIR}/yaAGC/agc_utilities.c
+${PROJECT_SOURCE_DIR}/yaAGC/agc_engine.c
+${PROJECT_SOURCE_DIR}/yaAGC/Backtrace.c
+${PROJECT_SOURCE_DIR}/yaAGC/random.c
+${PROJECT_SOURCE_DIR}/yaAGC/SocketAPI.c
+${PROJECT_SOURCE_DIR}/yaAGC/rfopen.c)
 
 add_executable(${APPNAME} ${SOURCES} ${SOURCESc})
-target_include_directories(${APPNAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC)
+target_include_directories(${APPNAME} PRIVATE ${PROJECT_SOURCE_DIR}/yaAGC)
 target_compile_definitions(${APPNAME} PRIVATE NVER="${NVER}")
 
 if(WIN32)
