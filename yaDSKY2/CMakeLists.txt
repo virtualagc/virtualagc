@@ -1,53 +1,37 @@
-find_package(wxWidgets COMPONENTS gl core base)
 if(NOT wxWidgets_FOUND)
-  find_program(wxcfg NAMES wx-config)
-  if(NOT wxcfg)
-    return()
-  endif()
+  return()
 endif()
 
-set(APPNAME yaDSKY2)
-
-set(SOURCES ${APPNAME}.cpp)
+set(SOURCES yaDSKY2.cpp)
 
 set(SOURCESc
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/agc_utilities.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/agc_engine.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/Backtrace.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/random.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/SocketAPI.c
-${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC/rfopen.c)
+${PROJECT_SOURCE_DIR}/yaAGC/agc_utilities.c
+${PROJECT_SOURCE_DIR}/yaAGC/agc_engine.c
+${PROJECT_SOURCE_DIR}/yaAGC/Backtrace.c
+${PROJECT_SOURCE_DIR}/yaAGC/random.c
+${PROJECT_SOURCE_DIR}/yaAGC/SocketAPI.c
+${PROJECT_SOURCE_DIR}/yaAGC/rfopen.c)
 
-add_executable(${APPNAME} ${SOURCES} ${SOURCESc})
-target_include_directories(${APPNAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../yaAGC)
-target_compile_definitions(${APPNAME} PRIVATE NVER="${NVER}")
+add_executable(yaDSKY2 ${SOURCES} ${SOURCESc})
+target_include_directories(yaDSKY2 PRIVATE ${PROJECT_SOURCE_DIR}/yaAGC)
+target_compile_definitions(yaDSKY2 PRIVATE NVER="${NVER}")
 
 if(WIN32)
-  target_link_libraries(${APPNAME} PRIVATE ${WINSOCK_LIBRARIES})
+  target_link_libraries(yaDSKY2 PRIVATE ${WINSOCK_LIBRARIES})
 endif()
 
-if(wxWidgets_FOUND)
-  target_include_directories(${APPNAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
-  target_link_libraries(${APPNAME} PRIVATE ${wxWidgets_LIBRARIES})
-  target_compile_definitions(${APPNAME} PRIVATE ${wxWidgets_DEFINITIONS})
+if(wxWidgets_INCLUDE_DIRS)
+  target_include_directories(yaDSKY2 PRIVATE ${wxWidgets_INCLUDE_DIRS})
+  target_compile_definitions(yaDSKY2 PRIVATE ${wxWidgets_DEFINITIONS})
 else()
-  # fallback in case CMake FindWx isn't up to date
-  execute_process(COMMAND bash -c "wx-config --cflags"
-  OUTPUT_VARIABLE wxWidgets_DEFINITIONS
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  separate_arguments(wxWidgets_DEFINITIONS)
-  target_compile_options(${APPNAME} PRIVATE ${wxWidgets_DEFINITIONS})
-
-  execute_process(COMMAND bash -c "wx-config --libs"
-  OUTPUT_VARIABLE wxWidgets_LIBRARIES
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  separate_arguments(wxWidgets_LIBRARIES)
-  target_link_libraries(${APPNAME} PRIVATE ${wxWidgets_LIBRARIES})
+  target_compile_options(yaDSKY2 PRIVATE ${wxWidgets_FLAGS})
 endif()
+target_link_libraries(yaDSKY2 PRIVATE ${wxWidgets_LIBRARIES})
+
 
 # --- install
 
-install(TARGETS ${APPNAME})
+install(TARGETS yaDSKY2)
 
 # must have trailing /
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
